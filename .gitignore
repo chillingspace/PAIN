@@ -1,0 +1,56 @@
+# ========================
+# Visual Studio / C++ IDE
+# ========================
+.vs/
+*.VC.db
+*.VC.VC.opendb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ncb
+*.sdf
+*.opendb
+
+# ========================
+# Build output folders
+# ========================
+# Engine and Sandbox outputs
+bin-*/               # Matches bin/Debug-x64/PAINEngine, etc.
+bin-int-*/           # Intermediate build files
+Debug*/
+Release*/
+x64/
+Win32/
+
+# ========================
+# Compiled object files / libraries / executables
+# ========================
+*.obj
+*.o
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.idb
+*.tlog
+*.ipch
+*.pch
+*.iobj
+*.ipdb
+*.iopt
+
+# ========================
+# Logs / Cache / Temp
+# ========================
+*.log
+*.cache
+
+# ========================
+# Miscellaneous / Extras
+# ========================
+*.vsix
+*.tmp
+*.bak
+*.swp
