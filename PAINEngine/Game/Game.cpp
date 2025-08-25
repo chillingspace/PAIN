@@ -1,9 +1,17 @@
-#include <iostream>
-#include "Engine.h"
+#include <PAINEngine.h>
+#include <PAINEngine/EntryPoint.h>
 
-int main() {
-    Engine engine;
-    engine.Hello();  // Calls into the DLL
-    std::cin.get();  // Pause so console stays open
-    return 0;
+class Game : public PAIN::Application
+{
+	public: 
+		Game() {
+
+		}
+		~Game() {
+
+		}
+};
+
+PAIN::Application* PAIN::CreateApplication() {
+	return new Game();
 }
