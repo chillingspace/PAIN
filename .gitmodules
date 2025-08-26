@@ -1,3 +1,0 @@
-[submodule "PAINEngine/PAINEngine/vendor/spdlog"]
-	path = PAINEngine/PAINEngine/vendor/spdlog
-	url = https://github.com/gabime/spdlog
