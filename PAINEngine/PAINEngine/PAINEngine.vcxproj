@@ -129,6 +129,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +149,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\PAINEngine\Log.h" />
     <ClInclude Include="src\PAINEngine.h" />
     <ClInclude Include="src\PAINEngine\Application.h" />
     <ClInclude Include="src\PAINEngine\Core.h" />
@@ -162,6 +167,7 @@
     <ClInclude Include="src\PAINEngine\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\PAINEngine\Log.cpp" />
     <ClCompile Include="src\PAINEngine\Application.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

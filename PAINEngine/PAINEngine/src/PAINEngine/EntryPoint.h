@@ -6,7 +6,13 @@
 	extern PAIN::Application* PAIN::CreateApplication();
 
 	int main(int argc, char** argv) {
-		printf("Starting PAINEngine\n");
+
+		PAIN::Log::Init();
+		PN_CORE_WARN("Initialized Log!");
+		int a = 5;
+		PN_INFO("Hello! Var={0}", a);
+
+		//printf("Starting PAINEngine\n");
 		auto game = PAIN::CreateApplication();
 		game->Run();
 		delete game;

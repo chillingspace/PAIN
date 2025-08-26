@@ -30,12 +30,18 @@
     <ClInclude Include="src\PAINEngine\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PAINEngine\Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
