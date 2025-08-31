@@ -137,6 +137,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,6 +164,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Log.h" />
