@@ -9,5 +9,11 @@
 
 // add headers that you want to pre-compile here
 
+// Physics lib stuff - lim
+#include "Jolt/Jolt.h"
+#include <Jolt/Core/Factory.h>          
+#include <Jolt/RegisterTypes.h>         
+#include <Jolt/Physics/PhysicsSystem.h> 
+#include <Jolt/Physics/Body/Body.h>     
 
 #endif //PCH_H

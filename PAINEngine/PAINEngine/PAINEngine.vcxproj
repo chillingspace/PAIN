@@ -129,13 +129,17 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Y3S1-SIT\GAM\PAIN\PAINEngine\PAINEngine\vendor;C:\Y3S1-SIT\GAM\PAIN\PAINEngine\PAINEngine\vendor\spdlog\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;opengl32.lib;fmod_vc.lib;fmodL_vc.lib;freetype.lib;Lua.lib;Jolt_Release.lib;Jolt_Debug.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>Jolt_Release.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
@@ -156,13 +160,17 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Y3S1-SIT\GAM\PAIN\PAINEngine\PAINEngine\vendor;C:\Y3S1-SIT\GAM\PAIN\PAINEngine\PAINEngine\vendor\spdlog\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>glew32.lib;glfw3.lib;opengl32.lib;fmod_vc.lib;fmodL_vc.lib;freetype.lib;Lua.lib;Jolt_Release.lib;Jolt_Debug.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>Jolt_Debug.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
