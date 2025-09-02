@@ -5,7 +5,7 @@
 
 	extern PAIN::Application* PAIN::CreateApplication();
 
-	int main(int argc, char** argv) {
+	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 		PAIN::Log::Init();
 		PN_CORE_WARN("Initialized Log!");
