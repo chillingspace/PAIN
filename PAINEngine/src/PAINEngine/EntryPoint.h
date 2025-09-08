@@ -12,7 +12,6 @@
 		int a = 5;
 		PN_INFO("Hello! Var={}", a);
 
-		//printf("Starting PAINEngine\n");
 		auto game = PAIN::CreateApplication();
 		game->Run();
 		delete game;

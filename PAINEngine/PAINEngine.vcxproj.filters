@@ -41,9 +41,6 @@
     <ClCompile Include="src\PAINEngine\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Log.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
