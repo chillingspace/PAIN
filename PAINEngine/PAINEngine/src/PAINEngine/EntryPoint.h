@@ -10,7 +10,7 @@
 		PAIN::Log::Init();
 		PN_CORE_WARN("Initialized Log!");
 		int a = 5;
-		PN_INFO("Hello! Var={0}", a);
+		PN_INFO("Hello! Var={}", a);
 
 		//printf("Starting PAINEngine\n");
 		auto game = PAIN::CreateApplication();
