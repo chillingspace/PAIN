@@ -1,9 +1,9 @@
-/*****************************************************************//**
- * \file   components.h
- * \brief  All data components
+﻿/*****************************************************************//**
+ * \file   cPhysics.h
+ * \brief  All physics data components
  *
  * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
- * \co-author 
+ * \co-author
  * \date   September 2025
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
@@ -11,17 +11,6 @@
 #include "../pch.h"
 
 namespace PAIN {
-
-	/******************************************************************************************
-	* Note: When creating components, try to stack them properly to properly optimise memory
-	* (Place largest type var (Double) first, then followed by smallest.
-	*****************************************************************************************/
-
-	struct Transform {
-		glm::f64quat rotation;
-		glm::f64vec3 position;
-		glm::f64vec3 scale{1, 1, 1};
-	};
 
 	/*****************************************************************//**
 	* Physics Components
@@ -44,41 +33,36 @@ namespace PAIN {
 
 	enum class SHAPE { Box, Sphere, Capsule, Mesh };
 
-	struct ColliderComponent {
-		// To be changed to use MAX_ENTITY
-		std::array<CollisionInfo, 100> current_collisions;
+	struct Collider {
 
 		// For Box/Capsule
-		glm::f64vec3 size;           
+		glm::f64vec3 size;
 		// For Sphere
 		glm::i64 radius{ 0.0f };
 
-		glm::i64 collision_layer = 0; 
+		glm::i64 collision_layer = 0;
 
 		SHAPE shape;
 
 		// For pickup and stuff (Like unity's pickup item)
-		bool b_is_trigger = false; 
+		bool b_is_trigger = false;
 
 	};
 
+	// To be changed to use MAX_ENTITY, to be put in collision manager, not wise for each entity to carry so much bytes
+	std::array<CollisionInfo, 100> current_collisions;
 
-	enum class JOINT_TYPE {
-		FIXED,
-		HINGE
-	};
+
+	enum class JOINT_TYPE { FIXED, HINGE };
 
 	struct Joint {
-		// for hinge stuff
+		// For hinge points
 		glm::f64vec3 anchor;
-		glm::f64vec3 axis; 
+		glm::f64vec3 axis;
 		// For hinge limits
 		glm::f64 limit_min;
-		glm::f64 limit_max; 
+		glm::f64 limit_max;
 		JOINT_TYPE joint_type;
 		// Entity::Type connectedEntity;
 	};
 }
-
-
-
