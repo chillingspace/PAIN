@@ -10,6 +10,7 @@ File names in snakeCase (e.g bryanSoh.cpp)
 const, constexpr, enum, typedef define SNAKE_CASE (e.g const int BRYAN_SOH)
 All functions to be under namespace PAIN
 Try not to use std vector due we need to think of optimization for memory, if really need, REMEMBER TO RESIZE!!
+When you push, make sure u no warnings and no leaks!
 
 
 GLSL
