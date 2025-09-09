@@ -1,5 +1,5 @@
 #include <PAINEngine.h>
-#include <PAINEngine/EntryPoint.h>
+#include <PAINEngine/Core/EntryPoint.h>
 
 class Game : public PAIN::Application
 {

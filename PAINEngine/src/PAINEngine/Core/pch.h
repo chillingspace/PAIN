@@ -19,6 +19,8 @@
 #include <Jolt/RegisterTypes.h>         
 #include <Jolt/Physics/PhysicsSystem.h> 
 #include <Jolt/Physics/Body/Body.h>     
+#include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
 
  /*****************************************************************//**
  * Engine Specific Library

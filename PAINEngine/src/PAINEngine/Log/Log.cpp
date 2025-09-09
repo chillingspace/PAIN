@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "../Core/pch.h"
 #include "Log.h"
 
 namespace PAIN {
