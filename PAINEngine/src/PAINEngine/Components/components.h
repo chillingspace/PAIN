@@ -29,8 +29,13 @@ namespace PAIN {
 		JPH::BodyID bodyID;
 	};
 
-	struct JointComponent {
-		enum class Type { Fixed, Hinge } jointType;
+	enum class Joint_Type {
+		FIXED,
+		HINGE
+	};
+
+	struct joint {
+		Joint_Type joint_type;
 		// Entity::Type connectedEntity;
 		// for hinge stuff
 		glm::vec3 anchor;
