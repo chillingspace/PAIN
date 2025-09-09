@@ -27,11 +27,43 @@
 // graphics headers
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
 
 // Imgui headers
 #include "ImGui/headers/imgui.h"
 #include "ImGui/headers/imgui_impl_opengl3.h"
 #include "ImGui/headers/imgui_impl_glfw.h"
+
+ /*****************************************************************//**
+ * STL
+ *********************************************************************/
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <vector>
+#include <array>
+#include <string>
+#include <unordered_map>
+#include <cctype>
+#include <sstream>
+#include <time.h>
+#include <list>
+#include <sstream>
+#include <memory>
+#include <cmath>
+#include <iterator>
+#include <queue>
+#include <set>
+#include <unordered_set>
+#include <ctime>
+#include <iomanip>
+#include <chrono>
+#include <thread>
+#include <optional>
+#include <stack>
+#include <regex>
+#include <limits>
+#include <random>
 
 #undef APIENTRY
 

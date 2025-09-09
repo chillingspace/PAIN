@@ -1,4 +1,4 @@
-recompiled headers - pch.h
+Precompiled headers - pch.h
 
 all header files in headers directory all c++ files in src directory all shader files in shaders directory
 
@@ -6,8 +6,12 @@ Naming conventions
 Variables snake_case (e.g int bryan_soh)
 Functions, ctor, dtor camelCase (e.g int bryanLim () {})
 Classes, Namespaces PascalCase (e.g class SeanGwee)
-File names in snake case (e.g bryan_soh.cpp), unless file is a class definition/declaration, in which case, use PascalCase (e.g SeanGwee.h)
+File names in snakeCase (e.g bryanSoh.cpp)
 const, constexpr, enum, typedef define SNAKE_CASE (e.g const int BRYAN_SOH)
+All functions to be under namespace PAIN
+Try not to use std vector due we need to think of optimization for memory, if really need, REMEMBER TO RESIZE!!
+
+
 GLSL
 variables snake case
 a prefix for vertex attribute
