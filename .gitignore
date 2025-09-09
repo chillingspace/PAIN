@@ -29,8 +29,6 @@ Win32/
 *.obj
 *.o
 *.exe
-*.dll
-*.lib
 *.exp
 *.pdb
 *.idb
@@ -44,7 +42,6 @@ Win32/
 # ========================
 # Keep third-party dependencies
 # ========================
-!dependencies/**
 
 # ========================
 # Logs / Cache / Temp
