@@ -1,12 +1,15 @@
-# ========================
-# PAINEngine CMake
-# ========================
+cmake_minimum_required(VERSION 3.25)
+project(PAINEngine)
 
+# -------------------------
 # Collect engine sources
+# -------------------------
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
-# Build engine as shared library
-add_library(PAINEngine SHARED ${ENGINE_SRC})
+# -------------------------
+# Build engine as static lib
+# -------------------------
+add_library(PAINEngine STATIC ${ENGINE_SRC})
 
 # -------------------------
 # Include directories
@@ -25,13 +28,18 @@ target_include_directories(PAINEngine PUBLIC
 )
 
 # -------------------------
-# Library directories
+# Set library output folder
 # -------------------------
-link_directories(${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib)
+set_target_properties(PAINEngine PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
 
 # -------------------------
-# Link libraries
+# Link libraries (prebuilt .lib)
 # -------------------------
+# Full paths to avoid link_directories
+set(LIB_DIR "${CMAKE_SOURCE_DIR}/dependencies/lib")
+
 target_link_libraries(PAINEngine
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/glfw3.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/glew32.lib"
@@ -44,28 +52,15 @@ target_link_libraries(PAINEngine
 )
 
 # -------------------------
-# Preprocessor definitions
+# Compiler options
 # -------------------------
-# Export macro for DLL
-target_compile_definitions(PAINEngine PRIVATE PAINENGINE_EXPORTS)
-
-# Windows platform detection
-if(WIN32)
-    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS PN_BUILD_DLL)
-endif()
-
-# Force UTF-8 encoding for spdlog/fmt
 if(MSVC)
     target_compile_options(PAINEngine PUBLIC /utf-8)
 endif()
 
-
 # -------------------------
-# Copy DLLs after build
+# Platform macros
 # -------------------------
-# Copy everything from shared/ into the output bin directory
-add_custom_command(TARGET PAINEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/shared
-        $<TARGET_FILE_DIR:PAINEngine>
-)
+if(WIN32)
+    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS)
+endif()
