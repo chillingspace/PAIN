@@ -181,6 +181,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\Log.h" />
     <ClInclude Include="src\PAINEngine.h" />
     <ClInclude Include="src\PAINEngine\Application.h" />

@@ -7,11 +7,11 @@
 
 namespace PAIN {
 
-    class PAIN_API Log
+    class Log
     {
     public:
         // Initialize the loggers
-        static void Init()
+        static void PAIN_API Init()
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
 
@@ -23,13 +23,13 @@ namespace PAIN {
         }
 
         // Accessors
-        inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-        inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+        inline static PAIN_API std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+        inline static PAIN_API std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
     private:
         // Inline static members (C++17+)
-        inline static std::shared_ptr<spdlog::logger> s_CoreLogger;
-        inline static std::shared_ptr<spdlog::logger> s_ClientLogger;
+        inline static PAIN_API std::shared_ptr<spdlog::logger> s_CoreLogger;
+        inline static PAIN_API std::shared_ptr<spdlog::logger> s_ClientLogger;
     };
 
 } // namespace PAIN
