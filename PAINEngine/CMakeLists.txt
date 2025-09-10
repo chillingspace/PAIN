@@ -7,6 +7,19 @@ project(PAINEngine)
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 # -------------------------
+# Public headers for consumers (Game, tools)
+# -------------------------
+target_include_directories(PAINEngine
+  PUBLIC
+    "${CMAKE_SOURCE_DIR}"           # so every .cpp can do: #include "pch.h"
+)
+
+# -------------------------
+# PCH: ensure each .cpp begins with  #include "pch.h"
+# -------------------------
+target_precompile_headers(PAINEngine PRIVATE "${CMAKE_SOURCE_DIR}/PAINEngine/src/pch.h")
+
+# -------------------------
 # Build engine as static lib
 # -------------------------
 add_library(PAINEngine STATIC ${ENGINE_SRC})
