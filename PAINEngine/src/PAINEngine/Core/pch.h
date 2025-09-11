@@ -29,7 +29,10 @@
 // graphics headers
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+
+// GLM headers
 #include "glm/glm.hpp"
+#include <glm/gtc/quaternion.hpp>
 
 // Imgui headers
 #include "ImGui/headers/imgui.h"

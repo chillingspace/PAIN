@@ -8,49 +8,55 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "Core/pch.h"
+#include "PAINEngine/Core/pch.h"
 
 namespace PAIN {
 
 	/*****************************************************************//**
 	* Physics Components
 	*********************************************************************/
+	namespace Physics {
 
-	struct RigidBody3D {
-		glm::f32vec3 velocity;
-		glm::f32vec3 angular_velocity;
-		glm::f32 mass;
-		JPH::BodyID bodyID;
-		bool b_is_dynamic;
-	};
+		struct RigidBody3D {
+			glm::f32vec3 velocity;
+			glm::f32vec3 angular_velocity;
+			glm::f32 mass;
+			JPH::BodyID bodyID;
+			bool b_is_dynamic;
+		};
+	}
 
-	struct CollisionInfo {
-		// Entity::Type otherEntity;
-		glm::f32vec3 contact_point;
-		glm::f32vec3 normal;
-		glm::f32 penetration;
-	};
+	/*****************************************************************//**
+	* Collision Components
+	*********************************************************************/
 
 	enum class SHAPE { Box, Sphere, Capsule, Mesh };
 
-	struct Collider {
+	namespace Collision {
+		struct Collider {
 
-		// For Box/Capsule
-		glm::f32vec3 size;
-		// For Sphere
-		glm::i32 radius{ 0.0f };
+			// Default to be box
+			SHAPE shape = SHAPE::Box;
 
-		glm::i32 collision_layer = 0;
+			// To save memory, only one member is valid at a time, rest would be garbage values if un init. 
+			// Set the shape type first, then set the collidor respective sizes. 
+			union
+			{
+				glm::vec3 box_size;     
+				glm::f32 sphere_radius;
+				struct { glm::f32 radius; glm::f32 height; } capsule;
+			};
 
-		SHAPE shape;
+			// Optional physical props (future)
+			glm::f32 friction = 0.5f;
+			glm::f32 restitution = 0.1f;
 
-		// For pickup and stuff (Like unity's pickup item)
-		bool b_is_trigger = false;
+			// Jolt object layer
+			uint16_t collision_layer = 0; 
+			bool is_trigger = false;
 
-	};
-
-	// To be changed to use MAX_ENTITY, to be put in collision manager, not wise for each entity to carry so much bytes
-	std::array<CollisionInfo, 100> current_collisions;
+		};
+	}
 
 
 	enum class JOINT_TYPE { FIXED,HINGE

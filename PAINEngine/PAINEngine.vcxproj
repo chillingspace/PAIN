@@ -127,9 +127,9 @@
       <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;_DEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>PAINEngine/Core/pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -142,9 +142,8 @@
       <IgnoreSpecificDefaultLibraries>Jolt_Release.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.idb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
@@ -158,9 +157,9 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;NDEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Core/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>PAINEngine/Core/pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -173,9 +172,8 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.idb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
@@ -189,19 +187,19 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Core\EntryPoint.h" />
     <ClInclude Include="src\PAINEngine\Core\pch.h" />
     <ClInclude Include="src\PAINEngine\Log\Log.h" />
-    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.h" />
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h" />
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Application\Application.cpp" />
     <ClCompile Include="src\PAINEngine\Core\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Core/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PAINEngine/Core/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Core/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PAINEngine/Core/pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Log\Log.cpp" />
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.cpp" />
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>

@@ -8,7 +8,7 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "Core/pch.h"
+#include "PAINEngine/Core/pch.h"
 
 namespace PAIN {
 
@@ -18,9 +18,9 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct Transform {
-		glm::f64quat rotation;
-		glm::f64vec3 position;
-		glm::f64vec3 scale{1, 1, 1};
+		glm::f32quat rotation;
+		glm::f32vec3 position;
+		glm::f32vec3 scale{1, 1, 1};
 	};
 }
 

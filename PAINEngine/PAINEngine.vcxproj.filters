@@ -42,7 +42,7 @@
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.h">
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClCompile Include="src\PAINEngine\Log\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.cpp">
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp">
