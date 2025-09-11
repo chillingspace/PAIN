@@ -21,9 +21,6 @@
     <ClInclude Include="src\PAINEngine\Components\cTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\Physics\sysPhysics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,7 +39,10 @@
     <ClInclude Include="src\PAINEngine\Log\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\sysPhysics.h">
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,9 +68,6 @@
     <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Systems\Physics\sysPhysics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\PAINEngine\Application\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,7 +77,10 @@
     <ClCompile Include="src\PAINEngine\Log\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Systems\sysPhysics.cpp">
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\mCollision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

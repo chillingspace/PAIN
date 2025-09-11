@@ -8,7 +8,7 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "../pch.h"
+#include "Core/pch.h"
 
 namespace PAIN {
 
