@@ -5,6 +5,8 @@
 
 #include "../Core.h"
 #include <string>
+#include <functional>
+#include <stdexcept>
 
 namespace PAIN {
 
@@ -36,9 +38,9 @@ namespace PAIN {
     int getCategoryFlags() const override { return category; }
 
 		//Event Class
-		class PAIN_API Event {
+		class Event {
 		private:
-
+			friend class Dispatcher;
 		protected:
 
 			//Boolean for handling events
@@ -52,6 +54,43 @@ namespace PAIN {
 			virtual int         getCategoryFlags() const = 0;
 			bool IsInCategory(Category c) const { return getCategoryFlags() & c; }
 			virtual std::string toString() { return GetName(); }
+
+			bool checkHandled() const { return b_event_handled; }
+		};
+
+		//Event dispatcher
+		class Dispatcher {
+		private:
+			Event& event;
+
+			//Event function signature
+			template<typename T>
+			using Func = std::function<bool(T&)>;
+		public:
+
+			//Explicit dispatcher constructor
+			explicit Dispatcher(Event& event) : event{ event }{}
+
+			// Callable must be: bool(T& e)
+			template<typename T>
+			bool Dispatch(Func<T>&& func) {
+
+				//Throw error why dispatching if type passed through is not valid event
+				if (std::is_base_of<Event, T>::value) {
+					throw std::runtime_error("T must derive from Event");
+				}
+
+				//Check event type
+				if (event.getType() == T::GetStaticType()) {
+
+					//Execute function
+					event.b_event_handled = func(*(T*)&event);
+					return true;
+				}
+
+				//Return false continue dispatching
+				return false;
+			}
 		};
 	}
 }

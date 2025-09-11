@@ -13,14 +13,21 @@ namespace PAIN {
 			unsigned int width;
 			unsigned int height;
 
-			Package(std::string const& title = "Pain Engine", unsigned int width = 1280, unsigned height = 720) : title{ title }, width{ width }, height{ height } {}
+			Package(std::string const& title = "Pain Engine", unsigned int width = 1600, unsigned int height = 900) : title{ title }, width{ width }, height{ height } {}
 		};
 
 		//Virtual window class
 		class PAIN_API Window {
 		public:
 			virtual ~Window() = default;
+
+			//Register callbacks
+			virtual void registerCallbacks(void* app) = 0;
+
+			//Update window
 			virtual bool onUpdate() = 0;
+
+			//Create window
 			static Window* create(Package const& package = Package());
 		};
 	}

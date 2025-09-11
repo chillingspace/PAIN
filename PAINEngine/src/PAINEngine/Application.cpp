@@ -17,4 +17,22 @@ namespace PAIN {
 		while (app_window->onUpdate()) {
 		};
 	}
+
+	void Application::dispatchToLayers(Event::Event& e) {
+		for (auto it = layers.begin(); it != layers.end(); ++it) {
+			
+			//Dispatch event down layers
+			(*it)->OnEvent(e);
+			if (e.checkHandled()) break;
+		}
+	}
+
+	void Application::dispatchToLayersReversed(Event::Event& e) {
+		for (auto it = layers.end(); it != layers.begin(); --it) {
+
+			//Dispatch event down layers
+			(*it)->OnEvent(e);
+			if (e.checkHandled()) break;
+		}
+	}
 }

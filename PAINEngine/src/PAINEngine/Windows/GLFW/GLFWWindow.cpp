@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
+#include "../../Application.h"
+
 namespace PAIN {
 	namespace Window {
 
@@ -11,6 +13,12 @@ namespace PAIN {
 
 		//Init GLFW
 		void GLFW_Window::init(Package const& package) {
+			
+			//Set buffer size
+			frame_buffer.x = package.width;
+			frame_buffer.y = package.height;
+
+			//Creating window
 			GLenum err;
 
 			if (!glfwInit()) {
@@ -35,7 +43,7 @@ namespace PAIN {
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // window dimensions are static
 
 			//Create window
-			ptr_window = glfwCreateWindow(static_cast<int>(package.width), static_cast<int>(package.height), package.title.c_str(), nullptr, nullptr);
+			ptr_window = glfwCreateWindow(static_cast<int>(frame_buffer.x), static_cast<int>(frame_buffer.y), package.title.c_str(), nullptr, nullptr);
 			if (!ptr_window) {
 				PN_CORE_ERROR("Failed to create window");
 				glfwTerminate();
@@ -71,6 +79,40 @@ namespace PAIN {
 			glfwTerminate();
 		}
 
+		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
+
+			//Fetch window class
+			//auto* self = static_cast<Application*>(glfwGetWindowUserPointer(window));
+		}
+
+		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
+
+		}
+
+		void GLFW_Window::mousebutton_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
+
+		}
+
+		void GLFW_Window::mousepos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xpos, [[maybe_unused]] double ypos) {
+
+		}
+
+		void GLFW_Window::mousescroll_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xoffset, [[maybe_unused]] double yoffset) {
+
+		}
+
+		void GLFW_Window::windowfocus_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int focused) {
+
+		}
+
+		void GLFW_Window::dropfile_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int count, [[maybe_unused]] const char** paths) {
+
+		}
+
+		void GLFW_Window::cursorenter_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int entered) {
+
+		}
+
 		//Construct window
 		GLFW_Window::GLFW_Window(Package const& package) {
 			init(package);
@@ -79,6 +121,22 @@ namespace PAIN {
 		//Destruct window
 		GLFW_Window::~GLFW_Window() {
 			shutdown();
+		}
+
+		void GLFW_Window::registerCallbacks(void* app) {
+
+			//Register all callbacks
+			glfwSetFramebufferSizeCallback(ptr_window, fbsize_cb);
+			glfwSetKeyCallback(ptr_window, key_cb);
+			glfwSetMouseButtonCallback(ptr_window, mousebutton_cb);
+			glfwSetCursorPosCallback(ptr_window, mousepos_cb);
+			glfwSetScrollCallback(ptr_window, mousescroll_cb);
+			glfwSetWindowFocusCallback(ptr_window, windowfocus_cb);
+			glfwSetDropCallback(ptr_window, dropfile_cb);
+			glfwSetCursorEnterCallback(ptr_window, cursorenter_cb);
+
+			//Storing class in glfw
+			glfwSetWindowUserPointer(ptr_window, app);
 		}
 
 		//Window update
