@@ -124,14 +124,15 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;_DEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;GLEW_STATIC;_DEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +149,10 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuratio
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -155,14 +160,15 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;NDEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PN_PLATFORM_WINDOWS;PN_BUILD_DLL;GLEW_STATIC;GLEW_STATICNDEBUG;PAINENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,15 +185,22 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuratio
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Components\components.h" />
+    <ClInclude Include="src\PAINEngine\Events\Event.h" />
     <ClInclude Include="src\PAINEngine\Log.h" />
     <ClInclude Include="src\PAINEngine.h" />
     <ClInclude Include="src\PAINEngine\Application.h" />
     <ClInclude Include="src\PAINEngine\Core.h" />
     <ClInclude Include="src\PAINEngine\EntryPoint.h" />
     <ClInclude Include="src\PAINEngine\pch.h" />
+    <ClInclude Include="src\PAINEngine\Windows\GLFW\GLFWWindow.h" />
+    <ClInclude Include="src\PAINEngine\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Application.cpp" />
@@ -198,6 +211,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Log.cpp" />
+    <ClCompile Include="src\PAINEngine\Windows\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>

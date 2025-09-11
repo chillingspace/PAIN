@@ -1,0 +1,8 @@
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/PAINEngine/CMakeFiles/PAINEngine.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/PAINEngine/CMakeFiles/edit_cache.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/PAINEngine/CMakeFiles/rebuild_cache.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/Game/CMakeFiles/Game.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/Game/CMakeFiles/edit_cache.dir
+C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/Game/CMakeFiles/rebuild_cache.dir

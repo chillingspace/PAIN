@@ -36,6 +36,15 @@
     <ClInclude Include="src\PAINEngine\Components\components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PAINEngine\Events\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Windows\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Windows\GLFW\GLFWWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\pch.cpp">
@@ -66,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Windows\GLFW\GLFWWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

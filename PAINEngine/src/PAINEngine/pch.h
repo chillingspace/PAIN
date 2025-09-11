@@ -34,6 +34,23 @@
 #include "ImGui/headers/imgui_impl_opengl3.h"
 #include "ImGui/headers/imgui_impl_glfw.h"
 
+#undef APIENTRY
+
+//Memory
+#define _CRTDBG_MAP_ALLOC
+
+ /*****************************************************************//**
+ * Windows Application
+ *********************************************************************/
+#ifdef PN_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif
+
+ /*****************************************************************//**
+ * CORE HEADER
+ *********************************************************************/
+#include "Core.h"
+
  /*****************************************************************//**
  * STL
  *********************************************************************/
@@ -65,6 +82,13 @@
 #include <limits>
 #include <random>
 
-#undef APIENTRY
+ /*****************************************************************//**
+ * LOGGING
+ *********************************************************************/
+#include "Log.h"
+
+//Ban normal logging
+#define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
+#define cerr  PN_IOSTREAM_FORBIDDEN__use_logger_instead
 
 #endif //PCH_H
