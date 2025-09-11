@@ -132,7 +132,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -168,7 +168,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <AdditionalIncludeDirectories>$(SolutionDir)PAINEngine\vendor;$(SolutionDir)PAINEngine\vendor\spdlog\include;$(SolutionDir)PAINEngine\src\PAINEngine</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -186,7 +186,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
