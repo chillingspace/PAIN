@@ -6,7 +6,9 @@ namespace PAIN {
 	Application::Application()
 	{
 		//Create window
-		app_window = std::unique_ptr<Window::Window>(Window::Window::create());
+		app_window = std::shared_ptr<Window::Window>(Window::Window::create());
+		app_window->registerCallbacks(this);
+		layers.push_back(app_window);
 	}
 
 	Application::~Application()

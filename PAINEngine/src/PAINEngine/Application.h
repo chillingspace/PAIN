@@ -11,20 +11,12 @@
 
 namespace PAIN {
 
-	class AppLayer {
-	private:
-	public:
-
-		//Event handler for app layer
-		virtual void OnEvent(Event::Event& e) = 0;
-	};
-
 	class PAIN_API Application
 	{ 
 	private:
 
 		//Application window
-		std::unique_ptr<Window::Window> app_window;
+		std::shared_ptr<Window::Window> app_window;
 
 		//App layers
 		std::vector<std::shared_ptr<AppLayer>> layers;
@@ -42,8 +34,6 @@ namespace PAIN {
 
 	// Defined in client
 	Application* CreateApplication();
-
-
 }
 
 #endif

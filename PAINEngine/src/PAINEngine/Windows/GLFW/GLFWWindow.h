@@ -4,7 +4,8 @@
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
-#include "Events/Event.h"
+#include "Events/WindowEvents.h"
+#include "Events/KeyEvents.h"
 
 namespace PAIN {
 	namespace Window {
@@ -37,11 +38,14 @@ namespace PAIN {
 			GLFW_Window(Package const& package);
 			virtual ~GLFW_Window();
 
+			//Register callbacks
+			void registerCallbacks(void* app) override;
+
 			//Update
 			bool onUpdate() override;
 
-			//Register callbacks
-			void registerCallbacks(void* app) override;
+			//Event call back
+			void OnEvent(Event::Event& e) override;
 		};
 	}
 }

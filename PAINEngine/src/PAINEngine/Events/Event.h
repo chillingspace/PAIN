@@ -8,6 +8,7 @@
 #include <functional>
 #include <stdexcept>
 
+
 namespace PAIN {
 
 	namespace Event {
@@ -30,8 +31,8 @@ namespace PAIN {
 		};
 
 #define EVENT_CLASS_TYPE(type)\
-    static Type getStaticType() { return EventType::type; }\
-    Type getEventType() const override { return GetStaticType(); }\
+    static Type getStaticType() { return Type::##type; }\
+    Type getType() const override { return getStaticType(); }\
     const char* getName() const override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category)\
@@ -50,10 +51,10 @@ namespace PAIN {
 
 			//Public getters
 			virtual Type   getType() const = 0;
-			virtual const char* GetName()      const = 0;
+			virtual const char* getName()      const = 0;
 			virtual int         getCategoryFlags() const = 0;
-			bool IsInCategory(Category c) const { return getCategoryFlags() & c; }
-			virtual std::string toString() { return GetName(); }
+			bool isInCategory(Category c) const { return getCategoryFlags() & c; }
+			virtual std::string toString() { return getName(); }
 
 			bool checkHandled() const { return b_event_handled; }
 		};
@@ -75,13 +76,13 @@ namespace PAIN {
 			template<typename T>
 			bool Dispatch(Func<T>&& func) {
 
-				//Throw error why dispatching if type passed through is not valid event
-				if (std::is_base_of<Event, T>::value) {
-					throw std::runtime_error("T must derive from Event");
-				}
+				////Throw error why dispatching if type passed through is not valid event
+				//if (std::is_base_of<Event, T>::value) {
+				//	throw std::runtime_error("T must derive from Event");
+				//}
 
 				//Check event type
-				if (event.getType() == T::GetStaticType()) {
+				if (event.getType() == T::getStaticType()) {
 
 					//Execute function
 					event.b_event_handled = func(*(T*)&event);

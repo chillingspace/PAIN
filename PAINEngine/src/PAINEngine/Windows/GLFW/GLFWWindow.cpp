@@ -82,11 +82,25 @@ namespace PAIN {
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
 
 			//Fetch window class
-			//auto* self = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Create event
+			Event::WindowResized event(glm::uvec2(width, height));
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
 
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Create event
+			Event::KeyPress event(key);
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
 		}
 
 		void GLFW_Window::mousebutton_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
@@ -139,7 +153,6 @@ namespace PAIN {
 			glfwSetWindowUserPointer(ptr_window, app);
 		}
 
-		//Window update
 		bool GLFW_Window::onUpdate() {
 
 			//Poll window events
@@ -151,6 +164,25 @@ namespace PAIN {
 			}
 
 			return false;
+		}
+
+		void GLFW_Window::OnEvent(Event::Event& e) {
+
+			//Early exit condition
+			if(!e.isInCategory(Event::Category::Application)) return;
+
+			//Create event dispatcher
+			Event::Dispatcher dispatcher(e);
+
+			//Dispatch window resized event
+			dispatcher.Dispatch<Event::WindowResized>([&](Event::WindowResized& e) -> bool {
+
+				//Update frame buffer size
+				frame_buffer = e.getFrameBuffer();
+
+				//Return false: continue dispatching, true = stop dispatching 
+				return false;
+			});
 		}
 	}
 }

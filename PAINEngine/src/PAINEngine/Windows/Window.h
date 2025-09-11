@@ -3,6 +3,7 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
+#include "Core.h"
 #include <string>
 
 namespace PAIN {
@@ -17,7 +18,7 @@ namespace PAIN {
 		};
 
 		//Virtual window class
-		class PAIN_API Window {
+		class PAIN_API Window : public AppLayer {
 		public:
 			virtual ~Window() = default;
 
@@ -29,6 +30,9 @@ namespace PAIN {
 
 			//Create window
 			static Window* create(Package const& package = Package());
+
+			//Event callback
+			virtual void OnEvent(Event::Event& e) = 0;
 		};
 	}
 }
