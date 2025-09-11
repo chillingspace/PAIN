@@ -133,6 +133,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,9 +144,8 @@
       <IgnoreSpecificDefaultLibraries>Jolt_Release.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
+      <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.idb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
@@ -169,6 +169,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
