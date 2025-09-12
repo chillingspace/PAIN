@@ -72,7 +72,7 @@
     <ClInclude Include="src\PAINEngine\ECS\System\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\ECS\System\SystemManager.h">
+    <ClInclude Include="src\PAINEngine\ECS\Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -119,7 +119,7 @@
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\ECS\System\SystemManager.cpp">
+    <ClCompile Include="src\PAINEngine\ECS\Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

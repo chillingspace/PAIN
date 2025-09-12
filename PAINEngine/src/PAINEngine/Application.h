@@ -6,6 +6,7 @@
 #include "Core.h"
 #include "Managers/Windows/Window.h"
 #include "Managers/Events/Event.h"
+#include "ECS/Controller.h"
 #include <memory>
 #include <vector>
 
@@ -15,26 +16,14 @@ namespace PAIN {
 	{ 
 	private:
 
-		//Application window
-		std::shared_ptr<Window::Window> app_window;
-
-		//App layers
-		std::vector<std::shared_ptr<ECS::ISystem>> layer_stack;
-
-		//Boolean for running app
-		bool b_running = true;
+		//Main controller of systems
+		std::shared_ptr<ECS::Controller> systems_controller;
 
 	public:
 		Application();
 		virtual ~Application();
 
 		void Run();
-
-		void Terminate();
-
-		void dispatchToLayers(Event::Event& e);
-
-		void dispatchToLayersReversed(Event::Event& e);
 	};
 
 	// Defined in client

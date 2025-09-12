@@ -6,7 +6,7 @@
 #include "Managers/Events/MouseEvents.h"
 #include "Managers/Events/AssetEvents.h"
 
-#include "Application.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
 	namespace Window {
@@ -87,7 +87,7 @@ namespace PAIN {
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
 
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Create event
 			Event::WindowResized event(glm::uvec2(width, height));
@@ -98,7 +98,7 @@ namespace PAIN {
 
 		void GLFW_Window::windowfocus_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int focused) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::WindowFocused event(static_cast<bool>(focused));
@@ -109,7 +109,7 @@ namespace PAIN {
 
 		void GLFW_Window::windowpos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int xpos, [[maybe_unused]] int ypos) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::WindowMoved event(glm::uvec2(xpos, ypos));
@@ -120,16 +120,16 @@ namespace PAIN {
 
 		void GLFW_Window::windowclose_cb([[maybe_unused]] GLFWwindow* window) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Stop application
-			app->Terminate();
+			app->terminateApp();
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
 
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Action switch
 			switch (action) {
@@ -173,7 +173,7 @@ namespace PAIN {
 
 		void GLFW_Window::mousebutton_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Action switch
 			switch (action) {
@@ -203,7 +203,7 @@ namespace PAIN {
 
 		void GLFW_Window::mousepos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xpos, [[maybe_unused]] double ypos) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::MouseMoved event(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
@@ -214,7 +214,7 @@ namespace PAIN {
 
 		void GLFW_Window::mousescroll_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xoffset, [[maybe_unused]] double yoffset) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::MouseScrolled event(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
@@ -225,7 +225,7 @@ namespace PAIN {
 
 		void GLFW_Window::cursorenter_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int entered) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::CursorEntered event(static_cast<bool>(entered));
@@ -236,7 +236,7 @@ namespace PAIN {
 
 		void GLFW_Window::dropfile_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int count, [[maybe_unused]] const char** paths) {
 			//Fetch window class
-			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+			auto* app = static_cast<ECS::Controller*>(glfwGetWindowUserPointer(window));
 
 			//Dispatch event
 			Event::FileDropped event(count, paths);

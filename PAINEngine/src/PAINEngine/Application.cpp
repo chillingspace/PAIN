@@ -5,10 +5,15 @@ namespace PAIN {
 
 	Application::Application()
 	{
+		//Create systems controller
+		systems_controller = std::make_shared<ECS::Controller>();
+
 		//Create window
-		app_window = std::shared_ptr<Window::Window>(Window::Window::create());
-		app_window->registerCallbacks(this);
-		layer_stack.push_back(app_window);
+		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create());
+		app_window->registerCallbacks(systems_controller.get());
+
+		//Push into systems controller
+		systems_controller->addSystems(app_window);
 	}
 
 	Application::~Application()
@@ -18,34 +23,10 @@ namespace PAIN {
 	void Application::Run() {
 
 		//Application loop
-		while (b_running) {
+		while (systems_controller->checkAppRunning()) {
 
-			//Iterate through all systems
-			for (auto& system : layer_stack) {
-				system->onUpdate();
-			}
+			//systems controller update func
+			systems_controller->onUpdate();
 		};
-	}
-
-	void Application::Terminate() {
-		b_running = false;
-	}
-
-	void Application::dispatchToLayers(Event::Event& e) {
-		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
-			
-			//Dispatch event down layers
-			(*it)->onEvent(e);
-			if (e.checkHandled()) break;
-		}
-	}
-
-	void Application::dispatchToLayersReversed(Event::Event& e) {
-		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
-
-			//Dispatch event down layers
-			(*it)->onEvent(e);
-			if (e.checkHandled()) break;
-		}
 	}
 }
