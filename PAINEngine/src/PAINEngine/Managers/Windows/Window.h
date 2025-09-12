@@ -18,7 +18,7 @@ namespace PAIN {
 		};
 
 		//Virtual window class
-		class PAIN_API Window : public AppLayer {
+		class PAIN_API Window : public ECS::ISystem {
 		public:
 			virtual ~Window() = default;
 
@@ -32,7 +32,7 @@ namespace PAIN {
 			static Window* create(Package const& package = Package());
 
 			//Event callback
-			virtual void OnEvent(Event::Event& e) = 0;
+			virtual void onEvent(Event::Event& e) = 0;
 		};
 	}
 }

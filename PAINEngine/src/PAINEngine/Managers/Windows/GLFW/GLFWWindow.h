@@ -44,7 +44,7 @@ namespace PAIN {
 			bool onUpdate() override;
 
 			//Event call back
-			void OnEvent(Event::Event& e) override;
+			void onEvent(Event::Event& e) override;
 		};
 	}
 }

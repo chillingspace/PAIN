@@ -19,7 +19,7 @@ namespace PAIN {
 		std::shared_ptr<Window::Window> app_window;
 
 		//App layers
-		std::vector<std::shared_ptr<AppLayer>> layers;
+		std::vector<std::shared_ptr<ECS::ISystem>> layer_stack;
 
 	public:
 		Application();

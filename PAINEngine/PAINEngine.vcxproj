@@ -195,6 +195,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\Components\cTransform.h" />
+    <ClInclude Include="src\PAINEngine\ECS\System\System.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\Event.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h" />
@@ -213,6 +214,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Application.cpp" />
+    <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

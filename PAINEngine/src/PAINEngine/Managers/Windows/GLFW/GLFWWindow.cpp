@@ -93,7 +93,7 @@ namespace PAIN {
 			Event::WindowResized event(glm::uvec2(width, height));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::windowfocus_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int focused) {
@@ -104,7 +104,7 @@ namespace PAIN {
 			Event::WindowFocused event(static_cast<bool>(focused));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::windowpos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int xpos, [[maybe_unused]] int ypos) {
@@ -115,7 +115,7 @@ namespace PAIN {
 			Event::WindowMoved event(glm::uvec2(xpos, ypos));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
@@ -132,8 +132,8 @@ namespace PAIN {
 				Event::KeyTriggered trigger_event(key);
 
 				//Dispatch event to app layers
-				app->dispatchToLayers(press_event);
-				app->dispatchToLayers(trigger_event);
+				app->dispatchToLayersReversed(press_event);
+				app->dispatchToLayersReversed(trigger_event);
 
 				break;
 			}
@@ -144,8 +144,8 @@ namespace PAIN {
 				Event::KeyRepeated repeat_event(key);
 
 				//Dispatch event to app layers
-				app->dispatchToLayers(press_event);
-				app->dispatchToLayers(repeat_event);
+				app->dispatchToLayersReversed(press_event);
+				app->dispatchToLayersReversed(repeat_event);
 				break;
 			}
 			case GLFW_RELEASE: {
@@ -153,7 +153,7 @@ namespace PAIN {
 				Event::KeyReleased event(key);
 
 				//Dispatch event to app layers
-				app->dispatchToLayers(event);
+				app->dispatchToLayersReversed(event);
 				break;
 			}
 			default: {
@@ -175,7 +175,7 @@ namespace PAIN {
 				Event::MouseBtnPressed event(button);
 
 				//Dispatch event to app layers
-				app->dispatchToLayers(event);
+				app->dispatchToLayersReversed(event);
 				break;
 			}
 			case GLFW_RELEASE: {
@@ -183,7 +183,7 @@ namespace PAIN {
 				Event::MouseBtnReleased event(button);
 
 				//Dispatch event to app layers
-				app->dispatchToLayers(event);
+				app->dispatchToLayersReversed(event);
 				break;
 			}
 			default: {
@@ -201,7 +201,7 @@ namespace PAIN {
 			Event::MouseMoved event(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::mousescroll_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xoffset, [[maybe_unused]] double yoffset) {
@@ -212,7 +212,7 @@ namespace PAIN {
 			Event::MouseScrolled event(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::cursorenter_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int entered) {
@@ -223,7 +223,7 @@ namespace PAIN {
 			Event::CursorEntered event(static_cast<bool>(entered));
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		void GLFW_Window::dropfile_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int count, [[maybe_unused]] const char** paths) {
@@ -234,7 +234,7 @@ namespace PAIN {
 			Event::FileDropped event(count, paths);
 
 			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+			app->dispatchToLayersReversed(event);
 		}
 
 		//Construct window
@@ -277,7 +277,7 @@ namespace PAIN {
 			return false;
 		}
 
-		void GLFW_Window::OnEvent(Event::Event& e) {
+		void GLFW_Window::onEvent(Event::Event& e) {
 
 			//Early exit condition
 			if(!e.isInCategory(Event::Category::Application)) return;

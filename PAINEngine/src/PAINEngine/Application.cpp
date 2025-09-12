@@ -8,7 +8,7 @@ namespace PAIN {
 		//Create window
 		app_window = std::shared_ptr<Window::Window>(Window::Window::create());
 		app_window->registerCallbacks(this);
-		layers.push_back(app_window);
+		layer_stack.push_back(app_window);
 	}
 
 	Application::~Application()
@@ -21,19 +21,19 @@ namespace PAIN {
 	}
 
 	void Application::dispatchToLayers(Event::Event& e) {
-		for (auto it = layers.begin(); it != layers.end(); ++it) {
+		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 			
 			//Dispatch event down layers
-			(*it)->OnEvent(e);
+			(*it)->onEvent(e);
 			if (e.checkHandled()) break;
 		}
 	}
 
 	void Application::dispatchToLayersReversed(Event::Event& e) {
-		for (auto it = layers.end(); it != layers.begin(); --it) {
+		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->OnEvent(e);
+			(*it)->onEvent(e);
 			if (e.checkHandled()) break;
 		}
 	}
