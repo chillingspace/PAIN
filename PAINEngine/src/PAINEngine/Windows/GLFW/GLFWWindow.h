@@ -4,8 +4,6 @@
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
-#include "Events/WindowEvents.h"
-#include "Events/KeyEvents.h"
 
 namespace PAIN {
 	namespace Window {

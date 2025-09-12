@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
+#include "Events/WindowEvents.h"
+#include "Events/KeyEvents.h"
+#include "Events/MouseEvents.h"
+
 #include "../../Application.h"
 
 namespace PAIN {
@@ -96,15 +100,74 @@ namespace PAIN {
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
-			//Create event
-			Event::KeyPress event(key);
+			//Action switch
+			switch (action) {
+			case GLFW_PRESS:
+			{
+				//Create key pressed event
+				Event::KeyPressed press_event(key);
+				Event::KeyTriggered trigger_event(key);
 
-			//Dispatch event to app layers
-			app->dispatchToLayers(event);
+				//Dispatch event to app layers
+				app->dispatchToLayers(press_event);
+				app->dispatchToLayers(trigger_event);
+
+				break;
+			}
+			case GLFW_REPEAT: {
+
+				//Create key pressed event
+				Event::KeyPressed press_event(key);
+				Event::KeyRepeated repeat_event(key);
+
+				//Dispatch event to app layers
+				app->dispatchToLayers(press_event);
+				app->dispatchToLayers(repeat_event);
+				break;
+			}
+			case GLFW_RELEASE: {
+				//Create key released event
+				Event::KeyReleased event(key);
+
+				//Dispatch event to app layers
+				app->dispatchToLayers(event);
+				break;
+			}
+			default: {
+				PN_CORE_WARN("Invalid Key Event Detected");
+				break;
+			}
+			}
 		}
 
 		void GLFW_Window::mousebutton_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
+			//Action switch
+			switch (action) {
+			case GLFW_PRESS:
+			{
+				//Create key pressed event
+				Event::MouseBtnPressed event(button);
+
+				//Dispatch event to app layers
+				app->dispatchToLayers(event);
+				break;
+			}
+			case GLFW_RELEASE: {
+				//Create key released event
+				Event::MouseBtnReleased event(button);
+
+				//Dispatch event to app layers
+				app->dispatchToLayers(event);
+				break;
+			}
+			default: {
+				PN_CORE_WARN("Invalid Button Event Detected");
+				break;
+			}
+			}
 		}
 
 		void GLFW_Window::mousepos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xpos, [[maybe_unused]] double ypos) {
@@ -169,7 +232,7 @@ namespace PAIN {
 		void GLFW_Window::OnEvent(Event::Event& e) {
 
 			//Early exit condition
-			if(!e.isInCategory(Event::Category::Application)) return;
+			//if(!e.isInCategory(Event::Category::Application)) return;
 
 			//Create event dispatcher
 			Event::Dispatcher dispatcher(e);
@@ -183,6 +246,17 @@ namespace PAIN {
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;
 			});
+
+			//Dispatch window resized event
+			dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
+
+				if (e.getBtnCode() == GLFW_MOUSE_BUTTON_LEFT) {
+					PN_CORE_INFO("PRESSED");
+				}
+
+				//Return false: continue dispatching, true = stop dispatching 
+				return false;
+				});
 		}
 	}
 }
