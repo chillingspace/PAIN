@@ -66,6 +66,9 @@
     <ClInclude Include="src\PAINEngine\Events\MouseEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PAINEngine\Events\AssetEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\pch.cpp">

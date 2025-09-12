@@ -16,9 +16,10 @@ namespace PAIN {
 		//Event Types
 		enum class Type {
 			None = 0,
-			WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+			WindowResize, WindowFocus, WindowMove,
 			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
-			MouseButtonPress, MouseButtonRelease, MouseMoved, MouseScrolled
+			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
+			FileDrop
 		};
 
 		//Event Categories
@@ -28,6 +29,7 @@ namespace PAIN {
 			Input		= 1 << 2,
 			Keyboard	= 1 << 3,
 			Mouse		= 1 << 4,
+			Asset		= 1 << 5
 		};
 
 #define EVENT_CLASS_TYPE(type)\

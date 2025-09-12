@@ -4,6 +4,7 @@
 #include "Events/WindowEvents.h"
 #include "Events/KeyEvents.h"
 #include "Events/MouseEvents.h"
+#include "Events/AssetEvents.h"
 
 #include "../../Application.h"
 
@@ -95,6 +96,28 @@ namespace PAIN {
 			app->dispatchToLayers(event);
 		}
 
+		void GLFW_Window::windowfocus_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int focused) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Dispatch event
+			Event::WindowFocused event(static_cast<bool>(focused));
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
+		}
+
+		void GLFW_Window::windowpos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int xpos, [[maybe_unused]] int ypos) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Dispatch event
+			Event::WindowMoved event(glm::uvec2(xpos, ypos));
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
+		}
+
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
 
 			//Fetch window class
@@ -171,23 +194,47 @@ namespace PAIN {
 		}
 
 		void GLFW_Window::mousepos_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xpos, [[maybe_unused]] double ypos) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
+			//Dispatch event
+			Event::MouseMoved event(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
 		}
 
 		void GLFW_Window::mousescroll_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] double xoffset, [[maybe_unused]] double yoffset) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
-		}
+			//Dispatch event
+			Event::MouseScrolled event(glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
 
-		void GLFW_Window::windowfocus_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int focused) {
-
-		}
-
-		void GLFW_Window::dropfile_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int count, [[maybe_unused]] const char** paths) {
-
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
 		}
 
 		void GLFW_Window::cursorenter_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int entered) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
+			//Dispatch event
+			Event::CursorEntered event(static_cast<bool>(entered));
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
+		}
+
+		void GLFW_Window::dropfile_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int count, [[maybe_unused]] const char** paths) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Dispatch event
+			Event::FileDropped event(count, paths);
+
+			//Dispatch event to app layers
+			app->dispatchToLayers(event);
 		}
 
 		//Construct window
@@ -204,13 +251,14 @@ namespace PAIN {
 
 			//Register all callbacks
 			glfwSetFramebufferSizeCallback(ptr_window, fbsize_cb);
+			glfwSetWindowFocusCallback(ptr_window, windowfocus_cb);
+			glfwSetWindowPosCallback(ptr_window, windowpos_cb);
 			glfwSetKeyCallback(ptr_window, key_cb);
 			glfwSetMouseButtonCallback(ptr_window, mousebutton_cb);
 			glfwSetCursorPosCallback(ptr_window, mousepos_cb);
 			glfwSetScrollCallback(ptr_window, mousescroll_cb);
-			glfwSetWindowFocusCallback(ptr_window, windowfocus_cb);
-			glfwSetDropCallback(ptr_window, dropfile_cb);
 			glfwSetCursorEnterCallback(ptr_window, cursorenter_cb);
+			glfwSetDropCallback(ptr_window, dropfile_cb);
 
 			//Storing class in glfw
 			glfwSetWindowUserPointer(ptr_window, app);
@@ -248,11 +296,9 @@ namespace PAIN {
 			});
 
 			//Dispatch window resized event
-			dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
+			dispatcher.Dispatch<Event::MouseScrolled>([&](Event::MouseScrolled& e) -> bool {
 
-				if (e.getBtnCode() == GLFW_MOUSE_BUTTON_LEFT) {
-					PN_CORE_INFO("PRESSED");
-				}
+				PN_CORE_INFO(e.toString());
 
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;

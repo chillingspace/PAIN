@@ -5,6 +5,7 @@
 
 #include "Event.h"
 #include <sstream>
+#include "glm/glm.hpp"
 
 namespace PAIN {
 	namespace Event {
@@ -59,6 +60,68 @@ namespace PAIN {
 
 			//Register Event
 			EVENT_CLASS_TYPE(MouseButtonRelease);
+		};
+
+		class MouseMoved : public Event {
+		private:
+			glm::vec2 window_pos;
+		public:
+
+			//Construct event
+			MouseMoved(glm::vec2 window_pos) : window_pos{ window_pos }{}
+
+			//Get window pos
+			glm::vec2 getWindowPos() const { return window_pos; }
+
+			//Debug string
+			std::string toString() override {
+				std::stringstream ss;
+				ss << "Mouse At, X: " << window_pos.x << ", Y: " << window_pos.y;
+				return ss.str();
+			}
+
+			//Register Event
+			EVENT_CLASS_TYPE(MouseMove);
+			EVENT_CLASS_CATEGORY(Category::Mouse | Category::Input)
+		};
+
+		class MouseScrolled : public Event {
+		private:
+			glm::vec2 offset;
+		public:
+
+			//Construct event
+			MouseScrolled(glm::vec2 offset) : offset{ offset } {}
+
+			//Get window pos
+			glm::vec2 getOffset() const { return offset; }
+
+			//Debug string
+			std::string toString() override {
+				std::stringstream ss;
+				ss << "Mouse Scroll Offset, X: " << offset.x << ", Y: " << offset.y;
+				return ss.str();
+			}
+
+			//Register Event
+			EVENT_CLASS_TYPE(MouseScroll);
+			EVENT_CLASS_CATEGORY(Category::Mouse | Category::Input)
+		};
+
+		class CursorEntered : public Event {
+		private:
+			bool b_entered;
+		public:
+
+			//Construct event
+			CursorEntered(bool b_entered) : b_entered{ b_entered } {}
+
+			//Get window pos
+			bool checkCursorEntered() const { return b_entered; }
+
+			//Register Event
+			EVENT_CLASS_TYPE(CursorEnter);
+			EVENT_CLASS_CATEGORY(Category::Mouse | Category::Input)
 		};
 	}
 }

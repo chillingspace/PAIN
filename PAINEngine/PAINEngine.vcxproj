@@ -195,6 +195,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\Components\cTransform.h" />
+    <ClInclude Include="src\PAINEngine\Events\AssetEvents.h" />
     <ClInclude Include="src\PAINEngine\Events\Event.h" />
     <ClInclude Include="src\PAINEngine\Events\KeyEvents.h" />
     <ClInclude Include="src\PAINEngine\Events\MouseEvents.h" />

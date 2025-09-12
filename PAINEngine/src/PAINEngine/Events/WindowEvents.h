@@ -31,6 +31,44 @@ namespace PAIN {
 			EVENT_CLASS_CATEGORY(Category::Application)
 		};
 
+		class WindowFocused : public Event {
+		private:
+			bool b_focus;
+		public:
+
+			//Construct event
+			WindowFocused(bool b_focus) : b_focus{ b_focus } {}
+
+			//Get window pos
+			bool checkWindowFocus() const { return b_focus; }
+
+			//Register Event
+			EVENT_CLASS_TYPE(WindowFocus);
+			EVENT_CLASS_CATEGORY(Category::Application)
+		};
+
+		class WindowMoved : public Event {
+		private:
+			glm::uvec2 window_pos;
+		public:
+
+			//Construct event
+			WindowMoved(glm::uvec2 window_pos) : window_pos{ window_pos } {}
+
+			//Get window pos
+			glm::uvec2 getWindowPos() const { return window_pos; }
+
+			//Debug string
+			std::string toString() override {
+				std::stringstream ss;
+				ss << "Window Moved To, X: " << window_pos.x << ", Y: " << window_pos.y;
+				return ss.str();
+			}
+
+			//Register Event
+			EVENT_CLASS_TYPE(WindowMove);
+			EVENT_CLASS_CATEGORY(Category::Application)
+		};
 	}
 }
 
