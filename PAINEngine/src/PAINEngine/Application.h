@@ -21,11 +21,16 @@ namespace PAIN {
 		//App layers
 		std::vector<std::shared_ptr<ECS::ISystem>> layer_stack;
 
+		//Boolean for running app
+		bool b_running = true;
+
 	public:
 		Application();
 		virtual ~Application();
 
 		void Run();
+
+		void Terminate();
 
 		void dispatchToLayers(Event::Event& e);
 

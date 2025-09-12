@@ -16,8 +16,19 @@ namespace PAIN {
 	}
 
 	void Application::Run() {
-		while (app_window->onUpdate()) {
+
+		//Application loop
+		while (b_running) {
+
+			//Iterate through all systems
+			for (auto& system : layer_stack) {
+				system->onUpdate();
+			}
 		};
+	}
+
+	void Application::Terminate() {
+		b_running = false;
 	}
 
 	void Application::dispatchToLayers(Event::Event& e) {

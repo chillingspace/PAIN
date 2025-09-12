@@ -26,13 +26,13 @@ namespace PAIN {
 			virtual void registerCallbacks(void* app) = 0;
 
 			//Update window
-			virtual bool onUpdate() = 0;
-
-			//Create window
-			static Window* create(Package const& package = Package());
+			virtual void onUpdate() = 0;
 
 			//Event callback
 			virtual void onEvent(Event::Event& e) = 0;
+
+			//Create window
+			static Window* create(Package const& package = Package());
 		};
 	}
 }

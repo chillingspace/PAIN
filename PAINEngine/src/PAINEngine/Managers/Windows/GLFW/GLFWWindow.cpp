@@ -118,6 +118,14 @@ namespace PAIN {
 			app->dispatchToLayersReversed(event);
 		}
 
+		void GLFW_Window::windowclose_cb([[maybe_unused]] GLFWwindow* window) {
+			//Fetch window class
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+			//Stop application
+			app->Terminate();
+		}
+
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
 
 			//Fetch window class
@@ -253,6 +261,7 @@ namespace PAIN {
 			glfwSetFramebufferSizeCallback(ptr_window, fbsize_cb);
 			glfwSetWindowFocusCallback(ptr_window, windowfocus_cb);
 			glfwSetWindowPosCallback(ptr_window, windowpos_cb);
+			glfwSetWindowCloseCallback(ptr_window, windowclose_cb);
 			glfwSetKeyCallback(ptr_window, key_cb);
 			glfwSetMouseButtonCallback(ptr_window, mousebutton_cb);
 			glfwSetCursorPosCallback(ptr_window, mousepos_cb);
@@ -263,18 +272,10 @@ namespace PAIN {
 			//Storing class in glfw
 			glfwSetWindowUserPointer(ptr_window, app);
 		}
-
-		bool GLFW_Window::onUpdate() {
+		void GLFW_Window::onUpdate() {
 
 			//Poll window events
 			glfwPollEvents();
-			
-			//Check for trigger to close window
-			if (!glfwWindowShouldClose(ptr_window)) {
-				return true;
-			}
-
-			return false;
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {

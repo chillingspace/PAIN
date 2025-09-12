@@ -25,6 +25,7 @@ namespace PAIN {
 			static void fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height);
 			static void windowfocus_cb([[maybe_unused]] GLFWwindow* window, int focused);
 			static void windowpos_cb([[maybe_unused]] GLFWwindow* window, int xpos, int ypos);
+			static void windowclose_cb([[maybe_unused]] GLFWwindow* window);
 			static void key_cb([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
 			static void mousebutton_cb([[maybe_unused]] GLFWwindow* window, int button, int action, [[maybe_unused]] int mods);
 			static void mousepos_cb([[maybe_unused]] GLFWwindow* window, double xpos, double ypos);
@@ -41,7 +42,7 @@ namespace PAIN {
 			void registerCallbacks(void* app) override;
 
 			//Update
-			bool onUpdate() override;
+			void onUpdate() override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;
