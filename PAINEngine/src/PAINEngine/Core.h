@@ -2,7 +2,7 @@
 
 #define PAIN_API
 
-#include "Events/Event.h"
+#include "Managers/Events/Event.h"
 
 namespace PAIN {
 	class AppLayer {

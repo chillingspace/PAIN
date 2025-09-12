@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
-#include "Events/WindowEvents.h"
-#include "Events/KeyEvents.h"
-#include "Events/MouseEvents.h"
-#include "Events/AssetEvents.h"
+#include "Managers/Events/WindowEvents.h"
+#include "Managers/Events/KeyEvents.h"
+#include "Managers/Events/MouseEvents.h"
+#include "Managers/Events/AssetEvents.h"
 
-#include "../../Application.h"
+#include "Application.h"
 
 namespace PAIN {
 	namespace Window {
@@ -280,7 +280,7 @@ namespace PAIN {
 		void GLFW_Window::OnEvent(Event::Event& e) {
 
 			//Early exit condition
-			//if(!e.isInCategory(Event::Category::Application)) return;
+			if(!e.isInCategory(Event::Category::Application)) return;
 
 			//Create event dispatcher
 			Event::Dispatcher dispatcher(e);

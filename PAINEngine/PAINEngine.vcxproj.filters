@@ -36,19 +36,19 @@
     <ClInclude Include="src\PAINEngine\Components\components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Events\Event.h">
+    <ClInclude Include="src\PAINEngine\Managers\Events\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Windows\Window.h">
+    <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Windows\GLFW\GLFWWindow.h">
+    <ClInclude Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Events\WindowEvents.h">
+    <ClInclude Include="src\PAINEngine\Managers\Events\WindowEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Events\KeyEvents.h">
+    <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h">
@@ -63,10 +63,10 @@
     <ClInclude Include="src\PAINEngine\Components\cTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Events\MouseEvents.h">
+    <ClInclude Include="src\PAINEngine\Managers\Events\MouseEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Events\AssetEvents.h">
+    <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -101,7 +101,7 @@
     <ClCompile Include="src\PAINEngine\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Windows\GLFW\GLFWWindow.cpp">
+    <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp">

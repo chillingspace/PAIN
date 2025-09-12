@@ -4,8 +4,8 @@
 #define APPLICATION_HPP
 
 #include "Core.h"
-#include "Windows/Window.h"
-#include "Events/Event.h"
+#include "Managers/Windows/Window.h"
+#include "Managers/Events/Event.h"
 #include <memory>
 #include <vector>
 
