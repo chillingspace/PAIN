@@ -6,8 +6,6 @@
 #include "Managers/Events/MouseEvents.h"
 #include "Managers/Events/AssetEvents.h"
 
-#include "AppLayer.h"
-
 namespace PAIN {
 	namespace Window {
 

@@ -192,7 +192,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\PAINEngine\AppLayer.h" />
+    <ClInclude Include="src\PAINEngine\Applications\AppLayer.h" />
     <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\Components\cTransform.h" />
@@ -205,9 +205,9 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Managers\Events\WindowEvents.h" />
     <ClInclude Include="src\PAINEngine\Logging\Log.h" />
     <ClInclude Include="src\PAINEngine.h" />
-    <ClInclude Include="src\PAINEngine\Application.h" />
+    <ClInclude Include="src\PAINEngine\Applications\Application.h" />
     <ClInclude Include="src\PAINEngine\Core.h" />
-    <ClInclude Include="src\PAINEngine\EntryPoint.h" />
+    <ClInclude Include="src\PAINEngine\Applications\EntryPoint.h" />
     <ClInclude Include="src\PAINEngine\pch.h" />
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h" />
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
@@ -215,8 +215,8 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\PAINEngine\AppLayer.cpp" />
-    <ClCompile Include="src\PAINEngine\Application.cpp" />
+    <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">

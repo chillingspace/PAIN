@@ -21,13 +21,13 @@
     <ClInclude Include="src\PAINEngine\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Application.h">
+    <ClInclude Include="src\PAINEngine\Applications\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\EntryPoint.h">
+    <ClInclude Include="src\PAINEngine\Applications\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Logging\Log.h">
@@ -75,7 +75,7 @@
     <ClInclude Include="src\PAINEngine\ECS\Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\AppLayer.h">
+    <ClInclude Include="src\PAINEngine\Applications\AppLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -83,7 +83,7 @@
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Application.cpp">
+    <ClCompile Include="src\PAINEngine\Applications\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">
@@ -125,7 +125,7 @@
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\AppLayer.cpp">
+    <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

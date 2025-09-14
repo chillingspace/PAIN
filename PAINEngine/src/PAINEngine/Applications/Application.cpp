@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Application.h"
 
+#include "Managers/Windows/Window.h"
+#include "Managers/Events/Event.h"
+#include "ECS/Controller.h"
+
 namespace PAIN {
 
 	Application::Application()
