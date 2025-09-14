@@ -4,6 +4,7 @@
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
+#include "Renderer/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {
@@ -16,6 +17,9 @@ namespace PAIN {
 
 			//Window buffer size
 			glm::uvec2 frame_buffer;
+
+			// Rendering context (OpenGL for now)
+			std::unique_ptr<GraphicsContext> m_Context; 
 
 			//Private internal functions
 			virtual void init(Package const& package);
