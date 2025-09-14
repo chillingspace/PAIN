@@ -6,6 +6,8 @@
 #include <string>
 #include "ECS/System/System.h"
 
+#include "AppLayer.h"
+
 namespace PAIN {
 	namespace Window {
 
@@ -18,7 +20,7 @@ namespace PAIN {
 		};
 
 		//Virtual window class
-		class Window : public ECS::ISystem {
+		class Window : public AppLayer {
 		public:
 			virtual ~Window() = default;
 

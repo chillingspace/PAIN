@@ -14,6 +14,7 @@ namespace PAIN {
 		}
 
 		void Controller::dispatchToLayersReversed(Event::Event& e) {
+			if (systems.empty()) return;
 			for (auto it = systems.rbegin(); it != systems.rend(); ++it) {
 
 				//Dispatch event down layers
@@ -33,12 +34,8 @@ namespace PAIN {
 			}
 		}
 
-		bool Controller::checkAppRunning() const {
-			return b_app_running;
-		}
+		void Controller::onEvent(Event::Event& e) {
 
-		void Controller::terminateApp() {
-			b_app_running = false;
 		}
 	}
 }

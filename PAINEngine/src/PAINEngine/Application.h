@@ -3,6 +3,8 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
+#include "AppLayer.h"
+
 #include "Managers/Windows/Window.h"
 #include "Managers/Events/Event.h"
 #include "ECS/Controller.h"
@@ -15,8 +17,8 @@ namespace PAIN {
 	{ 
 	private:
 
-		//Main controller of systems
-		std::shared_ptr<ECS::Controller> systems_controller;
+		//Create app layer stack
+		std::shared_ptr<AppLayerStack> layer_stack;
 
 	public:
 		Application();

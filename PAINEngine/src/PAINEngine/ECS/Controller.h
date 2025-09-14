@@ -6,17 +6,16 @@
 #include <memory>
 #include <vector>
 
+#include "AppLayer.h"
+
 namespace PAIN {
 	namespace ECS {
 
-		class Controller {
+		class Controller : public AppLayer {
 		private:
 
 			//Vector of systems
 			std::vector<std::shared_ptr<ISystem>> systems;
-
-			//Boolean to stop operation
-			bool b_app_running = true;
 
 		public:
 			Controller() = default;
@@ -33,11 +32,8 @@ namespace PAIN {
 			//Update function
 			void onUpdate();
 
-			//Fetch flag
-			bool checkAppRunning() const;
-
-			//Terminate
-			void terminateApp();
+			//Event callback
+			void onEvent(Event::Event& e) override;
 		};
 
 	}

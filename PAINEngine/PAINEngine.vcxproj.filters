@@ -75,6 +75,9 @@
     <ClInclude Include="src\PAINEngine\ECS\Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PAINEngine\AppLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\pch.cpp">
@@ -120,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\AppLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

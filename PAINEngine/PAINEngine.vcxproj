@@ -192,6 +192,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\PAINEngine\AppLayer.h" />
     <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\Components\cTransform.h" />
@@ -214,6 +215,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\PAINEngine\AppLayer.cpp" />
     <ClCompile Include="src\PAINEngine\Application.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
