@@ -30,7 +30,7 @@
     <ClInclude Include="src\PAINEngine\EntryPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Log.h">
+    <ClInclude Include="src\PAINEngine\Logging\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Components\components.h">
@@ -104,7 +104,7 @@
     <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Log.cpp">
+    <ClCompile Include="src\PAINEngine\Logging\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp">

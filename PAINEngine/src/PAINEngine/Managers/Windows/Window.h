@@ -3,13 +3,13 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
-#include "Core.h"
 #include <string>
+#include "ECS/System/System.h"
 
 namespace PAIN {
 	namespace Window {
 
-		struct PAIN_API Package {
+		struct Package {
 			std::string title;
 			unsigned int width;
 			unsigned int height;
@@ -18,7 +18,7 @@ namespace PAIN {
 		};
 
 		//Virtual window class
-		class PAIN_API Window : public ECS::ISystem {
+		class Window : public ECS::ISystem {
 		public:
 			virtual ~Window() = default;
 

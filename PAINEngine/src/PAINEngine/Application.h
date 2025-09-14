@@ -3,7 +3,6 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
-#include "Core.h"
 #include "Managers/Windows/Window.h"
 #include "Managers/Events/Event.h"
 #include "ECS/Controller.h"
@@ -12,7 +11,7 @@
 
 namespace PAIN {
 
-	class PAIN_API Application
+	class Application
 	{ 
 	private:
 

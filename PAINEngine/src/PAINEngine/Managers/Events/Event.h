@@ -3,7 +3,6 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-#include "Core.h"
 #include <string>
 #include <functional>
 #include <stdexcept>

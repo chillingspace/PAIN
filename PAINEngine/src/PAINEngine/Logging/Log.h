@@ -1,13 +1,12 @@
 #pragma once
 
 #include <memory> 
-#include "Core.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace PAIN {
 
-	class PAIN_API Log
+	class Log
 	{
 	public:
 		static void Init();

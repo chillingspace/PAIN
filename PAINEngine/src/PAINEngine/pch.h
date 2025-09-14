@@ -90,7 +90,7 @@
  /*****************************************************************//**
  * LOGGING
  *********************************************************************/
-#include "Log.h"
+#include "Logging/Log.h"
 
 //Ban normal logging
 #define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
