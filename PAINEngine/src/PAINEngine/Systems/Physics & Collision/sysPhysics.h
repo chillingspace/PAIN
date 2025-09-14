@@ -14,7 +14,9 @@
 #define SYS_PHYSICS_H
 
 #include "pch.h"
-#include "sCollision.h"
+#include "Core.h"
+#include "Managers/Collision & Layer/sCollision.h"
+#include "Managers/Collision & Layer/sLayer.h"
 
 using namespace glm;
 
@@ -22,54 +24,14 @@ namespace PAIN {
 
 	namespace Physics {
 
-		// Broad phase layer 1-1 mapping with number of obj layers
-		// 4 due to trigger, static, dynamic, character (player) layers
-
-		// Object layers are used to define who collides with who. (Static collide with dynamic)
-		// (Dynamic collide with Static, but static will not collide with static)
-		// If is trigger, no physics resolve, just report overlap
-		namespace ObjectLayers
-		{
-			static constexpr JPH::ObjectLayer ol_static = 0;
-			static constexpr JPH::ObjectLayer ol_dynamic = 1;
-			static constexpr JPH::ObjectLayer ol_trigger = 2;
-			static constexpr JPH::ObjectLayer ol_character = 3;
-
-			static constexpr JPH::ObjectLayer num_obj_layers = 4;
-		}
-
-		// From gpt explanation: 
-		/*BroadPhase Layers are categories you assign to objects so the broad phase can skip unnecessary checks.
-		Example:
-
-		Static terrain → never collides with other static terrain.
-
-		Projectiles → might only collide with characters, not with each other.*/
-		namespace BroadPhaseLayers
-		{
-			/* Gpt explanation : Characters (usually kinematic controllers like capsules) are a special case — they typically:
-			Collide with static & dynamic so they walk on floors and bump into things.
-			Don’t collide with other characters (to avoid jitter/pushing).
-			Usually don’t collide with triggers physically, but still report overlaps (so you can detect pickups/volumes).*/
-
-			// Trigger layers are like for pickup objects, detect collision but no resolution
-
-			static constexpr JPH::BroadPhaseLayer bp_static{ 0 };
-			static constexpr JPH::BroadPhaseLayer bp_dynamic{ 1 };
-			static constexpr JPH::BroadPhaseLayer bp_trigger{ 2 };
-			static constexpr JPH::BroadPhaseLayer bp_character{ 3 };
-
-			static constexpr JPH::uint num_bp_layers = 4;
-		}
-
-		class System
+		class System : public ECS::ISystem
 		{
 		public:
 			System();
 			~System();
 
 			// To add virtual and override in when abstract systems come in
-			void update();
+			virtual void onUpdate() override;
 			void init();
 			std::string getSysName() { return "Physics System"; }
 

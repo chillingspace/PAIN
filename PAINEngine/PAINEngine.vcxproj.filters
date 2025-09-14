@@ -54,9 +54,6 @@
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\PAINEngine\Components\cPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -76,6 +73,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Applications\AppLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -113,9 +116,6 @@
     <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

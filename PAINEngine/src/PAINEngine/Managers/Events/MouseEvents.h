@@ -3,9 +3,10 @@
 #ifndef MOUSE_EVENTS_HPP
 #define MOUSE_EVENTS_HPP
 
+#include "pch.h"
 #include "Event.h"
 #include <sstream>
-#include "glm/glm.hpp"
+
 
 namespace PAIN {
 	namespace Event {

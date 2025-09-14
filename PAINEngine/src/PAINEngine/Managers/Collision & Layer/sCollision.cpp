@@ -10,3 +10,9 @@
 
 #include "pch.h"
 #include "sCollision.h"
+
+namespace NIKE {
+	namespace Collision {
+
+	}
+}
