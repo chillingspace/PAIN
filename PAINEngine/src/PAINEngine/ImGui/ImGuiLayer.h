@@ -1,5 +1,6 @@
 #pragma once
-#ifndef PDEBUG
+
+#ifdef _DEBUG
 #ifndef IMGUI_LAYER_HPP
 #define IMGUI_LAYER_HPP
 
@@ -10,9 +11,10 @@
 #include <ImGui/headers/imgui_impl_opengl3.h>
 #include "Managers/Windows/Window.h"
 
-struct GLFWwindow; // forward declaration
-
 namespace PAIN {
+    namespace Editor {
+
+    }
 
     class ImGuiLayer : public AppSystem {
     public:
@@ -28,13 +30,19 @@ namespace PAIN {
         void EndFrame();
 
     private:
+
+        int imguiKeyMapping(int code);
+
+        void handleKeyEvents(ImGuiIO& io, Event::Event& event);
+        void handleMouseEvents(ImGuiIO& io, Event::Event& event);
+        void handleWindowEvents(ImGuiIO& io, Event::Event& event);
+
         float       m_Time;
-        GLFWwindow* m_Window;
-        bool        m_BlockEvents;
-        bool        m_Initialized = false;   // add this
     };
 
 
-} // namespace PAIN
+} 
+
+// namespace PAIN
 #endif // IMGUI_LAYER_HPP
 #endif // PDEBUG

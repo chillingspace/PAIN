@@ -246,7 +246,7 @@ namespace PAIN {
 		void GLFW_Window::onEvent(Event::Event& e) {
 
 			//Early exit condition
-			if(!e.isInCategory(Event::Category::Application)) return;
+			//if(!e.isInCategory(Event::Category::Application)) return;
 
 			//Create event dispatcher
 			Event::Dispatcher dispatcher(e);
@@ -262,7 +262,7 @@ namespace PAIN {
 			});
 
 			//Dispatch window resized event
-			dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
+			dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
 
 				PN_CORE_INFO(e.toString());
 

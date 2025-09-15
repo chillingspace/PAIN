@@ -18,7 +18,10 @@ namespace PAIN {
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<PAIN::TestTriangleLayer>());
-		addCoreSystem(std::make_shared<PAIN::ImGuiLayer>());
+
+#ifdef _DEBUG
+		addLayerSystem(std::make_shared<PAIN::ImGuiLayer>());
+#endif
 	}
 
 	Application::~Application()
