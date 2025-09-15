@@ -22,8 +22,7 @@ namespace PAIN {
 			JPH::Factory::sInstance = new JPH::Factory();
 			JPH::RegisterTypes();
 
-			// Allocator + job system
-
+			// Allocator + job system inits to run jolt update
 			// 10 MB allocation 
 			temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024); 
 			job_system = std::make_unique<JPH::JobSystemThreadPool>(
@@ -47,7 +46,7 @@ namespace PAIN {
 			// Cleanup
 		}
 
-		void System::init()
+		void System::onAttach()
 		{
 			// TODO: Init layers
 			// Init Jolt physics world (broadphase, layers, allocators, etc.)
@@ -60,18 +59,26 @@ namespace PAIN {
 			//	mObjectVsBroadPhaseLayerFilter,
 			//	mObjectLayerPairFilter
 			//);
+
+			PN_INFO("PHYSICS SYSTEM INITIALIZED!");
 		}
 
-		void System::update()
+		void System::onUpdate()
 		{
 			// To get fixed delta time here
-			const float delta_time = 1.0f / 60.0f;
+			// const float delta_time = 1.0f / 60.0f;
 
 			// If both unique ptrs of job system and temp allocator are valid, then jolt update
-			if (temp_allocator && job_system)
-			{
-				jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
-			}
+			// Update to comment out first...
+			//if (temp_allocator && job_system)
+			//{
+			//	jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+			//}
+
+		}
+
+		void System::onDetach()
+		{
 
 		}
 

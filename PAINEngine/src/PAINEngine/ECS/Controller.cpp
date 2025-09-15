@@ -34,7 +34,7 @@ namespace PAIN {
 			}
 		}
 
-		void Controller::onEvent(Event::Event& e) {
+		void Controller::onEvent([[maybe_unused]] Event::Event& e) {
 
 		}
 	}

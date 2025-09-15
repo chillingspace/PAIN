@@ -6,7 +6,7 @@
 #include <string>
 #include "ECS/System/System.h"
 
-#include "Applications/AppLayer.h"
+#include "Applications/AppSystem.h"
 
 namespace PAIN {
 	namespace Window {
@@ -20,7 +20,7 @@ namespace PAIN {
 		};
 
 		//Virtual window class
-		class Window : public AppLayer {
+		class Window : public AppSystem {
 		public:
 			virtual ~Window() = default;
 

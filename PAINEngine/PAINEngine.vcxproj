@@ -123,12 +123,14 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\PAINEngine\Applications\AppLayer.h" />
+    <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
     <ClInclude Include="src\PAINEngine\Components\components.h" />
     <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h" />
     <ClInclude Include="src\PAINEngine\ECS\System\System.h" />
     <ClInclude Include="src\PAINEngine\ECS\Controller.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\Event.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h" />
@@ -149,10 +151,12 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
     <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.cpp" />
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -160,7 +164,6 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClCompile Include="src\PAINEngine\Logging\Log.cpp" />
     <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp" />
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
     <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">

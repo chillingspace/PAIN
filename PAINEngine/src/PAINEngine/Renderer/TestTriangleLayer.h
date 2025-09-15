@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Applications/AppLayer.h"
+#include "Applications/AppSystem.h"
 
 namespace PAIN {
-	class TestTriangleLayer : public AppLayer {
+	class TestTriangleLayer : public AppSystem {
 	public:
 		TestTriangleLayer();
 		~TestTriangleLayer();
 			
 		void onUpdate() override;
 
-		void onEvent(PAIN::Event::Event& e) override {
+		void onEvent([[maybe_unused]] PAIN::Event::Event& e) override {
 			// do nothing for now
 		}
 
