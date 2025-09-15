@@ -13,8 +13,8 @@
 #define COLLISION_SERVICE_H
 
 #include "pch.h"
-#include "Components/cTransform.h"
-#include "Components/cPhysics.h"
+#include "ECS/Components/cTransform.h"
+#include "ECS/Components/cPhysics.h"
 
 namespace PAIN {
 	namespace Collision {

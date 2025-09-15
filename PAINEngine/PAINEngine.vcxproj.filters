@@ -57,10 +57,10 @@
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Components\cPhysics.h">
+    <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PAINEngine\Components\cTransform.h">
+    <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Managers\Events\MouseEvents.h">
@@ -76,6 +76,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PAINEngine\Applications\AppLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Renderer\GraphicsContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PAINEngine\Renderer\TestTriangleLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -126,6 +135,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
