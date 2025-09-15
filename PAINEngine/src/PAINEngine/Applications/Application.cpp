@@ -4,6 +4,7 @@
 #include "Managers/Windows/Window.h"
 #include "Managers/Events/Event.h"
 #include "ECS/Controller.h"
+#include "Renderer/TestTriangleLayer.h"
 
 namespace PAIN {
 
@@ -22,6 +23,7 @@ namespace PAIN {
 		//Push into systems controller
 		layer_stack->addLayer(app_window);
 		layer_stack->addLayer(systems_controller);
+		layer_stack->addLayer(std::make_shared<PAIN::TestTriangleLayer>());
 	}
 
 	Application::~Application()

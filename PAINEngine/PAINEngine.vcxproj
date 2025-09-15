@@ -142,6 +142,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\pch.h" />
     <ClInclude Include="src\PAINEngine\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\PAINEngine\Renderer\TestTriangleLayer.h" />
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h" />
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
     <ClInclude Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.h" />
@@ -158,6 +159,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     </ClCompile>
     <ClCompile Include="src\PAINEngine\Logging\Log.cpp" />
     <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
     <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp" />
