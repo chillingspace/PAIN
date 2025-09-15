@@ -13,8 +13,7 @@ bool PAIN_FMOD_CHECK(FMOD_RESULT result, const char* file, int line)
 {
     if (result != FMOD_OK)
     {
-        // Using the Core logger for engine-level errors
-        PN_CORE_ERROR("FMOD Error: [{0}] {1} in {2}:{3}", result, FMOD_ErrorString(result), file, line);
+        PN_CORE_ERROR("FMOD Error: [{0}] {1} in {2}:{3}", static_cast<int>(result), FMOD_ErrorString(result), file, line);
         return false;
     }
     return true;
@@ -28,13 +27,13 @@ AudioManager::AudioManager()
     : m_system(nullptr), m_nextChannelId(0) {}
 
 AudioManager::~AudioManager() {
-    Shutdown();
+    // onDetach will be called by Application, so destructor can be empty.
 }
 
-void AudioManager::Initialize(int maxChannels) {
+void AudioManager::onAttach() {
     if (!FMOD_CHECK(FMOD::System_Create(&m_system))) return;
 
-    if (!FMOD_CHECK(m_system->init(maxChannels, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, nullptr))) {
+    if (!FMOD_CHECK(m_system->init(512, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, nullptr))) {
         m_system->release();
         m_system = nullptr;
         return;
@@ -42,10 +41,10 @@ void AudioManager::Initialize(int maxChannels) {
 
     m_system->set3DSettings(1.0f, 1.0f, 1.0f);
     
-    PN_CORE_INFO("Audio Manager Initialized.");
+    PN_CORE_INFO("Audio Manager Attached and Initialized.");
 }
 
-void AudioManager::Shutdown() {
+void AudioManager::onDetach() {
     if (m_system) {
         for (auto const& [key, val] : m_sounds) { val->release(); }
         m_sounds.clear();
@@ -58,11 +57,11 @@ void AudioManager::Shutdown() {
         m_system->close();
         m_system->release();
         m_system = nullptr;
-        PN_CORE_INFO("Audio Manager Shutdown.");
+        PN_CORE_INFO("Audio Manager Detached and Shutdown.");
     }
 }
 
-void AudioManager::Update() {
+void AudioManager::onUpdate() {
     if (!m_system) return;
 
     std::vector<int> stoppedChannels;
@@ -77,6 +76,11 @@ void AudioManager::Update() {
 
     m_system->update();
 }
+
+void AudioManager::onEvent(PAIN::Event::Event& e) {
+    // We can handle audio-related events here if needed in the future.
+}
+
 
 void AudioManager::LoadSound(const std::string& soundPath, bool is3D, bool isLooping, bool stream) {
     if (m_sounds.count(soundPath)) return;

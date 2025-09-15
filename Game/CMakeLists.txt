@@ -12,7 +12,7 @@ target_include_directories(Game PRIVATE ${CMAKE_SOURCE_DIR}/PAINEngine/src)
 
 # --- Post-Build Commands (PC Only) ---
 if(NOT ANDROID)
-    # This command copies the FMOD DLLs next to your Game.exe after it's built
+    # This command copies the required DLLs next to your Game.exe after it's built
     add_custom_command(TARGET Game POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmod.dll"
@@ -20,7 +20,7 @@ if(NOT ANDROID)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmodL.dll"
             "$<TARGET_FILE_DIR:Game>"
-        COMMENT "Copying FMOD DLLs to output directory..."
+        COMMENT "Copying runtime DLLs to output directory..."
     )
 
     # This command copies your game assets to the build output directory
