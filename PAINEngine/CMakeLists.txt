@@ -4,18 +4,31 @@ project(PAINEngine)
 # -------------------------
 # Collect engine sources
 # -------------------------
-file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
+file(GLOB_RECURSE ENGINE_SRC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.c"
+)
 
 # -------------------------
 # Build engine as static lib
 # -------------------------
 add_library(PAINEngine STATIC ${ENGINE_SRC})
 
+
+# -------------------------
+# Precompiled header
+# -------------------------
+target_precompile_headers(PAINEngine
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/pch.h"
+)
+
+
 # -------------------------
 # Include directories
 # -------------------------
 target_include_directories(PAINEngine PUBLIC
     ${CMAKE_SOURCE_DIR}/PAINEngine/src                  # Engine headers
+    ${CMAKE_SOURCE_DIR}/PAINEngine/src/PAINEngine 
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor               # All vendor headers
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/spdlog/include
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/glm
@@ -34,6 +47,7 @@ set_target_properties(PAINEngine PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
 
+
 # -------------------------
 # Link libraries (prebuilt .lib)
 # -------------------------
@@ -49,6 +63,7 @@ target_link_libraries(PAINEngine
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/Lua.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/Jolt_Release.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/Jolt_Debug.lib"
+    opengl32
 )
 
 # -------------------------
@@ -57,6 +72,7 @@ target_link_libraries(PAINEngine
 if(MSVC)
     target_compile_options(PAINEngine PUBLIC /utf-8)
 endif()
+
 
 # -------------------------
 # Platform macros
