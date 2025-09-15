@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
+#include "Renderer/OpenGL/OpenGLContext.h"
+
 #include "Managers/Events/WindowEvents.h"
 #include "Managers/Events/KeyEvents.h"
 #include "Managers/Events/MouseEvents.h"
@@ -16,13 +18,10 @@ namespace PAIN {
 
 		//Init GLFW
 		void GLFW_Window::init(Package const& package) {
-			
+
 			//Set buffer size
 			frame_buffer.x = package.width;
 			frame_buffer.y = package.height;
-
-			//Creating window
-			GLenum err;
 
 			if (!glfwInit()) {
 				PN_CORE_ERROR("Failed to initialize GLFW");
@@ -53,23 +52,9 @@ namespace PAIN {
 				throw std::exception();
 			}
 
-			glfwMakeContextCurrent(ptr_window);
-			if (!glfwGetCurrentContext()) {
-				throw std::exception("Context creation failed.");
-			}
-
-			// clear glErrors
-			while (glGetError() != GL_NO_ERROR) {}
-
-			err = glewInit();
-			if (err != GLEW_OK) {
-				PN_CORE_ERROR("GLEW init failed: {}", (const char*)(glewGetErrorString(err)));
-				throw std::exception();
-			}
-
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-			}
+			//Create rendering context
+			m_Context = std::make_unique<OpenGLContext>(ptr_window);
+			m_Context->Init();
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
@@ -274,6 +259,7 @@ namespace PAIN {
 
 			//Poll window events
 			glfwPollEvents();
+			m_Context->SwapBuffers();
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {
