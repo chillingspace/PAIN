@@ -11,22 +11,37 @@ namespace PAIN {
 
 	Application::Application()
 	{
-		//Create systems controller
-		auto systems_controller = std::make_shared<ECS::Controller>();
+		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
+		window_app->registerCallbacks(this);
 
-		//Create window
-		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create());
-		app_window->registerCallbacks(this);
-
-		core_stack.push_back(app_window);
-		core_stack.push_back(systems_controller);
-		core_stack.push_back(std::make_shared<PAIN::TestTriangleLayer>());
-		core_stack.push_back(std::make_shared<PAIN::ImGuiLayer>());
-
+		//Push itno the core systems stack
+		addCoreSystem(window_app);
+		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(std::make_shared<PAIN::TestTriangleLayer>());
+		addCoreSystem(std::make_shared<PAIN::ImGuiLayer>());
 	}
 
 	Application::~Application()
 	{
+		for (auto& layer : layer_stack) {
+			layer->onDetach();
+		}
+		layer_stack.clear();
+
+		for (auto& core : core_stack) {
+			core->onDetach();
+		}
+		core_stack.clear();
+	}
+
+	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+		core_system->onAttach();
+		core_stack.push_back(core_system);
+	}
+
+	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+		layer_system->onAttach();
+		layer_stack.push_back(layer_system);
 	}
 
 	void Application::Run() {

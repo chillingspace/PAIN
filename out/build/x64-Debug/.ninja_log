@@ -1,6 +1,0 @@
-# ninja log v6
-6	28	7792960460513597	C:/SIT Projects/Software Programming 5 Project/PAIN/out/build/x64-Debug/CMakeFiles/cmake.verify_globs	dc35dd5e558fdc71
-42	2238	7792960460873628	Game/CMakeFiles/Game.dir/src/Game.cpp.obj	f248bb6345c7a5dc
-38	2878	7792960460823610	PAINEngine/CMakeFiles/PAINEngine.dir/src/PAINEngine/pch.cpp.obj	4562a885a1ac428c
-29	2925	7792960460743627	PAINEngine/CMakeFiles/PAINEngine.dir/src/PAINEngine/Application.cpp.obj	6bc2e9acf12cf2a3
-32	3036	7792960460773598	PAINEngine/CMakeFiles/PAINEngine.dir/src/PAINEngine/Log.cpp.obj	76036bd157ec4952
