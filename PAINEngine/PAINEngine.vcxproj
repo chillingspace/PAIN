@@ -131,7 +131,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\ECS\Controller.h" />
     <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.h" />
     <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.h" />
-    <ClInclude Include="src\PAINEngine\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\PAINEngine\LevelEditor\Editor.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\Event.h" />
     <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h" />
@@ -159,7 +159,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
     <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.cpp" />
-    <ClCompile Include="src\PAINEngine\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\LevelEditor\Editor.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

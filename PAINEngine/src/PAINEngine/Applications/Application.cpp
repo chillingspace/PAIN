@@ -5,7 +5,7 @@
 #include "Managers/Events/Event.h"
 #include "ECS/Controller.h"
 #include "Renderer/TestTriangleLayer.h"
-#include "ImGui/ImGuiLayer.h"
+#include "LevelEditor/Editor.h"
 
 namespace PAIN {
 
@@ -17,8 +17,11 @@ namespace PAIN {
 		//Push itno the core systems stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
-		addCoreSystem(std::make_shared<PAIN::TestTriangleLayer>());
-		addCoreSystem(std::make_shared<PAIN::ImGuiLayer>());
+		addCoreSystem(std::make_shared<TestTriangleLayer>());
+
+#ifdef _DEBUG
+		addLayerSystem(std::make_shared<Editor::Editor>());
+#endif
 	}
 
 	Application::~Application()

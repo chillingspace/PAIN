@@ -20,6 +20,8 @@
     <ClCompile Include="vendor\ImGui\src\imgui_impl_opengl3.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui_tables.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp" />
+    <ClCompile Include="src\PAINEngine\LevelEditor\Editor.cpp" />
+    <ClCompile Include="src\PAINEngine\Renderer\OpenGL\ImGuiOpenGLRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
@@ -48,5 +50,7 @@
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
     <ClInclude Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.h" />
     <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h" />
+    <ClInclude Include="src\PAINEngine\LevelEditor\Editor.h" />
+    <ClInclude Include="src\PAINEngine\Renderer\OpenGL\ImGuiOpenGLRenderer.h" />
   </ItemGroup>
 </Project>
