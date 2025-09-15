@@ -33,6 +33,8 @@ namespace PAIN {
 			//Event callback
 			virtual void onEvent(Event::Event& e) = 0;
 
+			virtual void* getNativeWindow() const = 0;
+
 			//Create window
 			static Window* create(Package const& package = Package());
 		};

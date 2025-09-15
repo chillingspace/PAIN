@@ -5,6 +5,7 @@
 #include "Managers/Events/Event.h"
 #include "ECS/Controller.h"
 #include "Renderer/TestTriangleLayer.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace PAIN {
 
@@ -17,12 +18,10 @@ namespace PAIN {
 		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create());
 		app_window->registerCallbacks(this);
 
-		//Push itno the core systems stack
 		core_stack.push_back(app_window);
 		core_stack.push_back(systems_controller);
 		core_stack.push_back(std::make_shared<PAIN::TestTriangleLayer>());
-
-		//Push into the layered systems stack
+		core_stack.push_back(std::make_shared<PAIN::ImGuiLayer>());
 
 	}
 

@@ -1,37 +1,40 @@
 #pragma once
-
 #ifndef PDEBUG
-
 #ifndef IMGUI_LAYER_HPP
 #define IMGUI_LAYER_HPP
 
-#include "../Applications/AppLayer.h"
+#include "Applications/AppSystem.h"
+#include "Applications/Application.h"
+#include <ImGui/headers/imgui.h>
+#include <ImGui/headers/imgui_impl_glfw.h>
+#include <ImGui/headers/imgui_impl_opengl3.h>
+#include "Managers/Windows/Window.h"
 
-#include <../vendor/ImGui/headers/imgui.h>
-#include <../vendor/ImGui/headers/imgui_impl_glfw.h>
-#include <../vendor/ImGui/headers/imgui_impl_opengl3.h>
+struct GLFWwindow; // forward declaration
 
 namespace PAIN {
 
-	class ImGuiLayer : public AppLayer 
-	{
+    class ImGuiLayer : public AppSystem {
+    public:
+        ImGuiLayer();
+        ~ImGuiLayer();                       // no override
 
-	public:
-		ImGuiLayer();
-		~ImGuiLayer();
+        void onAttach() override;
+        void onDetach() override;
+        void onUpdate() override;
+        void onEvent(Event::Event& event) override;
 
-		void onAttach();
-		void onDetach();
-		void onUpdate();
-		void onEvent(Event::Event& event);
+        void BeginFrame();
+        void EndFrame();
 
-	private:
-		float m_Time;
+    private:
+        float       m_Time;
+        GLFWwindow* m_Window;
+        bool        m_BlockEvents;
+        bool        m_Initialized = false;   // <— add this
+    };
 
-	};
 
-}
-
-#endif //IMGUI_LAYER_HPP
-
-#endif
+} // namespace PAIN
+#endif // IMGUI_LAYER_HPP
+#endif // PDEBUG

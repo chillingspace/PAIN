@@ -36,11 +36,16 @@ namespace PAIN {
 			static void mousescroll_cb([[maybe_unused]] GLFWwindow* window, double xoffset, double yoffset);
 			static void cursorenter_cb([[maybe_unused]] GLFWwindow* window, int entered);
 			static void dropfile_cb([[maybe_unused]] GLFWwindow* window, int count, const char** paths);
+
+			void* getNativeWindow() const override { return ptr_window; }
+
 		public:
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
 			virtual ~GLFW_Window();
+
+	
 
 			//Register callbacks
 			void registerCallbacks(void* app) override;
