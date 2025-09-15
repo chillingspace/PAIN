@@ -36,6 +36,10 @@ namespace PAIN {
 		Application();
 		virtual ~Application();
 
+		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
+
+		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+
 		void Run();
 
 		void terminate();
