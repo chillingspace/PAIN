@@ -32,7 +32,9 @@ namespace PAIN {
 
 			// To add virtual and override in when abstract systems come in
 			virtual void onUpdate() override;
-			void init();
+			virtual void onAttach() override;
+
+			virtual void onDetach() override;
 			std::string getSysName() { return "Physics System"; }
 
 		private:
@@ -67,8 +69,6 @@ namespace PAIN {
 
 			// Jolt init setup
 			void joltSetup();
-
-			std::unique_ptr<Collision::Service> collision_service;
 
 		};
 	}

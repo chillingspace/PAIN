@@ -46,7 +46,7 @@ namespace PAIN {
 			// Cleanup
 		}
 
-		void System::init()
+		void System::onAttach()
 		{
 			// TODO: Init layers
 			// Init Jolt physics world (broadphase, layers, allocators, etc.)
@@ -59,6 +59,8 @@ namespace PAIN {
 			//	mObjectVsBroadPhaseLayerFilter,
 			//	mObjectLayerPairFilter
 			//);
+
+			PN_INFO("PHYSICS SYSTEM INITIALIZED!");
 		}
 
 		void System::onUpdate()
@@ -72,6 +74,11 @@ namespace PAIN {
 			//{
 			//	jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
 			//}
+
+		}
+
+		void System::onDetach()
+		{
 
 		}
 

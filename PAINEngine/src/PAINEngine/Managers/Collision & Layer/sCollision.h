@@ -13,7 +13,7 @@
 #define COLLISION_SERVICE_H
 
 #include "pch.h"
-#include "Applications/AppLayer.h"
+#include "Applications/AppSystem.h"
 
 namespace PAIN {
 	namespace Collision {
@@ -26,7 +26,7 @@ namespace PAIN {
 			bool b_is_trigger;
 		};
 
-		class Service : public AppLayer
+		class Service : public AppSystem
 		{
 		public:
 
