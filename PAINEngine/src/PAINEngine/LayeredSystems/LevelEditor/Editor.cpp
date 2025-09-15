@@ -86,8 +86,7 @@ namespace PAIN {
             return ImGuiKey_None;
         }
 
-        Editor::Editor()
-            : m_Time(0.0f) {
+        Editor::Editor() {
         }
 
         Editor::~Editor() {}
@@ -104,9 +103,16 @@ namespace PAIN {
 
             ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
             ImGui_ImplOpenGL3_Init("#version 450");
+
+            // Load imgui settings
+            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
         }
 
         void Editor::onDetach() {
+            //Save imgui layouts
+            ImGuiIO& io = ImGui::GetIO();
+            ImGui::SaveIniSettingsToDisk(io.IniFilename);
+
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();

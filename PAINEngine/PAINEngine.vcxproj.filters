@@ -21,6 +21,7 @@
     <ClCompile Include="vendor\ImGui\src\imgui_tables.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp" />
     <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Editor.cpp" />
+    <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Actions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
@@ -50,5 +51,6 @@
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\GLFW\GLFWWindow.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\Window.h" />
     <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Editor.h" />
+    <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Actions.h" />
   </ItemGroup>
 </Project>

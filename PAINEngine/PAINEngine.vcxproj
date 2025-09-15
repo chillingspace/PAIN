@@ -137,6 +137,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\CoreSystems\Events\KeyEvents.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Events\MouseEvents.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Events\WindowEvents.h" />
+    <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Actions.h" />
     <ClInclude Include="src\PAINEngine\Logging\Log.h" />
     <ClInclude Include="src\PAINEngine.h" />
     <ClInclude Include="src\PAINEngine\Applications\Application.h" />
@@ -159,6 +160,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClCompile Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sLayer.cpp" />
     <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Editor.cpp" />
+    <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Actions.cpp" />
     <ClCompile Include="src\PAINEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

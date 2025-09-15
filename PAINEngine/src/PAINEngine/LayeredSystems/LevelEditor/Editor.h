@@ -11,6 +11,8 @@
 #include <ImGui/headers/imgui_impl_opengl3.h>
 #include "CoreSystems/Windows/Window.h"
 
+#include "Actions.h"
+
 namespace PAIN {
     namespace Editor {
 
@@ -25,10 +27,14 @@ namespace PAIN {
             void onUpdate() override;
             void onEvent(Event::Event& event) override;
 
-            void BeginFrame();
-            void EndFrame();
-
         private:
+
+            //Actions manager
+            std::unique_ptr<ActionManager> action_manager;
+
+            void BeginFrame();
+
+            void EndFrame();
 
             //Mapping of glfw keys to imgui keys
             int imguiKeyMapping(int code);
@@ -37,8 +43,6 @@ namespace PAIN {
             void handleKeyEvents(ImGuiIO& io, Event::Event& event);
             void handleMouseEvents(ImGuiIO& io, Event::Event& event);
             void handleWindowEvents(ImGuiIO& io, Event::Event& event);
-
-            float       m_Time;
         };
     }
 } 
