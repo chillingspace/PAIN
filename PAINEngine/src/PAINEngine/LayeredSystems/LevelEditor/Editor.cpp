@@ -2,7 +2,6 @@
 #include "Editor.h"
 
 #ifdef _DEBUG
-#include <GLFW/glfw3.h>
 
 #include "CoreSystems/Events/WindowEvents.h"
 #include "CoreSystems/Events/KeyEvents.h"
