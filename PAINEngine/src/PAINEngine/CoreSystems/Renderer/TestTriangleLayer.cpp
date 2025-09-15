@@ -58,8 +58,8 @@ namespace PAIN {
 
     void TestTriangleLayer::onAttach() {
         // Initialize 3D positions for the demo
-        m_cubePosition = glm::vec3(-5.0f, 0.0f, -2.0f);
-        m_cameraPosition = glm::vec3(0.0f, 0.0f, 5.0f);
+        m_cubePosition = glm::vec3(-12.0f, 0.0f, -4.0f); // Start at the new top-left
+        m_cameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);   // Camera is at the center
 
         // Get a reference to the audio manager
         AudioManager& audio = Application::Get().GetAudioManager();
@@ -87,38 +87,47 @@ namespace PAIN {
     void TestTriangleLayer::onUpdate() {
         AudioManager& audio = Application::Get().GetAudioManager();
 
-        // Animate the cube's position in a rectangle
+        // Animate the cube's position in a larger and wider rectangle
         static int pathSegment = 0;
         static float progress = 0.0f;
-        float speed = 0.02f;
+        float speed = 0.005f; // Slower speed for a longer traversal time
 
         glm::vec3 points[4] = {
-            {-5.0f, 0.0f, -2.0f}, // Top-left
-            { 5.0f, 0.0f, -2.0f}, // Top-right
-            { 5.0f, 0.0f,  2.0f}, // Bottom-right
-            {-5.0f, 0.0f,  2.0f}  // Bottom-left
+            {-12.0f, 0.0f, -4.0f}, // Top-left (NW)
+            { 12.0f, 0.0f, -4.0f}, // Top-right (NE)
+            { 12.0f, 0.0f,  4.0f}, // Bottom-right (SE)
+            {-12.0f, 0.0f,  4.0f}  // Bottom-left (SW)
         };
 
         progress += speed;
         if (progress >= 1.0f) {
             progress = 0.0f;
             pathSegment = (pathSegment + 1) % 4;
+
+            // Log the new movement direction
+            switch (pathSegment) {
+            case 0: PN_CORE_INFO("Sound source moving from back-left to front-left."); break;
+            case 1: PN_CORE_INFO("Sound source moving from front-left to front-right."); break;
+            case 2: PN_CORE_INFO("Sound source moving from front-right to back-right."); break;
+            case 3: PN_CORE_INFO("Sound source moving from back-right to back-left."); break;
+            }
         }
 
         glm::vec3 startPoint = points[pathSegment];
         glm::vec3 endPoint = points[(pathSegment + 1) % 4];
         m_cubePosition = glm::mix(startPoint, endPoint, progress);
 
-        // Update the FMOD listener's position and orientation to match the camera
+        // Update the FMOD listener's position and orientation. The listener is static.
         glm::vec3 cameraVelocity = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 cameraForward = glm::normalize(glm::vec3(0, 0, -1));
+        glm::vec3 cameraForward = { 0.0f, 0.0f, -1.0f }; // Camera faces forward along -Z axis
         glm::vec3 cameraUp = { 0.0f, 1.0f, 0.0f };
         audio.SetListener(m_cameraPosition, cameraVelocity, cameraForward, cameraUp);
 
         // Play a random footstep sound from the playlist periodically
         static int frameCount = 0;
-        if (++frameCount % 100 == 0) // Changed from 60 to 100 for a ~0.7s delay
+        if (++frameCount % 100 == 0)
         {
+            PN_CORE_INFO("Playing footstep sound...");
             audio.PlayRandomFromPlaylist("FootstepsGrass", m_cubePosition, 0.0f);
         }
 
