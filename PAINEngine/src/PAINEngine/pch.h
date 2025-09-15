@@ -21,6 +21,8 @@
 #include <Jolt/Physics/Body/Body.h>     
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h> 
+#include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
  /*****************************************************************//**
  * Engine Specific Library
@@ -57,6 +59,11 @@
 #include "Core.h"
 
  /*****************************************************************//**
+ * Seri HEADER
+ *********************************************************************/
+//#include "nlohmann/json.hpp"
+
+ /*****************************************************************//**
  * STL
  *********************************************************************/
 #include <iostream>
@@ -70,7 +77,6 @@
 #include <sstream>
 #include <time.h>
 #include <list>
-#include <sstream>
 #include <memory>
 #include <cmath>
 #include <iterator>
@@ -86,6 +92,7 @@
 #include <regex>
 #include <limits>
 #include <random>
+#include <bitset>
 
  /*****************************************************************//**
  * LOGGING

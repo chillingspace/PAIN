@@ -6,12 +6,12 @@
 #include <memory>
 #include <vector>
 
-#include "Applications/AppLayer.h"
+#include "Applications/AppSystem.h"
 
 namespace PAIN {
 	namespace ECS {
 
-		class Controller : public AppLayer {
+		class Controller : public AppSystem {
 		private:
 
 			//Vector of systems
