@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "Actions.h"
+#include "Command.h"
 
 namespace PAIN {
 	namespace Editor {
 
-		void ActionManager::undo() {
+		void CommandManager::undo() {
 
 			//Check if undo stack is empty
 			if (undo_stack.empty()) {
@@ -22,7 +22,7 @@ namespace PAIN {
 			undo_stack.pop();
 		}
 
-		void ActionManager::redo() {
+		void CommandManager::redo() {
 
 			//Check if redo stack is empty
 			if (redo_stack.empty()) {
@@ -40,7 +40,7 @@ namespace PAIN {
 			redo_stack.pop();
 		}
 
-		void ActionManager::executeAction(Action&& action) {
+		void CommandManager::executeAction(Action&& action) {
 
 			//Execute action immediatedly
 			action.do_action();
@@ -54,7 +54,7 @@ namespace PAIN {
 			}
 		}
 
-		void ActionManager::clearStacks() {
+		void CommandManager::clearStacks() {
 			//Clear redo stack
 			while (!redo_stack.empty()) {
 				redo_stack.pop();

@@ -11,7 +11,7 @@
 #include <ImGui/headers/imgui_impl_opengl3.h>
 #include "CoreSystems/Windows/Window.h"
 
-#include "Actions.h"
+#include "Command.h"
 
 namespace PAIN {
     namespace Editor {
@@ -30,7 +30,7 @@ namespace PAIN {
         private:
 
             //Actions manager
-            std::unique_ptr<ActionManager> action_manager;
+            std::unique_ptr<CommandManager> action_manager;
 
             void BeginFrame();
 

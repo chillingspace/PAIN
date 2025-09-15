@@ -13,7 +13,7 @@ namespace PAIN {
 		};
 
 		//Undo & Redo Level Editor Manager
-		class ActionManager {
+		class CommandManager {
 		private:
 
 			//Undo stack actions
@@ -22,8 +22,8 @@ namespace PAIN {
 			//Redo stack actions
 			std::stack<Action> redo_stack;
 		public:
-			ActionManager() = default;
-			~ActionManager() = default;
+			CommandManager() = default;
+			~CommandManager() = default;
 
 			//Undo action
 			void undo();
