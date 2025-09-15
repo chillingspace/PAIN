@@ -14,7 +14,6 @@ file(GLOB_RECURSE ENGINE_SRC
 # -------------------------
 add_library(PAINEngine STATIC ${ENGINE_SRC})
 
-
 # -------------------------
 # Precompiled header
 # -------------------------
@@ -22,14 +21,13 @@ target_precompile_headers(PAINEngine
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/pch.h"
 )
 
-
 # -------------------------
 # Include directories
 # -------------------------
 target_include_directories(PAINEngine PUBLIC
-    ${CMAKE_SOURCE_DIR}/PAINEngine/src                  # Engine headers
-    ${CMAKE_SOURCE_DIR}/PAINEngine/src/PAINEngine 
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor               # All vendor headers
+    ${CMAKE_SOURCE_DIR}/PAINEngine/src              # Engine headers
+    ${CMAKE_SOURCE_DIR}/PAINEngine/src/PAINEngine
+    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor          # All vendor headers
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/spdlog/include
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/glm
     ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/GLFW/include
@@ -47,18 +45,17 @@ set_target_properties(PAINEngine PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
 
-
 # -------------------------
-# Link libraries (prebuilt .lib)
+# Link libraries
 # -------------------------
-# Full paths to avoid link_directories
-set(LIB_DIR "${CMAKE_SOURCE_DIR}/dependencies/lib")
+# Note: We now link FMOD using the ${FMOD_LIBS} variable from the root CMakeLists.txt
+target_link_libraries(PAINEngine PUBLIC
+    # FMOD Libraries (handled by root script)
+    ${FMOD_LIBS}
 
-target_link_libraries(PAINEngine
+    # Other Dependencies
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/glfw3.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/glew32.lib"
-    "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/fmod_vc.lib"
-    "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/fmodL_vc.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/freetype.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/Lua.lib"
     "${CMAKE_SOURCE_DIR}/PAINEngine/dependencies/lib/Jolt_Release.lib"
@@ -72,7 +69,6 @@ target_link_libraries(PAINEngine
 if(MSVC)
     target_compile_options(PAINEngine PUBLIC /utf-8)
 endif()
-
 
 # -------------------------
 # Platform macros
