@@ -56,6 +56,14 @@ namespace PAIN {
 
         // Setup Shaders
         m_Shader = std::make_unique<Shader>(vertexShaderSrc, fragmentShaderSrc);
+
+        // JSON test
+        //json j;
+        //j["hello"] = "world";
+        //j["value"] = 123;
+
+        //std::ofstream out("test.json");
+        //out << j.dump(4);
     }
 
     TestTriangleLayer::~TestTriangleLayer() {
