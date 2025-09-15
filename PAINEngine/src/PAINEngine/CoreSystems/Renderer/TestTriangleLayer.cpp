@@ -127,7 +127,7 @@ namespace PAIN {
         static int frameCount = 0;
         if (++frameCount % 100 == 0)
         {
-            PN_CORE_INFO("Playing footstep sound...");
+            //PN_CORE_INFO("Playing footstep sound...");
             audio.PlayRandomFromPlaylist("FootstepsGrass", m_cubePosition, 0.0f);
         }
 
