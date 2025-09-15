@@ -11,8 +11,13 @@
 #include "pch.h"
 #include "sCollision.h"
 
-namespace NIKE {
+namespace PAIN {
 	namespace Collision {
-
+		void Service::clearPreviousCollisions()
+		{
+		}
+		void Service::onEvent([[maybe_unused]] Event::Event& e)
+		{
+		}
 	}
 }

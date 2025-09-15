@@ -13,6 +13,7 @@
 #define COLLISION_SERVICE_H
 
 #include "pch.h"
+#include "Applications/AppLayer.h"
 
 namespace PAIN {
 	namespace Collision {
@@ -25,7 +26,7 @@ namespace PAIN {
 			bool b_is_trigger;
 		};
 
-		class Service
+		class Service : public AppLayer
 		{
 		public:
 
@@ -33,9 +34,11 @@ namespace PAIN {
 			static constexpr size_t MAX_COLLISIONS = 100; 
 
 			Service() = default;
-			~Service() = default;
+			virtual ~Service() = default;
 
 			void clearPreviousCollisions();
+
+			virtual void onEvent(Event::Event& e) override;
 
 		private:
 			// To be changed to use MAX_ENTITY, to be put in collision manager, not wise for each entity to carry so much bytes

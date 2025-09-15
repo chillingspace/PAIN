@@ -10,7 +10,7 @@ namespace PAIN {
 			
 		void onUpdate() override;
 
-		void onEvent(PAIN::Event::Event& e) override {
+		void onEvent([[maybe_unused]] PAIN::Event::Event& e) override {
 			// do nothing for now
 		}
 

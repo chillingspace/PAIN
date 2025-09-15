@@ -164,7 +164,6 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClCompile Include="src\PAINEngine\Logging\Log.cpp" />
     <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp" />
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
     <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">

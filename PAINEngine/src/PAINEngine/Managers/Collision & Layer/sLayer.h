@@ -13,8 +13,6 @@
 #define LAYER_SERVICE_H
 
 #include "pch.h"
-#include "Components/cTransform.h"
-#include "Components/cPhysics.h"
 
 namespace NIKE {
 	namespace Layer {
