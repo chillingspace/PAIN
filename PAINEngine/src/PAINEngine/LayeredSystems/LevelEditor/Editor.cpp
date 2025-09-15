@@ -8,6 +8,7 @@
 #include "CoreSystems/Events/KeyEvents.h"
 #include "CoreSystems/Events/MouseEvents.h"
 #include "CoreSystems/Events/AssetEvents.h"
+#include "PAINEngine/Audio/AudioManager.h"
 
 namespace PAIN {
 
@@ -104,12 +105,10 @@ namespace PAIN {
             ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
             ImGui_ImplOpenGL3_Init("#version 450");
 
-            // Load imgui settings
             ImGui::LoadIniSettingsFromDisk(io.IniFilename);
         }
 
         void Editor::onDetach() {
-            //Save imgui layouts
             ImGuiIO& io = ImGui::GetIO();
             ImGui::SaveIniSettingsToDisk(io.IniFilename);
 
@@ -131,45 +130,50 @@ namespace PAIN {
             ImGui::Checkbox("Show Demo Window", &show_demo);
             ImGui::End();
 
-            // Placeholder For Audio (no FMOD yet)
-            ImGui::Begin("Audio Controls (Placeholder)");
+            // Functional Audio Controls
+            ImGui::Begin("Audio Controls");
+            AudioManager& audio = Application::Get().GetAudioManager();
 
-            static char soundId[256] = "";         
-            static float volume = 1.0f;
+            static char soundPath[256] = "assets/audio/SFX/MovingSFX/Footstep_Metal_01.wav";
+            static float volume = 0.0f;
             static bool loop = false;
-            static bool isPlaying = false;
+            static bool is3D = true;
+            static float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
 
-            ImGui::TextDisabled("No audio backend integrated yet (FMOD pending).");
-            ImGui::Separator();
-
-            ImGui::InputText("Sound", soundId, IM_ARRAYSIZE(soundId));
-            ImGui::SameLine();
-            if (ImGui::Button("Clear")) {
-                soundId[0] = '\0';
-            }
-
-            ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.2f");
+            ImGui::InputText("Sound Path", soundPath, IM_ARRAYSIZE(soundPath));
+            ImGui::SliderFloat("Volume (dB)", &volume, -80.0f, 10.0f, "%.2f");
             ImGui::Checkbox("Loop", &loop);
+            ImGui::Checkbox("3D", &is3D);
 
-            ImGui::Separator();
-            if (ImGui::Button("Play")) {
-
-                // trigger FMOD play for `soundId` with `volume` & `loop`.
-                isPlaying = true;
+            if (is3D) {
+                ImGui::SliderFloat("X", &posX, -10.0f, 10.0f);
+                ImGui::SliderFloat("Y", &posY, -10.0f, 10.0f);
+                ImGui::SliderFloat("Z", &posZ, -10.0f, 10.0f);
             }
+
+            if (ImGui::Button("Load Sound")) {
+                audio.LoadSound(soundPath, is3D, loop);
+            }
+
             ImGui::SameLine();
-            if (ImGui::Button("Pause")) {
 
-                // pause the active sound/instance.
-                isPlaying = false;
+            if (ImGui::Button("Play Sound")) {
+                audio.PlaySound(soundPath, { posX, posY, posZ }, volume);
             }
 
             ImGui::Separator();
-            ImGui::Text("Status: %s", isPlaying ? "Playing (simulated)" : "Paused/Stopped");
-            ImGui::Text("Selected: %s", soundId[0] ? soundId : "<none>");
-            ImGui::End();
-            // --- End placeholder ---
+            ImGui::Text("Playlist Controls");
+            if (ImGui::Button("Play Random Footstep"))
+            {
+                audio.PlayRandomFromPlaylist("FootstepsGrass", { posX, posY, posZ }, volume);
+            }
 
+            ImGui::Separator();
+            if (ImGui::Button("Stop All Sounds")) {
+                audio.StopAllChannels();
+            }
+
+            ImGui::End();
 
             EndFrame();
         }
@@ -187,148 +191,67 @@ namespace PAIN {
 
         void Editor::onEvent(Event::Event& event) {
 
-            //Get imgui input
             ImGuiIO& io = ImGui::GetIO();
-
-            //Check imgui polling for keyboard event
-            if (event.isInCategory(Event::Keyboard)) {
-
-                //Check if imgui wants to capture keyboard events
-                if (io.WantCaptureKeyboard) {
-
-                    //Handle keyboard events
-                    handleKeyEvents(io, event);
-                }
+            if (event.isInCategory(Event::Keyboard) && io.WantCaptureKeyboard) {
+                handleKeyEvents(io, event);
             }
-
-            //Check imgui polling for mouse events
-            if (event.isInCategory(Event::Mouse)) {
-
-                //Check if imgui wants to capture mouse events
-                if (io.WantCaptureMouse) {
-
-                    //Handle mouse events
-                    handleMouseEvents(io, event);
-                }
+            if (event.isInCategory(Event::Mouse) && io.WantCaptureMouse) {
+                handleMouseEvents(io, event);
             }
-
-            //Check imgui polling for mouse events
             if (event.isInCategory(Event::Application)) {
-
-                //Handle mouse events
                 handleWindowEvents(io, event);
             }
         }
 
         void Editor::handleKeyEvents(ImGuiIO& io, Event::Event& event) {
-
-            //Create event dispatcher
             Event::Dispatcher dispatcher(event);
-
-            //Dispatch key triggered event
             dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
-
-                //Update imgui
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
-
-            //Dispatch key press event
             dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
-
-                //Update imgui
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
-
-            //Dispatch key repeated event
             dispatcher.Dispatch<Event::KeyRepeated>([&](Event::KeyRepeated& e) -> bool {
-
-                //Update imgui
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
-
-            //Dispatch key released event
             dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
-
-                //Update imgui
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), false);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
         }
 
         void Editor::handleMouseEvents(ImGuiIO& io, Event::Event& event) {
-            //Create event dispatcher
             Event::Dispatcher dispatcher(event);
-
-            //Dispatch Mouse pressed event
             dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
-
-                //Update imgui
                 io.AddMouseButtonEvent(e.getBtnCode(), true);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
-
-            //Dispatch Mouse released event
             dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
-
-                //Update imgui
                 io.AddMouseButtonEvent(e.getBtnCode(), false);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return true;
                 });
-
-            //Dispatch Mouse released event
             dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-
-                //Update imgui mouse position
                 io.AddMousePosEvent(e.getWindowPos().x, e.getWindowPos().y);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return false;
                 });
-
-            //Dispatch Mouse scroll event
             dispatcher.Dispatch<Event::MouseScrolled>([&](Event::MouseScrolled& e) -> bool {
-
-                //Update scroll offset
                 io.AddMouseWheelEvent(e.getOffset().x, e.getOffset().y);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return false;
                 });
         }
 
         void Editor::handleWindowEvents(ImGuiIO& io, Event::Event& event) {
-
-            //Create event dispatcher
             Event::Dispatcher dispatcher(event);
-
-            //Dispatch key triggered event
             dispatcher.Dispatch<Event::WindowResized>([&](Event::WindowResized& e) -> bool {
-
-                //Update imgui that windows is resized
                 io.DisplaySize.x = static_cast<float>(e.getFrameBuffer().x);
                 io.DisplaySize.y = static_cast<float>(e.getFrameBuffer().y);
-
-                //Return false: continue dispatching, true = stop dispatching 
                 return false;
                 });
         }
     }
 
-} // namespace PAIN
-
+}
 #endif

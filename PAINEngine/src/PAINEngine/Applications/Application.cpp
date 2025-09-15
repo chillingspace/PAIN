@@ -6,15 +6,26 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
+#include "PAINEngine/Audio/AudioManager.h"
 
 namespace PAIN {
 
+	// Define the static instance
+	Application* Application::s_Instance = nullptr;
+
 	Application::Application()
 	{
+		// Set the static instance
+		s_Instance = this;
+
 		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
 		window_app->registerCallbacks(this);
 
-		//Push itno the core systems stack
+		// Create and add the AudioManager to the core systems
+		m_AudioManager = std::make_shared<AudioManager>();
+		addCoreSystem(m_AudioManager);
+
+		//Push other core systems into the stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<TestTriangleLayer>());
@@ -143,7 +154,7 @@ namespace PAIN {
 	}
 
 	void Application::drainEventQueue() {
-		
+
 		//Handle all events in queue
 		while (!event_queue.empty()) {
 

@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "AudioManager.h"
-#include "PAINEngine/Logging/Log.h" // Include your engine's Log header
+#include "PAINEngine/Logging/Log.h"
 
 #include <fmod.hpp>
 #include <fmod_errors.h>
 #include <cmath>
 #include <random>
 
-// Helper to check for FMOD errors and log them using your engine's logger
+// Helper macro to check for FMOD errors and log them
 #define FMOD_CHECK(result) PAIN_FMOD_CHECK(result, __FILE__, __LINE__)
 bool PAIN_FMOD_CHECK(FMOD_RESULT result, const char* file, int line)
 {
@@ -23,11 +23,12 @@ FMOD_VECTOR AudioManager::toFMODVector(const glm::vec3& vec) {
     return { vec.x, vec.y, vec.z };
 }
 
-AudioManager::AudioManager() 
-    : m_system(nullptr), m_nextChannelId(0) {}
+AudioManager::AudioManager()
+    : m_system(nullptr), m_nextChannelId(0) {
+}
 
 AudioManager::~AudioManager() {
-    // onDetach will be called by Application, so destructor can be empty.
+    // onDetach will be called by the Application class.
 }
 
 void AudioManager::onAttach() {
@@ -40,7 +41,7 @@ void AudioManager::onAttach() {
     }
 
     m_system->set3DSettings(1.0f, 1.0f, 1.0f);
-    
+
     PN_CORE_INFO("Audio Manager Attached and Initialized.");
 }
 
@@ -78,9 +79,8 @@ void AudioManager::onUpdate() {
 }
 
 void AudioManager::onEvent(PAIN::Event::Event& e) {
-    // We can handle audio-related events here if needed in the future.
+    // Stub for future event handling.
 }
-
 
 void AudioManager::LoadSound(const std::string& soundPath, bool is3D, bool isLooping, bool stream) {
     if (m_sounds.count(soundPath)) return;
@@ -119,12 +119,12 @@ int AudioManager::PlaySound(const std::string& soundPath, const glm::vec3& posit
     FMOD::Channel* channel = nullptr;
     if (FMOD_CHECK(m_system->playSound(it->second, nullptr, true, &channel))) {
         FMOD_VECTOR pos = toFMODVector(position);
-        FMOD_VECTOR vel = {0, 0, 0};
-        
+        FMOD_VECTOR vel = { 0, 0, 0 };
+
         channel->set3DAttributes(&pos, &vel);
         channel->setVolume(dbToVolume(volumeDb));
         channel->setPaused(false);
-        
+
         int channelId = m_nextChannelId++;
         m_channels[channelId] = channel;
         return channelId;
@@ -146,7 +146,7 @@ int AudioManager::PlayRandomFromPlaylist(const std::string& playlistName, const 
     FMOD::Channel* channel = nullptr;
     if (FMOD_CHECK(m_system->playSound(soundToPlay, nullptr, true, &channel))) {
         FMOD_VECTOR pos = toFMODVector(position);
-        FMOD_VECTOR vel = {0, 0, 0};
+        FMOD_VECTOR vel = { 0, 0, 0 };
 
         channel->set3DAttributes(&pos, &vel);
         channel->setVolume(dbToVolume(volumeDb));
@@ -161,7 +161,7 @@ int AudioManager::PlayRandomFromPlaylist(const std::string& playlistName, const 
 
 void AudioManager::SetListener(const glm::vec3& position, const glm::vec3& velocity, const glm::vec3& forward, const glm::vec3& up) {
     if (!m_system) return;
-    
+
     FMOD_VECTOR pos = toFMODVector(position);
     FMOD_VECTOR vel = toFMODVector(velocity);
     FMOD_VECTOR fwd = toFMODVector(forward);
