@@ -1,152 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
+    <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
+    <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
+    <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.cpp" />
+    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\pch.cpp" />
+    <ClCompile Include="src\PAINEngine\Logging\Log.cpp" />
+    <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
+    <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_demo.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_draw.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_tables.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\PAINEngine\pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Applications\Application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Applications\EntryPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Logging\Log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Components\components.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Events\Event.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Events\WindowEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Events\MouseEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\ECS\System\System.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\ECS\Controller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Applications\AppLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.h">
-    <ClInclude Include="src\PAINEngine\Renderer\GraphicsContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PAINEngine\Renderer\TestTriangleLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\PAINEngine\pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Applications\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_impl_glfw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_impl_opengl3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_tables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Logging\Log.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\ECS\System\System.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\ECS\Controller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Applications\AppLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.cpp">
-    <ClCompile Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PAINEngine\Renderer\TestTriangleLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
+    <ClInclude Include="src\PAINEngine\Components\components.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h" />
+    <ClInclude Include="src\PAINEngine\ECS\System\System.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Controller.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sCollision.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Collision &amp; Layer\sLayer.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Events\AssetEvents.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Events\Event.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Events\KeyEvents.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Events\MouseEvents.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Events\WindowEvents.h" />
+    <ClInclude Include="src\PAINEngine\Logging\Log.h" />
+    <ClInclude Include="src\PAINEngine.h" />
+    <ClInclude Include="src\PAINEngine\Applications\Application.h" />
+    <ClInclude Include="src\PAINEngine\Core.h" />
+    <ClInclude Include="src\PAINEngine\Applications\EntryPoint.h" />
+    <ClInclude Include="src\PAINEngine\pch.h" />
+    <ClInclude Include="src\PAINEngine\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\PAINEngine\Renderer\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\PAINEngine\Renderer\TestTriangleLayer.h" />
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h" />
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Windows\GLFW\GLFWWindow.h" />
+    <ClInclude Include="src\PAINEngine\Managers\Windows\Window.h" />
   </ItemGroup>
 </Project>
