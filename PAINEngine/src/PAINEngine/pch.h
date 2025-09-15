@@ -43,11 +43,6 @@
 
 #undef APIENTRY
 
-//FMOD Library
-#include "FMOD_CORE/fmod.h"
-#include "FMOD_CORE/fmod.hpp"
-#include "FMOD_CORE/fmod_errors.h"
-
 //Memory
 #define _CRTDBG_MAP_ALLOC
 
