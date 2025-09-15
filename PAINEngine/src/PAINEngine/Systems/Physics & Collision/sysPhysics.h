@@ -15,8 +15,8 @@
 
 #include "pch.h"
 #include "Core.h"
-#include "Managers/Collision & Layer/sCollision.h"
-#include "Managers/Collision & Layer/sLayer.h"
+#include "CoreSystems/Collision & Layer/sCollision.h"
+#include "CoreSystems/Collision & Layer/sLayer.h"
 
 using namespace glm;
 

@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
-#include "Renderer/OpenGL/OpenGLContext.h"
+#include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
 
-#include "Managers/Events/WindowEvents.h"
-#include "Managers/Events/KeyEvents.h"
-#include "Managers/Events/MouseEvents.h"
-#include "Managers/Events/AssetEvents.h"
+#include "CoreSystems/Events/WindowEvents.h"
+#include "CoreSystems/Events/KeyEvents.h"
+#include "CoreSystems/Events/MouseEvents.h"
+#include "CoreSystems/Events/AssetEvents.h"
 
 #include "Applications/Application.h"
 

@@ -4,10 +4,10 @@
 #ifdef _DEBUG
 #include <GLFW/glfw3.h>
 
-#include "Managers/Events/WindowEvents.h"
-#include "Managers/Events/KeyEvents.h"
-#include "Managers/Events/MouseEvents.h"
-#include "Managers/Events/AssetEvents.h"
+#include "CoreSystems/Events/WindowEvents.h"
+#include "CoreSystems/Events/KeyEvents.h"
+#include "CoreSystems/Events/MouseEvents.h"
+#include "CoreSystems/Events/AssetEvents.h"
 
 namespace PAIN {
 

@@ -9,7 +9,7 @@
 #include <ImGui/headers/imgui.h>
 #include <ImGui/headers/imgui_impl_glfw.h>
 #include <ImGui/headers/imgui_impl_opengl3.h>
-#include "Managers/Windows/Window.h"
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
     namespace Editor {
@@ -30,8 +30,10 @@ namespace PAIN {
 
         private:
 
+            //Mapping of glfw keys to imgui keys
             int imguiKeyMapping(int code);
 
+            //Events that imgui listens for
             void handleKeyEvents(ImGuiIO& io, Event::Event& event);
             void handleMouseEvents(ImGuiIO& io, Event::Event& event);
             void handleWindowEvents(ImGuiIO& io, Event::Event& event);

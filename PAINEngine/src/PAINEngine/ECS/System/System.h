@@ -3,7 +3,7 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
-#include "Managers/Events/Event.h"
+#include "CoreSystems/Events/Event.h"
 
 namespace PAIN {
 	namespace ECS {

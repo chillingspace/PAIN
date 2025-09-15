@@ -4,7 +4,7 @@
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
-#include "Renderer/GraphicsContext.h"
+#include "CoreSystems/Windows/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {

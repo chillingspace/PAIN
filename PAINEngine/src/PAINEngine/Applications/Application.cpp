@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Application.h"
 
-#include "Managers/Windows/Window.h"
-#include "Managers/Events/Event.h"
+#include "CoreSystems/Windows/Window.h"
+#include "CoreSystems/Events/Event.h"
 #include "ECS/Controller.h"
-#include "Renderer/TestTriangleLayer.h"
-#include "LevelEditor/Editor.h"
+#include "CoreSystems/Renderer/TestTriangleLayer.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
 
 namespace PAIN {
 
@@ -19,6 +19,7 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<TestTriangleLayer>());
 
+		//Editor only added when debug mode
 #ifdef _DEBUG
 		addLayerSystem(std::make_shared<Editor::Editor>());
 #endif
