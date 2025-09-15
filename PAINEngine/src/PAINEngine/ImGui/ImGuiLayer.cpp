@@ -39,7 +39,7 @@ namespace PAIN {
     }
 
     void ImGuiLayer::onUpdate() {
-        if (!m_Initialized) onAttach();   // <— ensure initialized
+        if (!m_Initialized) onAttach();   // ensure initialized
 
         BeginFrame();
 
@@ -56,7 +56,7 @@ namespace PAIN {
     }
 
     void ImGuiLayer::BeginFrame() {
-        if (!m_Initialized) onAttach();   // <— guard (extra safety)
+        if (!m_Initialized) onAttach();   // guard (extra safety)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -76,7 +76,8 @@ namespace PAIN {
     void ImGuiLayer::onEvent(Event::Event& event) {
         if (m_BlockEvents) {
             ImGuiIO& io = ImGui::GetIO();
-            // hook into your event system if desired
+            UNREFERENCED_PARAMETER(io);
+            UNREFERENCED_PARAMETER(event);
         }
     }
 

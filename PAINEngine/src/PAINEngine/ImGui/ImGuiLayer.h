@@ -31,7 +31,7 @@ namespace PAIN {
         float       m_Time;
         GLFWwindow* m_Window;
         bool        m_BlockEvents;
-        bool        m_Initialized = false;   // <— add this
+        bool        m_Initialized = false;   // add this
     };
 
 
