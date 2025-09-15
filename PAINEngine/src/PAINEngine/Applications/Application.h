@@ -3,7 +3,7 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
-#include "AppLayer.h"
+#include "AppSystem.h"
 #include "../Managers/Events/Event.h"
 
 #include <memory>
@@ -17,8 +17,8 @@ namespace PAIN {
 	private:
 
 		//Create applications stacks
-		std::vector<std::shared_ptr<AppLayer>> layer_stack;
-		std::vector<std::shared_ptr<AppLayer>> core_stack;
+		std::vector<std::shared_ptr<AppSystem>> layer_stack;
+		std::vector<std::shared_ptr<AppSystem>> core_stack;
 
 		//Boolean running app running
 		bool b_app_running = true;

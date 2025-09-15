@@ -4,11 +4,10 @@
 #define APP_LAYER_HPP
 
 #include "../Managers/Events/Event.h"
-#include <memory>
 
 namespace PAIN {
 
-	class AppLayer {
+	class AppSystem {
 	private:
 	public:
 		//Optional virtual functions
