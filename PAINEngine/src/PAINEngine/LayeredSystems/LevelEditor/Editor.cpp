@@ -86,8 +86,7 @@ namespace PAIN {
             return ImGuiKey_None;
         }
 
-        Editor::Editor()
-            : m_Time(0.0f) {
+        Editor::Editor() {
         }
 
         Editor::~Editor() {}
@@ -104,9 +103,16 @@ namespace PAIN {
 
             ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
             ImGui_ImplOpenGL3_Init("#version 450");
+
+            // Load imgui settings
+            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
         }
 
         void Editor::onDetach() {
+            //Save imgui layouts
+            ImGuiIO& io = ImGui::GetIO();
+            ImGui::SaveIniSettingsToDisk(io.IniFilename);
+
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();
@@ -124,6 +130,46 @@ namespace PAIN {
                 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Checkbox("Show Demo Window", &show_demo);
             ImGui::End();
+
+            // Placeholder For Audio (no FMOD yet)
+            ImGui::Begin("Audio Controls (Placeholder)");
+
+            static char soundId[256] = "";         
+            static float volume = 1.0f;
+            static bool loop = false;
+            static bool isPlaying = false;
+
+            ImGui::TextDisabled("No audio backend integrated yet (FMOD pending).");
+            ImGui::Separator();
+
+            ImGui::InputText("Sound", soundId, IM_ARRAYSIZE(soundId));
+            ImGui::SameLine();
+            if (ImGui::Button("Clear")) {
+                soundId[0] = '\0';
+            }
+
+            ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.2f");
+            ImGui::Checkbox("Loop", &loop);
+
+            ImGui::Separator();
+            if (ImGui::Button("Play")) {
+
+                // trigger FMOD play for `soundId` with `volume` & `loop`.
+                isPlaying = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Pause")) {
+
+                // pause the active sound/instance.
+                isPlaying = false;
+            }
+
+            ImGui::Separator();
+            ImGui::Text("Status: %s", isPlaying ? "Playing (simulated)" : "Paused/Stopped");
+            ImGui::Text("Selected: %s", soundId[0] ? soundId : "<none>");
+            ImGui::End();
+            // --- End placeholder ---
+
 
             EndFrame();
         }
