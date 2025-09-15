@@ -125,6 +125,8 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
     <ClInclude Include="src\PAINEngine\Components\components.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Renderer\Shader.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h" />
     <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h" />
     <ClInclude Include="src\PAINEngine\ECS\System\System.h" />
@@ -154,6 +156,8 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
     <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\Shader.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sCollision.cpp" />

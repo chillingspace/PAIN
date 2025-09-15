@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TestTriangleLayer.h"
 
+
 namespace PAIN {
 	 
     TestTriangleLayer::TestTriangleLayer() {
@@ -29,7 +30,6 @@ namespace PAIN {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-
         // Simple shaders
         const char* vertexShaderSrc = R"(
         #version 330 core
@@ -54,51 +54,11 @@ namespace PAIN {
         }
     )";
 
-        // Compile vertex shader
-        unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSrc, nullptr);
-        glCompileShader(vertexShader);
-
-        int success;
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            char info[512];
-            glGetShaderInfoLog(vertexShader, 512, nullptr, info);
-            throw std::runtime_error(std::string("Vertex shader compilation failed: ") + info);
-        }
-
-        // Compile fragment shader
-        unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSrc, nullptr);
-        glCompileShader(fragmentShader);
-
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            char info[512];
-            glGetShaderInfoLog(fragmentShader, 512, nullptr, info);
-            throw std::runtime_error(std::string("Fragment shader compilation failed: ") + info);
-        }
-
-        // Link shader program
-        m_ShaderProgram = glCreateProgram();
-        glAttachShader(m_ShaderProgram, vertexShader);
-        glAttachShader(m_ShaderProgram, fragmentShader);
-        glLinkProgram(m_ShaderProgram);
-
-        glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &success);
-        if (!success) {
-            char info[512];
-            glGetProgramInfoLog(m_ShaderProgram, 512, nullptr, info);
-            throw std::runtime_error(std::string("Shader program linking failed: ") + info);
-        }
-
-        // Cleanup
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
+        // Setup Shaders
+        m_Shader = std::make_unique<Shader>(vertexShaderSrc, fragmentShaderSrc);
     }
 
     TestTriangleLayer::~TestTriangleLayer() {
-        glDeleteProgram(m_ShaderProgram);
         glDeleteBuffers(1, &m_VBO);
         glDeleteVertexArrays(1, &m_VAO);
     }
@@ -108,8 +68,9 @@ namespace PAIN {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(m_ShaderProgram);
+        m_Shader->Bind();
         glBindVertexArray(m_VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        m_Shader->UnBind();
     }
 }
