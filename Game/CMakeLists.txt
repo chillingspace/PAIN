@@ -31,3 +31,9 @@ if(NOT ANDROID)
         COMMENT "Copying game assets..."
     )
 endif()
+
+# --- Visual Studio Specific Properties ---
+# Set the debugging working directory to the output directory
+set_target_properties(Game PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Game>"
+)
