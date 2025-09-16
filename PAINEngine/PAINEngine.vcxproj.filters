@@ -24,8 +24,6 @@
     <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\Shader.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Command.cpp" />
-    <ClCompile Include="src\PAINEngine\CoreSystems\Audio\Audio.cpp" />
-    <ClCompile Include="src\PAINEngine\CoreSystems\Audio\FMOD\FMODAudio.cpp" />
     <ClCompile Include="sSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +57,6 @@
     <ClInclude Include="src\PAINEngine\CoreSystems\Renderer\Shader.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Command.h" />
-    <ClInclude Include="src\PAINEngine\CoreSystems\Audio\Audio.h" />
-    <ClInclude Include="src\PAINEngine\CoreSystems\Audio\FMOD\FMODAudio.h" />
     <ClInclude Include="sSerialization.h" />
   </ItemGroup>
 </Project>
