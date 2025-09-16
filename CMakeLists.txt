@@ -40,6 +40,3 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
 add_subdirectory(Game)
-
-# Set the startup project for the Visual Studio solution
-set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)

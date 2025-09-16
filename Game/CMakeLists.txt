@@ -15,10 +15,10 @@ if(NOT ANDROID)
     # This command copies the required DLLs next to your Game.exe after it's built
     add_custom_command(TARGET Game POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/PAINEngine/vendor/FMOD/windows/api/core/lib/x64/fmod.dll"
+            "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmod.dll"
             "$<TARGET_FILE_DIR:Game>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/PAINEngine/vendor/FMOD/windows/api/core/lib/x64/fmodL.dll"
+            "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmodL.dll"
             "$<TARGET_FILE_DIR:Game>"
         COMMENT "Copying runtime DLLs to output directory..."
     )
@@ -31,9 +31,3 @@ if(NOT ANDROID)
         COMMENT "Copying game assets..."
     )
 endif()
-
-# --- Visual Studio Specific Properties ---
-# Set the debugging working directory to the output directory (e.g., bin/Debug)
-set_target_properties(Game PROPERTIES
-    VS_DEBUGGING_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-)
