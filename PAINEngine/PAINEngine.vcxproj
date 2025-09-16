@@ -77,12 +77,10 @@
     <PostBuildEvent>
       <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.idb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-
-xcopy /Y /R /C /I "$(SolutionDir)PAINEngine\dependencies\shared\fmod.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"</Command>
+xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"</Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -115,20 +113,16 @@ xcopy /Y /R /C /I "$(SolutionDir)PAINEngine\dependencies\shared\fmod.dll" "$(Sol
       <Command>xcopy /Y /R /C /I "$(TargetDir)PAINEngine.lib" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.exp" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
-
-xcopy /Y /R /C /I "$(SolutionDir)PAINEngine\dependencies\shared\fmod.dll" "$(SolutionDir)bin\$(Configuration)-$(Platform)\Game\"
 </Command>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;glfw3_mt.lib;opengl32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\dependencies\lib\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
     <ClInclude Include="src\PAINEngine\Components\components.h" />
-    <ClInclude Include="src\PAINEngine\CoreSystems\Audio\Audio.h" />
-    <ClInclude Include="src\PAINEngine\CoreSystems\Audio\FMOD\FMODAudio.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Renderer\Shader.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h" />
@@ -161,8 +155,6 @@ xcopy /Y /R /C /I "$(SolutionDir)PAINEngine\dependencies\shared\fmod.dll" "$(Sol
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
     <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
-    <ClCompile Include="src\PAINEngine\CoreSystems\Audio\Audio.cpp" />
-    <ClCompile Include="src\PAINEngine\CoreSystems\Audio\FMOD\FMODAudio.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\Shader.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
