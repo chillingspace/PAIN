@@ -11,7 +11,11 @@
 #include <ImGui/headers/imgui_impl_opengl3.h>
 #include "CoreSystems/Windows/Window.h"
 
+//Command header
 #include "Command.h"
+
+//Panels headers
+#include "Panels/Panels.h"
 
 namespace PAIN {
     namespace Editor {
@@ -29,8 +33,13 @@ namespace PAIN {
 
         private:
 
+            //Panels
+            std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+
             //Actions manager
-            std::unique_ptr<CommandManager> action_manager;
+            std::shared_ptr<CommandManager> command_manager;
+
+            void updateShortCuts();
 
             void BeginFrame();
 
