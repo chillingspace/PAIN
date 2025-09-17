@@ -23,6 +23,7 @@ Release*/
 x64/
 Win32/
 /build/
+out*/
 
 # ========================
 # Compiled object files / libraries / executables
