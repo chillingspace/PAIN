@@ -9,6 +9,11 @@
 #ifndef PCH_H
 #define PCH_H
 
+ /*****************************************************************//**
+ * PREDEFINED Macros
+ *********************************************************************/
+#define CLASS_STR(T) #T //Convert Class To Str
+
 // add headers that you want to pre-compile here
 
  /*****************************************************************//**

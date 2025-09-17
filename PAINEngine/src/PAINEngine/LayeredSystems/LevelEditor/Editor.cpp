@@ -106,6 +106,13 @@ namespace PAIN {
             ImGui_ImplOpenGL3_Init("#version 450");
 
             ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+
+            //Construct command manager
+            command_manager = std::make_shared<CommandManager>();
+
+            //Register panels
+            //panels[CLASS_STR(IPanel)] = std::make_shared<IPanel>();
+            //PN_CORE_INFO(panels[CLASS_STR(IPanel)]->getPanelName());
         }
 
         void Editor::onDetach() {
@@ -119,7 +126,16 @@ namespace PAIN {
 
         void Editor::onUpdate() {
 
+            //Update shortcuts
+            updateShortCuts();
+
+            //Begin IMGUI Frame
             BeginFrame();
+
+            //Update all panels
+            for (auto const& panel : panels) {
+                panel.second->drawWindow();
+            }
 
             static bool show_demo = true;
             if (show_demo) ImGui::ShowDemoWindow(&show_demo);
@@ -176,6 +192,35 @@ namespace PAIN {
             ImGui::End();
 
             EndFrame();
+        }
+
+        void Editor::updateShortCuts() {
+            //Get IO
+            ImGuiIO& io = ImGui::GetIO();
+
+            //Undo
+            static bool z_triggered = false;
+            if (io.KeyCtrl && io.KeysDown[ImGuiKey_Z]) {
+                if (!z_triggered) {
+                    command_manager->undo();
+                    z_triggered = true;
+                }
+            }
+            else {
+                z_triggered = false;
+            }
+
+            //Redo
+            static bool y_triggered = false;
+            if (io.KeyCtrl && io.KeysDown[ImGuiKey_Y]) {
+                if (!y_triggered) {
+                    command_manager->redo();
+                    y_triggered = true;
+                }
+            }
+            else {
+                y_triggered = false;
+            }
         }
 
         void Editor::BeginFrame() {

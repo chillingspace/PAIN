@@ -7,6 +7,7 @@ project(PAINEngine)
 file(GLOB_RECURSE ENGINE_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.h"
 )
 
 # -------------------------
