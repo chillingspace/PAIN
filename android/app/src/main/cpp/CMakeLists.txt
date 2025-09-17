@@ -1,47 +1,59 @@
-# android/app/src/main/cpp/CMakeLists.txt
-
 cmake_minimum_required(VERSION 3.16)
-
-project(PAINEngineJNI) # The name of our native library
-
-# Ensure we're building for Android
-if(NOT ANDROID)
-    message(FATAL_ERROR "This CMakeLists.txt is intended for Android builds only.")
-endif()
+project(Game)
 
 # --- Add Global Definitions for C++ Code ---
 add_definitions(-DPLATFORM_ANDROID)
+add_definitions(-DIMGUI_IMPL_OPENGL_ES3)
 
-# --- Define Path to Shared Engine Source Code ---
-# This path is relative from this file's location to your PAINEngine's source.
-set(ENGINE_SRC_DIR ../../../../../PAINEngine/src)
-file(GLOB_RECURSE ENGINE_SOURCES "${ENGINE_SRC_DIR}/*.cpp" "${ENGINE_SRC_DIR}/*.h")
+# --- Define Paths to Shared Engine Source Code ---
+set(ENGINE_SRC_DIR ../../../../../PAINEngine/src/PAINEngine)
+set(IMGUI_VENDOR_DIR ../../../../../PAINEngine/vendor/ImGui)
 
-# --- FMOD Configuration ---
-# Set the include directory for FMOD headers
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/FMOD/android/api/core/inc)
+# --- Manually list all required source files (NO JOLT/PHYSICS) ---
+set(ENGINE_SOURCES
+    "${ENGINE_SRC_DIR}/pch.cpp"
+    "${ENGINE_SRC_DIR}/Applications/Application.cpp"
+    "${ENGINE_SRC_DIR}/Applications/AppSystem.cpp"
+    "${ENGINE_SRC_DIR}/Audio/AudioManager.cpp"
+    "${ENGINE_SRC_DIR}/CoreSystems/Renderer/Shader.cpp"
+    "${ENGINE_SRC_DIR}/CoreSystems/Renderer/TestTriangleLayer.cpp"
+    "${ENGINE_SRC_DIR}/Logging/Log.cpp"
+)
 
-# Add the FMOD library path. ${ANDROID_ABI} ensures it picks the right one (arm64-v8a, etc.)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/FMOD/android/api/core/lib/${ANDROID_ABI})
+set(IMGUI_SOURCES
+    "${IMGUI_VENDOR_DIR}/src/imgui.cpp"
+    "${IMGUI_VENDOR_DIR}/src/imgui_demo.cpp"
+    "${IMGUI_VENDOR_DIR}/src/imgui_draw.cpp"
+    "${IMGUI_VENDOR_DIR}/src/imgui_tables.cpp"
+    "${IMGUI_VENDOR_DIR}/src/imgui_widgets.cpp"
+    "${IMGUI_VENDOR_DIR}/src/imgui_impl_opengl3.cpp"
+)
 
 # --- Add Native Library Target ---
 add_library(${PROJECT_NAME} SHARED
-    # Add your JNI bridge file here (we will create this later)
-    JNIBridge.cpp 
-    
-    # Add all the engine source files
+    JNIBridge.cpp
+    ../../../../../Game/src/Game.cpp
     ${ENGINE_SOURCES}
+    ${IMGUI_SOURCES}
 )
 
-# --- Link System and FMOD Libraries ---
+# --- Include Directories ---
+target_include_directories(${PROJECT_NAME} PRIVATE
+    # Add all necessary include paths relative to this CMakeLists.txt
+    ../../../../../PAINEngine/src
+    ../../../../../PAINEngine/vendor
+    ../../../../../vendor/FMOD/android/api/core/inc
+    ../../../../../vendor/FMOD/android/api/studio/inc
+)
+
+# --- Link Libraries ---
 target_link_libraries(${PROJECT_NAME}
-    # Standard Android libraries
-    android
-    log
-    GLESv3
-    EGL
-
-    # Link the FMOD libraries by name (CMake will find them in the link_directories path)
-    fmod
-    fmodL
+    android log EGL GLESv3
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../vendor/FMOD/android/api/core/lib/${ANDROID_ABI}/libfmod.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../vendor/FMOD/android/api/core/lib/${ANDROID_ABI}/libfmodL.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../vendor/FMOD/android/api/studio/lib/${ANDROID_ABI}/libfmodstudio.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../vendor/FMOD/android/api/studio/lib/${ANDROID_ABI}/libfmodstudioL.so
 )
+
+# --- Final Target Properties ---
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "Game")

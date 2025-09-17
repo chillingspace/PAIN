@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GLFWWindow.h"
 
+#ifdef PN_PLATFORM_WINDOWS // Windows PC guard
+
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
 
 #include "CoreSystems/Events/WindowEvents.h"
@@ -272,3 +274,4 @@ namespace PAIN {
 		}
 	}
 }
+#endif // End of guard

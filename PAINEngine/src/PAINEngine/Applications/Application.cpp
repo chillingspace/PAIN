@@ -1,110 +1,109 @@
 #include "pch.h"
 #include "Application.h"
-
-#include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
-//#include "CoreSystems/Audio/Audio.h"
 #include "ECS/Controller.h"
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
-#include "PAINEngine/Audio/AudioManager.h"
+
+#if defined(PN_PLATFORM_WINDOWS)
+#include "CoreSystems/Windows/GLFW/GLFWWindow.h"
+#endif
 
 namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
+    Application* Application::s_Instance = nullptr;
 
-	Application::Application()
-	{
-		// Set the static instance
-		s_Instance = this;
+    Application::Application()
+    {
+        s_Instance = this;
+    }
 
-		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
-		window_app->registerCallbacks(this);
+    Application::~Application()
+    {
+        Shutdown();
+    }
 
-		// Create and add the AudioManager to the core systems
-		m_AudioManager = std::make_shared<AudioManager>();
-		addCoreSystem(m_AudioManager);
+    void Application::InitializeDesktop()
+    {
+        #if defined(PN_PLATFORM_WINDOWS)
+            m_Window = std::unique_ptr<Window::Window>(Window::Window::create());
+            m_Window->registerCallbacks(this);
+            core_stack.push_back(std::shared_ptr<Window::Window>(m_Window.get(), [](void*){}));
+        #endif
 
-		//Push other core systems into the stack
-		addCoreSystem(window_app);
-		addCoreSystem(std::make_shared<ECS::Controller>());
-		addCoreSystem(std::make_shared<TestTriangleLayer>());
-		//addCoreSystem(std::make_shared<Audio::Controller>());
+        m_AudioManager = std::make_shared<AudioManager>();
+        addCoreSystem(m_AudioManager);
+        // addCoreSystem(std::make_shared<ECS::Controller>()); // Temporarily disabled
+        addCoreSystem(std::make_shared<TestTriangleLayer>());
 
-		//Editor only added when debug mode
-#ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>());
-#endif
-	}
+        // #if defined(_DEBUG) && defined(PN_PLATFORM_WINDOWS)
+        //     addLayerSystem(std::make_shared<Editor::Editor>()); // Temporarily disabled
+        // #endif
+    }
 
-	Application::~Application()
-	{
-		for (auto& layer : layer_stack) {
-			layer->onDetach();
-		}
-		layer_stack.clear();
+    
+    #if defined(PLATFORM_ANDROID)
+    void Application::InitializeAndroid(AAssetManager* assetManager)
+    {
+        m_AudioManager = std::make_shared<AudioManager>();
+        // TODO: Pass assetManager to AudioManager
+        addCoreSystem(m_AudioManager);
+        // addCoreSystem(std::make_shared<ECS::Controller>()); // Temporarily disabled
+        addCoreSystem(std::make_shared<TestTriangleLayer>());
+    }
+    #endif
 
-		for (auto& core : core_stack) {
-			core->onDetach();
-		}
-		core_stack.clear();
-	}
+    void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+        core_system->onAttach();
+        core_stack.push_back(core_system);
+    }
 
-	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
-		core_system->onAttach();
-		core_stack.push_back(core_system);
-	}
+    void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+        layer_system->onAttach();
+        layer_stack.push_back(layer_system);
+    }
 
-	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
-		layer_system->onAttach();
-		layer_stack.push_back(layer_system);
-	}
+    void Application::Run() {
+        #if defined(PN_PLATFORM_WINDOWS)
+            while (b_app_running) {
+                Update();
+            }
+        #endif
+    }
 
-	void Application::Run() {
-
-		//Application loop
-		while (b_app_running) {
-
-			//Drain all events in queue
-			drainEventQueue();
-
-			//Update all layered systems
-			for (auto& layer : layer_stack) {
-				layer->onUpdate();
-			}
-
-			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate();
-			}
-		};
-	}
-
-	void Application::terminate() {
-		b_app_running = false;
-	}
-
+    void Application::Update()
+    {
+        drainEventQueue();
+        for (auto& layer : layer_stack) {
+            layer->onUpdate();
+        }
+        for (auto& core : core_stack) {
+            core->onUpdate();
+        }
+    }
+    
+    void Application::Shutdown()
+    {
+        for (auto& layer : layer_stack) {
+            layer->onDetach();
+        }
+        layer_stack.clear();
+        for (auto& core : core_stack) {
+            core->onDetach();
+        }
+        core_stack.clear();
+    }
+    
+    // ... (rest of the event dispatching functions remain the same) ...
 	void Application::dispatchEventsForward(Event::Event& e) {
-		//Boolean flag for propogation
 		bool handled = false;
-
-		//Dispatch to core from bottom up
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
-
-			//Dispatch event down layers
 			(*it)->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
-
-		//Check if handled
 		if (handled) return;
-
-		//Dispatch to layer bottom up
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
-
-			//Dispatch event down layers
 			(*it)->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
@@ -112,25 +111,14 @@ namespace PAIN {
 	}
 
 	void Application::dispatchEventsReversed(Event::Event& e) {
-		//Boolean flag for propogation
 		bool handled = false;
-
-		//Dispatch to layer top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
-
-			//Dispatch event down layers
 			(*it)->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
-
-		//Check if handled
 		if (handled) return;
-
-		//Dispatch to core top down
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
-
-			//Dispatch event down layers
 			(*it)->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
@@ -138,15 +126,10 @@ namespace PAIN {
 	}
 
 	void Application::dispatchEvent(Event::Event& e) {
-
-		//Check event type
 		if (e.isInCategory(Event::Input)) {
-
-			//Dispatch event in reverse order
 			dispatchEventsReversed(e);
 		}
 		else {
-			//Dispatch event in order
 			dispatchEventsForward(e);
 		}
 	}
@@ -156,11 +139,7 @@ namespace PAIN {
 	}
 
 	void Application::drainEventQueue() {
-
-		//Handle all events in queue
 		while (!event_queue.empty()) {
-
-			//Handle event and pop from queue
 			dispatchEvent(*event_queue.front());
 			event_queue.pop();
 		}
