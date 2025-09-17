@@ -78,7 +78,7 @@ void AudioManager::onUpdate() {
     m_system->update();
 }
 
-void AudioManager::onEvent(PAIN::Event::Event& e) {
+void AudioManager::onEvent([[maybe_unused]] PAIN::Event::Event& e) {
     // Stub for future event handling.
 }
 

@@ -25,7 +25,7 @@
 #endif
 
 // --- ImGui Backend Includes ---
-// The main "imgui.h" is in your pch.h, so we only need the platform-specific backends here.
+// The main "imgui.h" is in pch.h, so only need the platform-specific backends here.
 #ifdef PN_PLATFORM_WINDOWS
     #include "ImGui/headers/imgui_impl_glfw.h"
     #include "ImGui/headers/imgui_impl_opengl3.h"

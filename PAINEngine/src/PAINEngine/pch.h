@@ -11,60 +11,50 @@
 
 // add headers that you want to pre-compile here
 
- /*****************************************************************//**
+/*****************************************************************//**
  * Physics Library
  *********************************************************************/
 #include "Jolt/Jolt.h"
-#include <Jolt/Core/Factory.h>          
-#include <Jolt/RegisterTypes.h>         
-#include <Jolt/Physics/PhysicsSystem.h> 
-#include <Jolt/Physics/Body/Body.h>     
+#include <Jolt/Core/Factory.h>
+#include <Jolt/RegisterTypes.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Core/JobSystemThreadPool.h> 
+#include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
- /*****************************************************************//**
+/*****************************************************************//**
  * Engine Specific Library
  *********************************************************************/
 
-// graphics headers
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
+// Handles platform-specific includes for graphics, OS, and ImGui backends
+#include "PAINEngine/Platform.h"
 
 // Math Lib
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
-// Imgui headers
+// Main ImGui header
 #include "ImGui/headers/imgui.h"
-#include "ImGui/headers/imgui_impl_opengl3.h"
-#include "ImGui/headers/imgui_impl_glfw.h"
 
 #undef APIENTRY
 
 //Memory
 #define _CRTDBG_MAP_ALLOC
 
- /*****************************************************************//**
- * Windows Application
- *********************************************************************/
-#ifdef PN_PLATFORM_WINDOWS
-#include <Windows.h>
-#endif
-
- /*****************************************************************//**
+/*****************************************************************//**
  * CORE HEADER
  *********************************************************************/
 #include "Core.h"
 
- /*****************************************************************//**
+/*****************************************************************//**
  * Seri HEADER
  *********************************************************************/
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
- /*****************************************************************//**
+/*****************************************************************//**
  * STL
  *********************************************************************/
 #include <iostream>
@@ -95,7 +85,7 @@ using json = nlohmann::json;
 #include <random>
 #include <bitset>
 
- /*****************************************************************//**
+/*****************************************************************//**
  * LOGGING
  *********************************************************************/
 #include "Logging/Log.h"
