@@ -42,15 +42,18 @@ namespace PAIN {
 				//Panel flags
 				ImGuiWindowFlags flags = 0;
 
+				//Panel name
+				std::string name = CLASS_STR(IPanel);
+
 				//Optional virtual panel window settings
 				virtual void nextWindowSettings() {}
 			public:
 
 				//Constructor
-				explicit IPanel(std::shared_ptr<CommandManager> command_manager) :command_manager{ command_manager }{}
+				IPanel(std::shared_ptr<CommandManager> command_manager) : command_manager{ command_manager }{}
 
 				//Get panel name
-				std::string getPanelName() const { return CLASS_STR(IPanel); }
+				std::string getPanelName() const { return name; }
 
 				//Get panel dock id
 				unsigned int getDockID() const { return dock_id; }

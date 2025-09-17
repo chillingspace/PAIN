@@ -15,7 +15,7 @@ namespace PAIN {
 
                 //Draw window
                 bool b_check_active = true;
-                if (ImGui::Begin(getPanelName().c_str(), &b_check_active, flags)) {
+                if (ImGui::Begin(name.c_str(), &b_check_active, flags)) {
 
                     //Set window dock id
                     dock_id = ImGui::GetWindowDockID();
