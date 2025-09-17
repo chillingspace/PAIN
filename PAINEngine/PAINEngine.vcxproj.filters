@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
+    <ClCompile Include="src\PAINEngine\Applications\Application.cpp" />
+    <ClCompile Include="src\PAINEngine\ECS\System\System.cpp" />
+    <ClCompile Include="src\PAINEngine\ECS\Controller.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sCollision.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\pch.cpp" />
+    <ClCompile Include="src\PAINEngine\Logging\Log.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Windows\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\TestTriangleLayer.cpp" />
+    <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Windows\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_demo.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_draw.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_tables.cpp" />
+    <ClCompile Include="vendor\ImGui\src\imgui_widgets.cpp" />
+    <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Editor.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\Shader.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.cpp" />
+    <ClCompile Include="src\PAINEngine\LayeredSystems\LevelEditor\Command.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\PAINEngine\Applications\AppSystem.h" />
+    <ClInclude Include="src\PAINEngine\Components\components.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Components\cPhysics.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Components\cTransform.h" />
+    <ClInclude Include="src\PAINEngine\ECS\System\System.h" />
+    <ClInclude Include="src\PAINEngine\ECS\Controller.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sCollision.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Collision &amp; Layer\sLayer.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Events\AssetEvents.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Events\Event.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Events\KeyEvents.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Events\MouseEvents.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Events\WindowEvents.h" />
+    <ClInclude Include="src\PAINEngine\Logging\Log.h" />
+    <ClInclude Include="src\PAINEngine.h" />
+    <ClInclude Include="src\PAINEngine\Applications\Application.h" />
+    <ClInclude Include="src\PAINEngine\Core.h" />
+    <ClInclude Include="src\PAINEngine\Applications\EntryPoint.h" />
+    <ClInclude Include="src\PAINEngine\pch.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\GraphicsContext.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Renderer\TestTriangleLayer.h" />
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sCollision.h" />
+    <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\GLFW\GLFWWindow.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\Window.h" />
+    <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Editor.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Renderer\Shader.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Windows\OpenGL\ImGuiOpenGLRenderer.h" />
+    <ClInclude Include="src\PAINEngine\LayeredSystems\LevelEditor\Command.h" />
+  </ItemGroup>
+</Project>
