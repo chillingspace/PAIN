@@ -104,3 +104,15 @@ target_compile_definitions(PAINEngine PUBLIC
     PN_PLATFORM_WINDOWS
     GLEW_STATIC
 )
+
+# -------------------------
+# Organize files in VS Solution Explorer
+# -------------------------
+
+# Engine sources
+foreach(file IN LISTS ENGINE_SRC)
+    file(RELATIVE_PATH relPath "${CMAKE_CURRENT_SOURCE_DIR}/src" "${file}")
+    get_filename_component(groupPath "${relPath}" PATH)
+    string(REPLACE "/" "\\" groupPath "${groupPath}")
+    source_group("${groupPath}" FILES "${file}")
+endforeach()
