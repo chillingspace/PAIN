@@ -1,0 +1,20 @@
+{
+  "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe" : 
+  {
+    "hash" : "545372c8dfdf9588e8ce7f57b6b1e15c8a1df04b",
+    "size" : 677496,
+    "timestamp" : 1755258928
+  },
+  "C:/Users/Owner/AppData/Local/Android/Sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe" : 
+  {
+    "hash" : "7c3fd7e8485eb236b82c6e51828dbce0d4cd3cf6",
+    "size" : 126674024,
+    "timestamp" : 1758120406
+  },
+  "C:/Users/Owner/AppData/Local/Android/Sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe" : 
+  {
+    "hash" : "64b8bfc17e6f3e16300ee8f83f299fc1be1d30ee",
+    "size" : 126674024,
+    "timestamp" : 1758120408
+  }
+}
