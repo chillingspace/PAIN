@@ -1,63 +1,30 @@
 #include <jni.h>
 #include <memory>
+#include <PAINEngine.h>
 #include <android/asset_manager_jni.h>
-#include "PAINEngine/Applications/Application.h"
 
-// The CreateApplication function is defined in Game.cpp and returns our game instance.
-namespace PAIN {
-    Application* CreateApplication();
-}
-
-// Global pointer to the C++ engine application instance.
-static std::unique_ptr<PAIN::Application> g_App;
+std::unique_ptr<PAIN::Application> app;
 
 extern "C" {
 
 JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeInit(JNIEnv *env, jclass clazz, jobject assetManager)
-{
-    AAssetManager* nativeAssetManager = AAssetManager_fromJava(env, assetManager);
-    if (nativeAssetManager == nullptr) {
-        return;
-    }
-
-    g_App.reset(PAIN::CreateApplication());
-    g_App->InitializeAndroid(nativeAssetManager);
-}
-
-JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeOnSurfaceChanged(JNIEnv *env, jclass clazz, jint width, jint height)
-{
-    if (g_App) {}
-}
-
-JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeOnDrawFrame(JNIEnv *env, jclass clazz)
-{
-    if (g_App)
-    {
-        g_App->Update(); // Use single-frame Update() for Android
+Java_com_pain_engine_MyGLRenderer_onSurfaceCreated(JNIEnv *env, jobject thiz, jobject assetManager) {
+    if (!app) {
+        AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
+        app = std::unique_ptr<PAIN::Application>(PAIN::CreateApplication());
+        app->InitializeAndroid(mgr);
     }
 }
 
 JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeOnPause(JNIEnv *env, jclass clazz)
-{
-    if (g_App) {}
+Java_com_pain_engine_MyGLRenderer_onSurfaceChanged(JNIEnv *env, jobject thiz, jint width, jint height) {
+    glViewport(0, 0, width, height);
 }
 
 JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeOnResume(JNIEnv *env, jclass clazz)
-{
-    if (g_App) {}
-}
-
-JNIEXPORT void JNICALL
-Java_com_pain_engine_MainActivity_nativeOnDestroy(JNIEnv *env, jclass clazz)
-{
-    if (g_App)
-    {
-        g_App.reset();
+Java_com_pain_engine_MyGLRenderer_onDrawFrame(JNIEnv *env, jobject thiz) {
+    if (app) {
+        app->Update();
     }
 }
 

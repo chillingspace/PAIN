@@ -1,0 +1,41 @@
+{
+  "buildFiles": [
+    "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\android\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\Owner\\AppData\\Local\\Android\\Sdk\\cmake\\3.31.6\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\android\\app\\.cxx\\RelWithDebInfo\\11475u5k\\arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\Owner\\AppData\\Local\\Android\\Sdk\\cmake\\3.31.6\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\android\\app\\.cxx\\RelWithDebInfo\\11475u5k\\arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "Game::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "Game",
+      "output": "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\android\\app\\build\\intermediates\\cxx\\RelWithDebInfo\\11475u5k\\obj\\arm64-v8a\\libGame.so",
+      "runtimeFiles": [
+        "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\vendor\\FMOD\\android\\api\\core\\lib\\arm64-v8a\\libfmod.so",
+        "C:\\Users\\Owner\\Documents\\GitHub\\PAIN\\vendor\\FMOD\\android\\api\\studio\\lib\\arm64-v8a\\libfmodstudio.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "C:\\Users\\Owner\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "C:\\Users\\Owner\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

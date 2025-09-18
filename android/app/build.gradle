@@ -47,7 +47,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // Corrected FMOD Java library paths, relative to this build.gradle file
-    implementation files('../../../vendor/FMOD/android/api/core/lib/fmod.jar')
-    implementation files('../../../vendor/FMOD/android/api/studio/lib/fmodstudio.jar')
+    // This correctly includes only the fmod.jar from your new libs folder
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
