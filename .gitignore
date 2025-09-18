@@ -42,6 +42,11 @@ out*/
 *.iopt
 
 # ========================
+# VCPKG libraries
+# ========================
+/libs/vcpkg
+
+# ========================
 # Keep third-party dependencies
 # ========================
 
@@ -60,7 +65,7 @@ out*/
 *.swp
 
 
-# keep x64 lib for fmod
+# Keep x64 lib for FMOD
 !vendor/FMOD/
 !vendor/FMOD/windows/
 !vendor/FMOD/windows/api/
