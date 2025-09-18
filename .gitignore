@@ -45,6 +45,7 @@ out*/
 # VCPKG libraries
 # ========================
 /libs/vcpkg
+/vcpkg_installed
 
 # ========================
 # Keep third-party dependencies
