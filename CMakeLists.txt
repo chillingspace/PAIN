@@ -1,26 +1,46 @@
-cmake_minimum_required(VERSION 3.16)
-project(PAIN)
+cmake_minimum_required(VERSION 3.21)
+
+project(PAIN_Engine)
+
+# ========================================================================================
+# Boilerplate for vcpkg toolchain. This ensures libraries are found correctly.
+# ========================================================================================
+if(DEFINED CMAKE_TOOLCHAIN_FILE)
+    include(${CMAKE_TOOLCHAIN_FILE})
+elseif(DEFINED ENV{VCPKG_ROOT})
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    include(${CMAKE_TOOLCHAIN_FILE})
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# --- Set Output Directories (for Windows) ---
-if(NOT ANDROID)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE})
+# ========================================================================================
+# Add Subdirectories for the Engine and the Game
+# ========================================================================================
+add_subdirectory(PAINEngine)
+add_subdirectory(Game)
+
+# ========================================================================================
+# Android-Specific Configuration
+# ========================================================================================
+if(ANDROID)
+    # The main Android library is our "Game" target.
+    # We must name it 'libGame.so' for Android to load it correctly.
+    set_target_properties(Game PROPERTIES OUTPUT_NAME "Game")
+
+    # Link against Android's native libraries for graphics and logging.
+    target_link_libraries(Game PRIVATE
+        android
+        log
+        EGL
+        GLESv3
+    )
 endif()
 
-# --- Dependency Management ---
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(ImportDependencies)
-importDependencies()
-
-# --- Subdirectories ---
-add_subdirectory(PAINEngine)
-
-# Add the Game executable target ONLY for desktop builds
+# ========================================================================================
+# Windows-Specific Final Steps (for Visual Studio)
+# ========================================================================================
 if(NOT ANDROID)
-    add_subdirectory(Game)
-    # Set the startup project for Visual Studio
     set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
 endif()

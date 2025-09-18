@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef PN_PLATFORM_WINDOWS // Windows PC guard
-
 #ifndef GLFW_WINDOW_HPP
 #define GLFW_WINDOW_HPP
 
@@ -62,4 +60,3 @@ namespace PAIN {
 }
 
 #endif
-#endif // End of guard

@@ -4,8 +4,8 @@
 #define WINDOW_HPP
 
 #include <string>
+#include "ECS/System/System.h"
 
-//#include "ECS/System/System.h".
 #include "Applications/AppSystem.h"
 
 namespace PAIN {

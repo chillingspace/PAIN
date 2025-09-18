@@ -1,39 +1,21 @@
-# Collect all game source files
-file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
+# Define the executable target for the Game
+add_executable(Game src/Game.cpp)
 
-# Build sandbox as an executable
-add_executable(Game ${GAME_SRC})
-
-# Link against the engine
+# --- Link against the PAINEngine ---
+# This is the key step. By linking to PAINEngine, the "Game" target
+# automatically inherits all the PUBLIC include directories and linked libraries
+# from PAINEngine (like spdlog, glm, glfw, etc.).
 target_link_libraries(Game PRIVATE PAINEngine)
 
-# Include engine headers
-target_include_directories(Game PRIVATE ${CMAKE_SOURCE_DIR}/PAINEngine/src)
-
-# --- Post-Build Commands (PC Only) ---
+# --- Post-Build Command for Windows ---
+# This ensures that assets are copied to the output directory for easy debugging.
 if(NOT ANDROID)
-    # This command copies the required DLLs next to your Game.exe after it's built
     add_custom_command(TARGET Game POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmod.dll"
-            "$<TARGET_FILE_DIR:Game>"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64/fmodL.dll"
-            "$<TARGET_FILE_DIR:Game>"
-        COMMENT "Copying runtime DLLs to output directory..."
-    )
-
-    # This command copies your game assets to the build output directory
-    add_custom_command(TARGET Game POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
-            "${CMAKE_SOURCE_DIR}/assets"
-            "$<TARGET_FILE_DIR:Game>/assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/game-assets"
+        "$<TARGET_FILE_DIR:Game>/assets"
         COMMENT "Copying game assets..."
     )
+    # This sets the working directory in Visual Studio so the app can find the assets.
+    set_target_properties(Game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Game>")
 endif()
-
-# --- Visual Studio Specific Properties ---
-# Set the debugging working directory to the output directory
-set_target_properties(Game PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Game>"
-)

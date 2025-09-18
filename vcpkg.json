@@ -1,0 +1,12 @@
+{
+  "name": "giraphics",
+  "version-string": "0.1.0",
+  "builtin-baseline": "7e19f3c64cb636ee21f41bfe8558a6dfaae6236f",
+  "dependencies": [
+    { "name": "imgui", "features": ["opengl3-binding","glfw-binding"], "platform": "windows" },
+    { "name": "imgui", "features": ["opengl3-binding"], "platform": "android" }
+  ],
+  "overrides": [
+    { "name": "imgui", "version": "1.91.9#0" }
+  ]
+}

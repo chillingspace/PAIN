@@ -4,59 +4,59 @@
 #define APPLICATION_HPP
 
 #include "AppSystem.h"
-#include "PAINEngine/CoreSystems/Events/Event.h"
+#include "../CoreSystems/Events/Event.h"
 #include "PAINEngine/Audio/AudioManager.h"
-#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #include <memory>
 #include <vector>
 #include <queue>
 
-#if defined(PLATFORM_ANDROID)
-struct AAssetManager; // Forward declaration for Android Asset Manager
-#endif
-
 namespace PAIN {
 
-    class Application
-    {
-    private:
-        static Application* s_Instance;
-        std::vector<std::shared_ptr<AppSystem>> layer_stack;
-        std::vector<std::shared_ptr<AppSystem>> core_stack;
-        bool b_app_running = true;
-        std::queue<std::shared_ptr<Event::Event>> event_queue;
-        std::shared_ptr<AudioManager> m_AudioManager;
-        std::unique_ptr<Window::Window> m_Window;
+	class Application
+	{
+	private:
+		// Application instance
+		static Application* s_Instance;
 
-        void dispatchEventsForward(Event::Event& e);
-        void dispatchEventsReversed(Event::Event& e);
+		//Create applications stacks
+		std::vector<std::shared_ptr<AppSystem>> layer_stack;
+		std::vector<std::shared_ptr<AppSystem>> core_stack;
 
-    public:
-        Application();
-        virtual ~Application();
-        
-        void InitializeDesktop();
-#if defined(PLATFORM_ANDROID)
-        void InitializeAndroid(AAssetManager* assetManager);
-#endif
+		//Boolean running app running
+		bool b_app_running = true;
 
-        void Run();
-        void Update();
-        void Shutdown();
+		//Event queue
+		std::queue<std::shared_ptr<Event::Event>> event_queue;
 
-        void addCoreSystem(std::shared_ptr<AppSystem> core_system);
-        void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+		// Direct pointer to the AudioManager
+		std::shared_ptr<AudioManager> m_AudioManager;
 
-        void dispatchEvent(Event::Event& e);
-        void pushEventQueue(std::shared_ptr<Event::Event> e);
-        void drainEventQueue();
+		//Dispatch events to layers
+		void dispatchEventsForward(Event::Event& e);
 
-        inline static Application& Get() { return *s_Instance; }
-        inline AudioManager& GetAudioManager() { return *m_AudioManager; }
-    };
+		//Reverse dispatching to layers
+		void dispatchEventsReversed(Event::Event& e);
 
-    Application* CreateApplication();
+	public:
+		Application();
+		virtual ~Application();
+
+		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
+		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+		void Run();
+		void terminate();
+		void dispatchEvent(Event::Event& e);
+		void pushEventQueue(std::shared_ptr<Event::Event> e);
+		void drainEventQueue();
+
+		// Static getter to access the application and audio manager
+		inline static Application& Get() { return *s_Instance; }
+		inline AudioManager& GetAudioManager() { return *m_AudioManager; }
+	};
+
+	// Defined in client
+	Application* CreateApplication();
 }
 
 #endif

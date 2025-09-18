@@ -1,4 +1,9 @@
 // pch.h: This is a precompiled header file.
+// Files listed below are compiled only once, improving build performance for future builds.
+// This also affects IntelliSense performance, including code completion and many code browsing features.
+// However, files listed here are ALL re-compiled if any one of them is updated between builds.
+// Do not add files here that you will be updating frequently as this negates the performance advantage.
+
 #pragma once
 
 #ifndef PCH_H
@@ -9,17 +14,7 @@
  *********************************************************************/
 #define CLASS_STR(T) #T //Convert Class To Str
 
-// --- Platform Specific Includes ---
-#if defined(PN_PLATFORM_WINDOWS)
-    // Windows Desktop: Include GLEW and GLFW for OpenGL
-    #include <GL/glew.h>
-    #include <GLFW/glfw3.h>
-    #include <Windows.h>
-    #undef APIENTRY // To prevent conflict with Jolt
-#elif defined(PLATFORM_ANDROID)
-    // Android: Include GLES3 headers
-    #include <GLES3/gl3.h>
-#endif
+// add headers that you want to pre-compile here
 
  /*****************************************************************//**
  * Physics Library
@@ -38,23 +33,30 @@
  * Engine Specific Library
  *********************************************************************/
 
+// graphics headers
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+
 // Math Lib
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
 // Imgui headers
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "ImGui/headers/imgui.h"
+#include "ImGui/headers/imgui_impl_opengl3.h"
+#include "ImGui/headers/imgui_impl_glfw.h"
 
-#if defined(PN_PLATFORM_WINDOWS)
-    #include "ImGui/headers/imgui_impl_opengl3.h"
-    #include "ImGui/headers/imgui_impl_glfw.h"
-#elif defined(PLATFORM_ANDROID)
-    #include "ImGui/headers/imgui_impl_opengl3.h"
-#endif
+#undef APIENTRY
 
 //Memory
 #define _CRTDBG_MAP_ALLOC
+
+ /*****************************************************************//**
+ * Windows Application
+ *********************************************************************/
+#ifdef PN_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif
 
  /*****************************************************************//**
  * CORE HEADER
