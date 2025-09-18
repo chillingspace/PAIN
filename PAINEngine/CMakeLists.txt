@@ -38,7 +38,18 @@ target_precompile_headers(PAINEngine PRIVATE "PAINEngine/pch.h")
 
 # --- Platform-specific Definitions ---
 target_compile_definitions(PAINEngine PUBLIC
-    $<$<PLATFORM_ID:Windows>:GLEW_STATIC>
-    $<$<PLATFORM_ID:Windows>:PN_PLATFORM_WINDOWS>
-    $<$<PLATFORM_ID:Android>:PN_PLATFORM_ANDROID>
+    PN_PLATFORM_WINDOWS
+    GLEW_STATIC
 )
+
+# -------------------------
+# Organize files in VS Solution Explorer
+# -------------------------
+
+# Engine sources
+foreach(file IN LISTS ENGINE_SRC)
+    file(RELATIVE_PATH relPath "${CMAKE_CURRENT_SOURCE_DIR}/src" "${file}")
+    get_filename_component(groupPath "${relPath}" PATH)
+    string(REPLACE "/" "\\" groupPath "${groupPath}")
+    source_group("${groupPath}" FILES "${file}")
+endforeach()
