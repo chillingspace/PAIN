@@ -71,7 +71,7 @@ set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)                # Jolt default: no 
 # set(DEBUG_RENDERER_IN_DISTRIBUTION OFF CACHE BOOL "" FORCE)
 
 # Add the Jolt project (use EXCLUDE_FROM_ALL to avoid building Samples etc. unless asked)
-add_subdirectory("${VENDOR_DIR}/Jolt" "${CMAKE_BINARY_DIR}/vendor_jolt" EXCLUDE_FROM_ALL)
+add_subdirectory("${VENDOR_DIR}/Jolt/Build" "${CMAKE_BINARY_DIR}/vendor_jolt" EXCLUDE_FROM_ALL)
 
 # ------------------------
 # System GL (platform-specific)

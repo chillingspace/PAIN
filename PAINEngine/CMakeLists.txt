@@ -52,6 +52,9 @@ endif()
 # (Optional) any extra includes you keep under vendor/GL for <GL/*.h>
 target_link_libraries(PAINEngine PUBLIC gl_headers)
 
+# Link Jolt
+target_link_libraries(PAINEngine PUBLIC Jolt)
+
 # -------------------------
 # Precompiled Header
 # -------------------------
