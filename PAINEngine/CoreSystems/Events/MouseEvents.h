@@ -3,6 +3,7 @@
 #ifndef MOUSE_EVENTS_HPP
 #define MOUSE_EVENTS_HPP
 
+#include "pch.h
 #include "CoreSystems/Events/Event.h"
 #include <sstream>
 

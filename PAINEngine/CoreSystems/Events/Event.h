@@ -6,6 +6,7 @@
 #include <string>
 #include <functional>
 #include <stdexcept>
+#include <sstream>
 
 
 namespace PAIN {

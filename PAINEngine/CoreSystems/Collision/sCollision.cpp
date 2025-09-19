@@ -8,6 +8,7 @@
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
+#include "pch.h"
 #include "CoreSystems/Collision/sCollision.h"
 
 namespace PAIN {

@@ -3,6 +3,7 @@
 #ifndef WINDOW_EVENTS_HPP
 #define WINDOW_EVENTS_HPP
 
+#include "pch.h"
 #include "CoreSystems/Events/Event.h"
 
 namespace PAIN {

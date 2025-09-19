@@ -1,31 +1,4 @@
-// CHECK INCLUDES
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <vector>
-#include <array>
-#include <string>
-#include <unordered_map>
-#include <cctype>
-#include <sstream>
-#include <time.h>
-#include <list>
-#include <memory>
-#include <cmath>
-#include <iterator>
-#include <queue>
-#include <set>
-#include <unordered_set>
-#include <ctime>
-#include <iomanip>
-#include <chrono>
-#include <thread>
-#include <optional>
-#include <stack>
-#include <regex>
-#include <limits>
-#include <random>
-#include <bitset>
+#include "pch.h"
 
 #include "CoreSystems/Windows/GLFW/GLFWWindow.h"
 

@@ -3,6 +3,7 @@
 #ifndef GLFW_WINDOW_HPP
 #define GLFW_WINDOW_HPP
 
+#include "pch.h"
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Windows/GraphicsContext.h"
 

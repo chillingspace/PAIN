@@ -5,7 +5,7 @@
 
 #include "Applications/AppSystem.h"
 #include "CoreSystems/Events/Event.h"
-#include "PAINEngine/Audio/AudioManager.h"
+#include "Audio/AudioManager.h"
 
 #include <memory>
 #include <vector>

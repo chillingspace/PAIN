@@ -4,6 +4,7 @@
 #ifndef TOOLS_PANELS_HPP
 #define TOOLS_PANELS_HPP
 
+#include "pch.h"
 #include "LayeredSystems/LevelEditor/Panels/Panels.h"
 
 namespace PAIN {

@@ -8,9 +8,10 @@
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "sLayer.h"
+#include "pch.h"
+#include "CoreSystems/Collision/sLayer.h"
 
-namespace NIKE {
+namespace PAIN {
 	namespace Layer {
 
 	}

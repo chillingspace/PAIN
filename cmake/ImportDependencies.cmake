@@ -12,6 +12,7 @@ macro(import_glfw)
         set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(glfw)
+        include_directories(${glfw_SOURCE_DIR}/include)
     endif()
 endmacro()
 
@@ -24,6 +25,7 @@ macro(import_glm)
             GIT_TAG 1.0.1
         )
         FetchContent_MakeAvailable(glm)
+        include_directories(${glm_SOURCE_DIR})
     endif()
 endmacro()
 
@@ -37,6 +39,7 @@ macro(import_glew)
         )
         set(GLEW_BUILD_UTILS OFF CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(glew)
+        include_directories(${glew_SOURCE_DIR}/include)
     endif()
 endmacro()
 

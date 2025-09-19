@@ -3,10 +3,13 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
+#include "pch.h"
+
 #include <memory>
 #include <vector>
 
 #include "Applications/AppSystem.h"
+#include "ECS/System/System.h"
 
 namespace PAIN {
 	namespace ECS {

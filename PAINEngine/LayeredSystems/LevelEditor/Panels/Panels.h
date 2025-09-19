@@ -4,6 +4,11 @@
 #ifndef PANELS_HPP
 #define PANELS_HPP
 
+#include <string>
+#include <vector>
+#include <functional>
+#include <memory>
+#include <imgui.h>
 #include "LayeredSystems/LevelEditor/Command.h"
 
 namespace PAIN {

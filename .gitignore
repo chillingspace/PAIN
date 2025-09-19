@@ -64,6 +64,7 @@ out*/
 *.tmp
 *.bak
 *.swp
+build_log.txt
 
 
 # Keep x64 lib for FMOD

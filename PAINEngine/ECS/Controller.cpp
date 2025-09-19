@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ECS/Controller.h"
 
 namespace PAIN {

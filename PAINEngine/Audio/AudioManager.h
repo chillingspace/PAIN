@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Logging/Log.h"
 #include "Applications/AppSystem.h"
 
 #include <string>

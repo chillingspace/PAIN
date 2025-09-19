@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "LayeredSystems/LevelEditor/Panels/Panels.h"
 
 #ifdef _DEBUG

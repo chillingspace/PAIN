@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
 
 namespace PAIN {

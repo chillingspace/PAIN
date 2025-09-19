@@ -8,7 +8,8 @@
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "sysPhysics.h"
+#include "pch.h"
+#include "Systems/Physics/sysPhysics.h"
 
 namespace PAIN {
 
