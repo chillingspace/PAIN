@@ -69,12 +69,31 @@ if (ANDROID)
 endif()
 
 # ======================= FMOD Vendor  =========================
-if(ANDROID)
-    # For Android, paths are handled by the android/app/src/main/cpp/CMakeLists.txt but define the library names for consistency
-    set(FMOD_LIBS fmod fmodL)
-else()
-    # For PC, set include and library paths
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/inc)
-    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64)
-    set(FMOD_LIBS fmod_vc fmodL_vc)
+add_library(fmod SHARED IMPORTED GLOBAL)
+add_library(fmodL SHARED IMPORTED GLOBAL)  # optional logging lib, if you use it
+# Public headers for both targets
+set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+
+if (WIN32 AND NOT ANDROID)
+  # MSVC import lib + runtime DLL (optional but nice for post-build copy)
+  set_target_properties(fmod PROPERTIES
+    IMPORTED_IMPLIB   "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64/fmod_vc.lib"
+    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/windows/api/core/fmod.dll"
+  )
+  set_target_properties(fmodL PROPERTIES
+    IMPORTED_IMPLIB   "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64/fmodL_vc.lib"
+    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/windows/api/core/fmodL.dll"
+  )
+elseif(ANDROID)
+  # Pick the right .so for the active ABI
+  set_target_properties(fmod PROPERTIES
+    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/android/${ANDROID_ABI}/libfmod.so"
+  )
+  set_target_properties(fmodL PROPERTIES
+    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/android/${ANDROID_ABI}/libfmodL.so"
+  )
+  # NDK system libs FMOD depends on
+  target_link_libraries(fmod  INTERFACE log android)
+  target_link_libraries(fmodL INTERFACE log android)
 endif()
