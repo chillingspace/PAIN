@@ -1,7 +1,7 @@
 # ======================= Project Configuration =========================
 # Using the exact versioning from the original working sample
 cmake_minimum_required(VERSION 2.8...3.15)
-cmake_policy(VERSION 3.5)
+cmake_policy(VERSION 2.8...3.15)
 
 project(PAIN-CrossPlatform)
 
@@ -15,8 +15,6 @@ importVcPkgDependencies()
 include(ImportDependencies)
 importDependencies()
 
-find_package(imgui CONFIG REQUIRED)
-
 # --- Global Definitions ---
 if(NOT ANDROID)
     add_definitions(-DGLEW_STATIC)
@@ -27,7 +25,6 @@ endif()
 # --- List of External Libraries (platform-specific) ---
 if(ANDROID)
     set(ALL_LIBS
-        PRIVATE imgui::imgui  # From vcpkg
         PRIVATE spdlog::spdlog
         PRIVATE Jolt
         # FMOD libs are added directly in the Android-specific CMakeLists.txt
@@ -36,7 +33,6 @@ else()
     set(ALL_LIBS
         PRIVATE glfw
         PRIVATE glew_static
-        PRIVATE imgui::imgui  # From vcpkg
         PRIVATE spdlog::spdlog
         PRIVATE Jolt
         PRIVATE "${CMAKE_SOURCE_DIR}/libs/fmod/lib/x64/fmod_vc.lib"
@@ -71,6 +67,7 @@ file(GLOB_RECURSE APP_SRC
     "${SRC_DIR}/LayeredSystems/LevelEditor/Panels/*.cpp"
     "${SRC_DIR}/Logging/*.cpp"
     "${SRC_DIR}/Systems/Physics/*.cpp"
+    "${SRC_DIR}/ImGui/src/*.cpp"
 )
 
 # --- Build the Executable ---

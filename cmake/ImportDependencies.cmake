@@ -58,7 +58,7 @@ macro(import_jolt)
         FetchContent_Declare(
             jolt
             GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
-            GIT_TAG v4.0.3
+            GIT_TAG v5.3.0
         )
         # Disable parts of Jolt we don't need to speed up the build
         set(JPH_PROFILE_ENABLED OFF CACHE BOOL "" FORCE)
@@ -66,6 +66,60 @@ macro(import_jolt)
         FetchContent_MakeAvailable(jolt)
     endif()
 endmacro()
+
+# Macro to import ImGui
+# macro(import_imgui)
+#     if(NOT TARGET imgui)  # Guard to prevent multiple inclusion
+#         FetchContent_Declare(
+#             imgui
+#             GIT_REPOSITORY https://github.com/ocornut/imgui.git
+#             GIT_TAG v1.90.4
+#         )
+#         if(NOT imgui_POPULATED)
+#             FetchContent_MakeAvailable(imgui)
+#         endif()
+
+#         # Create ImGui library manually since it doesn't have CMakeLists.txt
+#         set(IMGUI_SOURCES
+#             ${imgui_SOURCE_DIR}/imgui.cpp
+#             ${imgui_SOURCE_DIR}/imgui_demo.cpp
+#             ${imgui_SOURCE_DIR}/imgui_draw.cpp
+#             ${imgui_SOURCE_DIR}/imgui_tables.cpp
+#             ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+#         )
+
+#         # Add platform-specific backend sources
+#         if(ANDROID)
+#             # For Android, we'll use OpenGL ES 3.0 backend
+#             list(APPEND IMGUI_SOURCES
+#                 ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+#             )
+#         else()
+#             # For desktop, use GLFW + OpenGL 3 backend
+#             list(APPEND IMGUI_SOURCES
+#                 ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+#                 ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+#             )
+#         endif()
+
+#         add_library(imgui STATIC ${IMGUI_SOURCES})
+#         target_include_directories(imgui PUBLIC 
+#             ${imgui_SOURCE_DIR}
+#             ${imgui_SOURCE_DIR}/backends
+#         )
+        
+#         # Link platform-specific libraries
+#         if(ANDROID)
+#             target_link_libraries(imgui PUBLIC GLESv3 EGL)
+#         else()
+#             target_link_libraries(imgui PUBLIC glfw libglew_static)
+#         endif()
+        
+#         # Set C++ standard for ImGui (required for constexpr support)
+#         set_property(TARGET imgui PROPERTY CXX_STANDARD 11)
+#         set_property(TARGET imgui PROPERTY CXX_STANDARD_REQUIRED ON)
+#     endif()
+# endmacro()
 
 
 # Macro to import all dependencies
@@ -77,6 +131,7 @@ macro(importDependencies)
     import_glew()
     import_spdlog()
     import_jolt()
+    # import_imgui()
 
     message(STATUS "All dependencies have been imported successfully.")
 endmacro()
