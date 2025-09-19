@@ -12,6 +12,14 @@ file(GLOB_RECURSE ENGINE_SRC
 
 add_library(PAINEngine STATIC ${ENGINE_SRC})
 
+# Public headers
+target_include_directories(PAINEngine
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine
+)
+
 # ======================= Precompiled Headers  =========================
 
 target_precompile_headers(PAINEngine

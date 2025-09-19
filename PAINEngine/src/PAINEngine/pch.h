@@ -38,8 +38,8 @@
 //#include "GLFW/glfw3.h"
 //
 //// Math Lib
-//#include "glm/glm.hpp"
-//#include "glm/gtc/quaternion.hpp"
+#include "glm.hpp"
+#include "gtc/quaternion.hpp"
 //
 //// Imgui headers
 //#include "ImGui/headers/imgui.h"

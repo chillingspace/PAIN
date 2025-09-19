@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "glm/glm.hpp"
+#include "glm.hpp"
 #include <fmod_common.h>
 
 namespace FMOD {
