@@ -1,46 +1,102 @@
-cmake_minimum_required(VERSION 3.21)
+# ======================= Project Configuration =========================
+# Using the exact versioning from the original working sample
+cmake_minimum_required(VERSION 2.8...3.15)
+cmake_policy(VERSION 3.5)
 
-project(PAIN_Engine)
+project(PAIN-CrossPlatform)
 
-# ========================================================================================
-# Boilerplate for vcpkg toolchain. This ensures libraries are found correctly.
-# ========================================================================================
-if(DEFINED CMAKE_TOOLCHAIN_FILE)
-    include(${CMAKE_TOOLCHAIN_FILE})
-elseif(DEFINED ENV{VCPKG_ROOT})
-    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
-    include(${CMAKE_TOOLCHAIN_FILE})
+# --- vcpkg, Dependencies, and Helpers ---
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(VCPKG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/libs/vcpkg")
+
+include(vcpkg_windows)
+importVcPkgDependencies()
+
+include(ImportDependencies)
+importDependencies()
+
+find_package(imgui CONFIG REQUIRED)
+
+# --- Global Definitions ---
+if(NOT ANDROID)
+    add_definitions(-DGLEW_STATIC)
+else()
+    add_definitions(-DPLATFORM_ANDROID)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# ========================================================================================
-# Add Subdirectories for the Engine and the Game
-# ========================================================================================
-add_subdirectory(PAINEngine)
-add_subdirectory(Game)
-
-# ========================================================================================
-# Android-Specific Configuration
-# ========================================================================================
+# --- List of External Libraries (platform-specific) ---
 if(ANDROID)
-    # The main Android library is our "Game" target.
-    # We must name it 'libGame.so' for Android to load it correctly.
-    set_target_properties(Game PROPERTIES OUTPUT_NAME "Game")
-
-    # Link against Android's native libraries for graphics and logging.
-    target_link_libraries(Game PRIVATE
-        android
-        log
-        EGL
-        GLESv3
+    set(ALL_LIBS
+        PRIVATE imgui::imgui  # From vcpkg
+        PRIVATE spdlog::spdlog
+        PRIVATE Jolt
+        # FMOD libs are added directly in the Android-specific CMakeLists.txt
+    )
+else()
+    set(ALL_LIBS
+        PRIVATE glfw
+        PRIVATE glew_static
+        PRIVATE imgui::imgui  # From vcpkg
+        PRIVATE spdlog::spdlog
+        PRIVATE Jolt
+        PRIVATE "${CMAKE_SOURCE_DIR}/libs/fmod/lib/x64/fmod_vc.lib"
+        PRIVATE "${CMAKE_SOURCE_DIR}/libs/fmod/lib/x64/fmodL_vc.lib"
+        PRIVATE opengl32
     )
 endif()
 
-# ========================================================================================
-# Windows-Specific Final Steps (for Visual Studio)
-# ========================================================================================
+# --- FMOD Include Paths (same for both platforms) ---
+if(ANDROID)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/android/app/src/main/cpp/libs/fmod/inc)
+else()
+    include_directories(${CMAKE_SOURCE_DIR}/libs/fmod/inc)
+endif()
+
+# --- Source File Configuration ---
+# MODIFIED: Point to our new unified engine folder
+set(SRC_DIR ./PAINEngine)
+
+# MODIFIED: Find all .cpp files in the PAINEngine folder and its subdirectories
+file(GLOB_RECURSE APP_SRC
+    "${SRC_DIR}/*.cpp"
+    "${SRC_DIR}/Applications/*.cpp"
+    "${SRC_DIR}/Audio/*.cpp"
+    "${SRC_DIR}/CoreSystems/Collision/*.cpp"
+    "${SRC_DIR}/CoreSystems/Renderer/*.cpp"
+    "${SRC_DIR}/CoreSystems/Windows/GLFW/*.cpp"
+    "${SRC_DIR}/CoreSystems/Windows/OpenGL/*.cpp"
+    "${SRC_DIR}/ECS/*.cpp"
+    "${SRC_DIR}/ECS/System/*.cpp"
+    "${SRC_DIR}/LayeredSystems/LevelEditor/*.cpp"
+    "${SRC_DIR}/LayeredSystems/LevelEditor/Panels/*.cpp"
+    "${SRC_DIR}/Logging/*.cpp"
+    "${SRC_DIR}/Systems/Physics/*.cpp"
+)
+
+# --- Build the Executable ---
+add_executable(${CMAKE_PROJECT_NAME} ${APP_SRC})
+
+# --- Linking ---
+target_link_libraries(${CMAKE_PROJECT_NAME} ${ALL_LIBS})
+
+# Set C++ Standard
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 20)
+
+# --- Include Directories ---
+# This is the "Golden Rule" setting. It tells the compiler to always
+# start looking for our headers from the PAINEngine folder.
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${SRC_DIR})
+
+# --- Post-Build Commands ---
+# MODIFIED: Copy the correct assets folder and the new imgui.ini
 if(NOT ANDROID)
-    set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
+    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+            "${CMAKE_SOURCE_DIR}/assets"
+            "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/assets"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/Game/imgui.ini"
+            "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/imgui.ini"
+        COMMENT "Copying game assets and imgui.ini..."
+    )
 endif()

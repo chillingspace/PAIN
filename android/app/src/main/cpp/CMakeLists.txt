@@ -57,7 +57,7 @@ find_package(imgui CONFIG REQUIRED)
 # for GameActivity/NativeActivity derived applications, the same library name must be
 # used in the AndroidManifest.xml file.
 
-set(SRC_DIR ../../../../../my_gl_app)
+set(SRC_DIR ../../../../../PAINEngine)
 
 # Get source files from my_gl_app directory
 file(GLOB_RECURSE MY_GL_APP_SRC

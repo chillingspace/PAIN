@@ -1,0 +1,46 @@
+// --- External Libraries ---
+#include <GL/glew.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+// --- PAINEngine Headers ---
+// Use the full path from the PAINEngine root for consistency
+#include "CoreSystems/Windows/OpenGL/ImGuiOpenGLRenderer.h" 
+
+// This macro is specific to ImGui's implementation and should be defined before the includes
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+
+bool ImGuiOpenGLRenderer::Init(GLFWwindow* window)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    return true;
+}
+
+void ImGuiOpenGLRenderer::Shutdown()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void ImGuiOpenGLRenderer::BeginFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void ImGuiOpenGLRenderer::EndFrame()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
