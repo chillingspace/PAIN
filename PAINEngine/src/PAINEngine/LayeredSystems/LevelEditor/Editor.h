@@ -6,9 +6,6 @@
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
-#include <ImGui/headers/imgui.h>
-#include <ImGui/headers/imgui_impl_glfw.h>
-#include <ImGui/headers/imgui_impl_opengl3.h>
 #include "CoreSystems/Windows/Window.h"
 
 //Command header

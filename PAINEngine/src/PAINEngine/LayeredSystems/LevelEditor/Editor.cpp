@@ -202,7 +202,7 @@ namespace PAIN {
 
             //Undo
             static bool z_triggered = false;
-            if (io.KeyCtrl && io.KeysDown[ImGuiKey_Z]) {
+            if (io.KeyCtrl && ImGui::IsKeyDown(ImGuiKey_Z)) {
                 if (!z_triggered) {
                     command_manager->undo();
                     z_triggered = true;
@@ -214,7 +214,7 @@ namespace PAIN {
 
             //Redo
             static bool y_triggered = false;
-            if (io.KeyCtrl && io.KeysDown[ImGuiKey_Y]) {
+            if (io.KeyCtrl && ImGui::IsKeyDown(ImGuiKey_Y)) {
                 if (!y_triggered) {
                     command_manager->redo();
                     y_triggered = true;
@@ -301,4 +301,5 @@ namespace PAIN {
     }
 
 }
+
 #endif

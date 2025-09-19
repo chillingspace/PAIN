@@ -33,18 +33,18 @@
  * Engine Specific Library
  *********************************************************************/
 
-// graphics headers
-//#include "GL/glew.h"
-//#include "GLFW/glfw3.h"
+//graphics headers
+#include "glew.h"
+#include "GLFW/glfw3.h"
 //
 //// Math Lib
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
 //
-//// Imgui headers
-//#include "ImGui/headers/imgui.h"
-//#include "ImGui/headers/imgui_impl_opengl3.h"
-//#include "ImGui/headers/imgui_impl_glfw.h"
+// Imgui headers
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
 #undef APIENTRY
 

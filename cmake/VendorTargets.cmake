@@ -43,6 +43,7 @@ else()
 endif()
 
 # ======================= Jolt Vendor  =========================
+
 # (Optional but recommended) choose Jolt options BEFORE add_subdirectory.
 # They’ll become the default values in the Jolt subproject cache.
 # See docs for meaning of these flags. :contentReference[oaicite:1]{index=1}
@@ -69,13 +70,17 @@ if (ANDROID)
 endif()
 
 # ======================= FMOD Vendor  =========================
+
 add_library(fmod SHARED IMPORTED GLOBAL)
 add_library(fmodL SHARED IMPORTED GLOBAL)  # optional logging lib, if you use it
-# Public headers for both targets
-set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/FMOD/windows/api/core/inc")
-set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/FMOD/windows/api/core/inc")
 
 if (WIN32 AND NOT ANDROID)
+  # Public headers
+  set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+      "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+  set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+      "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+
   # MSVC import lib + runtime DLL (optional but nice for post-build copy)
   set_target_properties(fmod PROPERTIES
     IMPORTED_IMPLIB   "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64/fmod_vc.lib"
@@ -86,6 +91,12 @@ if (WIN32 AND NOT ANDROID)
     IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/windows/api/core/fmodL.dll"
   )
 elseif(ANDROID)
+  # Public headers
+  set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+      "${VENDOR_DIR}/FMOD/android/api/core/inc")
+  set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+      "${VENDOR_DIR}/FMOD/android/api/core/inc")
+
   # Pick the right .so for the active ABI
   set_target_properties(fmod PROPERTIES
     IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/android/${ANDROID_ABI}/libfmod.so"

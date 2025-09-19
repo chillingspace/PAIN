@@ -1,10 +1,10 @@
 #include "pch.h"
-#include <GL/glew.h>
+#include <glew.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 
-#include "ImGui/headers/imgui.h"
-#include "ImGui/headers/imgui_impl_glfw.h"
-#include "ImGui/headers/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "ImGuiOpenGLRenderer.h"
 
 bool ImGuiOpenGLRenderer::Init(GLFWwindow* window)

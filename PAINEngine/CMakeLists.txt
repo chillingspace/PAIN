@@ -36,6 +36,8 @@ target_link_libraries(PAINEngine
     PUBLIC  imgui::imgui
     PUBLIC  Jolt
     PUBLIC  gl_headers
+    public  fmod
+    public  fmodL
 )
 
 # ImGui backends compiled into the engine
