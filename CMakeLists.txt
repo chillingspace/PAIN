@@ -1,6 +1,15 @@
+# ======================= Project Configuration =========================
+# Cmake version
 cmake_minimum_required(VERSION 3.16)
+
+# Main Project
 project(PAIN)
 
+
+# Set the CMake policy version (this enables all policies up to CMake 3.5)
+cmake_policy(VERSION 3.5)
+
+# Set Cmake Standards
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -11,24 +20,41 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(ImportDependencies)
 importDependencies() # Placeholder
 
-# --- Platform Detection and Global Definitions ---
+# Global compile flags and macros
 if(NOT ANDROID)
-    # PC-specific definitions (e.g., for static GLEW if you use it)
-    add_definitions(-DPLATFORM_WINDOWS) # Assuming Windows for PC
+    add_definitions(-DGLEW_STATIC)
 else()
-    # Android-specific definitions
     add_definitions(-DPLATFORM_ANDROID)
 endif()
 
-# --- FMOD Configuration ---
+# ======================= Vendors  =========================
+
+include(VendorTargets)   # defines imgui, glfw, glm, nlohmann_json, spdlog_header_only, Jolt::Jolt, etc.
+
+# ======================= Project Dependencies  =========================
+
+# List of external libraries (platform-specific)
 if(ANDROID)
-    # For Android, paths are handled by the android/app/src/main/cpp/CMakeLists.txt but define the library names for consistency
-    set(FMOD_LIBS fmod fmodL)
+    # On Android, we link NDK GL + imgui (built above) + your existing libs.
+    set(ALL_LIBS
+        PRIVATE imgui::imgui
+        PRIVATE ${EGL_LIB} ${GLES_LIB} ${ANDROID_LIB} ${LOG_LIB}
+        PRIVATE fmod
+        PRIVATE fmodL
+        PRIVATE refl-cpp::refl-cpp
+        PRIVATE nlohmann_json::nlohmann_json
+    )
 else()
-    # For PC, set include and library paths
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/inc)
-    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64)
-    set(FMOD_LIBS fmod_vc fmodL_vc)
+    # On Windows, link OpenGL, GLFW, and GLEW (all vendored, no vcpkg).
+    set(ALL_LIBS
+        PRIVATE OpenGL::GL
+        PRIVATE glfw
+        PRIVATE libglew_static
+        PRIVATE imgui::imgui
+        PRIVATE fmod_vc
+        PRIVATE refl-cpp::refl-cpp
+        PRIVATE nlohmann_json::nlohmann_json
+    )
 endif()
 
 # --- Output Directories ---

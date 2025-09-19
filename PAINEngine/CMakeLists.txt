@@ -11,38 +11,46 @@ file(GLOB_RECURSE ENGINE_SRC
 )
 
 # -------------------------
-# Define ImGui Sources
-# -------------------------
-set(IMGUI_SOURCES
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_demo.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/ImGui/src/imgui_impl_opengl3.cpp
-)
-
-# -------------------------
-# Build ImGui as a Static Library
-# -------------------------
-add_library(imgui STATIC ${IMGUI_SOURCES})
-
-# Add the vendor directory to the include path for the imgui target
-target_include_directories(imgui PUBLIC
-    "${CMAKE_SOURCE_DIR}/PAINEngine/vendor"
-)
-
-# Add required compile definitions directly to the imgui target
-target_compile_definitions(imgui PUBLIC
-    IMGUI_IMPL_OPENGL_LOADER_GLEW
-    IMGUI_DEFINE_MATH_OPERATORS
-)
-
-# -------------------------
 # Build Engine as a Static Library
 # -------------------------
 add_library(PAINEngine STATIC ${ENGINE_SRC})
+
+# -------------------------
+# Compile ImGui Backends Into Engine Target
+# -------------------------
+
+# 1) Link vendor targets
+target_link_libraries(PAINEngine
+  PUBLIC  glm
+  PUBLIC  nlohmann_json
+  PUBLIC  spdlog_header_only
+  PUBLIC  imgui::imgui
+  PUBLIC  Jolt::Jolt
+)
+
+# 2) ImGui backends compiled into the engine
+target_sources(PAINEngine PRIVATE
+  ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+if (ANDROID)
+  target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_android.cpp)
+  target_compile_definitions(PAINEngine PRIVATE IMGUI_IMPL_OPENGL_ES3=1)
+else()
+  target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
+endif()
+target_include_directories(PAINEngine PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
+
+# 3) Platform GL
+if (WIN32 AND NOT ANDROID)
+  target_link_libraries(PAINEngine PUBLIC OpenGL::GL glfw)
+else() # ANDROID
+  # NDK system libs (resolve by name)
+  target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log)
+  target_compile_definitions(PAINEngine PRIVATE IMGUI_IMPL_OPENGL_ES3=1)
+endif()
+
+# (Optional) any extra includes you keep under vendor/GL for <GL/*.h>
+target_link_libraries(PAINEngine PUBLIC gl_headers)
 
 # -------------------------
 # Precompiled Header
@@ -57,6 +65,7 @@ target_precompile_headers(PAINEngine
 target_include_directories(PAINEngine PUBLIC
     ${CMAKE_SOURCE_DIR}/PAINEngine/src
     ${CMAKE_SOURCE_DIR}/PAINEngine/src/PAINEngine
+    ${CMAKE_SOURCE_DIR}/PAINEngine/vendor
     
     # Treat vendor folders as SYSTEM to suppress their warnings
     SYSTEM ${CMAKE_SOURCE_DIR}/PAINEngine/vendor/spdlog/include
