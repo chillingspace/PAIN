@@ -23,8 +23,8 @@ namespace PAIN {
 		window_app->registerCallbacks(this);
 
 		// Create and add the AudioManager to the core systems
-		m_AudioManager = std::make_shared<AudioManager>();
-		addCoreSystem(m_AudioManager);
+		//m_AudioManager = std::make_shared<AudioManager>();
+		//addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
 		addCoreSystem(window_app);

@@ -62,10 +62,10 @@ namespace PAIN {
         m_cameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);   // Camera is at the center
 
         // Get a reference to the audio manager
-        AudioManager& audio = Application::Get().GetAudioManager();
+        //AudioManager& audio = Application::Get().GetAudioManager();
 
         // Load a looping 3D music stream
-        audio.LoadSound("assets/audio/Music/Boss_Music.wav", true, true, true);
+        //audio.LoadSound("assets/audio/Music/Boss_Music.wav", true, true, true);
 
         // Define and load the footstep sound effect playlist
         std::vector<std::string> grassFootsteps = {
@@ -78,14 +78,14 @@ namespace PAIN {
             "assets/audio/SFX/MovingSFX/Footstep_Grass_07.wav",
             "assets/audio/SFX/MovingSFX/Footstep_Grass_08.wav"
         };
-        audio.LoadPlaylist("FootstepsGrass", grassFootsteps);
+        //audio.LoadPlaylist("FootstepsGrass", grassFootsteps);
 
         // Start the music at the cube's initial position with reduced volume
-        audio.PlaySound("assets/audio/Music/Boss_Music.wav", m_cubePosition, -10.0f);
+        //audio.PlaySound("assets/audio/Music/Boss_Music.wav", m_cubePosition, -10.0f);
     }
 
     void TestTriangleLayer::onUpdate() {
-        AudioManager& audio = Application::Get().GetAudioManager();
+        //AudioManager& audio = Application::Get().GetAudioManager();
 
         // Animate the cube's position in a larger and wider rectangle
         static int pathSegment = 0;
@@ -121,14 +121,14 @@ namespace PAIN {
         glm::vec3 cameraVelocity = { 0.0f, 0.0f, 0.0f };
         glm::vec3 cameraForward = { 0.0f, 0.0f, -1.0f }; // Camera faces forward along -Z axis
         glm::vec3 cameraUp = { 0.0f, 1.0f, 0.0f };
-        audio.SetListener(m_cameraPosition, cameraVelocity, cameraForward, cameraUp);
+        //audio.SetListener(m_cameraPosition, cameraVelocity, cameraForward, cameraUp);
 
         // Play a random footstep sound from the playlist periodically
         static int frameCount = 0;
         if (++frameCount % 100 == 0)
         {
             //PN_CORE_INFO("Playing footstep sound...");
-            audio.PlayRandomFromPlaylist("FootstepsGrass", m_cubePosition, 0.0f);
+            //audio.PlayRandomFromPlaylist("FootstepsGrass", m_cubePosition, 0.0f);
         }
 
         // Standard rendering logic

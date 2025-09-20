@@ -30,14 +30,19 @@ target_precompile_headers(PAINEngine
 
 # target link vendors
 target_link_libraries(PAINEngine
-    PUBLIC  glm
-    PUBLIC  nlohmann_json
-    PUBLIC  spdlog_header_only
-    PUBLIC  imgui::imgui
-    PUBLIC  Jolt
-    PUBLIC  gl_headers
-    public  fmod
-    public  fmodL
+    PRIVATE  
+        glm
+        nlohmann_json
+        imgui::imgui
+        Jolt
+        gl_headers
+        fmod
+        fmodL
+)
+
+target_link_libraries(PAINEngine
+    PUBLIC  
+        spdlog_header_only
 )
 
 # ImGui backends compiled into the engine
@@ -50,6 +55,8 @@ if (ANDROID)
     target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_android.cpp)
     target_compile_definitions(PAINEngine PRIVATE IMGUI_IMPL_OPENGL_ES3=1)
 else()
+set_source_files_properties(${IMGUI_GL3}
+  PROPERTIES COMPILE_DEFINITIONS "IMGUI_IMPL_OPENGL_LOADER_CUSTOM=1")
     target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
 endif()
     target_include_directories(PAINEngine PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)

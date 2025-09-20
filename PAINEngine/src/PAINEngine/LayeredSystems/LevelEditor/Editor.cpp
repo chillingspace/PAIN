@@ -150,7 +150,7 @@ namespace PAIN {
 
             // Functional Audio Controls
             ImGui::Begin("Audio Controls");
-            AudioManager& audio = Application::Get().GetAudioManager();
+            //AudioManager& audio = Application::Get().GetAudioManager();
 
             static char soundPath[256] = "assets/audio/SFX/MovingSFX/Footstep_Metal_01.wav";
             static float volume = 0.0f;
@@ -170,25 +170,25 @@ namespace PAIN {
             }
 
             if (ImGui::Button("Load Sound")) {
-                audio.LoadSound(soundPath, is3D, loop);
+                //audio.LoadSound(soundPath, is3D, loop);
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Play Sound")) {
-                audio.PlaySound(soundPath, { posX, posY, posZ }, volume);
+                //audio.PlaySound(soundPath, { posX, posY, posZ }, volume);
             }
 
             ImGui::Separator();
             ImGui::Text("Playlist Controls");
             if (ImGui::Button("Play Random Footstep"))
             {
-                audio.PlayRandomFromPlaylist("FootstepsGrass", { posX, posY, posZ }, volume);
+                //audio.PlayRandomFromPlaylist("FootstepsGrass", { posX, posY, posZ }, volume);
             }
 
             ImGui::Separator();
             if (ImGui::Button("Stop All Sounds")) {
-                audio.StopAllChannels();
+                //audio.StopAllChannels();
             }
 
             ImGui::End();

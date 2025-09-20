@@ -56,6 +56,9 @@ set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)                # Jolt default: no 
 # Add the Jolt project (use EXCLUDE_FROM_ALL to avoid building Samples etc. unless asked)
 add_subdirectory("${VENDOR_DIR}/Jolt/Build" "${CMAKE_BINARY_DIR}/vendor_jolt" EXCLUDE_FROM_ALL)
 
+set_property(TARGET Jolt PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 # ======================= GL Vendor  =========================
 
 if (WIN32 AND NOT ANDROID)

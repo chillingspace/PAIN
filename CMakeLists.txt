@@ -21,6 +21,9 @@ if (ANDROID)
   add_compile_definitions(PLATFORM_ANDROID)
 endif()
 
+# Use /MD in Release and /MDd in Debug for all MSVC targets
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 # ======================= Vendors  =========================
 
 include(VendorTargets)   # defines imgui, glfw, glm, nlohmann_json, spdlog_header_only, Jolt::Jolt, etc.
