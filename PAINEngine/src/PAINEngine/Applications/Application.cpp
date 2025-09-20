@@ -7,6 +7,7 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
 
@@ -20,6 +21,9 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<TestTriangleLayer>());
 		//addCoreSystem(std::make_shared<Audio::Controller>());
+
+		// Add Serialization 
+		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG

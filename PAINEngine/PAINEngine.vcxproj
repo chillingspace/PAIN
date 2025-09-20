@@ -151,7 +151,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClInclude Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\GLFW\GLFWWindow.h" />
     <ClInclude Include="src\PAINEngine\CoreSystems\Windows\Window.h" />
-    <ClInclude Include="sSerialization.h" />
+    <ClInclude Include="src\PAINEngine\CoreSystems\Serialization\sSerialization.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PAINEngine\Applications\AppSystem.cpp" />
@@ -173,7 +173,7 @@ xcopy /Y /R /C /I "$(TargetDir)PAINEngine.pdb" "$(SolutionDir)bin\$(Configuratio
     <ClCompile Include="src\PAINEngine\CoreSystems\Renderer\TestTriangleLayer.cpp" />
     <ClCompile Include="src\PAINEngine\Systems\Physics &amp; Collision\sysPhysics.cpp" />
     <ClCompile Include="src\PAINEngine\CoreSystems\Windows\GLFW\GLFWWindow.cpp" />
-    <ClCompile Include="sSerialization.cpp" />
+    <ClCompile Include="src\PAINEngine\CoreSystems\Serialization\sSerialization.cpp" />
     <ClCompile Include="vendor\ImGui\src\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
