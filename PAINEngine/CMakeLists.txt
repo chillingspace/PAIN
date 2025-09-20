@@ -35,9 +35,7 @@ target_link_libraries(PAINEngine
         nlohmann_json
         imgui::imgui
         Jolt
-        gl_headers
-        fmod
-        fmodL
+        FMOD::core
 )
 
 target_link_libraries(PAINEngine
@@ -55,15 +53,15 @@ if (ANDROID)
     target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_android.cpp)
     target_compile_definitions(PAINEngine PRIVATE IMGUI_IMPL_OPENGL_ES3=1)
 else()
-set_source_files_properties(${IMGUI_GL3}
-  PROPERTIES COMPILE_DEFINITIONS "IMGUI_IMPL_OPENGL_LOADER_CUSTOM=1")
+    set_source_files_properties(${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        PROPERTIES COMPILE_DEFINITIONS "IMGUI_IMPL_OPENGL_LOADER_CUSTOM=1")
     target_sources(PAINEngine PRIVATE ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
 endif()
     target_include_directories(PAINEngine PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 
 # Platform GL
 if (WIN32 AND NOT ANDROID)
-    target_link_libraries(PAINEngine PUBLIC OpenGL::GL glfw)
+    target_link_libraries(PAINEngine PUBLIC OpenGL::GL glfw GLEW::GLEW imgui::imgui)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS GLEW_STATIC)
 else()
     target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log)

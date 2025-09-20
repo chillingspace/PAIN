@@ -1,5 +1,5 @@
 #include "pch.h"
-#include <glew.h>
+#include <GL/glew.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 
 #include "imgui.h"

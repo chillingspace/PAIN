@@ -15,11 +15,24 @@ target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
 
 # ======================= ImGui Vendor  =========================
 
+set(_GLEW_DIR "${CMAKE_SOURCE_DIR}/vendor/glew")
+
+add_library(_glew STATIC
+  "${_GLEW_DIR}/src/glew.c"
+)
+target_include_directories(_glew PUBLIC "${_GLEW_DIR}/include")
+target_compile_definitions(_glew PUBLIC GLEW_STATIC)  # ensure headers use static path
+
+add_library(GLEW::GLEW ALIAS _glew)
+
+# ======================= ImGui Vendor  =========================
+
 add_library(imgui STATIC
   "${VENDOR_DIR}/ImGui/imgui.cpp"
   "${VENDOR_DIR}/ImGui/imgui_draw.cpp"
   "${VENDOR_DIR}/ImGui/imgui_tables.cpp"
   "${VENDOR_DIR}/ImGui/imgui_widgets.cpp"
+  "${VENDOR_DIR}/ImGui/imgui_demo.cpp"
 )
 target_include_directories(imgui PUBLIC "${VENDOR_DIR}/ImGui")
 add_library(imgui::imgui ALIAS imgui)
@@ -74,40 +87,43 @@ endif()
 
 # ======================= FMOD Vendor  =========================
 
-add_library(fmod SHARED IMPORTED GLOBAL)
-add_library(fmodL SHARED IMPORTED GLOBAL)  # optional logging lib, if you use it
+add_library(FMOD::core SHARED IMPORTED GLOBAL)
 
 if (WIN32 AND NOT ANDROID)
-  # Public headers
-  set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-      "${VENDOR_DIR}/FMOD/windows/api/core/inc")
-  set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-      "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+  set(_FMOD_INC "${VENDOR_DIR}/FMOD/windows/api/core/inc")
+  set(_FMOD_LIB "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64")
 
-  # MSVC import lib + runtime DLL (optional but nice for post-build copy)
-  set_target_properties(fmod PROPERTIES
-    IMPORTED_IMPLIB   "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64/fmod_vc.lib"
-    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/windows/api/core/fmod.dll"
+  set_target_properties(FMOD::core PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES       "${_FMOD_INC}"
+
+    # Debug -> logging build (L), other configs -> non-logging
+    IMPORTED_IMPLIB_DEBUG               "${_FMOD_LIB}/fmodL_vc.lib"
+    IMPORTED_LOCATION_DEBUG             "${_FMOD_LIB}/fmodL.dll"
+
+    IMPORTED_IMPLIB_RELEASE             "${_FMOD_LIB}/fmod_vc.lib"
+    IMPORTED_LOCATION_RELEASE           "${_FMOD_LIB}/fmod.dll"
+
+    IMPORTED_IMPLIB_RELWITHDEBINFO      "${_FMOD_LIB}/fmod_vc.lib"
+    IMPORTED_LOCATION_RELWITHDEBINFO    "${_FMOD_LIB}/fmod.dll"
+
+    IMPORTED_IMPLIB_MINSIZEREL          "${_FMOD_LIB}/fmod_vc.lib"
+    IMPORTED_LOCATION_MINSIZEREL        "${_FMOD_LIB}/fmod.dll"
   )
-  set_target_properties(fmodL PROPERTIES
-    IMPORTED_IMPLIB   "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64/fmodL_vc.lib"
-    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/windows/api/core/fmodL.dll"
-  )
+
 elseif(ANDROID)
-  # Public headers
-  set_target_properties(fmod  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-      "${VENDOR_DIR}/FMOD/android/api/core/inc")
-  set_target_properties(fmodL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-      "${VENDOR_DIR}/FMOD/android/api/core/inc")
+  set(_FMOD_INC "${VENDOR_DIR}/FMOD/android/api/core/inc")
+  set(_FMOD_LIB "${VENDOR_DIR}/FMOD/android/api/core/lib/${ANDROID_ABI}")
 
-  # Pick the right .so for the active ABI
-  set_target_properties(fmod PROPERTIES
-    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/android/${ANDROID_ABI}/libfmod.so"
+  set_target_properties(FMOD::core PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES       "${_FMOD_INC}"
+
+    # Debug -> logging .so, others -> non-logging
+    IMPORTED_LOCATION_DEBUG             "${_FMOD_LIB}/libfmodL.so"
+    IMPORTED_LOCATION_RELEASE           "${_FMOD_LIB}/libfmod.so"
+    IMPORTED_LOCATION_RELWITHDEBINFO    "${_FMOD_LIB}/libfmod.so"
+    IMPORTED_LOCATION_MINSIZEREL        "${_FMOD_LIB}/libfmod.so"
   )
-  set_target_properties(fmodL PROPERTIES
-    IMPORTED_LOCATION "${VENDOR_DIR}/FMOD/android/${ANDROID_ABI}/libfmodL.so"
-  )
-  # NDK system libs FMOD depends on
-  target_link_libraries(fmod  INTERFACE log android)
-  target_link_libraries(fmodL INTERFACE log android)
+
+  # NDK system libs FMOD needs on Android
+  target_link_libraries(FMOD::core INTERFACE log android)
 endif()
