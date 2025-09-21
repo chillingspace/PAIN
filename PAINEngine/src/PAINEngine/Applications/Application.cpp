@@ -1,4 +1,7 @@
+#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
+#endif
+
 #include "Application.h"
 
 #include "CoreSystems/Windows/Window.h"

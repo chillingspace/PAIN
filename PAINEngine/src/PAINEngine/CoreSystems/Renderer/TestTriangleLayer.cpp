@@ -1,4 +1,6 @@
+#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
+#endif
 #include "TestTriangleLayer.h"
 #include "PAINEngine/Applications/Application.h"
 

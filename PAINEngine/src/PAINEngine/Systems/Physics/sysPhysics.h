@@ -13,7 +13,9 @@
 #ifndef SYS_PHYSICS_H
 #define SYS_PHYSICS_H
 
+#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
+#endif
 #include "Core.h"
 #include "CoreSystems/Collision/sCollision.h"
 #include "CoreSystems/Collision/sLayer.h"

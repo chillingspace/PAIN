@@ -12,7 +12,6 @@
 #ifndef COLLISION_SERVICE_H
 #define COLLISION_SERVICE_H
 
-#include "pch.h"
 #include "Applications/AppSystem.h"
 
 namespace PAIN {
