@@ -1,6 +1,4 @@
-#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
-#endif
 #include <GL/glew.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 

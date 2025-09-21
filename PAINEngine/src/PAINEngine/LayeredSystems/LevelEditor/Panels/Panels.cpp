@@ -1,6 +1,4 @@
-#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
-#endif
 #include "Panels.h"
 
 #ifdef _DEBUG

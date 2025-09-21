@@ -8,9 +8,7 @@
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
-#endif
 #include "sLayer.h"
 
 namespace NIKE {

@@ -12,9 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Set the directory for our custom CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Add defines
-add_definitions(-DPN_PLATFORM_WINDOWS)
-
 # Include our dependency helper module
 include(ImportDependencies)
 importDependencies() # Placeholder

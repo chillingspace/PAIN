@@ -12,9 +12,7 @@
 #ifndef LAYER_SERVICE_H
 #define LAYER_SERVICE_H
 
-#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
-#endif
 
 namespace NIKE {
 	namespace Layer {
