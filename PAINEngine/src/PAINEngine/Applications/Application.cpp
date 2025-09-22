@@ -18,7 +18,7 @@ namespace PAIN {
 	{
 		// Set the static instance
 		s_Instance = this;
-
+		
 		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
 		window_app->registerCallbacks(this);
 

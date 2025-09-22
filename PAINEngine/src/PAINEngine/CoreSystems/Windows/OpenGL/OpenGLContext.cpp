@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "OpenGLContext.h"
 
 namespace PAIN {
@@ -34,3 +36,5 @@ namespace PAIN {
 		glfwSwapBuffers(m_WindowHandle);
 	}
 }
+
+#endif

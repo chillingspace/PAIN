@@ -4,9 +4,10 @@
 #define WINDOW_HPP
 
 #include <string>
-#include "ECS/System/System.h"
 
 #include "Applications/AppSystem.h"
+
+#include "CoreSystems/Windows/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {
@@ -21,6 +22,9 @@ namespace PAIN {
 
 		//Virtual window class
 		class Window : public AppSystem {
+		protected:
+			// Rendering context (OpenGL for now)
+			std::unique_ptr<GraphicsContext> m_Context;
 		public:
 			virtual ~Window() = default;
 

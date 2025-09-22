@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "GLFWWindow.h"
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
@@ -272,3 +274,5 @@ namespace PAIN {
 		}
 	}
 }
+
+#endif

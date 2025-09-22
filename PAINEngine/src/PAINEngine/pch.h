@@ -34,7 +34,9 @@
  *********************************************************************/
 
 //Android GL vs Window GL
-#ifdef PLATFORM_ANDROID
+#ifdef PN_PLATFORM_ANDROID
+#include <android/native_window.h>
+#include <android/native_activity.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
@@ -49,9 +51,15 @@
 
 // Imgui headers
 #ifdef _DEBUG
+
+#ifdef PN_PLATFORM_ANDROID
+
+#else
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
+#endif
+
 #undef APIENTRY
 #endif
 

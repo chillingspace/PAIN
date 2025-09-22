@@ -13,6 +13,11 @@ if(ANDROID)
             ${CMAKE_CURRENT_SOURCE_DIR}/native_app_glue
     )
 
+    find_library(log-lib log)
+    find_library(android-lib android)
+    find_library(egl-lib EGL)
+    find_library(gles-lib GLESv3)
+
     # Link against your engine + game core and Android libs
     target_link_libraries(pain
             PRIVATE
