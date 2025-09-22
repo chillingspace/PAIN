@@ -12,7 +12,10 @@
 #include "Command.h"
 
 //Panels headers
-#include "Panels/Panels.h"
+//#include "Panels/Panels.h"
+
+//Platform header
+#include "Platform/EditorPlatform.h"
 
 namespace PAIN {
     namespace Editor {
@@ -31,24 +34,27 @@ namespace PAIN {
         private:
 
             //Panels
-            std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+            //std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
 
             //Actions manager
             std::shared_ptr<CommandManager> command_manager;
 
-            void updateShortCuts();
+            //Platform editor
+            std::shared_ptr<EditorPlatform> platform;
+
+            //void updateShortCuts();
 
             void BeginFrame();
 
             void EndFrame();
 
             //Mapping of glfw keys to imgui keys
-            int imguiKeyMapping(int code);
+            //int imguiKeyMapping(int code);
 
-            //Events that imgui listens for
-            void handleKeyEvents(ImGuiIO& io, Event::Event& event);
-            void handleMouseEvents(ImGuiIO& io, Event::Event& event);
-            void handleWindowEvents(ImGuiIO& io, Event::Event& event);
+            ////Events that imgui listens for
+            //void handleKeyEvents(ImGuiIO& io, Event::Event& event);
+            //void handleMouseEvents(ImGuiIO& io, Event::Event& event);
+            //void handleWindowEvents(ImGuiIO& io, Event::Event& event);
         };
     }
 } 

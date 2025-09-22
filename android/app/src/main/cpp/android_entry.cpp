@@ -5,6 +5,8 @@
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
+#include <PAINEngine.h>
+
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  "PAIN", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "PAIN", __VA_ARGS__)
 
@@ -27,26 +29,21 @@ static void handle_cmd(android_app* app, int32_t cmd) {
     }
 }
 
-void android_main(android_app* app) {
+extern "C" void android_main(android_app* app) {
     app->onAppCmd = handle_cmd;
 
-    // You can fetch AAssetManager here and hand it to your engine (ImGui/your IO/FM0D needs it)
-    // AAssetManager* mgr = app->activity->assetManager;
+    // Make engine, but do NOT call Run() yet.
+    auto* game = PAIN::CreateApplication();  // returns your Application*
 
-    // Main loop
-    int events;
-    android_poll_source* source = nullptr;
-    while (true) {
+    // Wait until APP_CMD_INIT_WINDOW to create EGL + attach window:
+    int events; android_poll_source* source = nullptr;
+    bool running = true;
+    while (running) {
         while (ALooper_pollOnce(0, nullptr, &events, (void**)&source) >= 0) {
             if (source) source->process(app, source);
-            if (app->destroyRequested) {
-                LOGI("Destroy requested");
-                return;
-            }
+            if (app->destroyRequested) { running = false; break; }
         }
 
-        // TODO: engine tick + render
-        // glClear(GL_COLOR_BUFFER_BIT);
-        // eglSwapBuffers(display, surface);
+        //eglSwapBuffers(display, surface);
     }
 }

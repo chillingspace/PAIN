@@ -49,20 +49,6 @@
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
 
-// Imgui headers
-#ifdef _DEBUG
-
-#ifdef PN_PLATFORM_ANDROID
-
-#else
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_glfw.h"
-#endif
-
-#undef APIENTRY
-#endif
-
 //Memory
 #define _CRTDBG_MAP_ALLOC
 

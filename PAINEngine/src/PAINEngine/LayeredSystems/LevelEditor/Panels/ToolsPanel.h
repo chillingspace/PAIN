@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef TOOLS_PANELS_HPP
 #define TOOLS_PANELS_HPP
 
@@ -23,5 +24,6 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif
 #endif

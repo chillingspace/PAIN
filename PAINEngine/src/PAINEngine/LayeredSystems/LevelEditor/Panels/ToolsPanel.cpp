@@ -2,6 +2,7 @@
 #include "ToolsPanel.h"
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 
 namespace PAIN {
 	namespace Editor {
@@ -86,4 +87,5 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif
