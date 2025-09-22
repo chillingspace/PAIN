@@ -1,13 +1,17 @@
 # ======================= Project Configuration =========================
 # Cmake version
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22)
 
 # Main Project
 project(PAIN)
 
 # Set Cmake Standards
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(ANDROID)
+	set(CMAKE_CXX_STANDARD 17)
+else()
+	set(CMAKE_CXX_STANDARD 20)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 # Set the directory for our custom CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -19,6 +23,7 @@ importDependencies() # Placeholder
 # Global compile flags and macros
 if (ANDROID)
   add_compile_definitions(PLATFORM_ANDROID)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 endif()
 
 # Use /MD in Release and /MDd in Debug for all MSVC targets

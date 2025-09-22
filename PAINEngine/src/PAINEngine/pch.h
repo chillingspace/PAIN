@@ -33,14 +33,20 @@
  * Engine Specific Library
  *********************************************************************/
 
-//graphics headers
+//Android GL vs Window GL
+#ifdef PLATFORM_ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#include <EGL/egl.h>
+#else
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-//
-//// Math Lib
+#endif
+
+// Math Lib
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
-//
+
 // Imgui headers
 #ifdef _DEBUG
 #include "imgui.h"
