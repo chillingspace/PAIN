@@ -1,4 +1,6 @@
-set(VENDOR_DIR "${CMAKE_SOURCE_DIR}/vendor")
+if (NOT DEFINED VENDOR_DIR)
+  set(VENDOR_DIR "${CMAKE_SOURCE_DIR}/vendor")
+endif()
 
 # ======================= Header Only Vendors  =========================
 add_library(glm INTERFACE)
@@ -13,17 +15,19 @@ target_include_directories(spdlog_header_only INTERFACE "${VENDOR_DIR}/spdlog/in
 add_library(gl_headers INTERFACE)
 target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
 
-# ======================= ImGui Vendor  =========================
+# ======================= GLEW Vendor  =========================
 
-set(_GLEW_DIR "${CMAKE_SOURCE_DIR}/vendor/glew")
+if (WIN32 AND NOT ANDROID)
+    set(_GLEW_DIR "${CMAKE_SOURCE_DIR}/vendor/glew")
 
-add_library(_glew STATIC
-  "${_GLEW_DIR}/src/glew.c"
-)
-target_include_directories(_glew PUBLIC "${_GLEW_DIR}/include")
-target_compile_definitions(_glew PUBLIC GLEW_STATIC)  # ensure headers use static path
+    add_library(_glew STATIC
+      "${_GLEW_DIR}/src/glew.c"
+    )
+    target_include_directories(_glew PUBLIC "${_GLEW_DIR}/include")
+    target_compile_definitions(_glew PUBLIC GLEW_STATIC)  # ensure headers use static path
 
-add_library(GLEW::GLEW ALIAS _glew)
+    add_library(GLEW::GLEW ALIAS _glew)
+endif()
 
 # ======================= ImGui Vendor  =========================
 
@@ -42,17 +46,19 @@ set(IMGUI_DIR "${VENDOR_DIR}/ImGui" CACHE PATH "Path to ImGui sources")
 
 # ======================= GLFW Vendor  =========================
 
-if (EXISTS "${VENDOR_DIR}/GLFW/CMakeLists.txt")
-  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
-  add_subdirectory("${VENDOR_DIR}/GLFW" "${CMAKE_BINARY_DIR}/vendor_glfw")
-else()
-  add_library(glfw STATIC IMPORTED GLOBAL)
-  set_target_properties(glfw PROPERTIES
-    IMPORTED_LOCATION             "${VENDOR_DIR}/GLFW/lib/glfw3.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/GLFW/include"
-  )
+if (WIN32 AND NOT ANDROID)
+    if (EXISTS "${VENDOR_DIR}/GLFW/CMakeLists.txt")
+      set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+      set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+      set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
+      add_subdirectory("${VENDOR_DIR}/GLFW" "${CMAKE_BINARY_DIR}/vendor_glfw")
+    else()
+      add_library(glfw STATIC IMPORTED GLOBAL)
+      set_target_properties(glfw PROPERTIES
+        IMPORTED_LOCATION             "${VENDOR_DIR}/GLFW/lib/glfw3.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/GLFW/include"
+      )
+    endif()
 endif()
 
 # ======================= Jolt Vendor  =========================
