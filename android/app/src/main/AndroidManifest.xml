@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
-        android:hasCode="false">
+        android:hasCode="true">
         <activity
             android:name="android.app.NativeActivity"
             android:launchMode="singleTask"

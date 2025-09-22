@@ -35,15 +35,6 @@ extern "C" void android_main(android_app* app) {
     // Make engine, but do NOT call Run() yet.
     auto* game = PAIN::CreateApplication();  // returns your Application*
 
-    // Wait until APP_CMD_INIT_WINDOW to create EGL + attach window:
-    int events; android_poll_source* source = nullptr;
-    bool running = true;
-    while (running) {
-        while (ALooper_pollOnce(0, nullptr, &events, (void**)&source) >= 0) {
-            if (source) source->process(app, source);
-            if (app->destroyRequested) { running = false; break; }
-        }
-
-        //eglSwapBuffers(display, surface);
-    }
+    game->Run();
+    delete game;
 }

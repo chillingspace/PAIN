@@ -29,7 +29,7 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
-		addCoreSystem(std::make_shared<TestTriangleLayer>());
+		//addCoreSystem(std::make_shared<TestTriangleLayer>());
 		//addCoreSystem(std::make_shared<Audio::Controller>());
 
 		//Editor only added when debug mode
