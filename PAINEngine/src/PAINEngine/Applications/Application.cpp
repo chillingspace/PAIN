@@ -9,6 +9,9 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "PAINEngine/Audio/AudioManager.h"
 
+// Assets
+#include "CoreSystems/Assets/sAssetCompiler.h"
+
 namespace PAIN {
 
 	// Define the static instance
@@ -29,6 +32,7 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(std::make_shared<ASSET_COMPILER::Service>());
 		//addCoreSystem(std::make_shared<TestTriangleLayer>());
 		//addCoreSystem(std::make_shared<Audio::Controller>());
 
