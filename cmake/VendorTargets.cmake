@@ -12,6 +12,9 @@ target_include_directories(nlohmann_json INTERFACE "${VENDOR_DIR}/nlohmann/inclu
 add_library(spdlog_header_only INTERFACE)
 target_include_directories(spdlog_header_only INTERFACE "${VENDOR_DIR}/spdlog/include")
 
+add_library(FileWatch_header_only INTERFACE)
+target_include_directories(FileWatch_header_only INTERFACE "${VENDOR_DIR}/FileWatch")
+
 add_library(gl_headers INTERFACE)
 target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
 
@@ -64,7 +67,7 @@ endif()
 # ======================= Jolt Vendor  =========================
 
 # (Optional but recommended) choose Jolt options BEFORE add_subdirectory.
-# They’ll become the default values in the Jolt subproject cache.
+# Theyï¿½ll become the default values in the Jolt subproject cache.
 # See docs for meaning of these flags. :contentReference[oaicite:1]{index=1}
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)               # build static lib
 set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)                # Jolt default: no RTTI
