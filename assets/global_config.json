@@ -1,0 +1,23 @@
+{
+  "defaults": {
+    "texture": {
+      "mipmaps": true,
+      "compression": {
+        "windows": "DXT5",
+        "android": "ASTC_4x4"
+      }
+    },
+    "shader": {
+      "optimize": true,
+      "targets": ["windows_dx12", "android_gles3"]
+    },
+    "mesh": {
+      "optimize": true,
+      "compress": true
+    },
+    "audio": {
+      "format": "ogg",
+      "quality": "medium"
+    }
+  }
+}
