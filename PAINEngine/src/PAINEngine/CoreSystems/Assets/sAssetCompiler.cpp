@@ -37,16 +37,29 @@ namespace PAIN {
             json json_file;
             input_file >> json_file;
 
+            // Get current working directory and build paths from there
+            std::filesystem::path current_path = std::filesystem::current_path();
+            std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
+
+            // Or try to find the project root by looking for a marker file
+            std::filesystem::path search_path = current_path;
+            while (search_path.has_parent_path()) {
+                if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
+                    project_root = search_path / "PAIN";
+                    break;
+                }
+                search_path = search_path.parent_path();
+            }
+
             // Slowly, find the file paths
-            std::filesystem::path project_root = std::filesystem::absolute("../../../PAIN"); // or store a config root
-            std::filesystem::path tool_path= project_root / "tools" / "glslangValidator.exe";
+            std::filesystem::path tool_path= project_root / "assets" / "tools" / "glslangValidator.exe";
             std::filesystem::path input_path = project_root / "assets" / "Shaders" / "base.vert";
-            std::filesystem::path output_dir = project_root / "assets" / "Shaders" / "Compiled Shaders";
+            std::filesystem::path output_dir = project_root / "assets" / "Shaders" / "Compiled_Shaders";
             std::filesystem::path output_file = output_dir / ("base.vert.spv");
 
-            std::ifstream check_file(tool_path);
+            std::ifstream check_file(input_path);
             if (!check_file.good()) {
-                PN_CORE_WARN("[ShaderCompiler] Cannot find exe: {}\n",  desc_path);
+                PN_CORE_WARN("[ShaderCompiler] Cannot find exe: {}\n", input_path.string());
                 return;
             }
 
@@ -55,16 +68,17 @@ namespace PAIN {
 
             auto norm = [](std::filesystem::path p) {
                 std::string s = p.string();
-                std::replace(s.begin(), s.end(), '/', '\\'); // system() safe
+                std::replace(s.begin(), s.end(), '/', '\\'); 
                 return s;
                 };
 
             // Build command
             #ifdef PN_PLATFORM_WINDOWS
             std::ostringstream cmd;
-            cmd << "\"" << norm(tool_path) << "\" "
-                << "-V \"" << norm(input_path) << "\" "
-                << "-o \"" << norm(output_file) << "\"";
+            // No quotes around executable
+            cmd << tool_path.string() << " "  
+                << "-G \"" << input_path.string() << "\" "
+                << "-o \"" << output_file.string() << "\"";
             #else
             std::ostringstream cmd;
             cmd << "\"" << tool_path.string() << "\" "

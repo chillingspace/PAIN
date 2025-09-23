@@ -12,12 +12,13 @@
 #define PATH_SERVICE_HPP
 
 #include "pch.h"
+#include "Applications/AppSystem.h"
 
 namespace PAIN {
 	 namespace Path {
 		
 	 	//Path global service
-	 	class Service {
+	 	class Service : public AppSystem {
 	 	private:
 
 	 		//Storage of virtual paths

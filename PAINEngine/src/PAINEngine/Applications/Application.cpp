@@ -11,6 +11,7 @@
 
 // Assets
 #include "CoreSystems/Assets/sAssetCompiler.h"
+#include "CoreSystems/Assets/sPath.h"
 
 namespace PAIN {
 
@@ -33,6 +34,7 @@ namespace PAIN {
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<ASSET_COMPILER::Service>());
+		addCoreSystem(std::make_shared<Path::Service>());
 		//addCoreSystem(std::make_shared<TestTriangleLayer>());
 		//addCoreSystem(std::make_shared<Audio::Controller>());
 

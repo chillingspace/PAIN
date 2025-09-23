@@ -9,14 +9,13 @@
 layout (location = 0) in vec2 a_position;
 layout (location = 1) in vec3 a_color;
 
-layout (location=0) out vec4 f_color;
+layout (location = 0) out vec4 f_color;
 
-uniform mat3 model_to_ndc;
+layout(location = 0) uniform mat4 model_to_ndc;
 
 void main() {
-	//	gl_Position = vec4(a_position, 0.0, 1.0); no uniform
-	gl_Position = vec4( vec2(model_to_ndc * vec3(a_position, 1.f)), 0.0, 1.0);
-	f_color = vec4(a_color, 1);
+    // Correct way: let the matrix do the full transformation
+    gl_Position = model_to_ndc * vec4(a_position, 0.0, 1.0);
+    f_color = vec4(a_color, 1.0);
 }
-
 
