@@ -29,12 +29,13 @@ static void handle_cmd(android_app* app, int32_t cmd) {
     }
 }
 
+extern PAIN::Application* PAIN::CreateApplication();
+
 extern "C" void android_main(android_app* app) {
-    app->onAppCmd = handle_cmd;
 
     // Make engine, but do NOT call Run() yet.
     auto* game = PAIN::CreateApplication();  // returns your Application*
-
+    game->Init(app);
     game->Run();
     delete game;
 }

@@ -44,6 +44,7 @@ namespace PAIN {
 
 		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
 		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+		void Init(void* app = nullptr);
 		void Run();
 		void terminate();
 		void dispatchEvent(Event::Event& e);
