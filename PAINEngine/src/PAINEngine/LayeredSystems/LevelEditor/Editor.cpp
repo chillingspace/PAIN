@@ -10,8 +10,10 @@
 #include "CoreSystems/Events/AssetEvents.h"
 #include "PAINEngine/Audio/AudioManager.h"
 
+// Panels
 #include "Panels/ToolsPanel.h"
 #include "Panels/AudioPanel.h"
+#include "Panels/ScenesPanel.h"
 
 
 namespace PAIN {
@@ -118,10 +120,9 @@ namespace PAIN {
             panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
             PN_CORE_INFO(panels[CLASS_STR(Panel::Tools)]->getPanelName());
 
-            // Register panels
-            panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
             panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
 
+            panels[CLASS_STR(Panel::ScenesPanel)] = std::make_shared<Panel::ScenesPanel>(command_manager);
         }
 
         void Editor::onDetach() {
