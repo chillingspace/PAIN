@@ -7,8 +7,8 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
-#include "PAINEngine/Audio/AudioManager.h"
-
+#include "Audio/AudioManager.h"
+#include "CoreSystems/Renderer/Android/AndroidRenderer.h"
 namespace PAIN {
 
 	// Define the static instance
@@ -22,6 +22,13 @@ namespace PAIN {
 		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
 		window_app->registerCallbacks(this);
 
+		#ifdef PN_PLATFORM_ANDROID
+			auto renderer = std::make_shared<AndroidRenderer>();
+		#else
+			auto renderer = std::make_shared<TestTriangleLayer>();
+		#endif
+
+
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
 		//addCoreSystem(m_AudioManager);
@@ -29,7 +36,7 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
-		//addCoreSystem(std::make_shared<TestTriangleLayer>());
+		addLayerSystem(renderer);
 		//addCoreSystem(std::make_shared<Audio::Controller>());
 
 		//Editor only added when debug mode
