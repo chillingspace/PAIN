@@ -2,6 +2,7 @@
 #include "ComponentsPanel.h"
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #include <algorithm>
 
 namespace PAIN {
@@ -192,4 +193,5 @@ void ComponentsPanel::onUpdate() {
 } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

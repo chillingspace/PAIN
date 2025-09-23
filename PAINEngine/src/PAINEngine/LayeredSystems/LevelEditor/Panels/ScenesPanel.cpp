@@ -2,7 +2,7 @@
 #include "ScenesPanel.h"
 
 #ifdef _DEBUG
-
+#ifdef PN_PLATFORM_WINDOWS
 #include <algorithm>
 
 namespace PAIN {
@@ -65,7 +65,7 @@ namespace PAIN {
 
                     const bool valid = !tmpNameBuf_.empty() && (tmpNameBuf_.find(".scn") == std::string::npos);
                     if (ImGui::Button("Ok") && valid) {
-                        // reset “scene” in our temporary model
+                        // reset "scene" in our temporary model
                         currSceneId_ = makeSceneId(tmpNameBuf_);
 
                         // optional external hook
@@ -246,4 +246,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

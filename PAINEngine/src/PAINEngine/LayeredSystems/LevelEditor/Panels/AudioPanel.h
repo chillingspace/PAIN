@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef DEBUG_AUDIO_PANEL_HPP
 #define DEBUG_AUDIO_PANEL_HPP
 
@@ -23,5 +24,6 @@ namespace PAIN {
 	} // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif
 #endif
