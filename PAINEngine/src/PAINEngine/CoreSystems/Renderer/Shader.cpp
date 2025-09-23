@@ -43,8 +43,13 @@ namespace PAIN {
 		if (!success) {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("Shader compile error (%s): %s",
+                 type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+            #else
 			PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
-		}
+            #endif
+        }
 
 		return shader;
 
@@ -59,7 +64,11 @@ namespace PAIN {
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetShaderInfoLog(shader, len, nullptr, log.data());
+        #ifdef PN_PLATFORM_ANDROID
+        LOGE("[Shader] Compile failed: ");
+        #else
 		PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
+        #endif
 		return false;
 	}
 
@@ -72,7 +81,11 @@ namespace PAIN {
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetProgramInfoLog(program, len, nullptr, log.data());
-		PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("[Shader] Link failed: ");
+            #else
+            PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
+            #endif
 		return false;
 	}
 
@@ -84,8 +97,12 @@ namespace PAIN {
 		glLinkProgram(program);
 
 		if (!CheckProgram(program)) {
-			PN_CORE_ERROR("FAILED");
-			assert("Program link failed");
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("Program link FAILED");
+            #else
+            PN_CORE_ERROR("Program link FAILED");
+            #endif
+            assert("Program link failed");
 		}
 
 		// (Optional but recommended)

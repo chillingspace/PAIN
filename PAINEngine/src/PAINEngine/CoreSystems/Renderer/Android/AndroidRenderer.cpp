@@ -5,9 +5,9 @@
 namespace PAIN {
 
     AndroidRenderer::AndroidRenderer() {
-        clearColor[0] = 0.2f;
-        clearColor[1] = 0.3f;
-        clearColor[2] = 0.3f;
+        clearColor[0] = 0.5f;
+        clearColor[1] = 0.5f;
+        clearColor[2] = 0.5f;
     }
 
     AndroidRenderer::~AndroidRenderer() {
@@ -16,12 +16,12 @@ namespace PAIN {
 
     bool AndroidRenderer::Init() {
         if (!createShaders()) {
-            PN_CORE_ERROR("Failed to create shaders");
+            LOGE("Failed to create shaders");
             return false;
         }
 
         if (!createBuffers()) {
-            PN_CORE_ERROR("Failed to create buffers");
+            LOGE("Failed to create buffers");
             return false;
         }
 
@@ -30,8 +30,7 @@ namespace PAIN {
 
     bool AndroidRenderer::createShaders() {
         // Simple vertex and fragment shader code
-        const std::string vertexSrc = R"(
-        #version 300 es
+        const std::string vertexSrc = R"(#version 300 es
         layout(location = 0) in vec3 aPos;
         layout(location = 1) in vec3 aColor;
         out vec3 ourColor;
@@ -41,8 +40,7 @@ namespace PAIN {
         }
     )";
 
-        const std::string fragmentSrc = R"(
-        #version 300 es
+        const std::string fragmentSrc = R"(#version 300 es
         precision mediump float;
         in vec3 ourColor;
         out vec4 FragColor;
@@ -93,14 +91,31 @@ namespace PAIN {
 
     void AndroidRenderer::Render() {
         // Clear color
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear depth and color
         glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Use Shader Program
+        glUseProgram(program);
+
+        const char* version = (const char*)glGetString(GL_VERSION);
+        bool useVAO = (version && strstr(version, "OpenGL ES 3"));
+
+        if (useVAO) {
+            glBindVertexArray(vao);
+        } else {
+            // For OpenGL ES 2.0, manually bind attributes
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // position
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // color
+            glEnableVertexAttribArray(1);
+        }
 
         // Draw triangle
-        glUseProgram(program);
-        glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
+
+
     }
 
     void AndroidRenderer::Cleanup() {

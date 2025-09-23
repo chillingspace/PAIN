@@ -58,7 +58,8 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 #ifdef PN_PLATFORM_ANDROID
-		//auto renderer = std::make_shared<RendererLayer>();
+		auto renderer = std::make_shared<RendererLayer>();
+        addCoreSystem(renderer);
 #else
 		auto renderer = std::make_shared<TestTriangleLayer>();
 		addCoreSystem(renderer);
