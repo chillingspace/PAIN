@@ -11,43 +11,18 @@ namespace PAIN {
             return new Android_Window(app, package);
         }
 
-        void Android_Window::handle_cmd(android_app* app, int32_t cmd) {
-
-            Android_Window* state = (Android_Window*)app->userData;
-
-            switch (cmd) {
-            case APP_CMD_INIT_WINDOW:
-                if (app->window != nullptr) {
-                    // Create window with the native window
-                    PAIN::Window::Package windowPackage;
-                    windowPackage.width = ANativeWindow_getWidth(app->window);
-                    windowPackage.height = ANativeWindow_getHeight(app->window);
-                    windowPackage.title = "PAIN Engine Android";
-
-                    // Create window with native handle
-                    state->init(windowPackage);
-                }
-                break;
-
-            case APP_CMD_TERM_WINDOW:
-                break;
-
-            case APP_CMD_GAINED_FOCUS:
-                break;
-
-            case APP_CMD_LOST_FOCUS:
-                break;
-
-            case APP_CMD_PAUSE:
-                break;
-
-            case APP_CMD_RESUME:
-                break;
-            }
-        }
-
         Android_Window::Android_Window(void* app, Package const& package) {
             m_App = static_cast<android_app*>(app);
+            m_Window = m_App->window;
+
+            // Create window with the native window
+            PAIN::Window::Package windowPackage;
+            windowPackage.width = ANativeWindow_getWidth(m_Window);
+            windowPackage.height = ANativeWindow_getHeight(m_Window);
+            windowPackage.title = "PAIN Engine Android";
+
+            // Create window with native handle
+            init(windowPackage);
         }
 
         Android_Window::~Android_Window() {
@@ -56,7 +31,7 @@ namespace PAIN {
 
         void Android_Window::init(Package const& package) {
             if (!m_Window) {
-                PN_CORE_ERROR("Cannot initialize Android_Window without native window!");
+                LOGE("Cannot initialize Android_Window without native window!");
                 return;
             }
 
@@ -78,21 +53,21 @@ namespace PAIN {
 
             m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
             if (m_Display == EGL_NO_DISPLAY) {
-                PN_CORE_ERROR("eglGetDisplay failed");
+                LOGE("eglGetDisplay failed");
                 return;
             }
 
             EGLint major, minor;
             if (!eglInitialize(m_Display, &major, &minor)) {
-                PN_CORE_ERROR("eglInitialize failed");
+                LOGE("eglInitialize failed");
                 return;
             }
-            PN_CORE_INFO("EGL initialized: %d.%d", major, minor);
+            LOGI("EGL initialized: %d.%d", major, minor);
 
             EGLConfig config;
             EGLint numConfigs;
             if (!eglChooseConfig(m_Display, attribs, &config, 1, &numConfigs)) {
-                PN_CORE_ERROR("eglChooseConfig failed");
+                LOGE("eglChooseConfig failed");
                 return;
             }
 
@@ -103,7 +78,7 @@ namespace PAIN {
 
             m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
             if (m_Surface == EGL_NO_SURFACE) {
-                PN_CORE_ERROR("eglCreateWindowSurface failed");
+                LOGE("eglCreateWindowSurface failed");
                 return;
             }
 
@@ -114,12 +89,12 @@ namespace PAIN {
 
             m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, ctxAttribs);
             if (m_Context == EGL_NO_CONTEXT) {
-                PN_CORE_ERROR("eglCreateContext failed");
+                LOGE("eglCreateContext failed");
                 return;
             }
 
             if (!eglMakeCurrent(m_Display, m_Surface, m_Surface, m_Context)) {
-                PN_CORE_ERROR("eglMakeCurrent failed");
+                LOGE("eglMakeCurrent failed");
                 return;
             }
 
@@ -130,7 +105,7 @@ namespace PAIN {
             frame_buffer.x = width;
             frame_buffer.y = height;
 
-            PN_CORE_INFO("Android Window initialized: %dx%d", width, height);
+            LOGI("Android Window initialized: %dx%d", width, height);
 
             // Set viewport
             glViewport(0, 0, width, height);
@@ -141,6 +116,7 @@ namespace PAIN {
 
             //Set animating to true
             b_animating = true;
+            b_initialized = true;
         }
 
         void Android_Window::shutdown() {
@@ -162,31 +138,16 @@ namespace PAIN {
             }
 
             m_Window = nullptr;
-            PN_CORE_INFO("Android Window shut down");
+            LOGI("Android Window shut down");
         }
 
         void Android_Window::registerCallbacks(void* app) {
         }
 
         void Android_Window::onAttach() {
-            m_App->userData = this;
-            m_App->onAppCmd = handle_cmd;
-            m_Window = m_App->window;
         }
 
         void Android_Window::onUpdate() {
-
-            //Events
-            int events;
-            android_poll_source* source;
-
-            // Process all pending events
-            while (ALooper_pollOnce(b_animating ? 0 : -1, nullptr, &events,
-                (void**)&source) >= 0) {
-                if (source) {
-                    source->process(m_App, source);
-                }
-            }
 
             //Swap buffers
             if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {

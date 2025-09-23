@@ -25,9 +25,7 @@ namespace PAIN {
 
 			//Anrdoid state
 			bool b_animating = false;
-
-			//Android callbacks
-			static void handle_cmd(android_app* app, int32_t cmd);
+			bool b_initialized = false;
 
 			//Private internal functions
 			virtual void init(Package const& package);

@@ -69,10 +69,24 @@ namespace PAIN {
 #ifdef _DEBUG
 		addLayerSystem(std::make_shared<Editor::Editor>(window_app->getNativeWindow()));
 #endif
+
+		//Mark engine as ready
+		b_app_running = true;
 	}
 
 	void Application::Run() {
 
+#ifdef  PN_PLATFORM_ANDROID
+		//Update all layered systems
+		for (auto& layer : layer_stack) {
+			layer->onUpdate();
+		}
+
+		//Update all core systems
+		for (auto& core : core_stack) {
+			core->onUpdate();
+		}
+#else
 		//Application loop
 		while (b_app_running) {
 
@@ -89,6 +103,7 @@ namespace PAIN {
 				core->onUpdate();
 			}
 		};
+#endif
 	}
 
 	void Application::terminate() {
