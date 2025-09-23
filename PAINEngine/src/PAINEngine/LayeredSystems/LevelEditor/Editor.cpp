@@ -11,6 +11,8 @@
 #include "PAINEngine/Audio/AudioManager.h"
 
 #include "Panels/ToolsPanel.h"
+#include "Panels/AudioPanel.h"
+
 
 namespace PAIN {
 
@@ -115,6 +117,11 @@ namespace PAIN {
             //Register panels
             panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
             PN_CORE_INFO(panels[CLASS_STR(Panel::Tools)]->getPanelName());
+
+            // Register panels
+            panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
+            panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
+
         }
 
         void Editor::onDetach() {
@@ -139,59 +146,6 @@ namespace PAIN {
                 panel.second->drawWindow();
             }
 
-            static bool show_demo = true;
-            if (show_demo) ImGui::ShowDemoWindow(&show_demo);
-
-            ImGui::Begin("PAIN Engine Debug");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Checkbox("Show Demo Window", &show_demo);
-            ImGui::End();
-
-            // Functional Audio Controls
-            ImGui::Begin("Audio Controls");
-            AudioManager& audio = Application::Get().GetAudioManager();
-
-            static char soundPath[256] = "assets/audio/SFX/MovingSFX/Footstep_Metal_01.wav";
-            static float volume = 0.0f;
-            static bool loop = false;
-            static bool is3D = true;
-            static float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
-
-            ImGui::InputText("Sound Path", soundPath, IM_ARRAYSIZE(soundPath));
-            ImGui::SliderFloat("Volume (dB)", &volume, -80.0f, 10.0f, "%.2f");
-            ImGui::Checkbox("Loop", &loop);
-            ImGui::Checkbox("3D", &is3D);
-
-            if (is3D) {
-                ImGui::SliderFloat("X", &posX, -10.0f, 10.0f);
-                ImGui::SliderFloat("Y", &posY, -10.0f, 10.0f);
-                ImGui::SliderFloat("Z", &posZ, -10.0f, 10.0f);
-            }
-
-            if (ImGui::Button("Load Sound")) {
-                audio.LoadSound(soundPath, is3D, loop);
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Play Sound")) {
-                audio.PlaySound(soundPath, { posX, posY, posZ }, volume);
-            }
-
-            ImGui::Separator();
-            ImGui::Text("Playlist Controls");
-            if (ImGui::Button("Play Random Footstep"))
-            {
-                audio.PlayRandomFromPlaylist("FootstepsGrass", { posX, posY, posZ }, volume);
-            }
-
-            ImGui::Separator();
-            if (ImGui::Button("Stop All Sounds")) {
-                audio.StopAllChannels();
-            }
-
-            ImGui::End();
 
             EndFrame();
         }
