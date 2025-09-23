@@ -14,6 +14,7 @@
 #include "Panels/ToolsPanel.h"
 #include "Panels/AudioPanel.h"
 #include "Panels/ScenesPanel.h"
+#include "Panels/ComponentsPanel.h"
 
 
 namespace PAIN {
@@ -102,11 +103,13 @@ namespace PAIN {
 
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
-            ImGuiIO& io = ImGui::GetIO(); (void)io;
 
+            ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // <—
             ImGui::StyleColorsDark();
+
 
             ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
             ImGui_ImplOpenGL3_Init("#version 450");
@@ -123,6 +126,9 @@ namespace PAIN {
             panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
 
             panels[CLASS_STR(Panel::ScenesPanel)] = std::make_shared<Panel::ScenesPanel>(command_manager);
+
+            panels[CLASS_STR(Panel::ComponentsPanel)] =
+                std::make_shared<Panel::ComponentsPanel>(command_manager);
         }
 
         void Editor::onDetach() {
