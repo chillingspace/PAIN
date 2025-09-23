@@ -24,7 +24,7 @@ namespace PAIN {
 		std::vector<std::shared_ptr<AppSystem>> core_stack;
 
 		//Boolean running app running
-		bool b_app_running = true;
+		bool b_app_running = false;
 
 		//Event queue
 		std::queue<std::shared_ptr<Event::Event>> event_queue;
@@ -44,11 +44,15 @@ namespace PAIN {
 
 		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
 		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+		void Init(void* app = nullptr);
 		void Run();
 		void terminate();
 		void dispatchEvent(Event::Event& e);
 		void pushEventQueue(std::shared_ptr<Event::Event> e);
 		void drainEventQueue();
+
+		//Get application state
+		bool getReady() const { return b_app_running; }
 
 		// Static getter to access the application and audio manager
 		inline static Application& Get() { return *s_Instance; }

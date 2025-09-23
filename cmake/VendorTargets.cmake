@@ -88,6 +88,24 @@ if (WIN32 AND NOT ANDROID)
 endif()
 
 if (ANDROID)
+    # Robustly locate the NDK glue dir (CMake sets one of these)
+    set(_NDK "${CMAKE_ANDROID_NDK}")
+    if(NOT _NDK AND DEFINED ANDROID_NDK)
+        set(_NDK "${ANDROID_NDK}")
+    endif()
+    if(NOT _NDK)
+        message(FATAL_ERROR "Cannot find NDK path (CMAKE_ANDROID_NDK/ANDROID_NDK not set)")
+    endif()
+
+    set(NATIVE_APP_GLUE_DIR "${_NDK}/sources/android/native_app_glue")
+
+    add_library(native_app_glue STATIC
+            "${NATIVE_APP_GLUE_DIR}/android_native_app_glue.c"
+    )
+    target_include_directories(native_app_glue PUBLIC
+            "${NATIVE_APP_GLUE_DIR}"
+    )
+
     find_library(ANDROID_LIB android)
     find_library(LOG_LIB     log)
     find_library(EGL_LIB     EGL)

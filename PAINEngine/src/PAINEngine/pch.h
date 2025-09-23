@@ -37,9 +37,23 @@
 #ifdef PN_PLATFORM_ANDROID
 #include <android/native_window.h>
 #include <android/native_activity.h>
+#include <android_native_app_glue.h>
+#include <android/log.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
+
+#ifndef LOG_TAG
+#define LOG_TAG "PAIN"   // change to your app tag
+#endif
+
+// printf-style
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,   LOG_TAG, __VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,    LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,    LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,   LOG_TAG, __VA_ARGS__)
+
 #else
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"

@@ -88,15 +88,15 @@ namespace PAIN {
         //    return ImGuiKey_None;
         //}
 
-        Editor::Editor() {
+        Editor::Editor(void* window) {
+
+            //Construct platform
+            platform = std::shared_ptr<EditorPlatform>(EditorPlatform::createEditorPlatform(window));
         }
 
         Editor::~Editor() {}
 
         void Editor::onAttach() {
-
-            //Construct platform
-            platform = std::shared_ptr<EditorPlatform>(EditorPlatform::createEditorPlatform());
 
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();

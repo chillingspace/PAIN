@@ -23,7 +23,7 @@ namespace PAIN {
         //Editor
         class Editor : public AppSystem {
         public:
-            Editor();
+            Editor(void* window);
             ~Editor();                       // no override
 
             void onAttach() override;
