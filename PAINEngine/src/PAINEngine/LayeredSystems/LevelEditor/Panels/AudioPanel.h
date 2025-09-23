@@ -15,7 +15,7 @@ namespace PAIN {
 			public:
 				DebugAudioPanel(std::shared_ptr<CommandManager> command_manager);
 
-				void nextWindowSettings() override; // no-op (standard window)
+				void nextWindowSettings() override; 
 				void onUpdate() override;
 			};
 

@@ -11,36 +11,32 @@ namespace PAIN {
 	namespace Editor {
 		namespace Panel {
 
-			DebugAudioPanel::DebugAudioPanel(std::shared_ptr<CommandManager> command_manager)
-				: IPanel(command_manager)
-			{
-				// Visible title for the window
-				name  = "Debug & Audio";
-				flags = ImGuiWindowFlags_None;
+
+			DebugAudioPanel::DebugAudioPanel(std::shared_ptr<CommandManager> command_manager) : IPanel(command_manager) {
+
+				
+				name = "##AudioPanel";
+
+				//Set panel flag
+				flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+					ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+					ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
+					ImGuiWindowFlags_MenuBar;
 			}
+
 
 			void DebugAudioPanel::nextWindowSettings() {
 				// Default behavior (no fullscreen/docking hacks needed)
 			}
 
 			void DebugAudioPanel::onUpdate() {
-				// --- ImGui Demo toggle + small perf HUD ---
-				static bool show_demo = true;
-				if (show_demo) ImGui::ShowDemoWindow(&show_demo);
 
-				if (ImGui::Begin("PAIN Engine Debug")) {
-					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-						1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-					ImGui::Checkbox("Show Demo Window", &show_demo);
-				}
-				ImGui::End();
-
-				// --- Functional Audio Controls ---
 				if (ImGui::Begin("Audio Controls")) {
 					AudioManager& audio = PAIN::Application::Get().GetAudioManager();
 
 					static char  soundPath[256] = "assets/audio/SFX/MovingSFX/Footstep_Metal_01.wav";
-					static float volume         = 0.0f;  // dB
+					static float volume         = 0.0f;  
 					static bool  loop           = false;
 					static bool  is3D           = true;
 					static float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
