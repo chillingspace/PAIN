@@ -1,10 +1,11 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
+
 #ifndef GLFW_WINDOW_HPP
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
-#include "CoreSystems/Windows/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {
@@ -17,9 +18,6 @@ namespace PAIN {
 
 			//Window buffer size
 			glm::uvec2 frame_buffer;
-
-			// Rendering context (OpenGL for now)
-			std::unique_ptr<GraphicsContext> m_Context; 
 
 			//Private internal functions
 			virtual void init(Package const& package);
@@ -43,9 +41,7 @@ namespace PAIN {
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
-			virtual ~GLFW_Window();
-
-	
+			virtual ~GLFW_Window();	
 
 			//Register callbacks
 			void registerCallbacks(void* app) override;
@@ -59,4 +55,5 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif

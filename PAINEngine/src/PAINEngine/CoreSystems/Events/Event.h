@@ -32,7 +32,7 @@ namespace PAIN {
 		};
 
 #define EVENT_CLASS_TYPE(type)\
-    static Type getStaticType() { return Type::##type; }\
+    static Type getStaticType() { return Type::type; }\
     Type getType() const override { return getStaticType(); }\
     const char* getName() const override { return #type; }
 

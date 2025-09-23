@@ -6,16 +6,16 @@
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
-#include <ImGui/headers/imgui.h>
-#include <ImGui/headers/imgui_impl_glfw.h>
-#include <ImGui/headers/imgui_impl_opengl3.h>
 #include "CoreSystems/Windows/Window.h"
 
 //Command header
 #include "Command.h"
 
 //Panels headers
-#include "Panels/Panels.h"
+//#include "Panels/Panels.h"
+
+//Platform header
+#include "Platform/EditorPlatform.h"
 
 namespace PAIN {
     namespace Editor {
@@ -23,7 +23,7 @@ namespace PAIN {
         //Editor
         class Editor : public AppSystem {
         public:
-            Editor();
+            Editor(void* window);
             ~Editor();                       // no override
 
             void onAttach() override;
@@ -34,12 +34,15 @@ namespace PAIN {
         private:
 
             //Panels
-            std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+            //std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
 
             //Actions manager
             std::shared_ptr<CommandManager> command_manager;
 
-            void updateShortCuts();
+            //Platform editor
+            std::shared_ptr<EditorPlatform> platform;
+
+            //void updateShortCuts();
 
             void BeginFrame();
 
@@ -48,12 +51,12 @@ namespace PAIN {
             void BuildDockspace();
 
             //Mapping of glfw keys to imgui keys
-            int imguiKeyMapping(int code);
+            //int imguiKeyMapping(int code);
 
-            //Events that imgui listens for
-            void handleKeyEvents(ImGuiIO& io, Event::Event& event);
-            void handleMouseEvents(ImGuiIO& io, Event::Event& event);
-            void handleWindowEvents(ImGuiIO& io, Event::Event& event);
+            ////Events that imgui listens for
+            //void handleKeyEvents(ImGuiIO& io, Event::Event& event);
+            //void handleMouseEvents(ImGuiIO& io, Event::Event& event);
+            //void handleWindowEvents(ImGuiIO& io, Event::Event& event);
         };
     }
 } 

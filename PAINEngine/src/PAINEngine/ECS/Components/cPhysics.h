@@ -8,7 +8,18 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-#include "pch.h"
+#ifndef C_PYSHICS_H
+#define C_PYSHICS_H
+
+ #include "Jolt/Jolt.h"
+ #include <Jolt/Core/Factory.h>          
+ #include <Jolt/RegisterTypes.h>         
+ #include <Jolt/Physics/PhysicsSystem.h> 
+ #include <Jolt/Physics/Body/Body.h>     
+ #include <Jolt/Core/TempAllocator.h>
+ #include <Jolt/Core/JobSystemThreadPool.h> 
+ #include <Jolt/Physics/Collision/ObjectLayer.h>
+ #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
 namespace PAIN {
 
@@ -73,3 +84,5 @@ namespace PAIN {
 		// Entity::Type connectedEntity;
 	};
 }
+
+#endif

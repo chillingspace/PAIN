@@ -1,45 +1,65 @@
-cmake_minimum_required(VERSION 3.16)
+# ======================= Project Configuration =========================
+# Cmake version
+cmake_minimum_required(VERSION 3.22)
+
+# Main Project
 project(PAIN)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Set Cmake Standards
+if(ANDROID)
+	set(CMAKE_CXX_STANDARD 17)
+else()
+	set(CMAKE_CXX_STANDARD 20)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 # Set the directory for our custom CMake modules
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Include our dependency helper module
 include(ImportDependencies)
 importDependencies() # Placeholder
 
-# --- Platform Detection and Global Definitions ---
-if(NOT ANDROID)
-    # PC-specific definitions (e.g., for static GLEW if you use it)
-    add_definitions(-DPLATFORM_WINDOWS) # Assuming Windows for PC
-else()
-    # Android-specific definitions
-    add_definitions(-DPLATFORM_ANDROID)
+# Global compile flags and macros
+if (ANDROID)
+  add_compile_definitions(PLATFORM_ANDROID)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 endif()
 
-# --- FMOD Configuration ---
-if(ANDROID)
-    # For Android, paths are handled by the android/app/src/main/cpp/CMakeLists.txt but define the library names for consistency
-    set(FMOD_LIBS fmod fmodL)
-else()
-    # For PC, set include and library paths
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/inc)
-    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/FMOD/windows/api/core/lib/x64)
-    set(FMOD_LIBS fmod_vc fmodL_vc)
+# Use /MD in Release and /MDd in Debug for all MSVC targets
+if (MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
-# --- Output Directories ---
-# Keep your bin/bin-int structure
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin-int/${CMAKE_BUILD_TYPE})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+# ======================= Vendors  =========================
+
+include(VendorTargets)   # defines imgui, glfw, glm, nlohmann_json, spdlog_header_only, Jolt::Jolt, etc.
+
+# ======================= Output Directories  =========================
+
+if (NOT ANDROID)
+	# Keep your bin/bin-int structure
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin-int/${CMAKE_BUILD_TYPE})
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+
+	foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+	  string(TOUPPER "${cfg}" CFG)
+	  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")
+	  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")
+	  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin-int/${cfg}")
+	endforeach()
+endif()
 
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
 add_subdirectory(Game)
 
+if (ANDROID)
+  add_subdirectory(android/app/src/main/cpp)
+endif()
+
 # Set the startup project for the Visual Studio solution
-set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
+if (MSVC)
+  set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
+endif()

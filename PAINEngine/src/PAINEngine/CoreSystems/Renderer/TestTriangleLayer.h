@@ -2,7 +2,7 @@
 
 #include "PAINEngine/Applications/AppSystem.h"
 #include "PAINEngine/CoreSystems/Renderer/Shader.h"
-#include "glm/glm.hpp"
+#include "glm.hpp"
 
 namespace PAIN {
 	class TestTriangleLayer : public AppSystem {

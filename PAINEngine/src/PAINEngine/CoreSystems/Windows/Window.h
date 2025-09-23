@@ -4,9 +4,10 @@
 #define WINDOW_HPP
 
 #include <string>
-#include "ECS/System/System.h"
 
 #include "Applications/AppSystem.h"
+
+#include "CoreSystems/Windows/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {
@@ -21,11 +22,17 @@ namespace PAIN {
 
 		//Virtual window class
 		class Window : public AppSystem {
+		protected:
+			// Rendering context (OpenGL for now)
+			std::unique_ptr<GraphicsContext> m_Context;
 		public:
 			virtual ~Window() = default;
 
 			//Register callbacks
 			virtual void registerCallbacks(void* app) = 0;
+
+			//Virtual on attach
+			virtual void onAttach() override {}
 
 			//Update window
 			virtual void onUpdate() = 0;
@@ -36,7 +43,7 @@ namespace PAIN {
 			virtual void* getNativeWindow() const = 0;
 
 			//Create window
-			static Window* create(Package const& package = Package());
+			static Window* create(void* app = nullptr, Package const& package = Package());
 		};
 	}
 }

@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "GLFWWindow.h"
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
@@ -14,7 +16,7 @@ namespace PAIN {
 	namespace Window {
 
 		//Create window
-		Window* Window::create(Package const& package) {
+		Window* Window::create([[maybe_unused]] void* app, Package const& package) {
 			return new GLFW_Window(package);
 		}
 
@@ -240,6 +242,7 @@ namespace PAIN {
 
 			//Poll window events
 			glfwPollEvents();
+
 			m_Context->SwapBuffers();
 		}
 
@@ -272,3 +275,5 @@ namespace PAIN {
 		}
 	}
 }
+
+#endif

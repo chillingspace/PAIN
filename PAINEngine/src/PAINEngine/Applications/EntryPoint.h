@@ -17,6 +17,7 @@
 		PN_INFO("Hello! Var={}", a);
 
 		auto game = PAIN::CreateApplication();
+		game->Init();
 		game->Run();
 		delete game;
 	}
