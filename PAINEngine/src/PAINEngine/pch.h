@@ -63,7 +63,7 @@
  * Windows Application
  *********************************************************************/
 #ifdef PN_PLATFORM_WINDOWS
-#include "../../FileWatch/FileWatch.hpp"
+#include "FileWatch.hpp"
 #endif
 
  /*****************************************************************//**
