@@ -1,3 +1,5 @@
+#ifdef PN_PLATFORM_ANDROID
+
 #include "AndroidRenderer.h"
 
 #include <cstring>
@@ -134,3 +136,5 @@ namespace PAIN {
     }
 
 }
+
+#endif

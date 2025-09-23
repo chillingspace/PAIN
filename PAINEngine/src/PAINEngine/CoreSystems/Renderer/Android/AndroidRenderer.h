@@ -1,5 +1,8 @@
 #pragma once
+#ifdef PN_PLATFORM_ANDROID
 #include "pch.h"
+
+
 #include "../Shader.h"
 
 namespace PAIN {
@@ -28,3 +31,5 @@ namespace PAIN {
     };
 
 }
+
+#endif
