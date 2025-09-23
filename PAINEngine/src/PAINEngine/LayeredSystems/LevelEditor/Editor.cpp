@@ -148,6 +148,8 @@ namespace PAIN {
             //Begin IMGUI Frame
             BeginFrame();
 
+            BuildDockspace();
+
             //Update all panels
             for (auto const& panel : panels) {
                 panel.second->drawWindow();
@@ -197,6 +199,43 @@ namespace PAIN {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
+        void Editor::BuildDockspace() {
+            ImGuiViewport* vp = ImGui::GetMainViewport();
+
+            // Reserve vertical space for the fixed Tools panel (menu + toolbar)
+            const float menu_h = ImGui::GetFrameHeight(); // same as Tools
+            const float toolbar_h = .2f;                   // same as Tools
+            const float tools_h = menu_h + toolbar_h;
+
+            // Position/size the dockspace host BELOW the tools bar
+            ImGui::SetNextWindowPos(ImVec2(vp->Pos.x, vp->Pos.y + tools_h));
+            ImGui::SetNextWindowSize(ImVec2(vp->Size.x, vp->Size.y - tools_h));
+            ImGui::SetNextWindowViewport(vp->ID);
+
+            ImGuiWindowFlags host_flags =
+                ImGuiWindowFlags_NoDocking |
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoBringToFrontOnFocus |
+                ImGuiWindowFlags_NoNavFocus |
+                ImGuiWindowFlags_NoBackground;   // no menubar here; Tools owns the menu
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+            ImGui::Begin("##DockSpaceHost", nullptr, host_flags);
+
+            ImGuiDockNodeFlags dock_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+            ImGuiID dockspace_id = ImGui::GetID("EditorDockSpace");
+            ImGui::DockSpace(dockspace_id, ImVec2(0.f, 0.f), dock_flags);
+
+            ImGui::End();
+            ImGui::PopStyleVar(2);
+        }
+
+
         void Editor::onEvent(Event::Event& event) {
 
             ImGuiIO& io = ImGui::GetIO();
@@ -210,6 +249,7 @@ namespace PAIN {
                 handleWindowEvents(io, event);
             }
         }
+
 
         void Editor::handleKeyEvents(ImGuiIO& io, Event::Event& event) {
             Event::Dispatcher dispatcher(event);

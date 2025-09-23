@@ -45,6 +45,8 @@ namespace PAIN {
 
             void EndFrame();
 
+            void BuildDockspace();
+
             //Mapping of glfw keys to imgui keys
             int imguiKeyMapping(int code);
 
