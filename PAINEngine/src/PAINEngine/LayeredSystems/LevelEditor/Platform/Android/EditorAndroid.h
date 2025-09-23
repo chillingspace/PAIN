@@ -14,10 +14,11 @@ namespace PAIN {
         //GLFW Editor
         class EditorAndroid : public EditorPlatform {
         private:
+            ANativeWindow* a_window = nullptr;
             virtual void init() override;
             virtual void shutdown() override;
         public:
-            EditorAndroid() { init(); }
+            EditorAndroid(ANativeWindow* a_window) :a_window{ a_window } { init(); }
             ~EditorAndroid() override { shutdown(); }
             virtual void beginFrame() override;
         };

@@ -31,6 +31,9 @@ namespace PAIN {
 			//Register callbacks
 			virtual void registerCallbacks(void* app) = 0;
 
+			//Virtual on attach
+			virtual void onAttach() override {}
+
 			//Update window
 			virtual void onUpdate() = 0;
 
@@ -40,7 +43,7 @@ namespace PAIN {
 			virtual void* getNativeWindow() const = 0;
 
 			//Create window
-			static Window* create(Package const& package = Package());
+			static Window* create(void* app = nullptr, Package const& package = Package());
 		};
 	}
 }

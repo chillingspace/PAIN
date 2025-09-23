@@ -16,33 +16,6 @@ namespace PAIN {
 
 	Application::Application()
 	{
-		// Set the static instance
-		s_Instance = this;
-		
-		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
-		window_app->registerCallbacks(this);
-
-		#ifdef PN_PLATFORM_ANDROID
-			auto renderer = std::make_shared<AndroidRenderer>();
-		#else
-			auto renderer = std::make_shared<TestTriangleLayer>();
-		#endif
-
-
-		// Create and add the AudioManager to the core systems
-		//m_AudioManager = std::make_shared<AudioManager>();
-		//addCoreSystem(m_AudioManager);
-
-		//Push other core systems into the stack
-		addCoreSystem(window_app);
-		addCoreSystem(std::make_shared<ECS::Controller>());
-		addLayerSystem(renderer);
-		//addCoreSystem(std::make_shared<Audio::Controller>());
-
-		//Editor only added when debug mode
-#ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>());
-#endif
 	}
 
 	Application::~Application()
@@ -66,6 +39,35 @@ namespace PAIN {
 	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
+	}
+
+	void Application::Init(void* app) {
+		// Set the static instance
+		s_Instance = this;
+
+		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		window_app->registerCallbacks(this);
+
+		#ifdef PN_PLATFORM_ANDROID
+			auto renderer = std::make_shared<AndroidRenderer>();
+		#else
+			auto renderer = std::make_shared<TestTriangleLayer>();
+		#endif
+
+		// Create and add the AudioManager to the core systems
+		//m_AudioManager = std::make_shared<AudioManager>();
+		//addCoreSystem(m_AudioManager);
+
+		//Push other core systems into the stack
+		addCoreSystem(window_app);
+		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(renderer);
+		//addCoreSystem(std::make_shared<Audio::Controller>());
+
+		//Editor only added when debug mode
+#ifdef _DEBUG
+		addLayerSystem(std::make_shared<Editor::Editor>(window_app->getNativeWindow()));
+#endif
 	}
 
 	void Application::Run() {

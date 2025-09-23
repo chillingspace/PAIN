@@ -37,6 +37,7 @@
 #ifdef PN_PLATFORM_ANDROID
 #include <android/native_window.h>
 #include <android/native_activity.h>
+#include <android_native_app_glue.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>

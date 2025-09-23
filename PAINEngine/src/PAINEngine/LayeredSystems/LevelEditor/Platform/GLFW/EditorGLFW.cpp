@@ -8,8 +8,8 @@
 namespace PAIN {
 	namespace Editor {
 
-		EditorPlatform* EditorPlatform::createEditorPlatform() {
-			return new EditorGLFW();
+		EditorPlatform* EditorPlatform::createEditorPlatform(void* window) {
+			return new EditorGLFW(static_cast<GLFWwindow*>(window));
 		}
 
 		void EditorGLFW::init() {
@@ -21,7 +21,7 @@ namespace PAIN {
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 			ImGui::StyleColorsDark();
 
-			ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+			ImGui_ImplGlfw_InitForOpenGL(g_window, true);
 			ImGui_ImplOpenGL3_Init("#version 450");
 
 			ImGui::LoadIniSettingsFromDisk(io.IniFilename);
