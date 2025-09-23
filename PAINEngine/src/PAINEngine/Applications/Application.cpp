@@ -49,12 +49,6 @@ namespace PAIN {
 		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		window_app->registerCallbacks(this);
 
-		#ifdef PN_PLATFORM_ANDROID
-			auto renderer = std::make_shared<RendererLayer>();
-		#else
-			auto renderer = std::make_shared<TestTriangleLayer>();
-		#endif
-
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
 		//addCoreSystem(m_AudioManager);
@@ -62,7 +56,13 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
+
+#ifdef PN_PLATFORM_ANDROID
+		//auto renderer = std::make_shared<RendererLayer>();
+#else
+		auto renderer = std::make_shared<TestTriangleLayer>();
 		addCoreSystem(renderer);
+#endif
 		//addCoreSystem(std::make_shared<Audio::Controller>());
 
 		//Editor only added when debug mode
