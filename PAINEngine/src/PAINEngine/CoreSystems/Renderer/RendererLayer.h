@@ -3,9 +3,9 @@
 #include "pch.h"
 #include "PAINEngine/Applications/AppSystem.h"
 
-class AndroidRenderer;
-#ifdef PN_PLATFORM_ANDROID
 
+#ifdef PN_PLATFORM_ANDROID
+#include "Android/AndroidRenderer.h"
 #else
 
 #endif
@@ -15,7 +15,7 @@ namespace PAIN {
     class RendererLayer : public AppSystem {
     public:
         RendererLayer() = default;
-        ~RendererLayer();
+        ~RendererLayer() = default;
 
         void onAttach() override;
         void onUpdate() override;

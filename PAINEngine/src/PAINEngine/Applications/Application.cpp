@@ -1,3 +1,4 @@
+#include <CoreSystems/Renderer/RendererLayer.h>
 #include "pch.h"
 #include "Application.h"
 
@@ -8,7 +9,7 @@
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "Audio/AudioManager.h"
-#include "CoreSystems/Renderer/Android/AndroidRenderer.h"
+#include "CoreSystems/Renderer/RendererLayer.h"
 namespace PAIN {
 
 	// Define the static instance
@@ -49,7 +50,7 @@ namespace PAIN {
 		window_app->registerCallbacks(this);
 
 		#ifdef PN_PLATFORM_ANDROID
-			auto renderer = std::make_shared<AndroidRenderer>();
+			auto renderer = std::make_shared<RendererLayer>();
 		#else
 			auto renderer = std::make_shared<TestTriangleLayer>();
 		#endif

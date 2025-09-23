@@ -1,15 +1,7 @@
 #include "RendererLayer.h"
 
-#ifdef PN_PLATFORM_ANDROID
-#include "Android/AndroidRenderer.h"
-#else
-
-#endif
-
 namespace PAIN {
-	PAIN::RendererLayer::~RendererLayer()
-	{
-	}
+
 	void RendererLayer::onAttach()
 	{
 		
