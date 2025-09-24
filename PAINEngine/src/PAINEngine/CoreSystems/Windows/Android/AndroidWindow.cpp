@@ -1,8 +1,17 @@
+#include <CoreSystems/Events/Android/OtherEvents.h>
 #include "pch.h"
 
 #ifdef PN_PLATFORM_ANDROID
 
 #include "AndroidWindow.h"
+
+#include "CoreSystems/Events/Android/AppEvents.h"
+#include "CoreSystems/Events/Android/FocusEvents.h"
+#include "CoreSystems/Events/Android/OtherEvents.h"
+#include "CoreSystems/Events/Android/SurfaceEvents.h"
+#include "CoreSystems/Events/Android/TouchEvents.h"
+
+#include "Applications/Application.h"
 
 namespace PAIN {
 	namespace Window {
@@ -140,7 +149,23 @@ namespace PAIN {
             LOGI("Android Window shut down");
         }
 
+        int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)
+        {
+            PAIN::Application* game = (PAIN::Application*)app->userData;
+
+            //Dispatch all events
+            game->pushEventQueue(std::make_shared<Event::AllEvent>(event));
+            
+            //// Let ImGui consume it first
+            //if (ImGui_ImplAndroid_HandleInputEvent(event))
+            //    return 1; // handled
+
+            //// �your own game/editor handling�
+            return 0;
+        }
+
         void Android_Window::registerCallbacks(void* app) {
+            m_App->onInputEvent = handle_input;
         }
 
         void Android_Window::pollEvents() {

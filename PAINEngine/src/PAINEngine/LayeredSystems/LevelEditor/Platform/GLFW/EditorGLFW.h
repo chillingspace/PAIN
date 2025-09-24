@@ -15,12 +15,14 @@ namespace PAIN {
         class EditorGLFW : public EditorPlatform {
         private:
             GLFWwindow* g_window = nullptr;
-            virtual void init() override;
-            virtual void shutdown() override;
+            void init() override;
+            void shutdown() override;
         public:
             EditorGLFW(GLFWwindow* g_window) : g_window{ g_window } { init(); }
             ~EditorGLFW() override { shutdown(); }
-            virtual void beginFrame() override;
+            void beginFrame() override;
+
+            void handleEvents(Event::Event& event) override;
         };
     }
 }

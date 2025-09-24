@@ -30,6 +30,8 @@ namespace PAIN {
 			virtual void init(Package const& package);
 			virtual void shutdown();
 
+			static int32_t handle_input(android_app* app, AInputEvent* event);
+
 		public:
 
 			//Constructors & Destructors

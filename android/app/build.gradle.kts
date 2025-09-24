@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.Copy
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -41,8 +39,19 @@ android {
     packaging {
         jniLibs.useLegacyPackaging = true
     }
-    sourceSets["main"].jniLibs.srcDirs("src/main/jniLibs")
-    //sourceSets["main"].assets.srcDirs("../../../assets")
+
+
+    // 👉 No copy: package JNI libs straight from vendor AND (optionally) local jniLibs
+    sourceSets.getByName("main") {
+        jniLibs.srcDirs(
+            "$rootDir/../vendor/FMOD/android/api/core/lib"
+        )
+
+        // 👉 No copy: package assets straight from repo root (and keep local assets if any)
+        assets.srcDirs(
+            "$rootDir/../assets"
+        )
+    }
 }
 
 dependencies {
@@ -53,17 +62,3 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
-
-// Copies vendor .so's into app/src/main/jniLibs/<ABI>/ on each build
-val syncVendorJniLibs by tasks.register<Copy>("syncVendorJniLibs") {
-    // vendor dir that contains ABI subfolders
-    from("$rootDir/vendor/fmod/android/core/lib") {
-        include("arm64-v8a/*.so")
-        include("x86_64/*.so")
-    }
-    into("$projectDir/src/main/jniLibs")
-}
-
-// Make packaging depend on our sync step (works across AGP tasks)
-tasks.matching { it.name.contains("merge") && it.name.contains("JniLibFolders") }
-    .configureEach { dependsOn(syncVendorJniLibs) }

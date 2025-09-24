@@ -3,10 +3,10 @@
 
 #ifdef _DEBUG
 
-#include "CoreSystems/Events/WindowEvents.h"
-#include "CoreSystems/Events/KeyEvents.h"
-#include "CoreSystems/Events/MouseEvents.h"
-#include "CoreSystems/Events/AssetEvents.h"
+//#include "CoreSystems/Events/GLFW/WindowEvents.h"
+//#include "CoreSystems/Events/GLFW/KeyEvents.h"
+//#include "CoreSystems/Events/GLFW/MouseEvents.h"
+//#include "CoreSystems/Events/GLFW/AssetEvents.h"
 #include "PAINEngine/Audio/AudioManager.h"
 
 // Panels
@@ -191,7 +191,10 @@ namespace PAIN {
         //    }
         //}
 
-        void Editor::onEvent(Event::Event& /*event*/) {
+        void Editor::onEvent(Event::Event& event) {
+
+            //Pass down events to platform for handling
+            platform->handleEvents(event);
 
             //ImGuiIO& io = ImGui::GetIO();
             //if (event.isInCategory(Event::Keyboard) && io.WantCaptureKeyboard) {

@@ -41,6 +41,10 @@ namespace PAIN {
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 		}
+
+		void EditorGLFW::handleEvents(Event::Event& event) {
+
+		}
 	}
 }
 

@@ -5,10 +5,10 @@
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
 
-#include "CoreSystems/Events/WindowEvents.h"
-#include "CoreSystems/Events/KeyEvents.h"
-#include "CoreSystems/Events/MouseEvents.h"
-#include "CoreSystems/Events/AssetEvents.h"
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
+#include "CoreSystems/Events/GLFW/MouseEvents.h"
+#include "CoreSystems/Events/GLFW/AssetEvents.h"
 
 #include "Applications/Application.h"
 

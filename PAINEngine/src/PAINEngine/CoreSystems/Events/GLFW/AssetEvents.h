@@ -3,7 +3,7 @@
 #ifndef ASSET_EVENTS_HPP
 #define ASSET_EVENTS_HPP
 
-#include "Event.h"
+#include "../Event.h"
 
 namespace PAIN {
 	namespace Event {
