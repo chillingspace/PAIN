@@ -19,6 +19,9 @@ namespace PAIN {
 			//Window buffer size
 			glm::uvec2 frame_buffer;
 
+			//Init flag
+			bool b_initialized = false;
+
 			//Private internal functions
 			virtual void init(Package const& package);
 			virtual void shutdown();
@@ -35,22 +38,27 @@ namespace PAIN {
 			static void cursorenter_cb([[maybe_unused]] GLFWwindow* window, int entered);
 			static void dropfile_cb([[maybe_unused]] GLFWwindow* window, int count, const char** paths);
 
-			void* getNativeWindow() const override { return ptr_window; }
-
 		public:
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
 			virtual ~GLFW_Window();	
 
-			//Register callbacks
-			void registerCallbacks(void* app) override;
-
 			//Update
 			void onUpdate() override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;
+
+			//Register callbacks
+			void registerCallbacks(void* app) override;
+
+			//Get native window
+			void* getNativeWindow() const override { return ptr_window; }
+
+			void pollEvents() override;
+
+			void swapBuffers() override;
 		};
 	}
 }

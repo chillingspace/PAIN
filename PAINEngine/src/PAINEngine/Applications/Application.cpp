@@ -1,4 +1,3 @@
-#include <CoreSystems/Renderer/RendererLayer.h>
 #include "pch.h"
 #include "Application.h"
 
@@ -46,15 +45,15 @@ namespace PAIN {
 		// Set the static instance
 		s_Instance = this;
 
-		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create(app));
-		window_app->registerCallbacks(this);
+		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		app_window->registerCallbacks(this);
 
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
 		//addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
-		addCoreSystem(window_app);
+		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 #ifdef PN_PLATFORM_ANDROID
@@ -68,7 +67,7 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>(window_app->getNativeWindow()));
+		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
 #endif
 
 		//Mark engine as ready
@@ -77,34 +76,28 @@ namespace PAIN {
 
 	void Application::Run() {
 
-#ifdef  PN_PLATFORM_ANDROID
-		//Update all layered systems
-		for (auto& layer : layer_stack) {
-			layer->onUpdate();
-		}
-
-		//Update all core systems
-		for (auto& core : core_stack) {
-			core->onUpdate();
-		}
-#else
 		//Application loop
 		while (b_app_running) {
 
+			//Poll events
+			app_window->pollEvents();
+
 			//Drain all events in queue
 			drainEventQueue();
+
+			//Update all core systems
+			for (auto& core : core_stack) {
+				core->onUpdate();
+			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
 				layer->onUpdate();
 			}
 
-			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate();
-			}
+			//Swap buffer
+			app_window->swapBuffers();
 		};
-#endif
 	}
 
 	void Application::terminate() {

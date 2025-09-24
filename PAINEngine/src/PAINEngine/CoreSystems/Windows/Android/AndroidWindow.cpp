@@ -115,7 +115,6 @@ namespace PAIN {
             glDepthFunc(GL_LESS);
 
             //Set animating to true
-            b_animating = true;
             b_initialized = true;
         }
 
@@ -144,15 +143,35 @@ namespace PAIN {
         void Android_Window::registerCallbacks(void* app) {
         }
 
-        void Android_Window::onAttach() {
+        void Android_Window::pollEvents() {
+
+            int events;
+            android_poll_source* source;
+
+            // Process all pending events
+            while (ALooper_pollOnce(b_initialized ? 0 : -1, nullptr, &events,
+                (void**)&source) >= 0) {
+                if (source) {
+                    source->process(m_App, source);
+                }
+
+                if (m_App->destroyRequested) {
+                    LOGI("Destroy requested");
+
+                }
+            }
         }
 
-        void Android_Window::onUpdate() {
+        void Android_Window::swapBuffers() {
 
             //Swap buffers
             if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {
                 eglSwapBuffers(m_Display, m_Surface);
             }
+        }
+
+        void Android_Window::onUpdate() {
+
         }
 
         void Android_Window::onEvent(Event::Event& e) {

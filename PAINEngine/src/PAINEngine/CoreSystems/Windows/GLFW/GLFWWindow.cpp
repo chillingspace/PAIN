@@ -62,6 +62,8 @@ namespace PAIN {
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
+
+			b_initialized = true;
 		}
 
 		//Shutdown & release resource
@@ -238,12 +240,16 @@ namespace PAIN {
 			//Storing class in glfw
 			glfwSetWindowUserPointer(ptr_window, app);
 		}
-		void GLFW_Window::onUpdate() {
 
+		void GLFW_Window::pollEvents() {
 			//Poll window events
 			glfwPollEvents();
+		}
 
+		void GLFW_Window::swapBuffers() {
 			m_Context->SwapBuffers();
+		}
+		void GLFW_Window::onUpdate() {
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {

@@ -15,13 +15,11 @@ static void handle_cmd(android_app* app, int32_t cmd) {
 
     switch (cmd) {
         case APP_CMD_INIT_WINDOW:
-            // TODO: create EGL context & surface on app->window
             game->Init(app);
             LOGI("APP_CMD_INIT_WINDOW");
             break;
         case APP_CMD_TERM_WINDOW:
             game->terminate();
-            // TODO: destroy EGL resources
             LOGI("APP_CMD_TERM_WINDOW");
             break;
         case APP_CMD_GAINED_FOCUS:
@@ -40,39 +38,29 @@ extern "C" void android_main(android_app* app) {
     //Game entry
     PAIN::Application* game = PAIN::CreateApplication();
 
+    //Check if application is created early return
+    if(!game) return;
+
     //App command handles events
     app->userData = game;
     app->onAppCmd = handle_cmd;
 
     //Game loop
-    while (true) {
-
+    while(!game->getAppState()) {
         int events;
         android_poll_source* source;
 
-        // Process all pending events
-        while (ALooper_pollOnce(game && game->getReady() ? 0 : -1, nullptr, &events,
-            (void**)&source) >= 0) {
+        //Process events waiting for game to init
+        while (ALooper_pollOnce(-1, nullptr, &events,
+                                (void**)&source) >= 0) {
             if (source) {
                 source->process(app, source);
             }
 
-            if (app->destroyRequested) {
-                LOGI("Destroy requested");
-                break;
-            }
-        }
-
-        //Run engine when ready
-        if (game) {
-            game->Run();
-        }
-
-        //Break loop if app destroyed
-        if (app->destroyRequested) {
-            break;
+            if(game->getAppState()) break;
         }
     }
 
+    game->Run();
     delete game;
 }

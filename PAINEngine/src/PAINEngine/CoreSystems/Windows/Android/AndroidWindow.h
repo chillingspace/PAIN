@@ -24,15 +24,11 @@ namespace PAIN {
 			glm::uvec2 frame_buffer;
 
 			//Anrdoid state
-			bool b_animating = false;
 			bool b_initialized = false;
 
 			//Private internal functions
 			virtual void init(Package const& package);
 			virtual void shutdown();
-
-			//Get android native window
-			void* getNativeWindow() const override { return m_Window; }
 
 		public:
 
@@ -40,17 +36,21 @@ namespace PAIN {
 			Android_Window(void* app, Package const& package);
 			virtual ~Android_Window();
 
-			//Register callbacks
-			void registerCallbacks(void* app) override;
-
-			//On attach
-			void onAttach() override;
-
 			//Update
 			void onUpdate() override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;
+
+			//Register callbacks
+			void registerCallbacks(void* app) override;
+
+			//Get android native window
+			void* getNativeWindow() const override { return m_Window; }
+
+			void pollEvents() override;
+
+			void swapBuffers() override;
 		};
 	}
 }
