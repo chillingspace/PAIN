@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "GLFWWindow.h"
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
@@ -14,7 +16,7 @@ namespace PAIN {
 	namespace Window {
 
 		//Create window
-		Window* Window::create(Package const& package) {
+		Window* Window::create([[maybe_unused]] void* app, Package const& package) {
 			return new GLFW_Window(package);
 		}
 
@@ -60,6 +62,8 @@ namespace PAIN {
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
+
+			b_initialized = true;
 		}
 
 		//Shutdown & release resource
@@ -236,11 +240,16 @@ namespace PAIN {
 			//Storing class in glfw
 			glfwSetWindowUserPointer(ptr_window, app);
 		}
-		void GLFW_Window::onUpdate() {
 
+		void GLFW_Window::pollEvents() {
 			//Poll window events
 			glfwPollEvents();
+		}
+
+		void GLFW_Window::swapBuffers() {
 			m_Context->SwapBuffers();
+		}
+		void GLFW_Window::onUpdate() {
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {
@@ -272,3 +281,5 @@ namespace PAIN {
 		}
 	}
 }
+
+#endif

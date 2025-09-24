@@ -1,10 +1,15 @@
 #pragma once
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef PANELS_HPP
 #define PANELS_HPP
 
 #include "../Command.h"
+
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -71,3 +76,4 @@ namespace PAIN {
 
 #endif // IMGUI_LAYER_HPP
 #endif // PDEBUG
+#endif

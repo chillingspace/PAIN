@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
+
 #include "CoreSystems/Windows/GraphicsContext.h"
 
 struct GLFWwindow;
@@ -18,3 +20,5 @@ namespace PAIN {
 	};
 
 }
+
+#endif

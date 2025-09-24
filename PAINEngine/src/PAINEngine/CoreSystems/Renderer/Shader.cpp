@@ -43,27 +43,71 @@ namespace PAIN {
 		if (!success) {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("Shader compile error (%s): %s",
+                 type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+            #else
 			PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
-		}
+            #endif
+        }
 
 		return shader;
 
 	}
+
+	static bool CheckShader(GLuint shader, const char* label) {
+		GLint compiled = GL_FALSE;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		if (compiled == GL_TRUE) return true;
+
+		GLint len = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+		std::string log(len ? len - 1 : 0, '\0');
+		if (len > 1) glGetShaderInfoLog(shader, len, nullptr, log.data());
+        #ifdef PN_PLATFORM_ANDROID
+        LOGE("[Shader] Compile failed: ");
+        #else
+		PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
+        #endif
+		return false;
+	}
+
+	static bool CheckProgram(GLuint program) {
+		GLint linked = GL_FALSE;
+		glGetProgramiv(program, GL_LINK_STATUS, &linked);
+		if (linked == GL_TRUE) return true;
+
+		GLint len = 0;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+		std::string log(len ? len - 1 : 0, '\0');
+		if (len > 1) glGetProgramInfoLog(program, len, nullptr, log.data());
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("[Shader] Link failed: ");
+            #else
+            PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
+            #endif
+		return false;
+	}
+
 	uint32_t Shader::LinkProgram(unsigned int vert_shader, unsigned int frag_shader)
 	{
-		// Create program
-		uint32_t program = glCreateProgram();
+		GLuint program = glCreateProgram();
 		glAttachShader(program, vert_shader);
 		glAttachShader(program, frag_shader);
 		glLinkProgram(program);
 
-		int success;
-		glGetProgramiv(m_RendererID, GL_LINK_STATUS, &success);
-		if (!success) {
-			char infoLog[512];
-			glGetProgramInfoLog(m_RendererID, 512, nullptr, infoLog);
-			PN_CORE_ERROR("Shader Program Linking Failed:\n{0}", infoLog);
+		if (!CheckProgram(program)) {
+            #ifdef PN_PLATFORM_ANDROID
+            LOGE("Program link FAILED");
+            #else
+            PN_CORE_ERROR("Program link FAILED");
+            #endif
+            assert("Program link failed");
 		}
+
+		// (Optional but recommended)
+		glDetachShader(program, vert_shader);
+		glDetachShader(program, frag_shader);
 
 		return program;
 	}
