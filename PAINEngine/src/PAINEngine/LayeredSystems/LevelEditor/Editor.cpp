@@ -146,6 +146,13 @@ namespace PAIN {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Checkbox("Show Demo Window", &show_demo);
+
+            auto& window = Application::Get().GetWindow();
+            bool vsync = window.is_Vsync();
+            if (ImGui::Checkbox("VSync", &vsync)) {
+                window.set_Vsync(vsync);
+            }
+
             ImGui::End();
 
             // Functional Audio Controls

@@ -7,6 +7,11 @@
 #include "ImGui/headers/imgui_impl_opengl3.h"
 #include "ImGuiOpenGLRenderer.h"
 
+double ImGuiOpenGLRenderer::lastTime = 0.0;
+int ImGuiOpenGLRenderer::frames = 0;
+float ImGuiOpenGLRenderer::FPS = 0.0f;
+
+
 bool ImGuiOpenGLRenderer::Init(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();
@@ -30,6 +35,15 @@ void ImGuiOpenGLRenderer::Shutdown()
 
 void ImGuiOpenGLRenderer::BeginFrame()
 {
+    double currentTime = glfwGetTime();
+    frames++;
+    if (currentTime - lastTime >= 1.0) { // update once per second
+        FPS = (float)frames / (float)(currentTime - lastTime);
+        frames = 0;
+        lastTime = currentTime;
+    }
+
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();

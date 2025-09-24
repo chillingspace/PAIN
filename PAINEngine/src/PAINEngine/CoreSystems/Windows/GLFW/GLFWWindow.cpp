@@ -9,6 +9,7 @@
 #include "CoreSystems/Events/AssetEvents.h"
 
 #include "Applications/Application.h"
+#include "CoreSystems/Windows/OpenGL/ImGuiOpenGLRenderer.h"
 
 namespace PAIN {
 	namespace Window {
@@ -16,6 +17,34 @@ namespace PAIN {
 		//Create window
 		Window* Window::create(Package const& package) {
 			return new GLFW_Window(package);
+		}
+
+		void GLFW_Window::recomputeViewport(int fb_width, int fb_height)
+		{
+			fb_width = max(fb_width, 1);
+			fb_height = max(fb_height, 1);
+			float fb_aspect_ratio = static_cast<float>(fb_width) / static_cast<float>(fb_height);
+			int vp_width, vp_height;
+
+			if (fb_aspect_ratio > m_AspectRatio) { // if window wider
+				vp_height = fb_height;
+				vp_width = static_cast<int>(std::round(vp_height * m_AspectRatio));
+			}
+			else { // if window thinner
+				vp_width = fb_width;
+				vp_height = static_cast<int>(std::round(vp_width / m_AspectRatio));
+			}
+
+			m_Viewport.w = vp_width;
+			m_Viewport.h = vp_height;
+			m_Viewport.x = (fb_width - vp_width) / 2;
+			m_Viewport.y = (fb_height - vp_height) / 2;
+			glViewport(m_Viewport.x, m_Viewport.y, m_Viewport.w, m_Viewport.h);
+		}
+
+		glm::uvec2 GLFW_Window::getFramebufferSize() const
+		{
+			return frame_buffer;
 		}
 
 		//Init GLFW
@@ -44,7 +73,7 @@ namespace PAIN {
 			glfwWindowHint(GLFW_DEPTH_BITS, 24);
 			glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);
 			glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
-			glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // window dimensions are static
+			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // window dimensions are static
 
 			//Create window
 			ptr_window = glfwCreateWindow(static_cast<int>(frame_buffer.x), static_cast<int>(frame_buffer.y), package.title.c_str(), nullptr, nullptr);
@@ -57,6 +86,17 @@ namespace PAIN {
 			//Create rendering context
 			m_Context = std::make_unique<OpenGLContext>(ptr_window);
 			m_Context->Init();
+
+			int fbw = 0;
+			int fbh = 0;
+			glfwGetFramebufferSize(ptr_window, &fbw, &fbh); //fb size, not window
+			fbw = max(fbw, 1); 
+			fbh = max(fbh, 1);
+			m_AspectRatio = (float)package.width / (float)package.height; 
+			recomputeViewport(fbw, fbh); // sets m_Viewport 
+
+			set_Vsync(true);
+
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
@@ -219,6 +259,17 @@ namespace PAIN {
 			shutdown();
 		}
 
+		void GLFW_Window::set_Vsync(bool set)
+		{
+			vsync = set;
+			glfwSwapInterval(vsync ? 1 : 0);
+		}
+
+		bool GLFW_Window::is_Vsync() const
+		{
+			return vsync;
+		}
+
 		void GLFW_Window::registerCallbacks(void* app) {
 
 			//Register all callbacks
@@ -257,13 +308,16 @@ namespace PAIN {
 				//Update frame buffer size
 				frame_buffer = e.getFrameBuffer();
 
+				//glViewport(0,0, (GLsizei)frame_buffer.x, (GLsizei)frame_buffer.y);
+				recomputeViewport((int)frame_buffer.x, (int)frame_buffer.y);
+
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;
 			});
 
 			//Dispatch window resized event
 			dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
-
+				
 				PN_CORE_INFO(e.toString());
 
 				//Return false: continue dispatching, true = stop dispatching 

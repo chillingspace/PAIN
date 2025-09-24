@@ -21,6 +21,14 @@ namespace PAIN {
 			// Rendering context (OpenGL for now)
 			std::unique_ptr<GraphicsContext> m_Context; 
 
+			float m_AspectRatio = .0f;   
+			struct Viewport { int x = 0, y = 0, w = 0, h = 0; } m_Viewport;
+			void recomputeViewport(int fb_width, int fb_height);
+			glm::uvec2 getFramebufferSize() const;
+
+			bool vsync = true;
+
+
 			//Private internal functions
 			virtual void init(Package const& package);
 			virtual void shutdown();
@@ -44,8 +52,9 @@ namespace PAIN {
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
 			virtual ~GLFW_Window();
-
 	
+			void set_Vsync(bool set) override;
+			bool is_Vsync() const override;
 
 			//Register callbacks
 			void registerCallbacks(void* app) override;

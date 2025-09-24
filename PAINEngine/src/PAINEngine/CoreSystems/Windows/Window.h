@@ -35,6 +35,9 @@ namespace PAIN {
 
 			virtual void* getNativeWindow() const = 0;
 
+			virtual void set_Vsync(bool set) = 0;
+			virtual bool is_Vsync() const = 0;
+
 			//Create window
 			static Window* create(Package const& package = Package());
 		};

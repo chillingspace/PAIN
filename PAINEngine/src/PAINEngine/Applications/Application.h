@@ -6,6 +6,8 @@
 #include "AppSystem.h"
 #include "../CoreSystems/Events/Event.h"
 #include "PAINEngine/Audio/AudioManager.h"
+#include "../CoreSystems/Windows/Window.h"
+
 
 #include <memory>
 #include <vector>
@@ -32,6 +34,8 @@ namespace PAIN {
 		// Direct pointer to the AudioManager
 		std::shared_ptr<AudioManager> m_AudioManager;
 
+		std::shared_ptr<Window::Window> m_Window;
+
 		//Dispatch events to layers
 		void dispatchEventsForward(Event::Event& e);
 
@@ -53,6 +57,9 @@ namespace PAIN {
 		// Static getter to access the application and audio manager
 		inline static Application& Get() { return *s_Instance; }
 		inline AudioManager& GetAudioManager() { return *m_AudioManager; }
+
+		inline Window::Window& GetWindow() { return *m_Window; }
+		inline const Window::Window& GetWindow() const { return *m_Window; }
 	};
 
 	// Defined in client

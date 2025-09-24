@@ -19,15 +19,21 @@ namespace PAIN {
 		// Set the static instance
 		s_Instance = this;
 
-		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
-		window_app->registerCallbacks(this);
+		Window::Package package;
+		package.width = 1280;
+		package.height = 720;
+		package.title = "PAIN Engine";
+		m_Window = std::shared_ptr<Window::Window>(Window::Window::create(package));
+
+		//auto window_app = std::shared_ptr<Window::Window>(Window::Window::create());
+		m_Window->registerCallbacks(this);
 
 		// Create and add the AudioManager to the core systems
 		m_AudioManager = std::make_shared<AudioManager>();
 		addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
-		addCoreSystem(window_app);
+		addCoreSystem(std::shared_ptr<Window::Window>(m_Window.get(), [](Window::Window*) {}));
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<TestTriangleLayer>());
 		//addCoreSystem(std::make_shared<Audio::Controller>());
