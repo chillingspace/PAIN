@@ -162,10 +162,11 @@ namespace PAIN {
                 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Checkbox("Show Demo Window", &show_demo);
 
-            auto& window = Application::Get().GetWindow();
-            bool vsync = window.is_Vsync();
+            auto window = Application::Get().GetWindowPtr();
+            if (!window) return;
+            bool vsync = window->is_Vsync();
             if (ImGui::Checkbox("VSync", &vsync)) {
-                window.set_Vsync(vsync);
+                window->set_Vsync(vsync);
             }
 
             ImGui::End();

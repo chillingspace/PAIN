@@ -35,7 +35,7 @@ namespace PAIN {
 		// Direct pointer to the AudioManager
 		//std::shared_ptr<AudioManager> m_AudioManager;
 
-		std::shared_ptr<Window::Window> m_Window;
+		//std::shared_ptr<Window::Window> m_Window;
 
 		//Dispatch events to layers
 		void dispatchEventsForward(Event::Event& e);
@@ -63,8 +63,9 @@ namespace PAIN {
 		inline static Application& Get() { return *s_Instance; }
 		//inline AudioManager& GetAudioManager() { return *m_AudioManager; }
 
-		inline Window::Window& GetWindow() { return *m_Window; }
-		inline const Window::Window& GetWindow() const { return *m_Window; }
+		inline Window::Window& GetWindow() { return *app_window; }
+		inline const Window::Window& GetWindow() const { return *app_window; }
+		inline std::shared_ptr<Window::Window> GetWindowPtr() const { return app_window; }
 	};
 
 	// Defined in client

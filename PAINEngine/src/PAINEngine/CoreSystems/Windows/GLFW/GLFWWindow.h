@@ -65,8 +65,6 @@ namespace PAIN {
 			//Event call back
 			void onEvent(Event::Event& e) override;
 
-			//Register callbacks
-			void registerCallbacks(void* app) override;
 
 			//Get native window
 			void* getNativeWindow() const override { return ptr_window; }
