@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "RendererLayer.h"
+#include "PAINEngine/Applications/Application.h"
 
 namespace PAIN {
 	RendererLayer::RendererLayer() : program(0), 
@@ -68,6 +69,35 @@ namespace PAIN {
 
         shader = std::make_unique<Shader>(vertexShaderSrc, fragmentShaderSrc);
 	}
+    
+	// initialization
+    void RendererLayer::onAttach() {
+        // Initialize 3D positions for the demo
+        m_cubePosition = glm::vec3(-12.0f, 0.0f, -4.0f); // Start at the new top-left
+        m_cameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);   // Camera is at the center
+
+        // Get a reference to the audio manager
+        AudioManager& audio = Application::Get().GetAudioManager();
+
+        // Load a looping 3D music stream
+        audio.LoadSound("assets/audio/Music/Boss_Music.wav", true, true, true);
+
+        // Define and load the footstep sound effect playlist
+        std::vector<std::string> grassFootsteps = {
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_01.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_02.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_03.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_04.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_05.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_06.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_07.wav",
+            "assets/audio/SFX/MovingSFX/Footstep_Grass_08.wav"
+        };
+        audio.LoadPlaylist("FootstepsGrass", grassFootsteps);
+
+        // Start the music at the cube's initial position with reduced volume
+        audio.PlaySound("assets/audio/Music/Boss_Music.wav", m_cubePosition, -10.0f);
+    }
 
 	// rendering loop
     void RendererLayer::onUpdate() {
@@ -78,11 +108,18 @@ namespace PAIN {
                      1.f);
 
 		glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(program);
+
+        //glUseProgram(program);
 
         shader->Bind();
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+    }
+
+    void RendererLayer::shutdown() {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
         shader->UnBind();
     }
 }

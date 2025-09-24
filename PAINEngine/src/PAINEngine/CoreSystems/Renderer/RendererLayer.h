@@ -1,6 +1,11 @@
+#ifndef RENDERLAYER_H
+#define RENDERLAYER_H
+
 #pragma once
 
+#include "PAINEngine/Applications/AppSystem.h"
 #include "PAINEngine/CoreSystems/Renderer/Shader.h"
+#include "glm/glm.hpp"
 
 #ifdef PLATFORM_ANDROID
 // include android stuff
@@ -17,6 +22,7 @@ namespace PAIN {
 		void onAttach(); // initialize
 		void onDetach();
 		void onUpdate(); // rendering loop
+		void shutdown();
 
 		// Event handler for app layer
 		void onEvent(/* Event::Event& e */);
@@ -39,6 +45,9 @@ namespace PAIN {
 		GLuint vao;
 
 		std::unique_ptr<Shader> shader;
+
+		glm::vec3 m_cubePosition;
+		glm::vec3 m_cameraPosition;
 
 #ifdef PLATFORM_WINDOWS
 		GLFWwindow* window;
@@ -71,5 +80,5 @@ namespace PAIN {
 
 
 
-
 #endif // RENDERERLAYER_H
+
