@@ -1,10 +1,11 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
+
 #ifndef GLFW_WINDOW_HPP
 #define GLFW_WINDOW_HPP
 
 #include "../Window.h"
-#include "CoreSystems/Windows/GraphicsContext.h"
 
 namespace PAIN {
 	namespace Window {
@@ -18,8 +19,8 @@ namespace PAIN {
 			//Window buffer size
 			glm::uvec2 frame_buffer;
 
-			// Rendering context (OpenGL for now)
-			std::unique_ptr<GraphicsContext> m_Context; 
+			//Init flag
+			bool b_initialized = false;
 
 			float m_AspectRatio = .0f;   
 			struct Viewport { int x = 0, y = 0, w = 0, h = 0; } m_Viewport;
@@ -45,8 +46,6 @@ namespace PAIN {
 			static void cursorenter_cb([[maybe_unused]] GLFWwindow* window, int entered);
 			static void dropfile_cb([[maybe_unused]] GLFWwindow* window, int count, const char** paths);
 
-			void* getNativeWindow() const override { return ptr_window; }
-
 		public:
 
 			//Constructors & Destructors
@@ -59,13 +58,25 @@ namespace PAIN {
 			//Register callbacks
 			void registerCallbacks(void* app) override;
 
+
 			//Update
 			void onUpdate() override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;
+
+			//Register callbacks
+			void registerCallbacks(void* app) override;
+
+			//Get native window
+			void* getNativeWindow() const override { return ptr_window; }
+
+			void pollEvents() override;
+
+			void swapBuffers() override;
 		};
 	}
 }
 
+#endif
 #endif

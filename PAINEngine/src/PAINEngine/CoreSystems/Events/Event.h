@@ -12,7 +12,39 @@ namespace PAIN {
 
 	namespace Event {
 
-		//Event Types
+#ifdef PN_PLATFORM_ANDROID
+		//Android Event Types
+		enum class Type {
+			None = 0,
+			// Existing events
+			WindowResize, WindowFocus, WindowMove,
+			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
+			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
+			FileDrop,
+			// New Android-specific events
+			AppStart, AppResume, AppPause, AppStop, AppDestroy,
+			SurfaceCreated, SurfaceChanged, SurfaceDestroyed,
+			FocusGained, FocusLost,
+			TouchDown, TouchUp, TouchMove, TouchCancel,
+			AndroidKeyDown, AndroidKeyUp, BackButton,
+			LowMemory, ConfigurationChanged, SensorEvent,
+			All
+		};
+
+		//Android Event Categories
+		enum Category {
+			None = 1 << 0,
+			Application = 1 << 1,
+			Input = 1 << 2,
+			Keyboard = 1 << 3,
+			Mouse = 1 << 4,
+			Asset = 1 << 5,
+			Touch = 1 << 6,  // New category for touch events
+			Sensor = 1 << 7,   // New category for sensor events
+			All = 1 << 8
+		};
+#else
+		//Window Event Types
 		enum class Type {
 			None = 0,
 			WindowResize, WindowFocus, WindowMove,
@@ -21,18 +53,19 @@ namespace PAIN {
 			FileDrop
 		};
 
-		//Event Categories
+		//Window Event Categories
 		enum Category {
-			None		= 1 << 0,
-			Application	= 1 << 1,
-			Input		= 1 << 2,
-			Keyboard	= 1 << 3,
-			Mouse		= 1 << 4,
-			Asset		= 1 << 5
+			None = 1 << 0,
+			Application = 1 << 1,
+			Input = 1 << 2,
+			Keyboard = 1 << 3,
+			Mouse = 1 << 4,
+			Asset = 1 << 5
 		};
+#endif
 
 #define EVENT_CLASS_TYPE(type)\
-    static Type getStaticType() { return Type::##type; }\
+    static Type getStaticType() { return Type::type; }\
     Type getType() const override { return getStaticType(); }\
     const char* getName() const override { return #type; }
 

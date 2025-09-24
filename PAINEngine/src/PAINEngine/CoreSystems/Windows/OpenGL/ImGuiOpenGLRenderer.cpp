@@ -1,10 +1,11 @@
 #include "pch.h"
-#include <GL/glew.h>
-#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 
-#include "ImGui/headers/imgui.h"
-#include "ImGui/headers/imgui_impl_glfw.h"
-#include "ImGui/headers/imgui_impl_opengl3.h"
+#ifndef PLATFORM_ANDROID
+#include <GL/glew.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "ImGuiOpenGLRenderer.h"
 
 double ImGuiOpenGLRenderer::lastTime = 0.0;
@@ -54,3 +55,5 @@ void ImGuiOpenGLRenderer::EndFrame()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
+#endif

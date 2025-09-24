@@ -1,0 +1,81 @@
+#pragma once
+#ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
+#ifndef PAIN_EDITOR_SCENES_PANEL_HPP
+#define PAIN_EDITOR_SCENES_PANEL_HPP
+
+#include "Panels.h"
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace PAIN {
+    namespace Editor {
+        namespace Panel {
+
+            // Optional wiring points for future integration (leave empty for now).
+            struct ScenesHooks {
+                // Called after creating a new scene (name without ".scn")
+                std::function<void(const std::string& baseName)> onCreate;
+                // Called on "Save Scene As" (new base name)
+                std::function<void(const std::string& baseName)> onSaveAs;
+                // Called on "Save Curr Scene"
+                std::function<void(const std::string& currSceneId)> onSaveCurrent;
+                // Called before deleting current scene (id with extension or your internal id)
+                std::function<void(const std::string& sceneId)> onDelete;
+                // Called when user requests a scene change (id with extension)
+                std::function<void(const std::string& sceneId)> onChange;
+            };
+
+            class ScenesPanel : public IPanel {
+            public:
+                ScenesPanel(std::shared_ptr<CommandManager> cm,
+                    ScenesHooks hooks = {});
+
+                void nextWindowSettings() override;   
+                void onUpdate() override;             
+
+                static constexpr const char* getStaticName() { return "##ScenesPanel"; }
+
+            private:
+                // Temporary in-panel “model” 
+                std::string currSceneId_; 
+                struct Layer {
+                    unsigned id;
+                    bool visible = true;
+                };
+                std::vector<Layer> layers_;                    
+                std::vector<std::vector<bool>> mask_;         
+                unsigned selectedLayerIdx_ = 0;
+
+                // UI 
+                bool showCreate_ = false;
+                bool showDelete_ = false;
+                bool showSaveAs_ = false;
+                bool showEditMask_ = false;
+                std::string tmpNameBuf_;       
+
+                // Hooks for future backend integration 
+                ScenesHooks hooks_;
+
+            private:
+                // helpers
+                void ensureAtLeastOneLayer();
+                void rebuildMaskSize(std::size_t n);
+                static std::string baseNameFromId(const std::string& sceneId);
+
+                // modals
+                void drawCreateModal();
+                void drawDeleteModal();
+                void drawSaveAsModal();
+                void drawEditMaskModal();
+            };
+
+        } // namespace Panel
+    } // namespace Editor
+} // namespace PAIN
+
+#endif
+#endif
+#endif

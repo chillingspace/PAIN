@@ -7,8 +7,8 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
-#include "PAINEngine/Audio/AudioManager.h"
-
+#include "Audio/AudioManager.h"
+#include "CoreSystems/Renderer/RendererLayer.h"
 namespace PAIN {
 
 	// Define the static instance
@@ -67,23 +67,62 @@ namespace PAIN {
 		layer_stack.push_back(layer_system);
 	}
 
+	void Application::Init(void* app) {
+		// Set the static instance
+		s_Instance = this;
+
+		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		app_window->registerCallbacks(this);
+
+		// Create and add the AudioManager to the core systems
+		//m_AudioManager = std::make_shared<AudioManager>();
+		//addCoreSystem(m_AudioManager);
+
+		//Push other core systems into the stack
+		//addCoreSystem(window_app);
+		addCoreSystem(std::make_shared<ECS::Controller>());
+
+#ifdef PN_PLATFORM_ANDROID
+		auto renderer = std::make_shared<RendererLayer>();
+        addCoreSystem(renderer);
+#else
+		auto renderer = std::make_shared<TestTriangleLayer>();
+		addCoreSystem(renderer);
+#endif
+		//addCoreSystem(std::make_shared<Audio::Controller>());
+
+		//Editor only added when debug mode
+#ifdef _DEBUG
+		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
+#endif
+
+		//Mark engine as ready
+		b_app_running = true;
+	}
+
 	void Application::Run() {
 
 		//Application loop
 		while (b_app_running) {
 
+			//Poll events
+			app_window->pollEvents();
+
 			//Drain all events in queue
 			drainEventQueue();
+
+			//Update all core systems
+			for (auto& core : core_stack) {
+				core->onUpdate();
+			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
 				layer->onUpdate();
 			}
 
-			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate();
-			}
+			//Swap buffer
+			app_window->swapBuffers();
 		};
 	}
 
