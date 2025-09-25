@@ -4,11 +4,13 @@
 #define APP_LAYER_HPP
 
 #include "../CoreSystems/Events/Event.h"
+#include "Services.h"
 
 namespace PAIN {
 
 	class AppSystem {
 	private:
+		std::shared_ptr<Services> services;
 	public:
 		//Optional virtual functions
 		virtual void onAttach() {}

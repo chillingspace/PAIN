@@ -11,11 +11,10 @@
 #include "CoreSystems/Renderer/RendererLayer.h"
 namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
-
 	Application::Application()
 	{
+		//Create default services
+		services = std::make_shared<Services>();
 	}
 
 	Application::~Application()
@@ -31,27 +30,31 @@ namespace PAIN {
 		core_stack.clear();
 	}
 
-	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+	template<typename T>
+	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
 		core_system->onAttach();
 		core_stack.push_back(core_system);
+		services->set<T>(core_system);
 	}
 
-	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+	template<typename T>
+	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
+		services->set<T>(layer_system);
 	}
 
 	void Application::Init(void* app) {
 
-		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
+		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
 		//addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
-		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 #ifdef PN_PLATFORM_ANDROID
@@ -78,13 +81,13 @@ namespace PAIN {
 		while (b_app_running) {
 
 			//Poll events
-			app_window->pollEvents();
+			services->get<Window::Window>()->pollEvents();
 
 			//Drain all events in queue
 			drainEventQueue();
 
 			//Skip all other systems when window is not active
-			if (!app_window->getActive()) continue;
+			if (!services->get<Window::Window>()->getActive()) continue;
 
 			//Update all core systems
 			for (auto& core : core_stack) {
@@ -97,7 +100,7 @@ namespace PAIN {
 			}
 
 			//Swap buffer
-			app_window->swapBuffers();
+			services->get<Window::Window>()->swapBuffers();
 		};
 	}
 
