@@ -9,6 +9,9 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
+
+#include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
+
 namespace PAIN {
 
 	// Define the static instance
@@ -60,7 +63,7 @@ namespace PAIN {
 		auto renderer = std::make_shared<RendererLayer>();
         addCoreSystem(renderer);
 #else
-		auto renderer = std::make_shared<TestTriangleLayer>();
+		auto renderer = std::make_shared<RendererLayer>();
 		addCoreSystem(renderer);
 #endif
 		//addCoreSystem(std::make_shared<Audio::Controller>());
