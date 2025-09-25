@@ -5,10 +5,10 @@
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
 
-#include "CoreSystems/Events/WindowEvents.h"
-#include "CoreSystems/Events/KeyEvents.h"
-#include "CoreSystems/Events/MouseEvents.h"
-#include "CoreSystems/Events/AssetEvents.h"
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
+#include "CoreSystems/Events/GLFW/MouseEvents.h"
+#include "CoreSystems/Events/GLFW/AssetEvents.h"
 
 #include "Applications/Application.h"
 
@@ -62,6 +62,9 @@ namespace PAIN {
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
+
+			//Set window flag to active
+			b_active = true;
 		}
 
 		//Shutdown & release resource
@@ -238,12 +241,16 @@ namespace PAIN {
 			//Storing class in glfw
 			glfwSetWindowUserPointer(ptr_window, app);
 		}
-		void GLFW_Window::onUpdate() {
 
+		void GLFW_Window::pollEvents() {
 			//Poll window events
 			glfwPollEvents();
+		}
 
+		void GLFW_Window::swapBuffers() {
 			m_Context->SwapBuffers();
+		}
+		void GLFW_Window::onUpdate() {
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {

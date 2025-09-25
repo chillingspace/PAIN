@@ -25,6 +25,8 @@ namespace PAIN {
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
 
+            virtual void handleEvents(Event::Event& event) = 0;
+
             static EditorPlatform* createEditorPlatform(void* window);
         };
 	}

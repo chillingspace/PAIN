@@ -15,12 +15,14 @@ namespace PAIN {
         class EditorAndroid : public EditorPlatform {
         private:
             ANativeWindow* a_window = nullptr;
-            virtual void init() override;
-            virtual void shutdown() override;
+            void init() override;
+            void shutdown() override;
         public:
             EditorAndroid(ANativeWindow* a_window) :a_window{ a_window } { init(); }
             ~EditorAndroid() override { shutdown(); }
-            virtual void beginFrame() override;
+            void beginFrame() override;
+
+            void handleEvents(Event::Event& event) override;
         };
     }
 }

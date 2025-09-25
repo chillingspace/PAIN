@@ -5,9 +5,11 @@
 
 #include <string>
 
-#include "Applications/AppSystem.h"
+#include "PAINEngine/Applications/AppSystem.h"
 
-#include "CoreSystems/Windows/GraphicsContext.h"
+#include "GraphicsContext.h"
+
+#include <memory>
 
 namespace PAIN {
 	namespace Window {
@@ -25,22 +27,32 @@ namespace PAIN {
 		protected:
 			// Rendering context (OpenGL for now)
 			std::unique_ptr<GraphicsContext> m_Context;
+
+			//Anrdoid state
+			bool b_active = false;
 		public:
 			virtual ~Window() = default;
+
+			//Update window
+			virtual void onUpdate() override = 0;
+
+			//Event callback
+			virtual void onEvent(Event::Event& e) override = 0;
 
 			//Register callbacks
 			virtual void registerCallbacks(void* app) = 0;
 
-			//Virtual on attach
-			virtual void onAttach() override {}
-
-			//Update window
-			virtual void onUpdate() = 0;
-
-			//Event callback
-			virtual void onEvent(Event::Event& e) = 0;
-
+			//Get native window
 			virtual void* getNativeWindow() const = 0;
+
+			//Pollevents
+			virtual void pollEvents() = 0;
+
+			//Swap buffers
+			virtual void swapBuffers() = 0;
+
+			//Get window active state
+			bool getActive() const { return b_active; }
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());

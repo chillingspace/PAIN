@@ -15,7 +15,8 @@
             android:name="android.app.NativeActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="landscape">
 
             <!-- IMPORTANT: match the name of your add_library(SHARED ...) -->
             <meta-data android:name="android.app.lib_name"

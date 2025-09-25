@@ -3,13 +3,18 @@
 
 #ifdef _DEBUG
 
-#include "CoreSystems/Events/WindowEvents.h"
-#include "CoreSystems/Events/KeyEvents.h"
-#include "CoreSystems/Events/MouseEvents.h"
-#include "CoreSystems/Events/AssetEvents.h"
+//#include "CoreSystems/Events/GLFW/WindowEvents.h"
+//#include "CoreSystems/Events/GLFW/KeyEvents.h"
+//#include "CoreSystems/Events/GLFW/MouseEvents.h"
+//#include "CoreSystems/Events/GLFW/AssetEvents.h"
 #include "PAINEngine/Audio/AudioManager.h"
 
+// Panels
 #include "Panels/ToolsPanel.h"
+#include "Panels/AudioPanel.h"
+#include "Panels/ScenesPanel.h"
+#include "Panels/ComponentsPanel.h"
+
 
 namespace PAIN {
 
@@ -98,12 +103,35 @@ namespace PAIN {
 
         void Editor::onAttach() {
 
+            // IMGUI_CHECKVERSION();
+            // ImGui::CreateContext();
+
+            // ImGuiIO& io = ImGui::GetIO();
+            // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+            // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+            // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   
+            // ImGui::StyleColorsDark();
+
+
+            // ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+            // ImGui_ImplOpenGL3_Init("#version 450");
+
+            // ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();
 
             //Register panels
             //panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
             //PN_CORE_INFO(panels[CLASS_STR(Panel::Tools)]->getPanelName());
+
+            // panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
+
+            // panels[CLASS_STR(Panel::ScenesPanel)] = std::make_shared<Panel::ScenesPanel>(command_manager);
+
+            // panels[CLASS_STR(Panel::ComponentsPanel)] =
+            //     std::make_shared<Panel::ComponentsPanel>(command_manager);
+
         }
 
         void Editor::onDetach() {
@@ -117,58 +145,18 @@ namespace PAIN {
             //Begin IMGUI Frame
             platform->beginFrame();
 
+            BuildDockspace();
+
             //Update all panels
             //for (auto const& panel : panels) {
             //    panel.second->drawWindow();
             //}
 
+
+
             static bool show_demo = true;
             if (show_demo) ImGui::ShowDemoWindow(&show_demo);
 
-            //// Functional Audio Controls
-            //ImGui::Begin("Audio Controls");
-            ////AudioManager& audio = Application::Get().GetAudioManager();
-
-            //static char soundPath[256] = "assets/audio/SFX/MovingSFX/Footstep_Metal_01.wav";
-            //static float volume = 0.0f;
-            //static bool loop = false;
-            //static bool is3D = true;
-            //static float posX = 0.0f, posY = 0.0f, posZ = 0.0f;
-
-            //ImGui::InputText("Sound Path", soundPath, IM_ARRAYSIZE(soundPath));
-            //ImGui::SliderFloat("Volume (dB)", &volume, -80.0f, 10.0f, "%.2f");
-            //ImGui::Checkbox("Loop", &loop);
-            //ImGui::Checkbox("3D", &is3D);
-
-            //if (is3D) {
-            //    ImGui::SliderFloat("X", &posX, -10.0f, 10.0f);
-            //    ImGui::SliderFloat("Y", &posY, -10.0f, 10.0f);
-            //    ImGui::SliderFloat("Z", &posZ, -10.0f, 10.0f);
-            //}
-
-            //if (ImGui::Button("Load Sound")) {
-            //    //audio.LoadSound(soundPath, is3D, loop);
-            //}
-
-            //ImGui::SameLine();
-
-            //if (ImGui::Button("Play Sound")) {
-            //    //audio.PlaySound(soundPath, { posX, posY, posZ }, volume);
-            //}
-
-            //ImGui::Separator();
-            //ImGui::Text("Playlist Controls");
-            //if (ImGui::Button("Play Random Footstep"))
-            //{
-            //    //audio.PlayRandomFromPlaylist("FootstepsGrass", { posX, posY, posZ }, volume);
-            //}
-
-            //ImGui::Separator();
-            //if (ImGui::Button("Stop All Sounds")) {
-            //    //audio.StopAllChannels();
-            //}
-
-            //ImGui::End();
 
             //Signal end of frame for imgui
             platform->endFrame();
@@ -203,7 +191,10 @@ namespace PAIN {
         //    }
         //}
 
-        void Editor::onEvent(Event::Event& /*event*/) {
+        void Editor::onEvent(Event::Event& event) {
+
+            //Pass down events to platform for handling
+            platform->handleEvents(event);
 
             //ImGuiIO& io = ImGui::GetIO();
             //if (event.isInCategory(Event::Keyboard) && io.WantCaptureKeyboard) {
@@ -256,6 +247,42 @@ namespace PAIN {
         //        return false;
         //        });
         //}
+
+        void Editor::BuildDockspace() {
+            // ImGuiViewport* vp = ImGui::GetMainViewport();
+
+            // // Reserve vertical space for the fixed Tools panel (menu + toolbar)
+            // const float menu_h = ImGui::GetFrameHeight(); // same as Tools
+            // const float toolbar_h = .2f;                   // same as Tools
+            // const float tools_h = menu_h + toolbar_h;
+
+            // // Position/size the dockspace host BELOW the tools bar
+            // ImGui::SetNextWindowPos(ImVec2(vp->Pos.x, vp->Pos.y + tools_h));
+            // ImGui::SetNextWindowSize(ImVec2(vp->Size.x, vp->Size.y - tools_h));
+            // ImGui::SetNextWindowViewport(vp->ID);
+
+            // ImGuiWindowFlags host_flags =
+            //     ImGuiWindowFlags_NoDocking |
+            //     ImGuiWindowFlags_NoTitleBar |
+            //     ImGuiWindowFlags_NoCollapse |
+            //     ImGuiWindowFlags_NoResize |
+            //     ImGuiWindowFlags_NoMove |
+            //     ImGuiWindowFlags_NoBringToFrontOnFocus |
+            //     ImGuiWindowFlags_NoNavFocus |
+            //     ImGuiWindowFlags_NoBackground;   // no menubar here; Tools owns the menu
+
+            // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            // ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+            // ImGui::Begin("##DockSpaceHost", nullptr, host_flags);
+
+            // ImGuiDockNodeFlags dock_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+            // ImGuiID dockspace_id = ImGui::GetID("EditorDockSpace");
+            // ImGui::DockSpace(dockspace_id, ImVec2(0.f, 0.f), dock_flags);
+
+            // ImGui::End();
+            // ImGui::PopStyleVar(2);
+        }
 
         //void Editor::handleWindowEvents(ImGuiIO& io, Event::Event& event) {
         //    Event::Dispatcher dispatcher(event);

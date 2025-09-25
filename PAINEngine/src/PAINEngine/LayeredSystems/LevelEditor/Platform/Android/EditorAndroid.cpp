@@ -4,6 +4,7 @@
 #ifdef PN_PLATFORM_ANDROID
 
 #include "EditorAndroid.h"
+#include "CoreSystems/Events/Android/OtherEvents.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -42,6 +43,24 @@ namespace PAIN {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplAndroid_NewFrame();
 			ImGui::NewFrame();
+		}
+
+		void EditorAndroid::handleEvents(Event::Event& event) {
+			//Early exit condition
+			if(!event.isInCategory(Event::Category::All)) return;
+
+			//Create event dispatcher
+			Event::Dispatcher dispatcher(event);
+
+			//Dispatch window resized event
+			dispatcher.Dispatch<Event::AllEvent>([&](Event::AllEvent& event) -> bool {
+
+				//Update frame buffer size
+				if (ImGui_ImplAndroid_HandleInputEvent(event.getEvent())) return true;
+
+				//Return false: continue dispatching, true = stop dispatching 
+				return false;
+				});
 		}
 	}
 }

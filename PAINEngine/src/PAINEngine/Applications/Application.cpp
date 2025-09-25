@@ -1,4 +1,3 @@
-#include <CoreSystems/Renderer/RendererLayer.h>
 #include "pch.h"
 #include "Application.h"
 
@@ -17,6 +16,8 @@ namespace PAIN {
 
 	Application::Application()
 	{
+		//Create default services
+		services = std::make_shared<Services>();
 	}
 
 	Application::~Application()
@@ -32,29 +33,32 @@ namespace PAIN {
 		core_stack.clear();
 	}
 
-	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+	template<typename T>
+	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
 		core_system->onAttach();
 		core_stack.push_back(core_system);
+		services->set<T>(core_system);
 	}
 
-	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+	template<typename T>
+	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
+		services->set<T>(layer_system);
 	}
 
 	void Application::Init(void* app) {
-		// Set the static instance
-		s_Instance = this;
 
-		auto window_app = std::shared_ptr<Window::Window>(Window::Window::create(app));
-		window_app->registerCallbacks(this);
+		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		app_window->registerCallbacks(this);
+		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
 		//addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
-		addCoreSystem(window_app);
+		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 #ifdef PN_PLATFORM_ANDROID
@@ -68,7 +72,7 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>(window_app->getNativeWindow()));
+		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
 #endif
 
 		//Mark engine as ready
@@ -77,34 +81,31 @@ namespace PAIN {
 
 	void Application::Run() {
 
-#ifdef  PN_PLATFORM_ANDROID
-		//Update all layered systems
-		for (auto& layer : layer_stack) {
-			layer->onUpdate();
-		}
-
-		//Update all core systems
-		for (auto& core : core_stack) {
-			core->onUpdate();
-		}
-#else
 		//Application loop
 		while (b_app_running) {
 
+			//Poll events
+			services->get<Window::Window>()->pollEvents();
+
 			//Drain all events in queue
 			drainEventQueue();
+
+			//Skip all other systems when window is not active
+			if (!services->get<Window::Window>()->getActive()) continue;
+
+			//Update all core systems
+			for (auto& core : core_stack) {
+				core->onUpdate();
+			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
 				layer->onUpdate();
 			}
 
-			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate();
-			}
+			//Swap buffer
+			services->get<Window::Window>()->swapBuffers();
 		};
-#endif
 	}
 
 	void Application::terminate() {
