@@ -12,6 +12,7 @@
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
+#include "CoreSystems/Assets/sAssetCompiler.h"
 
 
 namespace PAIN {
@@ -70,6 +71,7 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
 #endif
+		addCoreSystem(std::make_shared<Compiler::Service>());
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
@@ -202,7 +204,4 @@ namespace PAIN {
 			event_queue.pop();
 		}
 	}
-
-	// All services defines
-	#define PN_PATH_SERVICE services->get<Path::Service>()
 }

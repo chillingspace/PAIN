@@ -10,13 +10,24 @@
 #ifdef PN_PLATFORM_WINDOWS
 #include "sPath.h"
 
+#ifdef PN_PLATFORM_WINDOWS
+
 namespace PAIN {
 
-	 void Path::Service::init(nlohmann::json const& config) {
+	 void Path::Service::init(std::string const& config_path) {
 	 	//Identify current working directory
 	 	root_path = std::filesystem::current_path();
 
+		json config;
+
 	 	try {
+			// Convert the path to json
+			std::ifstream file(config_path);
+			if (!file.is_open()) {
+				PN_CORE_WARN("Could not open config file: {}", config_path);
+				return;
+			}
+			file >> config;
 	 		auto const& data = config.at("PathsConfig");
 
 	 		//Register default path aliases

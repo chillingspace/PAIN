@@ -50,7 +50,7 @@ namespace PAIN {
 			void onEvent(Event::Event& e) override {};
 
 	 		//Init
-	 		void init(nlohmann::json const& config);
+	 		void init(std::string const& config_path);
 
 	 		//Register new virtual path
 	 		void registerVirtualPath(std::string const& path_alias, std::filesystem::path const& path, bool b_full_path = false);
