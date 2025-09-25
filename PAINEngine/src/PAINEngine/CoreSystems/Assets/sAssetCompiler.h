@@ -10,6 +10,7 @@
 
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef S_ASSET_COMPILER_H
 #define S_ASSET_COMPILER_H
 
@@ -95,4 +96,5 @@ namespace PAIN {
 }
 
 
+#endif
 #endif

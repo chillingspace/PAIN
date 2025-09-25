@@ -8,6 +8,8 @@
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
+#ifdef PN_PLATFORM_WINDOWS
+
 #include "pch.h"
 #include "Applications/Application.h"
 #include "sAssetCompiler.h"
@@ -114,11 +116,11 @@ namespace PAIN {
 			compilers[ASSET_TYPE::TEXTURE] = std::make_unique<TextureCompiler>();
 			compilers[ASSET_TYPE::SHADER] = std::make_unique<ShaderCompiler>();
 
-			// Setting assets path
-            asset_path = "assets/";
+			//// Setting assets path
+   //         asset_path = "assets/";
 
-            // TODO: COMPILE ALL ASSETS
-            compileAsset(ASSET_TYPE::SHADER, "assets/Engine/Shaders/base.desc", "assets/Engine/Shaders/Compiled Shaders/");
+   //         // TODO: COMPILE ALL ASSETS
+   //         compileAsset(ASSET_TYPE::SHADER, "assets/Engine/Shaders/base.desc", "assets/Engine/Shaders/Compiled Shaders/");
             
 		}
 
@@ -159,3 +161,5 @@ namespace PAIN {
 
 	}
 }
+
+#endif
