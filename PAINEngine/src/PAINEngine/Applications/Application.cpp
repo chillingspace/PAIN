@@ -11,9 +11,6 @@
 #include "CoreSystems/Renderer/RendererLayer.h"
 namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
-
 	Application::Application()
 	{
 		//Create default services

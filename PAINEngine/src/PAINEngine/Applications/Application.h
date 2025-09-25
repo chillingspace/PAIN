@@ -15,8 +15,6 @@ namespace PAIN {
 	class Application
 	{
 	private:
-		// Application instance
-		static Application* s_Instance;
 
 		//Core services stack
 		std::shared_ptr<Services> services;
@@ -30,9 +28,6 @@ namespace PAIN {
 
 		//Event queue
 		std::queue<std::shared_ptr<Event::Event>> event_queue;
-
-		// Direct pointer to the AudioManager
-		//std::shared_ptr<AudioManager> m_AudioManager;
 
 		//Dispatch events to layers
 		void dispatchEventsForward(Event::Event& e);
