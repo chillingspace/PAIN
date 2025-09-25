@@ -52,14 +52,14 @@ namespace PAIN {
             }
 
             // Slowly, find the file paths
-            std::filesystem::path tool_path= project_root / "assets" / "tools" / "glslangValidator.exe";
-            std::filesystem::path input_path = project_root / "assets" / "Shaders" / "base.vert";
-            std::filesystem::path output_dir = project_root / "assets" / "Shaders" / "Compiled_Shaders";
+            std::filesystem::path tool_path= project_root / "assets" / "Engine" / "Tools" / "glslangValidator.exe";
+            std::filesystem::path input_path = project_root / "assets" / "Engine" / "Shaders" / "base.vert";
+            std::filesystem::path output_dir = project_root / "assets" / "Engine" / "Shaders" / "Compiled_Shaders";
             std::filesystem::path output_file = output_dir / ("base.vert.spv");
 
-            std::ifstream check_file(input_path);
+            std::ifstream check_file(tool_path);
             if (!check_file.good()) {
-                PN_CORE_WARN("[ShaderCompiler] Cannot find exe: {}\n", input_path.string());
+                PN_CORE_WARN("[ShaderCompiler] Cannot find exe: {}\n", tool_path.string());
                 return;
             }
 
@@ -124,7 +124,7 @@ namespace PAIN {
             asset_path = "assets/";
 
             // TODO: COMPILE ALL ASSETS
-            compileAsset(ASSET_TYPE::SHADER, "assets/Shaders/base.desc", "assets/Shaders/Compiled Shaders/");
+            compileAsset(ASSET_TYPE::SHADER, "assets/Engine/Shaders/base.desc", "assets/Engine/Shaders/Compiled Shaders/");
             
 		}
 

@@ -18,7 +18,7 @@ namespace PAIN {
 	 namespace Path {
 		
 	 	//Path global service
-	 	class Service : public AppSystem {
+	 	class Service {
 	 	private:
 
 	 		//Storage of virtual paths
@@ -38,8 +38,7 @@ namespace PAIN {
 	 	public:
 
 	 		//Default constructor and destructor
-	 		Service() = default;
-	 		~Service() = default;
+			Service() = default;
 
 	 		//Init
 	 		void init(nlohmann::json const& config);
