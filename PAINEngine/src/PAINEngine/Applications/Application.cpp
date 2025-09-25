@@ -3,12 +3,12 @@
 
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
+#include "CoreSystems/Renderer/RendererLayer.h"
 //#include "CoreSystems/Audio/Audio.h"
 #include "ECS/Controller.h"
-#include "CoreSystems/Renderer/TestTriangleLayer.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "Audio/AudioManager.h"
-#include "CoreSystems/Renderer/RendererLayer.h"
+
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
