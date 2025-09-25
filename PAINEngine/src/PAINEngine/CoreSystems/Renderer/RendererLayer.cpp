@@ -11,7 +11,10 @@ namespace PAIN {
 			renderer->Init();
 		}
 	#else
-
+		w_renderer = std::make_unique<WindowsRenderer>();
+		if (w_renderer) {
+			w_renderer->Init();
+		}
 	#endif
 
 	}
@@ -22,7 +25,9 @@ namespace PAIN {
 				renderer->Render();
 			}
 	#else
-
+		if (w_renderer) {
+			w_renderer->Render();
+		}
 	#endif
 
 
