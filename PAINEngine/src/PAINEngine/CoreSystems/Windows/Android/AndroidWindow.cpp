@@ -331,7 +331,6 @@ namespace PAIN {
 
         void Android_Window::onEvent(Event::Event& e) {
         }
-
 	}
 }
 

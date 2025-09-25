@@ -9,10 +9,12 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
-namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
+// Assets
+#include "CoreSystems/Assets/sPath.h"
+
+
+namespace PAIN {
 
 	Application::Application()
 	{
@@ -35,6 +37,7 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		core_system->services = services;
 		core_system->onAttach();
 		core_stack.push_back(core_system);
 		services->set<T>(core_system);
@@ -42,6 +45,7 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
+		layer_system->services = services;
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
 		services->set<T>(layer_system);
@@ -60,6 +64,12 @@ namespace PAIN {
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
+
+		// Windows only have paths, andriods have to use AASettmanager
+#ifdef PN_PLATFORM_WINDOWS
+		addCoreSystem(std::make_shared<Path::Service>());
+		services->get<Path::Service>()->init("assets/Config.json");
+#endif
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
@@ -192,4 +202,7 @@ namespace PAIN {
 			event_queue.pop();
 		}
 	}
+
+	// All services defines
+	#define PN_PATH_SERVICE services->get<Path::Service>()
 }

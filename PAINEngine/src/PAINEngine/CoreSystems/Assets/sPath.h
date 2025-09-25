@@ -12,13 +12,13 @@
 #define PATH_SERVICE_HPP
 
 #include "pch.h"
-#include "Applications/AppSystem.h"
+#include "Applications/Appsystem.h"
 
 namespace PAIN {
 	 namespace Path {
 		
 	 	//Path global service
-	 	class Service {
+	 	class Service : public AppSystem {
 	 	private:
 
 	 		//Storage of virtual paths
@@ -39,6 +39,14 @@ namespace PAIN {
 
 	 		//Default constructor and destructor
 			Service() = default;
+
+			//Optional virtual functions
+			void onAttach() override {};
+			void onDetach() override {};
+			void onUpdate() override {};
+
+			//Event handler for app layer
+			void onEvent(Event::Event& e) override {};
 
 	 		//Init
 	 		void init(nlohmann::json const& config);
