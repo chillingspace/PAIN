@@ -1,0 +1,20 @@
+{
+    "guid": "A1B2C3D4E5F60708",
+    "type": "SHADER",
+    "name": "base_shader",
+    "source_files": {
+        "vertex": "base.vert",
+        "fragment": "base.frag"
+    },
+    "platform_options": {
+        "windows": {
+            "target": "GLSL_450"
+        },
+        "android": {
+            "target": "GLES3"
+        }
+    },
+    "tags": ["default", "core", "example"],
+    "virtual_path": "shaders/core/base_shader"
+}
+    

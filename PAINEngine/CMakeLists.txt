@@ -36,11 +36,14 @@ target_link_libraries(PAINEngine
         imgui::imgui
         Jolt
         FMOD::core
+
 )
 
 target_link_libraries(PAINEngine
     PUBLIC  
         spdlog_header_only
+        FileWatch_header_only
+        nlohmann_json
 )
 
 # ImGui backends compiled into the engine
