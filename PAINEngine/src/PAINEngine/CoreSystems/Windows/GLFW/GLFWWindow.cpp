@@ -63,7 +63,8 @@ namespace PAIN {
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
 
-			b_initialized = true;
+			//Set window flag to active
+			b_active = true;
 		}
 
 		//Shutdown & release resource

@@ -42,8 +42,6 @@ namespace PAIN {
 	}
 
 	void Application::Init(void* app) {
-		// Set the static instance
-		s_Instance = this;
 
 		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
@@ -84,6 +82,9 @@ namespace PAIN {
 
 			//Drain all events in queue
 			drainEventQueue();
+
+			//Skip all other systems when window is not active
+			if (!app_window->getActive()) continue;
 
 			//Update all core systems
 			for (auto& core : core_stack) {

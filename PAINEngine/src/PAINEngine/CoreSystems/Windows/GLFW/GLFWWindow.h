@@ -19,12 +19,9 @@ namespace PAIN {
 			//Window buffer size
 			glm::uvec2 frame_buffer;
 
-			//Init flag
-			bool b_initialized = false;
-
 			//Private internal functions
-			virtual void init(Package const& package);
-			virtual void shutdown();
+			void init(Package const& package);
+			void shutdown();
 
 			//Callbacks
 			static void fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height);
