@@ -11,6 +11,9 @@
 #include "CoreSystems/Renderer/RendererLayer.h"
 namespace PAIN {
 
+	// Define the static instance
+	Application* Application::s_Instance = nullptr;
+
 	Application::Application()
 	{
 		//Create default services
@@ -55,6 +58,7 @@ namespace PAIN {
 		//addCoreSystem(m_AudioManager);
 
 		//Push other core systems into the stack
+		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 #ifdef PN_PLATFORM_ANDROID

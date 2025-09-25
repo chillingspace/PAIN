@@ -15,6 +15,8 @@ namespace PAIN {
 	class Application
 	{
 	private:
+		// Application instance
+		static Application* s_Instance;
 
 		//Core services stack
 		std::shared_ptr<Services> services;
