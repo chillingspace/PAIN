@@ -9,12 +9,14 @@
  *********************************************************************/
 
 #include "pch.h"
-#include "Applications/AppSystem.h"
+#include "Applications/Application.h"
 #include "sAssetCompiler.h"
+
+#include "sPath.h"
 
 
 namespace PAIN {
-    namespace ASSET_COMPILER {
+    namespace Compiler {
 
         void TextureCompiler::compile(const std::string& input_path, const std::string& output_path)
         {
@@ -26,16 +28,8 @@ namespace PAIN {
         }
 
         void ShaderCompiler::compile(const std::string& desc_path, const std::string& output_path) {
-            // Read descriptor JSON
-            std::ifstream input_file(desc_path);
-            if (!input_file.good()) {
-                PN_CORE_WARN("[ShaderCompiler] Cannot open descriptor: {}\n,  desc_path << ");
-                return;
-            }
 
-            // To read as a json file
-            json json_file;
-            input_file >> json_file;
+            json data = readDescFile(desc_path);
 
             // Get current working directory and build paths from there
             std::filesystem::path current_path = std::filesystem::current_path();
@@ -130,7 +124,10 @@ namespace PAIN {
 
 		void Service::onUpdate()
 		{
-
+            // Logic path: Use path service to watch asset directories, compile all assets in the directories,
+            // Watch if any changes in the different asset type directories, then compile again
+            
+            // Reads the desc file in the respective asset type directory, using the desc file's info to compile
 		}
 
 		void Service::onDetach() {

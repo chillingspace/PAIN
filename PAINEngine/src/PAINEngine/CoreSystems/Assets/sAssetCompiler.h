@@ -21,7 +21,7 @@
 //#endif
 
 namespace PAIN {
-	namespace ASSET_COMPILER {
+	namespace Compiler {
 
 		enum class ASSET_TYPE {
 			TEXTURE,
@@ -34,6 +34,21 @@ namespace PAIN {
 		public:
 			virtual ~IAssetCompiler() = default;
 			virtual void compile(const std::string& input_path, const std::string& output_path) = 0;
+			json readDescFile(const std::string& input_path)
+			{
+				// Read descriptor JSON
+				std::ifstream input_file(input_path);
+				if (!input_file.good()) {
+					PN_CORE_WARN("[ShaderCompiler] Cannot open descriptor: {}\n,  desc_path << ");
+					return;
+				}
+
+				// To read as a json file
+				json json_file;
+				input_file >> json_file;
+
+				return json_file;
+			}
 		};
 
 		class TextureCompiler : public IAssetCompiler {
@@ -56,6 +71,8 @@ namespace PAIN {
 			Service() = default;
 
 			void compileAsset(ASSET_TYPE type, const std::string& input_path, const std::string& output_path);
+
+#define PN_PATH_SERVICE  services->get<Path::Service>()
 
 
 			void onAttach() override;
