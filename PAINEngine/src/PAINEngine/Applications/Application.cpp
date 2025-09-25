@@ -35,6 +35,7 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		core_system->services = services;
 		core_system->onAttach();
 		core_stack.push_back(core_system);
 		services->set<T>(core_system);
@@ -42,6 +43,7 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
+		layer_system->services = services;
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
 		services->set<T>(layer_system);
