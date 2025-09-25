@@ -22,7 +22,8 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
-		PN_CORE_INFO("Shader program ID: {}", m_shader->GetRendererID());
+
+		glEnable(GL_DEPTH_TEST);
 
 		if (!createBuffers()) {
 			PN_CORE_ERROR("Failed to create buffers");
@@ -30,10 +31,26 @@ namespace PAIN {
 	}
 
 	bool WindowsRenderer::createBuffers() {
+
 		float vertices[] = {
-			 0.0f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
-			-0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f
+			// positions           // colors
+			-0.5f,-0.5f,-0.5f,   1,0,0,    0.5f,-0.5f,-0.5f,   0,1,0,    0.5f, 0.5f,-0.5f,  0,0,1,
+			 0.5f, 0.5f,-0.5f,   0,0,1,   -0.5f, 0.5f,-0.5f,   1,1,0,   -0.5f,-0.5f,-0.5f, 1,0,0,
+
+			-0.5f,-0.5f, 0.5f,   1,0,1,    0.5f,-0.5f, 0.5f,   0,1,1,    0.5f, 0.5f, 0.5f,  1,1,1,
+			 0.5f, 0.5f, 0.5f,   1,1,1,   -0.5f, 0.5f, 0.5f,   0,0,0,   -0.5f,-0.5f, 0.5f, 1,0,1,
+
+			-0.5f, 0.5f, 0.5f,   1,0,0,   -0.5f, 0.5f,-0.5f,   0,1,0,   -0.5f,-0.5f,-0.5f,0,0,1,
+			-0.5f,-0.5f,-0.5f,   0,0,1,   -0.5f,-0.5f, 0.5f,   1,1,0,   -0.5f, 0.5f, 0.5f, 1,0,0,
+
+			 0.5f, 0.5f, 0.5f,   1,0,1,    0.5f, 0.5f,-0.5f,  0,1,1,    0.5f,-0.5f,-0.5f,0,0,0,
+			 0.5f,-0.5f,-0.5f,   0,0,0,    0.5f,-0.5f, 0.5f,  1,1,1,    0.5f, 0.5f, 0.5f, 1,0,1,
+
+			-0.5f,0.5f,-0.5f,    1,1,0,    0.5f,0.5f,-0.5f,   0,1,1,    0.5f,0.5f, 0.5f,  1,0,1,
+			 0.5f,0.5f,0.5f,     1,0,1,   -0.5f,0.5f, 0.5f,   0,1,0,   -0.5f,0.5f,-0.5f, 1,1,0,
+
+			-0.5f,-0.5f,-0.5f,   1,0,0,    0.5f,-0.5f,-0.5f,  0,1,0,    0.5f,-0.5f,0.5f,   0,0,1,
+			 0.5f,-0.5f,0.5f,    0,0,1,   -0.5f,-0.5f,0.5f,   1,1,0,   -0.5f,-0.5f,-0.5f,1,0,0
 		};
 
 		m_shader->Bind();
@@ -65,13 +82,24 @@ namespace PAIN {
 	void WindowsRenderer::Render() {
 		// Clear screen
 		glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Bind shader and VAO, then draw triangle
 		m_shader->Bind();
-		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 
+		// Rotation mtx
+		float angle = static_cast<float>(glfwGetTime());
+		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(.5f, 1.f, 0.f));
+		glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -3.f));
+		glm::mat4 proj = glm::perspective(glm::radians(45.f), 1280.f / 720.f, .1f, 100.f);
+		glm::mat4 mvp = proj * view * model;
+
+		GLuint loc = glGetUniformLocation(m_shader->GetRendererID(), "u_MVP");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, &mvp[0][0]);
+
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
 	}
 
 
@@ -86,7 +114,10 @@ namespace PAIN {
 			vbo = 0;
 		}
 
-		m_shader.reset();
+		if (m_shader) {
+			m_shader.reset();
+		}
+
 	}
 }
 
