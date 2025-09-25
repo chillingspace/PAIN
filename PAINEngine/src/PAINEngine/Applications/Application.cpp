@@ -21,7 +21,6 @@ namespace PAIN {
 	{
 		//Create default services
 		services = std::make_shared<Services>();
-		s_Instance = this;
 	}
 
 	Application::~Application()

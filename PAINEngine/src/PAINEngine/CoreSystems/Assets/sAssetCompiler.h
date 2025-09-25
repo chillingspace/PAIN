@@ -40,7 +40,7 @@ namespace PAIN {
 				std::ifstream input_file(input_path);
 				if (!input_file.good()) {
 					PN_CORE_WARN("[ShaderCompiler] Cannot open descriptor: {}\n,  desc_path << ");
-					return;
+					return json{};
 				}
 
 				// To read as a json file
