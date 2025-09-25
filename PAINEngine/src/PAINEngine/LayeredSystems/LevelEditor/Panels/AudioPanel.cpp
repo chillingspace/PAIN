@@ -3,7 +3,6 @@
 #include "PAINEngine/Applications/Application.h" 
 
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
 #include "PAINEngine/Audio/AudioManager.h"
 
 
@@ -78,5 +77,4 @@ namespace PAIN {
 	} // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif

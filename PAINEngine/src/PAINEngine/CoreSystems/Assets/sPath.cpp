@@ -7,6 +7,7 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 #include "pch.h"
+#ifdef PN_PLATFORM_WINDOWS
 #include "sPath.h"
 
 namespace PAIN {
@@ -370,3 +371,5 @@ namespace PAIN {
 	 	}
 	 }
 }
+
+#endif

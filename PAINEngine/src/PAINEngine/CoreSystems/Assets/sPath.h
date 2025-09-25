@@ -8,6 +8,7 @@
  *********************************************************************/
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef PATH_SERVICE_HPP
 #define PATH_SERVICE_HPP
 
@@ -105,3 +106,4 @@ namespace PAIN {
 	 }
 }
 #endif // !PATH_SERVICE_HPP
+#endif

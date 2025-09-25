@@ -45,6 +45,10 @@ namespace PAIN {
 			ImGui::NewFrame();
 		}
 
+		void EditorAndroid::updateShortCuts(std::shared_ptr<CommandManager> command) {
+
+		}
+
 		void EditorAndroid::handleEvents(Event::Event& event) {
 			//Early exit condition
 			if(!event.isInCategory(Event::Category::All)) return;

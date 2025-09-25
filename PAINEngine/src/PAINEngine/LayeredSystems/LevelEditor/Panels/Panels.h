@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
 #ifndef PANELS_HPP
 #define PANELS_HPP
 
@@ -76,4 +75,3 @@ namespace PAIN {
 
 #endif // IMGUI_LAYER_HPP
 #endif // PDEBUG
-#endif

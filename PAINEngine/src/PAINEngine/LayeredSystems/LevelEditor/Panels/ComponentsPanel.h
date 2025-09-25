@@ -1,6 +1,5 @@
 #pragma once
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
 #ifndef PAIN_EDITOR_COMPONENTS_PANEL_HPP
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
 
@@ -73,6 +72,5 @@ private:
 } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif
 #endif

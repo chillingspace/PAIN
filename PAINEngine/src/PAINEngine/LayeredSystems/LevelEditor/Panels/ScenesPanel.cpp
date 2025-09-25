@@ -2,7 +2,6 @@
 #include "ScenesPanel.h"
 
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
 #include <algorithm>
 
 namespace PAIN {
@@ -246,5 +245,4 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif
