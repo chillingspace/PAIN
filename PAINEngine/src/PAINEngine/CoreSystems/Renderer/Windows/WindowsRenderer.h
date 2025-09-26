@@ -21,12 +21,19 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
+
+		struct Vertex {
+			glm::vec3 pos;
+			glm::vec3 color;
+		};
+
 		bool createBuffers();
 
 		float clearColor[3];
 
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
+		unsigned int ebo = 0;
 
 		std::unique_ptr<Shader> m_shader = nullptr;
 	};
