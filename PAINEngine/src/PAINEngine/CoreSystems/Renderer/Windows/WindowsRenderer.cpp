@@ -35,43 +35,56 @@ namespace PAIN {
 	bool WindowsRenderer::createBuffers() {
 
 		Vertex vertices[] = {
-			// back face z = -0.5
-		   {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
-		   {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // 1
-		   {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}}, // 2
-		   {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}}, // 3
-		   // front face z = +0.5
-		   {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}}, // 4
-		   {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 1.0f}}, // 5
-		   {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}, // 6
-		   {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 0.0f}}  // 7
-		};
-
-		// 12 triangles (36 indices)
-		unsigned int indices[] = {
 			// Front (+Z)
-			4, 5, 6,
-			4, 6, 7,
+			{{-0.5f, -0.5f,  0.5f}, {1,0,0}, {0,0,1}},
+			{{ 0.5f, -0.5f,  0.5f}, {0,1,0}, {0,0,1}},
+			{{ 0.5f,  0.5f,  0.5f}, {0,0,1}, {0,0,1}},
+			{{-0.5f,  0.5f,  0.5f}, {1,1,0}, {0,0,1}},
 
 			// Back (-Z)
-			0, 2, 1,
-			0, 3, 2,
-
-			// Right (+X)
-			1, 6, 5,
-			1, 2, 6,
+			{{ 0.5f, -0.5f, -0.5f}, {1,0,1}, {0,0,-1}},
+			{{-0.5f, -0.5f, -0.5f}, {0,1,1}, {0,0,-1}},
+			{{-0.5f,  0.5f, -0.5f}, {1,1,1}, {0,0,-1}},
+			{{ 0.5f,  0.5f, -0.5f}, {0,0,0}, {0,0,-1}},
 
 			// Left (-X)
-			0, 7, 3,
-			0, 4, 7,
+			{{-0.5f, -0.5f, -0.5f}, {1,0,0}, {-1,0,0}},
+			{{-0.5f, -0.5f,  0.5f}, {0,1,0}, {-1,0,0}},
+			{{-0.5f,  0.5f,  0.5f}, {0,0,1}, {-1,0,0}},
+			{{-0.5f,  0.5f, -0.5f}, {1,1,0}, {-1,0,0}},
+
+			// Right (+X)
+			{{ 0.5f, -0.5f,  0.5f}, {1,0,1}, {1,0,0}},
+			{{ 0.5f, -0.5f, -0.5f}, {0,1,1}, {1,0,0}},
+			{{ 0.5f,  0.5f, -0.5f}, {1,1,1}, {1,0,0}},
+			{{ 0.5f,  0.5f,  0.5f}, {0,0,0}, {1,0,0}},
 
 			// Top (+Y)
-			3, 6, 2,
-			3, 7, 6,
+			{{-0.5f,  0.5f,  0.5f}, {1,0,0}, {0,1,0}},
+			{{ 0.5f,  0.5f,  0.5f}, {0,1,0}, {0,1,0}},
+			{{ 0.5f,  0.5f, -0.5f}, {0,0,1}, {0,1,0}},
+			{{-0.5f,  0.5f, -0.5f}, {1,1,0}, {0,1,0}},
 
 			// Bottom (-Y)
-			0, 5, 4,
-			0, 1, 5
+			{{-0.5f, -0.5f, -0.5f}, {1,0,1}, {0,-1,0}},
+			{{ 0.5f, -0.5f, -0.5f}, {0,1,1}, {0,-1,0}},
+			{{ 0.5f, -0.5f,  0.5f}, {1,1,1}, {0,-1,0}},
+			{{-0.5f, -0.5f,  0.5f}, {0,0,0}, {0,-1,0}}
+		};
+
+		unsigned int indices[] = {
+			// Front (+Z)
+			0,1,2, 0,2,3,
+			// Back (-Z)
+			4,5,6, 4,6,7,
+			// Left (-X)
+			8,9,10, 8,10,11,
+			// Right (+X)
+			12,13,14, 12,14,15,
+			// Top (+Y)
+			16,17,18, 16,18,19,
+			// Bottom (-Y)
+			20,21,22, 20,22,23
 		};
 
 
@@ -93,18 +106,19 @@ namespace PAIN {
 
 
 		// Position attribute, layout(location = 0)
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(0);
 
 		// Color attribute, layout(location = 1)
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 		glEnableVertexAttribArray(1);
+
+		// Normal attribute, layout(location = 2)
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glEnableVertexAttribArray(2);
 
 		// Unbind VAO
 		glBindVertexArray(0);
-
-		// Unbind VBO
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		PN_CORE_INFO("Buffers created successfully");
 		return true;
@@ -114,30 +128,6 @@ namespace PAIN {
 		// Clear screen
 		glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//// Clear screen
-		//glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//glm::mat4 model = glm::rotate(glm::mat4(1.f), 0.f, glm::vec3(.5f, 1.f, 0.f));
-		//glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -3.f));
-		//glm::mat4 proj = glm::perspective(glm::radians(45.f), 1280.f / 720.f, .1f, 100.f);
-
-		//// Bind shader and VAO, then draw triangle
-		//m_shader->Bind();
-
-		//// Rotation mtx
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_View"), 1, GL_FALSE, &view[0][0]);
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Proj"), 1, GL_FALSE, &proj[0][0]);
-
-		//glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_ViewPos"), 0.f, 0.f, 0.f);
-		//glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), -0.2f, -1.0f, -0.3f);
-		//glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
-
-		//glBindVertexArray(vao);
-		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		//glBindVertexArray(0);
 
 		// Bind shader and VAO, then draw triangle
 		if (!m_shader) {
@@ -153,8 +143,11 @@ namespace PAIN {
 		glm::mat4 proj = glm::perspective(glm::radians(45.f), 1280.f / 720.f, .1f, 100.f);
 		glm::mat4 mvp = proj * view * model;
 
-		GLuint loc = glGetUniformLocation(m_shader->GetRendererID(), "u_MVP");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, &mvp[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
+
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), -0.2f, -1.0f, -0.3f);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
 
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
