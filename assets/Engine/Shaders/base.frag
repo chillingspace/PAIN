@@ -7,6 +7,7 @@
 in vec3 vNormal;
 in vec3 vFragPos;
 
+
 out vec4 FragColor;
 
 struct Material {

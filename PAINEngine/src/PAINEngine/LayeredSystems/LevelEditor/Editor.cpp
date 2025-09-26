@@ -3,8 +3,6 @@
 
 #ifdef _DEBUG
 
-#include "PAINEngine/Audio/AudioManager.h"
-
 // Panels
 #include "Panels/ToolsPanel.h"
 #include "Panels/AudioPanel.h"
@@ -20,6 +18,9 @@ namespace PAIN {
 
             //Construct platform
             platform = std::shared_ptr<EditorPlatform>(EditorPlatform::createEditorPlatform(window));
+
+            //Create panels ptr
+            panels = std::make_shared<PanelsMap>();
         }
 
         Editor::~Editor() {}
@@ -30,20 +31,16 @@ namespace PAIN {
             command_manager = std::make_shared<CommandManager>();
 
             //Register panels
-            panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
-            //PN_CORE_INFO(panels[CLASS_STR(Panel::Tools)]->getPanelName());
-
-            panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
-
-            panels[CLASS_STR(Panel::ScenesPanel)] = std::make_shared<Panel::ScenesPanel>(command_manager);
-
-            panels[CLASS_STR(Panel::ComponentsPanel)] = std::make_shared<Panel::ComponentsPanel>(command_manager);
+            registerPanel(std::make_shared<Panel::Tools>());
+            registerPanel(std::make_shared<Panel::DebugAudioPanel>());
+            registerPanel(std::make_shared<Panel::ScenesPanel>());
+            registerPanel(std::make_shared<Panel::ComponentsPanel>());
         }
 
         void Editor::onDetach() {
         }
 
-        void Editor::onUpdate() {
+        void Editor::onUpdate(float dt) {
 
             //Update shortcuts
             platform->updateShortCuts(command_manager);
@@ -54,16 +51,23 @@ namespace PAIN {
             //Build docking space for imgui
             buildDockspace();
 
-            //Update all panels
-            for (auto const& panel : panels) {
-                panel.second->drawWindow();
-            }
+            //Iterate through all panels
+            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) { panel->drawWindow(); });
 
             static bool show_demo = true;
             if (show_demo) ImGui::ShowDemoWindow(&show_demo);
 
             //Signal end of frame for imgui
             platform->endFrame();
+        }
+
+        template<typename T>
+        void Editor::registerPanel(std::shared_ptr<T> panel) {
+
+            //Pass services pointer onto panels
+            panel->command_manager = command_manager;
+            panel->services = services;
+            panels->set<T>(panel);
         }
 
         void Editor::onEvent(Event::Event& event) {
@@ -108,7 +112,6 @@ namespace PAIN {
             ImGui::PopStyleVar(2);
         }
     }
-
 }
 
 #endif

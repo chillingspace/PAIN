@@ -21,8 +21,8 @@
         "Grid_State": false
     },
     "PathsConfig": {
-        "Engine_Assets": "assets/Engine",
-        "Game_Assets": "assets"
+        "Engine_Assets:/": "assets/Engine",
+        "Game_Assets:/": "assets"
     },
     "WindowsConfig": {
         "Title": "Pain Engine",

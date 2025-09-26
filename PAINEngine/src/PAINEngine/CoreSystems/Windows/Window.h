@@ -34,7 +34,7 @@ namespace PAIN {
 			virtual ~Window() = default;
 
 			//Update window
-			virtual void onUpdate() override = 0;
+			virtual void onUpdate(float dt) override = 0;
 
 			//Event callback
 			virtual void onEvent(Event::Event& e) override = 0;

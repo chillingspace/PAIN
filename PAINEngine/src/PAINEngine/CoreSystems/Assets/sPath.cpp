@@ -13,7 +13,20 @@
 
 namespace PAIN {
 
-	 void Path::Service::init(std::string const& config_path) {
+
+
+	std::unordered_map<std::string, std::filesystem::path> const& Path::Service::getAllRegisteredVirtualPaths()
+	{
+		return virtual_paths;
+	}
+
+	std::unordered_map<std::filesystem::path, std::unique_ptr<filewatch::FileWatch<std::string>>> const& Path::Service::getAllDirWatchers()
+	{
+		return dir_watchers;
+	}
+
+
+	void Path::Service::init(std::string const& config_path) {
 	 	//Identify current working directory
 	 	root_path = std::filesystem::current_path();
 
