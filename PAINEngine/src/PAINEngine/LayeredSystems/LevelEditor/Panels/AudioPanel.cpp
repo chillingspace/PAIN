@@ -11,7 +11,7 @@ namespace PAIN {
 		namespace Panel {
 
 
-			DebugAudioPanel::DebugAudioPanel(std::shared_ptr<CommandManager> command_manager) : IPanel(command_manager) {
+			DebugAudioPanel::DebugAudioPanel() {
 
 				
 				name = "##AudioPanel";

@@ -4,9 +4,15 @@
 #define APP_LAYER_HPP
 
 #include "../CoreSystems/Events/Event.h"
-#include "Services.h"
+
+#include "../Utility/CustomTemplates.h"
 
 namespace PAIN {
+
+	class Services : public Custom::ClassWeakMap {
+	public:
+		Services() = default;
+	};
 
 	class AppSystem {
 	private:

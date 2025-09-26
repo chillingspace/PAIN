@@ -29,8 +29,7 @@ namespace PAIN {
 
             class ScenesPanel : public IPanel {
             public:
-                ScenesPanel(std::shared_ptr<CommandManager> cm,
-                    ScenesHooks hooks = {});
+                ScenesPanel(ScenesHooks hooks = {});
 
                 void nextWindowSettings() override;   
                 void onUpdate() override;             

@@ -17,6 +17,12 @@
 namespace PAIN {
     namespace Editor {
 
+        //Panels map
+        class PanelsMap : public Custom::ClassMap {
+        public:
+            PanelsMap() = default;
+        };
+
         //Editor
         class Editor : public AppSystem {
         public:
@@ -31,13 +37,16 @@ namespace PAIN {
         private:
 
             //Panels
-            std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+            std::shared_ptr<PanelsMap> panels;
 
             //Actions manager
             std::shared_ptr<CommandManager> command_manager;
 
             //Platform editor
             std::shared_ptr<EditorPlatform> platform;
+
+            template<typename T>
+            void registerPanel(std::shared_ptr<T> panel);
 
             void BeginFrame();
 

@@ -10,6 +10,11 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
 
+#include "Applications/AppSystem.h"
+
+// Forward declare the real Editor in its namespace:
+namespace PAIN { namespace Editor { class Editor; } }
+
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
@@ -29,8 +34,8 @@ namespace PAIN {
 			class IPanel {
 			private:
 
-				//Actions manager
-				std::shared_ptr<CommandManager> command_manager;
+				//Friend class
+				friend class PAIN::Editor::Editor;
 
 				//Popup queue
 				std::vector<PopUp> popup_queue;
@@ -39,6 +44,12 @@ namespace PAIN {
 				void drawPopUps();
 
 			protected:
+
+				//Actions manager
+				std::shared_ptr<CommandManager> command_manager;
+
+				//Services
+				std::shared_ptr<Services> services;
 
 				//Panel dock ID
 				unsigned int dock_id = 0;
@@ -54,7 +65,7 @@ namespace PAIN {
 			public:
 
 				//Constructor
-				IPanel(std::shared_ptr<CommandManager> command_manager) : command_manager{ command_manager }{}
+				IPanel() = default;
 
 				//Get panel name
 				std::string getPanelName() const { return name; }

@@ -34,8 +34,7 @@ struct ComponentsHooks {
 
 class ComponentsPanel : public IPanel {
 public:
-    ComponentsPanel(std::shared_ptr<CommandManager> cm,
-                    ComponentsHooks hooks = {});
+    ComponentsPanel(ComponentsHooks hooks = {});
 
     void nextWindowSettings() override;   // default
     void onUpdate() override;             // draw inside panel window

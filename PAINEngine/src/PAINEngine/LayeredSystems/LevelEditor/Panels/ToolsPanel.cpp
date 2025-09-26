@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "ToolsPanel.h"
 
+#include "ECS/Controller.h"
 #ifdef _DEBUG
 
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
-			Tools::Tools(std::shared_ptr<CommandManager> command_manager) : IPanel(command_manager) {
+			Tools::Tools() {
 
 				//Set panel name
 				name = "##ToolsPanel";
@@ -81,8 +82,6 @@ namespace PAIN {
                 }
 
                 ImGui::EndChild();
-
-
 			}
 		}
 	}

@@ -18,8 +18,8 @@ static std::vector<std::string> kSeedAvailable = {
     "Script"
 };
 
-ComponentsPanel::ComponentsPanel(std::shared_ptr<CommandManager> cm, ComponentsHooks hooks)
-    : IPanel(std::move(cm)), hooks_(std::move(hooks)) {
+ComponentsPanel::ComponentsPanel(ComponentsHooks hooks)
+    : hooks_(std::move(hooks)) {
 
     name  = "Components";
     flags = ImGuiWindowFlags_None;
