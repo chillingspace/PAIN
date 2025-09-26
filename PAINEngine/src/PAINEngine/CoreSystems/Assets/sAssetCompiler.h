@@ -31,20 +31,11 @@ namespace PAIN {
 			None
 		};
 
-		class IAssetCompiler : public AppSystem {
+		class IAssetCompiler{
 		public:
 			virtual ~IAssetCompiler() = default;
 			virtual void compile(const std::string& desc_path) = 0;
 
-			//Optional virtual functions
-			void onAttach() override {};
-			void onDetach() override {};
-			void onUpdate(float dt) override {};
-
-			//Event handler for app layer
-			void onEvent(Event::Event& e) override {};
-
-#define PN_PATH_SERVICE  services->get<Path::Service>()
 			static json readDescFile(const std::string& input_path)
 			{
 
@@ -85,7 +76,7 @@ namespace PAIN {
 
 		class Service : public AppSystem {
 		public:
-			Service() = default;
+			~Service() = default;
 
 			void scanAssetDirectory(std::string const& virtual_path, bool b_diretory_tree);
 
@@ -113,11 +104,6 @@ namespace PAIN {
 
 			//List of valid extension
 			std::set<std::string> valid_extensions;
-
-			// Pointers to the compilers
-			std::unique_ptr<TextureCompiler> texture_compiler;
-			std::unique_ptr<ShaderCompiler> shader_compiler;
-			//std::unique_ptr<AudioCompiler> audio_compiler;
 		};
 
 	}

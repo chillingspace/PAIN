@@ -54,6 +54,8 @@ namespace PAIN {
             std::string frag_file = data["source_files"]["fragment"].get<std::string>();
 
             // Resolve paths using Path Service
+            // For now have to set it like this, using path service here will crash somehow...if i put IassetCompiler
+            // To inherit AppSystem also feels wrong...
             std::filesystem::path tool_path = "assets/Engine/Tools/glslangValidator.exe";
             std::filesystem::path vert_path = "assets/Engine/Shaders/" + vert_file;
             std::filesystem::path frag_path = "assets/Engine/Shaders/" + frag_file;
@@ -66,12 +68,19 @@ namespace PAIN {
             std::filesystem::path vert_output = output_dir / (asset_id + "_vert.spv");
             std::filesystem::path frag_output = output_dir / (asset_id + "_frag.spv");
 
-            //// Check if tool exists
+            // Check if tool exists
             if (!std::filesystem::exists(tool_path)) {
                 PN_CORE_WARN("[ShaderCompiler] Cannot find glslangValidator: {}", tool_path.string());
                 return;
             }
 
+            // Check if very and frag files exists
+            if (!std::filesystem::exists(vert_path) && !std::filesystem::exists(frag_path)) {
+                PN_CORE_WARN("[ShaderCompiler] Cannot find vertex or fragment shader: {} / {}", vert_path.string(), frag_path.string());
+                return;
+            }
+
+            // To build the sys command to execute the compiler exe, have to be aboslute
             auto buildCommand = [](const std::filesystem::path& tool, const std::filesystem::path& input, const std::filesystem::path& output) {
                 std::ostringstream cmd;
 #ifdef PN_PLATFORM_WINDOWS
@@ -99,16 +108,12 @@ namespace PAIN {
             PN_CORE_INFO("[ShaderCompiler] Compiled shaders successfully: {} & {}", vert_output.string(), frag_output.string());
         }
 
-
-    
-
-
 		void Service::onAttach() {
 			PN_CORE_INFO("Asset Compiler init");
 
 			// Init specific asset compilers
-			compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
-			compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
+            // compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
+            compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
 
             //Texture extensions
             addValidExtensions(".png");
@@ -136,11 +141,7 @@ namespace PAIN {
             //addValidExtensions(".lua");
             //addValidExtensions(".json");
 
-            // TODO: COMPILE ALL ASSETS            
-		}
-
-        void Service::onUpdate(float dt)
-        {
+            // TODO: COMPILE ALL ASSETS      
             for (auto const& [alias, path] : PN_PATH_SERVICE->getAllRegisteredVirtualPaths())
             {
                 if (alias.find("Game_Assets:/") != 0) continue;
@@ -148,18 +149,24 @@ namespace PAIN {
                 // Initial compilation
                 scanAssetDirectory(alias, true);
 
-                //// Watch directory if not already watched
-                //if (PN_PATH_SERVICE->getAllDirWatchers().count(path)) continue;
+                // Watch directory if not already watched
+                if (PN_PATH_SERVICE->getAllDirWatchers().count(path)) continue;
 
-                //PN_PATH_SERVICE->watchDirectoryTree(alias, [this](std::filesystem::path const& changed_file, filewatch::Event event_type)
-                //    {
-                //        if (event_type == filewatch::Event::modified || event_type == filewatch::Event::added) {
-                //            processAssetFile(changed_file);
-                //        }
-                //    });
+                // Check if file is modified or added, compile it 
+                PN_PATH_SERVICE->watchDirectoryTree(alias, [this](std::filesystem::path const& changed_file, filewatch::Event event_type)
+                    {
+                        if (event_type == filewatch::Event::modified || event_type == filewatch::Event::added) {
+                            processAssetFile(changed_file);
+                        }
+                    });
 
-                //PN_CORE_INFO("[AssetCompilerService] Watching directory: {}", path.string());
+                PN_CORE_INFO("[AssetCompilerService] Watching directory: {}", path.string());
             }
+		}
+
+        void Service::onUpdate(float dt)
+        {
+
         }
 
 
@@ -276,19 +283,47 @@ namespace PAIN {
         {
             auto root_path = PN_PATH_SERVICE->resolvePath(virtual_path);
 
+            // Keep track of processed shader base names to avoid double compilation
+            std::unordered_set<std::string> processed_shaders;
+
+            auto compileFile = [&](const std::filesystem::path& file_path)
+            {
+                // Only process valid extensions
+                if (valid_extensions.find(file_path.extension().string()) == valid_extensions.end()) {
+                    //PN_CORE_WARN("[AssetCompilerService] Invalid extension: {}", file_path.string());
+                    return;
+                }
+
+                // For shaders: skip if base name already compiled
+                // Only for shaders
+                if (file_path.extension() == ".vert" || file_path.extension() == ".frag") {
+                    // Removes extension
+                    std::string base_name = file_path.stem().string(); 
+                    if (processed_shaders.find(base_name) != processed_shaders.end()) {
+                        // already compiled this shader
+                        return; 
+                    }
+                    processed_shaders.insert(base_name);
+                }
+
+                // Process asset normally
+                processAssetFile(file_path);
+            };
+
             if (!b_directory_tree) {
                 for (const auto& file : std::filesystem::directory_iterator(root_path)) {
                     if (!file.is_regular_file()) continue;
-                    processAssetFile(file.path());
+                    compileFile(file.path());
                 }
                 return;
             }
 
             for (const auto& file : std::filesystem::recursive_directory_iterator(root_path)) {
                 if (!file.is_regular_file()) continue;
-                processAssetFile(file.path());
+                compileFile(file.path());
             }
         }
+
 
 
         void Service::compileAsset(ASSET_TYPE type, const std::string& desc_file_path)
