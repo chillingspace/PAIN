@@ -101,7 +101,7 @@ namespace PAIN {
 
 		// Rotation mtx
 		float angle = static_cast<float>(glfwGetTime());
-		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, 1.f, 1.f));
+		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
 		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
 
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
