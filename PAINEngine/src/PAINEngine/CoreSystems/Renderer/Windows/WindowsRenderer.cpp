@@ -1,3 +1,15 @@
+/**
+ * @file WindowsRenderer.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-09-27
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+
 #ifdef PN_PLATFORM_WINDOWS
 
 #include "WindowsRenderer.h"
@@ -55,12 +67,12 @@ namespace PAIN {
 		glEnableVertexAttribArray(0);
 
 		// Color attribute, layout(location = 1)
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-		glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+		//glEnableVertexAttribArray(1);
 
-		// Normal attribute, layout(location = 2)
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-		glEnableVertexAttribArray(2);
+		// Normal attribute, layout(location = 1)
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glEnableVertexAttribArray(1);
 
 		// Unbind VAO
 		glBindVertexArray(0);
@@ -70,6 +82,12 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Render() {
+		// update
+		light.position = Camera::get().pos;
+		
+
+
+		// render
 		// Clear screen
 		glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -101,7 +119,7 @@ namespace PAIN {
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
 
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
-		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L_intensity"), light.L_intensity);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
 
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

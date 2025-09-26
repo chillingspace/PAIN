@@ -1,8 +1,9 @@
+// base.frag
+
 #version 330 core
 
 #define PI 3.14159265359
 
-in vec3 vColor;
 in vec3 vNormal;
 in vec3 vFragPos;
 
@@ -69,6 +70,12 @@ vec3 microfacetModel(vec3 position, vec3 n) {
 }
 
 void main() {
-    vec3 color = (vFragPos, normalize(vNormal));
+    vec3 vFragPosViewSpace = (u_V * vec4(vFragPos, 1.0)).xyz;
+    vec3 vNormalViewSpace = mat3(u_V) * normalize(vNormal);
+    
+    vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
     FragColor = vec4(color, 1.0);
+
+    // vec3 color = microfacetModel(vFragPos, normalize(vNormal));
+    // FragColor = vec4(color, 1.0);
 }
