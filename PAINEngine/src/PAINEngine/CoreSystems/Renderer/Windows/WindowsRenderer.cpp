@@ -1,3 +1,15 @@
+/**
+ * @file WindowsRenderer.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-09-27
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+
 #ifdef PN_PLATFORM_WINDOWS
 
 #include "WindowsRenderer.h"
@@ -16,123 +28,104 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Init() {
-		if (!createShaders()) {
-			PN_CORE_ERROR("Failed to create shaders");
+		m_shader = Shader::LoadShaders("base.vert", "base.frag");
+
+		if (!m_shader || m_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
 		}
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE); 
+		glCullFace(GL_BACK);
 
 		if (!createBuffers()) {
 			PN_CORE_ERROR("Failed to create buffers");
 		}
 	}
 
-	bool WindowsRenderer::createShaders() {
-		const char* vertexSrc = R"(
-        #version 330 core
-        layout(location = 0) in vec3 aPos;
-        layout(location = 1) in vec3 aColor;
-        out vec3 vColor;
-        void main() {
-            gl_Position = vec4(aPos, 1.0);
-            vColor = aColor;
-        }
-    )";
-
-		const char* fragmentSrc = R"(
-        #version 330 core
-        in vec3 vColor;
-        out vec4 FragColor;
-        void main() {
-            FragColor = vec4(vColor, 1.0);
-        }
-    )";
-
-		m_shaders = std::make_unique<Shader>(vertexSrc, fragmentSrc);
-
-		if (!m_shaders) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return false;
-		}
-
-		program = m_shaders->GetRendererID();
-
-		return true;
-	}
-
 	bool WindowsRenderer::createBuffers() {
-		float vertices[] = {
-			 0.0f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
-			-0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f
-		};
+		m_shader->Bind();
 
-		const char* version = (const char*)glGetString(GL_VERSION);
-		bool useVAO = (version && strstr(version, "OpenGL ES 3"));
-
-		// Create VAO (OpenGL ES 3.0+)
+		// Generate and bind VAO
 		glGenVertexArrays(1, &vao);
-		if (vao == 0) {
-			PN_CORE_ERROR("Failed to create VAO");
-			return false;
-		}
 		glBindVertexArray(vao);
-		PN_CORE_INFO("Using VAO for vertex attributes");
 
-		PN_CORE_ERROR("VAO not supported, using direct attribute binding");
-
-
-		// Create VBO
+		// Generate and bind VBO
 		glGenBuffers(1, &vbo);
-		if (vbo == 0) {
-			PN_CORE_ERROR("Failed to create VBO");
-			return false;
-		}
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		// Position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		// Generate and bind EBO (index buffer)
+		glGenBuffers(1, &ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+		// Position attribute, layout(location = 0)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		// Color attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		// Color attribute, layout(location = 1)
+		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+		//glEnableVertexAttribArray(1);
+
+		// Normal attribute, layout(location = 1)
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 		glEnableVertexAttribArray(1);
 
-		// Unbind
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// Unbind VAO
 		glBindVertexArray(0);
-		// For OpenGL ES 2.0, we'll bind attributes in render function
-		PN_CORE_INFO("Will bind attributes in render function for OpenGL ES 2.0");
-
 
 		PN_CORE_INFO("Buffers created successfully");
 		return true;
 	}
 
 	void WindowsRenderer::Render() {
-		// Clear the screen
+		// update
+		light.position = Camera::get().pos;
+		
+
+
+		// render
+		// Clear screen
 		glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Use shader program
-		glUseProgram(program);
+		// Bind shader and VAO, then draw triangle
+		if (!m_shader) {
+			PN_CORE_ERROR("Unable to find m_shaders");
+			return;
+		}
+		m_shader->Bind();
 
-		// Bind VAO and draw (OpenGL ES 3.0+)
+		// Rotation mtx
+		float angle = static_cast<float>(glfwGetTime());
+		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
+		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
+
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
+		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
+
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
+
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), 0.f, 0.0f, -1.f);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
+
+		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.rough"), material.rough);
+		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
+
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
+
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		// For OpenGL ES 2.0, bind attributes manually
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		// Position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		// Color attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
+
 
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {
@@ -145,10 +138,15 @@ namespace PAIN {
 			vbo = 0;
 		}
 
-		if (program != 0) {
-			glDeleteProgram(program);
-			program = 0;
+		if (ebo != 0) {
+			glDeleteBuffers(1, &ebo);
+			ebo = 0;
 		}
+
+		if (m_shader) {
+			m_shader.reset();
+		}
+
 	}
 }
 

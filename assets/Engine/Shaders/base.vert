@@ -1,21 +1,24 @@
-// @file	base.vert
-// @brief	base vertex shader
-// @author	Poh Jing Seng, 2301363, jingseng.poh@digipen.edu (10%)
-// @co-author Sean Gwee, 2301326, g.boonxuensean@digipen.edu (90%)
-// @date	11 Sep 2024
+// base.vert
 
-#version 450 core
 
-layout (location = 0) in vec2 a_position;
-layout (location = 1) in vec3 a_color;
+#version 330 core
 
-layout (location = 0) out vec4 f_color;
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aNormal;
 
-layout(location = 0) uniform mat4 model_to_ndc;
+out vec3 vNormal;
+out vec3 vFragPos;
+
+uniform mat4 u_M;
+uniform mat4 u_V;
+uniform mat4 u_P;
+uniform mat4 u_Model;
 
 void main() {
-    // Correct way: let the matrix do the full transformation
-    gl_Position = model_to_ndc * vec4(a_position, 0.0, 1.0);
-    f_color = vec4(a_color, 1.0);
-}
+    vNormal = mat3(transpose(inverse(u_Model))) * aNormal;
+    vFragPos = vec3(u_Model * vec4(aPos, 1.0));
 
+    mat4 MVP = u_P * u_V * u_M;
+
+    gl_Position = MVP * vec4(aPos, 1.0);
+}
