@@ -117,10 +117,30 @@ namespace PAIN {
 
 	class Camera {
 	public:
-		glm::vec3 pos;
-		float fov;
-		float near_plane;		// near plane (clipping)
-		float far_plane;		// far plane
+		glm::vec3 pos{ 0.f, 0.f, 10.f };
+		glm::vec3 target{ 0.f, 0.f, 0.f };
+		glm::vec3 up{ 0.f, 1.f, 0.f };
+
+		float fov{ 90.f };
+		float near_plane{ 0.1f };		// closest distance camera can see
+		float far_plane{ 100.f };		// furthest distance camera can see
+
+		float width_ratio{ 16.f };
+		float height_ratio{ 9.f };
+		float aspect_ratio{ width_ratio / height_ratio };
+
+		glm::mat4 view() const {
+			return glm::lookAt(pos, target, up);
+		}
+
+		glm::mat4 projection() const {
+			return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
+		}
+
+		static Camera& get() {
+			static Camera instance;
+			return instance;
+		}
 	};
 }
 

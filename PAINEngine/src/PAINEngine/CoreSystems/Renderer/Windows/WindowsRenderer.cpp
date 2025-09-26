@@ -83,17 +83,15 @@ namespace PAIN {
 
 		// Rotation mtx
 		float angle = static_cast<float>(glfwGetTime());
-		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, 1.f, 0.f));
-		glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -3.f));
-		glm::mat4 proj = glm::perspective(glm::radians(45.f), 1280.f / 720.f, .1f, 100.f);
-		glm::mat4 mvp = proj * view * model;
+		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, 1.f, 1.f));
+		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
 
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
 		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
 
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &view[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &proj[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
 
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), 0.f, 0.0f, -1.f);
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
