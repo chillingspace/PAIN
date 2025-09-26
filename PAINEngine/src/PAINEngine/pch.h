@@ -126,9 +126,9 @@ using json = nlohmann::json;
 #include <bitset>
 
  /*****************************************************************//**
- * LOGGING
+ * UTILITY
  *********************************************************************/
-#include "Logging/Log.h"
+#include "Utility/Log.h"
 
 //Ban normal logging
 #define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead

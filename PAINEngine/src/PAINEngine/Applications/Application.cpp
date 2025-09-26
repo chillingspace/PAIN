@@ -4,10 +4,10 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
-//#include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Audio/Audio.h"
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
-#include "Audio/AudioManager.h"
+#include "CoreSystems/Audio/AudioManager.h"
 
 
 // Assets
@@ -59,8 +59,11 @@ namespace PAIN {
 		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
-		//m_AudioManager = std::make_shared<AudioManager>();
-		//addCoreSystem(m_AudioManager);
+		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create());
+		addCoreSystem(app_audio);
+
+		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("assets/audio/Music/Boss_Music.wav");
 
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
@@ -68,9 +71,9 @@ namespace PAIN {
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS
-		addCoreSystem(std::make_shared<Compiler::Service>());
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
+		addCoreSystem(std::make_shared<Compiler::Service>());
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -93,6 +96,8 @@ namespace PAIN {
 
 	void Application::Run() {
 
+		float temp_dt = 0.0f;
+
 		//Application loop
 		while (b_app_running) {
 
@@ -107,12 +112,12 @@ namespace PAIN {
 
 			//Update all core systems
 			for (auto& core : core_stack) {
-				core->onUpdate();
+				core->onUpdate(temp_dt);
 			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
-				layer->onUpdate();
+				layer->onUpdate(temp_dt);
 			}
 
 			//Swap buffer

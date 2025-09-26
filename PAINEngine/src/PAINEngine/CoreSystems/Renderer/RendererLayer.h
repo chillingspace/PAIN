@@ -18,7 +18,7 @@ namespace PAIN {
         ~RendererLayer() = default;
 
         void onAttach() override;
-        void onUpdate() override;
+        void onUpdate(float dt) override;
 
         void onEvent([[maybe_unused]] Event::Event& e) override;
         
