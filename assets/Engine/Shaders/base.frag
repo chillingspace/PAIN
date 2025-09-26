@@ -8,9 +8,6 @@ in vec3 vFragPos;
 
 out vec4 FragColor;
 
-uniform vec3 u_LightDir;
-uniform vec3 u_LightColor;
-
 struct Material {
     float rough;
     float metal;
@@ -29,30 +26,26 @@ uniform mat4 u_V;
 uniform mat4 u_P;
 
 
-float ggxDistribution(float nDotH) 
-{
+float ggxDistribution(float nDotH) {
     float alpha2 = material.rough * material.rough * material.rough * material.rough;
     float d = (nDotH * nDotH) * (alpha2 - 1.0f) + 1.0f;
     return alpha2 / (PI * d * d);
 }
 
-float geomSmith(float nDotL) 
-{
+float geomSmith(float nDotL) {
     float k = (material.rough + 1.0f) * (material.rough + 1.0f) / 8.0f;
     float denom = nDotL * (1.0f - k) + k;
     return 1.0f / denom;
 }
 
-vec3 schlickFresnel(float lDotH) 
-{
+vec3 schlickFresnel(float lDotH) {
     vec3 f0 = vec3(0.04f); // Dielectrics
     if (material.metal == 1.0f)
         f0 = material.color;
     return f0 + (1.0f - f0) * pow(1.0f - lDotH, 5);
 }
 
-vec3 microfacetModel(vec3 position, vec3 n) 
-{  
+vec3 microfacetModel(vec3 position, vec3 n) {  
     vec3 diffuseBrdf = material.color;
 
     vec3 lightI = light[0].L;
@@ -78,13 +71,4 @@ vec3 microfacetModel(vec3 position, vec3 n)
 void main() {
     vec3 color = (vFragPos, normalize(vNormal));
     FragColor = vec4(color, 1.0);
-
-    return;
-
-    vec3 norm = normalize(vNormal);
-    float diff = max(dot(norm, normalize(-u_LightDir)), 0.0);
-    vec3 diffuse = diff * u_LightColor;
-    vec3 result = (diffuse + 0.1) * vColor; // +0.1 for ambient
-    FragColor = vec4(result, 1.0);
-
 }
