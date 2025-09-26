@@ -18,9 +18,7 @@
 namespace PAIN {
 
 	WindowsRenderer::WindowsRenderer() {
-		clearColor[0] = 0.2f;
-		clearColor[1] = 0.3f;
-		clearColor[2] = 0.3f;
+
 	}
 
 	WindowsRenderer::~WindowsRenderer() {
@@ -39,57 +37,17 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE); 
 		glCullFace(GL_BACK);
 
-		if (!createBuffers()) {
-			PN_CORE_ERROR("Failed to create buffers");
-		}
-	}
-
-	bool WindowsRenderer::createBuffers() {
-		m_shader->Bind();
-
-		// Generate and bind VAO
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		// Generate and bind VBO
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		// Generate and bind EBO (index buffer)
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-
-		// Position attribute, layout(location = 0)
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		// Color attribute, layout(location = 1)
-		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-		//glEnableVertexAttribArray(1);
-
-		// Normal attribute, layout(location = 1)
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-		glEnableVertexAttribArray(1);
-
-		// Unbind VAO
-		glBindVertexArray(0);
-
-		PN_CORE_INFO("Buffers created successfully");
-		return true;
+		m_mesh = Mesh::LoadObj();
 	}
 
 	void WindowsRenderer::Render() {
+
 		// update
 		light.position = Camera::get().pos;
-		
-
 
 		// render
 		// Clear screen
-		glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
+		glClearColor(.2f, .3f, .3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Bind shader and VAO, then draw triangle
@@ -121,9 +79,8 @@ namespace PAIN {
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
 
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
+		if (m_mesh) m_mesh->Draw();
+
 	}
 
 
@@ -146,6 +103,11 @@ namespace PAIN {
 		if (m_shader) {
 			m_shader.reset();
 		}
+
+		if (m_mesh) {
+			m_mesh.reset();
+		}
+
 
 	}
 }
