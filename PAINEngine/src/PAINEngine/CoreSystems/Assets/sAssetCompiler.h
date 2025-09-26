@@ -77,7 +77,7 @@ namespace PAIN {
 
 
 			void onAttach() override;
-			void onUpdate() override;
+			void onUpdate(float dt) override;
 			void onDetach() override;
 
 			void onEvent(Event::Event& e) override;

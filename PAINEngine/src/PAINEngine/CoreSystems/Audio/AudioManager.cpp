@@ -60,7 +60,7 @@ void AudioManager::onDetach() {
     }
 }
 
-void AudioManager::onUpdate() {
+void AudioManager::onUpdate(float dt) {
     if (!m_system) return;
 
     std::vector<int> stoppedChannels;

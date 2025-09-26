@@ -7,7 +7,7 @@
 //#include "CoreSystems/Audio/Audio.h"
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
-#include "Audio/AudioManager.h"
+#include "CoreSystems/Audio/AudioManager.h"
 
 
 // Assets
@@ -93,6 +93,8 @@ namespace PAIN {
 
 	void Application::Run() {
 
+		float temp_dt = 0.0f;
+
 		//Application loop
 		while (b_app_running) {
 
@@ -107,12 +109,12 @@ namespace PAIN {
 
 			//Update all core systems
 			for (auto& core : core_stack) {
-				core->onUpdate();
+				core->onUpdate(temp_dt);
 			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
-				layer->onUpdate();
+				layer->onUpdate(temp_dt);
 			}
 
 			//Swap buffer

@@ -24,7 +24,9 @@ namespace PAIN {
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onUpdate() = 0;
+		virtual void onUpdate(float dt) = 0;
+		virtual void onAppPause() {}
+		virtual void onAppResume() {}
 
 		//Event handler for app layer
 		virtual void onEvent(Event::Event& e) = 0;

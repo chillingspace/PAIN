@@ -3,8 +3,6 @@
 
 #ifdef _DEBUG
 
-#include "PAINEngine/Audio/AudioManager.h"
-
 // Panels
 #include "Panels/ToolsPanel.h"
 #include "Panels/AudioPanel.h"
@@ -42,7 +40,7 @@ namespace PAIN {
         void Editor::onDetach() {
         }
 
-        void Editor::onUpdate() {
+        void Editor::onUpdate(float dt) {
 
             //Update shortcuts
             platform->updateShortCuts(command_manager);

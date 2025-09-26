@@ -124,7 +124,7 @@ namespace PAIN {
             
 		}
 
-		void Service::onUpdate()
+		void Service::onUpdate(float dt)
 		{
             // Logic path: Use path service to watch asset directories, compile all assets in the directories,
             // Watch if any changes in the different asset type directories, then compile again
