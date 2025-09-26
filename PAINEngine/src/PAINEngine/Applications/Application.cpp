@@ -4,7 +4,7 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
-//#include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Audio/Audio.h"
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "CoreSystems/Audio/AudioManager.h"
@@ -59,8 +59,11 @@ namespace PAIN {
 		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
-		//m_AudioManager = std::make_shared<AudioManager>();
-		//addCoreSystem(m_AudioManager);
+		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create());
+		addCoreSystem(app_audio);
+
+		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("assets/audio/Music/Boss_Music.wav");
 
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);

@@ -36,9 +36,6 @@ namespace PAIN {
             virtual AudioResult init() = 0;
             virtual void shutdown() = 0;
 
-            // per-frame
-            virtual void update(float dt) = 0;
-
             // assets
             virtual AudioResult loadSound(std::string_view path,
                 bool is3D = true, bool looping = false, bool stream = false) = 0;
@@ -75,6 +72,11 @@ namespace PAIN {
             virtual void onUpdate(float dt) override = 0;
             virtual void onAppPause() override {}
             virtual void onAppResume() override {}
+
+            virtual void onEvent(Event::Event& e) override {}
+
+            //Static function to create audio class
+            static Audio* create();
         };
 
 	}
