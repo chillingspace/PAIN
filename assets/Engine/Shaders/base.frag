@@ -9,9 +9,9 @@
 // layout (location=0) in vec3 f_color; (uses uniform now)
 
 layout (location=0) in vec4 a_color;
-uniform vec3 f_color;
-uniform float f_opacity;
-uniform int override_color;
+layout(location = 0) uniform vec3 f_color;
+layout(location = 1) uniform float f_opacity;
+layout(location = 2) uniform int override_color;
 
 layout (location=0) out vec4 out_color;
 
