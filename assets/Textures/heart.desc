@@ -1,0 +1,11 @@
+{
+    "guid": "e2f3c0d1-7a24-4b85-9b27-9f9185f27d3a",
+    "asset_id": "heart",
+    "source_file": "heart.png",
+    "options": {
+        "format": "BC7_UNORM",
+        "mipmaps": true,
+        "srgb": true,
+        "output_dir": "assets/Textures/Compiled_Textures"
+    }
+}
