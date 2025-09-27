@@ -9,6 +9,9 @@ target_include_directories(glm INTERFACE "${VENDOR_DIR}/glm")
 add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE "${VENDOR_DIR}/nlohmann/include")
 
+add_library(reflcpp INTERFACE)
+target_include_directories(reflcpp INTERFACE "${VENDOR_DIR}/reflcpp")
+
 add_library(spdlog_header_only INTERFACE)
 target_include_directories(spdlog_header_only INTERFACE "${VENDOR_DIR}/spdlog/include")
 
