@@ -22,8 +22,87 @@ namespace PAIN {
 
 		void TextureCompiler::compile(const std::string& desc_path)
 		{
+			// Read descriptor JSON
+			json data = readDescFile(desc_path);
 
+			// Validate required fields
+			if (!data.contains("asset_id") || !data.contains("source_file")) {
+				PN_CORE_WARN("[TextureCompiler] Descriptor missing 'asset_id' or 'source_file': {}", desc_path);
+				return;
+			}
+
+			std::string asset_id = data["asset_id"].get<std::string>();
+			std::string source_file = data["source_file"].get<std::string>();
+
+			// Options, to standard init
+			std::string format = "BC7_UNORM";
+			bool mipmaps = true;
+			bool srgb = false;
+			std::filesystem::path output_dir = "assets/Textures/Compiled_Textures";
+
+			// Overrite the init with values from desc file
+			if (data.contains("options")) {
+				auto const& options = data["options"];
+				if (options.contains("format")) format = options["format"].get<std::string>();
+				if (options.contains("mipmaps")) mipmaps = options["mipmaps"].get<bool>();
+				if (options.contains("srgb")) srgb = options["srgb"].get<bool>();
+				if (options.contains("output_dir")) output_dir = options["output_dir"].get<std::string>();
+			}
+
+			// Resolve paths
+			std::filesystem::path tool_path = "assets/Engine/Tools/texconv.exe";
+			std::filesystem::path input_path = "assets/Textures/" + source_file;
+			std::filesystem::create_directories(output_dir);
+
+			std::filesystem::path output_path = output_dir / (asset_id + ".dds");
+
+			// Check tool
+			if (!std::filesystem::exists(tool_path)) {
+				PN_CORE_WARN("[TextureCompiler] Cannot find texconv: {}", tool_path.string());
+				return;
+			}
+
+			// Check input texture
+			if (!std::filesystem::exists(input_path)) {
+				PN_CORE_WARN("[TextureCompiler] Cannot find source texture: {}", input_path.string());
+				return;
+			}
+
+			// Build command
+			auto buildCommand = [&](const std::filesystem::path& tool,
+				const std::filesystem::path& input,
+				const std::filesystem::path& out_dir) {
+					std::ostringstream cmd;
+#ifdef PN_PLATFORM_WINDOWS
+					cmd << "\"" << std::filesystem::absolute(tool).string() << " "
+						<< "-y "  // overwrite existing
+						<< "-f " << format << " ";
+
+					if (mipmaps)
+						cmd << "-m 0 "; // generate full mipmap chain
+					else
+						cmd << "-m 1 "; // only base level
+
+					if (srgb)
+						cmd << "-srgb ";
+
+					cmd << "-o \"" << std::filesystem::absolute(out_dir).string() << "\" "
+						<< "\"" << std::filesystem::absolute(input).string() << "\"";
+#endif
+					return cmd.str();
+				};
+
+			// Run texconv
+			std::string tex_cmd = buildCommand(tool_path, input_path, output_dir);
+			if (std::system(tex_cmd.c_str()) != 0) {
+				PN_CORE_ERROR("[TextureCompiler] Texture compilation failed: {}", tex_cmd);
+				return;
+			}
+
+			PN_CORE_INFO("[TextureCompiler] Compiled texture successfully: {}", output_path.string());
 		}
+
+
 
 		void AudioCompiler::compile(const std::string& desc_path)
 		{
@@ -118,7 +197,7 @@ namespace PAIN {
 			PN_CORE_INFO("Asset Compiler init");
 
 			// Init specific asset compilers
-			// compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
+			compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
 			compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
 
 			//Texture extensions
