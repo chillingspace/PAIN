@@ -14,6 +14,8 @@
 
 #include "WindowsRenderer.h"
 #include <cstring>
+#include "Applications/Application.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
 
 namespace PAIN {
 
@@ -43,6 +45,9 @@ namespace PAIN {
 	void WindowsRenderer::Render() {
 
 		// update
+
+		//auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
 		light.position = Camera::get().pos;
 
 		// render
@@ -68,9 +73,6 @@ namespace PAIN {
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
-
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), 0.f, 0.0f, -1.f);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
 
 		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.rough"), material.rough);
 		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);

@@ -1,4 +1,7 @@
 #include "RendererLayer.h"
+#include "./CoreSystems/Events/GLFW/KeyEvents.h"
+#include "./CoreSystems/Events/GLFW/MouseEvents.h"
+#include "./CoreSystems/Events/GLFW/WindowEvents.h"
 
 namespace PAIN {
 
@@ -34,5 +37,27 @@ namespace PAIN {
 	}
 	void RendererLayer::onEvent(Event::Event& e)
 	{
+		Event::Dispatcher dispatcher(e);
+
+		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
+			//if (e.getKeyCode() == GLFW_KEY_W) {
+			//	Camera::get().pos += Camera::get().target * Camera::get().speed;
+			//}
+
+			PN_CORE_INFO(e.toString());
+
+			return false;
+			});
+
+		dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
+			PN_CORE_INFO(e.toString());
+
+			return false;
+			});
+
+		dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
+			PN_CORE_INFO(e.toString());
+			return false;
+			});
 	}
 }
