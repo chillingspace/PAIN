@@ -41,22 +41,26 @@ namespace PAIN {
 
             void ResourcePanel::onUpdate() {
                 // Currently empty, could be used for background updates
-                /*static bool initialized = false;
+                static bool initialized = false;
                 if (!initialized) {
                     init();
                     initialized = true;
-                }*/
+                }
 
                 //render();
             }
 
             void ResourcePanel::init() {
 
+                assert(services && "Services pointer is null in ResourcePanel::init()");
+                auto assetService = services->get<Assets::Service>();
+                assert(assetService && "Assets::Service not registered in ServiceContainer");
+
                 // Register engine icons
-                PN_ASSET_SERVICE->scanAssetDirectory(current_path, false);
+                //PN_ASSET_SERVICE->scanAssetDirectory(current_path, false);
                 // Initialize directories and files
-                directories = PN_PATH_SERVICE->listDirectories(current_path);
-                files = PN_PATH_SERVICE->listFiles(current_path);
+                //directories = PN_PATH_SERVICE->listDirectories(current_path);
+                //files = PN_PATH_SERVICE->listFiles(current_path);
 
                 // Initialize popups
                 error_msg = std::make_shared<std::string>("Error");

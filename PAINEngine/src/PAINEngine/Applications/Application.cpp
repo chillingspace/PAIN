@@ -11,6 +11,8 @@
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
+#include "CoreSystems/Assets/sLoader.h"
+#include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
 
 
@@ -83,11 +85,11 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Windows only have paths, andriods have to use AASettmanager
-#ifdef PN_PLATFORM_WINDOWS
+		#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
-		addCoreSystem(std::make_shared<Compiler::Service>());
-#endif
+		//addCoreSystem(std::make_shared<Assets::Service>());
+		#endif
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
