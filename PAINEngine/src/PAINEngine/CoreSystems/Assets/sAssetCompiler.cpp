@@ -18,343 +18,385 @@
 
 
 namespace PAIN {
-    namespace Compiler {
+	namespace Compiler {
 
-        void TextureCompiler::compile(const std::string& desc_path)
-        {
+		void TextureCompiler::compile(const std::string& desc_path)
+		{
 
-        }
+		}
 
-        void AudioCompiler::compile(const std::string& desc_path)
-        {
-        }
+		void AudioCompiler::compile(const std::string& desc_path)
+		{
+		}
 
-        void ShaderCompiler::compile(const std::string& desc_path)
-        {
-            // Read descriptor JSON
-            json data = readDescFile(desc_path);
+		void ShaderCompiler::compile(const std::string& desc_path)
+		{
+			// Read descriptor JSON
+			json data = readDescFile(desc_path);
 
-            // Get asset ID from descriptor
-            if (!data.contains("asset_id")) {
-                PN_CORE_WARN("[ShaderCompiler] Descriptor missing 'asset_id': {}", desc_path);
-                return;
-            }
-            std::string asset_id = data["asset_id"].get<std::string>();
+			// Get asset ID from descriptor
+			if (!data.contains("asset_id")) {
+				PN_CORE_WARN("[ShaderCompiler] Descriptor missing 'asset_id': {}", desc_path);
+				return;
+			}
+			std::string asset_id = data["asset_id"].get<std::string>();
 
-            // Get source files from descriptor
-            if (!data.contains("source_files") ||
-                !data["source_files"].contains("vertex") ||
-                !data["source_files"].contains("fragment"))
-            {
-                PN_CORE_WARN("[ShaderCompiler] Descriptor missing vertex or fragment shader: {}", desc_path);
-                return;
-            }
+			// Get source files from descriptor
+			if (!data.contains("source_files") ||
+				!data["source_files"].contains("vertex") ||
+				!data["source_files"].contains("fragment"))
+			{
+				PN_CORE_WARN("[ShaderCompiler] Descriptor missing vertex or fragment shader: {}", desc_path);
+				return;
+			}
 
-            std::string vert_file = data["source_files"]["vertex"].get<std::string>();
-            std::string frag_file = data["source_files"]["fragment"].get<std::string>();
+			std::string vert_file = data["source_files"]["vertex"].get<std::string>();
+			std::string frag_file = data["source_files"]["fragment"].get<std::string>();
 
-            // Resolve paths using Path Service
-            // For now have to set it like this, using path service here will crash somehow...if i put IassetCompiler
-            // To inherit AppSystem also feels wrong...
-            std::filesystem::path tool_path = "assets/Engine/Tools/glslangValidator.exe";
-            std::filesystem::path vert_path = "assets/Engine/Shaders/" + vert_file;
-            std::filesystem::path frag_path = "assets/Engine/Shaders/" + frag_file;
+			// Resolve paths using Path Service
+			// For now have to set it like this, using path service here will crash somehow...if i put IassetCompiler
+			// To inherit AppSystem also feels wrong...
+			std::filesystem::path tool_path = "assets/Engine/Tools/glslangValidator.exe";
+			std::filesystem::path vert_path = "assets/Engine/Shaders/" + vert_file;
+			std::filesystem::path frag_path = "assets/Engine/Shaders/" + frag_file;
 
-            // Output directory
-            std::filesystem::path output_dir = "assets/Engine/Shaders/Compiled_Shaders";
-            std::filesystem::create_directories(output_dir);
+			// Output directory
+			std::filesystem::path output_dir = "assets/Engine/Shaders/Compiled_Shaders";
+			std::filesystem::create_directories(output_dir);
 
-            // Output file paths based on asset ID
-            std::filesystem::path vert_output = output_dir / (asset_id + "_vert.spv");
-            std::filesystem::path frag_output = output_dir / (asset_id + "_frag.spv");
+			// Output file paths based on asset ID
+			std::filesystem::path vert_output = output_dir / (asset_id + "_vert.spv");
+			std::filesystem::path frag_output = output_dir / (asset_id + "_frag.spv");
 
-            // Check if tool exists
-            if (!std::filesystem::exists(tool_path)) {
-                PN_CORE_WARN("[ShaderCompiler] Cannot find glslangValidator: {}", tool_path.string());
-                return;
-            }
+			// Check if tool exists
+			if (!std::filesystem::exists(tool_path)) {
+				PN_CORE_WARN("[ShaderCompiler] Cannot find glslangValidator: {}", tool_path.string());
+				return;
+			}
 
-            // Check if very and frag files exists
-            if (!std::filesystem::exists(vert_path) && !std::filesystem::exists(frag_path)) {
-                PN_CORE_WARN("[ShaderCompiler] Cannot find vertex or fragment shader: {} / {}", vert_path.string(), frag_path.string());
-                return;
-            }
+			// Check if very and frag files exists
+			if (!std::filesystem::exists(vert_path) && !std::filesystem::exists(frag_path)) {
+				PN_CORE_WARN("[ShaderCompiler] Cannot find vertex or fragment shader: {} / {}", vert_path.string(), frag_path.string());
+				return;
+			}
 
-            // To build the sys command to execute the compiler exe, have to be aboslute
-            auto buildCommand = [](const std::filesystem::path& tool, const std::filesystem::path& input, const std::filesystem::path& output) {
-                std::ostringstream cmd;
+			// To build the sys command to execute the compiler exe, have to be aboslute
+			auto buildCommand = [](const std::filesystem::path& tool, const std::filesystem::path& input, const std::filesystem::path& output) {
+				std::ostringstream cmd;
 #ifdef PN_PLATFORM_WINDOWS
-                cmd << "\"" << std::filesystem::absolute(tool).string() << " "
-                    << "-G \"" << std::filesystem::absolute(input).string() << "\" "
-                    << "-o \"" << std::filesystem::absolute(output).string() << "\"";
+				cmd << "\"" << std::filesystem::absolute(tool).string() << " "
+					<< "-G \"" << std::filesystem::absolute(input).string() << "\" "
+					<< "-o \"" << std::filesystem::absolute(output).string() << "\"";
 #endif
-                return cmd.str();
-                };
+				return cmd.str();
+				};
 
-            // Compile vertex shader
-            std::string vert_cmd = buildCommand(tool_path, vert_path, vert_output);
-            if (std::system(vert_cmd.c_str()) != 0) {
-                PN_CORE_ERROR("[ShaderCompiler] Vertex shader compilation failed: {}", vert_cmd);
-                return;
-            }
+			// Compile vertex shader
+			std::string vert_cmd = buildCommand(tool_path, vert_path, vert_output);
+			if (std::system(vert_cmd.c_str()) != 0) {
+				PN_CORE_ERROR("[ShaderCompiler] Vertex shader compilation failed: {}", vert_cmd);
+				return;
+			}
 
-            // Compile fragment shader
-            std::string frag_cmd = buildCommand(tool_path, frag_path, frag_output);
-            if (std::system(frag_cmd.c_str()) != 0) {
-                PN_CORE_ERROR("[ShaderCompiler] Fragment shader compilation failed: {}", frag_cmd);
-                return;
-            }
+			// Compile fragment shader
+			std::string frag_cmd = buildCommand(tool_path, frag_path, frag_output);
+			if (std::system(frag_cmd.c_str()) != 0) {
+				PN_CORE_ERROR("[ShaderCompiler] Fragment shader compilation failed: {}", frag_cmd);
+				return;
+			}
 
-            PN_CORE_INFO("[ShaderCompiler] Compiled shaders successfully: {} & {}", vert_output.string(), frag_output.string());
-        }
+			PN_CORE_INFO("[ShaderCompiler] Compiled shaders successfully: {} & {}", vert_output.string(), frag_output.string());
+		}
+
+		void Service::pushFileEvent(std::function<void()> callback)
+		{
+			std::lock_guard<std::mutex> lock(file_event_mutex);
+			file_event_queue.push(std::move(callback));
+		}
 
 		void Service::onAttach() {
 			PN_CORE_INFO("Asset Compiler init");
 
 			// Init specific asset compilers
-            // compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
-            compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
+			// compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
+			compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
 
-            //Texture extensions
-            addValidExtensions(".png");
-            addValidExtensions(".jpg");
-            addValidExtensions(".jpeg");
-            addValidExtensions(".tex");
+			//Texture extensions
+			addValidExtensions(".png");
+			addValidExtensions(".jpg");
+			addValidExtensions(".jpeg");
+			addValidExtensions(".tex");
 
-            ////Font extension
-            //addValidExtensions(".ttf");
-              
-            // Shader extension
-            addValidExtensions(".frag");
-            addValidExtensions(".vert");
+			////Font extension
+			//addValidExtensions(".ttf");
 
-            //Audio extension
-            addValidExtensions(".wav");
+			// Shader extension
+			addValidExtensions(".frag");
+			addValidExtensions(".vert");
 
-            ////Video extension
-            //addValidExtensions(".mpg");
+			//Audio extension
+			addValidExtensions(".wav");
 
-            ////Other extension
-            //addValidExtensions(".prefab");
-            //addValidExtensions(".scn");
-            //addValidExtensions(".grid");
-            //addValidExtensions(".lua");
-            //addValidExtensions(".json");
+			////Video extension
+			//addValidExtensions(".mpg");
 
-            // TODO: COMPILE ALL ASSETS      
-            for (auto const& [alias, path] : PN_PATH_SERVICE->getAllRegisteredVirtualPaths())
-            {
-                if (alias.find("Game_Assets:/") != 0) continue;
+			////Other extension
+			//addValidExtensions(".prefab");
+			//addValidExtensions(".scn");
+			//addValidExtensions(".grid");
+			//addValidExtensions(".lua");
+			//addValidExtensions(".json");
 
-                // Initial compilation
-                scanAssetDirectory(alias, true);
+			for (auto const& [alias, path] : PN_PATH_SERVICE->getAllRegisteredVirtualPaths())
+			{
+				if (alias.find("Game_Assets:/") != 0) continue;
 
-                // Watch directory if not already watched
-                if (PN_PATH_SERVICE->getAllDirWatchers().count(path)) continue;
+				// Init compilation
+				scanAssetDirectory(alias, true);
 
-                // Check if file is modified or added, compile it 
-                PN_PATH_SERVICE->watchDirectoryTree(alias, [this](std::filesystem::path const& changed_file, filewatch::Event event_type)
-                    {
-                        if (event_type == filewatch::Event::modified || event_type == filewatch::Event::added) {
-                            processAssetFile(changed_file);
-                        }
-                    });
+				// Watch dir for changes
+				if (PN_PATH_SERVICE->getAllDirWatchers().count(path)) continue;
 
-                PN_CORE_INFO("[AssetCompilerService] Watching directory: {}", path.string());
-            }
+				PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/",
+					[this](const std::filesystem::path& file, filewatch::Event event) {
+
+						if (std::filesystem::is_directory(file)) return;
+						// Queue file processing
+						switch (event) {
+						case filewatch::Event::added:
+							pushFileEvent([file, event, this]() {
+								processAssetFile(file);
+								});
+							break;
+						case filewatch::Event::modified:
+							pushFileEvent([file, event, this]() {
+								processAssetFile(file);
+								});
+							break;
+						case filewatch::Event::removed:
+							//pushFileEvent([file, event, this]() {
+							//	processAssetFile(file);
+							//	});
+							break;
+						default:
+							break;
+						}
+
+					});
+
+				PN_CORE_INFO("[AssetCompilerService] Watching directory: {}", path.string());
+			}
+
 		}
 
-        void Service::onUpdate(float dt)
-        {
+		void Service::onUpdate(float dt)
+		{
+			//Update with file change events
+			while (!file_event_queue.empty()) {
 
-        }
+				try {
+					//Call callback function if valid
+					if (file_event_queue.front()) {
+						PN_CORE_INFO("Executing file event callback with file watcher.");
+						//Execute file event callback
+						file_event_queue.front()();
+					}
+
+					//Pop from queue
+					file_event_queue.pop();
+				}
+				catch (std::exception const&) {
+					PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+				}
+			}
+		}
 
 
 
 		void Service::onDetach() {
-			
+
 		}
 
 		void Service::onEvent(Event::Event& e) {
 
 		}
 
-        std::string Service::typeToString(ASSET_TYPE type) const {
-            switch (type) {
-            case ASSET_TYPE::Texture:
-                return "Texture";
-                break;
-            case ASSET_TYPE::Audio:
-                return "Music";
-                break;
-            case ASSET_TYPE::Shader:
-                return "Shader";
-                break;
-            //case Types::Scene:
-            //    return "Scene";
-            //    break;
-            //case Types::Prefab:
-            //    return "Prefab";
-            //    break;
-            //case Types::Grid:
-            //    return "Grid";
-            //    break;
-            //case Types::Script:
-            //    return "Script";
-            //    break;
-            //case Types::Video:
-            //    return "Video";
-            //    break;
-            default:
-                return "Unknown";
-                break;
-            }
-        }
+		std::string Service::typeToString(ASSET_TYPE type) const {
+			switch (type) {
+			case ASSET_TYPE::Texture:
+				return "Texture";
+				break;
+			case ASSET_TYPE::Audio:
+				return "Music";
+				break;
+			case ASSET_TYPE::Shader:
+				return "Shader";
+				break;
+				//case Types::Scene:
+				//    return "Scene";
+				//    break;
+				//case Types::Prefab:
+				//    return "Prefab";
+				//    break;
+				//case Types::Grid:
+				//    return "Grid";
+				//    break;
+				//case Types::Script:
+				//    return "Script";
+				//    break;
+				//case Types::Video:
+				//    return "Video";
+				//    break;
+			default:
+				return "Unknown";
+				break;
+			}
+		}
 
-        Compiler::ASSET_TYPE Service::getAssetType(std::filesystem::path const& path) const {
-            auto ext = path.extension().string();
-            // constexpr size_t music_threshold = 5 * 1024 * 1024; // 5 MB
-            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tex") {
-                return Compiler::ASSET_TYPE::Texture;
-            }
-            else if (ext == ".frag" || ext == ".vert") {
-                return Compiler::ASSET_TYPE::Shader;
-            }
-            //else if (ext == ".ttf") {
-            //    return Assets::Types::Font;
-            //}
-            else if (ext == ".wav") {
-                return Compiler::ASSET_TYPE::Audio;
-            }
-            //else if (ext == ".scn") {
-            //    return Assets::Types::Scene;
-            //}
-            //else if (ext == ".prefab") {
-            //    return Assets::Types::Prefab;
-            //}
-            //else if (ext == ".grid") {
-            //    return Assets::Types::Grid;
-            //}
-            //else if (ext == ".lua") {
-            //    return Assets::Types::Script;
-            //}
-            //else if (ext == ".mpg") {
-            //    return Assets::Types::Video;
-            //}
-            else {
-                return Compiler::ASSET_TYPE::None;
-            }
-        }
+		Compiler::ASSET_TYPE Service::getAssetType(std::filesystem::path const& path) const {
+			auto ext = path.extension().string();
+			// constexpr size_t music_threshold = 5 * 1024 * 1024; // 5 MB
+			if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tex") {
+				return Compiler::ASSET_TYPE::Texture;
+			}
+			else if (ext == ".frag" || ext == ".vert") {
+				return Compiler::ASSET_TYPE::Shader;
+			}
+			//else if (ext == ".ttf") {
+			//    return Assets::Types::Font;
+			//}
+			else if (ext == ".wav") {
+				return Compiler::ASSET_TYPE::Audio;
+			}
+			//else if (ext == ".scn") {
+			//    return Assets::Types::Scene;
+			//}
+			//else if (ext == ".prefab") {
+			//    return Assets::Types::Prefab;
+			//}
+			//else if (ext == ".grid") {
+			//    return Assets::Types::Grid;
+			//}
+			//else if (ext == ".lua") {
+			//    return Assets::Types::Script;
+			//}
+			//else if (ext == ".mpg") {
+			//    return Assets::Types::Video;
+			//}
+			else {
+				return Compiler::ASSET_TYPE::None;
+			}
+		}
 
-        void Service::processAssetFile(std::filesystem::path const& file_path)
-        {
-            if (!file_path.has_extension()) return;
+		void Service::processAssetFile(std::filesystem::path const& file_path)
+		{
+			if (!file_path.has_extension()) return;
 
-            // Extension check
-            if (valid_extensions.find(file_path.extension().string()) == valid_extensions.end()) {
-                // PN_CORE_WARN("[AssetCompilerService] Invalid extension: {}", file_path.string());
-                return;
-            }
+			// Extension check
+			if (valid_extensions.find(file_path.extension().string()) == valid_extensions.end()) {
+				// PN_CORE_WARN("[AssetCompilerService] Invalid extension: {}", file_path.string());
+				return;
+			}
 
-            // Get asset type
-            ASSET_TYPE type = getAssetType(file_path);
+			// Get asset type
+			ASSET_TYPE type = getAssetType(file_path);
 
-            std::string virtual_path = PN_PATH_SERVICE->convertToVirtualPath("Game_Assets:/", file_path.string());
+			std::string virtual_path = PN_PATH_SERVICE->convertToVirtualPath("Game_Assets:/", file_path.string());
 
-            // Build asset id
-            std::string asset_id = getIDFromPath(virtual_path);
-            size_t dot_pos = asset_id.find('.');
-            std::string asset_name = (dot_pos != std::string::npos) ? asset_id.substr(0, dot_pos) : asset_id;
+			// Build asset id
+			std::string asset_id = getIDFromPath(virtual_path);
+			size_t dot_pos = asset_id.find('.');
+			std::string asset_name = (dot_pos != std::string::npos) ? asset_id.substr(0, dot_pos) : asset_id;
 
-            // Build descriptor file path            
-            std::filesystem::path desc_file = file_path.parent_path() / (asset_name + ".desc");
+			// Build descriptor file path            
+			std::filesystem::path desc_file = file_path.parent_path() / (asset_name + ".desc");
 
-            // Compile (if desc exists, you could check here)
-            compileAsset(type, desc_file.string());
-        }
-        
-
-        void Service::addValidExtensions(std::string const& ext)
-        {
-            valid_extensions.insert(ext);
-        }
-
-        void Service::scanAssetDirectory(std::string const& virtual_path, bool b_directory_tree)
-        {
-            auto root_path = PN_PATH_SERVICE->resolvePath(virtual_path);
-
-            // Keep track of processed shader base names to avoid double compilation
-            std::unordered_set<std::string> processed_shaders;
-
-            auto compileFile = [&](const std::filesystem::path& file_path)
-            {
-                // Only process valid extensions
-                if (valid_extensions.find(file_path.extension().string()) == valid_extensions.end()) {
-                    //PN_CORE_WARN("[AssetCompilerService] Invalid extension: {}", file_path.string());
-                    return;
-                }
-
-                // For shaders: skip if base name already compiled
-                // Only for shaders
-                if (file_path.extension() == ".vert" || file_path.extension() == ".frag") {
-                    // Removes extension
-                    std::string base_name = file_path.stem().string(); 
-                    if (processed_shaders.find(base_name) != processed_shaders.end()) {
-                        // already compiled this shader
-                        return; 
-                    }
-                    processed_shaders.insert(base_name);
-                }
-
-                // Process asset normally
-                processAssetFile(file_path);
-            };
-
-            if (!b_directory_tree) {
-                for (const auto& file : std::filesystem::directory_iterator(root_path)) {
-                    if (!file.is_regular_file()) continue;
-                    compileFile(file.path());
-                }
-                return;
-            }
-
-            for (const auto& file : std::filesystem::recursive_directory_iterator(root_path)) {
-                if (!file.is_regular_file()) continue;
-                compileFile(file.path());
-            }
-        }
+			// Compile (if desc exists, you could check here)
+			compileAsset(type, desc_file.string());
+		}
 
 
+		void Service::addValidExtensions(std::string const& ext)
+		{
+			valid_extensions.insert(ext);
+		}
 
-        void Service::compileAsset(ASSET_TYPE type, const std::string& desc_file_path)
+		void Service::scanAssetDirectory(std::string const& virtual_path, bool b_directory_tree)
+		{
+			auto root_path = PN_PATH_SERVICE->resolvePath(virtual_path);
+
+			// Keep track of processed shader base names to avoid double compilation
+			std::unordered_set<std::string> processed_shaders;
+
+			auto compileFile = [&](const std::filesystem::path& file_path)
+				{
+					// Only process valid extensions
+					if (valid_extensions.find(file_path.extension().string()) == valid_extensions.end()) {
+						//PN_CORE_WARN("[AssetCompilerService] Invalid extension: {}", file_path.string());
+						return;
+					}
+
+					// For shaders: skip if base name already compiled
+					// Only for shaders
+					if (file_path.extension() == ".vert" || file_path.extension() == ".frag") {
+						// Removes extension
+						std::string base_name = file_path.stem().string();
+						if (processed_shaders.find(base_name) != processed_shaders.end()) {
+							// already compiled this shader, as alr taken in from the desc file
+							return;
+						}
+						processed_shaders.insert(base_name);
+					}
+
+					// Process asset normally
+					processAssetFile(file_path);
+				};
+
+			if (!b_directory_tree) {
+				for (const auto& file : std::filesystem::directory_iterator(root_path)) {
+					if (!file.is_regular_file()) continue;
+					compileFile(file.path());
+				}
+				return;
+			}
+
+			for (const auto& file : std::filesystem::recursive_directory_iterator(root_path)) {
+				if (!file.is_regular_file()) continue;
+				compileFile(file.path());
+			}
+		}
+
+
+
+		void Service::compileAsset(ASSET_TYPE type, const std::string& desc_file_path)
 		{
 			auto it = compilers.find(type);
 			if (it != compilers.end()) {
-                std::ifstream file(desc_file_path, std::ios::binary);
-                if (!file.good()) {
-                    PN_CORE_WARN("[AssetCompilerService] Input file does not exist: {}\n", desc_file_path);
-                    return;
-                }
+				std::ifstream file(desc_file_path, std::ios::binary);
+				if (!file.good()) {
+					PN_CORE_WARN("[AssetCompilerService] Input file does not exist: {}\n", desc_file_path);
+					return;
+				}
 				it->second->compile(desc_file_path);
 			}
 			else {
 				// Log: No compiler registered for this asset type
-                // PN_CORE_WARN("[AssetCompilerService] Compiler not registered", typeToString(type));
-                return;
+				// PN_CORE_WARN("[AssetCompilerService] Compiler not registered", typeToString(type));
+				return;
 			}
 		}
 
-        std::string Service::getIDFromPath(std::string const& path)
-        {
-            // Using virtual paths
-            auto actual_path = PN_PATH_SERVICE->normalizePath(PN_PATH_SERVICE->resolvePath(path)).string();
-            //string variables
-            size_t start = actual_path.find_last_of('\\') + 1;
-            //size_t size = actual_path.find_first_of('.', start) - start;
-            std::string asset_id = actual_path.substr(start);
+		std::string Service::getIDFromPath(std::string const& path)
+		{
+			// Using virtual paths
+			auto actual_path = PN_PATH_SERVICE->normalizePath(PN_PATH_SERVICE->resolvePath(path)).string();
+			//string variables
+			size_t start = actual_path.find_last_of('\\') + 1;
+			//size_t size = actual_path.find_first_of('.', start) - start;
+			std::string asset_id = actual_path.substr(start);
 
-            return asset_id;
-        }
+			return asset_id;
+		}
 
 
 
