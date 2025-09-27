@@ -10,6 +10,9 @@
 #include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
 
+// Serialization
+#include "CoreSystems/Serialization/sSerialization.h"
+
 // Assets
 #include "CoreSystems/Assets/sPath.h"
 
@@ -64,6 +67,9 @@ namespace PAIN {
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
+
+		// Add Serialization 
+		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS
