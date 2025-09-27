@@ -58,4 +58,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation(files("$rootDir/../vendor/FMOD/android/api/core/lib/fmod.jar"))
 }

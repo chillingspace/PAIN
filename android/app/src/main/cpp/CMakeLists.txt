@@ -30,26 +30,6 @@ if(ANDROID)
     find_library(egl-lib EGL)
     find_library(gles-lib GLESv3)
 
-    # --- FMOD IMPORT (Debug = libfmodL.so, Release = libfmod.so) ---
-    # This path mirrors your Gradle sourceSets:
-    #   jniLibs.srcDirs("$rootDir/../vendor/FMOD/android/api/core/lib")
-    # If this CMakeLists.txt lives in app/, then CMAKE_SOURCE_DIR is the project root.
-    set(FMOD_LIB_ROOT ${CMAKE_SOURCE_DIR}/vendor/FMOD/android/api/core/lib)
-
-    set(FMOD_ABI_DIR ${FMOD_LIB_ROOT}/${ANDROID_ABI})
-    set(FMOD_SO_DEBUG   ${FMOD_ABI_DIR}/libfmodL.so)
-    set(FMOD_SO_RELEASE ${FMOD_ABI_DIR}/libfmod.so)
-
-    add_library(fmod SHARED IMPORTED GLOBAL)
-    # Tell CMake where the actual binary lives for each config
-    set_target_properties(fmod PROPERTIES
-            IMPORTED_NO_SONAME TRUE
-            IMPORTED_LOCATION_DEBUG   ${FMOD_SO_DEBUG}
-            IMPORTED_LOCATION_RELWITHDEBINFO ${FMOD_SO_RELEASE}
-            IMPORTED_LOCATION_RELEASE ${FMOD_SO_RELEASE}
-            IMPORTED_LOCATION_MINSIZEREL ${FMOD_SO_RELEASE}
-    )
-
     # Link against your engine + game core and Android libs
     target_link_libraries(pain
             PRIVATE
@@ -59,7 +39,6 @@ if(ANDROID)
             log
             EGL
             GLESv3
-            fmod
     )
 
     target_link_options(GameCore PRIVATE

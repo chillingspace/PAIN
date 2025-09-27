@@ -1,6 +1,13 @@
 #include "pch.h"
 #include "FMODAudio.h"
 
+#ifdef PN_PLATFORM_ANDROID
+
+//Android FMOD header
+#include <fmod_android.h>
+
+#endif
+
 #include <fmod.hpp>
 #include <fmod_common.h>
 
@@ -13,8 +20,8 @@ namespace PAIN {
         static inline float db2lin(float db) { return std::pow(10.0f, db / 20.0f); }
         static inline float clamp01(float x) { return std::max(0.0f, std::min(1.0f, x)); }
 
-        Audio* Audio::create() {
-            return new FmodAudio();
+        Audio* Audio::create(void* app) {
+            return new FmodAudio(app);
         }
 
         struct FmodAudio::Impl {
@@ -93,14 +100,63 @@ namespace PAIN {
             }
         };
 
-        FmodAudio::FmodAudio() : impl_(std::make_unique<Impl>()) {}
+        FmodAudio::FmodAudio(void* app) : impl_(std::make_unique<Impl>()) {
+#ifdef PN_PLATFORM_ANDROID
+            m_App = static_cast<android_app*>(app);
+#endif
+        }
         FmodAudio::~FmodAudio() { shutdown(); }
+
+#ifdef PN_PLATFORM_ANDROID
+        void FmodAudio::fmodJNIAttach() {
+            // For NativeActivity, try simplified approach
+            JavaVM* vm = m_App->activity->vm;
+            JNIEnv* env = nullptr;
+
+            // Check if we can attach to the VM
+            jint result = vm->AttachCurrentThread(&env, nullptr);
+            if (result != JNI_OK) {
+                // Log error but continue - FMOD might work without JNI in some cases
+                LOGE("Failed to attach to JVM: %d", result);
+                return;
+            }
+
+            // Try to initialize FMOD JNI - this might fail for NativeActivity
+            // and that's okay, FMOD can still work for audio playback
+            try {
+                FMOD_Android_JNI_Init(vm, m_App->activity->clazz);
+            } catch (...) {
+                LOGE("FMOD JNI Init failed - continuing without JNI features");
+                // Continue anyway - basic audio might still work
+            }
+        }
+
+        void FmodAudio::fmodJNIDetach() {
+            try {
+                FMOD_Android_JNI_Close();
+            } catch (...) {
+                // Ignore errors during cleanup
+            }
+
+            // Detach from JVM
+            if (m_App && m_App->activity && m_App->activity->vm) {
+                m_App->activity->vm->DetachCurrentThread();
+            }
+        }
+#endif
 
         static AudioResult toResult(FMOD_RESULT r) {
             return r == FMOD_OK ? AudioResult::Ok : AudioResult::BackendError;
         }
 
         AudioResult FmodAudio::init() {
+
+#ifdef PN_PLATFORM_ANDROID
+            //Attach JNI for android first
+            fmodJNIAttach();
+#endif
+
+            //Check if fmod is already initialized
             if (impl_->initialized) return AudioResult::AlreadyInitialized;
 
             FMOD_RESULT r = FMOD::System_Create(&impl_->sys);
@@ -147,6 +203,11 @@ namespace PAIN {
                 impl_->sys = nullptr;
             }
             impl_->initialized = false;
+
+#ifdef PN_PLATFORM_ANDROID
+            //Detach JNI for android
+            fmodJNIDetach();
+#endif
         }
 
         void FmodAudio::onUpdate(float dt) {

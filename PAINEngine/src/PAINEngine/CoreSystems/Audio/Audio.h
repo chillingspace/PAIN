@@ -76,7 +76,7 @@ namespace PAIN {
             virtual void onEvent(Event::Event& e) override {}
 
             //Static function to create audio class
-            static Audio* create();
+            static Audio* create(void* app);
         };
 
 	}

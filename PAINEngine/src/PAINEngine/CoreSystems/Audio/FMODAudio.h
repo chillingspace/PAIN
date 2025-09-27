@@ -9,8 +9,20 @@ namespace PAIN {
 	namespace Audio {
 
         class FmodAudio : public Audio {
+        private:
+            struct Impl;
+            std::unique_ptr<Impl> impl_;
+
+#ifdef PN_PLATFORM_ANDROID
+            //Only for android
+            android_app* m_App = nullptr;
+
+            void fmodJNIAttach();
+            void fmodJNIDetach();
+#endif
+
         public:
-            FmodAudio();
+            FmodAudio(void* app);
             ~FmodAudio() override;
 
             AudioResult init() override;
@@ -37,10 +49,6 @@ namespace PAIN {
 
             void onAppPause() override;
             void onAppResume() override;
-
-        private:
-            struct Impl;
-            std::unique_ptr<Impl> impl_;
         };
 
 

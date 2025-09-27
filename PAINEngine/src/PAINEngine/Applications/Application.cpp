@@ -9,7 +9,6 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "CoreSystems/Audio/AudioManager.h"
 
-
 // Assets
 #include "CoreSystems/Assets/sPath.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
@@ -25,13 +24,19 @@ namespace PAIN {
 
 	Application::~Application()
 	{
-		for (auto& layer : layer_stack) {
-			layer->onDetach();
+		//Destroy top down
+		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		layer_stack.clear();
 
-		for (auto& core : core_stack) {
-			core->onDetach();
+		//Destroy to core top down
+		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		core_stack.clear();
 	}
@@ -59,11 +64,19 @@ namespace PAIN {
 		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
-		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create());
+		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
+		//Audio testing.
+#ifdef PN_PLATFORM_ANDROID
+
+		//Android specific paths, will need to abstract this out
+		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
+#else
 		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
 		app_audio->play("assets/audio/Music/Boss_Music.wav");
+#endif
 
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
