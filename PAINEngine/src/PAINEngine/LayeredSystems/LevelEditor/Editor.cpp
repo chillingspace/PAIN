@@ -8,7 +8,7 @@
 #include "Panels/AudioPanel.h"
 #include "Panels/ScenesPanel.h"
 #include "Panels/ComponentsPanel.h"
-
+#include "Panels/ResourcePanel.h"
 
 namespace PAIN {
 
@@ -35,6 +35,7 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
+            registerPanel(std::make_shared<Panel::ResourcePanel>());
         }
 
         void Editor::onDetach() {
