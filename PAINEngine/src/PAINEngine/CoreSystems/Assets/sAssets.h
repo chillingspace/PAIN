@@ -21,7 +21,16 @@ namespace PAIN {
             Service() = default;
             ~Service() = default;
 
-            void init();
+            // Optional, but needed to create class properly
+            void onAttach() override;
+            void onUpdate(float dt) override {}
+            void onDetach() override {}
+
+            void onAppPause() {}
+            void onAppResume() {}
+
+            //Event handler for app layer
+            void onEvent(Event::Event& e) override {};
 
             std::string registerAsset(const std::string& path, bool b_virtual);
             void unregisterAsset(const std::string& asset_id);

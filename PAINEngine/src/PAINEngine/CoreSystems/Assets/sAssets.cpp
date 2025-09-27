@@ -9,7 +9,7 @@
 namespace PAIN {
     namespace Assets {
 
-        void Service::init() {
+        void Service::onAttach() {
             // Register valid extensions (can be extended later)
             valid_extensions = { ".png", ".jpg", ".jpeg", ".tex", ".ttf",
                                  ".model", ".wav", ".mpg", ".prefab",
@@ -20,18 +20,18 @@ namespace PAIN {
 
             // Register known extensions with Loader
             auto loader = PN_LOADER_SERVICE;
-            loader->addValidExtension(".png", Loader::Types::Texture);
-            loader->addValidExtension(".jpg", Loader::Types::Texture);
-            loader->addValidExtension(".jpeg", Loader::Types::Texture);
-            loader->addValidExtension(".tex", Loader::Types::Texture);
-            loader->addValidExtension(".ttf", Loader::Types::Font);
-            loader->addValidExtension(".model", Loader::Types::Model);
-            loader->addValidExtension(".wav", Loader::Types::Sound);  // music/sound split later
-            loader->addValidExtension(".scn", Loader::Types::Scene);
-            loader->addValidExtension(".prefab", Loader::Types::Prefab);
-            loader->addValidExtension(".grid", Loader::Types::Grid);
-            loader->addValidExtension(".lua", Loader::Types::Script);
-            loader->addValidExtension(".mpg", Loader::Types::Video);
+            //loader->addValidExtension(".png", Loader::Types::Texture);
+            //loader->addValidExtension(".jpg", Loader::Types::Texture);
+            //loader->addValidExtension(".jpeg", Loader::Types::Texture);
+            //loader->addValidExtension(".tex", Loader::Types::Texture);
+            //loader->addValidExtension(".ttf", Loader::Types::Font);
+            //loader->addValidExtension(".model", Loader::Types::Model);
+            //loader->addValidExtension(".wav", Loader::Types::Sound);  // music/sound split later
+            //loader->addValidExtension(".scn", Loader::Types::Scene);
+            //loader->addValidExtension(".prefab", Loader::Types::Prefab);
+            //loader->addValidExtension(".grid", Loader::Types::Grid);
+            //loader->addValidExtension(".lua", Loader::Types::Script);
+            //loader->addValidExtension(".mpg", Loader::Types::Video);
         }
 
         std::string Service::registerAsset(const std::string& path, bool b_virtual) {
