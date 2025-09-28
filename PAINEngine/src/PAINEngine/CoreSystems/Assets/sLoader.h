@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
+
 #include "Applications/AppSystem.h"
 
 namespace PAIN {
@@ -27,6 +29,17 @@ namespace PAIN {
             Service() = default;
             ~Service() = default;
 
+            // Optional, but needed to create class properly
+            void onAttach() override;
+            void onUpdate(float dt) override {}
+            void onDetach() override {}
+
+            void onAppPause() {}
+            void onAppResume() {}
+
+            //Event handler for app layer
+            void onEvent(Event::Event& e) override {};
+
             void registerLoader(Types type, LoaderFunc loader);
             std::shared_ptr<void> load(Types type, const std::filesystem::path& path);
 
@@ -40,3 +53,5 @@ namespace PAIN {
 
     } // namespace Loader
 } // namespace PAIN
+
+#endif

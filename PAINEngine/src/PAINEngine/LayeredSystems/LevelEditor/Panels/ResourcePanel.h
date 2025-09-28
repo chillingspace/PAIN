@@ -9,82 +9,107 @@ namespace PAIN {
 
             class ResourcePanel : public IPanel {
             public:
+
+                // ----------------------------
+                // Core Overrides
+                // ----------------------------
                 ResourcePanel();
                 void nextWindowSettings() override;
                 void onUpdate() override;
 
+                // ----------------------------
+                // Life Cycle
+                // ----------------------------
                 void init();
                 void render();
 
-                //Panel Name
-                std::string getName() const {
-                    return "Resouce Editor";
+                // ----------------------------
+                // Panel Info
+                // ----------------------------
+                std::string getName() const { // Get Panel Name
+                    return "Resource Management";
+                }
+                static std::string getStaticName() { //Static panel name
+                    return "Resource Management";
                 }
 
-            private:
-                // Paths
-                std::string root_path;
-                std::string current_path;
-
-                // File and directory lists
-                std::vector<std::filesystem::path> directories;
-                std::vector<std::filesystem::path> files;
-
-                // Icon size
-                ImVec2 icon_size;
-
-                // Selected asset
-                std::string selected_asset_id;
-
-                // Search filter
-                std::string search_filter;
-
-                // Drag payload type
-                std::string payload_typestring;
-
-                // Directory mode
-                int directory_mode = 0;
-
-                // File event queue
-                std::mutex file_event_mutex;
-                std::queue<std::function<void()>> file_event_queue;
-
-                // File editing
-                std::unordered_map<std::string, std::string> file_editing_map;
-
-                // Popups
-                std::shared_ptr<std::string> error_msg;
-                std::shared_ptr<std::string> success_msg;
-
-                // ImGui dock ID
-                ImGuiID dock_id;
-
-                // File dropped flag
-                bool b_file_dropped = false;
+                // ----------------------------
+                // File Event Queue
+                // ----------------------------
+                void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
 
             private:
-                // File icon
-                unsigned int fileIcon(const std::filesystem::path& path);
 
-                // Drag-and-drop file handling
-                void moveFileAcceptPayload(const std::string& virtual_path);
+                // ----------------------------
+                // File & Directory
+                // ----------------------------
+                std::vector<std::filesystem::path> directories; //Directories
+                std::vector<std::filesystem::path> files; //Files
 
-                // File event queue helper
-                void pushFileEvent(std::function<void()> callback);
+                std::string root_path; //Root Path
+                std::string current_path; //Current Path
 
-                // Render all assets
-                void renderAssetsBrowser(const std::string& virtual_path);
+                // ----------------------------
+                // State Variables
+                // ----------------------------
+                std::string search_filter; //Search filter
+                ImVec2 icon_size; //Icon size
 
+                std::string selected_asset_id; //Selected file
+                std::string payload_typestring; //File payload type string
+
+                int directory_mode; //Selected directory mode
+                bool b_file_dropped; //File dropped
+
+
+                // ----------------------------
+                // File
+                // ----------------------------
+                std::queue<std::function<void()>> file_event_queue; //File Watching Queue
+                std::mutex file_event_mutex; //Mutex for thread safety
+
+                std::unordered_map<std::string, std::string> file_editing_map; //Map of file content
+
+                struct EditorState { //File editor state
+                    int cursor_pos = 0;
+                };
+
+                static int TextCallback(ImGuiInputTextCallbackData* data); //Text callback
+                void extractCurrentWord(std::string const& content, size_t cursor_pos, std::string& buffer); //Extract current word being edited
+                void showLuaIntellisense(std::string& content, size_t cursor_pos, std::string& buffer); //Lua intellisense
+
+
+                // ----------------------------
+                // Feedback
+                // ----------------------------
+                std::shared_ptr<std::string> error_msg; //Setting error message ( Usage: Editing error popup message )
+                std::shared_ptr<std::string> success_msg; //Setting success message ( Usage: Editing success popup message )
+
+
+                // ----------------------------
+                // Internal Helpers
+                // ----------------------------
+                unsigned int fileIcon(std::filesystem::path const& path); //Internal asset icon picking
+                void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
+                void renderFileEditor(); //Internal rendering of a file editor
+
+                // ----------------------------
                 // Popups
-                std::function<void()> deleteAssetPopup(const std::string& popup_id);
-                std::function<void()> deleteDirectoryPopup(const std::string& popup_id);
-                std::function<void()> newFolderPopup(const std::string& popup_id);
+                // ----------------------------
+                std::function<void()> deleteAssetPopup(std::string const& popup_id); //Delete asset popup
+                std::function<void()> deleteDirectoryPopup(std::string const& popup_id); //Delete directory content popup
+                std::function<void()> newFolderPopup(std::string const& popup_id); //New folder popup
 
-                // File editor helpers
-                static int TextCallback(ImGuiInputTextCallbackData* data);
-                void extractCurrentWord(const std::string& content, size_t cursor_pos, std::string& buffer);
-                void showLuaIntellisense(std::string& content, size_t cursor_pos, std::string& buffer);
-                void renderFileEditor();
+
+                // ----------------------------
+                // File Operations
+                // ----------------------------
+                void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
+
+                //Entities panel for string reference
+                //std::weak_ptr<EntitiesPanel> entities_panel;
+                //On drop file event
+                //void onEvent(std::shared_ptr<Assets::FileDropEvent> event) override;
             };
 
         } // namespace Panel

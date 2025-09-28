@@ -1,8 +1,42 @@
+
+#ifdef PN_PLATFORM_WINDOWS
+
 #include "pch.h"
 #include "sLoader.h"
 
 namespace PAIN {
     namespace Loader {
+
+        void PAIN::Loader::Service::onAttach() {
+            // Register texture loader
+            registerLoader(Types::Texture, [](const std::filesystem::path& path) -> std::shared_ptr<void> {
+                // TODO: replace with actual texture loading
+                //return std::make_shared<Texture>(path.string());
+                return 0;
+            });
+            addValidExtension(".png", Types::Texture);
+            addValidExtension(".jpg", Types::Texture);
+
+            // Register model loader
+            registerLoader(Types::Model, [](const std::filesystem::path& path) -> std::shared_ptr<void> {
+                // TODO: replace with actual model loading
+                //return std::make_shared<Model>(path.string());
+                return 0;
+            });
+            addValidExtension(".obj", Types::Model);
+            addValidExtension(".fbx", Types::Model);
+
+            // Register font loader
+            registerLoader(Types::Font, [](const std::filesystem::path& path) -> std::shared_ptr<void> {
+                // TODO: replace with actual font loading
+                //return std::make_shared<Font>(path.string());
+                return 0;
+            });
+            addValidExtension(".ttf", Types::Font);
+
+            // You can keep going for Audio, Script, etc.
+        }
+
 
         void Service::registerLoader(Types type, LoaderFunc loader) {
             if (loaders.find(type) != loaders.end()) {
@@ -34,3 +68,5 @@ namespace PAIN {
 
     } // namespace Loader
 } // namespace PAIN
+
+#endif

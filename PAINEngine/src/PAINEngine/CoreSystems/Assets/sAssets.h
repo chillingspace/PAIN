@@ -1,74 +1,207 @@
 ﻿#pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
+
+#include "pch.h"
 #include "sLoader.h"
 #include "Applications/AppSystem.h"
 
 namespace PAIN {
     namespace Assets {
 
-        struct MetaData {
-            Loader::Types type;
-            std::filesystem::path primary_path;
+		//Temporary Disable DLL Export Warning
+		#pragma warning(disable: 4251)
 
-            MetaData() : type(Loader::Types::None), primary_path("") {}
-            MetaData(Loader::Types t, const std::filesystem::path& path)
-                : type(t), primary_path(path) {
-            }
-        };
+		//File Drop Event (TO DO: File Drop)
+		/*struct FileDropEvent : public Events::IEvent {
+			int count;
+			const char** paths;
 
-        class Service : public AppSystem {
-        public:
-            Service() = default;
-            ~Service() = default;
+			FileDropEvent(int count, const char** paths)
+				: count{ count }, paths{ paths } {
+			}
+		};*/
 
-            // Optional, but needed to create class properly
-            void onAttach() override;
-            void onUpdate(float dt) override {}
-            void onDetach() override {}
+		// ----------------------------
+		// Asset Modes/Types 
+		// ----------------------------
+		enum Modes : unsigned int { // Modes
+			Loadable = 0,
+			Executable,
+			Editable
+		};
 
-            void onAppPause() {}
-            void onAppResume() {}
+		enum class Types { // Types
+			None = 0,
+			Texture,
+			Model,
+			Font,
+			Music,
+			Sound,
+			Scene,
+			Prefab,
+			Grid,
+			Script,
+			Video
+		};
 
-            //Event handler for app layer
-            void onEvent(Event::Event& e) override {};
+		// ----------------------------
+		// Asset Service 
+		// ----------------------------
+		class Service : public AppSystem {
+		public:
 
-            std::string registerAsset(const std::string& path, bool b_virtual);
-            void unregisterAsset(const std::string& asset_id);
+			// ----------------------------
+			// Life Cycle 
+			// ----------------------------
+			
+			Service() = default; //Default constructor and destructor
+			~Service() = default;
 
-            void cacheAsset(const std::string& asset_id);
-            void uncacheAsset(const std::string& asset_id);
-            void recacheAsset(const std::string& asset_id);
+			void onAttach() override;
+			void onUpdate(float dt) override {}
+			void onDetach() override {}
 
-            std::filesystem::path getAssetPath(const std::string& asset_id) const;
-            Loader::Types getAssetType(const std::string& asset_id) const;
-            Loader::Types getAssetType(const std::filesystem::path& path) const;
+			void onAppPause() {}
+			void onAppResume() {}
 
-            bool isAssetCached(const std::string& asset_id) const;
-            bool isAssetRegistered(const std::string& asset_id) const;
+			void onEvent(Event::Event& e) override {}; //Event handler for app layer
 
-            void scanAssetDirectory(const std::string& virtual_path, bool recursive);
-            void cacheAssetDirectory(const std::string& virtual_path, bool recursive);
-            void uncacheAssetDirectory(const std::string& virtual_path, bool recursive);
+			//(TO DO: Init Audio System)
+			void init(); //void init(std::shared_ptr<Audio::IAudioSystem> audio_sys); //Initialization 
 
-            void clearCache();
-            void logAssetsRegistry() const;
+			// ----------------------------
+			// Asset Registration & Loading
+			// ----------------------------
 
-            nlohmann::json serialize() const;
-            void deserialize(const nlohmann::json& data);
+			std::string registerAsset(std::string const& path, bool b_virtual = true); //Register asset
+			void unregisterAsset(std::string const& asset_id); //Unregister asset
 
-            std::string getIDFromPath(const std::string& path, bool b_virtual) const;
+			//(TO DO: Register Loader)
+			//void registerLoader(Types asset_type, LoaderFunc loader); //Register loader
 
-            bool hasAssets() const;
 
-        private:
-            std::map<std::string, MetaData> asset_registry;
-            std::map<std::string, std::shared_ptr<void>> asset_cache;
+			void cacheAsset(std::string const& asset_id); //Cache asset
+			void uncacheAsset(std::string const& asset_id); //Uncache asset
+			void recacheAsset(std::string const& asset_id); //Recache asset
 
-            std::set<std::string> valid_extensions;
-            std::set<std::string> invalid_keys;
 
-            bool isPathValid(const std::string& path, bool b_virtual) const;
-        };
+			template <typename T>
+			std::shared_ptr<T> getAsset(std::string const& asset_id); //Get asset
+
+			void getExecutable(std::string const& asset_id); //Get executable
+
+			// ----------------------------
+			// Type & State Queries
+			// ----------------------------
+
+			bool isAssetLoadable(std::string const& asset_id) const; //check if asset is loadable type
+			bool isAssetExecutable(std::string const& asset_id) const; //Check if asset is executable type
+			bool isAssetEditable(std::string const& asset_id) const; //Check if asset is editable type
+
+
+			Types getAssetType(std::string const& asset_id) const; //Get asset type from registered asset id
+			std::string getAssetTypeString(std::string const& asset_id) const; //Get asset type string from registered asset id
+			Types getAssetType(std::filesystem::path const& path) const; //Get asset type from path
+
+
+			std::filesystem::path getAssetPath(std::string const& asset_id) const; //Get asset path from registered asset id
+			std::vector<const char*> getAssetRefs(Types type) const; //Get all asset ref of type
+
+
+			bool isAssetCached(std::string const& asset_id) const; //Check if asset is loaded from asset id
+			bool isAssetCached(std::filesystem::path const& path) const; //Check if asset is loaded from file path
+
+
+			void addValidExtensions(std::string const& ext); //Add valid extension
+			std::set<std::string> getValidExtensions() const; //Get all valid extensions
+
+
+			void addInvalidKeys(std::string const& key); //Add invalid keys
+			std::set<std::string> getInvalidKeys() const; //Get all invalid keys
+
+
+			bool isPathValid(std::string const& path, bool b_virtual = true) const; //Check for valid path
+			bool isAssetRegistered(std::string const& asset_id) const; //Check for registration
+
+
+			std::string getIDFromPath(std::string const& path, bool b_virtual = true) const; //Get ref from path
+
+			// ----------------------------
+			// Debugging / Logging
+			// ----------------------------
+			void clearCache(); //Clear expired cache
+			void logAssetsRegistry() const; //Log assets reigstry
+
+
+			// ----------------------------
+			// Directory Helpers
+			// ----------------------------
+			void scanAssetDirectory(std::string const& virtual_path, bool b_diretory_tree = false); //Register all assets from directory tree
+			void cacheAssetDirectory(std::string const& virtual_path, bool b_diretory_tree = false); //Cache all assets from directory tree
+			void uncacheAssetDirectory(std::string const& virtual_path, bool b_diretory_tree = false); //Remove cache for all assets from directory tree
+
+
+			// ----------------------------
+			// Serialization
+			// ----------------------------
+			nlohmann::json serialize() const; //Serialize asset registry
+			void deserialize(nlohmann::json const& data); //Deserialize asset registry
+			void reserializeAllAssets(); //Reserialize data
+
+		private:
+
+			// ----------------------------
+			// Internal Data Structures
+			// ----------------------------
+			struct MetaData { // Asset Meta Data
+				Types type;
+				std::filesystem::path primary_path;
+				std::weak_ptr<void> cached;
+
+				MetaData() : type{ 0 } {};
+				MetaData(Types type, std::filesystem::path const& primary_path)
+					: type{ type }, primary_path{ primary_path } {
+				}
+			};
+
+
+			// ----------------------------
+			// Loader
+			// ----------------------------
+			using LoaderFunc = std::function<std::shared_ptr<void>(std::filesystem::path const&)>; //Loader function
+			//Font loader (TO DO: Loader)
+			//std::unique_ptr<Assets::FontLoader> font_loader;
+			//Render loader
+			//std::unique_ptr<Assets::RenderLoader> render_loader;
+			//Audio loader
+			//std::shared_ptr<Audio::IAudioSystem> audio_system;
+
+
+			// ----------------------------
+			// Containers
+			// ----------------------------
+			std::set<std::string> valid_extensions; //List of valid extension
+			std::set<std::string> invalid_keys; //List of key words to exclude
+
+
+			std::unordered_map<Types, std::bitset<3>> asset_types; //Asset types
+			std::unordered_map<std::string, MetaData> asset_registry; //Asset registry of meta data
+			std::unordered_map<Types, LoaderFunc> asset_loader; //Asset loader
+			std::unordered_map<std::string, std::shared_ptr<void>> asset_cache; //Assets cache for storing assets ( Optionally change to weakptr for a more event driven approach )
+
+
+			// ----------------------------
+			// Helpers
+			// ----------------------------
+			std::string typeToString(Types type) const; //Conversion from type to string
+
+		};
+
+		//Re-enable DLL Export warning
+		#pragma warning(default: 4251)
 
     } // namespace Assets
 } // namespace PAIN
+
+#endif

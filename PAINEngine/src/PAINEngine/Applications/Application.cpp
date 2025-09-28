@@ -89,6 +89,7 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
 		addCoreSystem(std::make_shared<Assets::Service>());
+		addCoreSystem(std::make_shared<Loader::Service>());
 		#endif
 
 #ifdef PN_PLATFORM_ANDROID
