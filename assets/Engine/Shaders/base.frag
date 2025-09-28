@@ -1,14 +1,16 @@
 // base.frag
 
 #version 330 core
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_explicit_uniform_location : enable
 
 #define PI 3.14159265359
 
-in vec3 vNormal;
-in vec3 vFragPos;
+layout(location = 0) in vec3 vNormal;
+layout(location = 1) in vec3 vFragPos;
 
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 struct Material {
     float rough;
@@ -21,11 +23,12 @@ struct Light {
     vec3 L;         // light intensity
 };
 
-uniform Material material;
-uniform Light light[1];
-uniform mat4 u_M;
-uniform mat4 u_V;
-uniform mat4 u_P;
+
+layout(location = 4) uniform Material material;
+layout(location = 7) uniform Light light[1];
+layout(location = 0) uniform mat4 u_M;
+layout(location = 1) uniform mat4 u_V;
+layout(location = 2) uniform mat4 u_P;
 
 
 float ggxDistribution(float nDotH) {
