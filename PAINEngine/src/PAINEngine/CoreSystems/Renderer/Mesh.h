@@ -11,8 +11,7 @@ namespace PAIN {
 	class Mesh {
 
 	public:
-		Mesh(const Vertex* vertices, size_t vertexCount,
-			const unsigned int* indices, size_t indexCount);
+		Mesh(const std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 		~Mesh();
 		void Draw() const;
 

@@ -37,7 +37,7 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE); 
 		glCullFace(GL_BACK);
 
-		m_mesh = Mesh::LoadObj();
+		m_mesh = Mesh::LoadObj("ogre.obj");
 
 	}
 
