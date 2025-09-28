@@ -16,6 +16,9 @@
 
 #include "pch.h"
 #include "../Shader.h"
+#include "../Mesh.h"
+#include "../Light.h"
+#include "../Material.h"
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
@@ -33,74 +36,6 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
-		struct Vertex {
-			glm::vec3 pos;
-			glm::vec3 normal;
-		};
-
-		static constexpr Vertex vertices[] = {
-			// Front (+Z)
-			{{-0.5f, -0.5f,  0.5f}, {0,0,1}},
-			{{ 0.5f, -0.5f,  0.5f}, {0,0,1}},
-			{{ 0.5f,  0.5f,  0.5f}, {0,0,1}},
-			{{-0.5f,  0.5f,  0.5f}, {0,0,1}},
-
-			// Back (-Z)
-			{{ 0.5f, -0.5f, -0.5f}, {0,0,-1}},
-			{{-0.5f, -0.5f, -0.5f}, {0,0,-1}},
-			{{-0.5f,  0.5f, -0.5f}, {0,0,-1}},
-			{{ 0.5f,  0.5f, -0.5f}, {0,0,-1}},
-
-			// Left (-X)
-			{{-0.5f, -0.5f, -0.5f}, {-1,0,0}},
-			{{-0.5f, -0.5f,  0.5f}, {-1,0,0}},
-			{{-0.5f,  0.5f,  0.5f}, {-1,0,0}},
-			{{-0.5f,  0.5f, -0.5f}, {-1,0,0}},
-
-			// Right (+X)
-			{{ 0.5f, -0.5f,  0.5f}, {1,0,0}},
-			{{ 0.5f, -0.5f, -0.5f}, {1,0,0}},
-			{{ 0.5f,  0.5f, -0.5f}, {1,0,0}},
-			{{ 0.5f,  0.5f,  0.5f}, {1,0,0}},
-
-			// Top (+Y)
-			{{-0.5f,  0.5f,  0.5f}, {0,1,0}},
-			{{ 0.5f,  0.5f,  0.5f}, {0,1,0}},
-			{{ 0.5f,  0.5f, -0.5f}, {0,1,0}},
-			{{-0.5f,  0.5f, -0.5f}, {0,1,0}},
-
-			// Bottom (-Y)
-			{{-0.5f, -0.5f, -0.5f}, {0,-1,0}},
-			{{ 0.5f, -0.5f, -0.5f}, {0,-1,0}},
-			{{ 0.5f, -0.5f,  0.5f}, {0,-1,0}},
-			{{-0.5f, -0.5f,  0.5f}, {0,-1,0}}
-		};
-
-		static constexpr unsigned int indices[] = {
-			// Front (+Z)
-			0,1,2, 0,2,3,
-			// Back (-Z)
-			4,5,6, 4,6,7,
-			// Left (-X)
-			8,9,10, 8,10,11,
-			// Right (+X)
-			12,13,14, 12,14,15,
-			// Top (+Y)
-			16,17,18, 16,18,19,
-			// Bottom (-Y)
-			20,21,22, 20,22,23
-		};
-
-		struct Material {
-			float rough;
-			float metal;
-			glm::vec3 color;
-		};
-
-		struct Light {
-			glm::vec3 position;
-			glm::vec3 L_intensity;
-		};
 
 		Material material = {
 			0.1f,		// 0.1 -> smooth, 1 -> rough
@@ -115,15 +50,12 @@ namespace PAIN {
 
 		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
-		bool createBuffers();
-
-		float clearColor[3];
-
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
 		unsigned int ebo = 0;
 
 		std::unique_ptr<Shader> m_shader = nullptr;
+		std::unique_ptr<Mesh> m_mesh = nullptr;
 	};
 
 	class Camera {
