@@ -592,7 +592,7 @@ namespace PAIN {
 				icon_size = { 128.0f, 128.0f };
 
 				//Register all engine icons
-				PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Icons");
+				//PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Icons");
 
 				//Init all directories & files
 				directories = PN_PATH_SERVICE->listDirectories(current_path);
