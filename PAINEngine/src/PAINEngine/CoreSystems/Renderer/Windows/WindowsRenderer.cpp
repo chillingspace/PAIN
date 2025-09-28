@@ -38,6 +38,7 @@ namespace PAIN {
 		glCullFace(GL_BACK);
 
 		m_mesh = Mesh::LoadObj();
+
 	}
 
 	void WindowsRenderer::Render() {

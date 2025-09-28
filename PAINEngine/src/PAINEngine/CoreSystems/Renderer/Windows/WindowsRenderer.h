@@ -17,6 +17,8 @@
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
+#include "../Light.h"
+#include "../Material.h"
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
@@ -34,17 +36,6 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
-
-		struct Material {
-			float rough;
-			float metal;
-			glm::vec3 color;
-		};
-
-		struct Light {
-			glm::vec3 position;
-			glm::vec3 L_intensity;
-		};
 
 		Material material = {
 			0.1f,		// 0.1 -> smooth, 1 -> rough
