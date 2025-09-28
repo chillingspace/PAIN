@@ -61,6 +61,10 @@ namespace PAIN {
 
 	void Application::Init(void* app) {
 
+		//Initialize logger
+		PAIN::Log::Init();
+		PN_CORE_INFO("Initialized Log!");
+
 		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);

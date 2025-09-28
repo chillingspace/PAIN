@@ -117,7 +117,7 @@ namespace PAIN {
             jint result = vm->AttachCurrentThread(&env, nullptr);
             if (result != JNI_OK) {
                 // Log error but continue - FMOD might work without JNI in some cases
-                LOGE("Failed to attach to JVM: %d", result);
+                PN_CORE_ERROR("Failed to attach to JVM: %d", result);
                 return;
             }
 
@@ -126,7 +126,7 @@ namespace PAIN {
             try {
                 FMOD_Android_JNI_Init(vm, m_App->activity->clazz);
             } catch (...) {
-                LOGE("FMOD JNI Init failed - continuing without JNI features");
+                PN_CORE_ERROR("FMOD JNI Init failed - continuing without JNI features");
                 // Continue anyway - basic audio might still work
             }
         }
