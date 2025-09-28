@@ -35,7 +35,10 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
+
+            #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
+            #endif
         }
 
         void Editor::onDetach() {

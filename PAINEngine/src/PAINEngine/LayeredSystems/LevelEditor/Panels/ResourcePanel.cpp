@@ -1,3 +1,6 @@
+#ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+
 #include "pch.h"
 #include "ResourcePanel.h"
 
@@ -10,8 +13,6 @@
 #define PN_PATH_SERVICE  services->get<Path::Service>()
 #define PN_LOADER_SERVICE  services->get<Loader::Service>()
 #define PN_ASSETS_SERVICE  services->get<Assets::Service>()
-
-#ifdef _DEBUG
 
 namespace PAIN {
     namespace Editor {
@@ -421,7 +422,7 @@ namespace PAIN {
 						files = PN_PATH_SERVICE->listFiles(current_path);
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
 
 					//Same line
@@ -431,9 +432,9 @@ namespace PAIN {
 					if (ImGui::Button("Cancel")) {
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
-					};
+				};
 			}
 
 			std::function<void()> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {
@@ -495,7 +496,7 @@ namespace PAIN {
 						files = PN_PATH_SERVICE->listFiles(current_path);
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
 
 					//Same line
@@ -505,7 +506,7 @@ namespace PAIN {
 					if (ImGui::Button("Cancel")) {
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
 				};
 			}
@@ -537,7 +538,7 @@ namespace PAIN {
 						folder_name.assign("");
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
 
 					//Same line
@@ -550,7 +551,7 @@ namespace PAIN {
 						folder_name.assign("");
 
 						//Close popup
-						//closePopUp(popup_id);
+						closePopUp(popup_id);
 					}
 				};
 			}
@@ -573,11 +574,11 @@ namespace PAIN {
 				success_msg = std::make_shared<std::string>("Success");
 
 				// Pop UP
-				/*registerPopUp("Error", defPopUp("Error", error_msg));
+				registerPopUp("Error", defPopUp("Error", error_msg));
 				registerPopUp("Success", defPopUp("Success", success_msg));
 				registerPopUp("Delete Asset", deleteAssetPopup("Delete Asset"));
 				registerPopUp("Clear Directory", deleteDirectoryPopup("Clear Directory"));
-				registerPopUp("New Folder", newFolderPopup("New Folder"));*/
+				registerPopUp("New Folder", newFolderPopup("New Folder"));
 
 				//Initialize root
 				root_path = "Game_Assets:/";
@@ -716,7 +717,7 @@ namespace PAIN {
 				{
 					//Create new folder popup
 					if (ImGui::Button("New Folder")) {
-						//openPopUp("New Folder");
+						openPopUp("New Folder");
 					}
 				}
 
@@ -740,19 +741,19 @@ namespace PAIN {
 							case 0: {
 								PN_ASSETS_SERVICE->cacheAssetDirectory(current_path);
 								success_msg->assign("All assets in: \"" + current_path + "\" loaded.");
-								//openPopUp("Success");
+								openPopUp("Success");
 								break;
 							}
 							case 1: {
 								PN_ASSETS_SERVICE->cacheAssetDirectory(current_path, true);
 								success_msg->assign("All assets in: \"" + current_path + "*\" loaded.");
-								//openPopUp("Success");
+								openPopUp("Success");
 								break;
 							}
 							case 2: {
 								PN_ASSETS_SERVICE->cacheAssetDirectory(root_path, true);
 								success_msg->assign("All assets in: \"" + root_path + "*\" loaded.");
-								//openPopUp("Success");
+								openPopUp("Success");
 								break;
 							}
 							default: {
@@ -769,19 +770,19 @@ namespace PAIN {
 						case 0: {
 							PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path);
 							success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							//openPopUp("Success");
+							openPopUp("Success");
 							break;
 						}
 						case 1: {
 							PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path, true);
 							success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							//openPopUp("Success");
+							openPopUp("Success");
 							break;
 						}
 						case 2: {
 							PN_ASSETS_SERVICE->uncacheAssetDirectory(root_path, true);
 							success_msg->assign("All assets in: \"" + root_path + "*\" unloaded.");
-							//openPopUp("Success");
+							openPopUp("Success");
 							break;
 						}
 						default: {
@@ -792,7 +793,7 @@ namespace PAIN {
 
 					//Delete all from directory
 					if (ImGui::Button("Delete All")) {
-						//openPopUp("Clear Directory");
+						openPopUp("Clear Directory");
 					}
 				}
 
@@ -833,7 +834,7 @@ namespace PAIN {
 				}
 
 				//Render popups
-				//renderPopUps();
+				renderPopUps();
 
 				ImGui::EndMenuBar();
 
@@ -887,7 +888,7 @@ namespace PAIN {
 								//Unload asset
 								PN_ASSETS_SERVICE->uncacheAsset(selected_asset_id);
 								success_msg->assign("Asset: \"" + selected_asset_id + "\" unloaded.");
-								//openPopUp("Success");
+								openPopUp("Success");
 							}
 
 							//Audio asset preview
@@ -954,7 +955,7 @@ namespace PAIN {
 								//Load asset
 								PN_ASSETS_SERVICE->cacheAsset(selected_asset_id);
 								success_msg->assign("Asset: \"" + selected_asset_id + "\" loaded.");
-								//openPopUp("Success");
+								openPopUp("Success");
 							}
 						}
 
@@ -991,7 +992,7 @@ namespace PAIN {
 
 					//Delete asset
 					if (ImGui::Button("Delete##DeleteAsset")) {
-						//openPopUp("Delete Asset");
+						openPopUp("Delete Asset");
 					}
 
 					//Same line
@@ -1005,7 +1006,7 @@ namespace PAIN {
 					}
 
 					//Render popups
-					//renderPopUps();
+					renderPopUps();
 				}
 
 				//Render file editor
@@ -1018,7 +1019,7 @@ namespace PAIN {
 				}*/
 
 				//Render popups
-				//renderPopUps();
+				renderPopUps();
 
 			}
 
@@ -1027,4 +1028,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

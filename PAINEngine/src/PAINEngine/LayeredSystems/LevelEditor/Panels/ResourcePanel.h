@@ -1,7 +1,8 @@
+#ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+
 #pragma once
 #include "Panels.h"
-
-#ifdef _DEBUG
 
 namespace PAIN {
     namespace Editor {
@@ -116,4 +117,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

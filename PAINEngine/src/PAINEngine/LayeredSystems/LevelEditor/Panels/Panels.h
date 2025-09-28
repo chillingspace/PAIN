@@ -43,6 +43,20 @@ namespace PAIN {
 				//Draw popups
 				void drawPopUps();
 
+
+				// ----------------------------
+				// Internal PopUps
+				// ----------------------------
+				static bool b_popup_showing;
+
+				struct InternalPopUp {
+					bool b_is_open = false;
+					std::function<void()> popUpFunction;
+				};
+
+				//Map of popups
+				std::unordered_map<std::string, InternalPopUp> popups;
+
 			protected:
 
 				//Actions manager
@@ -78,6 +92,30 @@ namespace PAIN {
 
 				//Draw panel window
 				void drawWindow();
+
+				// ----------------------------
+				// Internal PopUps
+				// ----------------------------
+				//Register new popup
+				void registerPopUp(std::string const& popup_id, std::function<void()> popup_func);
+
+				//Edit registered popup
+				void editPopUp(std::string const& popup_id, std::function<void()> popup_func);
+
+				//Open popup
+				void openPopUp(std::string const& popup_id);
+
+				//Close popup
+				void closePopUp(std::string const& popup_id);
+
+				//Render popup
+				void renderPopUps();
+
+				//Check if popup is showing
+				static bool checkPopUpShowing();
+
+				//Default Popup
+				std::function<void()> defPopUp(std::string const& id, std::shared_ptr<std::string> msg);
 			};
 		}
 	}
