@@ -34,31 +34,52 @@ namespace PAIN {
 			std::string asset_id = data["asset_id"].get<std::string>();
 			std::string source_file = data["source_file"].get<std::string>();
 
-			// Options, to standard init
-			std::string format = "BC7_UNORM";
+			// Options with default values
+			// ASTC format for Android
+			std::string android_format = "ASTC_4x4";  
+			// BC7 format for Windows
+			std::string windows_format = "BC7";       
 			bool mipmaps = true;
 			bool srgb = false;
-			std::filesystem::path output_dir = "assets/Textures/Compiled_Textures";
+			int quality_level = 128; // Quality setting
+			std::filesystem::path android_output_dir = "assets/Textures/Compiled_Textures_Android";
+			std::filesystem::path windows_output_dir = "assets/Textures/Compiled_Textures_Windows";
 
-			// Overrite the init with values from desc file
+			// Override defaults with values from desc file
 			if (data.contains("options")) {
 				auto const& options = data["options"];
-				if (options.contains("format")) format = options["format"].get<std::string>();
+				if (options.contains("android_format")) android_format = options["android_format"].get<std::string>();
+				if (options.contains("windows_format")) windows_format = options["windows_format"].get<std::string>();
 				if (options.contains("mipmaps")) mipmaps = options["mipmaps"].get<bool>();
 				if (options.contains("srgb")) srgb = options["srgb"].get<bool>();
-				if (options.contains("output_dir")) output_dir = options["output_dir"].get<std::string>();
+				if (options.contains("quality")) quality_level = options["quality"].get<int>();
+				if (options.contains("output_dir_android")) android_output_dir = options["output_dir_android"].get<std::string>();
+				if (options.contains("output_dir_windows")) windows_output_dir = options["output_dir_windows"].get<std::string>();
 			}
 
 			// Resolve paths
-			std::filesystem::path tool_path = "assets/Engine/Tools/texconv.exe";
+			// ARM ASTC encoder
+			std::filesystem::path astcenc_tool = "assets/Engine/Tools/astcenc-avx2.exe";  
+			// DirectX texture converter
+			std::filesystem::path texconv_tool = "assets/Engine/Tools/texconv.exe";  
 			std::filesystem::path input_path = "assets/Textures/" + source_file;
-			std::filesystem::create_directories(output_dir);
 
-			std::filesystem::path output_path = output_dir / (asset_id + ".dds");
+			// Create output directories
+			std::filesystem::create_directories(android_output_dir);
+			std::filesystem::create_directories(windows_output_dir);
 
-			// Check tool
-			if (!std::filesystem::exists(tool_path)) {
-				PN_CORE_WARN("[TextureCompiler] Cannot find texconv: {}", tool_path.string());
+			// Output paths for both platforms
+			std::filesystem::path android_output = android_output_dir / (asset_id + ".astc");
+			std::filesystem::path windows_output = windows_output_dir / (asset_id + ".dds");
+
+			// Check if tools exist
+			if (!std::filesystem::exists(astcenc_tool)) {
+				PN_CORE_WARN("[TextureCompiler] Cannot find ASTC encoder: {}", astcenc_tool.string());
+				return;
+			}
+
+			if (!std::filesystem::exists(texconv_tool)) {
+				PN_CORE_WARN("[TextureCompiler] Cannot find texconv: {}", texconv_tool.string());
 				return;
 			}
 
@@ -68,39 +89,119 @@ namespace PAIN {
 				return;
 			}
 
-			// Build command
-			auto buildCommand = [&](const std::filesystem::path& tool,
-				const std::filesystem::path& input,
-				const std::filesystem::path& out_dir) {
-					std::ostringstream cmd;
-#ifdef PN_PLATFORM_WINDOWS
-					cmd << "\"" << std::filesystem::absolute(tool).string() << " "
-						<< "-y "  // overwrite existing
-						<< "-f " << format << " ";
+			// Build Android ASTC command
+			auto buildAndroidCommand = [&]() {
+				std::ostringstream cmd;
 
-					if (mipmaps)
-						cmd << "-m 0 "; // generate full mipmap chain
-					else
-						cmd << "-m 1 "; // only base level
+				// Start with the executable in quotes
+				cmd << std::filesystem::absolute(astcenc_tool).string() << " ";
 
-					if (srgb)
-						cmd << "-srgb ";
+				// Color profile mode
+				if (srgb) {
+					cmd << " -cs"; // LDR sRGB color profile
+				}
+				else {
+					cmd << " -cl"; // LDR linear color profile
+				}
 
-					cmd << "-o \"" << std::filesystem::absolute(out_dir).string() << "\" "
-						<< "\"" << std::filesystem::absolute(input).string() << "\"";
-#endif
-					return cmd.str();
+				// Input file (quoted)
+				cmd << " \"" << std::filesystem::absolute(input_path).string() << "\"";
+
+				// Output file (quoted)
+				cmd << " \"" << std::filesystem::absolute(android_output).string() << "\"";
+
+				// Block size (comes after input/output)
+				std::string block_size = "4x4"; // default
+				if (android_format == "ASTC_4x4") block_size = "4x4";
+				else if (android_format == "ASTC_6x6") block_size = "6x6";
+				else if (android_format == "ASTC_8x8") block_size = "8x8";
+				else if (android_format == "ASTC_5x5") block_size = "5x5";
+				else if (android_format == "ASTC_10x10") block_size = "10x10";
+
+				cmd << " " << block_size;
+
+				// Quality preset based on quality_level
+				if (quality_level >= 200) cmd << " -exhaustive";      // highest quality
+				else if (quality_level >= 150) cmd << " -thorough";   // high quality
+				else if (quality_level >= 100) cmd << " -medium";     // balanced
+				else if (quality_level >= 50) cmd << " -fast";        // fast
+				else cmd << " -fastest";                               // fastest
+
+				// Additional flags for better output
+				cmd << " -silent";
+
+				return cmd.str();
 				};
 
-			// Run texconv
-			std::string tex_cmd = buildCommand(tool_path, input_path, output_dir);
-			if (std::system(tex_cmd.c_str()) != 0) {
-				PN_CORE_ERROR("[TextureCompiler] Texture compilation failed: {}", tex_cmd);
+			// Build Windows BC7 command  
+			auto buildWindowsCommand = [&]() {
+				std::ostringstream cmd;
+				cmd << "\"" << std::filesystem::absolute(texconv_tool).string() << " ";
+				// overwrite existing
+				cmd << "-y ";  
+
+				// Format selection
+				if (windows_format == "BC7") cmd << "-f BC7_UNORM ";
+				else if (windows_format == "BC3") cmd << "-f BC3_UNORM ";
+				else if (windows_format == "BC1") cmd << "-f BC1_UNORM ";
+				// default
+				else cmd << "-f BC7_UNORM "; 
+
+				// Mipmaps
+				if (mipmaps) {
+					// generate full mipmap chain
+					cmd << "-m 0 "; 
+				}
+				else {
+					// only base level
+					cmd << "-m 1 "; 
+				}
+
+				// sRGB handling
+				if (srgb) {
+					cmd << "-srgb ";
+				}
+
+				// Output directory and input file
+				cmd << "-o \"" << std::filesystem::absolute(windows_output_dir).string() << "\" ";
+				cmd << "\"" << std::filesystem::absolute(input_path).string() << "\"";
+
+				return cmd.str();
+				};
+
+			// Compile for Android (ASTC)
+			PN_CORE_INFO("[TextureCompiler] Compiling ASTC texture for Android: {}", asset_id);
+			std::string android_cmd = buildAndroidCommand();
+			if (std::system(android_cmd.c_str()) != 0) {
+				PN_CORE_ERROR("[TextureCompiler] Android ASTC compilation failed: {}", android_cmd);
 				return;
 			}
+			PN_CORE_INFO("[TextureCompiler] Android compilation successful: {}", android_output.string());
 
-			PN_CORE_INFO("[TextureCompiler] Compiled texture successfully: {}", output_path.string());
+			// Compile for Windows (BC7/DDS)
+			PN_CORE_INFO("[TextureCompiler] Compiling BC texture for Windows: {}", asset_id);
+			std::string windows_cmd = buildWindowsCommand();
+			if (std::system(windows_cmd.c_str()) != 0) {
+				PN_CORE_ERROR("[TextureCompiler] Windows BC compilation failed: {}", windows_cmd);
+				return;
+			}
+			PN_CORE_INFO("[TextureCompiler] Windows compilation successful: {}", windows_output.string());
+
+			PN_CORE_INFO("[TextureCompiler] Cross-platform texture compilation completed: {}", asset_id);
 		}
+
+		// Helper function to get the appropriate texture file for current platform
+//		std::filesystem::path TextureCompiler::getPlatformTexture(const std::string& asset_id)
+//		{
+//#ifdef PN_PLATFORM_ANDROID
+//			return std::filesystem::path("assets/Textures/Compiled_Textures_Android") / (asset_id + ".astc");
+//#elif defined(PN_PLATFORM_WINDOWS)  
+//			return std::filesystem::path("assets/Textures/Compiled_Textures_Windows") / (asset_id + ".dds");
+//#else
+//			// Fallback to Android version
+//			return std::filesystem::path("assets/Textures/Compiled_Textures_Android") / (asset_id + ".astc");
+//#endif
+//		}
 
 
 

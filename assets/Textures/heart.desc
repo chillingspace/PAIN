@@ -3,9 +3,12 @@
     "asset_id": "heart",
     "source_file": "heart.png",
     "options": {
-        "format": "BC7_UNORM",
+        "android_format": "ASTC_4x4",
+        "windows_format": "BC7", 
+        "quality": 192,
         "mipmaps": true,
-        "srgb": true,
-        "output_dir": "assets/Textures/Compiled_Textures"
+        "srgb": false,
+        "output_dir_windows": "assets/Textures/Compiled_Textures_Windows",
+        "output_dir_android": "assets/Textures/Compiled_Textures_Android"
     }
 }
