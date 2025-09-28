@@ -85,7 +85,7 @@ namespace PAIN {
 
             // Reserve vertical space for the fixed Tools panel (menu + toolbar)
             const float menu_h = ImGui::GetFrameHeight(); // same as Tools
-            const float toolbar_h = .2f;                   // same as Tools
+            const float toolbar_h = .0f;                   // same as Tools
             const float tools_h = menu_h + toolbar_h;
 
             // Position/size the dockspace host BELOW the tools bar

@@ -90,20 +90,25 @@ namespace PAIN {
             return ImGuiKey_None;
         }
 
-		void EditorGLFW::init() {
-			IMGUI_CHECKVERSION();
-			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
+        void EditorGLFW::init() {
+            IMGUI_CHECKVERSION();
+            ImGui::CreateContext();
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-			ImGui::StyleColorsDark();
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-			ImGui_ImplGlfw_InitForOpenGL(g_window, true);
-			ImGui_ImplOpenGL3_Init("#version 450");
+            ImGui::StyleColorsDark();
 
-			ImGui::LoadIniSettingsFromDisk(io.IniFilename);
-		}
+            // Init GLFW/OpenGL3 backends
+            ImGui_ImplGlfw_InitForOpenGL(g_window, true);
+            ImGui_ImplOpenGL3_Init("#version 450");
+
+            // Load saved layout (docking state, window positions, etc.)
+            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+        }
+
 
 		void EditorGLFW::shutdown() {
 			ImGuiIO& io = ImGui::GetIO();
