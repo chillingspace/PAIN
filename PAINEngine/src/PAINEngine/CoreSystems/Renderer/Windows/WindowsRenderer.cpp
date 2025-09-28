@@ -63,22 +63,22 @@ namespace PAIN {
 		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
 		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
 
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
+		m_shader->SetUniform("u_Model", model);
 
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
+		m_shader->SetUniform("u_M", model);
+		m_shader->SetUniform("u_V", Camera::get().view());
+		m_shader->SetUniform("u_P", Camera::get().projection());
 
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightDir"), 0.f, 0.0f, -1.f);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "u_LightColor"), 1.0f, 1.0f, 1.0f);
+		m_shader->SetUniform("u_LightDir", glm::vec3{ 0.f, 0.0f, -1.f });
+		m_shader->SetUniform("u_LightColor", glm::vec3{ 1.0f, 1.0f, 1.0f });
 
-		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.rough"), material.rough);
-		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
+		m_shader->SetUniform("material.rough", material.rough);
+		m_shader->SetUniform("material.metal", material.metal);
+		m_shader->SetUniform("material.color", material.color);
 
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
+		m_shader->SetUniform("light[0].position", light.position);
+		m_shader->SetUniform("light[0].L", light.L_intensity);
+
 
 		if (m_mesh) m_mesh->Draw();
 
