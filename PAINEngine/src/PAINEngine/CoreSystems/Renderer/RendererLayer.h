@@ -31,6 +31,15 @@ namespace PAIN {
         std::unique_ptr<WindowsRenderer> w_renderer;
         #endif
 
+		bool W_KEYDOWN = false;
+		bool A_KEYDOWN = false;
+		bool S_KEYDOWN = false;
+		bool D_KEYDOWN = false;
+
+		bool mouseButtonDown = false;
+		float lastX = 0.0;
+		float lastY = 0.0;
+
     };
 
 }

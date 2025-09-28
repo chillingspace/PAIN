@@ -97,7 +97,12 @@ namespace PAIN {
 
 	void Application::Run() {
 
-		float temp_dt = 0.0f;
+		//float temp_dt = 0.0f;
+
+		static auto last_time = std::chrono::high_resolution_clock::now();
+		auto current_time = std::chrono::high_resolution_clock::now();
+		float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+		last_time = current_time;
 
 		//Application loop
 		while (b_app_running) {
@@ -113,12 +118,12 @@ namespace PAIN {
 
 			//Update all core systems
 			for (auto& core : core_stack) {
-				core->onUpdate(temp_dt);
+				core->onUpdate(dt);
 			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
-				layer->onUpdate(temp_dt);
+				layer->onUpdate(dt);
 			}
 
 			//Swap buffer

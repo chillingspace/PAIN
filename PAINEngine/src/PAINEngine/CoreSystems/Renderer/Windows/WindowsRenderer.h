@@ -68,11 +68,14 @@ namespace PAIN {
 	};
 
 	class Camera {
+	private:
+		Camera() = default;
+		~Camera() = default;
 	public:
 		float speed = 15.f;
 
 		glm::vec3 pos{ 0.f, 0.f, 3.f };
-		glm::vec3 target{ 0.f, 0.f, 0.f };
+		glm::vec3 forward{ 0.f, 0.f, -1.f };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
 		float fov{ 90.f };
@@ -84,7 +87,7 @@ namespace PAIN {
 		float aspect_ratio{ width_ratio / height_ratio };
 
 		glm::mat4 view() const {
-			return glm::lookAt(pos, target, up);
+			return glm::lookAt(pos, pos + forward, up);
 		}
 
 		glm::mat4 projection() const {
