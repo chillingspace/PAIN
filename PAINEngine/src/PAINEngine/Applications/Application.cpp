@@ -87,7 +87,8 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
+		// !NOTE: IMGUI eats events
+		//addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
 #endif
 
 		//Mark engine as ready
