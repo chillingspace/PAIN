@@ -27,6 +27,9 @@ namespace PAIN {
 		protected:
 			// Rendering context (OpenGL for now)
 			std::unique_ptr<GraphicsContext> m_Context;
+
+			//Anrdoid state
+			bool b_active = false;
 		public:
 			virtual ~Window() = default;
 
@@ -44,13 +47,14 @@ namespace PAIN {
 			//Get native window
 			virtual void* getNativeWindow() const = 0;
 
-			virtual void set_Vsync(bool set) = 0;
-			virtual bool is_Vsync() const = 0;
 			//Pollevents
 			virtual void pollEvents() = 0;
 
 			//Swap buffers
 			virtual void swapBuffers() = 0;
+
+			//Get window active state
+			bool getActive() const { return b_active; }
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "AudioPanel.h"
+#include "DebugPanel.h"
 #include "PAINEngine/Applications/Application.h" 
 
 #ifdef _DEBUG
@@ -9,25 +9,21 @@ namespace PAIN {
 		namespace Panel {
 
 
-			DebugAudioPanel::DebugAudioPanel() {
+			DebugPanel::DebugPanel() {
 
 				
-				name = "##AudioPanel";
+				name = "Debug Panel";
 
 				//Set panel flag
-				flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-					ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-					ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
-					ImGuiWindowFlags_MenuBar;
+				flags = ImGuiWindowFlags_None;
 			}
 
 
-			void DebugAudioPanel::nextWindowSettings() {
+			void DebugPanel::nextWindowSettings() {
 				// Default behavior (no fullscreen/docking hacks needed)
 			}
 
-			void DebugAudioPanel::onUpdate() {
+			void DebugPanel::onUpdate() {
 
 				//if (ImGui::Begin("Audio Controls")) {
 				//	AudioManager& audio = PAIN::Application::Get().GetAudioManager();

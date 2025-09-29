@@ -5,7 +5,7 @@
 
 #include "AppSystem.h"
 #include "PAINEngine/CoreSystems/Events/Event.h"
-#include "PAINEngine/CoreSystems/Windows/Window.h"
+//#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #include <memory>
 #include <vector>
@@ -18,7 +18,7 @@ namespace PAIN {
 	{
 	private:
 		// Application instance
-		static Application* s_Instance;
+		//static Application* s_Instance;
 
 		//Boolean running app running
 		bool b_app_running = false;
@@ -47,7 +47,7 @@ namespace PAIN {
 		// Direct pointer to the AudioManager
 		//std::shared_ptr<AudioManager> m_AudioManager;
 
-		//std::shared_ptr<Window::Window> m_Window;
+		//std::shared_ptr<Window::Window> app_window;
 
 		//Dispatch events to layers
 		void dispatchEventsForward(Event::Event& e);
@@ -59,8 +59,10 @@ namespace PAIN {
 		Application();
 		virtual ~Application();
 
-		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
-		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
+		template<typename T>
+		void addCoreSystem(std::shared_ptr<T> core_system);
+		template<typename T>
+		void addLayerSystem(std::shared_ptr<T> layer_system);
 		void Init(void* app = nullptr);
 		void Run();
 		void terminate();
@@ -72,12 +74,12 @@ namespace PAIN {
 		bool getAppState() const { return b_app_running; }
 
 		// Static getter to access the application and audio manager
-		inline static Application& Get() { return *s_Instance; }
+		//inline static Application& Get() { return *s_Instance; }
 		//inline AudioManager& GetAudioManager() { return *m_AudioManager; }
 
-		inline Window::Window& GetWindow() { return *app_window; }
-		inline const Window::Window& GetWindow() const { return *app_window; }
-		inline std::shared_ptr<Window::Window> GetWindowPtr() const { return app_window; }
+		//inline Window::Window& GetWindow() { return *app_window; }
+		//inline const Window::Window& GetWindow() const { return *app_window; }
+		//inline std::shared_ptr<Window::Window> GetWindowPtr() const { return app_window; }
 	};
 
 	// Defined in client

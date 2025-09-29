@@ -19,20 +19,9 @@ namespace PAIN {
 			//Window buffer size
 			glm::uvec2 frame_buffer;
 
-			//Init flag
-			bool b_initialized = false;
-
-			float m_AspectRatio = .0f;   
-			struct Viewport { int x = 0, y = 0, w = 0, h = 0; } m_Viewport;
-			void recomputeViewport(int fb_width, int fb_height);
-			glm::uvec2 getFramebufferSize() const;
-
-			bool vsync = true;
-
-
 			//Private internal functions
-			virtual void init(Package const& package);
-			virtual void shutdown();
+			void init(Package const& package);
+			void shutdown();
 
 			//Callbacks
 			static void fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height);
@@ -50,14 +39,7 @@ namespace PAIN {
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
-			virtual ~GLFW_Window();
-	
-			void set_Vsync(bool set) override;
-			bool is_Vsync() const override;
-
-			//Register callbacks
-			void registerCallbacks(void* app) override;
-
+			virtual ~GLFW_Window();	
 
 			//Update
 			void onUpdate(AppTiming timing) override;
@@ -65,6 +47,8 @@ namespace PAIN {
 			//Event call back
 			void onEvent(Event::Event& e) override;
 
+			//Register callbacks
+			void registerCallbacks(void* app) override;
 
 			//Get native window
 			void* getNativeWindow() const override { return ptr_window; }

@@ -1,8 +1,8 @@
 #pragma once
 
 #ifdef _DEBUG
-#ifndef DEBUG_AUDIO_PANEL_HPP
-#define DEBUG_AUDIO_PANEL_HPP
+#ifndef DEBUG_PANEL_HPP
+#define DEBUG_PANEL_HPP
 
 #include "Panels.h"
 
@@ -11,9 +11,9 @@ namespace PAIN {
 	namespace Editor {
 		namespace Panel {
 
-			class DebugAudioPanel : public IPanel {
+			class DebugPanel : public IPanel {
 			public:
-				DebugAudioPanel();
+				DebugPanel();
 
 				void nextWindowSettings() override; 
 				void onUpdate() override;

@@ -22,6 +22,8 @@ namespace PAIN {
             ~EditorAndroid() override { shutdown(); }
             void beginFrame() override;
 
+            void updateShortCuts(std::shared_ptr<CommandManager> command) override;
+
             void handleEvents(Event::Event& event) override;
         };
     }

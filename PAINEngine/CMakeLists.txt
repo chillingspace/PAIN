@@ -16,6 +16,7 @@ add_library(PAINEngine STATIC ${ENGINE_SRC})
 target_include_directories(PAINEngine
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/vendor/FileWatch
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine
 )
@@ -36,11 +37,14 @@ target_link_libraries(PAINEngine
         imgui::imgui
         Jolt
         FMOD::core
+
 )
 
 target_link_libraries(PAINEngine
     PUBLIC  
         spdlog_header_only
+        FileWatch_header_only
+        nlohmann_json
 )
 
 # ImGui backends compiled into the engine

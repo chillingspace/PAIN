@@ -14,46 +14,33 @@
  *********************************************************************/
 #define CLASS_STR(T) #T //Convert Class To Str
 
-// add headers that you want to pre-compile here
+ // add headers that you want to pre-compile here
 
- /*****************************************************************//**
- * Physics Library
- *********************************************************************/
-//#include "Jolt/Jolt.h"
-//#include <Jolt/Core/Factory.h>          
-//#include <Jolt/RegisterTypes.h>         
-//#include <Jolt/Physics/PhysicsSystem.h> 
-//#include <Jolt/Physics/Body/Body.h>     
-//#include <Jolt/Core/TempAllocator.h>
-//#include <Jolt/Core/JobSystemThreadPool.h> 
-//#include <Jolt/Physics/Collision/ObjectLayer.h>
-//#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+  /*****************************************************************//**
+  * Physics Library
+  *********************************************************************/
+  //#include "Jolt/Jolt.h"
+  //#include <Jolt/Core/Factory.h>          
+  //#include <Jolt/RegisterTypes.h>         
+  //#include <Jolt/Physics/PhysicsSystem.h> 
+  //#include <Jolt/Physics/Body/Body.h>     
+  //#include <Jolt/Core/TempAllocator.h>
+  //#include <Jolt/Core/JobSystemThreadPool.h> 
+  //#include <Jolt/Physics/Collision/ObjectLayer.h>
+  //#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
- /*****************************************************************//**
- * Engine Specific Library
- *********************************************************************/
+   /*****************************************************************//**
+   * Engine Specific Library
+   *********************************************************************/
 
-//Android GL vs Window GL
+   //Android GL vs Window GL
 #ifdef PN_PLATFORM_ANDROID
 #include <android/native_window.h>
 #include <android/native_activity.h>
 #include <android_native_app_glue.h>
-#include <android/log.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
-
-#ifndef LOG_TAG
-#define LOG_TAG "PAIN"   // change to your app tag
-#endif
-
-// printf-style
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,   LOG_TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,    LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,    LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,   LOG_TAG, __VA_ARGS__)
-
 #else
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -74,6 +61,13 @@
 #endif
 
  /*****************************************************************//**
+ * Windows Application
+ *********************************************************************/
+#ifdef PN_PLATFORM_WINDOWS
+#include "FileWatch.hpp"
+#endif
+
+ /*****************************************************************//**
  * CORE HEADER
  *********************************************************************/
 #include "Core.h"
@@ -81,12 +75,12 @@
  /*****************************************************************//**
  * Seri HEADER
  *********************************************************************/
-//#include "nlohmann/json.hpp"
-//using json = nlohmann::json;
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
 
- /*****************************************************************//**
- * STL
- *********************************************************************/
+/*****************************************************************//**
+* STL
+*********************************************************************/
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -115,10 +109,10 @@
 #include <random>
 #include <bitset>
 
- /*****************************************************************//**
- * LOGGING
- *********************************************************************/
-#include "Logging/Log.h"
+/*****************************************************************//**
+* UTILITY
+*********************************************************************/
+#include "Utility/Log.h"
 
 //Ban normal logging
 #define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead

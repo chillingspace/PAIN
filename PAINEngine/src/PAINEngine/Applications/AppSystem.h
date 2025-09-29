@@ -5,6 +5,8 @@
 
 #include "../CoreSystems/Events/Event.h"
 
+#include "../Utility/CustomTemplates.h"
+
 namespace PAIN {
 
 	struct AppTiming {
@@ -21,7 +23,11 @@ namespace PAIN {
 
 	class AppSystem {
 	private:
+		friend class Application;
+	protected:
+		std::shared_ptr<Services> services;
 	public:
+
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}

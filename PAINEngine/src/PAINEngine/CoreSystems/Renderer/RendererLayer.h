@@ -7,7 +7,7 @@
 #ifdef PN_PLATFORM_ANDROID
 #include "Android/AndroidRenderer.h"
 #else
-
+#include "Windows/WindowsRenderer.h"
 #endif
 
 namespace PAIN {
@@ -29,7 +29,7 @@ namespace PAIN {
         #ifdef PN_PLATFORM_ANDROID
             std::unique_ptr<AndroidRenderer> renderer;
         #else
-
+        std::unique_ptr<WindowsRenderer> w_renderer;
         #endif
 
     };

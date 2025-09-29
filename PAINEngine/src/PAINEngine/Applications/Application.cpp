@@ -3,19 +3,28 @@
 
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
-//#include "CoreSystems/Audio/Audio.h"
-#include "ECS/Controller.h"
-#include "CoreSystems/Renderer/TestTriangleLayer.h"
-#include "LayeredSystems/LevelEditor/Editor.h"
-#include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
+#include "CoreSystems/Audio/Audio.h"
+#include "ECS/Controller.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
+#include "CoreSystems/Audio/AudioManager.h"
+
+// Assets
+#include "CoreSystems/Assets/sPath.h"
+#include "CoreSystems/Assets/sLoader.h"
+#include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Assets/sAssetCompiler.h"
+
 namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
+	// define static instance
+	//Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
+		//Create default services
+		services = std::make_shared<Services>();
+
 //		// Set the static instance
 //		s_Instance = this;
 //
@@ -46,47 +55,82 @@ namespace PAIN {
 
 	Application::~Application()
 	{
-		for (auto& layer : layer_stack) {
-			layer->onDetach();
+		//Destroy top down
+		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		layer_stack.clear();
 
-		for (auto& core : core_stack) {
-			core->onDetach();
+		//Destroy to core top down
+		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		core_stack.clear();
 	}
 
-	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+	template<typename T>
+	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		core_system->services = services;
 		core_system->onAttach();
 		core_stack.push_back(core_system);
+		services->set<T>(core_system);
 	}
 
-	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+	template<typename T>
+	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
+		layer_system->services = services;
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
+		services->set<T>(layer_system);
 	}
 
 	void Application::Init(void* app) {
-		// Set the static instance
-		s_Instance = this;
 
-		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		//Initialize logger
+		PAIN::Log::Init();
+		PN_CORE_INFO("Initialized Log!");
+
+		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
+		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
-		//m_AudioManager = std::make_shared<AudioManager>();
-		//addCoreSystem(m_AudioManager);
+		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
+		addCoreSystem(app_audio);
+
+		//Audio testing.
+#ifdef PN_PLATFORM_ANDROID
+
+		//Android specific paths, will need to abstract this out
+		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
+#else
+		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("assets/audio/Music/Boss_Music.wav");
+#endif
 
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
+		// Windows only have paths, andriods have to use AASettmanager
+#ifdef PN_PLATFORM_WINDOWS
+		addCoreSystem(std::make_shared<Path::Service>());
+		services->get<Path::Service>()->init("assets/Config.json");
+		addCoreSystem(std::make_shared<Assets::Service>());
+		addCoreSystem(std::make_shared<Loader::Service>());
+		addCoreSystem(std::make_shared<Compiler::Service>());
+#endif
+
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
-        addCoreSystem(renderer);
+		addCoreSystem(renderer);
 #else
-		auto renderer = std::make_shared<TestTriangleLayer>();
+		auto renderer = std::make_shared<RendererLayer>();
 		addCoreSystem(renderer);
 #endif
 
@@ -108,7 +152,7 @@ namespace PAIN {
 		while (b_app_running) {
 
 			//Poll events
-			app_window->pollEvents();
+			services->get<Window::Window>()->pollEvents();
 
 			//Drain all events in queue
 			drainEventQueue();
@@ -152,7 +196,7 @@ namespace PAIN {
 			for (auto& layer : layer_stack) layer->onUpdate(timing);
 
 			//Swap buffer
-			app_window->swapBuffers();
+			services->get<Window::Window>()->swapBuffers();
 		};
 	}
 

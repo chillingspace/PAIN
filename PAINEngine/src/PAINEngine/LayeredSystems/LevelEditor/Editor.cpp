@@ -157,19 +157,19 @@ namespace PAIN {
             static bool show_demo = true;
             if (show_demo) ImGui::ShowDemoWindow(&show_demo);
 
-            ImGui::Begin("PAIN Engine Debug");
+           /* ImGui::Begin("PAIN Engine Debug");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Checkbox("Show Demo Window", &show_demo);
 
-            auto window = Application::Get().GetWindowPtr();
+            auto window = services->get<Window::Window>();
             if (!window) return;
             bool vsync = window->is_Vsync();
             if (ImGui::Checkbox("VSync", &vsync)) {
                 window->set_Vsync(vsync);
             }
 
-            ImGui::End();
+            ImGui::End();*/
 
             //Signal end of frame for imgui
             platform->endFrame();
