@@ -26,8 +26,8 @@ namespace PAIN {
 	};
 
 	Light light = {
-		{0.f, 1.f, 0.f},	// position
-		{0.1f, 0.1f, 0.1f}					// intensity
+		{2.f, 3.f, 2.f},	// position
+		{0.5f, 0.5f, 0.5f}					// intensity
 	};
 
 	WindowsRenderer::WindowsRenderer() {

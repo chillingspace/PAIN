@@ -33,6 +33,14 @@ namespace PAIN {
 	struct Light {
 		glm::vec3 position;
 		glm::vec3 L_intensity;
+
+		enum MOVE_MODES {
+			FREE,
+			ORBIT_ORIGIN,
+			NUM_MOVE_MODES,
+		};
+
+		MOVE_MODES move_mode = ORBIT_ORIGIN;
 	};
 
 	extern Material material;
@@ -70,12 +78,20 @@ namespace PAIN {
 		Camera() = default;
 		~Camera() = default;
 	public:
+		static enum MOVE_MODES {
+			FPS,
+			ORBIT_ORIGIN,
+			NUM_MOVE_MODES,
+		};
+
+		MOVE_MODES move_mode = ORBIT_ORIGIN;
+
 		float speed = 15.f;
 
 		float sensitivity = 0.1f;
 
-		glm::vec3 pos{ 0.f, 0.f, 3.f };
-		glm::vec3 forward{ 0.f, 0.f, -1.f };
+		glm::vec3 pos{ 0.f, 5.f, 7.f };
+		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
 		float fov{ 90.f };

@@ -36,6 +36,10 @@ namespace PAIN {
 #endif
 		switch (move_mode) {
 		case CAMERA:
+			if (Camera::get().move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
+				Camera::get().forward = -glm::normalize(Camera::get().pos); // always look at origin
+			}
+
 			if (W_KEYDOWN) {
 				glm::vec3 offset = Camera::get().forward * Camera::get().speed;
 				offset *= dt;
@@ -69,27 +73,37 @@ namespace PAIN {
 			break;
 		case LIGHT:
 			static constexpr float light_speed = 15.f;
+
+			glm::vec3 forward, right, up;
+
+			if (light.move_mode == Light::FREE) {
+				forward = glm::vec3(0.f, 0.f, -1.f);
+				right = glm::vec3(1.f, 0.f, 0.f);
+				up = glm::vec3(0.f, 1.f, 0.f);
+			}
+			else if (light.move_mode == Light::ORBIT_ORIGIN) {
+				forward = -glm::normalize(light.position);
+				right = glm::normalize(glm::cross(forward, glm::vec3(0.f, 1.f, 0.f)));
+				up = glm::normalize(glm::cross(right, forward));
+			}
+
 			if (W_KEYDOWN) {
-				light.position += Camera::get().forward * light_speed * dt;
+				light.position += forward * light_speed * dt;
 			}
 			if (S_KEYDOWN) {
-				light.position += -Camera::get().forward * light_speed * dt;
+				light.position += -forward * light_speed * dt;
 			}
 			if (A_KEYDOWN) {
-				const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(90.f), Camera::get().up);
-				const glm::vec3 left = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
-				light.position += left * light_speed * dt;
+				light.position += -right * light_speed * dt;
 			}
 			if (D_KEYDOWN) {
-				const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-90.f), Camera::get().up);
-				const glm::vec3 right = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
 				light.position += right * light_speed * dt;
 			}
 			if (SPACE_KEYDOWN) {
-				light.position += glm::vec3(0.f, 1.f, 0.f) * light_speed * dt;
+				light.position += up * light_speed * dt;
 			}
 			if (LCTRL_KEYDOWN) {
-				light.position += glm::vec3(0.f, -1.f, 0.f) * light_speed * dt;
+				light.position += -up * light_speed * dt;
 			}
 			break;
 		}
@@ -171,11 +185,16 @@ namespace PAIN {
 			});
 
 		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
-			
+
 			switch (e.getKeyCode())
 			{
 			case GLFW_KEY_TAB:
 				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
+				break;
+			case GLFW_KEY_O:
+				Camera::get().move_mode = static_cast<Camera::MOVE_MODES>((Camera::get().move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
+				light.move_mode = static_cast<Light::MOVE_MODES>((light.move_mode + 1) % Light::MOVE_MODES::NUM_MOVE_MODES);
+				break;
 			default:
 				break;
 			}
