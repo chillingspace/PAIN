@@ -49,10 +49,13 @@ namespace PAIN {
 		unsigned int vbo = 0;
 		unsigned int ebo = 0;
 
+		unsigned int empty_vao = 0;
+
 		std::unique_ptr<Shader> m_shader = nullptr;
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
 		std::unique_ptr<Shader> sphere_shader = nullptr;
+		std::unique_ptr<Shader> floor_shader = nullptr;
 	};
 
 	class Camera {
@@ -86,7 +89,9 @@ namespace PAIN {
 
 		// temp
 		glm::mat4 model() const {
-			return glm::mat4(1.f);
+			glm::mat4 m = glm::mat4(1.f);
+			m = glm::translate(m, glm::vec3(0.f, 1.f, 0.f));
+			return m;
 		}
 
 		glm::mat4 view() const {

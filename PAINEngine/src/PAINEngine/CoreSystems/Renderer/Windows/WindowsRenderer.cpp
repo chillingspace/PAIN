@@ -1,12 +1,12 @@
 /**
  * @file WindowsRenderer.cpp
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-09-27
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 
 
@@ -54,8 +54,21 @@ namespace PAIN {
 			return;
 		}
 
+		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE); 
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
 		m_mesh = Mesh::LoadObj("ogre.obj");
@@ -75,6 +88,20 @@ namespace PAIN {
 		glClearColor(.2f, .3f, .3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+		// draw floor
+		if (!floor_shader) {
+			PN_CORE_ERROR("Unable to find floor_shader");
+			return;
+		}
+		floor_shader->Bind();
+		floor_shader->SetUniform("u_V", Camera::get().view());
+		floor_shader->SetUniform("u_P", Camera::get().projection());
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+
+
 		// Bind shader and VAO, then draw triangle
 		if (!m_shader) {
 			PN_CORE_ERROR("Unable to find m_shaders");
@@ -92,8 +119,8 @@ namespace PAIN {
 		m_shader->SetUniform("material.metal", material.metal);
 		m_shader->SetUniform("material.color", material.color);
 
-		m_shader->SetUniform("light[0].position", light.position);
-		m_shader->SetUniform("light[0].L", light.L_intensity);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
 
 		if (m_mesh) m_mesh->Draw();
 
@@ -132,6 +159,11 @@ namespace PAIN {
 		if (vao != 0) {
 			glDeleteVertexArrays(1, &vao);
 			vao = 0;
+		}
+
+		if (empty_vao != 0) {
+			glDeleteVertexArrays(1, &empty_vao);
+			empty_vao = 0;
 		}
 
 		if (vbo != 0) {
