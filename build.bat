@@ -4,6 +4,17 @@ REM Windows Build Script for PAIN Engine
 REM ===============================================
 
 REM Clean previous build artifacts if they exist
+
+echo [0/3] Cleaning Android build cache...
+if exist android\app\.cxx (
+    rmdir /s /q android\app\.cxx
+    echo     Removed android\app\.cxx
+)
+if exist android\.gradle (
+    rmdir /s /q android\.gradle
+    echo     Removed android\.gradle
+)
+
 echo [1/3] Cleaning previous build...
 if exist build (
     rmdir /s /q build

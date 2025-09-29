@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
 #ifndef TOOLS_PANELS_HPP
 #define TOOLS_PANELS_HPP
 
@@ -14,7 +13,7 @@ namespace PAIN {
 			class Tools : public IPanel {
 			private:
 			public:
-				Tools(std::shared_ptr<CommandManager> command_manager);
+				Tools();
 
 				void nextWindowSettings() override;
 
@@ -24,6 +23,5 @@ namespace PAIN {
 	}
 }
 
-#endif
 #endif
 #endif

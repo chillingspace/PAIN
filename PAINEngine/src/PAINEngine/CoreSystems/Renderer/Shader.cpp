@@ -28,6 +28,63 @@ namespace PAIN {
 		glUseProgram(0);
 	}
 
+	// SET UNIFORMS HELPERS
+	void Shader::SetUniform(const std::string& name, const glm::mat4& m) const
+	{
+		glUniformMatrix4fv(glGetUniformLocation(m_RendererID, name.c_str()), 1, GL_FALSE, &m[0][0]);
+	}
+
+	void Shader::SetUniform(const std::string& name, const glm::vec4& val) const
+	{
+		glUniform4f(glGetUniformLocation(m_RendererID, name.c_str()), val.x, val.y, val.z, val.w);
+	}
+
+	void Shader::SetUniform(const std::string& name, const glm::vec3& val) const
+	{
+		glUniform3f(glGetUniformLocation(m_RendererID, name.c_str()), val.x, val.y, val.z);
+	}
+
+	void Shader::SetUniform(const std::string& name, float x, float y, float z) const
+	{
+		glUniform3f(glGetUniformLocation(m_RendererID, name.c_str()), x, y, z);
+	}
+
+	void Shader::SetUniform(const std::string& name, float val) const
+	{
+		glUniform1f(glGetUniformLocation(m_RendererID, name.c_str()), val);
+	}
+
+	void Shader::SetUniform(const std::string& name, int val) const
+	{
+		glUniform1i(glGetUniformLocation(m_RendererID, name.c_str()), val);
+	}
+
+	std::unique_ptr<Shader> Shader::LoadShaders(const std::string& vert_file, const std::string& frag_file)
+	{
+		// Get current working directory and build paths from there
+		std::filesystem::path current_path = std::filesystem::current_path();
+		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
+
+		// Or try to find the project root by looking for a marker file
+		std::filesystem::path search_path = current_path;
+		while (search_path.has_parent_path()) {
+			if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
+				project_root = search_path / "PAIN";
+				break;
+			}
+			search_path = search_path.parent_path();
+		}
+
+		std::filesystem::path vert_full = project_root / "assets" / "Engine" / "shaders" / vert_file;
+		std::filesystem::path frag_full = project_root / "assets" / "Engine" / "shaders" / frag_file;
+
+		std::string vert_code = ReadFile(vert_full);
+		std::string frag_code = ReadFile(frag_full);
+
+		return std::make_unique<Shader>(vert_code, frag_code);
+
+	}
+
 	uint32_t Shader::CompileShader(unsigned int type, const std::string& source)
 	{
 		// Create vert & frag shaders
@@ -44,11 +101,13 @@ namespace PAIN {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
             #ifdef PN_PLATFORM_ANDROID
-            LOGE("Shader compile error (%s): %s",
+            PN_CORE_ERROR("Shader compile error (%s): %s",
                  type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
             #else
 			PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
             #endif
+
+			assert(false);
         }
 
 		return shader;
@@ -65,7 +124,7 @@ namespace PAIN {
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetShaderInfoLog(shader, len, nullptr, log.data());
         #ifdef PN_PLATFORM_ANDROID
-        LOGE("[Shader] Compile failed: ");
+        PN_CORE_ERROR("[Shader] Compile failed: ");
         #else
 		PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
         #endif
@@ -82,7 +141,7 @@ namespace PAIN {
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetProgramInfoLog(program, len, nullptr, log.data());
             #ifdef PN_PLATFORM_ANDROID
-            LOGE("[Shader] Link failed: ");
+        PN_CORE_ERROR("[Shader] Link failed: ");
             #else
             PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
             #endif
@@ -98,7 +157,7 @@ namespace PAIN {
 
 		if (!CheckProgram(program)) {
             #ifdef PN_PLATFORM_ANDROID
-            LOGE("Program link FAILED");
+            PN_CORE_ERROR("Program link FAILED");
             #else
             PN_CORE_ERROR("Program link FAILED");
             #endif
@@ -110,5 +169,18 @@ namespace PAIN {
 		glDetachShader(program, frag_shader);
 
 		return program;
+	}
+
+	std::string Shader::ReadFile(const std::filesystem::path& path)
+	{
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			PN_CORE_WARN("Failed to open shader file: {}", path.string());
+			assert(0);
+		}
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+
+		return buffer.str();
 	}
 }

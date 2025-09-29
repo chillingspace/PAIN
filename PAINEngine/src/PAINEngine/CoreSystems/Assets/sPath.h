@@ -8,6 +8,7 @@
  *********************************************************************/
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef PATH_SERVICE_HPP
 #define PATH_SERVICE_HPP
 
@@ -43,13 +44,18 @@ namespace PAIN {
 			//Optional virtual functions
 			void onAttach() override {};
 			void onDetach() override {};
-			void onUpdate() override {};
+			void onFixedUpdate(AppTiming timing) override {};
+			void onUpdate(AppTiming timing) override {};
 
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override {};
 
+			std::unordered_map<std::string, std::filesystem::path> const& getAllRegisteredVirtualPaths();
+
+			std::unordered_map<std::filesystem::path, std::unique_ptr<filewatch::FileWatch<std::string>>> const& getAllDirWatchers();
+			
 	 		//Init
-	 		void init(nlohmann::json const& config);
+	 		void init(std::string const& config_path);
 
 	 		//Register new virtual path
 	 		void registerVirtualPath(std::string const& path_alias, std::filesystem::path const& path, bool b_full_path = false);
@@ -105,3 +111,4 @@ namespace PAIN {
 	 }
 }
 #endif // !PATH_SERVICE_HPP
+#endif

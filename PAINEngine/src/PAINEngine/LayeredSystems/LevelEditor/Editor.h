@@ -8,17 +8,20 @@
 #include "Applications/Application.h"
 #include "CoreSystems/Windows/Window.h"
 
-//Command header
-#include "Command.h"
-
 //Panels headers
-//#include "Panels/Panels.h"
+#include "Panels/Panels.h"
 
 //Platform header
 #include "Platform/EditorPlatform.h"
 
 namespace PAIN {
     namespace Editor {
+
+        //Panels map
+        class PanelsMap : public Custom::ClassMap {
+        public:
+            PanelsMap() = default;
+        };
 
         //Editor
         class Editor : public AppSystem {
@@ -28,13 +31,14 @@ namespace PAIN {
 
             void onAttach() override;
             void onDetach() override;
-            void onUpdate() override;
+            void onFixedUpdate(AppTiming timing) override {}
+            void onUpdate(AppTiming timing) override;
             void onEvent(Event::Event& event) override;
 
         private:
 
             //Panels
-            //std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+            std::shared_ptr<PanelsMap> panels;
 
             //Actions manager
             std::shared_ptr<CommandManager> command_manager;
@@ -42,21 +46,14 @@ namespace PAIN {
             //Platform editor
             std::shared_ptr<EditorPlatform> platform;
 
-            //void updateShortCuts();
+            template<typename T>
+            void registerPanel(std::shared_ptr<T> panel);
 
             void BeginFrame();
 
             void EndFrame();
 
-            void BuildDockspace();
-
-            //Mapping of glfw keys to imgui keys
-            //int imguiKeyMapping(int code);
-
-            ////Events that imgui listens for
-            //void handleKeyEvents(ImGuiIO& io, Event::Event& event);
-            //void handleMouseEvents(ImGuiIO& io, Event::Event& event);
-            //void handleWindowEvents(ImGuiIO& io, Event::Event& event);
+            void buildDockspace();
         };
     }
 } 

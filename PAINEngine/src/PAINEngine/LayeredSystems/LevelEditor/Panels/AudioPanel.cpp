@@ -3,16 +3,13 @@
 #include "PAINEngine/Applications/Application.h" 
 
 #ifdef _DEBUG
-#ifdef PN_PLATFORM_WINDOWS
-#include "PAINEngine/Audio/AudioManager.h"
-
 
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
 
 
-			DebugAudioPanel::DebugAudioPanel(std::shared_ptr<CommandManager> command_manager) : IPanel(command_manager) {
+			DebugAudioPanel::DebugAudioPanel() {
 
 				
 				name = "##AudioPanel";
@@ -78,5 +75,4 @@ namespace PAIN {
 	} // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif

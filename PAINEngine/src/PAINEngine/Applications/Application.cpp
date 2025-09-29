@@ -3,18 +3,20 @@
 
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
-//#include "CoreSystems/Audio/Audio.h"
-#include "ECS/Controller.h"
-#include "CoreSystems/Renderer/TestTriangleLayer.h"
-#include "LayeredSystems/LevelEditor/Editor.h"
-#include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
+#include "CoreSystems/Audio/Audio.h"
+#include "ECS/Controller.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
+#include "CoreSystems/Audio/AudioManager.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
+#include "CoreSystems/Assets/sLoader.h"
+#include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Assets/sAssetCompiler.h"
 
 
 namespace PAIN {
@@ -27,13 +29,19 @@ namespace PAIN {
 
 	Application::~Application()
 	{
-		for (auto& layer : layer_stack) {
-			layer->onDetach();
+		//Destroy top down
+		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		layer_stack.clear();
 
-		for (auto& core : core_stack) {
-			core->onDetach();
+		//Destroy to core top down
+		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
+
+			//On detach
+			(*it)->onDetach();
 		}
 		core_stack.clear();
 	}
@@ -56,13 +64,28 @@ namespace PAIN {
 
 	void Application::Init(void* app) {
 
+		//Initialize logger
+		PAIN::Log::Init();
+		PN_CORE_INFO("Initialized Log!");
+
 		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
-		//m_AudioManager = std::make_shared<AudioManager>();
-		//addCoreSystem(m_AudioManager);
+		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
+		addCoreSystem(app_audio);
+
+		//Audio testing.
+#ifdef PN_PLATFORM_ANDROID
+
+		//Android specific paths, will need to abstract this out
+		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
+#else
+		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
+		app_audio->play("assets/audio/Music/Boss_Music.wav");
+#endif
 
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
@@ -72,19 +95,21 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		// Windows only have paths, andriods have to use AASettmanager
-#ifdef PN_PLATFORM_WINDOWS
+		#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
-#endif
+		addCoreSystem(std::make_shared<Assets::Service>());
+		addCoreSystem(std::make_shared<Loader::Service>());
+		addCoreSystem(std::make_shared<Compiler::Service>());
+		#endif
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
         addCoreSystem(renderer);
 #else
-		auto renderer = std::make_shared<TestTriangleLayer>();
+		auto renderer = std::make_shared<RendererLayer>();
 		addCoreSystem(renderer);
 #endif
-		//addCoreSystem(std::make_shared<Audio::Controller>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -97,6 +122,9 @@ namespace PAIN {
 
 	void Application::Run() {
 
+		//Set last time
+		last_time = std::chrono::steady_clock::now();
+
 		//Application loop
 		while (b_app_running) {
 
@@ -106,18 +134,43 @@ namespace PAIN {
 			//Drain all events in queue
 			drainEventQueue();
 
+			//Update delta time
+			auto now = std::chrono::steady_clock::now();
+			timing.dt = std::chrono::duration<float>(now - last_time).count();
+			last_time = now;
+
+			//Accumulate for fixed updates
+			accumulator += timing.dt;
+
 			//Skip all other systems when window is not active
-			if (!services->get<Window::Window>()->getActive()) continue;
+			if (!services->get<Window::Window>()->getActive()) {
+				services->get<Window::Window>()->swapBuffers();
+				continue;
+			}
+
+			//Update fixed delta
+			int steps = 0;
+			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+
+				//Update all core systems
+				for (auto& core : core_stack) core->onFixedUpdate(timing);
+
+				//Update all layered systems
+				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+
+				accumulator -= timing.fixed_dt;
+				++steps;
+			}
+
+			//Update timing variables
+			timing.steps_this_frame = steps;
+			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
 			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate();
-			}
+			for (auto& core : core_stack) core->onUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) {
-				layer->onUpdate();
-			}
+			for (auto& layer : layer_stack) layer->onUpdate(timing);
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
@@ -208,7 +261,4 @@ namespace PAIN {
 			event_queue.pop();
 		}
 	}
-
-	// All services defines
-	#define PN_PATH_SERVICE services->get<Path::Service>()
 }
