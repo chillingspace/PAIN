@@ -107,12 +107,12 @@ namespace PAIN {
 
 			// Render skybox and light
 			w_renderer->Render();
-
+#ifdef PN_PLATFORM_WINDOWS
 			// Render objects
 			for (auto& obj : s_SubmissionQueue) {
 				w_renderer->RenderMesh(obj.mesh, obj.transform);
 			}
-
+#endif
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

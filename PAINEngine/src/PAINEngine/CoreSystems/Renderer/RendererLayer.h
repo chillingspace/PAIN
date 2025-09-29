@@ -52,7 +52,7 @@ namespace PAIN {
 //#else
 		std::unique_ptr<WindowsRenderer> w_renderer;
 		
-#ifdef PN_PLATFORM_ANDROID
+#ifdef PN_PLATFORM_WINDOWS
         static std::vector<SceneObject> s_SubmissionQueue;
 #endif
 
