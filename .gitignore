@@ -30,7 +30,7 @@ out*/
 # ========================
 *.obj
 *.o
-*.exe
+#*.exe
 *.exp
 *.pdb
 *.idb
@@ -58,12 +58,3 @@ out*/
 *.tmp
 *.bak
 *.swp
-
-
-# keep x64 lib for fmod
-!vendor/FMOD/
-!vendor/FMOD/windows/
-!vendor/FMOD/windows/api/
-!vendor/FMOD/windows/api/core/
-!vendor/FMOD/windows/api/core/lib/
-!vendor/FMOD/windows/api/core/lib/x64/

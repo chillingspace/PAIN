@@ -22,31 +22,31 @@ namespace PAIN {
 
         Android_Window::Android_Window(void* app, Package const& package) {
             m_App = static_cast<android_app*>(app);
-            m_Window = m_App->window;
-
-            // Create window with the native window
-            PAIN::Window::Package windowPackage;
-            windowPackage.width = ANativeWindow_getWidth(m_Window);
-            windowPackage.height = ANativeWindow_getHeight(m_Window);
-            windowPackage.title = "PAIN Engine Android";
-
-            // Create window with native handle
-            init(windowPackage);
         }
 
         Android_Window::~Android_Window() {
             shutdown();
         }
 
-        void Android_Window::init(Package const& package) {
-            if (!m_Window) {
-                LOGE("Cannot initialize Android_Window without native window!");
-                return;
+        bool Android_Window::initDisplay() {
+            m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+            if (m_Display == EGL_NO_DISPLAY) {
+                LOGE("eglGetDisplay failed");
+                return false;
             }
 
-            frame_buffer.x = package.width;
-            frame_buffer.y = package.height;
+            EGLint major, minor;
+            if (!eglInitialize(m_Display, &major, &minor)) {
+                LOGE("eglInitialize failed");
+                return false;
+            }
 
+            b_displayready = true;
+            LOGI("EGL initialized: %d.%d", major, minor);
+            return true;
+        }
+
+        bool Android_Window::setConfig() {
             // Initialize EGL
             const EGLint attribs[] = {
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -60,37 +60,17 @@ namespace PAIN {
                 EGL_NONE
             };
 
-            m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-            if (m_Display == EGL_NO_DISPLAY) {
-                LOGE("eglGetDisplay failed");
-                return;
-            }
-
-            EGLint major, minor;
-            if (!eglInitialize(m_Display, &major, &minor)) {
-                LOGE("eglInitialize failed");
-                return;
-            }
-            LOGI("EGL initialized: %d.%d", major, minor);
-
-            EGLConfig config;
             EGLint numConfigs;
             if (!eglChooseConfig(m_Display, attribs, &config, 1, &numConfigs)) {
                 LOGE("eglChooseConfig failed");
-                return;
+                return false;
             }
 
-            // Set native window format
-            EGLint format;
-            eglGetConfigAttrib(m_Display, config, EGL_NATIVE_VISUAL_ID, &format);
-            ANativeWindow_setBuffersGeometry(m_Window, 0, 0, format);
+            b_initialized = true;
+            return true;
+        }
 
-            m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
-            if (m_Surface == EGL_NO_SURFACE) {
-                LOGE("eglCreateWindowSurface failed");
-                return;
-            }
-
+        bool Android_Window::createContext() {
             const EGLint ctxAttribs[] = {
                 EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL_NONE
@@ -99,14 +79,47 @@ namespace PAIN {
             m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, ctxAttribs);
             if (m_Context == EGL_NO_CONTEXT) {
                 LOGE("eglCreateContext failed");
-                return;
+                return false;
             }
 
+            b_contextready = true;
+            return true;
+        }
+
+        bool Android_Window::createSurface() {
+            //Init app window
+            m_Window = m_App->window;
+
+            if (!m_Window) {
+                LOGE("Cannot initialize Android_Window without native window!");
+                return false;
+            }
+
+            // Set native window format
+            EGLint format = 0;
+            eglGetConfigAttrib(m_Display, config, EGL_NATIVE_VISUAL_ID, &format);
+            ANativeWindow_setBuffersGeometry(m_Window, 0, 0, format);
+
+            m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
+            if (m_Surface == EGL_NO_SURFACE) {
+                LOGE("eglCreateWindowSurface failed");
+                return false;
+            }
+
+            return true;
+        }
+
+        bool Android_Window::makeCurrent() {
             if (!eglMakeCurrent(m_Display, m_Surface, m_Surface, m_Context)) {
                 LOGE("eglMakeCurrent failed");
-                return;
+                return false;
             }
 
+            b_surfaceready = true;
+            return true;
+        }
+
+        bool Android_Window::querySurfaceDimensions() {
             // Query actual surface size
             EGLint width, height;
             eglQuerySurface(m_Display, m_Surface, EGL_WIDTH, &width);
@@ -114,47 +127,96 @@ namespace PAIN {
             frame_buffer.x = width;
             frame_buffer.y = height;
 
-            LOGI("Android Window initialized: %dx%d", width, height);
-
-            // Set viewport
-            glViewport(0, 0, width, height);
-
-            // Enable depth testing
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-
-            //Set animating to true
-            b_initialized = true;
+            return (width > 0 && height > 0);
         }
 
-        void Android_Window::shutdown() {
+        void Android_Window::destroySurface() {
+            if (m_Surface != EGL_NO_SURFACE) {
+                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, m_Context);
+                eglDestroySurface(m_Display, m_Surface);
+                m_Surface = EGL_NO_SURFACE;
+            }
+            m_Window = nullptr;
+            b_surfaceready = false;
+            b_active = false;
+        }
+
+        void Android_Window::destroyContext() {
+            if (m_Context != EGL_NO_CONTEXT) {
+                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                eglDestroyContext(m_Display, m_Context);
+                m_Context = EGL_NO_CONTEXT;
+            }
+            b_contextready = false;
+            b_active = false;
+        }
+
+        void Android_Window::terminateDisplay() {
             if (m_Display != EGL_NO_DISPLAY) {
                 eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-                if (m_Context != EGL_NO_CONTEXT) {
-                    eglDestroyContext(m_Display, m_Context);
-                    m_Context = EGL_NO_CONTEXT;
-                }
-
-                if (m_Surface != EGL_NO_SURFACE) {
-                    eglDestroySurface(m_Display, m_Surface);
-                    m_Surface = EGL_NO_SURFACE;
-                }
-
                 eglTerminate(m_Display);
                 m_Display = EGL_NO_DISPLAY;
             }
+            b_displayready = false;
+            b_initialized = false;
+            b_active = false;
+        }
 
+        void Android_Window::init() {
+
+            //Setup windows
+            if (!b_displayready) {
+                if (!initDisplay()) LOGE("DIPSLAY ERROR");
+            }
+            if (!b_initialized) { 
+                if (!setConfig()) LOGE("CONFIG ERROR");
+            }
+            if (!b_contextready) {
+                if (!createContext()) LOGE("CONTEXT ERROR");
+            }
+
+            //Setup surface
+            if (!b_surfaceready) {
+                if (!createSurface()) LOGE("SURFACE ERROR");
+                if (!makeCurrent()) LOGE("CONTEXT ERROR");
+                if (!querySurfaceDimensions()) LOGE("QUERY ERROR");
+
+                // Set viewport
+                glViewport(0, 0, frame_buffer.x, frame_buffer.y);
+
+                // Enable depth testing
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
+            }
+
+            //Set window to active
+            b_active = true;
+        }
+
+        void Android_Window::shutdown() {
+
+            //Terminate all
+            if(b_surfaceready)destroySurface();
+            if(b_contextready)destroyContext();
+            if(b_initialized || b_displayready)terminateDisplay();
+
+            //Ensure proper clearing
             m_Window = nullptr;
+            m_App = nullptr;
+            m_Display = EGL_NO_DISPLAY;
+            config = nullptr;
+            m_Surface = EGL_NO_SURFACE;
+            m_Context = EGL_NO_CONTEXT;
             LOGI("Android Window shut down");
         }
 
         int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)
         {
-            PAIN::Application* game = (PAIN::Application*)app->userData;
+            EventsPackage* package = (EventsPackage*)app->userData;
+            PAIN::Application* e_app = (PAIN::Application*)package->app;
 
             //Dispatch all events
-            game->pushEventQueue(std::make_shared<Event::AllEvent>(event));
+            e_app->pushEventQueue(std::make_shared<Event::AllEvent>(event));
             
             //// Let ImGui consume it first
             //if (ImGui_ImplAndroid_HandleInputEvent(event))
@@ -164,8 +226,81 @@ namespace PAIN {
             return 0;
         }
 
+        void Android_Window::handle_cmd(android_app* app, int32_t cmd) {
+            EventsPackage* package = (EventsPackage*)app->userData;
+            PAIN::Application* e_app = (PAIN::Application*)package->app;
+            Android_Window* e_window = (Android_Window*)package->window;
+
+            switch (cmd) {
+            case APP_CMD_INIT_WINDOW:
+
+                //Initialize window
+                e_window->init();
+
+                //Dispatch events
+
+                break;
+            case APP_CMD_TERM_WINDOW:
+
+                //Destroy window surface
+                e_window->destroySurface();
+
+                //Dispatch events
+                break;
+            case APP_CMD_GAINED_FOCUS:
+                //Dispatch events
+                break;
+
+            case APP_CMD_LOST_FOCUS:
+                //Dispatch events
+                break;
+
+            case APP_CMD_PAUSE:
+                //Dispatch events
+                break;
+
+            case APP_CMD_RESUME:
+                //Dispatch events
+                break;
+
+            case APP_CMD_DESTROY:
+
+                //Shutdown window
+                e_window->shutdown();
+
+                //Signal app to terminate as well
+                e_app->terminate();
+                break;
+            default:
+                break;
+            }
+        }
+
         void Android_Window::registerCallbacks(void* app) {
+
+            //Create events package for android app handled
+            m_EventPackage = EventsPackage{ this, m_App->userData };
+            m_App->userData = &m_EventPackage;
+
+            //Register callbacks
+            m_App->onAppCmd = handle_cmd;
             m_App->onInputEvent = handle_input;
+
+            //Wait for window to fully init
+            while (!b_active) {
+                int events;
+                android_poll_source* source;
+
+                //Process events waiting for game to init
+                while (ALooper_pollOnce(-1, nullptr, &events,
+                    (void**)&source) >= 0) {
+                    if (source) {
+                        source->process(m_App, source);
+                    }
+
+                    if (b_active) break;
+                }
+            }
         }
 
         void Android_Window::pollEvents() {
@@ -174,15 +309,10 @@ namespace PAIN {
             android_poll_source* source;
 
             // Process all pending events
-            while (ALooper_pollOnce(b_initialized ? 0 : -1, nullptr, &events,
+            while (ALooper_pollOnce(b_active ? 0 : -1, nullptr, &events,
                 (void**)&source) >= 0) {
                 if (source) {
                     source->process(m_App, source);
-                }
-
-                if (m_App->destroyRequested) {
-                    LOGI("Destroy requested");
-
                 }
             }
         }
@@ -201,7 +331,6 @@ namespace PAIN {
 
         void Android_Window::onEvent(Event::Event& e) {
         }
-
 	}
 }
 

@@ -9,10 +9,15 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "Audio/AudioManager.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
-namespace PAIN {
 
-	// Define the static instance
-	Application* Application::s_Instance = nullptr;
+// Serialization
+#include "CoreSystems/Serialization/sSerialization.h"
+
+// Assets
+#include "CoreSystems/Assets/sPath.h"
+
+
+namespace PAIN {
 
 	Application::Application()
 	{
@@ -42,6 +47,8 @@ namespace PAIN {
 //#ifdef _DEBUG
 //		addLayerSystem(std::make_shared<Editor::Editor>());
 //#endif
+		//Create default services
+		services = std::make_shared<Services>();
 	}
 
 	Application::~Application()
@@ -57,22 +64,27 @@ namespace PAIN {
 		core_stack.clear();
 	}
 
-	void Application::addCoreSystem(std::shared_ptr<AppSystem> core_system) {
+	template<typename T>
+	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		core_system->services = services;
 		core_system->onAttach();
 		core_stack.push_back(core_system);
+		services->set<T>(core_system);
 	}
 
-	void Application::addLayerSystem(std::shared_ptr<AppSystem> layer_system) {
+	template<typename T>
+	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
+		layer_system->services = services;
 		layer_system->onAttach();
 		layer_stack.push_back(layer_system);
+		services->set<T>(layer_system);
 	}
 
 	void Application::Init(void* app) {
-		// Set the static instance
-		s_Instance = this;
 
-		app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
+		auto app_window = std::shared_ptr<Window::Window>(Window::Window::create(app));
 		app_window->registerCallbacks(this);
+		addCoreSystem(app_window);
 
 		// Create and add the AudioManager to the core systems
 		//m_AudioManager = std::make_shared<AudioManager>();
@@ -81,6 +93,15 @@ namespace PAIN {
 		//Push other core systems into the stack
 		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
+
+		// Add Serialization 
+		addCoreSystem(std::make_shared<Serialization::Service>());
+
+		// Windows only have paths, andriods have to use AASettmanager
+#ifdef PN_PLATFORM_WINDOWS
+		addCoreSystem(std::make_shared<Path::Service>());
+		services->get<Path::Service>()->init("assets/Config.json");
+#endif
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
@@ -106,10 +127,13 @@ namespace PAIN {
 		while (b_app_running) {
 
 			//Poll events
-			app_window->pollEvents();
+			services->get<Window::Window>()->pollEvents();
 
 			//Drain all events in queue
 			drainEventQueue();
+
+			//Skip all other systems when window is not active
+			if (!services->get<Window::Window>()->getActive()) continue;
 
 			//Update all core systems
 			for (auto& core : core_stack) {
@@ -122,7 +146,7 @@ namespace PAIN {
 			}
 
 			//Swap buffer
-			app_window->swapBuffers();
+			services->get<Window::Window>()->swapBuffers();
 		};
 	}
 
@@ -210,4 +234,7 @@ namespace PAIN {
 			event_queue.pop();
 		}
 	}
+
+	// All services defines
+	#define PN_PATH_SERVICE services->get<Path::Service>()
 }
