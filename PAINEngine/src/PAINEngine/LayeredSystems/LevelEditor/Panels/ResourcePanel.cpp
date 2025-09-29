@@ -40,7 +40,7 @@ namespace PAIN {
                 // Default behavior (no special fullscreen/docking hacks)
             }
 
-            void ResourcePanel::onUpdate() {
+            void ResourcePanel::onUpdate(AppTiming timing) {
                 //// Currently empty, could be used for background updates
                 static bool initialized = false;
                 if (!initialized) {

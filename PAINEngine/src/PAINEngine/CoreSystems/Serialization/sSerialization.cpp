@@ -63,7 +63,7 @@ namespace PAIN {
 
         void PAIN::Serialization::Service::onAttach() {
             // Placeholder path
-            const std::string scenePath = "assets/Scenes/lvl1_1.scn";
+            const std::string scenePath = MakeScenePathFromBase("lvl1_1");
 
             PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
 
@@ -160,7 +160,30 @@ namespace PAIN {
         // ----------------------------
         bool Service::saveSceneToFile(const std::string& file_path) {
             // TO DO: ADD THIS ONCE ENTITY AND SCENE ARE READY
-            return false;
+            //return false;
+
+            // placeholder minimal json to test
+            nlohmann::json layer0 = {
+                { "Layer", {
+                    { "ID",      0 },
+                    { "Mask",    1 },
+                    { "B_State", true },
+                    { "B_YSort", false },
+                    { "Entities", nlohmann::json::array() }
+                }}
+            };
+
+            nlohmann::json scene = nlohmann::json::array({
+                { { "Grid ID", 0 } },
+                { { "Camera",  { { "Active Cam ID", "" } } } },
+                { { "MetaData",{ { "Entity_Tags", nlohmann::json::array() } } } },
+                { { "Layer Count", 1 } },
+                layer0
+                });
+
+            const bool ok = saveJsonFile(file_path, scene);
+            if (ok) curr_scene_file_ = file_path;
+            return ok;
         }
 
         bool Service::loadSceneFromFile(const std::string& file_path) {
@@ -304,7 +327,7 @@ namespace PAIN {
         std::string Service::MakeScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/scenes/") + b + ".scn.json";
+            return std::string("assets/Scenes/") + b + ".scn.json";
         }
 
         bool Service::createNewScene(std::string_view baseName)

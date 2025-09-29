@@ -28,7 +28,7 @@ namespace PAIN {
 				ImGui::SetNextWindowViewport(vp->ID);
 			}
 
-			void Tools::onUpdate() {
+			void Tools::onUpdate(AppTiming timing) {
                 //Begin menubar
                 if (ImGui::BeginMenuBar())
                 {

@@ -16,7 +16,7 @@ namespace PAIN {
                 // ----------------------------
                 ResourcePanel();
                 void nextWindowSettings() override;
-                void onUpdate() override;
+                void onUpdate(AppTiming timing) override;
 
                 // ----------------------------
                 // Life Cycle

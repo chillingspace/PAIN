@@ -41,9 +41,6 @@ namespace PAIN {
             auto ser = services->get<PAIN::Serialization::Service>();
             PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
 
-            // make scenes panel and give it hooks
-            auto scenesPanel = std::make_shared<Panel::ScenesPanel>();
-
             // if ScenesPanel uses a hooks struct, fill it:
             Panel::ScenesHooks hooks{};
             hooks.onCreate = [ser](const std::string& base) {
@@ -75,7 +72,7 @@ namespace PAIN {
                 }
                 };
 
-            scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
+            auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
 
             //Register panels
             registerPanel(std::make_shared<Panel::Tools>());
@@ -121,9 +118,10 @@ namespace PAIN {
                 }
 
                 // Iterate through all panels
-                panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
-                    panel->drawWindow();
+                panels->forEachOfType<Panel::IPanel>([&, timing](std::shared_ptr<Panel::IPanel> panel) {
+                    panel->drawWindow(timing);
                     });
+
 
                 static bool show_demo = false; // can toggle to true if want demo
                 if (show_demo) ImGui::ShowDemoWindow(&show_demo);

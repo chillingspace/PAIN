@@ -175,18 +175,30 @@ namespace PAIN {
             }
 
             // ---------- Main draw ----------
-            void ScenesPanel::onUpdate() {
+            void ScenesPanel::onUpdate(AppTiming timing) {
                 // Title & dock are handled by IPanel
                 ImGui::Text("Scene ID: %s", currSceneId_.empty() ? "(none)" : currSceneId_.c_str());
 
                 // Create / Delete / Save / Save As
-                if (ImGui::Button("Create New Scene")) { showCreate_ = true; }
+                if (ImGui::Button("Create New Scene")) { 
+                    //showCreate_ = true; 
+                    if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
+                    currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                }
 
                 if (!currSceneId_.empty()) {
                     ImGui::SameLine();
-                    if (ImGui::Button("Delete Scene")) { showDelete_ = true; }
+                    if (ImGui::Button("Delete Scene")) { 
+                        //showDelete_ = true; 
+                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
+                        currSceneId_.clear();
+                    }
 
-                    if (ImGui::Button("Save Scene As")) { showSaveAs_ = true; }
+                    if (ImGui::Button("Save Scene As")) { 
+                        //showSaveAs_ = true; 
+                        if (hooks_.onSaveAs) hooks_.onSaveAs(std::string{ nameBuf_ });
+                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                    }
 
                     ImGui::SameLine();
                     if (ImGui::Button("Save Curr Scene")) {

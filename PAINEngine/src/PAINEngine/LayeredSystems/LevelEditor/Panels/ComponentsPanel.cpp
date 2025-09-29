@@ -107,7 +107,7 @@ void ComponentsPanel::drawRemoveModal() {
     }
 }
 
-void ComponentsPanel::onUpdate() {
+void ComponentsPanel::onUpdate(AppTiming timing) {
     // header line
     ImGui::Text("Selected Entity: %s", onEntity_.empty() ? "(placeholder)" : "(placeholder)");
     ImGui::Text("Components: %d", (int)onEntity_.size());
