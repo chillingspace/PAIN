@@ -54,6 +54,13 @@ namespace fs = std::filesystem;
 namespace PAIN {
     namespace Serialization {
 
+        inline std::string sanitize_base(std::string s) {
+            s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) {
+                return !(std::isalnum(c) || c == '_' || c == '-');
+                }), s.end());
+            return s;
+        }
+
         void PAIN::Serialization::Service::onAttach() {
             // Placeholder path
             const std::string scenePath = "assets/Scenes/lvl1_1.scn";
@@ -291,6 +298,55 @@ namespace PAIN {
             PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
 
             curr_scene_file_ = file_path;
+            return true;
+        }
+
+        std::string Service::MakeScenePathFromBase(std::string_view base)
+        {
+            std::string b = sanitize_base(std::string(base));
+            return std::string("assets/scenes/") + b + ".scn.json";
+        }
+
+        bool Service::createNewScene(std::string_view baseName)
+        {
+            const std::string path = MakeScenePathFromBase(baseName);
+            return saveSceneToFile(path); // uses existing minimal payload
+        }
+
+        bool Service::saveCurrentScene()
+        {
+            if (curr_scene_file_.empty()) return false;
+            // for now just touch the minimal payload, later then dump ECS/cameras wtv
+            return saveSceneToFile(curr_scene_file_);
+        }
+
+        bool Service::saveSceneAs(std::string_view baseName)
+        {
+            const std::string path = MakeScenePathFromBase(baseName);
+            if (!saveSceneToFile(path)) return false;
+            curr_scene_file_ = path;
+            return true;
+        }
+
+        bool Service::loadSceneById(std::string_view sceneIdWithExt)
+        {
+            // panel uses "xxx.scn" as an id, map to .scn.json
+            std::string base(sceneIdWithExt);
+            // strip ".scn" if present, then build full path
+            if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
+            const std::string path = MakeScenePathFromBase(base);
+            return loadSceneFromFile(path);
+        }
+
+        bool Service::deleteSceneById(std::string_view sceneIdWithExt)
+        {
+            std::string base(sceneIdWithExt);
+            if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
+            const std::string path = MakeScenePathFromBase(base);
+            std::error_code ec;
+            std::filesystem::remove(path, ec);
+            if (ec) return false;
+            if (curr_scene_file_ == path) curr_scene_file_.clear();
             return true;
         }
 

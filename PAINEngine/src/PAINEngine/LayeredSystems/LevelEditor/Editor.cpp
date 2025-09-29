@@ -10,8 +10,12 @@
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
 #include "Panels/ViewportPanel.h"
-
+#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+
+#define PN_CORE_ASSERT(cond, msg) \
+    do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
+
 
 namespace PAIN {
 
@@ -33,10 +37,51 @@ namespace PAIN {
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();
 
+            // get serialization service
+            auto ser = services->get<PAIN::Serialization::Service>();
+            PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
+
+            // make scenes panel and give it hooks
+            auto scenesPanel = std::make_shared<Panel::ScenesPanel>();
+
+            // if ScenesPanel uses a hooks struct, fill it:
+            Panel::ScenesHooks hooks{};
+            hooks.onCreate = [ser](const std::string& base) {
+                if (!ser->createNewScene(base)) {
+                    PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveAs = [ser](const std::string& base) {
+                if (!ser->saveSceneAs(base)) {
+                    PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveCurrent = [ser](const std::string& /*currSceneId*/) {
+                if (!ser->saveCurrentScene()) {
+                    PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
+                }
+                };
+            hooks.onDelete = [ser](const std::string& sceneId) {
+                if (!ser->deleteSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
+                }
+                };
+            hooks.onChange = [ser](const std::string& sceneId) {
+                if (!ser->loadSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
+                }
+                else {
+                    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
+                }
+                };
+
+            scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
+
             //Register panels
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
-            registerPanel(std::make_shared<Panel::ScenesPanel>());
+            //registerPanel(std::make_shared<Panel::ScenesPanel>());
+            registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
 

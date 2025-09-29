@@ -57,6 +57,14 @@ namespace PAIN {
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
 
+            static std::string MakeScenePathFromBase(std::string_view base); 
+
+            bool createNewScene(std::string_view baseName);  
+            bool saveCurrentScene(); 
+            bool saveSceneAs(std::string_view baseName);  
+            bool loadSceneById(std::string_view sceneIdWithExt);  
+            bool deleteSceneById(std::string_view sceneIdWithExt); 
+
         private:
             std::string curr_scene_file_;
         };
