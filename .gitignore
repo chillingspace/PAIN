@@ -42,9 +42,9 @@ out*/
 *.iopt
 
 # ========================
-# Keep third-party dependencies
+# Keep assets
 # ========================
-
+!Assets/**
 # ========================
 # Logs / Cache / Temp
 # ========================
