@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Editor.h"
 
 #ifdef _DEBUG
@@ -9,6 +9,9 @@
 #include "Panels/ScenesPanel.h"
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
+#include "Panels/ViewportPanel.h"
+
+#include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
 
 namespace PAIN {
 
@@ -35,35 +38,56 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
+            registerPanel(std::make_shared<Panel::ViewportPanel>());
 
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
+
+            //toggleVisible();
         }
 
         void Editor::onDetach() {
         }
 
         void Editor::onUpdate(AppTiming timing) {
-
-            //Update shortcuts
+            // Update shortcuts
             platform->updateShortCuts(command_manager);
 
-            //Begin IMGUI Frame
+            // Begin IMGUI Frame
             platform->beginFrame();
 
-            //Build docking space for imgui
-            buildDockspace();
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+            }
 
-            //Iterate through all panels
-            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) { panel->drawWindow(); });
+            if (editor_visible) {
 
-            static bool show_demo = true;
-            if (show_demo) ImGui::ShowDemoWindow(&show_demo);
+                // Build docking space
+                buildDockspace();
 
-            //Signal end of frame for imgui
+                auto renderer = services->get<RendererLayer>();
+                auto vp = panels->get<Panel::ViewportPanel>();
+                if (renderer && vp) {
+                    vp->setRenderTexture(renderer->getFramebufferTexture(),
+                        renderer->getFramebufferWidth(),
+                        renderer->getFramebufferHeight());
+                }
+
+                // Iterate through all panels
+                panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
+                    panel->drawWindow();
+                    });
+
+                static bool show_demo = false; // can toggle to true if want demo
+                if (show_demo) ImGui::ShowDemoWindow(&show_demo);
+            }
+
             platform->endFrame();
         }
+
+
 
         template<typename T>
         void Editor::registerPanel(std::shared_ptr<T> panel) {

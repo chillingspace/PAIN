@@ -84,7 +84,7 @@ namespace PAIN {
 		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
 #else
 		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("assets/audio/Music/Boss_Music.wav");
+		//app_audio->play("assets/audio/Music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack
@@ -113,6 +113,7 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
+		// !NOTE: IMGUI eats events
 		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
 #endif
 
@@ -127,6 +128,11 @@ namespace PAIN {
 
 		//Application loop
 		while (b_app_running) {
+
+			//static auto last_time = std::chrono::high_resolution_clock::now();
+			//auto current_time = std::chrono::high_resolution_clock::now();
+			//float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+			//last_time = current_time;
 
 			//Poll events
 			services->get<Window::Window>()->pollEvents();
@@ -147,6 +153,7 @@ namespace PAIN {
 				services->get<Window::Window>()->swapBuffers();
 				continue;
 			}
+
 
 			//Update fixed delta
 			int steps = 0;
