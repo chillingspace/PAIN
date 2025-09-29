@@ -14,13 +14,13 @@ extern AAssetManager* assetManager;
 // Inline function so it can be in the header
 inline std::string ReadFileAndroid(const std::string& path) {
     if (!assetManager) {
-        PN_CORE_INFO("AssetManager not initialized!");
+        PN_CORE_ERROR("AssetManager not initialized!");
         return "";
     }
 
     AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER);
     if (!asset) {
-        PN_CORE_INFO("Failed to open: %s", path.c_str());
+        PN_CORE_ERROR("Failed to open: {0}", path.c_str());
         return "";
     }
 
