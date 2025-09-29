@@ -10,7 +10,7 @@
  */
 
 
-#ifdef PN_PLATFORM_WINDOWS
+//#ifdef PN_PLATFORM_WINDOWS
 
 #include "WindowsRenderer.h"
 #include <cstring>
@@ -193,4 +193,4 @@ namespace PAIN {
 	}
 }
 
-#endif // PN_PLATFORM_WINDOWS
+//#endif // PN_PLATFORM_WINDOWS
