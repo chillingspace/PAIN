@@ -45,25 +45,36 @@ namespace PAIN {
         }
 
         void Editor::onUpdate(AppTiming timing) {
-
-            //Update shortcuts
+            // Update shortcuts
             platform->updateShortCuts(command_manager);
 
-            //Begin IMGUI Frame
+            // Begin IMGUI Frame
             platform->beginFrame();
 
-            //Build docking space for imgui
-            buildDockspace();
+            static bool editor_visible = true;
 
-            //Iterate through all panels
-            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) { panel->drawWindow(); });
+            // Toggle visibility with a key (say F1)
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                editor_visible = !editor_visible;
+            }
 
-            static bool show_demo = true;
-            if (show_demo) ImGui::ShowDemoWindow(&show_demo);
+            if (editor_visible) {
+                // Build docking space for imgui
+                buildDockspace();
 
-            //Signal end of frame for imgui
+                // Iterate through all panels
+                panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
+                    panel->drawWindow();
+                    });
+
+                static bool show_demo = true;
+                if (show_demo) ImGui::ShowDemoWindow(&show_demo);
+            }
+
+            // Signal end of frame for imgui
             platform->endFrame();
         }
+
 
         template<typename T>
         void Editor::registerPanel(std::shared_ptr<T> panel) {
