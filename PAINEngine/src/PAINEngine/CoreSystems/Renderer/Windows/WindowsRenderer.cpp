@@ -73,23 +73,11 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		m_mesh = Mesh::LoadObj("ogre.obj");
+		m_mesh = Mesh::LoadObj();
 
 	}
 
 	void WindowsRenderer::Render() {
-
-		// update
-
-		//auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-
-		//light.position = Camera::get().pos;
-
-		// render
-		// Clear screen
-		glClearColor(.2f, .3f, .3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
 		// draw floor
 		if (!floor_shader) {
@@ -102,29 +90,6 @@ namespace PAIN {
 		glBindVertexArray(empty_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-
-
-		// Bind shader and VAO, then draw triangle
-		if (!m_shader) {
-			PN_CORE_ERROR("Unable to find m_shaders");
-			return;
-		}
-		m_shader->Bind();
-
-		//glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * Camera::get().model();
-
-		m_shader->SetUniform("u_M", Camera::get().model());
-		m_shader->SetUniform("u_V", Camera::get().view());
-		m_shader->SetUniform("u_P", Camera::get().projection());
-
-		m_shader->SetUniform("material.rough", material.rough);
-		m_shader->SetUniform("material.metal", material.metal);
-		m_shader->SetUniform("material.color", material.color);
-
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
-
-		if (m_mesh) m_mesh->Draw();
 
 		// render sphere (for light pos)
 		if (!sphere_shader) {
@@ -153,7 +118,32 @@ namespace PAIN {
 		sphere_shader->SetUniform("u_SphereCenter", light.position);
 		sphere_shader->SetUniform("u_SphereRadius", 0.1f);
 
-		if (m_mesh) m_mesh->Draw();
+		m_mesh->Draw();
+	}
+
+	void WindowsRenderer::RenderMesh(Mesh* mesh)
+	{
+		if (!mesh || !m_shader) return;
+
+		m_shader->Bind();
+
+		m_shader->SetUniform("u_M", Camera::get().model());
+		m_shader->SetUniform("u_V", Camera::get().view());
+		m_shader->SetUniform("u_P", Camera::get().projection());
+
+		m_shader->SetUniform("material.rough", material.rough);
+		m_shader->SetUniform("material.metal", material.metal);
+		m_shader->SetUniform("material.color", material.color);
+
+		m_shader->SetUniform("light[0].position", light.position);
+		m_shader->SetUniform("light[0].L", light.L_intensity);
+
+		mesh->Draw();
+	}
+
+	void WindowsRenderer::Clear() {
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 

@@ -8,6 +8,7 @@ namespace PAIN {
 		//tex coords
 	};
 
+
 	class Mesh {
 
 	public:

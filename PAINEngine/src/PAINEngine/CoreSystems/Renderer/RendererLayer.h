@@ -23,6 +23,9 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
+		static void Submit(Mesh* mesh);
+
+
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		ImTextureID getFramebufferTexture() const {
@@ -39,6 +42,8 @@ namespace PAIN {
 #else
 		std::unique_ptr<WindowsRenderer> w_renderer;
 #endif
+
+		static std::vector<Mesh*> s_SubmissionQueue;
 
 		enum MOVE_MODES {
 			CAMERA,

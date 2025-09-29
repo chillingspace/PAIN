@@ -42,6 +42,8 @@ namespace PAIN {
 
 		void Init();
 		void Render();
+		void RenderMesh(Mesh* mesh);
+		void Clear();
 		void Cleanup();
 
 		/*bool InitGLFW();
@@ -58,10 +60,11 @@ namespace PAIN {
 		unsigned int fbo = 0;
 
 		std::unique_ptr<Shader> m_shader = nullptr;
-		std::unique_ptr<Mesh> m_mesh = nullptr;
-
 		std::unique_ptr<Shader> sphere_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
+
+		std::unique_ptr<Mesh> m_mesh = nullptr;
+
 	};
 }
 

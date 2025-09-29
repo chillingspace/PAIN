@@ -5,9 +5,12 @@
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
 #include "CoreSystems/Audio/Audio.h"
-#include "ECS/Controller.h"
-#include "LayeredSystems/LevelEditor/Editor.h"
 #include "CoreSystems/Audio/AudioManager.h"
+
+#include "LayeredSystems/LevelEditor/Editor.h"
+
+#include "ECS/Controller.h"
+#include "Scene/Scene.h"
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
@@ -117,6 +120,9 @@ namespace PAIN {
 
 	void Application::Run() {
 
+		Scene scene;
+		scene.Init();
+
 		//Set last time
 		last_time = std::chrono::steady_clock::now();
 
@@ -153,11 +159,15 @@ namespace PAIN {
 			int steps = 0;
 			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
+				scene.OnUpdate();
+
 				//Update all core systems
 				for (auto& core : core_stack) core->onFixedUpdate(timing);
 
 				//Update all layered systems
 				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+
+
 
 				accumulator -= timing.fixed_dt;
 				++steps;

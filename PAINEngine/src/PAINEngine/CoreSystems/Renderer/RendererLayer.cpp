@@ -18,6 +18,7 @@
 #endif
 
 namespace PAIN {
+	std::vector<Mesh*> RendererLayer::s_SubmissionQueue;
 
 	void RendererLayer::onAttach() {
 
@@ -89,11 +90,18 @@ namespace PAIN {
 
 			}
 
-			// Clear + render
+			// Clear
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			// Render skybox and light
 			w_renderer->Render();
+
+			// Render objects
+			for (auto* mesh : s_SubmissionQueue) {
+				w_renderer->RenderMesh(mesh);
+			}
+
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -186,6 +194,14 @@ namespace PAIN {
 		yOffset = 0.f;
 #endif
 	}
+
+	void RendererLayer::Submit(Mesh* mesh)
+	{
+#ifndef PN_PLATFORM_ANDROID
+		s_SubmissionQueue.push_back(mesh);
+#endif
+	}
+
 	void RendererLayer::onEvent(Event::Event& e) {
 #ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);
