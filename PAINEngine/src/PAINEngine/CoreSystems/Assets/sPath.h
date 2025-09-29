@@ -44,7 +44,8 @@ namespace PAIN {
 			//Optional virtual functions
 			void onAttach() override {};
 			void onDetach() override {};
-			void onUpdate(float dt) override {};
+			void onFixedUpdate(AppTiming timing) override {};
+			void onUpdate(AppTiming timing) override {};
 
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override {};

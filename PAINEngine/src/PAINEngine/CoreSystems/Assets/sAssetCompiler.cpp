@@ -369,7 +369,11 @@ namespace PAIN {
 
 		}
 
-		void Service::onUpdate(float dt)
+		void Service::onFixedUpdate(AppTiming timing) {
+
+		}
+
+		void Service::onUpdate(AppTiming timing)
 		{
 			//Update with file change events
 			while (!file_event_queue.empty()) {

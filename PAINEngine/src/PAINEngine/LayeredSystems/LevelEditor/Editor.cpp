@@ -44,7 +44,7 @@ namespace PAIN {
         void Editor::onDetach() {
         }
 
-        void Editor::onUpdate(float dt) {
+        void Editor::onUpdate(AppTiming timing) {
 
             //Update shortcuts
             platform->updateShortCuts(command_manager);

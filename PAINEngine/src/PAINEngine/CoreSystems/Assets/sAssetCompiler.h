@@ -94,7 +94,9 @@ namespace PAIN {
 			void pushFileEvent(std::function<void()> callback);
 
 			void onAttach() override;
-			void onUpdate(float dt) override;
+
+			void onFixedUpdate(AppTiming timing) override;
+			void onUpdate(AppTiming timing) override;
 			void onDetach() override;
 
 			void onEvent(Event::Event& e) override;

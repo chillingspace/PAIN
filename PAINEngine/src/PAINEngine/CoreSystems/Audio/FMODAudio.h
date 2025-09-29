@@ -27,7 +27,8 @@ namespace PAIN {
 
             AudioResult init() override;
             void shutdown() override;
-            void onUpdate(float dt) override;
+            void onFixedUpdate(AppTiming timing) override {}
+            void onUpdate(AppTiming timing) override;
 
             AudioResult loadSound(std::string_view, bool, bool, bool) override;
             AudioResult loadPlaylist(const PlaylistDesc&) override;

@@ -104,7 +104,6 @@ namespace PAIN {
 		auto renderer = std::make_shared<RendererLayer>();
 		addCoreSystem(renderer);
 #endif
-		//addCoreSystem(std::make_shared<Audio::Controller>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -117,7 +116,8 @@ namespace PAIN {
 
 	void Application::Run() {
 
-		float temp_dt = 0.0f;
+		//Set last time
+		last_time = std::chrono::steady_clock::now();
 
 		//Application loop
 		while (b_app_running) {
@@ -128,18 +128,43 @@ namespace PAIN {
 			//Drain all events in queue
 			drainEventQueue();
 
+			//Update delta time
+			auto now = std::chrono::steady_clock::now();
+			timing.dt = std::chrono::duration<float>(now - last_time).count();
+			last_time = now;
+
+			//Accumulate for fixed updates
+			accumulator += timing.dt;
+
 			//Skip all other systems when window is not active
-			if (!services->get<Window::Window>()->getActive()) continue;
+			if (!services->get<Window::Window>()->getActive()) {
+				services->get<Window::Window>()->swapBuffers();
+				continue;
+			}
+
+			//Update fixed delta
+			int steps = 0;
+			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+
+				//Update all core systems
+				for (auto& core : core_stack) core->onFixedUpdate(timing);
+
+				//Update all layered systems
+				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+
+				accumulator -= timing.fixed_dt;
+				++steps;
+			}
+
+			//Update timing variables
+			timing.steps_this_frame = steps;
+			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
 			//Update all core systems
-			for (auto& core : core_stack) {
-				core->onUpdate(temp_dt);
-			}
+			for (auto& core : core_stack) core->onUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) {
-				layer->onUpdate(temp_dt);
-			}
+			for (auto& layer : layer_stack) layer->onUpdate(timing);
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();

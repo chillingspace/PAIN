@@ -59,7 +59,8 @@ namespace PAIN {
 			~Service() = default;
 
 			void onAttach() override;
-			void onUpdate(float dt) override {}
+			void onFixedUpdate(AppTiming timing) override {}
+			void onUpdate(AppTiming timing) override {}
 			void onDetach() override {}
 
 			void onAppPause() {}

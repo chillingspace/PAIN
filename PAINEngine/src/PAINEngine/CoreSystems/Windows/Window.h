@@ -33,8 +33,10 @@ namespace PAIN {
 		public:
 			virtual ~Window() = default;
 
+
 			//Update window
-			virtual void onUpdate(float dt) override = 0;
+			virtual void onFixedUpdate(AppTiming timing) override {}
+			virtual void onUpdate(AppTiming timing) override = 0;
 
 			//Event callback
 			virtual void onEvent(Event::Event& e) override = 0;

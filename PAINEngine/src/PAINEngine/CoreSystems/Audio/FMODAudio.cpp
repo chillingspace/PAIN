@@ -210,9 +210,9 @@ namespace PAIN {
 #endif
         }
 
-        void FmodAudio::onUpdate(float dt) {
+        void FmodAudio::onUpdate(AppTiming timing) {
             if (!impl_->initialized) return;
-            impl_->tickFades(dt);
+            impl_->tickFades(timing.dt);
             impl_->sys->update();
 
             // prune stopped channels

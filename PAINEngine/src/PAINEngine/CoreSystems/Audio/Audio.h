@@ -69,7 +69,9 @@ namespace PAIN {
             //Functions from app system interface
             void onAttach() override { init(); }
             void onDetach() override { shutdown(); }
-            virtual void onUpdate(float dt) override = 0;
+
+            void onFixedUpdate(AppTiming timing) override {}
+            virtual void onUpdate(AppTiming timing) override = 0;
             virtual void onAppPause() override {}
             virtual void onAppResume() override {}
 
