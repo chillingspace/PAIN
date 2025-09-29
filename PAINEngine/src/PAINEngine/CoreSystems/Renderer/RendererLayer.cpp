@@ -91,7 +91,10 @@ namespace PAIN {
 				glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
 				glViewport(0, 0, winWidth, winHeight);
 #else
-				glViewport(0, 0, 800, 600);
+				ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
+				winWidth = ANativeWindow_getWidth(nativeWindow);
+				winHeight = ANativeWindow_getHeight(nativeWindow);
+				glViewport(0, 0, winWidth, winHeight);
 #endif
 
 			}
