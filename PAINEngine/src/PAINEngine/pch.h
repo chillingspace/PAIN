@@ -121,4 +121,8 @@ using json = nlohmann::json;
 #define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
 #define cerr  PN_IOSTREAM_FORBIDDEN__use_logger_instead
 
+#ifdef PN_PLATFORM_ANDROID
+#include "./Utility/AndroidFs.h"
+#endif
+
 #endif //PCH_H

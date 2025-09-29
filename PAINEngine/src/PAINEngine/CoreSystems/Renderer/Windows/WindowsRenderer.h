@@ -24,7 +24,7 @@ namespace PAIN {
 };
 
 
-#ifdef PN_PLATFORM_WINDOWS
+//#ifdef PN_PLATFORM_WINDOWS
 
 
 #include "pch.h"
@@ -121,4 +121,4 @@ namespace PAIN {
 	};
 }
 
-#endif // __WINDOWS_RENDERER_H__
+//#endif // __WINDOWS_RENDERER_H__

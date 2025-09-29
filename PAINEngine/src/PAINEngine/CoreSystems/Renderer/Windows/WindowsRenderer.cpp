@@ -10,7 +10,7 @@
  */
 
 
-#ifdef PN_PLATFORM_WINDOWS
+ //#ifdef PN_PLATFORM_WINDOWS
 
 #include "WindowsRenderer.h"
 #include <cstring>
@@ -40,21 +40,34 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Init() {
-		m_shader = Shader::LoadShaders("base.vert", "base.frag");
+#ifdef PN_PLATFORM_WINDOWS
+		m_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
+#else
+		m_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
+#endif
 
 		if (!m_shader || m_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
-
+		else {
+			PN_CORE_INFO("Successfully linked shader");
+		}
+#ifdef PN_PLATFORM_WINDOWS
 		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
+		#else
+		sphere_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
+#endif
 
 		if (!sphere_shader || sphere_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
-
+#ifdef PN_PLATFORM_WINDOWS
 		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+		#else
+		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
+#endif
 
 		if (!floor_shader || floor_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -73,7 +86,9 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+		PN_CORE_INFO("Before loading ogre");
 		m_mesh = Mesh::LoadObj("ogre.obj");
+		PN_CORE_INFO("After loading ogre");
 
 	}
 
@@ -193,4 +208,4 @@ namespace PAIN {
 	}
 }
 
-#endif // PN_PLATFORM_WINDOWS
+//#endif // PN_PLATFORM_WINDOWS
