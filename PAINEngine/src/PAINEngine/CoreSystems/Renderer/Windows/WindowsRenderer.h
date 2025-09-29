@@ -74,6 +74,8 @@ namespace PAIN {
 	public:
 		float speed = 15.f;
 
+		float sensitivity = 0.1f;
+
 		glm::vec3 pos{ 0.f, 0.f, 3.f };
 		glm::vec3 forward{ 0.f, 0.f, -1.f };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
@@ -85,6 +87,10 @@ namespace PAIN {
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
 		float aspect_ratio{ width_ratio / height_ratio };
+
+		glm::mat4 model() const {
+			return glm::mat4(1.f);
+		}
 
 		glm::mat4 view() const {
 			return glm::lookAt(pos, pos + forward, up);

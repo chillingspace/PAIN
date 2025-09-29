@@ -37,8 +37,8 @@ namespace PAIN {
 		bool D_KEYDOWN = false;
 
 		bool mouseButtonDown = false;
-		float lastX = 0.0;
-		float lastY = 0.0;
+		float xOffset = 0.0f;
+		float yOffset = 0.0f;
 
     };
 

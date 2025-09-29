@@ -99,13 +99,13 @@ namespace PAIN {
 
 		//float temp_dt = 0.0f;
 
-		static auto last_time = std::chrono::high_resolution_clock::now();
-		auto current_time = std::chrono::high_resolution_clock::now();
-		float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
-		last_time = current_time;
-
 		//Application loop
 		while (b_app_running) {
+
+			static auto last_time = std::chrono::high_resolution_clock::now();
+			auto current_time = std::chrono::high_resolution_clock::now();
+			float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+			last_time = current_time;
 
 			//Poll events
 			services->get<Window::Window>()->pollEvents();

@@ -64,13 +64,13 @@ namespace PAIN {
 
 		// Rotation mtx
 		float angle = static_cast<float>(glfwGetTime());
-		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
-		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
+		//glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
+		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * Camera::get().model();
 
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_Model"), 1, GL_FALSE, &Camera::get().model()[0][0]);
 		//glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_MVP"), 1, GL_FALSE, &mvp[0][0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &Camera::get().model()[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
 
