@@ -19,6 +19,17 @@
 
 namespace PAIN {
 
+	Material material = {
+	0.1f,		// 0.1 -> smooth, 1 -> rough
+	0.3f,
+	{0.5f,0.5f,0.5f}
+	};
+
+	Light light = {
+		{0.f, 1.f, 0.f},	// position
+		{0.1f, 0.1f, 0.1f}					// intensity
+	};
+
 	WindowsRenderer::WindowsRenderer() {
 
 	}

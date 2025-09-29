@@ -14,12 +14,32 @@
 
 #ifdef PN_PLATFORM_WINDOWS
 
+#ifndef __WINDOWS_RENDERER_H__
+#define __WINDOWS_RENDERER_H__
+
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
+
+	struct Material {
+		float rough;
+		float metal;
+		glm::vec3 color;
+	};
+
+	struct Light {
+		glm::vec3 position;
+		glm::vec3 L_intensity;
+	};
+
+	extern Material material;
+	extern Light light;
+
+	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
+
 	class WindowsRenderer {
 	public:
 		WindowsRenderer();
@@ -34,30 +54,6 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
-
-		struct Material {
-			float rough;
-			float metal;
-			glm::vec3 color;
-		};
-
-		struct Light {
-			glm::vec3 position;
-			glm::vec3 L_intensity;
-		};
-
-		Material material = {
-			0.1f,		// 0.1 -> smooth, 1 -> rough
-			0.3f,
-			{0.5f,0.5f,0.5f}
-		};
-
-		Light light = {
-			{0.f, 1.f, 0.f},	// position
-			{0.1f, 0.1f, 0.1f}					// intensity
-		};
-
-		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
@@ -110,5 +106,6 @@ namespace PAIN {
 	};
 }
 
+#endif // __WINDOWS_RENDERER_H__
 
 #endif // PN_PLATFORM_WINDFOWS

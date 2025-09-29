@@ -34,26 +34,44 @@ namespace PAIN {
 			w_renderer->Render();
 		}
 #endif
-
-		if (W_KEYDOWN) {
-			glm::vec3 offset = Camera::get().forward * Camera::get().speed;
-			offset *= dt;
-			Camera::get().pos += offset;
-		}
-		if (S_KEYDOWN) {
-			glm::vec3 offset = Camera::get().forward * Camera::get().speed;
-			offset *= dt;
-			Camera::get().pos -= offset;
-		}
-		if (A_KEYDOWN) {
-			glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
-			offset *= dt;
-			Camera::get().pos -= offset;
-		}
-		if (D_KEYDOWN) {
-			glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
-			offset *= dt;
-			Camera::get().pos += offset;
+		switch (move_mode) {
+		case CAMERA:
+			if (W_KEYDOWN) {
+				glm::vec3 offset = Camera::get().forward * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos += offset;
+			}
+			if (S_KEYDOWN) {
+				glm::vec3 offset = Camera::get().forward * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos -= offset;
+			}
+			if (A_KEYDOWN) {
+				glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos -= offset;
+			}
+			if (D_KEYDOWN) {
+				glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos += offset;
+			}
+			break;
+		case LIGHT:
+			static constexpr float light_speed = 15.f;
+			if (W_KEYDOWN) {
+				light.position += glm::vec3(0.f, 0.f, -1.f) * light_speed * dt;
+			}
+			if (S_KEYDOWN) {
+				light.position += glm::vec3(0.f, 0.f, 1.f) * light_speed * dt;
+			}
+			if (A_KEYDOWN) {
+				light.position += glm::vec3(-1.f, 0.f, 0.f) * light_speed * dt;
+			}
+			if (D_KEYDOWN) {
+				light.position += glm::vec3(1.f, 0.f, 0.f) * light_speed * dt;
+			}
+			break;
 		}
 
 		if (mouseButtonDown && xOffset != 0.f) {
@@ -90,6 +108,12 @@ namespace PAIN {
 			case GLFW_KEY_D:
 				D_KEYDOWN = true;
 				break;
+			case GLFW_KEY_SPACE:
+				SPACE_KEYDOWN = true;
+				break;
+			case GLFW_KEY_LEFT_CONTROL:
+				LCTRL_KEYDOWN = true;
+				break;
 			default:
 				break;
 			}
@@ -114,9 +138,28 @@ namespace PAIN {
 			case GLFW_KEY_D:
 				D_KEYDOWN = false;
 				break;
+			case GLFW_KEY_SPACE:
+				SPACE_KEYDOWN = false;
+				break;
+			case GLFW_KEY_LEFT_CONTROL:
+				LCTRL_KEYDOWN = false;
+				break;
 			default:
 				break;
 			}
+			return false;
+			});
+
+		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+			
+			switch (e.getKeyCode())
+			{
+			case GLFW_KEY_TAB:
+				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
+			default:
+				break;
+			}
+
 			return false;
 			});
 
