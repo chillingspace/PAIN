@@ -40,14 +40,11 @@ android {
         jniLibs.useLegacyPackaging = true
     }
 
-
-    // 👉 No copy: package JNI libs straight from vendor AND (optionally) local jniLibs
     sourceSets.getByName("main") {
         jniLibs.srcDirs(
             "$rootDir/../vendor/FMOD/android/api/core/lib"
         )
 
-        // 👉 No copy: package assets straight from repo root (and keep local assets if any)
         assets.srcDirs(
             "$rootDir/../assets"
         )
@@ -61,4 +58,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation(files("$rootDir/../vendor/FMOD/android/api/core/lib/fmod.jar"))
 }

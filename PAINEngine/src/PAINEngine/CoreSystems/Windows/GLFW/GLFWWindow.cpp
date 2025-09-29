@@ -301,7 +301,7 @@ namespace PAIN {
 		void GLFW_Window::swapBuffers() {
 			m_Context->SwapBuffers();
 		}
-		void GLFW_Window::onUpdate() {
+		void GLFW_Window::onUpdate(float dt) {
 		}
 
 		void GLFW_Window::onEvent(Event::Event& e) {
