@@ -54,6 +54,19 @@ namespace PAIN {
 			return;
 		}
 
+		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -74,6 +87,20 @@ namespace PAIN {
 		// Clear screen
 		glClearColor(.2f, .3f, .3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		// draw floor
+		if (!floor_shader) {
+			PN_CORE_ERROR("Unable to find floor_shader");
+			return;
+		}
+		floor_shader->Bind();
+		floor_shader->SetUniform("u_V", Camera::get().view());
+		floor_shader->SetUniform("u_P", Camera::get().projection());
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+
 
 		// Bind shader and VAO, then draw triangle
 		if (!m_shader) {
@@ -132,6 +159,11 @@ namespace PAIN {
 		if (vao != 0) {
 			glDeleteVertexArrays(1, &vao);
 			vao = 0;
+		}
+
+		if (empty_vao != 0) {
+			glDeleteVertexArrays(1, &empty_vao);
+			empty_vao = 0;
 		}
 
 		if (vbo != 0) {
