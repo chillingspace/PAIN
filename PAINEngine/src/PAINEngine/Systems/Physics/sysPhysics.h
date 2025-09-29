@@ -31,10 +31,10 @@ namespace PAIN {
 			~System();
 
 			// To add virtual and override in when abstract systems come in
-			void onUpdate() override;
-			void onAttach() override;
+			virtual void onUpdate() override;
+			virtual void onAttach() override;
 
-			void onDetach() override;
+			virtual void onDetach() override;
 			std::string getSysName() { return "Physics System"; }
 
 		private:

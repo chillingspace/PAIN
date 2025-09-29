@@ -52,10 +52,7 @@
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,   LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,    LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN,    LOG_TAG, __VA_ARGS__)
-#define LOGE(...) do { \
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); \
-        assert(false && "LOGE triggered"); \
-    } while(0)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,   LOG_TAG, __VA_ARGS__)
 
 #else
 #include "GL/glew.h"
@@ -77,13 +74,6 @@
 #endif
 
  /*****************************************************************//**
- * Windows Application
- *********************************************************************/
-#ifdef PN_PLATFORM_WINDOWS
-#include "FileWatch.hpp"
-#endif
-
- /*****************************************************************//**
  * CORE HEADER
  *********************************************************************/
 #include "Core.h"
@@ -91,10 +81,8 @@
  /*****************************************************************//**
  * Seri HEADER
  *********************************************************************/
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
-
-#include "refl.hpp"
+//#include "nlohmann/json.hpp"
+//using json = nlohmann::json;
 
  /*****************************************************************//**
  * STL

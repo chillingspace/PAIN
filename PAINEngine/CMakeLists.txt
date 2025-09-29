@@ -32,18 +32,15 @@ target_precompile_headers(PAINEngine
 target_link_libraries(PAINEngine
     PRIVATE  
         glm
+        nlohmann_json
         imgui::imgui
         Jolt
         FMOD::core
-
 )
 
 target_link_libraries(PAINEngine
     PUBLIC  
         spdlog_header_only
-        FileWatch_header_only
-        nlohmann_json
-	reflcpp
 )
 
 # ImGui backends compiled into the engine

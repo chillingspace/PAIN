@@ -5,6 +5,7 @@
 
 #include "AppSystem.h"
 #include "PAINEngine/CoreSystems/Events/Event.h"
+#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #include <memory>
 #include <vector>
@@ -15,9 +16,11 @@ namespace PAIN {
 	class Application
 	{
 	private:
+		// Application instance
+		static Application* s_Instance;
 
-		//Core services stack
-		std::shared_ptr<Services> services;
+		//Window instance
+		std::shared_ptr<Window::Window> app_window;
 
 		//Create applications stacks
 		std::vector<std::shared_ptr<AppSystem>> layer_stack;
@@ -44,10 +47,8 @@ namespace PAIN {
 		Application();
 		virtual ~Application();
 
-		template<typename T>
-		void addCoreSystem(std::shared_ptr<T> core_system);
-		template<typename T>
-		void addLayerSystem(std::shared_ptr<T> layer_system);
+		void addCoreSystem(std::shared_ptr<AppSystem> core_system);
+		void addLayerSystem(std::shared_ptr<AppSystem> layer_system);
 		void Init(void* app = nullptr);
 		void Run();
 		void terminate();
