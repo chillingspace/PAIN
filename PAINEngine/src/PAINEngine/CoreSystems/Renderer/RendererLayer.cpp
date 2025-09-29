@@ -119,42 +119,59 @@ namespace PAIN {
 		switch (move_mode) {
 		case CAMERA:
 			if (Camera::get().move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
-				Camera::get().forward = -glm::normalize(Camera::get().pos); // always look at origin
-			}
+				// spherical
+				float radius = glm::length(Camera::get().pos);
+				float theta = atan2(Camera::get().pos.z, Camera::get().pos.x);
+				float phi = acos(Camera::get().pos.y / radius);
 
-			if (W_KEYDOWN) {
-				glm::vec3 offset = Camera::get().forward * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos += offset;
+				if (W_KEYDOWN) radius -= Camera::get().speed * dt;
+				if (S_KEYDOWN) radius += Camera::get().speed * dt;
+				if (A_KEYDOWN) theta += 1.5f * dt;
+				if (D_KEYDOWN) theta -= 1.5f * dt;
+				if (SPACE_KEYDOWN) phi -= 1.5f * dt;
+				if (LCTRL_KEYDOWN) phi += 1.5f * dt;
+
+				// clamp phi
+				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
+
+				// cartesian
+				Camera::get().pos.x = radius * sin(phi) * cos(theta);
+				Camera::get().pos.y = radius * cos(phi);
+				Camera::get().pos.z = radius * sin(phi) * sin(theta);
+
+				// look at origin
+				Camera::get().forward = -glm::normalize(Camera::get().pos);
 			}
-			if (S_KEYDOWN) {
-				glm::vec3 offset = Camera::get().forward * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos -= offset;
-			}
-			if (A_KEYDOWN) {
-				glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos -= offset;
-			}
-			if (D_KEYDOWN) {
-				glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos += offset;
-			}
-			if (SPACE_KEYDOWN) {
-				glm::vec3 offset = Camera::get().up * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos += offset;
-			}
-			if (LCTRL_KEYDOWN) {
-				glm::vec3 offset = Camera::get().up * Camera::get().speed;
-				offset *= dt;
-				Camera::get().pos -= offset;
+			else {
+				if (W_KEYDOWN) {
+					glm::vec3 offset = Camera::get().forward * Camera::get().speed * dt;
+					Camera::get().pos += offset;
+				}
+				if (S_KEYDOWN) {
+					glm::vec3 offset = Camera::get().forward * Camera::get().speed * dt;
+					Camera::get().pos -= offset;
+				}
+				if (A_KEYDOWN) {
+					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
+					Camera::get().pos += offset;
+				}
+				if (D_KEYDOWN) {
+					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
+					Camera::get().pos -= offset;
+				}
+				if (SPACE_KEYDOWN) {
+					glm::vec3 offset = Camera::get().up * Camera::get().speed * dt;
+					Camera::get().pos += offset;
+				}
+				if (LCTRL_KEYDOWN) {
+					glm::vec3 offset = Camera::get().up * Camera::get().speed * dt;
+					Camera::get().pos -= offset;
+				}
 			}
 			break;
 		case LIGHT:
 			static constexpr float light_speed = 15.f;
+			static constexpr float angle_speed = 1.5f; // radians per second
 
 			glm::vec3 forward, right, up;
 
@@ -162,31 +179,49 @@ namespace PAIN {
 				forward = glm::vec3(0.f, 0.f, -1.f);
 				right = glm::vec3(1.f, 0.f, 0.f);
 				up = glm::vec3(0.f, 1.f, 0.f);
+
+				if (W_KEYDOWN) {
+					light.position += forward * light_speed * dt;
+				}
+				if (S_KEYDOWN) {
+					light.position += -forward * light_speed * dt;
+				}
+				if (A_KEYDOWN) {
+					light.position += -right * light_speed * dt;
+				}
+				if (D_KEYDOWN) {
+					light.position += right * light_speed * dt;
+				}
+				if (SPACE_KEYDOWN) {
+					light.position += up * light_speed * dt;
+				}
+				if (LCTRL_KEYDOWN) {
+					light.position += -up * light_speed * dt;
+				}
 			}
 			else if (light.move_mode == Light::ORBIT_ORIGIN) {
-				forward = -glm::normalize(light.position);
-				right = glm::normalize(glm::cross(forward, glm::vec3(0.f, 1.f, 0.f)));
-				up = glm::normalize(glm::cross(right, forward));
+				// Convert current position to spherical
+				float radius = glm::length(light.position);
+				float theta = atan2(light.position.z, light.position.x);
+				float phi = acos(light.position.y / radius);
+
+				// Modify spherical coordinates
+				if (W_KEYDOWN) radius -= light_speed * dt;
+				if (S_KEYDOWN) radius += light_speed * dt;
+				if (A_KEYDOWN) theta -= angle_speed * dt;
+				if (D_KEYDOWN) theta += angle_speed * dt;
+				if (SPACE_KEYDOWN) phi -= angle_speed * dt;
+				if (LCTRL_KEYDOWN) phi += angle_speed * dt;
+
+				// Clamp phi to avoid flipping
+				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
+
+				// Convert back to Cartesian
+				light.position.x = radius * sin(phi) * cos(theta);
+				light.position.y = radius * cos(phi);
+				light.position.z = radius * sin(phi) * sin(theta);
 			}
 
-			if (W_KEYDOWN) {
-				light.position += forward * light_speed * dt;
-			}
-			if (S_KEYDOWN) {
-				light.position += -forward * light_speed * dt;
-			}
-			if (A_KEYDOWN) {
-				light.position += -right * light_speed * dt;
-			}
-			if (D_KEYDOWN) {
-				light.position += right * light_speed * dt;
-			}
-			if (SPACE_KEYDOWN) {
-				light.position += up * light_speed * dt;
-			}
-			if (LCTRL_KEYDOWN) {
-				light.position += -up * light_speed * dt;
-			}
 			break;
 		}
 

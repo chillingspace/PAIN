@@ -273,7 +273,7 @@ namespace PAIN {
 			//Dispatch window resized event
 			dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
 
-				PN_CORE_INFO(e.toString());
+				//PN_CORE_INFO(e.toString());
 
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;
