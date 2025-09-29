@@ -1,5 +1,7 @@
 #pragma once
 #include "pch.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "../CoreSystems/Renderer/Mesh.h"
 #include "../CoreSystems/Renderer/RendererLayer.h"
 
@@ -22,3 +24,5 @@ namespace PAIN {
 		//std::unique_ptr<ECS::Controller> ecs;
 	};
 }
+
+#ifdef

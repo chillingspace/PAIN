@@ -18,8 +18,9 @@
 #endif
 
 namespace PAIN {
+#ifdef PN_PLATFORM_WINDOWS
 	std::vector<SceneObject> RendererLayer::s_SubmissionQueue;
-
+#endif
 	void RendererLayer::onAttach() {
 
 #ifdef PN_PLATFORM_ANDROID
@@ -194,14 +195,14 @@ namespace PAIN {
 		yOffset = 0.f;
 #endif
 	}
-
+#ifndef PN_PLATFORM_ANDROID
 	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
 	{
-#ifndef PN_PLATFORM_ANDROID
-		s_SubmissionQueue.push_back({ mesh, model});
-#endif
-	}
 
+		s_SubmissionQueue.push_back({ mesh, model});
+
+	}
+#endif
 	void RendererLayer::onEvent(Event::Event& e) {
 #ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);

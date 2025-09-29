@@ -10,7 +10,10 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 
 #include "ECS/Controller.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "Scene/Scene.h"
+#endif
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
@@ -119,9 +122,10 @@ namespace PAIN {
 	}
 
 	void Application::Run() {
-
+#ifdef PN_PLATFORM_WINDOWS
 		Scene scene;
 		scene.Init();
+#endif
 
 		//Set last time
 		last_time = std::chrono::steady_clock::now();
@@ -158,9 +162,9 @@ namespace PAIN {
 			//Update fixed delta
 			int steps = 0;
 			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
-
+#ifdef PN_PLATFORM_WINDOWS
 				scene.OnUpdate();
-
+#endif
 				//Update all core systems
 				for (auto& core : core_stack) core->onFixedUpdate(timing);
 

@@ -14,10 +14,13 @@
 
 namespace PAIN {
 
-	struct SceneObject {
+#ifdef PN_PLATFORM_WINDOWS
+    struct SceneObject {
 		Mesh* mesh;
 		glm::mat4 transform;  // model matrix
 	};
+
+#endif
 
 
 	class RendererLayer : public AppSystem {
@@ -29,8 +32,9 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
+#ifdef PN_PLATFORM_WINDOWS
 		static void Submit(Mesh* mesh, const glm::mat4& model);
-
+#endif
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
@@ -47,9 +51,10 @@ namespace PAIN {
 		std::unique_ptr<AndroidRenderer> renderer;
 #else
 		std::unique_ptr<WindowsRenderer> w_renderer;
+        static std::vector<SceneObject> s_SubmissionQueue;
 #endif
 
-		static std::vector<SceneObject> s_SubmissionQueue;
+
 
 		enum MOVE_MODES {
 			CAMERA,
