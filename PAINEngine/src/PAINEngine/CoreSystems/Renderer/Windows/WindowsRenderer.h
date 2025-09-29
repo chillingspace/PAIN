@@ -60,7 +60,7 @@ namespace PAIN {
 		Camera() = default;
 		~Camera() = default;
 	public:
-		static enum MOVE_MODES {
+		enum MOVE_MODES {
 			FPS,
 			ORBIT_ORIGIN,
 			NUM_MOVE_MODES,

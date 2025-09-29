@@ -84,13 +84,13 @@ namespace PAIN {
 
 		//glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * Camera::get().model();
 
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &Camera::get().model()[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
+		m_shader->SetUniform("u_M", Camera::get().model());
+		m_shader->SetUniform("u_V", Camera::get().view());
+		m_shader->SetUniform("u_P", Camera::get().projection());
 
-		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.rough"), material.rough);
-		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
+		m_shader->SetUniform("material.rough", material.rough);
+		m_shader->SetUniform("material.metal", material.metal);
+		m_shader->SetUniform("material.color", material.color);
 
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
@@ -110,19 +110,19 @@ namespace PAIN {
 		model = glm::scale(model, glm::vec3(0.1f));
 
 		// reuse uniforms
-		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
+		sphere_shader->SetUniform("u_M", model);
+		sphere_shader->SetUniform("u_V", Camera::get().view());
+		sphere_shader->SetUniform("u_P", Camera::get().projection());
 
-		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.rough"), material.rough);
-		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.metal"), material.metal);
-		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
+		sphere_shader->SetUniform("material.rough", material.rough);
+		sphere_shader->SetUniform("material.metal", material.metal);
+		sphere_shader->SetUniform("material.color", material.color);
 
-		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
-		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
+		sphere_shader->SetUniform("light[0].position", light.position);
+		sphere_shader->SetUniform("light[0].L", light.L_intensity);
 
-		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "u_SphereCenter"), light.position.x, light.position.y, light.position.z);
-		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "u_SphereRadius"), 0.1f);
+		sphere_shader->SetUniform("u_SphereCenter", light.position);
+		sphere_shader->SetUniform("u_SphereRadius", 0.1f);
 
 		if (m_mesh) m_mesh->Draw();
 	}
