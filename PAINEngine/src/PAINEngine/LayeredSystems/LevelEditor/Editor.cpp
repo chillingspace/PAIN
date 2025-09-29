@@ -55,14 +55,14 @@ namespace PAIN {
             // Begin IMGUI Frame
             platform->beginFrame();
 
-            // Toggle visibility with F1
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
             }
 
-
             if (editor_visible) {
-                // Build docking space for imgui
+
+                // Build docking space
                 buildDockspace();
 
                 auto renderer = services->get<RendererLayer>();
@@ -78,11 +78,10 @@ namespace PAIN {
                     panel->drawWindow();
                     });
 
-                static bool show_demo = false; // can toggle to true if you want demo
+                static bool show_demo = false; // can toggle to true if want demo
                 if (show_demo) ImGui::ShowDemoWindow(&show_demo);
             }
 
-            // Signal end of frame for imgui
             platform->endFrame();
         }
 

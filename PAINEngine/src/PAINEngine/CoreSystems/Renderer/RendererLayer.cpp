@@ -29,8 +29,6 @@ namespace PAIN {
 		}
 #endif
 
-		// FrameBuffer 
-
 		// Create framebuffer for ImGui viewport
 		glGenFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
