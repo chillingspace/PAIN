@@ -27,12 +27,12 @@ namespace PAIN {
 		//			renderer->Init();
 		//		}
 		//#else
-		PN_CORE_INFO("jspoh attach rl1");
+		//PN_CORE_INFO("jspoh attach rl1");
 		w_renderer = std::make_unique<WindowsRenderer>();
 		if (w_renderer) {
 			w_renderer->Init();
 		}
-		PN_CORE_INFO("jspoh attach r2");
+		//PN_CORE_INFO("jspoh attach r2");
 
 		// Create framebuffer for ImGui viewport
 		glGenFramebuffers(1, &fbo);
@@ -67,7 +67,7 @@ namespace PAIN {
 
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
-		PN_CORE_INFO("RendererLayer::onUpdate - dt: {}", dt);
+		//PN_CORE_INFO("RendererLayer::onUpdate - dt: {}", dt);
 
 		//#ifdef PN_PLATFORM_ANDROID
 		//		if (renderer) {
