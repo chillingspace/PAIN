@@ -1,4 +1,4 @@
-#ifdef PN_PLATFORM_WINDOWS
+
 #include "Scene.h"
 namespace PAIN {
 
@@ -24,4 +24,3 @@ namespace PAIN {
 	}
 }
 
-#endif
