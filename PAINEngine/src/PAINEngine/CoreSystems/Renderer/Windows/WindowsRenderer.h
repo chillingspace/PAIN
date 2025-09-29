@@ -14,6 +14,9 @@
 
 #ifdef PN_PLATFORM_WINDOWS
 
+#ifndef __WINDOWS_RENDERER_H__
+#define __WINDOWS_RENDERER_H__
+
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
@@ -22,6 +25,12 @@
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
+
+	extern Material material;
+	extern Light light;
+
+	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
+
 	class WindowsRenderer {
 	public:
 		WindowsRenderer();
@@ -36,32 +45,35 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
-
-		Material material = {
-			0.1f,		// 0.1 -> smooth, 1 -> rough
-			0.3f,
-			{0.5f,0.5f,0.5f}
-		};
-
-		Light light = {
-			{0.f, 0.f, 0.f},	// position
-			{0.1f, 0.1f, 0.1f}					// intensity
-		};
-
-		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
-
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
 		unsigned int ebo = 0;
 
 		std::unique_ptr<Shader> m_shader = nullptr;
 		std::unique_ptr<Mesh> m_mesh = nullptr;
+
+		std::unique_ptr<Shader> sphere_shader = nullptr;
 	};
 
 	class Camera {
+	private:
+		Camera() = default;
+		~Camera() = default;
 	public:
-		glm::vec3 pos{ 0.f, 0.f, 3.f };
-		glm::vec3 target{ 0.f, 0.f, 0.f };
+		static enum MOVE_MODES {
+			FPS,
+			ORBIT_ORIGIN,
+			NUM_MOVE_MODES,
+		};
+
+		MOVE_MODES move_mode = ORBIT_ORIGIN;
+
+		float speed = 15.f;
+
+		float sensitivity = 0.1f;
+
+		glm::vec3 pos{ 0.f, 5.f, 7.f };
+		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
 		float fov{ 90.f };
@@ -72,8 +84,13 @@ namespace PAIN {
 		float height_ratio{ 9.f };
 		float aspect_ratio{ width_ratio / height_ratio };
 
+		// temp
+		glm::mat4 model() const {
+			return glm::mat4(1.f);
+		}
+
 		glm::mat4 view() const {
-			return glm::lookAt(pos, target, up);
+			return glm::lookAt(pos, pos + forward, up);
 		}
 
 		glm::mat4 projection() const {
@@ -87,5 +104,6 @@ namespace PAIN {
 	};
 }
 
+#endif // __WINDOWS_RENDERER_H__
 
 #endif // PN_PLATFORM_WINDFOWS

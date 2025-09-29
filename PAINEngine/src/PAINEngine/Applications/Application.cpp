@@ -107,7 +107,8 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
-		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
+		// !NOTE: IMGUI eats events
+		//addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
 #endif
 
 		//Mark engine as ready
@@ -121,6 +122,11 @@ namespace PAIN {
 
 		//Application loop
 		while (b_app_running) {
+
+			//static auto last_time = std::chrono::high_resolution_clock::now();
+			//auto current_time = std::chrono::high_resolution_clock::now();
+			//float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+			//last_time = current_time;
 
 			//Poll events
 			services->get<Window::Window>()->pollEvents();
@@ -141,6 +147,7 @@ namespace PAIN {
 				services->get<Window::Window>()->swapBuffers();
 				continue;
 			}
+
 
 			//Update fixed delta
 			int steps = 0;

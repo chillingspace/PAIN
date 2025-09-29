@@ -14,8 +14,22 @@
 
 #include "WindowsRenderer.h"
 #include <cstring>
+#include "Applications/Application.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
 
 namespace PAIN {
+
+	Material material = {
+	0.1f,		// 0.1 -> smooth, 1 -> rough
+	0.3f,
+	{0.5f,0.5f,0.5f}
+	};
+
+	Light light = {
+		{2.f, 3.f, 2.f},	// position
+		{0.5f, 0.5f, 0.5f},					// intensity
+		Light::ORBIT_ORIGIN
+	};
 
 	WindowsRenderer::WindowsRenderer() {
 
@@ -33,6 +47,13 @@ namespace PAIN {
 			return;
 		}
 
+		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
+
+		if (!sphere_shader || sphere_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE); 
 		glCullFace(GL_BACK);
@@ -44,7 +65,10 @@ namespace PAIN {
 	void WindowsRenderer::Render() {
 
 		// update
-		light.position = Camera::get().pos;
+
+		//auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+		//light.position = Camera::get().pos;
 
 		// render
 		// Clear screen
@@ -58,30 +82,49 @@ namespace PAIN {
 		}
 		m_shader->Bind();
 
-		// Rotation mtx
-		float angle = static_cast<float>(glfwGetTime());
-		glm::mat4 model = glm::rotate(glm::mat4(1.f), angle, glm::vec3(1.f, -1.f, -1.f));
-		glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * model;
+		//glm::mat4 mvp = Camera::get().projection() * Camera::get().view() * Camera::get().model();
 
-		m_shader->SetUniform("u_Model", model);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &Camera::get().model()[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(m_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
 
-		m_shader->SetUniform("u_M", model);
-		m_shader->SetUniform("u_V", Camera::get().view());
-		m_shader->SetUniform("u_P", Camera::get().projection());
+		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.rough"), material.rough);
+		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
 
-		m_shader->SetUniform("u_LightDir", glm::vec3{ 0.f, 0.0f, -1.f });
-		m_shader->SetUniform("u_LightColor", glm::vec3{ 1.0f, 1.0f, 1.0f });
-
-		m_shader->SetUniform("material.rough", material.rough);
-		m_shader->SetUniform("material.metal", material.metal);
-		m_shader->SetUniform("material.color", material.color);
-
-		m_shader->SetUniform("light[0].position", light.position);
-		m_shader->SetUniform("light[0].L", light.L_intensity);
-
+    glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
+		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
 
 		if (m_mesh) m_mesh->Draw();
 
+		// render sphere (for light pos)
+		if (!sphere_shader) {
+			PN_CORE_ERROR("Unable to find sphere_shader");
+			return;
+		}
+		sphere_shader->Bind();
+
+		// build lightsource model
+		glm::mat4 model = glm::mat4(1.f);
+		model = glm::translate(model, light.position);
+		model = glm::scale(model, glm::vec3(0.1f));
+
+		// reuse uniforms
+		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_M"), 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_V"), 1, GL_FALSE, &Camera::get().view()[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(sphere_shader->GetRendererID(), "u_P"), 1, GL_FALSE, &Camera::get().projection()[0][0]);
+
+		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.rough"), material.rough);
+		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.metal"), material.metal);
+		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
+
+		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
+		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
+
+		glUniform3f(glGetUniformLocation(sphere_shader->GetRendererID(), "u_SphereCenter"), light.position.x, light.position.y, light.position.z);
+		glUniform1f(glGetUniformLocation(sphere_shader->GetRendererID(), "u_SphereRadius"), 0.1f);
+
+		if (m_mesh) m_mesh->Draw();
 	}
 
 

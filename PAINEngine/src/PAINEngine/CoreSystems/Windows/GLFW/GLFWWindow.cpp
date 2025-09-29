@@ -108,7 +108,6 @@ namespace PAIN {
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
-
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
@@ -279,6 +278,8 @@ namespace PAIN {
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;
 				});
+
+			
 		}
 	}
 }
