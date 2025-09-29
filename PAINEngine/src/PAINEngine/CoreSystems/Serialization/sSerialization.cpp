@@ -15,14 +15,15 @@
 struct _SerSmokeTransform {
     float x{}, y{}, z{};
 };
+
 REFL_TYPE(_SerSmokeTransform)
 REFL_FIELD(x)
 REFL_FIELD(y)
 REFL_FIELD(z)
 REFL_END
 
-//static_assert(refl::trait::is_reflectable_v<_SerSmokeTransform>,
-//    "_SerSmokeTransform is not reflectable in this TU");
+// Will throw error if the test struct is not reflectable
+static_assert(refl::trait::is_reflectable_v<_SerSmokeTransform>, "_SerSmokeTransform not reflectable");
 
 template <typename T>
 void DebugDumpReflectionAndJson(const T& obj, const nlohmann::json& j) {
@@ -52,7 +53,23 @@ namespace fs = std::filesystem;
 
 namespace PAIN {
     namespace Serialization {
+
         void PAIN::Serialization::Service::onAttach() {
+            // Path to your real scene file
+            //const std::string scenePath = "assets/Scenes/lvl1_1.scn";
+
+            //PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
+
+            //if (loadSceneFromFile(scenePath)) {
+            //    PN_CORE_INFO("[Serialization] Scene loaded successfully: {0}", scenePath);
+            //}
+            //else {
+            //    PN_CORE_INFO("[Serialization] Scene load FAILED: {0}", scenePath);
+            //}
+        }
+
+        /*void PAIN::Serialization::Service::onAttach() {
+           
             // 1) Write a minimal scene file
             const std::string scenePath = "assets/smoke.scene.json";
             saveSceneToFile(scenePath);
@@ -93,7 +110,8 @@ namespace PAIN {
             else {
                 PN_CORE_INFO("[Serialization] Round-trip OK");
             }
-        }
+            
+        }*/
 
         // END OF DEBUG
 
@@ -134,23 +152,147 @@ namespace PAIN {
         // Scene-level placeholders
         // ----------------------------
         bool Service::saveSceneToFile(const std::string& file_path) {
-            nlohmann::json scene;
-            scene["Scene"] = {
-                { "name",    "Untitled" },
-                { "version", 1 },
-                { "savedAt", std::time(nullptr) }
-            };
-            const bool ok = saveJsonFile(file_path, scene);
-            if (ok) curr_scene_file_ = file_path;
-            return ok;
+            // TO DO: ADD THIS ONCE ENTITY AND SCENE ARE READY
+            return false;
         }
 
         bool Service::loadSceneFromFile(const std::string& file_path) {
             auto j = loadJsonFile(file_path);
-            if (j.is_null() || j.empty()) return false;
-            // Later: read camera/editor/system blocks via from_json_reflected
+            if (j.is_null() || j.empty()) {
+                PN_CORE_INFO("[Scene] loadSceneFromFile: empty or invalid: {0}", file_path);
+                return false;
+            }
+            if (!j.is_array()) {
+                PN_CORE_INFO("[Scene] loadSceneFromFile: expected array at root (got {0})", j.type_name());
+                return false;
+            }
+
+            // Helper: find first section by key (e.g., "Camera", "Grid ID", etc.)
+            auto findSection = [&](const char* key) -> const nlohmann::json* {
+                for (const auto& elem : j) {
+                    if (!elem.is_object()) continue;
+                    auto it = elem.find(key);
+                    if (it != elem.end()) return &(*it);
+                }
+                return nullptr;
+                };
+
+            // Build a compact report JSON we can log/save
+            nlohmann::json report;
+            report["file"] = file_path;
+
+            // Grid ID
+            if (const auto* grid = findSection("Grid ID"); grid && grid->is_number_integer())
+                report["grid_id"] = grid->get<int>();
+            else
+                report["grid_id"] = nullptr;
+
+            // Camera
+            if (const auto* cam = findSection("Camera"); cam && cam->is_object()) {
+                auto it = cam->find("Active Cam ID");
+                report["active_cam_id"] = (it != cam->end() && it->is_string()) ? *it : nlohmann::json(nullptr);
+            }
+            else {
+                report["active_cam_id"] = nullptr;
+            }
+
+            // Meta tags
+            if (const auto* meta = findSection("MetaData"); meta && meta->is_object()) {
+                auto it = meta->find("Entity_Tags");
+                report["meta_tags"] = (it != meta->end() && it->is_array()) ? *it : nlohmann::json::array();
+            }
+            else {
+                report["meta_tags"] = nlohmann::json::array();
+            }
+
+            // Declared layer count
+            if (const auto* lc = findSection("Layer Count"); lc && lc->is_number_integer())
+                report["layer_count_declared"] = lc->get<int>();
+            else
+                report["layer_count_declared"] = nullptr;
+
+            // Layers summary
+            nlohmann::json layers_out = nlohmann::json::array();
+            size_t total_entities = 0;
+
+            for (const auto& elem : j) {
+                auto it = elem.find("Layer");
+                if (it == elem.end() || !it->is_object()) continue;
+                const auto& L = *it;
+
+                nlohmann::json Lout;
+                Lout["ID"] = L.value("ID", 0);
+                Lout["Mask"] = L.value("Mask", 0);
+                Lout["B_State"] = L.value("B_State", true);
+                Lout["B_YSort"] = L.value("B_YSort", false);
+
+                // Entities
+                nlohmann::json ents_out = nlohmann::json::array();
+                if (auto ents = L.find("Entities"); ents != L.end() && ents->is_array()) {
+                    for (const auto& ewrap : *ents) {
+                        if (!ewrap.is_object()) continue;
+                        auto eit = ewrap.find("Entity");
+                        if (eit == ewrap.end() || !eit->is_object()) continue;
+
+                        const auto& E = *eit;
+
+                        nlohmann::json Eout;
+                        // Not all scenes have a name/id here; include if present
+                        if (auto n = E.find("Name"); n != E.end() && n->is_string()) Eout["Name"] = *n;
+                        if (auto id = E.find("ID"); id != E.end())                  Eout["ID"] = *id;
+
+                        // Components: output only the component names (keys)
+                        nlohmann::json comps_names = nlohmann::json::array();
+                        if (auto comps = E.find("Components"); comps != E.end() && comps->is_object()) {
+                            for (auto cj = comps->begin(); cj != comps->end(); ++cj) {
+                                comps_names.push_back(cj.key()); // e.g. "Transform::Transform", "Render::Texture"
+                            }
+                        }
+                        Eout["Components"] = comps_names;
+                        ents_out.push_back(std::move(Eout));
+                    }
+                }
+                Lout["entity_count"] = ents_out.size();
+                Lout["Entities"] = std::move(ents_out);
+                total_entities += static_cast<size_t>(Lout["entity_count"]);
+                layers_out.push_back(std::move(Lout));
+            }
+
+            report["layers"] = std::move(layers_out);
+            report["total_entities"] = total_entities;
+
+            // Log a concise summary
+            PN_CORE_INFO("[Scene] {0}: grid={1}, active_cam='{2}', layers={3}, entities={4}",
+                file_path,
+                report["grid_id"].is_null() ? -1 : report["grid_id"].get<int>(),
+                report["active_cam_id"].is_null() ? "(none)" : report["active_cam_id"].get<std::string>(),
+                report["layers"].size(), report["total_entities"].get<size_t>());
+
+            // Log the first few layers/entities to eyeball
+            const size_t max_layers_log = 2;
+            const size_t max_ents_log = 3;
+            size_t lidx = 0;
+            for (const auto& L : report["layers"]) {
+                if (lidx++ >= max_layers_log) break;
+                PN_CORE_INFO("  [Layer ID={0} Mask={1} YSort={2}] entities={3}",
+                    L["ID"].get<int>(), L["Mask"].get<int>(),
+                    L["B_YSort"].get<bool>(), L["entity_count"].get<size_t>());
+                size_t eidx = 0;
+                for (const auto& E : L["Entities"]) {
+                    if (eidx++ >= max_ents_log) break;
+                    const std::string name = E.contains("Name") ? E["Name"].get<std::string>() : "(noname)";
+                    PN_CORE_INFO("    - Ent name='{0}' comps={1}", name, E["Components"].size());
+                }
+            }
+
+            // Save a pretty report next to the scene (so you can inspect with any JSON viewer)
+            const std::string report_path = file_path + ".report.json";
+            saveJsonFile(report_path, report);
+            PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
+
             curr_scene_file_ = file_path;
             return true;
         }
+
     }
 }
