@@ -24,14 +24,12 @@
 
 namespace PAIN {
 
-	Application::Application()
-	{
+	Application::Application() {
 		//Create default services
 		services = std::make_shared<Services>();
 	}
 
-	Application::~Application()
-	{
+	Application::~Application() {
 		//Destroy top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
@@ -51,8 +49,11 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		PN_CORE_INFO("jspoh addcore");
 		core_system->services = services;
+		PN_CORE_INFO("jspoh addcore after services");
 		core_system->onAttach();
+		PN_CORE_INFO("jspoh addcore after onAttach");
 		core_stack.push_back(core_system);
 		services->set<T>(core_system);
 	}
@@ -90,26 +91,25 @@ namespace PAIN {
 		//app_audio->play("assets/audio/Music/Boss_Music.wav");
 #endif
 
-		//Push other core systems into the stack
-		//addCoreSystem(window_app);
+
+//Push other core systems into the stack
+//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Windows only have paths, andriods have to use AASettmanager
-		#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
 		addCoreSystem(std::make_shared<Assets::Service>());
 		addCoreSystem(std::make_shared<Loader::Service>());
 		addCoreSystem(std::make_shared<Compiler::Service>());
-		#endif
-
-#ifdef PN_PLATFORM_ANDROID
-		auto renderer = std::make_shared<RendererLayer>();
-        addCoreSystem(renderer);
-#else
-		auto renderer = std::make_shared<RendererLayer>();
-		addCoreSystem(renderer);
 #endif
+
+		PN_CORE_INFO("jspoh1");
+		auto renderer = std::make_shared<RendererLayer>();
+		PN_CORE_INFO("jspoh2");
+		addCoreSystem(renderer);
+		PN_CORE_INFO("jspoh3");
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -189,6 +189,8 @@ namespace PAIN {
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
+
+			PN_CORE_INFO("LOOP");
 		};
 	}
 

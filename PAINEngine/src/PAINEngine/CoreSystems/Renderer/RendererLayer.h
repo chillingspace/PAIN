@@ -5,11 +5,11 @@
 #include "imgui.h"
 
 
-#ifdef PN_PLATFORM_ANDROID
-#include "Android/AndroidRenderer.h"
-#else
+//#ifdef PN_PLATFORM_ANDROID
+//#include "Android/AndroidRenderer.h"
+//#else
 #include "Windows/WindowsRenderer.h"
-#endif
+//#endif
 
 
 namespace PAIN {
@@ -47,10 +47,12 @@ namespace PAIN {
 
 	private:
 
-#ifdef PN_PLATFORM_ANDROID
-		std::unique_ptr<AndroidRenderer> renderer;
-#else
+// #ifdef PN_PLATFORM_ANDROID
+//		std::unique_ptr<AndroidRenderer> renderer;
+//#else
 		std::unique_ptr<WindowsRenderer> w_renderer;
+		
+#ifdef PN_PLATFORM_ANDROID
         static std::vector<SceneObject> s_SubmissionQueue;
 #endif
 

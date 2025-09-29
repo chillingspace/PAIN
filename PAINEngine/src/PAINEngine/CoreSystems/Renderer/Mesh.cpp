@@ -51,10 +51,10 @@ namespace PAIN {
 	}
 	std::unique_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
 	{
-
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 
+#ifdef PN_PLATFORM_WINDOWS
 		// Get current working directory and build paths from there
 		std::filesystem::path current_path = std::filesystem::current_path();
 		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
@@ -73,6 +73,7 @@ namespace PAIN {
 
 		if (!std::filesystem::exists(mesh_full) || mesh_file == "")
 		{
+#endif
 			PN_CORE_ERROR("Mesh file not found: {}, loading default mesh", mesh_file == "" ? "No mesh file given" : mesh_file);
 			vertices = {
 				// Front (+Z)
@@ -127,6 +128,7 @@ namespace PAIN {
 				20,21,22, 20,22,23
 			};
 			return std::make_unique<Mesh>(vertices, indices);
+#ifdef PN_PLATFORM_WINDOWS
 		}
 
 		struct TempVertex {
@@ -203,5 +205,6 @@ namespace PAIN {
 		// must add texcoords
 
 		return std::make_unique<Mesh>(vertices, indices);
+#endif
 	}
 }
