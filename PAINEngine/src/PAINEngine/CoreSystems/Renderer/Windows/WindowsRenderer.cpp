@@ -57,7 +57,8 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE); 
 		glCullFace(GL_BACK);
 
-		m_mesh = Mesh::LoadObj();
+		m_mesh = Mesh::LoadObj("ogre.obj");
+
 	}
 
 	void WindowsRenderer::Render() {
@@ -90,7 +91,7 @@ namespace PAIN {
 		glUniform1f(glGetUniformLocation(m_shader->GetRendererID(), "material.metal"), material.metal);
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "material.color"), material.color.r, material.color.g, material.color.b);
 
-		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
+    glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].position"), light.position.x, light.position.y, light.position.z);
 		glUniform3f(glGetUniformLocation(m_shader->GetRendererID(), "light[0].L"), light.L_intensity.x, light.L_intensity.y, light.L_intensity.z);
 
 		if (m_mesh) m_mesh->Draw();

@@ -17,8 +17,9 @@ namespace PAIN {
 		RendererLayer() = default;
 		~RendererLayer() = default;
 
-		void onAttach() override;
-		void onUpdate(float dt) override;
+        void onAttach() override;
+        void onFixedUpdate(AppTiming timing) override {};
+        void onUpdate(AppTiming timing) override;
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 

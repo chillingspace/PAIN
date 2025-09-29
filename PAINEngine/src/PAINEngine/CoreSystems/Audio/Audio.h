@@ -69,14 +69,16 @@ namespace PAIN {
             //Functions from app system interface
             void onAttach() override { init(); }
             void onDetach() override { shutdown(); }
-            virtual void onUpdate(float dt) override = 0;
+
+            void onFixedUpdate(AppTiming timing) override {}
+            virtual void onUpdate(AppTiming timing) override = 0;
             virtual void onAppPause() override {}
             virtual void onAppResume() override {}
 
             virtual void onEvent(Event::Event& e) override {}
 
             //Static function to create audio class
-            static Audio* create();
+            static Audio* create(void* app);
         };
 
 	}

@@ -30,7 +30,8 @@ namespace PAIN {
 			void addSystems(std::shared_ptr<ISystem> system);
 
 			//Update function
-			void onUpdate(float dt) override;
+			void onFixedUpdate(AppTiming timing) override {}
+			void onUpdate(AppTiming timing) override;
 
 			//Event callback
 			void onEvent(Event::Event& e) override;

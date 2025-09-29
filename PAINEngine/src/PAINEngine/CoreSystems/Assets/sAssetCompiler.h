@@ -90,9 +90,13 @@ namespace PAIN {
 			void processAssetFile(std::filesystem::path const& file_path);
 			void addValidExtensions(std::string const& ext);
 
+			//Thread safe insertion for file event queue
+			void pushFileEvent(std::function<void()> callback);
 
 			void onAttach() override;
-			void onUpdate(float dt) override;
+
+			void onFixedUpdate(AppTiming timing) override;
+			void onUpdate(AppTiming timing) override;
 			void onDetach() override;
 
 			void onEvent(Event::Event& e) override;
@@ -104,6 +108,12 @@ namespace PAIN {
 
 			//List of valid extension
 			std::set<std::string> valid_extensions;
+
+			//File Watching Queue
+			std::queue<std::function<void()>> file_event_queue;
+
+			//Mutex for thread safety
+			std::mutex file_event_mutex;
 		};
 
 	}

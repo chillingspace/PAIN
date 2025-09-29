@@ -23,7 +23,7 @@ namespace PAIN {
 #endif
 
 	}
-	void RendererLayer::onUpdate(float dt)
+	void RendererLayer::onUpdate(AppTiming timing)
 	{
 #ifdef PN_PLATFORM_ANDROID
 		if (renderer) {

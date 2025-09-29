@@ -20,6 +20,8 @@
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
+#include "../Light.h"
+#include "../Material.h"
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
@@ -62,7 +64,6 @@ namespace PAIN {
 		GLFWwindow* GetWindow() const { return window; };*/
 
 	private:
-
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
 		unsigned int ebo = 0;

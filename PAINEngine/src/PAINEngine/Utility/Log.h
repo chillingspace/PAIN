@@ -3,6 +3,10 @@
 #include <memory> 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#ifdef PN_PLATFORM_ANDROID
+#include <spdlog/sinks/android_sink.h>
+#include <android/log.h>
+#endif
 
 namespace PAIN {
 
@@ -21,6 +25,7 @@ namespace PAIN {
 
 }
 
+
 // Core log macros 
 #define PN_CORE_TRACE(...)    ::PAIN::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define PN_CORE_INFO(...)     ::PAIN::Log::GetCoreLogger()->info(__VA_ARGS__)
@@ -34,3 +39,14 @@ namespace PAIN {
 #define PN_WARN(...)     ::PAIN::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define PN_ERROR(...)    ::PAIN::Log::GetClientLogger()->error(__VA_ARGS__)
 #define PN_FATAL(...)    ::PAIN::Log::GetClientLogger()->fatal(__VA_ARGS__)
+
+// Log.h (debug-only assert wrapper)
+#ifndef NDEBUG
+#define PN_DEBUG_BREAK() do { assert(false && "PN_FATAL triggered"); } while(0)
+#else
+#define PN_DEBUG_BREAK() ((void)0)
+#endif
+
+// Then make convenience macros:
+#define PN_CORE_FATAL_AND_BREAK(...) do { PN_CORE_FATAL(__VA_ARGS__); PN_DEBUG_BREAK(); } while(0)
+#define PN_FATAL_AND_BREAK(...)      do { PN_FATAL(__VA_ARGS__);      PN_DEBUG_BREAK(); } while(0)

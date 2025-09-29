@@ -8,7 +8,7 @@
 #include "Panels/AudioPanel.h"
 #include "Panels/ScenesPanel.h"
 #include "Panels/ComponentsPanel.h"
-
+#include "Panels/ResourcePanel.h"
 
 namespace PAIN {
 
@@ -35,12 +35,16 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
+
+            #ifdef PN_PLATFORM_WINDOWS
+            registerPanel(std::make_shared<Panel::ResourcePanel>());
+            #endif
         }
 
         void Editor::onDetach() {
         }
 
-        void Editor::onUpdate(float dt) {
+        void Editor::onUpdate(AppTiming timing) {
 
             //Update shortcuts
             platform->updateShortCuts(command_manager);
@@ -81,7 +85,7 @@ namespace PAIN {
 
             // Reserve vertical space for the fixed Tools panel (menu + toolbar)
             const float menu_h = ImGui::GetFrameHeight(); // same as Tools
-            const float toolbar_h = .2f;                   // same as Tools
+            const float toolbar_h = .0f;                   // same as Tools
             const float tools_h = menu_h + toolbar_h;
 
             // Position/size the dockspace host BELOW the tools bar
