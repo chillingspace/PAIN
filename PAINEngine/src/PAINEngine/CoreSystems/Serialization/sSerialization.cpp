@@ -55,17 +55,17 @@ namespace PAIN {
     namespace Serialization {
 
         void PAIN::Serialization::Service::onAttach() {
-            // Path to your real scene file
-            //const std::string scenePath = "assets/Scenes/lvl1_1.scn";
+            // Placeholder path
+            const std::string scenePath = "assets/Scenes/lvl1_1.scn";
 
-            //PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
+            PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
 
-            //if (loadSceneFromFile(scenePath)) {
-            //    PN_CORE_INFO("[Serialization] Scene loaded successfully: {0}", scenePath);
-            //}
-            //else {
-            //    PN_CORE_INFO("[Serialization] Scene load FAILED: {0}", scenePath);
-            //}
+            if (loadSceneFromFile(scenePath)) {
+                PN_CORE_INFO("[Serialization] Scene loaded successfully: {0}", scenePath);
+            }
+            else {
+                PN_CORE_INFO("[Serialization] Scene load FAILED: {0}", scenePath);
+            }
         }
 
         /*void PAIN::Serialization::Service::onAttach() {

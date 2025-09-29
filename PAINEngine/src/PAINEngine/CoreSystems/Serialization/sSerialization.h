@@ -35,20 +35,23 @@ namespace PAIN {
         class Service : public AppSystem {
         public:
             Service() = default;
-            virtual ~Service() = default;
+            // If you did Option A above, keep override; otherwise drop it
+            ~Service() = default;
 
             // AppSystem lifecycle
-            void onAttach() override;            // optional: load autosave, etc.
-            //void onAttach() override {}            // optional: load autosave, etc.
-            void onDetach() override {}             // optional: flush saves
-            void onUpdate() override {}             // keep empty for now (no ECS yet)
-            void onEvent(Event::Event& e) override {} // wire hotkeys later (Ctrl+S, etc.)
+            void onAttach() override;         
+            void onDetach() override {}               
+            void onFixedUpdate(AppTiming tinming) override {}  
+            void onUpdate(AppTiming tinming) override {}       
+            void onAppPause() override {}
+            void onAppResume() override {}
+            void onEvent(Event::Event& e) override {}
 
             // File helpers
             bool saveJsonFile(const std::string& file_path, const nlohmann::json& data);
             nlohmann::json loadJsonFile(const std::string& file_path);
 
-            // Scene-level placeholders (no entities yet)
+            // Scene-level placeholders
             bool saveSceneToFile(const std::string& file_path);
             bool loadSceneFromFile(const std::string& file_path);
 
