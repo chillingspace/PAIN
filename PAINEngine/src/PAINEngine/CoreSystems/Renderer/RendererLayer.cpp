@@ -21,16 +21,18 @@ namespace PAIN {
 
 	void RendererLayer::onAttach() {
 
-#ifdef PN_PLATFORM_ANDROID
-		renderer = std::make_unique<AndroidRenderer>();
-		if (renderer) {
-			renderer->Init();
-		}
-#else
+		//#ifdef PN_PLATFORM_ANDROID
+		//		renderer = std::make_unique<AndroidRenderer>();
+		//		if (renderer) {
+		//			renderer->Init();
+		//		}
+		//#else
+		PN_CORE_INFO("jspoh attach rl1");
 		w_renderer = std::make_unique<WindowsRenderer>();
 		if (w_renderer) {
 			w_renderer->Init();
 		}
+		PN_CORE_INFO("jspoh attach r2");
 
 		// Create framebuffer for ImGui viewport
 		glGenFramebuffers(1, &fbo);
@@ -58,19 +60,20 @@ namespace PAIN {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
+		//#endif
 
 
 	}
 
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
+		PN_CORE_INFO("RendererLayer::onUpdate - dt: {}", dt);
 
-#ifdef PN_PLATFORM_ANDROID
-		if (renderer) {
-			renderer->Render();
-		}
-#else
+		//#ifdef PN_PLATFORM_ANDROID
+		//		if (renderer) {
+		//			renderer->Render();
+		//		}
+		//#else
 		if (w_renderer) {
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
@@ -84,8 +87,12 @@ namespace PAIN {
 				// Match viewport to window size
 				auto window = services->get<Window::Window>();
 				int winWidth, winHeight;
+#ifdef PN_PLATFORM_WINDOWS
 				glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
 				glViewport(0, 0, winWidth, winHeight);
+#else
+				glViewport(0, 0, 800, 600);
+#endif
 
 			}
 
@@ -184,10 +191,10 @@ namespace PAIN {
 		}
 		xOffset = 0.f;
 		yOffset = 0.f;
-#endif
+		//#endif
 	}
 	void RendererLayer::onEvent(Event::Event& e) {
-#ifndef PN_PLATFORM_ANDROID
+		//#ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);
 
 		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
@@ -300,6 +307,6 @@ namespace PAIN {
 			PN_CORE_INFO(e.toString());
 			return false;
 			});
-#endif
+		//#endif
 	}
 }
