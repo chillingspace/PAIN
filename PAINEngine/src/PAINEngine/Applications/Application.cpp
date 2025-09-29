@@ -190,7 +190,7 @@ namespace PAIN {
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
 
-			PN_CORE_INFO("LOOP");
+			//PN_CORE_INFO("LOOP");
 		};
 	}
 
