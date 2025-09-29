@@ -56,20 +56,40 @@ namespace PAIN {
 				offset *= dt;
 				Camera::get().pos += offset;
 			}
+			if (SPACE_KEYDOWN) {
+				glm::vec3 offset = Camera::get().up * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos += offset;
+			}
+			if (LCTRL_KEYDOWN) {
+				glm::vec3 offset = Camera::get().up * Camera::get().speed;
+				offset *= dt;
+				Camera::get().pos -= offset;
+			}
 			break;
 		case LIGHT:
 			static constexpr float light_speed = 15.f;
 			if (W_KEYDOWN) {
-				light.position += glm::vec3(0.f, 0.f, -1.f) * light_speed * dt;
+				light.position += Camera::get().forward * light_speed * dt;
 			}
 			if (S_KEYDOWN) {
-				light.position += glm::vec3(0.f, 0.f, 1.f) * light_speed * dt;
+				light.position += -Camera::get().forward * light_speed * dt;
 			}
 			if (A_KEYDOWN) {
-				light.position += glm::vec3(-1.f, 0.f, 0.f) * light_speed * dt;
+				const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(90.f), Camera::get().up);
+				const glm::vec3 left = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
+				light.position += left * light_speed * dt;
 			}
 			if (D_KEYDOWN) {
-				light.position += glm::vec3(1.f, 0.f, 0.f) * light_speed * dt;
+				const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-90.f), Camera::get().up);
+				const glm::vec3 right = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
+				light.position += right * light_speed * dt;
+			}
+			if (SPACE_KEYDOWN) {
+				light.position += glm::vec3(0.f, 1.f, 0.f) * light_speed * dt;
+			}
+			if (LCTRL_KEYDOWN) {
+				light.position += glm::vec3(0.f, -1.f, 0.f) * light_speed * dt;
 			}
 			break;
 		}
