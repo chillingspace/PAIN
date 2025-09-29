@@ -26,25 +26,6 @@
 
 namespace PAIN {
 
-	struct Material {
-		float rough;
-		float metal;
-		glm::vec3 color;
-	};
-
-	struct Light {
-		glm::vec3 position;
-		glm::vec3 L_intensity;
-
-		enum MOVE_MODES {
-			FREE,
-			ORBIT_ORIGIN,
-			NUM_MOVE_MODES,
-		};
-
-		MOVE_MODES move_mode = ORBIT_ORIGIN;
-	};
-
 	extern Material material;
 	extern Light light;
 

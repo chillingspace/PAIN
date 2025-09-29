@@ -27,7 +27,8 @@ namespace PAIN {
 
 	Light light = {
 		{2.f, 3.f, 2.f},	// position
-		{0.5f, 0.5f, 0.5f}					// intensity
+		{0.5f, 0.5f, 0.5f},					// intensity
+		Light::ORBIT_ORIGIN
 	};
 
 	WindowsRenderer::WindowsRenderer() {

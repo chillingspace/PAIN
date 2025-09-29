@@ -25,6 +25,8 @@ namespace PAIN {
 	}
 	void RendererLayer::onUpdate(AppTiming timing)
 	{
+		const float dt = timing.dt;
+
 #ifdef PN_PLATFORM_ANDROID
 		if (renderer) {
 			renderer->Render();
