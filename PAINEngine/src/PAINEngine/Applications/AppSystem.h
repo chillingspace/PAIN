@@ -31,8 +31,8 @@ namespace PAIN {
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onFixedUpdate(AppTiming tinming) = 0;
-		virtual void onUpdate(AppTiming tinming) = 0;
+		virtual void onFixedUpdate(AppTiming timing) = 0;
+		virtual void onUpdate(AppTiming timing) = 0;
 		virtual void onAppPause() {}
 		virtual void onAppResume() {}
 

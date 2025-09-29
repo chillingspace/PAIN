@@ -14,6 +14,7 @@
 #include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
+#include "CoreSystems/Path/Path.h"
 
 
 namespace PAIN {
@@ -96,6 +97,11 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Loader::Service>());
 		addCoreSystem(std::make_shared<Compiler::Service>());
 		#endif
+
+		//Create path service
+		auto temp = std::shared_ptr<Path::Path>(Path::Path::create());
+		services->set<Path::Path>(temp);
+		services->get<Path::Path>()->logVirtualPaths();
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();
