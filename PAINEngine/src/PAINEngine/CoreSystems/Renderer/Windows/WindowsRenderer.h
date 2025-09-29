@@ -42,7 +42,7 @@ namespace PAIN {
 
 		void Init();
 		void Render();
-		void RenderMesh(Mesh* mesh);
+		void RenderMesh(Mesh* mesh, const glm::mat4& model);
 		void Clear();
 		void Cleanup();
 

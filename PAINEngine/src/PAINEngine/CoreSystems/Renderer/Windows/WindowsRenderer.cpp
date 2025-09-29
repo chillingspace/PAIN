@@ -121,13 +121,13 @@ namespace PAIN {
 		m_mesh->Draw();
 	}
 
-	void WindowsRenderer::RenderMesh(Mesh* mesh)
+	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
 	{
 		if (!mesh || !m_shader) return;
 
 		m_shader->Bind();
 
-		m_shader->SetUniform("u_M", Camera::get().model());
+		m_shader->SetUniform("u_M", model);
 		m_shader->SetUniform("u_V", Camera::get().view());
 		m_shader->SetUniform("u_P", Camera::get().projection());
 

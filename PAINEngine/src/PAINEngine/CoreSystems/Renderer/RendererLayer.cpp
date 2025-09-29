@@ -18,7 +18,7 @@
 #endif
 
 namespace PAIN {
-	std::vector<Mesh*> RendererLayer::s_SubmissionQueue;
+	std::vector<SceneObject> RendererLayer::s_SubmissionQueue;
 
 	void RendererLayer::onAttach() {
 
@@ -98,8 +98,8 @@ namespace PAIN {
 			w_renderer->Render();
 
 			// Render objects
-			for (auto* mesh : s_SubmissionQueue) {
-				w_renderer->RenderMesh(mesh);
+			for (auto& obj : s_SubmissionQueue) {
+				w_renderer->RenderMesh(obj.mesh, obj.transform);
 			}
 
 
@@ -195,10 +195,10 @@ namespace PAIN {
 #endif
 	}
 
-	void RendererLayer::Submit(Mesh* mesh)
+	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
 	{
 #ifndef PN_PLATFORM_ANDROID
-		s_SubmissionQueue.push_back(mesh);
+		s_SubmissionQueue.push_back({ mesh, model});
 #endif
 	}
 

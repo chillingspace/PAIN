@@ -14,6 +14,12 @@
 
 namespace PAIN {
 
+	struct SceneObject {
+		Mesh* mesh;
+		glm::mat4 transform;  // model matrix
+	};
+
+
 	class RendererLayer : public AppSystem {
 	public:
 		RendererLayer() = default;
@@ -23,7 +29,7 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
-		static void Submit(Mesh* mesh);
+		static void Submit(Mesh* mesh, const glm::mat4& model);
 
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
@@ -43,7 +49,7 @@ namespace PAIN {
 		std::unique_ptr<WindowsRenderer> w_renderer;
 #endif
 
-		static std::vector<Mesh*> s_SubmissionQueue;
+		static std::vector<SceneObject> s_SubmissionQueue;
 
 		enum MOVE_MODES {
 			CAMERA,
