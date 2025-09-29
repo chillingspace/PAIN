@@ -25,4 +25,4 @@ namespace PAIN {
 	};
 }
 
-#ifdef
+#endif
