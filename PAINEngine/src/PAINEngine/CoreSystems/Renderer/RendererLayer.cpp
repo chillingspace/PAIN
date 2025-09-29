@@ -4,6 +4,13 @@
 #include "./CoreSystems/Events/GLFW/MouseEvents.h"
 #include "./CoreSystems/Events/GLFW/WindowEvents.h"
 #include "./CoreSystems/Renderer/Windows/WindowsRenderer.h"
+#include "./Applications/Application.h"
+
+//For imgui viewport
+#include "./LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+#include "./LayeredSystems/LevelEditor/Editor.h"
+
+#include <GLFW/glfw3.h>
 
 namespace PAIN {
 
@@ -22,7 +29,38 @@ namespace PAIN {
 		}
 #endif
 
+		// FrameBuffer 
+
+		// Create framebuffer for ImGui viewport
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		// Create color texture
+		glGenTextures(1, &fboTexture);
+		glBindTexture(GL_TEXTURE_2D, fboTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fbWidth, fbHeight, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D, fboTexture, 0);
+
+		// Create depth-stencil buffer
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+			GL_RENDERBUFFER, rbo);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("Framebuffer is not complete!");
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 	}
+
 	void RendererLayer::onUpdate(AppTiming timing)
 	{
 		const float dt = timing.dt;
@@ -33,7 +71,30 @@ namespace PAIN {
 		}
 #else
 		if (w_renderer) {
+			auto editor = services->get<Editor::Editor>();
+			bool editor_visible = editor && editor->isVisible();
+
+			if (editor_visible) {
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+				glViewport(0, 0, fbWidth, fbHeight);
+			}
+			else {
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				// Match viewport to window size
+				auto window = services->get<Window::Window>();
+				int winWidth, winHeight;
+				glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
+				glViewport(0, 0, winWidth, winHeight);
+
+			}
+
+			// Clear + render
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			w_renderer->Render();
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
 #endif
 		switch (move_mode) {

@@ -35,6 +35,9 @@ namespace PAIN {
             void onUpdate(AppTiming timing) override;
             void onEvent(Event::Event& event) override;
 
+            bool isVisible() const { return editor_visible; }
+            void toggleVisible() { editor_visible = !editor_visible; }
+
         private:
 
             //Panels
@@ -54,6 +57,8 @@ namespace PAIN {
             void EndFrame();
 
             void buildDockspace();
+
+            bool editor_visible = true;
         };
     }
 } 

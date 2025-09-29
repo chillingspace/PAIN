@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "PAINEngine/Applications/AppSystem.h"
+#include "imgui.h"
 
 
 #ifdef PN_PLATFORM_ANDROID
@@ -9,6 +10,7 @@
 #else
 #include "Windows/WindowsRenderer.h"
 #endif
+
 
 namespace PAIN {
 
@@ -22,6 +24,12 @@ namespace PAIN {
         void onUpdate(AppTiming timing) override;
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
+
+		ImTextureID getFramebufferTexture() const {
+			return (ImTextureID)(intptr_t)fboTexture;
+		}
+		int getFramebufferWidth() const { return fbWidth; }
+		int getFramebufferHeight() const { return fbHeight; }
 
 
 	private:
@@ -50,6 +58,12 @@ namespace PAIN {
 		bool mouseButtonDown = false;
 		float xOffset = 0.0f;
 		float yOffset = 0.0f;
+
+		unsigned int fbo = 0;
+		unsigned int fboTexture = 0;
+		unsigned int rbo = 0;
+		int fbWidth = 1280;
+		int fbHeight = 720;
 
 	};
 

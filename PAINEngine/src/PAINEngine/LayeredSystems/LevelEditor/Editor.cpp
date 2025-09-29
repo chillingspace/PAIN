@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Editor.h"
 
 #ifdef _DEBUG
@@ -9,6 +9,9 @@
 #include "Panels/ScenesPanel.h"
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
+#include "Panels/ViewportPanel.h"
+
+#include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
 
 namespace PAIN {
 
@@ -35,6 +38,7 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
+            registerPanel(std::make_shared<Panel::ViewportPanel>());
 
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
@@ -51,29 +55,37 @@ namespace PAIN {
             // Begin IMGUI Frame
             platform->beginFrame();
 
-            static bool editor_visible = true;
-
-            // Toggle visibility with a key (say F1)
+            // Toggle visibility with F1
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
-                editor_visible = !editor_visible;
+                toggleVisible();
             }
+
 
             if (editor_visible) {
                 // Build docking space for imgui
                 buildDockspace();
+
+                auto renderer = services->get<RendererLayer>();
+                auto vp = panels->get<Panel::ViewportPanel>();
+                if (renderer && vp) {
+                    vp->setRenderTexture(renderer->getFramebufferTexture(),
+                        renderer->getFramebufferWidth(),
+                        renderer->getFramebufferHeight());
+                }
 
                 // Iterate through all panels
                 panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
                     panel->drawWindow();
                     });
 
-                static bool show_demo = true;
+                static bool show_demo = false; // can toggle to true if you want demo
                 if (show_demo) ImGui::ShowDemoWindow(&show_demo);
             }
 
             // Signal end of frame for imgui
             platform->endFrame();
         }
+
 
 
         template<typename T>
