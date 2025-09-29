@@ -195,7 +195,7 @@ namespace PAIN {
             }
         }
 
-        void Android_Window::onUpdate() {
+        void Android_Window::onUpdate(AppTiming timing) {
 
         }
 

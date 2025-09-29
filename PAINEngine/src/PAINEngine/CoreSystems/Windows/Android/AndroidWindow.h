@@ -39,7 +39,8 @@ namespace PAIN {
 			virtual ~Android_Window();
 
 			//Update
-			void onUpdate() override;
+            void onFixedUpdate(AppTiming timing) override {}
+			void onUpdate(AppTiming timing) override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;

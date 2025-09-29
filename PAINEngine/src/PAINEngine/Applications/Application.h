@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include <queue>
+#include <chrono>
 
 namespace PAIN {
 
@@ -19,15 +20,26 @@ namespace PAIN {
 		// Application instance
 		static Application* s_Instance;
 
-		//Window instance
-		std::shared_ptr<Window::Window> app_window;
+		//Boolean running app running
+		bool b_app_running = false;
+
+		//App timings
+		std::chrono::steady_clock::time_point last_time;
+		float accumulator = 0.0f;
+		AppTiming timing;
+
+#ifdef  PN_PLATFORM_ANDROID
+		int const MAX_STEPS = 4;
+#else
+		int const MAX_STEPS = 5;
+#endif
+
+		//Core services stack
+		std::shared_ptr<Services> services;
 
 		//Create applications stacks
 		std::vector<std::shared_ptr<AppSystem>> layer_stack;
 		std::vector<std::shared_ptr<AppSystem>> core_stack;
-
-		//Boolean running app running
-		bool b_app_running = false;
 
 		//Event queue
 		std::queue<std::shared_ptr<Event::Event>> event_queue;

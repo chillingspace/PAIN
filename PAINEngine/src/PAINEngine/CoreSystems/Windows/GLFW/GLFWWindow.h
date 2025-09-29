@@ -60,7 +60,7 @@ namespace PAIN {
 
 
 			//Update
-			void onUpdate() override;
+			void onUpdate(AppTiming timing) override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;

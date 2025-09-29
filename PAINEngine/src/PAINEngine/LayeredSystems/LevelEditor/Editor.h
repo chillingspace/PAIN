@@ -28,7 +28,8 @@ namespace PAIN {
 
             void onAttach() override;
             void onDetach() override;
-            void onUpdate() override;
+            void onFixedUpdate(AppTiming timing) override {}
+            void onUpdate(AppTiming timing) override;
             void onEvent(Event::Event& event) override;
 
         private:

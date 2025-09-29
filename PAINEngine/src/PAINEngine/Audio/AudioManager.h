@@ -22,7 +22,8 @@ public:
 	// AppSystem virtual function overrides
 	void onAttach() override;
 	void onDetach() override;
-	void onUpdate() override;
+	void onFixedUpdate(PAIN::AppTiming timing) override {}
+	void onUpdate(PAIN::AppTiming timing) override;
 	void onEvent(PAIN::Event::Event& e) override;
 
 	// Public audio API

@@ -62,7 +62,7 @@ void AudioManager::onDetach() {
     }
 }
 
-void AudioManager::onUpdate() {
+void AudioManager::onUpdate(PAIN::AppTiming dt) {
     if (!m_system) return;
 
     std::vector<int> stoppedChannels;

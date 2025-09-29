@@ -137,7 +137,7 @@ namespace PAIN {
         void Editor::onDetach() {
         }
 
-        void Editor::onUpdate() {
+        void Editor::onUpdate(AppTiming timing) {
 
             //Update shortcuts
             //updateShortCuts();
