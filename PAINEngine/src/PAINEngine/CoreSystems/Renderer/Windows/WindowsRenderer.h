@@ -1,34 +1,38 @@
 /**
  * @file WindowsRenderer.h
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2025-09-27
- * 
+ *
  * @copyright Copyright (c) 2025
- * 
+ *
  */
 
 
 #pragma once
 
-#ifdef PN_PLATFORM_WINDOWS
-
 #ifndef __WINDOWS_RENDERER_H__
 #define __WINDOWS_RENDERER_H__
+
+#include "../Light.h"
+#include "../Material.h"
+
+namespace PAIN {
+	extern Material material;
+	extern Light light;
+};
+
+
+#ifdef PN_PLATFORM_WINDOWS
+
 
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
-#include "../Light.h"
-#include "../Material.h"
 #include "../../../Applications/AppSystem.h"
 
 namespace PAIN {
-
-	extern Material material;
-	extern Light light;
-
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
 	class WindowsRenderer {
@@ -51,13 +55,21 @@ namespace PAIN {
 
 		unsigned int empty_vao = 0;
 
+		unsigned int fbo = 0;
+
 		std::unique_ptr<Shader> m_shader = nullptr;
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
 		std::unique_ptr<Shader> sphere_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 	};
+}
 
+
+#endif // PN_PLATFORM_WINDFOWS
+
+
+namespace PAIN {
 	class Camera {
 	private:
 		Camera() = default;
@@ -110,5 +122,3 @@ namespace PAIN {
 }
 
 #endif // __WINDOWS_RENDERER_H__
-
-#endif // PN_PLATFORM_WINDFOWS

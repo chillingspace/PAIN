@@ -33,6 +33,9 @@
  * Engine Specific Library
  *********************************************************************/
 
+// key events
+#include "./Utility/KeyCodes.h"
+
 //Android GL vs Window GL
 #ifdef PN_PLATFORM_ANDROID
 #include <android/native_window.h>

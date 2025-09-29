@@ -81,7 +81,7 @@ namespace PAIN {
 		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
 #else
 		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("assets/audio/Music/Boss_Music.wav");
+		//app_audio->play("assets/audio/Music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack

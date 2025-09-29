@@ -6,16 +6,20 @@
 #include "./CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "./Applications/Application.h"
 
+#include "./CoreSystems/Renderer/Light.h"
+#include "./CoreSystems/Renderer/Material.h"
+
 //For imgui viewport
 #include "./LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "./LayeredSystems/LevelEditor/Editor.h"
 
+#ifndef PN_PLATFORM_ANDROID
 #include <GLFW/glfw3.h>
+#endif
 
 namespace PAIN {
 
-	void RendererLayer::onAttach()
-	{
+	void RendererLayer::onAttach() {
 
 #ifdef PN_PLATFORM_ANDROID
 		renderer = std::make_unique<AndroidRenderer>();
@@ -27,7 +31,6 @@ namespace PAIN {
 		if (w_renderer) {
 			w_renderer->Init();
 		}
-#endif
 
 		// Create framebuffer for ImGui viewport
 		glGenFramebuffers(1, &fbo);
@@ -55,12 +58,12 @@ namespace PAIN {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
 
 
 	}
 
-	void RendererLayer::onUpdate(AppTiming timing)
-	{
+	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
 
 #ifdef PN_PLATFORM_ANDROID
@@ -94,7 +97,6 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
-#endif
 		switch (move_mode) {
 		case CAMERA:
 			if (Camera::get().move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
@@ -182,31 +184,31 @@ namespace PAIN {
 		}
 		xOffset = 0.f;
 		yOffset = 0.f;
+#endif
 	}
-	void RendererLayer::onEvent(Event::Event& e)
-	{
+	void RendererLayer::onEvent(Event::Event& e) {
+#ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);
 
 		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
 
-			switch (e.getKeyCode())
-			{
-			case GLFW_KEY_W:
+			switch (e.getKeyCode()) {
+			case PAIN_KEY_W:
 				W_KEYDOWN = true;
 				break;
-			case GLFW_KEY_A:
+			case PAIN_KEY_A:
 				A_KEYDOWN = true;
 				break;
-			case GLFW_KEY_S:
+			case PAIN_KEY_S:
 				S_KEYDOWN = true;
 				break;
-			case GLFW_KEY_D:
+			case PAIN_KEY_D:
 				D_KEYDOWN = true;
 				break;
-			case GLFW_KEY_SPACE:
+			case PAIN_KEY_SPACE:
 				SPACE_KEYDOWN = true;
 				break;
-			case GLFW_KEY_LEFT_CONTROL:
+			case PAIN_KEY_LEFT_CONTROL:
 				LCTRL_KEYDOWN = true;
 				break;
 			default:
@@ -219,24 +221,23 @@ namespace PAIN {
 
 		dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
 			//PN_CORE_INFO(e.toString());
-			switch (e.getKeyCode())
-			{
-			case GLFW_KEY_W:
+			switch (e.getKeyCode()) {
+			case PAIN_KEY_W:
 				W_KEYDOWN = false;
 				break;
-			case GLFW_KEY_A:
+			case PAIN_KEY_A:
 				A_KEYDOWN = false;
 				break;
-			case GLFW_KEY_S:
+			case PAIN_KEY_S:
 				S_KEYDOWN = false;
 				break;
-			case GLFW_KEY_D:
+			case PAIN_KEY_D:
 				D_KEYDOWN = false;
 				break;
-			case GLFW_KEY_SPACE:
+			case PAIN_KEY_SPACE:
 				SPACE_KEYDOWN = false;
 				break;
-			case GLFW_KEY_LEFT_CONTROL:
+			case PAIN_KEY_LEFT_CONTROL:
 				LCTRL_KEYDOWN = false;
 				break;
 			default:
@@ -247,12 +248,11 @@ namespace PAIN {
 
 		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
 
-			switch (e.getKeyCode())
-			{
-			case GLFW_KEY_TAB:
+			switch (e.getKeyCode()) {
+			case PAIN_KEY_TAB:
 				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
 				break;
-			case GLFW_KEY_O:
+			case PAIN_KEY_O:
 				Camera::get().move_mode = static_cast<Camera::MOVE_MODES>((Camera::get().move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
 				light.move_mode = static_cast<Light::MOVE_MODES>((light.move_mode + 1) % Light::MOVE_MODES::NUM_MOVE_MODES);
 				break;
@@ -266,7 +266,7 @@ namespace PAIN {
 		dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
 			//PN_CORE_INFO(e.toString());
 
-			if (e.getBtnCode() == GLFW_MOUSE_BUTTON_LEFT) {
+			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
 				mouseButtonDown = true;
 			}
 
@@ -275,7 +275,7 @@ namespace PAIN {
 
 		dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
 
-			if (e.getBtnCode() == GLFW_MOUSE_BUTTON_LEFT) {
+			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
 				mouseButtonDown = false;
 			}
 
@@ -300,5 +300,6 @@ namespace PAIN {
 			PN_CORE_INFO(e.toString());
 			return false;
 			});
+#endif
 	}
 }

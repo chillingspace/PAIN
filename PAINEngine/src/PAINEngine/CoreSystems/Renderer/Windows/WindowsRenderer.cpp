@@ -67,6 +67,8 @@ namespace PAIN {
 			return;
 		}
 
+		glGenFramebuffers(1, &fbo);
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -184,7 +186,10 @@ namespace PAIN {
 			m_mesh.reset();
 		}
 
-
+		if (fbo != 0) {
+			glDeleteFramebuffers(1, &fbo);
+			fbo = 0;
+		}
 	}
 }
 

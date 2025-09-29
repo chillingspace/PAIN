@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
 
 namespace PAIN {
@@ -20,5 +19,3 @@ namespace PAIN {
 
 }
 
-
-#endif

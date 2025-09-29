@@ -43,6 +43,8 @@ namespace PAIN {
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
+
+            //toggleVisible();
         }
 
         void Editor::onDetach() {
