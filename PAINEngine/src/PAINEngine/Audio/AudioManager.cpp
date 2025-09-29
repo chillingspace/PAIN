@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "AudioManager.h"
+#include "PAINEngine/Logging/Log.h"
+
 #include <fmod.hpp>
 #include <fmod_errors.h>
 #include <cmath>
@@ -60,7 +62,7 @@ void AudioManager::onDetach() {
     }
 }
 
-void AudioManager::onUpdate(float dt) {
+void AudioManager::onUpdate() {
     if (!m_system) return;
 
     std::vector<int> stoppedChannels;

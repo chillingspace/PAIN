@@ -18,12 +18,12 @@ namespace PAIN {
 
     bool AndroidRenderer::Init() {
         if (!createShaders()) {
-            PN_CORE_ERROR("Failed to create shaders");
+            LOGE("Failed to create shaders");
             return false;
         }
 
         if (!createBuffers()) {
-            PN_CORE_ERROR("Failed to create buffers");
+            LOGE("Failed to create buffers");
             return false;
         }
 

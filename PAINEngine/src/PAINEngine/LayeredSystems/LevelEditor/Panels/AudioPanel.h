@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef DEBUG_AUDIO_PANEL_HPP
 #define DEBUG_AUDIO_PANEL_HPP
 
@@ -13,7 +14,7 @@ namespace PAIN {
 
 			class DebugAudioPanel : public IPanel {
 			public:
-				DebugAudioPanel();
+				DebugAudioPanel(std::shared_ptr<CommandManager> command_manager);
 
 				void nextWindowSettings() override; 
 				void onUpdate() override;
@@ -23,5 +24,6 @@ namespace PAIN {
 	} // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif
 #endif

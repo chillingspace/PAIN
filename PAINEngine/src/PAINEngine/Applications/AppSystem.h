@@ -4,15 +4,9 @@
 #define APP_LAYER_HPP
 
 #include "../CoreSystems/Events/Event.h"
-
-#include "../Utility/CustomTemplates.h"
+#include "Services.h"
 
 namespace PAIN {
-
-	class Services : public Custom::ClassWeakMap {
-	public:
-		Services() = default;
-	};
 
 	class AppSystem {
 	private:
@@ -24,9 +18,7 @@ namespace PAIN {
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onUpdate(float dt) = 0;
-		virtual void onAppPause() {}
-		virtual void onAppResume() {}
+		virtual void onUpdate() = 0;
 
 		//Event handler for app layer
 		virtual void onEvent(Event::Event& e) = 0;

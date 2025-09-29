@@ -8,8 +8,6 @@
 #include "imgui_impl_opengl3.h"
 #undef APIENTRY
 
-#include "../Command.h"
-
 namespace PAIN {
 	namespace Editor {
 
@@ -26,8 +24,6 @@ namespace PAIN {
                 ImGui::Render();
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
-
-            virtual void updateShortCuts(std::shared_ptr<CommandManager> command) = 0;
 
             virtual void handleEvents(Event::Event& event) = 0;
 

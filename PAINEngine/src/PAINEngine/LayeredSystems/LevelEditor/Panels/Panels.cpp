@@ -2,6 +2,7 @@
 #include "Panels.h"
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 
 namespace PAIN {
 	namespace Editor {
@@ -80,96 +81,9 @@ namespace PAIN {
                     else          ++it;
                 }
             }
-
-
-			// ----------------------------
-			// Internal PopUps
-			// ----------------------------
-			bool IPanel::b_popup_showing = false;
-
-			void IPanel::registerPopUp(std::string const& popup_id, std::function<void()> popup_func) {
-				//Check if popup has already been registered
-				if (popups.find(popup_id) != popups.end()) {
-					throw std::runtime_error("Popup already registered");
-				}
-
-				//Emplace popup
-				popups.emplace(popup_id, InternalPopUp{ false, std::move(popup_func) });
-			}
-
-			void IPanel::editPopUp(std::string const& popup_id, std::function<void()> popup_func) {
-				//Check if popup has been registered
-				if (popups.find(popup_id) == popups.end()) {
-					throw std::runtime_error("Popup not yet registered");
-				}
-
-				popups.at(popup_id) = InternalPopUp{ false, popup_func };
-			}
-
-			void IPanel::openPopUp(std::string const& popup_id) {
-				auto it = popups.find(popup_id);
-
-				if (it == popups.end()) {
-					throw std::runtime_error("Popup doest not exist");
-				}
-
-				//Calculate the center of the viewport
-				ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-				ImVec2 viewport_pos = ImGui::GetMainViewport()->Pos;
-				ImVec2 popup_pos = ImVec2(viewport_pos.x + viewport_size.x * 0.5f, viewport_pos.y + viewport_size.y * 0.5f);
-
-				//Center the popup
-				ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-				//Set pop management variables
-				b_popup_showing = true;
-				popups.at(popup_id).b_is_open = true;
-				ImGui::OpenPopup(popup_id.c_str());
-			}
-
-			void IPanel::closePopUp(std::string const& popup_id) {
-				auto it = popups.find(popup_id);
-
-				if (it == popups.end()) {
-					throw std::runtime_error("Popup doest not exist");
-				}
-
-				b_popup_showing = false;
-				popups.at(popup_id).b_is_open = false;
-				ImGui::CloseCurrentPopup();
-			}
-
-			void IPanel::renderPopUps() {
-
-				//Iterate through all popup and render
-				for (auto& popup : popups) {
-					if (popup.second.b_is_open && ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-						popup.second.popUpFunction();
-						ImGui::EndPopup();
-					}
-				}
-			}
-
-			bool IPanel::checkPopUpShowing() {
-				return b_popup_showing;
-			}
-
-			std::function<void()> IPanel::defPopUp(std::string const& id, std::shared_ptr<std::string> msg) {
-				return [this, id, msg]() {
-					//Show error message
-					ImGui::Text("%s", msg->c_str());
-
-					//Add Spacing
-					ImGui::Spacing();
-
-					//OK button to close the popup
-					if (ImGui::Button("OK")) {
-						closePopUp(id);
-					}
-				};
-			}
 		}
 	}
 }
 
+#endif
 #endif

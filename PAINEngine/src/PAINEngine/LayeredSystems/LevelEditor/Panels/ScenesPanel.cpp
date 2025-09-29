@@ -2,6 +2,7 @@
 #include "ScenesPanel.h"
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #include <algorithm>
 
 namespace PAIN {
@@ -18,8 +19,8 @@ namespace PAIN {
                 return (p == std::string::npos) ? s : s.substr(0, p);
             }
 
-            ScenesPanel::ScenesPanel(ScenesHooks hooks)
-                : hooks_(std::move(hooks)) {
+            ScenesPanel::ScenesPanel(std::shared_ptr<CommandManager> cm, ScenesHooks hooks)
+                : IPanel(std::move(cm)), hooks_(std::move(hooks)) {
 
                 name = "Scene Manager";                 // visible window title
                 flags = ImGuiWindowFlags_None;    // normal tool window
@@ -245,4 +246,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

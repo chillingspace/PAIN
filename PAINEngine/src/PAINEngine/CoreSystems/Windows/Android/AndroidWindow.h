@@ -65,7 +65,7 @@ namespace PAIN {
 			virtual ~Android_Window();
 
 			//Update
-			void onUpdate(float dt) override;
+			void onUpdate() override;
 
 			//Event call back
 			void onEvent(Event::Event& e) override;

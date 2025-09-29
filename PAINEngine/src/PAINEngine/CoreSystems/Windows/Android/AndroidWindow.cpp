@@ -31,18 +31,18 @@ namespace PAIN {
         bool Android_Window::initDisplay() {
             m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
             if (m_Display == EGL_NO_DISPLAY) {
-                PN_CORE_ERROR("eglGetDisplay failed");
+                LOGE("eglGetDisplay failed");
                 return false;
             }
 
             EGLint major, minor;
             if (!eglInitialize(m_Display, &major, &minor)) {
-                PN_CORE_ERROR("eglInitialize failed");
+                LOGE("eglInitialize failed");
                 return false;
             }
 
             b_displayready = true;
-            PN_CORE_INFO("EGL initialized: %d.%d", major, minor);
+            LOGI("EGL initialized: %d.%d", major, minor);
             return true;
         }
 
@@ -62,7 +62,7 @@ namespace PAIN {
 
             EGLint numConfigs;
             if (!eglChooseConfig(m_Display, attribs, &config, 1, &numConfigs)) {
-                PN_CORE_ERROR("eglChooseConfig failed");
+                LOGE("eglChooseConfig failed");
                 return false;
             }
 
@@ -78,7 +78,7 @@ namespace PAIN {
 
             m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, ctxAttribs);
             if (m_Context == EGL_NO_CONTEXT) {
-                PN_CORE_ERROR("eglCreateContext failed");
+                LOGE("eglCreateContext failed");
                 return false;
             }
 
@@ -91,7 +91,7 @@ namespace PAIN {
             m_Window = m_App->window;
 
             if (!m_Window) {
-                PN_CORE_ERROR("Cannot initialize Android_Window without native window!");
+                LOGE("Cannot initialize Android_Window without native window!");
                 return false;
             }
 
@@ -102,7 +102,7 @@ namespace PAIN {
 
             m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
             if (m_Surface == EGL_NO_SURFACE) {
-                PN_CORE_ERROR("eglCreateWindowSurface failed");
+                LOGE("eglCreateWindowSurface failed");
                 return false;
             }
 
@@ -111,7 +111,7 @@ namespace PAIN {
 
         bool Android_Window::makeCurrent() {
             if (!eglMakeCurrent(m_Display, m_Surface, m_Surface, m_Context)) {
-                PN_CORE_ERROR("eglMakeCurrent failed");
+                LOGE("eglMakeCurrent failed");
                 return false;
             }
 
@@ -166,20 +166,20 @@ namespace PAIN {
 
             //Setup windows
             if (!b_displayready) {
-                if (!initDisplay()) PN_CORE_ERROR("DIPSLAY ERROR");
+                if (!initDisplay()) LOGE("DIPSLAY ERROR");
             }
             if (!b_initialized) { 
-                if (!setConfig()) PN_CORE_ERROR("CONFIG ERROR");
+                if (!setConfig()) LOGE("CONFIG ERROR");
             }
             if (!b_contextready) {
-                if (!createContext()) PN_CORE_ERROR("CONTEXT ERROR");
+                if (!createContext()) LOGE("CONTEXT ERROR");
             }
 
             //Setup surface
             if (!b_surfaceready) {
-                if (!createSurface()) PN_CORE_ERROR("SURFACE ERROR");
-                if (!makeCurrent()) PN_CORE_ERROR("CONTEXT ERROR");
-                if (!querySurfaceDimensions()) PN_CORE_ERROR("QUERY ERROR");
+                if (!createSurface()) LOGE("SURFACE ERROR");
+                if (!makeCurrent()) LOGE("CONTEXT ERROR");
+                if (!querySurfaceDimensions()) LOGE("QUERY ERROR");
 
                 // Set viewport
                 glViewport(0, 0, frame_buffer.x, frame_buffer.y);
@@ -207,7 +207,7 @@ namespace PAIN {
             config = nullptr;
             m_Surface = EGL_NO_SURFACE;
             m_Context = EGL_NO_CONTEXT;
-            PN_CORE_INFO("Android Window shut down");
+            LOGI("Android Window shut down");
         }
 
         int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)
@@ -325,7 +325,7 @@ namespace PAIN {
             }
         }
 
-        void Android_Window::onUpdate(float dt) {
+        void Android_Window::onUpdate() {
 
         }
 

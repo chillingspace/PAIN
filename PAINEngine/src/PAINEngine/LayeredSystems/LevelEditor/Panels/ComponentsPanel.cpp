@@ -2,6 +2,7 @@
 #include "ComponentsPanel.h"
 
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #include <algorithm>
 
 namespace PAIN {
@@ -18,8 +19,8 @@ static std::vector<std::string> kSeedAvailable = {
     "Script"
 };
 
-ComponentsPanel::ComponentsPanel(ComponentsHooks hooks)
-    : hooks_(std::move(hooks)) {
+ComponentsPanel::ComponentsPanel(std::shared_ptr<CommandManager> cm, ComponentsHooks hooks)
+    : IPanel(std::move(cm)), hooks_(std::move(hooks)) {
 
     name  = "Components";
     flags = ImGuiWindowFlags_None;
@@ -192,4 +193,5 @@ void ComponentsPanel::onUpdate() {
 } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

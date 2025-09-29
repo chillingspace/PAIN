@@ -27,7 +27,7 @@ namespace PAIN {
 			systems.push_back(system);
 		}
 
-		void Controller::onUpdate(float dt) {
+		void Controller::onUpdate() {
 			//Iterate through all systems
 			for (auto& system : systems) {
 				system->onUpdate();

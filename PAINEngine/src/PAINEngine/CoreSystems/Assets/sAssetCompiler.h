@@ -10,7 +10,6 @@
 
 #pragma once
 
-#ifdef PN_PLATFORM_WINDOWS
 #ifndef S_ASSET_COMPILER_H
 #define S_ASSET_COMPILER_H
 
@@ -22,101 +21,61 @@
 //#endif
 
 namespace PAIN {
-	namespace Compiler {
+	namespace ASSET_COMPILER {
 
 		enum class ASSET_TYPE {
-			Texture,
-			Audio,
-			Shader,
-			None
+			TEXTURE,
+			AUDIO,
+			SHADER,
+
 		};
 
-		class IAssetCompiler{
+		class IAssetCompiler {
 		public:
 			virtual ~IAssetCompiler() = default;
-			virtual void compile(const std::string& desc_path) = 0;
-
-			static json readDescFile(const std::string& input_path)
-			{
-
-				// Read descriptor JSON
-				std::ifstream input_file(input_path);
-				if (!input_file.is_open()) {
-					PN_CORE_WARN("Cannot open descriptor: {}", input_path);
-					return json{};
-				}
-
-				json json_file;
-				try {
-					input_file >> json_file;
-				}
-				catch (const nlohmann::json::exception& e) {
-					PN_CORE_WARN("Failed to parse JSON: {}", e.what());
-					return json{};
-				}
-
-				return json_file;
-			}
+			virtual void compile(const std::string& input_path, const std::string& output_path) = 0;
 		};
 
 		class TextureCompiler : public IAssetCompiler {
 		public:
-			void compile(const std::string& desc_path) override;
+			void compile(const std::string& input_path, const std::string& output_path) override;
 		};
 
 		class ShaderCompiler : public IAssetCompiler {
 		public:
-			void compile(const std::string& desc_path) override;
+			void compile(const std::string& input_path, const std::string& output_path) override;
 		};
 
 		class AudioCompiler : public IAssetCompiler {
 		public:
-			void compile(const std::string& desc_path) override;
+			void compile(const std::string& input_path, const std::string& output_path) override;
 		};
 
 		class Service : public AppSystem {
 		public:
-			~Service() = default;
+			Service() = default;
 
-			void scanAssetDirectory(std::string const& virtual_path, bool b_diretory_tree);
+			void compileAsset(ASSET_TYPE type, const std::string& input_path, const std::string& output_path);
 
-			void compileAsset(ASSET_TYPE type, const std::string& desc_file_path);
-
-			// Helper function
-			std::string getIDFromPath(std::string const& path);
-			std::string typeToString(ASSET_TYPE type) const;
-			ASSET_TYPE getAssetType(std::filesystem::path const& path) const;
-
-			void processAssetFile(std::filesystem::path const& file_path);
-			void addValidExtensions(std::string const& ext);
-
-			//Thread safe insertion for file event queue
-			void pushFileEvent(std::function<void()> callback);
 
 			void onAttach() override;
-			void onUpdate(float dt) override;
+			void onUpdate() override;
 			void onDetach() override;
 
 			void onEvent(Event::Event& e) override;
 
-#define PN_PATH_SERVICE  services->get<Path::Service>()
-
 		private:
 			std::unordered_map<ASSET_TYPE, std::unique_ptr<IAssetCompiler>> compilers;
+			std::string asset_path;
 
-			//List of valid extension
-			std::set<std::string> valid_extensions;
-
-			//File Watching Queue
-			std::queue<std::function<void()>> file_event_queue;
-
-			//Mutex for thread safety
-			std::mutex file_event_mutex;
+			// Pointers to the compilers
+			std::unique_ptr<TextureCompiler> texture_compiler;
+			std::unique_ptr<ShaderCompiler> shader_compiler;
+			//std::unique_ptr<AudioCompiler> audio_compiler;
 		};
 
 	}
 }
 
 
-#endif
 #endif

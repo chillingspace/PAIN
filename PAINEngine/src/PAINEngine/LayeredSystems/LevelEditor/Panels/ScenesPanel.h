@@ -1,5 +1,6 @@
 #pragma once
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef PAIN_EDITOR_SCENES_PANEL_HPP
 #define PAIN_EDITOR_SCENES_PANEL_HPP
 
@@ -29,7 +30,8 @@ namespace PAIN {
 
             class ScenesPanel : public IPanel {
             public:
-                ScenesPanel(ScenesHooks hooks = {});
+                ScenesPanel(std::shared_ptr<CommandManager> cm,
+                    ScenesHooks hooks = {});
 
                 void nextWindowSettings() override;   
                 void onUpdate() override;             
@@ -74,5 +76,6 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif
 #endif
