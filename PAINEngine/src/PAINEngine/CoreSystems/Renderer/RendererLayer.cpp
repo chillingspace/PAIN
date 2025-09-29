@@ -153,11 +153,11 @@ namespace PAIN {
 				}
 				if (A_KEYDOWN) {
 					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
-					Camera::get().pos += offset;
+					Camera::get().pos -= offset;
 				}
 				if (D_KEYDOWN) {
 					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
-					Camera::get().pos -= offset;
+					Camera::get().pos += offset;
 				}
 				if (SPACE_KEYDOWN) {
 					glm::vec3 offset = Camera::get().up * Camera::get().speed * dt;
@@ -208,8 +208,8 @@ namespace PAIN {
 				// Modify spherical coordinates
 				if (W_KEYDOWN) radius -= light_speed * dt;
 				if (S_KEYDOWN) radius += light_speed * dt;
-				if (A_KEYDOWN) theta -= angle_speed * dt;
-				if (D_KEYDOWN) theta += angle_speed * dt;
+				if (A_KEYDOWN) theta += angle_speed * dt;
+				if (D_KEYDOWN) theta -= angle_speed * dt;
 				if (SPACE_KEYDOWN) phi -= angle_speed * dt;
 				if (LCTRL_KEYDOWN) phi += angle_speed * dt;
 

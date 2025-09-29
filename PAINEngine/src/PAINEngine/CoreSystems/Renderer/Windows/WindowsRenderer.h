@@ -90,7 +90,7 @@ namespace PAIN {
 
 		float sensitivity = 0.1f;
 
-		glm::vec3 pos{ 0.f, 5.f, 7.f };
+		glm::vec3 pos{ 0.f, 2.f, 4.f };
 		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 

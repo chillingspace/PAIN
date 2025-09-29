@@ -27,7 +27,7 @@ namespace PAIN {
 
 	Light light = {
 		{2.f, 3.f, 2.f},	// position
-		{0.5f, 0.5f, 0.5f},					// intensity
+		{0.2f, 0.2f, 0.2f},					// intensity
 		Light::ORBIT_ORIGIN
 	};
 
@@ -55,7 +55,7 @@ namespace PAIN {
 		}
 #ifdef PN_PLATFORM_WINDOWS
 		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
-		#else
+#else
 		sphere_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
 #endif
 
@@ -65,7 +65,7 @@ namespace PAIN {
 		}
 #ifdef PN_PLATFORM_WINDOWS
 		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
-		#else
+#else
 		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
 #endif
 
