@@ -116,6 +116,14 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
+
+#ifdef PN_PLATFORM_ANDROID
+		move_mode = LIGHT;
+		light.move_mode = Light::MOVE_MODES::ORBIT_ORIGIN;
+		A_KEYDOWN = true;
+#endif
+
+
 		switch (move_mode) {
 		case CAMERA:
 			if (Camera::get().move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
@@ -243,7 +251,7 @@ namespace PAIN {
 
 	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
 	{
-		s_SubmissionQueue.push_back({ mesh, model});
+		s_SubmissionQueue.push_back({ mesh, model });
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {
