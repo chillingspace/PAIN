@@ -16,10 +16,9 @@ namespace PAIN {
 		int steps_this_frame = 0;
 	};
 
-	class Services : public Custom::ClassMap {
+	class Services : public Custom::ClassWeakMap {
 	public:
 		Services() = default;
-		~Services() override = default;
 	};
 
 	class AppSystem {
@@ -28,9 +27,6 @@ namespace PAIN {
 	protected:
 		std::shared_ptr<Services> services;
 	public:
-
-		AppSystem() = default;
-		virtual ~AppSystem() = default;
 
 		//Optional virtual functions
 		virtual void onAttach() {}

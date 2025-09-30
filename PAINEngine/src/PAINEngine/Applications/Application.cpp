@@ -86,6 +86,7 @@ namespace PAIN {
 #endif
 
 		//Push other core systems into the stack
+		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Windows only have paths, andriods have to use AASettmanager
@@ -98,7 +99,8 @@ namespace PAIN {
 		#endif
 
 		//Create path service
-		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create()));
+		auto temp = std::shared_ptr<Path::Path>(Path::Path::create());
+		services->set<Path::Path>(temp);
 		services->get<Path::Path>()->logVirtualPaths();
 
 #ifdef PN_PLATFORM_ANDROID
