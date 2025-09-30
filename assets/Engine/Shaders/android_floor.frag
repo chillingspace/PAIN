@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
 
-layout(location=0) in vec3 fFragPos;
+in vec3 fFragPos;
 
 layout(location = 0) out vec3 gPos;
 layout(location = 1) out vec3 gCol;
