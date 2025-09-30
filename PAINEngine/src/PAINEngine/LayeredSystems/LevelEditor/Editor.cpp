@@ -57,13 +57,38 @@ namespace PAIN {
             // Begin IMGUI Frame
             platform->beginFrame();
 
+#ifdef PN_PLATFORM_ANDROID
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
             }
+#else
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+            }
+#endif
+
+            // --- ADD BUTTON HERE ---
+            {
+                ImGui::Begin("##EditorToggleWindow", nullptr,
+                    ImGuiWindowFlags_NoDecoration |
+                    ImGuiWindowFlags_AlwaysAutoResize |
+                    ImGuiWindowFlags_NoMove);
+
+                // place top-left corner
+                ImGui::SetWindowPos(ImVec2(500, 100), ImGuiCond_Always);
+
+                if (ImGui::Button(editor_visible ? "Hide Editor" : "Show Editor")) {
+                    toggleVisible();
+                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+                }
+
+                ImGui::End();
+            }
+            // --- END BUTTON ---
 
             if (editor_visible) {
-
                 // Build docking space
                 buildDockspace();
 
@@ -86,6 +111,7 @@ namespace PAIN {
 
             platform->endFrame();
         }
+
 
 
 

@@ -58,7 +58,7 @@ namespace PAIN {
 
             void buildDockspace();
 
-            bool editor_visible = false;
+            bool editor_visible = true;
         };
     }
 } 
