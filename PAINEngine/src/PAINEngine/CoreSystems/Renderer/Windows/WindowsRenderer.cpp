@@ -275,7 +275,7 @@ namespace PAIN {
 		}
 		s_SubmissionQueue.clear();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -312,6 +312,21 @@ namespace PAIN {
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		{
+			/* this block is for debug tracing. print color texture(buffer) straight to screen */
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			passthrough_shader->Bind();
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, col_texture);
+
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			return;
+		}
 
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
