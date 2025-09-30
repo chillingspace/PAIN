@@ -10,7 +10,7 @@
 
 
 namespace PAIN {
-
+	
 	class RendererLayer : public AppSystem {
 	public:
 		RendererLayer() = default;
@@ -25,14 +25,15 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		ImTextureID getFramebufferTexture() const {
-			return (ImTextureID)(intptr_t)fboTexture;
+			return (ImTextureID)(intptr_t)WindowsRenderer::get().getFinalTexture();
 		}
-		int getFramebufferWidth() const { return fbWidth; }
-		int getFramebufferHeight() const { return fbHeight; }
+		int getFramebufferWidth() const { return winWidth; }
+		int getFramebufferHeight() const { return winHeight; }
 
 
 	private:
-		std::unique_ptr<WindowsRenderer> w_renderer;
+
+		//std::unique_ptr<WindowsRenderer> w_renderer;
 		
 		enum MOVE_MODES {
 			CAMERA,
@@ -53,11 +54,11 @@ namespace PAIN {
 		float xOffset = 0.0f;
 		float yOffset = 0.0f;
 
-		unsigned int fbo = 0;
-		unsigned int fboTexture = 0;
-		unsigned int rbo = 0;
-		int fbWidth = 1280;
-		int fbHeight = 720;
+		//unsigned int fbo = 0;
+		//unsigned int fboTexture = 0;
+		//unsigned int rbo = 0;
+		//int fbWidth = 1280;
+		//int fbHeight = 720;
 
 	};
 

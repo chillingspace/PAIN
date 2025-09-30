@@ -3,10 +3,8 @@ precision highp float;
 
 #define PI 3.14159265359
 
-in vec3 vNormal;
-in vec3 vFragPos;
-
-out vec4 FragColor;
+in vec2 TexCoords;
+layout(location = 0) out vec4 FragColor;
 
 struct Material {
     float rough;
@@ -19,11 +17,17 @@ struct Light {
     vec3 L;         // light intensity
 };
 
-uniform Material material;
 uniform Light light[1];
 uniform mat4 u_M;
 uniform mat4 u_V;
 uniform mat4 u_P;
+
+uniform sampler2D gPos;
+uniform sampler2D gCol;
+uniform sampler2D gNorm;
+uniform sampler2D gMaterial;
+
+Material material;
 
 
 float ggxDistribution(float nDotH) {
@@ -69,12 +73,17 @@ vec3 microfacetModel(vec3 position, vec3 n) {
 }
 
 void main() {
-    vec3 vFragPosViewSpace = (u_V * vec4(vFragPos, 1.0)).xyz;
-    vec3 vNormalViewSpace = mat3(u_V) * normalize(vNormal);
-    
-    vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
-    FragColor = vec4(color, 1.0);
+    vec3 fragPos = texture(gPos, TexCoords).rgb;
+    material.color = texture(gCol, TexCoords).rgb;
+    vec3 normal = texture(gNorm, TexCoords).rgb;
+    vec2 m = texture(gMaterial, TexCoords).rg;
 
-    // vec3 color = microfacetModel(vFragPos, normalize(vNormal));
-    // FragColor = vec4(color, 1.0);
+    material.rough = m.r;
+    material.metal = m.g;
+
+    vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
+    vec3 viewNormal = mat3(u_V) * normalize(normal);
+
+    vec3 color = microfacetModel(viewFragPos, viewNormal);
+    FragColor = vec4(color, 1.0);
 }
