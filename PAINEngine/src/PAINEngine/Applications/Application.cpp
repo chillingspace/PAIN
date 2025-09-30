@@ -31,7 +31,7 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->onDetach();
 		}
 		layer_stack.clear();
 
@@ -39,7 +39,7 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->onDetach();
 		}
 		core_stack.clear();
 	}
@@ -48,16 +48,16 @@ namespace PAIN {
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
 		core_system->services = services;
 		core_system->onAttach();
-		core_stack.push_back(core_system);
 		services->set<T>(core_system);
+		core_stack.push_back(services->get<T>());
 	}
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
 		layer_system->services = services;
 		layer_system->onAttach();
-		layer_stack.push_back(layer_system);
 		services->set<T>(layer_system);
+		layer_stack.push_back(services->get<T>());
 	}
 
 	void Application::Init(void* app) {
@@ -99,8 +99,7 @@ namespace PAIN {
 		#endif
 
 		//Create path service
-		auto temp = std::shared_ptr<Path::Path>(Path::Path::create());
-		services->set<Path::Path>(temp);
+		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create()));
 		services->get<Path::Path>()->logVirtualPaths();
 
 #ifdef PN_PLATFORM_ANDROID
@@ -153,10 +152,10 @@ namespace PAIN {
 			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
 				//Update all core systems
-				for (auto& core : core_stack) core->onFixedUpdate(timing);
+				for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
 
 				//Update all layered systems
-				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+				for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
 
 				accumulator -= timing.fixed_dt;
 				++steps;
@@ -167,10 +166,10 @@ namespace PAIN {
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
 			//Update all core systems
-			for (auto& core : core_stack) core->onUpdate(timing);
+			for (auto& core : core_stack) core.lock()->onUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) layer->onUpdate(timing);
+			for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
@@ -189,7 +188,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -201,7 +200,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -215,7 +214,7 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -227,7 +226,7 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}

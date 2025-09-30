@@ -16,7 +16,7 @@ namespace PAIN {
 		int steps_this_frame = 0;
 	};
 
-	class Services : public Custom::ClassWeakMap {
+	class Services : public Custom::ClassMap {
 	public:
 		Services() = default;
 	};
