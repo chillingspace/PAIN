@@ -187,22 +187,31 @@ namespace PAIN {
             // stop all first
             stopAll();
 
-            // release sounds
-            for (auto& kv : impl_->sounds)
-                if (kv.second.sound) kv.second.sound->release();
-            impl_->sounds.clear();
+            //// Step 2: Release sounds BEFORE releasing system
+            //for (auto& kv : impl_->sounds) {
+            //    if (kv.second.sound) {
+            //        kv.second.sound->release();
+            //        kv.second.sound = nullptr;  // Prevent double-release
+            //    }
+            //}
+            //impl_->sounds.clear();
 
-            // release groups
-            for (auto& kv : impl_->groups)
-                if (kv.second.cg) kv.second.cg->release();
-            impl_->groups.clear();
+            //// Step 3: Release channel groups BEFORE releasing system  
+            //for (auto& kv : impl_->groups) {
+            //    if (kv.second.cg) {
+            //        kv.second.cg->release();
+            //        kv.second.cg = nullptr;  // Prevent double-release
+            //    }
+            //}
+            //impl_->groups.clear();
 
-            if (impl_->sys) {
-                impl_->sys->close();
-                impl_->sys->release();
-                impl_->sys = nullptr;
-            }
-            impl_->initialized = false;
+            ////Step 4: Finally release system (after everything else)
+            //if (impl_->sys) {
+            //    impl_->sys->close();
+            //    impl_->sys->release();
+            //    impl_->sys = nullptr;
+            //}
+            //impl_->initialized = false;
 
 #ifdef PN_PLATFORM_ANDROID
             //Detach JNI for android

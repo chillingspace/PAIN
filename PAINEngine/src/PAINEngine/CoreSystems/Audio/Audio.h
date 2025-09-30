@@ -30,7 +30,7 @@ namespace PAIN {
         private:
 
         public:
-            virtual ~Audio() = default;
+            virtual ~Audio() override = default;
 
             // lifetime
             virtual AudioResult init() = 0;
