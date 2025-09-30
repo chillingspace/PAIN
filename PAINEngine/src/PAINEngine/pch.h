@@ -49,9 +49,16 @@
 #include "GLFW/glfw3.h"
 #endif
 
+ /*****************************************************************//**
+ * Asset Parser includes
+ *********************************************************************/
+#ifdef PN_PLATFORM_WINDOWS
+#include "gli/gli.hpp"
+#endif
+
 // Math Lib
-#include "glm.hpp"
-#include "gtc/quaternion.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 //Memory
 #define _CRTDBG_MAP_ALLOC
@@ -64,7 +71,7 @@
 #endif
 
  /*****************************************************************//**
- * Windows Application
+ * Filewatcher
  *********************************************************************/
 #ifdef PN_PLATFORM_WINDOWS
 #include "FileWatch.hpp"
