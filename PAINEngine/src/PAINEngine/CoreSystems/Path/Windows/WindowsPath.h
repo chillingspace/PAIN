@@ -40,9 +40,6 @@ namespace PAIN {
 			std::vector<std::string> listDirectories(const std::string& virtualPath, const std::string& filter = "") const override;
 			bool pathExists(const std::string& virtualPath) const override;
 			bool createDirectory(const std::string& virtualPath) const override;
-			std::string getAlias(const std::string& virtualPath) const override;
-			void logVirtualPaths() const override;
-
 		};
 
 	}

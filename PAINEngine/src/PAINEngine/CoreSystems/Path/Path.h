@@ -15,7 +15,7 @@ namespace PAIN {
 
 			//Parsing virtual functions
 			std::pair<std::string, std::string> parseVirtualPath(const std::string& virtualPath) const {
-				auto separatorPos = virtualPath.find("://");
+				auto separatorPos = virtualPath.find(getVirtualSymbol());
 				if (separatorPos == std::string::npos) {
 					throw std::runtime_error("Invalid virtual path format: " + virtualPath);
 				}
@@ -39,6 +39,12 @@ namespace PAIN {
 			Path() = default;
 			virtual ~Path() = default;
 
+			std::string getVirtualSymbol() const { return "://"; }
+
+			std::string aliasCombineRelative(std::string const& alias, std::string const& relative) const {
+				return alias + getVirtualSymbol() + relative;
+			}
+
 			virtual void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) = 0;
 			virtual void updateVirtualPath(const std::string& alias, const std::string& path) = 0;
 			virtual std::string resolvePath(const std::string& virtualPath) const = 0;
@@ -46,14 +52,24 @@ namespace PAIN {
 			virtual std::vector<std::string> listDirectories(const std::string& virtualPath, const std::string& filter = "") const = 0;
 			virtual bool pathExists(const std::string& virtualPath) const = 0;
 			virtual bool createDirectory(const std::string& virtualPath) const = 0;
-			virtual std::string getAlias(const std::string& virtualPath) const = 0;
-			virtual void logVirtualPaths() const = 0;
+
+			std::string getAlias(const std::string& virtualPath) const {
+				auto [alias, relativePath] = parseVirtualPath(virtualPath);
+				return alias;
+			}
+
+			void logVirtualPaths() const {
+				PN_CORE_INFO("=== Windows Virtual Paths ===");
+				for (const auto& [alias, path] : virtual_paths) {
+					PN_CORE_INFO("{} -> {}", alias, path);
+				}
+			}
 
 			//Gettors
 			std::unordered_map<std::string, std::string> getAllVirtualPaths() const { return virtual_paths; }
 
 			//Create path service
-			static Path* create();
+			static Path* create(void* app);
 		};
 
 	}

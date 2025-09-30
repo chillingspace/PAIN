@@ -17,7 +17,7 @@ namespace PAIN {
         RendererLayer() = default;
         ~RendererLayer() override = default;
 
-        void onDetach() override { w_renderer = nullptr; }
+        void onDetach() override { renderer = nullptr; }
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
@@ -30,7 +30,7 @@ namespace PAIN {
         #ifdef PN_PLATFORM_ANDROID
             std::unique_ptr<AndroidRenderer> renderer;
         #else
-        std::unique_ptr<WindowsRenderer> w_renderer;
+        std::unique_ptr<WindowsRenderer> renderer;
         #endif
 
     };

@@ -11,7 +11,7 @@ namespace PAIN {
 	namespace Path {
 
 		//Create path service
-		Path* Path::create() {
+		Path* Path::create(void* app) {
 			return new WindowsPath();
 		}
 
@@ -90,14 +90,14 @@ namespace PAIN {
                     std::filesystem::create_directories(path);
                 }
                 else {
-                    PN_CORE_WARN("Path does not exist. Invalid registering of path.");
+                    PN_CORE_WARN("Path: {} does not exist. Invalid registering of path.", path);
                     return;
                 }
             }
 
             //check if path actually exists
             if (virtual_paths.find(alias) != virtual_paths.end()) {
-                PN_CORE_WARN("Alias already exists. Invalid registering of path.");
+                PN_CORE_WARN("Alias: {} already exists. Invalid registering of path.", alias);
                 return;
             }
 
@@ -109,14 +109,14 @@ namespace PAIN {
         void WindowsPath::updateVirtualPath(const std::string& alias, const std::string& path) {
             //check if path actually exists
             if (!std::filesystem::exists(path)) {
-                PN_CORE_WARN("Path does not exist. Invalid updating of path.");
+                PN_CORE_WARN("Path: {} does not exist. Invalid registering of path.", path);
                 return;
             }
 
             //check if path actually exists
             auto it = virtual_paths.find(alias);
             if (it == virtual_paths.end()) {
-                PN_CORE_WARN("Alias does not exists. Invalid updating of path.");
+                PN_CORE_WARN("Alias: {} does not exists. Invalid registering of path.", alias);
                 return;
             }
 
@@ -205,18 +205,6 @@ namespace PAIN {
             }
             catch (const std::exception&) {
                 return false;
-            }
-        }
-
-        std::string WindowsPath::getAlias(const std::string& virtualPath) const {
-            auto [alias, relativePath] = parseVirtualPath(virtualPath);
-            return alias;
-        }
-
-        void WindowsPath::logVirtualPaths() const {
-            PN_CORE_INFO("=== Windows Virtual Paths ===");
-            for (const auto& [alias, path] : virtual_paths) {
-                PN_CORE_INFO("{} -> {}", alias, path);
             }
         }
 	}

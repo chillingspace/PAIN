@@ -7,30 +7,20 @@ namespace PAIN {
 		
 	#ifdef PN_PLATFORM_ANDROID
 		renderer = std::make_unique<AndroidRenderer>();
+	#else
+		renderer = std::make_unique<WindowsRenderer>();
+	#endif
+
 		if (renderer) {
 			renderer->Init();
 		}
-	#else
-		w_renderer = std::make_unique<WindowsRenderer>();
-		if (w_renderer) {
-			w_renderer->Init();
-		}
-	#endif
 
 	}
 	void RendererLayer::onUpdate(AppTiming timing)
 	{
-	#ifdef PN_PLATFORM_ANDROID
-			if (renderer) {
-				renderer->Render();
-			}
-	#else
-		if (w_renderer) {
-			w_renderer->Render();
+		if (renderer) {
+			renderer->Render();
 		}
-	#endif
-
-
 	}
 	void RendererLayer::onEvent(Event::Event& e)
 	{

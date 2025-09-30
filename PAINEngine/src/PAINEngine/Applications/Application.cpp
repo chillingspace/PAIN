@@ -72,20 +72,19 @@ namespace PAIN {
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
-		// Create and add the AudioManager to the core systems
+		//Create path service
+		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
+		services->get<Path::Path>()->logVirtualPaths();
+
+		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
 		//Audio testing.
-#ifdef PN_PLATFORM_ANDROID
-
-		//Android specific paths, will need to abstract this out
-		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
-#else
-		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("assets/audio/Music/Boss_Music.wav");
-#endif
+		auto asset_path = services->get<Path::Path>()->resolvePath("assets://audio/Music/Boss_Music.wav");
+		PN_CORE_INFO(asset_path);
+		app_audio->loadSound(asset_path, true, false, false);
+		app_audio->play(asset_path);
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>());
@@ -98,10 +97,6 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Loader::Service>());
 		addCoreSystem(std::make_shared<Compiler::Service>());
 		#endif
-
-		//Create path service
-		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create()));
-		services->get<Path::Path>()->logVirtualPaths();
 
 #ifdef PN_PLATFORM_ANDROID
 		auto renderer = std::make_shared<RendererLayer>();

@@ -270,9 +270,6 @@ namespace PAIN {
 
             case APP_CMD_DESTROY:
 
-                //Shutdown window
-                e_window->shutdown();
-
                 //Signal app to terminate as well
                 e_app->terminate();
                 break;
