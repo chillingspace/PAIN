@@ -20,6 +20,8 @@ namespace PAIN {
 				// Provide texture from renderer
 				void setRenderTexture(ImTextureID texID, int width, int height);
 
+				ImVec2 getViewportSize();
+
 			private:
 				ImTextureID renderTexture;
 				int texWidth = 0;
