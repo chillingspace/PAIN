@@ -64,6 +64,14 @@ namespace PAIN {
 		void SetWindow(GLFWwindow* window);
 		GLFWwindow* GetWindow() const { return window; };*/
 
+		unsigned int getFinalFbo() const {
+			return final_fbo;
+		}
+
+		unsigned int getFinalTexture() const {
+			return final_texture;
+		}
+
 	private:
 		unsigned int vao = 0;
 		unsigned int vbo = 0;
