@@ -423,6 +423,16 @@ namespace PAIN {
 			glDeleteTextures(1, &norm_texture);
 			col_texture = 0;
 		}
+
+		if (material_properties_texture) {
+			glDeleteTextures(1, &material_properties_texture);
+			material_properties_texture = 0;
+		}
+
+		if (final_texture) {
+			glDeleteTextures(1, &final_texture);
+			final_texture = 0;
+		}
 	}
 }
 
