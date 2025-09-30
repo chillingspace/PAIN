@@ -79,7 +79,4 @@ void main() {
     
     vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
     FragColor = vec4(color, 1.0);
-
-    // vec3 color = microfacetModel(vFragPos, normalize(vNormal));
-    // FragColor = vec4(color, 1.0);
 }
