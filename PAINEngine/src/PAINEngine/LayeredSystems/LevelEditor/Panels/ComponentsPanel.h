@@ -35,6 +35,7 @@ struct ComponentsHooks {
 class ComponentsPanel : public IPanel {
 public:
     ComponentsPanel(ComponentsHooks hooks = {});
+    ~ComponentsPanel() override = default;
 
     void nextWindowSettings() override;   // default
     void onUpdate() override;             // draw inside panel window

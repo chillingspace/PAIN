@@ -18,6 +18,7 @@
 #include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
+#include "CoreSystems/Path/Path.h"
 
 
 namespace PAIN {
@@ -32,7 +33,8 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->services = nullptr;
+			(*it).lock()->onDetach();
 		}
 		layer_stack.clear();
 
@@ -40,7 +42,8 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->services = nullptr;
+			(*it).lock()->onDetach();
 		}
 		core_stack.clear();
 	}
@@ -52,16 +55,16 @@ namespace PAIN {
 		PN_CORE_INFO("jspoh addcore after services");
 		core_system->onAttach();
 		PN_CORE_INFO("jspoh addcore after onAttach");
-		core_stack.push_back(core_system);
 		services->set<T>(core_system);
+		core_stack.push_back(services->get<T>());
 	}
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
 		layer_system->services = services;
 		layer_system->onAttach();
-		layer_stack.push_back(layer_system);
 		services->set<T>(layer_system);
+		layer_stack.push_back(services->get<T>());
 	}
 
 	void Application::Init(void* app) {
@@ -88,23 +91,21 @@ namespace PAIN {
 #endif
 
 		// Create and add the AudioManager to the core systems
+		//Create path service
+		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
+		services->get<Path::Path>()->logVirtualPaths();
+
+		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
 		//Audio testing.
-#ifdef PN_PLATFORM_ANDROID
+		auto asset_path = services->get<Path::Path>()->resolvePath("assets://audio/Music/Boss_Music.wav");
+		PN_CORE_INFO(asset_path);
+		app_audio->loadSound(asset_path, true, false, false);
+		app_audio->play(asset_path);
 
-		//Android specific paths, will need to abstract this out
-		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
-#else
-		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
-		//app_audio->play("assets/audio/Music/Boss_Music.wav");
-#endif
-
-
-//Push other core systems into the stack
-//addCoreSystem(window_app);
+		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Windows only have paths, andriods have to use AASettmanager
@@ -175,10 +176,10 @@ namespace PAIN {
 
 
 				//Update all core systems
-				for (auto& core : core_stack) core->onFixedUpdate(timing);
+				for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
 
 				//Update all layered systems
-				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+				for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
 
 
 
@@ -193,10 +194,10 @@ namespace PAIN {
 			scene.OnUpdate();
 
 			//Update all core systems
-			for (auto& core : core_stack) core->onUpdate(timing);
+			for (auto& core : core_stack) core.lock()->onUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) layer->onUpdate(timing);
+			for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
@@ -217,7 +218,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -229,7 +230,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -243,7 +244,7 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -255,7 +256,7 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}

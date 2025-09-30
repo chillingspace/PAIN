@@ -48,6 +48,9 @@ namespace PAIN {
         }
 
         void Editor::onDetach() {
+            panels = nullptr;
+            platform = nullptr;
+            command_manager = nullptr;
         }
 
         void Editor::onUpdate(AppTiming timing) {

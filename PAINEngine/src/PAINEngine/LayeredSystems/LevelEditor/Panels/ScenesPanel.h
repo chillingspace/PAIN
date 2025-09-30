@@ -30,6 +30,7 @@ namespace PAIN {
             class ScenesPanel : public IPanel {
             public:
                 ScenesPanel(ScenesHooks hooks = {});
+                ~ScenesPanel() override = default;
 
                 void nextWindowSettings() override;   
                 void onUpdate() override;             
