@@ -88,7 +88,6 @@ namespace PAIN {
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				// Match viewport to window size
 				auto window = services->get<Window::Window>();
-				int winWidth, winHeight;
 #ifdef PN_PLATFORM_WINDOWS
 				glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
 				glViewport(0, 0, winWidth, winHeight);

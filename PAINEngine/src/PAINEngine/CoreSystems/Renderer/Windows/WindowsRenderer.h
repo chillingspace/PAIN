@@ -57,7 +57,14 @@ namespace PAIN {
 
 		unsigned int empty_vao = 0;
 
-		unsigned int fbo = 0;
+		unsigned int ds_fbo = 0;			// deferred shading framebuffer
+		unsigned int pos_texture = 0;
+		unsigned int col_texture = 0;
+		unsigned int norm_texture = 0;
+		unsigned int rbo = 0;				// depth buffer
+
+		unsigned int final_fbo = 0;
+		unsigned int final_texture = 0;		// for imgui
 
 		std::unique_ptr<Shader> m_shader = nullptr;
 		std::unique_ptr<Shader> sphere_shader = nullptr;
