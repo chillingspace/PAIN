@@ -35,16 +35,30 @@ namespace PAIN {
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
+	struct SceneObject {
+		Mesh* mesh;
+		glm::mat4 transform;  // model matrix
+	};
+
 	class WindowsRenderer {
-	public:
+	private:
 		WindowsRenderer();
 		~WindowsRenderer();
+
+	public:
+
+		static WindowsRenderer& get() {
+			static WindowsRenderer instance;
+			return instance;
+		}
 
 		void Init();
 		void Render();
 		void RenderMesh(Mesh* mesh, const glm::mat4& model);
 		void Clear();
 		void Cleanup();
+
+		std::vector<SceneObject> s_SubmissionQueue;
 
 		/*bool InitGLFW();
 		void SetWindow(GLFWwindow* window);
@@ -68,7 +82,7 @@ namespace PAIN {
 		unsigned int final_texture = 0;		// for imgui
 
 		std::unique_ptr<Shader> m_shader = nullptr;
-		std::unique_ptr<Shader> sphere_shader = nullptr;
+		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;

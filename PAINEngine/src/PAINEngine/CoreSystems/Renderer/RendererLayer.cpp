@@ -19,7 +19,7 @@
 
 namespace PAIN {
 
-	std::vector<SceneObject> s_SubmissionQueue;
+	//std::vector<SceneObject> s_SubmissionQueue;
 
 	void RendererLayer::onAttach() {
 
@@ -30,10 +30,14 @@ namespace PAIN {
 		//		}
 		//#else
 		//PN_CORE_INFO("jspoh attach rl1");
-		w_renderer = std::make_unique<WindowsRenderer>();
-		if (w_renderer) {
-			w_renderer->Init();
-		}
+		//w_renderer = std::make_unique<WindowsRenderer>();
+
+		//if (w_renderer) {
+		//	w_renderer->Init();
+		//}
+		
+		WindowsRenderer::get().Init();
+				
 		//PN_CORE_INFO("jspoh attach r2");
 
 		// Create framebuffer for ImGui viewport
@@ -76,7 +80,8 @@ namespace PAIN {
 		//			renderer->Render();
 		//		}
 		//#else
-		if (w_renderer) {
+		//if (w_renderer) 
+		{
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
 
@@ -105,13 +110,15 @@ namespace PAIN {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Render skybox and light
-			w_renderer->Render();
+			//w_renderer->Render();
+			WindowsRenderer::get().Render();
 
 			// Render objects
-			for (auto& obj : s_SubmissionQueue) {
-				w_renderer->RenderMesh(obj.mesh, obj.transform);
-			}
-			s_SubmissionQueue.clear();
+			//for (auto& obj : s_SubmissionQueue) {
+			//	//w_renderer->RenderMesh(obj.mesh, obj.transform);
+			//	WindowsRenderer::get().RenderMesh(obj.mesh, obj.transform);
+			//}
+			//s_SubmissionQueue.clear();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -250,7 +257,7 @@ namespace PAIN {
 
 	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
 	{
-		s_SubmissionQueue.push_back({ mesh, model });
+		WindowsRenderer::get().s_SubmissionQueue.push_back({ mesh, model });
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {

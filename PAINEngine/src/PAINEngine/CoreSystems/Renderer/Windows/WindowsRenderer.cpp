@@ -20,9 +20,9 @@
 namespace PAIN {
 
 	Material material = {
-	0.1f,		// 0.1 -> smooth, 1 -> rough
-	0.3f,
-	{0.5f,0.5f,0.5f}
+		0.1f,		// 0.1 -> smooth, 1 -> rough
+		0.3f,
+		{0.5f,0.5f,0.5f}
 	};
 
 	Light light = {
@@ -120,7 +120,7 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
-		glBindFramebuffer(0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void WindowsRenderer::Init() {
@@ -138,12 +138,12 @@ namespace PAIN {
 			PN_CORE_INFO("Successfully linked shader");
 		}
 #ifdef PN_PLATFORM_WINDOWS
-		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
+		geometry_shader = Shader::LoadShaders("geometry.vert", "geometry.frag");
 #else
-		sphere_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
+		geometry_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
 #endif
 
-		if (!sphere_shader || sphere_shader->GetRendererID() == 0) {
+		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
@@ -183,6 +183,9 @@ namespace PAIN {
 			PN_CORE_ERROR("Unable to find floor_shader");
 			return;
 		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+
 		floor_shader->Bind();
 		floor_shader->SetUniform("u_V", Camera::get().view());
 		floor_shader->SetUniform("u_P", Camera::get().projection());
@@ -190,12 +193,12 @@ namespace PAIN {
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 
-		// render sphere (for light pos)
-		if (!sphere_shader) {
-			PN_CORE_ERROR("Unable to find sphere_shader");
-			return;
-		}
-		sphere_shader->Bind();
+		//// render sphere (for light pos)
+		//if (!geometry_shader) {
+		//	PN_CORE_ERROR("Unable to find geometry_shader");
+		//	return;
+		//}
+		//geometry_shader->Bind();
 
 		// build lightsource model
 		glm::mat4 model = glm::mat4(1.f);
@@ -203,31 +206,42 @@ namespace PAIN {
 		model = glm::scale(model, glm::vec3(0.1f));
 
 		// reuse uniforms
-		sphere_shader->SetUniform("u_M", model);
-		sphere_shader->SetUniform("u_V", Camera::get().view());
-		sphere_shader->SetUniform("u_P", Camera::get().projection());
+		//geometry_shader->SetUniform("u_M", model);
+		//geometry_shader->SetUniform("u_V", Camera::get().view());
+		//geometry_shader->SetUniform("u_P", Camera::get().projection());
 
 		m_mesh->Draw();
+
+		for (auto& obj : s_SubmissionQueue) {
+			RenderMesh(obj.mesh, obj.transform);
+		}
+		s_SubmissionQueue.clear();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
 	{
-		if (!mesh || !m_shader) return;
+		if (!mesh || !geometry_shader) return;
 
-		m_shader->Bind();
+		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
-		m_shader->SetUniform("u_M", model);
-		m_shader->SetUniform("u_V", Camera::get().view());
-		m_shader->SetUniform("u_P", Camera::get().projection());
+		geometry_shader->Bind();
 
-		m_shader->SetUniform("material.rough", material.rough);
-		m_shader->SetUniform("material.metal", material.metal);
-		m_shader->SetUniform("material.color", material.color);
+		geometry_shader->SetUniform("u_M", model);
+		geometry_shader->SetUniform("u_V", Camera::get().view());
+		geometry_shader->SetUniform("u_P", Camera::get().projection());
 
-		m_shader->SetUniform("light[0].position", light.position);
-		m_shader->SetUniform("light[0].L", light.L_intensity);
+		geometry_shader->SetUniform("material.rough", material.rough);
+		geometry_shader->SetUniform("material.metal", material.metal);
+		geometry_shader->SetUniform("material.color", material.color);
+
+		geometry_shader->SetUniform("light[0].position", light.position);
+		geometry_shader->SetUniform("light[0].L", light.L_intensity);
 
 		mesh->Draw();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void WindowsRenderer::Clear() {

@@ -15,12 +15,6 @@
 namespace PAIN {
 
 
-    struct SceneObject {
-		Mesh* mesh;
-		glm::mat4 transform;  // model matrix
-	};
-
-
 
 
 	class RendererLayer : public AppSystem {
@@ -50,7 +44,7 @@ namespace PAIN {
 // #ifdef PN_PLATFORM_ANDROID
 //		std::unique_ptr<AndroidRenderer> renderer;
 //#else
-		std::unique_ptr<WindowsRenderer> w_renderer;
+		//std::unique_ptr<WindowsRenderer> w_renderer;
 		
 
         //static std::vector<SceneObject> s_SubmissionQueue;
