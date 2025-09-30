@@ -177,6 +177,7 @@ namespace PAIN {
 			//Update timing variables
 			timing.steps_this_frame = steps;
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
 			scene.OnUpdate();
 
 			//Update all core systems

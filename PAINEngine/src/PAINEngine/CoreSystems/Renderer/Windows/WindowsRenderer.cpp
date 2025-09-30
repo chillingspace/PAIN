@@ -86,10 +86,7 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		PN_CORE_INFO("Before loading ogre");
-		m_mesh = Mesh::LoadObj("ogre.obj");
-		PN_CORE_INFO("After loading ogre");
-
+		m_mesh = Mesh::LoadObj();
 	}
 
 	void WindowsRenderer::Render() {
@@ -155,12 +152,6 @@ namespace PAIN {
 
 		mesh->Draw();
 	}
-
-	void WindowsRenderer::Clear() {
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
 
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {

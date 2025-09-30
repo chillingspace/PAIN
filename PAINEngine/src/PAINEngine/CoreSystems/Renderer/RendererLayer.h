@@ -32,9 +32,7 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
-
 		static void Submit(Mesh* mesh, const glm::mat4& model);
-
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
@@ -54,9 +52,6 @@ namespace PAIN {
 		
 
         //static std::vector<SceneObject> s_SubmissionQueue;
-
-
-
 
 		enum MOVE_MODES {
 			CAMERA,
