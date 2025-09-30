@@ -1,38 +1,26 @@
 #pragma once
 
 #include "pch.h"
-#include "PAINEngine/Applications/AppSystem.h"
+#include "Scene/Scene.h"
+#include "Applications/AppSystem.h"
 #include "imgui.h"
 
-
-//#ifdef PN_PLATFORM_ANDROID
-//#include "Android/AndroidRenderer.h"
-//#else
 #include "Windows/WindowsRenderer.h"
-//#endif
+
 
 
 namespace PAIN {
-
-
-    struct SceneObject {
-		Mesh* mesh;
-		glm::mat4 transform;  // model matrix
-	};
-
-
-
 
 	class RendererLayer : public AppSystem {
 	public:
 		RendererLayer() = default;
 		~RendererLayer() = default;
 
+		std::shared_ptr<Scene> m_Scene;
+
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
-
-		static void Submit(Mesh* mesh, const glm::mat4& model);
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
@@ -44,15 +32,8 @@ namespace PAIN {
 
 
 	private:
-
-// #ifdef PN_PLATFORM_ANDROID
-//		std::unique_ptr<AndroidRenderer> renderer;
-//#else
 		std::unique_ptr<WindowsRenderer> w_renderer;
 		
-
-        //static std::vector<SceneObject> s_SubmissionQueue;
-
 		enum MOVE_MODES {
 			CAMERA,
 			LIGHT,

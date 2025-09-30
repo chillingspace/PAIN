@@ -265,7 +265,7 @@ namespace PAIN {
 
 	void Application::pushEventQueue(std::shared_ptr<Event::Event> e) {
 		event_queue.push(e);
-	}
+	}	
 
 	void Application::drainEventQueue() {
 

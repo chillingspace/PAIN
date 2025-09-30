@@ -1,40 +1,29 @@
-#include "pch.h"
 #include "RendererLayer.h"
-#include "./CoreSystems/Events/GLFW/KeyEvents.h"
-#include "./CoreSystems/Events/GLFW/MouseEvents.h"
-#include "./CoreSystems/Events/GLFW/WindowEvents.h"
-#include "./CoreSystems/Renderer/Windows/WindowsRenderer.h"
-#include "./Applications/Application.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
+#include "CoreSystems/Events/GLFW/MouseEvents.h"
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
+#include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
+#include "CoreSystems/Renderer/Mesh.h"
+#include "Applications/Application.h"
 
-#include "./CoreSystems/Renderer/Light.h"
-#include "./CoreSystems/Renderer/Material.h"
+
+#include "CoreSystems/Renderer/Light.h"
+#include "CoreSystems/Renderer/Material.h"
 
 //For imgui viewport
-#include "./LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
-#include "./LayeredSystems/LevelEditor/Editor.h"
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
 
-#ifndef PN_PLATFORM_ANDROID
-#include <GLFW/glfw3.h>
-#endif
 
 namespace PAIN {
 
-	std::vector<SceneObject> s_SubmissionQueue;
 
 	void RendererLayer::onAttach() {
 
-		//#ifdef PN_PLATFORM_ANDROID
-		//		renderer = std::make_unique<AndroidRenderer>();
-		//		if (renderer) {
-		//			renderer->Init();
-		//		}
-		//#else
-		//PN_CORE_INFO("jspoh attach rl1");
 		w_renderer = std::make_unique<WindowsRenderer>();
 		if (w_renderer) {
 			w_renderer->Init();
 		}
-		//PN_CORE_INFO("jspoh attach r2");
 
 		// Create framebuffer for ImGui viewport
 		glGenFramebuffers(1, &fbo);
@@ -64,17 +53,23 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//#endif
 
+		//Init scene
+		m_Scene = std::make_shared<Scene>();
+
+		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
+
+
+		if (m_Scene) {
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform1);
+			m_Scene->AddObject(Mesh::LoadObj(), transform2);
+		}
 
 	}
 
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
-		//PN_CORE_INFO("RendererLayer::onUpdate - dt: {}", dt);
 
-		//#ifdef PN_PLATFORM_ANDROID
-		//		if (renderer) {
-		//			renderer->Render();
-		//		}
 		//#else
 		if (w_renderer) {
 			auto editor = services->get<Editor::Editor>();
@@ -107,13 +102,7 @@ namespace PAIN {
 
 			// Render skybox and light
 			w_renderer->Render();
-
-			// Render objects
-			for (auto& obj : s_SubmissionQueue) {
-				w_renderer->RenderMesh(obj.mesh, obj.transform);
-			}
-			s_SubmissionQueue.clear();
-
+			w_renderer->RenderScene(m_Scene);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
 
@@ -247,11 +236,6 @@ namespace PAIN {
 		xOffset = 0.f;
 		yOffset = 0.f;
 		//#endif
-	}
-
-	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
-	{
-		s_SubmissionQueue.push_back({ mesh, model });
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {

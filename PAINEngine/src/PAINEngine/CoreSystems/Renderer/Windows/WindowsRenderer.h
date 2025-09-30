@@ -30,7 +30,8 @@ namespace PAIN {
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
-#include "../../../Applications/AppSystem.h"
+#include "Applications/AppSystem.h"
+#include "Scene/Scene.h"
 
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
@@ -43,6 +44,7 @@ namespace PAIN {
 		void Init();
 		void Render();
 		void RenderMesh(Mesh* mesh, const glm::mat4& model);
+		void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
 		/*bool InitGLFW();

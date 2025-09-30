@@ -143,6 +143,14 @@ namespace PAIN {
 		mesh->Draw();
 	}
 
+	void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
+	{
+		for (auto& obj : scene.get()->GetObjects()) {
+
+			RenderMesh(obj.mesh, obj.transform);
+		}
+	}
+
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {
 			glDeleteVertexArrays(1, &vao);
