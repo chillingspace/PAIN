@@ -226,7 +226,7 @@ namespace PAIN {
 		m_mesh = Mesh::LoadObj();
 	}
 
-	void WindowsRenderer::Render() {
+	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -244,6 +244,15 @@ namespace PAIN {
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
+		}
+
+		// render scene
+		if (scene)
+		{
+			for (auto& obj : scene->GetObjects())
+			{
+				RenderMesh(obj.mesh, obj.transform); // uses geometry_shader
+			}
 		}
 
 		//// render sphere (for light pos)
@@ -267,10 +276,6 @@ namespace PAIN {
 			//m_mesh->Draw();
 		}
 
-		for (auto& obj : s_SubmissionQueue) {
-			RenderMesh(obj.mesh, obj.transform);
-		}
-		s_SubmissionQueue.clear();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
@@ -356,13 +361,14 @@ namespace PAIN {
 		mesh->Draw();
 	}
 
-	void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
-	{
-		for (auto& obj : scene.get()->GetObjects()) {
+	//void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
+	//{
 
-			RenderMesh(obj.mesh, obj.transform);
-		}
-	}
+	//	for (auto& obj : scene.get()->GetObjects()) {
+
+	//		RenderMesh(obj.mesh, obj.transform);
+	//	}
+	//}
 
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {

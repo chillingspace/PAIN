@@ -36,11 +36,6 @@ namespace PAIN {
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
-	struct SceneObject {
-		Mesh* mesh;
-		glm::mat4 transform;  // model matrix
-	};
-
 	class WindowsRenderer {
 	private:
 		WindowsRenderer();
@@ -54,12 +49,10 @@ namespace PAIN {
 		}
 
 		void Init();
-		void Render();
+		void Render(std::shared_ptr<Scene> scene);
 		void RenderMesh(Mesh* mesh, const glm::mat4& model);
-		void RenderScene(std::shared_ptr<Scene> scene);
+		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
-
-		std::vector<SceneObject> s_SubmissionQueue;
 
 		/*bool InitGLFW();
 		void SetWindow(GLFWwindow* window);

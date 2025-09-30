@@ -99,14 +99,7 @@ namespace PAIN {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Render skybox and light
-			WindowsRenderer::get().Render();
-			WindowsRenderer::get().RenderScene(m_Scene);
-			// Render objects
-			//for (auto& obj : s_SubmissionQueue) {
-			//	//w_renderer->RenderMesh(obj.mesh, obj.transform);
-			//	WindowsRenderer::get().RenderMesh(obj.mesh, obj.transform);
-			//}
-			//s_SubmissionQueue.clear();
+			WindowsRenderer::get().Render(m_Scene);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

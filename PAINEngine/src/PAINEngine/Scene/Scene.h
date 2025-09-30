@@ -12,7 +12,6 @@ namespace PAIN {
 		glm::mat4 transform;  // model matrix
 	};
 
-
 	class Scene {
 	public:
 		Scene() = default;
