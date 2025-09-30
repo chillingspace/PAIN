@@ -61,6 +61,7 @@ namespace PAIN {
 		unsigned int pos_texture = 0;
 		unsigned int col_texture = 0;
 		unsigned int norm_texture = 0;
+		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
 		unsigned int rbo = 0;				// depth buffer
 
 		unsigned int final_fbo = 0;
