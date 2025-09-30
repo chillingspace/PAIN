@@ -72,6 +72,7 @@ namespace PAIN {
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
+		void _initDeferredShadingBuffers();
 	};
 }
 

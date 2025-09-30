@@ -39,47 +39,7 @@ namespace PAIN {
 		Cleanup();
 	}
 
-	void WindowsRenderer::Init() {
-#ifdef PN_PLATFORM_WINDOWS
-		m_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
-#else
-		m_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
-#endif
-
-		if (!m_shader || m_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
-#else
-		sphere_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
-#endif
-
-		if (!sphere_shader || sphere_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-		glGenVertexArrays(1, &empty_vao);
-		if (empty_vao == 0) {
-			PN_CORE_ERROR("Failed to create empty VAO");
-			return;
-		}
-
+	void WindowsRenderer::_initDeferredShadingBuffers() {
 		// fbo/texture for deferred shading
 		// !TODO: resize when window resizes
 
@@ -150,6 +110,50 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+	}
+
+	void WindowsRenderer::Init() {
+#ifdef PN_PLATFORM_WINDOWS
+		m_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
+#else
+		m_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
+#endif
+
+		if (!m_shader || m_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+		else {
+			PN_CORE_INFO("Successfully linked shader");
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		sphere_shader = Shader::LoadShaders("sphere.vert", "sphere.frag");
+#else
+		sphere_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
+#endif
+
+		if (!sphere_shader || sphere_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+#else
+		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
+#endif
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
+		_initDeferredShadingBuffers();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
