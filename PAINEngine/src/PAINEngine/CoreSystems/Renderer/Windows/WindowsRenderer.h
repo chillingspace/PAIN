@@ -84,7 +84,7 @@ namespace PAIN {
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
 
-		std::unique_ptr<Shader> m_shader = nullptr;
+		std::unique_ptr<Shader> pbr_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;

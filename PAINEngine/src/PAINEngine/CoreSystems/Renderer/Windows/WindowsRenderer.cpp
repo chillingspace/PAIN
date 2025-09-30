@@ -172,12 +172,12 @@ namespace PAIN {
 
 	void WindowsRenderer::Init() {
 #ifdef PN_PLATFORM_WINDOWS
-		m_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
+		pbr_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
 #else
-		m_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
+		pbr_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
 #endif
 
-		if (!m_shader || m_shader->GetRendererID() == 0) {
+		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
@@ -279,15 +279,40 @@ namespace PAIN {
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
-		
+
+#ifdef JS_DEBUG
 		passthrough_shader->Bind();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, col_texture);
 		passthrough_shader->SetUniform("tex", 0);
+#else
+		pbr_shader->Bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, pos_texture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, col_texture);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, norm_texture);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+		pbr_shader->SetUniform("gPos", 0);
+		pbr_shader->SetUniform("gCol", 1);
+		pbr_shader->SetUniform("gNorm", 2);
+		pbr_shader->SetUniform("gMaterial", 3);
+		pbr_shader->SetUniform("u_V", Camera::get().view());
+		pbr_shader->SetUniform("light[0].position", light.position);
+		pbr_shader->SetUniform("light[0].L", light.L_intensity);
+#endif
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
+
 	}
 
 	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
@@ -337,8 +362,8 @@ namespace PAIN {
 			ebo = 0;
 		}
 
-		if (m_shader) {
-			m_shader.reset();
+		if (pbr_shader) {
+			pbr_shader.reset();
 		}
 
 		if (m_mesh) {
