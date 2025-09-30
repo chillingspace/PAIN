@@ -71,6 +71,9 @@ namespace PAIN {
 
 		unsigned int empty_vao = 0;
 
+		unsigned int passthrough_vao = 0;
+		unsigned int passthrough_vbo = 0;
+
 		unsigned int ds_fbo = 0;			// deferred shading framebuffer
 		unsigned int pos_texture = 0;
 		unsigned int col_texture = 0;
@@ -84,6 +87,7 @@ namespace PAIN {
 		std::unique_ptr<Shader> m_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
+		std::unique_ptr<Shader> passthrough_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 

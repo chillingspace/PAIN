@@ -40,87 +40,134 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::_initDeferredShadingBuffers() {
+		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}", winWidth, winHeight);
+
+		if (winWidth == 0 || winHeight == 0) {
+			PN_CORE_ERROR("Invalid window dimensions: {}x{}", winWidth, winHeight);
+			return;
+		}
+
 		// fbo/texture for deferred shading
 		// !TODO: resize when window resizes
 
-		glGenFramebuffers(1, &ds_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		{
+			glGenFramebuffers(1, &ds_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
-		glGenTextures(1, &pos_texture);
-		if (pos_texture == 0) {
-			PN_CORE_ERROR("Failed to create position texture");
-			return;
+			glGenTextures(1, &pos_texture);
+			if (pos_texture == 0) {
+				PN_CORE_ERROR("Failed to create position texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, pos_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pos_texture, 0);
+
+			glGenTextures(1, &col_texture);
+			if (col_texture == 0) {
+				PN_CORE_ERROR("Failed to create color texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, col_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, col_texture, 0);
+
+			glGenTextures(1, &norm_texture);
+			if (norm_texture == 0) {
+				PN_CORE_ERROR("Failed to create normal texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, norm_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, norm_texture, 0);
+
+			glGenTextures(1, &material_properties_texture);
+			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, material_properties_texture, 0);
+
+			unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+			glDrawBuffers(4, attachments);
+
+			glGenRenderbuffers(1, &rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("G-buffer FBO is incomplete! Status: 0x{:x}", status);
+				return;
+			}
+			PN_CORE_INFO("G-buffer FBO is complete");
 		}
-		glBindTexture(GL_TEXTURE_2D, pos_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pos_texture, 0);
-
-		glGenTextures(1, &col_texture);
-		if (col_texture == 0) {
-			PN_CORE_ERROR("Failed to create color texture");
-			return;
-		}
-		glBindTexture(GL_TEXTURE_2D, col_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, col_texture, 0);
-
-		glGenTextures(1, &norm_texture);
-		if (norm_texture == 0) {
-			PN_CORE_ERROR("Failed to create normal texture");
-			return;
-		}
-		glBindTexture(GL_TEXTURE_2D, norm_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, norm_texture, 0);
-
-		glGenTextures(1, &material_properties_texture);
-		glBindTexture(GL_TEXTURE_2D, material_properties_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, material_properties_texture, 0);
-
-		unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-		glDrawBuffers(4, attachments);
-
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 		// final fbo/texture(final output, for rendering)
 
-		glGenFramebuffers(1, &final_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		{
+			glGenFramebuffers(1, &final_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
-		glGenTextures(1, &final_texture);
-		if (final_texture == 0) {
-			PN_CORE_ERROR("Failed to create final texture");
-			return;
+			glGenTextures(1, &final_texture);
+			if (final_texture == 0) {
+				PN_CORE_ERROR("Failed to create final texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-		glBindTexture(GL_TEXTURE_2D, final_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// vao/vbo for final passthrough texture
+
+		{
+			static constexpr float quadVertices[] = {
+				// positions    // texCoords
+				-1.0f,  1.0f,   0.0f, 1.0f,
+				-1.0f, -1.0f,   0.0f, 0.0f,
+				 1.0f, -1.0f,   1.0f, 0.0f,
+				-1.0f,  1.0f,   0.0f, 1.0f,
+				 1.0f, -1.0f,   1.0f, 0.0f,
+				 1.0f,  1.0f,   1.0f, 1.0f
+			};
+
+			glGenVertexArrays(1, &passthrough_vao);
+			glGenBuffers(1, &passthrough_vbo);
+
+			glBindVertexArray(passthrough_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, passthrough_vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+			glBindVertexArray(0);
+		}
 	}
 
 	void WindowsRenderer::Init() {
@@ -158,6 +205,12 @@ namespace PAIN {
 			return;
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
+		passthrough_shader = Shader::LoadShaders("texture.vert", "texture.frag");
+#else
+		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
+#endif
+
 		glGenVertexArrays(1, &empty_vao);
 		if (empty_vao == 0) {
 			PN_CORE_ERROR("Failed to create empty VAO");
@@ -177,21 +230,24 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Render() {
+		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// draw floor
-		if (!floor_shader) {
-			PN_CORE_ERROR("Unable to find floor_shader");
-			return;
+		{
+			if (!floor_shader) {
+				PN_CORE_ERROR("Unable to find floor_shader");
+				return;
+			}
+
+
+			floor_shader->Bind();
+			floor_shader->SetUniform("u_V", Camera::get().view());
+			floor_shader->SetUniform("u_P", Camera::get().projection());
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
 		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
-
-		floor_shader->Bind();
-		floor_shader->SetUniform("u_V", Camera::get().view());
-		floor_shader->SetUniform("u_P", Camera::get().projection());
-		glBindVertexArray(empty_vao);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
 
 		//// render sphere (for light pos)
 		//if (!geometry_shader) {
@@ -201,16 +257,18 @@ namespace PAIN {
 		//geometry_shader->Bind();
 
 		// build lightsource model
-		glm::mat4 model = glm::mat4(1.f);
-		model = glm::translate(model, light.position);
-		model = glm::scale(model, glm::vec3(0.1f));
+		{
+			glm::mat4 model = glm::mat4(1.f);
+			model = glm::translate(model, light.position);
+			model = glm::scale(model, glm::vec3(0.1f));
 
-		// reuse uniforms
-		//geometry_shader->SetUniform("u_M", model);
-		//geometry_shader->SetUniform("u_V", Camera::get().view());
-		//geometry_shader->SetUniform("u_P", Camera::get().projection());
+			// reuse uniforms
+			//geometry_shader->SetUniform("u_M", model);
+			//geometry_shader->SetUniform("u_V", Camera::get().view());
+			//geometry_shader->SetUniform("u_P", Camera::get().projection());
 
-		m_mesh->Draw();
+			//m_mesh->Draw();
+		}
 
 		for (auto& obj : s_SubmissionQueue) {
 			RenderMesh(obj.mesh, obj.transform);
@@ -218,13 +276,23 @@ namespace PAIN {
 		s_SubmissionQueue.clear();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		passthrough_shader->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, col_texture);
+		passthrough_shader->SetUniform("tex", 0);
+
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
 	}
 
 	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
 	{
 		if (!mesh || !geometry_shader) return;
-
-		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
 		geometry_shader->Bind();
 
@@ -240,8 +308,6 @@ namespace PAIN {
 		geometry_shader->SetUniform("light[0].L", light.L_intensity);
 
 		mesh->Draw();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void WindowsRenderer::Clear() {
