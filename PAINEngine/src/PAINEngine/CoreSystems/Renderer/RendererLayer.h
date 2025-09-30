@@ -53,7 +53,7 @@ namespace PAIN {
 		std::unique_ptr<WindowsRenderer> w_renderer;
 		
 
-        static std::vector<SceneObject> s_SubmissionQueue;
+        //static std::vector<SceneObject> s_SubmissionQueue;
 
 
 

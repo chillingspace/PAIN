@@ -161,7 +161,6 @@ namespace PAIN {
 			int steps = 0;
 			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
-				scene.OnUpdate();
 
 				//Update all core systems
 				for (auto& core : core_stack) core->onFixedUpdate(timing);
@@ -178,6 +177,7 @@ namespace PAIN {
 			//Update timing variables
 			timing.steps_this_frame = steps;
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+			scene.OnUpdate();
 
 			//Update all core systems
 			for (auto& core : core_stack) core->onUpdate(timing);

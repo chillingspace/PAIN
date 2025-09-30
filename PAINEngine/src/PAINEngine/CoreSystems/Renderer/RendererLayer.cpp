@@ -19,7 +19,7 @@
 
 namespace PAIN {
 
-	std::vector<SceneObject> RendererLayer::s_SubmissionQueue;
+	std::vector<SceneObject> s_SubmissionQueue;
 
 	void RendererLayer::onAttach() {
 
@@ -112,7 +112,7 @@ namespace PAIN {
 			for (auto& obj : s_SubmissionQueue) {
 				w_renderer->RenderMesh(obj.mesh, obj.transform);
 			}
-
+			s_SubmissionQueue.clear();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -243,9 +243,7 @@ namespace PAIN {
 
 	void RendererLayer::Submit(Mesh* mesh, const glm::mat4& model)
 	{
-
 		s_SubmissionQueue.push_back({ mesh, model});
-
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {
