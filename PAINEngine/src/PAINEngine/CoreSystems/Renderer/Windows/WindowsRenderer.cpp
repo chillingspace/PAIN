@@ -130,7 +130,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, final_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -275,7 +275,7 @@ namespace PAIN {
 		}
 		s_SubmissionQueue.clear();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -313,20 +313,20 @@ namespace PAIN {
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		{
-			/* this block is for debug tracing. print color texture(buffer) straight to screen */
+		//{
+		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			passthrough_shader->Bind();
+		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//	passthrough_shader->Bind();
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, col_texture);
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_2D, col_texture);
 
-			glBindVertexArray(passthrough_vao);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+		//	glBindVertexArray(passthrough_vao);
+		//	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-			return;
-		}
+		//	return;
+		//}
 
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
