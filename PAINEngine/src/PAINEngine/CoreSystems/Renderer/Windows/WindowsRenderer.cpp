@@ -123,16 +123,6 @@ namespace PAIN {
 		sphere_shader->SetUniform("u_V", Camera::get().view());
 		sphere_shader->SetUniform("u_P", Camera::get().projection());
 
-		sphere_shader->SetUniform("material.rough", material.rough);
-		sphere_shader->SetUniform("material.metal", material.metal);
-		sphere_shader->SetUniform("material.color", material.color);
-
-		sphere_shader->SetUniform("light[0].position", light.position);
-		sphere_shader->SetUniform("light[0].L", light.L_intensity);
-
-		sphere_shader->SetUniform("u_SphereCenter", light.position);
-		sphere_shader->SetUniform("u_SphereRadius", 0.1f);
-
 		m_mesh->Draw();
 	}
 
