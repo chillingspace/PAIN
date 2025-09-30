@@ -130,7 +130,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, final_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -187,7 +187,7 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
 		geometry_shader = Shader::LoadShaders("geometry.vert", "geometry.frag");
 #else
-		geometry_shader = Shader::LoadShaders("android_sphere.vert", "android_sphere.frag");
+		geometry_shader = Shader::LoadShaders("android_geometry.vert", "android_geometry.frag");
 #endif
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
@@ -275,17 +275,18 @@ namespace PAIN {
 		}
 		s_SubmissionQueue.clear();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-#ifdef JS_DEBUG
-		passthrough_shader->Bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, col_texture);
-		passthrough_shader->SetUniform("tex", 0);
-#else
+//#ifdef JS_DEBUG
+//		passthrough_shader->Bind();
+//		glActiveTexture(GL_TEXTURE0);
+//		glBindTexture(GL_TEXTURE_2D, col_texture);
+//		passthrough_shader->SetUniform("tex", 0);
+//#else
+		// render to final framebuffer for post processing/imgui/display
 		pbr_shader->Bind();
 
 		glActiveTexture(GL_TEXTURE0);
@@ -307,12 +308,20 @@ namespace PAIN {
 		pbr_shader->SetUniform("u_V", Camera::get().view());
 		pbr_shader->SetUniform("light[0].position", light.position);
 		pbr_shader->SetUniform("light[0].L", light.L_intensity);
-#endif
+//#endif
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
 
+		// render to actual screen
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		passthrough_shader->Bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, final_texture);
+
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
 	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)

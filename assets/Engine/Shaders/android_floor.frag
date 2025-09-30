@@ -1,8 +1,13 @@
 #version 300 es
 precision highp float;
 
-in vec3 fFragPos;
-out vec4 outColor;
+layout(location=0) in vec3 fFragPos;
+
+layout(location = 0) out vec3 gPos;
+layout(location = 1) out vec3 gCol;
+layout(location = 2) out vec3 gNorm;
+layout(location = 3) out vec2 gMaterial;
+
 
 void main() {
     const float tile_size = 1.0;
@@ -14,5 +19,11 @@ void main() {
     const vec3 dark = vec3(0.2, 0.2, 0.2);
     const vec3 light = vec3(0.5, 0.5, 0.5);
 
-    outColor = vec4(mix(light, dark, dark_tile_intensity), 1.0);
+    const float roughness = 0.1;        // 1 -> rough, 0.1 -> smooth
+    const float metallic = 0.3;         // metal
+
+    gPos = fFragPos;
+    gCol = mix(light, dark, dark_tile_intensity);
+    gNorm = vec3(0.0, 1.0, 0.0);
+    gMaterial = vec2(roughness, metallic);
 }
