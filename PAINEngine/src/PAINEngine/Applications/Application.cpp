@@ -74,6 +74,19 @@ namespace PAIN {
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// Match viewport to window size
+		auto window = services->get<Window::Window>();
+#ifdef PN_PLATFORM_WINDOWS
+		glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
+		glViewport(0, 0, winWidth, winHeight);
+#else
+		ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
+		winWidth = ANativeWindow_getWidth(nativeWindow);
+		winHeight = ANativeWindow_getHeight(nativeWindow);
+		glViewport(0, 0, winWidth, winHeight);
+#endif
+
 		// Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);

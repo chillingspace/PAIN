@@ -35,10 +35,22 @@ namespace PAIN {
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
+	struct SceneObject {
+		Mesh* mesh;
+		glm::mat4 transform;  // model matrix
+	};
+
 	class WindowsRenderer {
-	public:
+	private:
 		WindowsRenderer();
 		~WindowsRenderer();
+
+	public:
+
+		static WindowsRenderer& get() {
+			static WindowsRenderer instance;
+			return instance;
+		}
 
 		void Init();
 		void Render();
@@ -46,9 +58,19 @@ namespace PAIN {
 		void Clear();
 		void Cleanup();
 
+		std::vector<SceneObject> s_SubmissionQueue;
+
 		/*bool InitGLFW();
 		void SetWindow(GLFWwindow* window);
 		GLFWwindow* GetWindow() const { return window; };*/
+
+		unsigned int getFinalFbo() const {
+			return final_fbo;
+		}
+
+		unsigned int getFinalTexture() const {
+			return final_texture;
+		}
 
 	private:
 		unsigned int vao = 0;
@@ -57,14 +79,27 @@ namespace PAIN {
 
 		unsigned int empty_vao = 0;
 
-		unsigned int fbo = 0;
+		unsigned int passthrough_vao = 0;
+		unsigned int passthrough_vbo = 0;
 
-		std::unique_ptr<Shader> m_shader = nullptr;
-		std::unique_ptr<Shader> sphere_shader = nullptr;
+		unsigned int ds_fbo = 0;			// deferred shading framebuffer
+		unsigned int pos_texture = 0;
+		unsigned int col_texture = 0;
+		unsigned int norm_texture = 0;
+		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
+		unsigned int rbo = 0;				// depth buffer
+
+		unsigned int final_fbo = 0;
+		unsigned int final_texture = 0;		// for imgui
+
+		std::unique_ptr<Shader> pbr_shader = nullptr;
+		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
+		std::unique_ptr<Shader> passthrough_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
+		void _initDeferredShadingBuffers();
 	};
 }
 

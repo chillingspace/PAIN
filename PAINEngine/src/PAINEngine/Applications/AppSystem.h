@@ -21,6 +21,9 @@ namespace PAIN {
 		Services() = default;
 	};
 
+	// !TODO: need to find a diff way to store this, else add event listener to edit this
+	inline int winWidth, winHeight;
+
 	class AppSystem {
 	private:
 		friend class Application;
