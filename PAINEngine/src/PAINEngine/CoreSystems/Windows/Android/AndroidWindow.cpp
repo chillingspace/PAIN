@@ -195,19 +195,24 @@ namespace PAIN {
 
         void Android_Window::shutdown() {
 
-            //Terminate all
-            if(b_surfaceready)destroySurface();
-            if(b_contextready)destroyContext();
-            if(b_initialized || b_displayready)terminateDisplay();
+            if (b_active) {
 
-            //Ensure proper clearing
-            m_Window = nullptr;
-            m_App = nullptr;
-            m_Display = EGL_NO_DISPLAY;
-            config = nullptr;
-            m_Surface = EGL_NO_SURFACE;
-            m_Context = EGL_NO_CONTEXT;
-            PN_CORE_INFO("Android Window shut down");
+                //Terminate all
+                if (b_surfaceready)destroySurface();
+                if (b_contextready)destroyContext();
+                if (b_initialized || b_displayready)terminateDisplay();
+
+                //Ensure proper clearing
+                m_Window = nullptr;
+                m_App = nullptr;
+                m_Display = EGL_NO_DISPLAY;
+                config = nullptr;
+                m_Surface = EGL_NO_SURFACE;
+                m_Context = EGL_NO_CONTEXT;
+                PN_CORE_INFO("Android Window shut down");
+
+                b_active = false;
+            }
         }
 
         int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)

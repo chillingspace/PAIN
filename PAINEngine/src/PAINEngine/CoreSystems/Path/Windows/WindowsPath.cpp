@@ -69,29 +69,30 @@ namespace PAIN {
 
             //Register default virtual paths
             registerVirtualPath("game", game_path);
-            registerVirtualPath("assets", game_path + "/Assets");
-            registerVirtualPath("local", localdata_path + "/" + app_name);
-            registerVirtualPath("roaming", roamingdata_path + "/" + app_name);
-            registerVirtualPath("documents", documents_path + "/" + app_name);
-            registerVirtualPath("temp", localdata_path + "/" + app_name + "/temp");
-
-            //Create necessary directories
-            createDirectory("local://");
-            createDirectory("roaming://");
-            createDirectory("documents://");
-            createDirectory("temp://");
+            registerVirtualPath("assets", game_path + "/Assets", true);
+            registerVirtualPath("local", localdata_path + "/" + app_name, true);
+            registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
+            registerVirtualPath("documents", documents_path + "/" + app_name, true);
+            registerVirtualPath("temp", localdata_path + "/" + app_name + "/temp", true);
         }
 
         void WindowsPath::destroy() {
             virtual_paths.clear();
         }
 
-        void WindowsPath::registerVirtualPath(const std::string& alias, const std::string& path) {
+        void WindowsPath::registerVirtualPath(const std::string& alias, const std::string& path, bool create_new) {
 
             //check if path actually exists
             if (!std::filesystem::exists(path)) {
-                PN_CORE_WARN("Path does not exist. Invalid registering of path.");
-                return;
+
+                //Create new path
+                if (create_new) {
+                    std::filesystem::create_directories(path);
+                }
+                else {
+                    PN_CORE_WARN("Path does not exist. Invalid registering of path.");
+                    return;
+                }
             }
 
             //check if path actually exists

@@ -62,7 +62,9 @@ namespace PAIN {
 
 			//Constructors & Destructors
 			Android_Window(void* app, Package const& package);
-			virtual ~Android_Window();
+			~Android_Window() override;
+
+			virtual void onDetach() override { shutdown(); }
 
 			//Update
             void onFixedUpdate(AppTiming timing) override {}

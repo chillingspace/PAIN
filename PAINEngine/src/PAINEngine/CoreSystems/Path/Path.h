@@ -39,7 +39,7 @@ namespace PAIN {
 			Path() = default;
 			virtual ~Path() = default;
 
-			virtual void registerVirtualPath(const std::string& alias, const std::string& path) = 0;
+			virtual void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) = 0;
 			virtual void updateVirtualPath(const std::string& alias, const std::string& path) = 0;
 			virtual std::string resolvePath(const std::string& virtualPath) const = 0;
 			virtual std::vector<std::string> listFiles(const std::string& virtualPath, const std::string& filter = "", const std::string& extension = "") const = 0;

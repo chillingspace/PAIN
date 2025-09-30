@@ -14,6 +14,7 @@ namespace PAIN {
 			class DebugAudioPanel : public IPanel {
 			public:
 				DebugAudioPanel();
+				~DebugAudioPanel() override = default;
 
 				void nextWindowSettings() override; 
 				void onUpdate() override;

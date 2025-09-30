@@ -31,6 +31,7 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//On detach
+			(*it).lock()->services = nullptr;
 			(*it).lock()->onDetach();
 		}
 		layer_stack.clear();
@@ -39,6 +40,7 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//On detach
+			(*it).lock()->services = nullptr;
 			(*it).lock()->onDetach();
 		}
 		core_stack.clear();
@@ -86,7 +88,6 @@ namespace PAIN {
 #endif
 
 		//Push other core systems into the stack
-		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Windows only have paths, andriods have to use AASettmanager

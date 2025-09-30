@@ -33,7 +33,7 @@ namespace PAIN {
 			virtual ~WindowsPath() { destroy(); }
 
 			//Override functions from path interface
-			void registerVirtualPath(const std::string& alias, const std::string& path) override;
+			void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) override;
 			void updateVirtualPath(const std::string& alias, const std::string& path) override;
 			std::string resolvePath(const std::string& virtualPath) const override;
 			std::vector<std::string> listFiles(const std::string& virtualPath, const std::string& filter = "", const std::string& extension = "") const override;

@@ -187,19 +187,19 @@ namespace PAIN {
             // stop all first
             stopAll();
 
-            // release sounds
-            //for (auto& kv : impl_->sounds)
-            //    if (kv.second.sound) kv.second.sound->release();
+            //release sounds
+            for (auto& kv : impl_->sounds)
+                if (kv.second.sound) kv.second.sound->release();
             impl_->sounds.clear();
 
-            // release groups
-            //for (auto& kv : impl_->groups)
-            //    if (kv.second.cg) kv.second.cg->release();
+            //release groups
+            for (auto& kv : impl_->groups)
+                if (kv.second.cg) kv.second.cg->release();
             impl_->groups.clear();
 
             if (impl_->sys) {
-
-
+                impl_->sys->close();
+                impl_->sys->release();
                 impl_->sys = nullptr;
             }
             impl_->initialized = false;

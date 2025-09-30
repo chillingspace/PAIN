@@ -15,8 +15,9 @@ namespace PAIN {
     class RendererLayer : public AppSystem {
     public:
         RendererLayer() = default;
-        ~RendererLayer() = default;
+        ~RendererLayer() override = default;
 
+        void onDetach() override { w_renderer = nullptr; }
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
