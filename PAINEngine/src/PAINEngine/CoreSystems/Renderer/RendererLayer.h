@@ -18,7 +18,7 @@ namespace PAIN {
 
 		std::shared_ptr<Scene> m_Scene;
 
-        void onDetach() override { renderer = nullptr; }
+        void onDetach() override { }
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
