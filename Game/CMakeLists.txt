@@ -5,10 +5,12 @@ file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
 if (ANDROID)
   add_library(GameCore STATIC ${GAME_SRC})
   target_link_libraries(GameCore PUBLIC PAINEngine)
+  add_dependencies(GameCore CompileAllAssetsAndroid)
 
 else()
   add_executable(Game ${GAME_SRC})
   target_link_libraries(Game PRIVATE PAINEngine)
+  add_dependencies(Game CompileAllAssets)
 
   # Copy the correct FMOD runtime next to Game.exe using the imported target
   # Debug -> fmodL.(dll), others -> fmod.(dll)

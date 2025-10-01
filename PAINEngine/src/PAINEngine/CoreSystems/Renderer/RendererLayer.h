@@ -38,7 +38,6 @@ namespace PAIN {
 		
 		enum MOVE_MODES {
 			CAMERA,
-			LIGHT,
 			NUM_MOVE_MODES
 		};
 		MOVE_MODES move_mode = CAMERA;
