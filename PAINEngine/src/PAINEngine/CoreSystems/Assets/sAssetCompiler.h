@@ -15,6 +15,7 @@
 #define S_ASSET_COMPILER_H
 
 #include "Applications/AppSystem.h"
+#include "Utility/guid.h"
 
 //#ifdef PN_PLATFORM_ANDROID
 //#include <android/asset_manager.h>
