@@ -115,17 +115,22 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Assets::Service>());
 		addCoreSystem(std::make_shared<Compiler::Service>());
 #endif
+		// Scenes
+		std::shared_ptr<Scene> scene = std::make_shared<Scene>();;
+		services->set<Scene>(scene);
+		scene.get()->Init();
 
-		PN_CORE_INFO("jspoh1");
+		// Renderer
 		auto renderer = std::make_shared<RendererLayer>();
-		PN_CORE_INFO("jspoh2");
+
 		addCoreSystem(renderer);
-		PN_CORE_INFO("jspoh3");
+
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
 		// !NOTE: IMGUI eats events
-		addLayerSystem(std::make_shared<Editor::Editor>(app_window->getNativeWindow()));
+		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
+		addLayerSystem(editor);
 #endif
 
 		//Mark engine as ready
@@ -134,8 +139,6 @@ namespace PAIN {
 
 	void Application::Run() {
 
-		Scene scene;
-		scene.Init();
 
 
 		//Set last time
@@ -190,8 +193,6 @@ namespace PAIN {
 			//Update timing variables
 			timing.steps_this_frame = steps;
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
-
-			scene.OnUpdate();
 
 			//Update all core systems
 			for (auto& core : core_stack) core.lock()->onUpdate(timing);

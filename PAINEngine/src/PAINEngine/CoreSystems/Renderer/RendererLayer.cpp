@@ -54,7 +54,7 @@ namespace PAIN {
 		//#endif
 
 		//Init scene
-		m_Scene = std::make_shared<Scene>();
+		m_Scene = services->get<Scene>();
 
 		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
@@ -70,8 +70,6 @@ namespace PAIN {
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
 
-		//#else
-		//if (w_renderer) 
 		{
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();

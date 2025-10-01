@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ToolsPanel.h"
-
 #include "ECS/Controller.h"
+#include "Scene/Scene.h"
 #ifdef _DEBUG
 
 namespace PAIN {
@@ -19,7 +19,7 @@ namespace PAIN {
                     ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
                     ImGuiWindowFlags_MenuBar;
 			}
-
+            
 			void Tools::nextWindowSettings() {
 				//Fullscreen dockspace (content sits under the bars)
 				ImGuiViewport* vp = ImGui::GetMainViewport();
@@ -50,7 +50,31 @@ namespace PAIN {
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Assets")) { ImGui::MenuItem("Create"); ImGui::EndMenu(); }
-                    if (ImGui::BeginMenu("GameObject")) { ImGui::MenuItem("Create Empty"); ImGui::EndMenu(); }
+                    
+                    if (ImGui::BeginMenu("GameObject")) { 
+                        if (ImGui::MenuItem("Create Empty")){
+                            PN_CORE_INFO("Added new obj");
+                            auto m_scene = services->get<Scene>();
+                            size_t i = m_scene->GetObjects().size();
+                            glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * i));
+
+                            if (m_scene) {
+                                m_scene->AddObject(Mesh::LoadObj(), transform);
+                            }
+                        }
+                        if (ImGui::MenuItem("Delete Game Object")) {
+                            PN_CORE_INFO("Deleted last obj");
+                            auto m_scene = services->get<Scene>();
+                            size_t i = m_scene->GetObjects().size();
+
+                            if (m_scene && i != 0) {
+                                m_scene->DeleteObject();
+                            }
+                        }
+
+                        ImGui::EndMenu(); 
+                    }
+
                     if (ImGui::BeginMenu("Component")) { ImGui::MenuItem("Add..."); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Window")) { ImGui::MenuItem("Layouts"); ImGui::EndMenu(); }
@@ -62,13 +86,13 @@ namespace PAIN {
 
                 // Reserve space right under the main menu for the toolbar (#2)
                 float menu_h = ImGui::GetFrameHeight();
-                float toolbar_h = 34.0f;
+
                 ImGui::SetCursorPosY(menu_h); // place toolbar directly below menu
 
                 ImGuiWindowFlags toolbar_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking |
                     ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-                ImGui::BeginChild("##TopToolbar", ImVec2(0, toolbar_h), false, toolbar_flags);
+                ImGui::BeginChild("##TopToolbar", ImVec2(0, 20.f), false, toolbar_flags);
 
                 // Center: Play / Pause / Step
                 {
