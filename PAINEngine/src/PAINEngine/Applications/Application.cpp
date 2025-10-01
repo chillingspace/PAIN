@@ -103,7 +103,7 @@ namespace PAIN {
 		auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/Music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
-		app_audio->play(asset_path);
+		// app_audio->play(asset_path);
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>());

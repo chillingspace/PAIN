@@ -25,11 +25,11 @@ namespace PAIN {
 		{0.5f,0.5f,0.5f}
 	};
 
-	Light light = {
-		{2.f, 3.f, 2.f},	// position
-		{0.2f, 0.2f, 0.2f},					// intensity
-		Light::ORBIT_ORIGIN
-	};
+	//Light light = {
+	//	{2.f, 3.f, 2.f},	// position
+	//	{0.2f, 0.2f, 0.2f},					// intensity
+	//	Light::ORBIT_ORIGIN
+	//};
 
 	WindowsRenderer::WindowsRenderer() {
 
@@ -224,6 +224,24 @@ namespace PAIN {
 		glCullFace(GL_BACK);
 
 		m_mesh = Mesh::LoadObj();
+
+		// init light source(s)
+
+		LightSources::get().create("cam");
+		auto olcam = LightSources::get().get("cam");
+		Light& lcam = olcam.value();
+
+		LightSources::get().create("a");
+		auto ola = LightSources::get().get("a");
+		Light& la = ola.value();
+		la.position = glm::vec3(2.f, 8.f, 2.f);
+		la.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("b");
+		auto olb = LightSources::get().get("b");
+		Light& lb = olb.value();
+		lb.position = glm::vec3(-4.f, 4.f, -8.f);
+		lb.L_intensity = glm::vec3(0.2f);
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
@@ -255,65 +273,73 @@ namespace PAIN {
 			}
 		}
 
-		//// render sphere (for light pos)
-		//if (!geometry_shader) {
-		//	PN_CORE_ERROR("Unable to find geometry_shader");
-		//	return;
-		//}
-		//geometry_shader->Bind();
-
-		// build lightsource model
-		{
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, light.position);
-			model = glm::scale(model, glm::vec3(0.1f));
-
-			// reuse uniforms
-			//geometry_shader->SetUniform("u_M", model);
-			//geometry_shader->SetUniform("u_V", Camera::get().view());
-			//geometry_shader->SetUniform("u_P", Camera::get().projection());
-
-			//m_mesh->Draw();
-		}
-
-
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-//#ifdef JS_DEBUG
-//		passthrough_shader->Bind();
-//		glActiveTexture(GL_TEXTURE0);
-//		glBindTexture(GL_TEXTURE_2D, col_texture);
-//		passthrough_shader->SetUniform("tex", 0);
-//#else
-		// render to final framebuffer for post processing/imgui/display
-		pbr_shader->Bind();
+		//#ifdef JS_DEBUG
+		//		passthrough_shader->Bind();
+		//		glActiveTexture(GL_TEXTURE0);
+		//		glBindTexture(GL_TEXTURE_2D, col_texture);
+		//		passthrough_shader->SetUniform("tex", 0);
+		//#else
+				// render to final framebuffer for post processing/imgui/display
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, pos_texture);
+		{
+			// pbr pass
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, col_texture);
+			pbr_shader->Bind();
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, norm_texture);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, pos_texture);
 
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, col_texture);
 
-		pbr_shader->SetUniform("gPos", 0);
-		pbr_shader->SetUniform("gCol", 1);
-		pbr_shader->SetUniform("gNorm", 2);
-		pbr_shader->SetUniform("gMaterial", 3);
-		pbr_shader->SetUniform("u_V", Camera::get().view());
-		pbr_shader->SetUniform("light[0].position", light.position);
-		pbr_shader->SetUniform("light[0].L", light.L_intensity);
-//#endif
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, norm_texture);
 
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+			pbr_shader->SetUniform("gPos", 0);
+			pbr_shader->SetUniform("gCol", 1);
+			pbr_shader->SetUniform("gNorm", 2);
+			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("u_V", Camera::get().view());
+			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
+
+			int i{};
+			for (const Light& l : LightSources::get().getAll()) {
+				std::stringstream ss;
+
+				ss << "u_Lights[" << i << "].position";
+				pbr_shader->SetUniform(ss.str(), l.position);
+				ss.str("");
+				ss.clear();
+
+				if (LightSources::get().lightsOn) {
+					ss << "u_Lights[" << i << "].L";
+					pbr_shader->SetUniform(ss.str(), l.L_intensity);
+					ss.str("");
+					ss.clear();
+				}
+
+				i++;
+			}
+
+			//auto ol = LightSources::get().get("a");
+			//Light& l = ol.value();
+			//pbr_shader->SetUniform("u_Lights[0].position", l.position);
+			//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
+
+			//#endif
+
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
 
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
@@ -354,9 +380,6 @@ namespace PAIN {
 		geometry_shader->SetUniform("material.rough", material.rough);
 		geometry_shader->SetUniform("material.metal", material.metal);
 		geometry_shader->SetUniform("material.color", material.color);
-
-		geometry_shader->SetUniform("light[0].position", light.position);
-		geometry_shader->SetUniform("light[0].L", light.L_intensity);
 
 		mesh->Draw();
 	}
