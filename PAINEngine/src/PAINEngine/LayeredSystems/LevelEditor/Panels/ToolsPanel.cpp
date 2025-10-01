@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ToolsPanel.h"
-
 #include "ECS/Controller.h"
+#include "Scene/Scene.h"
 #ifdef _DEBUG
 
 namespace PAIN {
@@ -19,7 +19,7 @@ namespace PAIN {
                     ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
                     ImGuiWindowFlags_MenuBar;
 			}
-
+            
 			void Tools::nextWindowSettings() {
 				//Fullscreen dockspace (content sits under the bars)
 				ImGuiViewport* vp = ImGui::GetMainViewport();
@@ -50,7 +50,22 @@ namespace PAIN {
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Assets")) { ImGui::MenuItem("Create"); ImGui::EndMenu(); }
-                    if (ImGui::BeginMenu("GameObject")) { ImGui::MenuItem("Create Empty"); ImGui::EndMenu(); }
+                    
+                    if (ImGui::BeginMenu("GameObject")) { 
+                        if (ImGui::MenuItem("Create Empty")){
+                            PN_CORE_INFO("Added new obj");
+                            auto m_scene = services->get<Scene>();
+                            size_t i = m_scene->GetObjects().size();
+                            glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * i));
+
+                            if (m_scene) {
+                                m_scene->AddObject(Mesh::LoadObj(), transform);
+                            }
+                        }
+
+                        ImGui::EndMenu(); 
+                    }
+
                     if (ImGui::BeginMenu("Component")) { ImGui::MenuItem("Add..."); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Window")) { ImGui::MenuItem("Layouts"); ImGui::EndMenu(); }
