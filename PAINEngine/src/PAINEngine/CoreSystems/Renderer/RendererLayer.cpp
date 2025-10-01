@@ -180,6 +180,12 @@ namespace PAIN {
 		xOffset = 0.f;
 		yOffset = 0.f;
 		//#endif
+
+
+		// set cam light to cam
+		auto olcam = LightSources::get().get("cam");
+		Light& lcam = olcam.value();
+		lcam.position = Camera::get().pos;
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {
