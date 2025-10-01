@@ -52,7 +52,7 @@ namespace PAIN {
 				return entities.find(entity) != entities.end();
 			}
 
-			void Entity::Service::setSignature(Entity::Type entity, PAIN::ECS::Component::Signature signature) {
+			void Entity::Service::setSignature(Entity::Type entity, Component::Signature signature) {
 				//Check if entity has alr been created
 				if (entities.find(entity) == entities.end()) {
 					throw std::runtime_error("Entity not found.");
@@ -62,7 +62,7 @@ namespace PAIN {
 				entities.at(entity) = signature;
 			}
 
-			PAIN::ECS::Component::Signature const& Entity::Service::getSignature(Entity::Type entity) const {
+			Component::Signature const& Entity::Service::getSignature(Entity::Type entity) const {
 				//Check if entity has alr been created
 				if (entities.find(entity) == entities.end()) {
 					throw std::runtime_error("Entity not found.");

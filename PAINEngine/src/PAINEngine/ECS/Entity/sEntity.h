@@ -26,10 +26,10 @@ namespace PAIN {
 				void operator=(Service const& copy) = delete;
 
 				//Map of create entities and their component signatures
-				std::unordered_map<PAIN::ECS::Entity::Type, PAIN::ECS::Component::Signature> entities;
+				std::unordered_map<Entity::Type, Component::Signature> entities;
 
 				//Entity indexes waiting to be used
-				std::queue<PAIN::ECS::Entity::Type> avail_entities;
+				std::queue<Entity::Type> avail_entities;
 
 			public:
 
@@ -37,28 +37,28 @@ namespace PAIN {
 				Service();
 
 				//Create Entity
-				PAIN::ECS::Entity::Type createEntity();
+				Entity::Type createEntity();
 
 				//Destroy Entity
-				void destroyEntity(PAIN::ECS::Entity::Type entity);
+				void destroyEntity(Entity::Type entity);
 
 				//Check entity is present
-				bool checkEntity(PAIN::ECS::Entity::Type entity) const;
+				bool checkEntity(Entity::Type entity) const;
 
 				//Set signature
-				void setSignature(PAIN::ECS::Entity::Type entity, PAIN::ECS::Component::Signature signature);
+				void setSignature(Entity::Type entity, Component::Signature signature);
 
 				//Get signature
-				PAIN::ECS::Component::Signature const& getSignature(PAIN::ECS::Entity::Type entity) const;
+				Component::Signature const& getSignature(Entity::Type entity) const;
 
 				//Get entity component count
-				int getEntityComponentCount(PAIN::ECS::Entity::Type entity) const;
+				int getEntityComponentCount(Entity::Type entity) const;
 
 				//Get number of active entities
 				int getEntitiesCount() const;
 
 				//Get all active entity
-				std::set<PAIN::ECS::Entity::Type> getAllEntities() const;
+				std::set<Entity::Type> getAllEntities() const;
 			};
 		}
 	}

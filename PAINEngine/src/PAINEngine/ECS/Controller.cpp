@@ -3,7 +3,7 @@
 
 namespace PAIN {
 	namespace ECS {
-		Controller::Controller() : entity_service{ std::make_unique<Entity::Service>() }
+		Controller::Controller() : entity_service{ std::make_unique<Entity::Service>() }, components_service{ std::make_unique<Component::Service>() }
 		{
 		}
 
