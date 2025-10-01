@@ -15,6 +15,8 @@ namespace PAIN {
 		};
 
 	private:
+		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;
+		static int num_shadowmapped_lights;
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::NONE;
 		unsigned int shadow_fbo = 0;
 		unsigned int shadow_texture = 0;
@@ -61,7 +63,9 @@ namespace PAIN {
 			}
 		}
 	public:
-		Light() = default;
+		Light() {
+			num_shadowmapped_lights = 0;
+		}
 		~Light() {
 			_cleanup();
 		}
@@ -106,6 +110,18 @@ namespace PAIN {
 		bool setShadowType(SHADOW_TYPES type) {
 			if (type == shadow_type) {
 				return false;
+			}
+
+			if (type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights >= MAX_SHADOWMAPPED_LIGHTS) {
+				return false;
+			}
+
+			if (type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights < MAX_SHADOWMAPPED_LIGHTS) {
+				++num_shadowmapped_lights;
+			}
+
+			if (type != SHADOW_TYPES::MAPPED && shadow_type == SHADOW_TYPES::MAPPED) {
+				--num_shadowmapped_lights;
 			}
 
 			if (type == SHADOW_TYPES::MAPPED && shadow_fbo == 0) {

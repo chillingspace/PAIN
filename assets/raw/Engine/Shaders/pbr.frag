@@ -34,6 +34,10 @@ uniform sampler2D gCol;
 uniform sampler2D gNorm;
 uniform sampler2D gMaterial;
 
+#define MAX_SHADOWMAPPED_LIGHTS 4
+uniform sampler2D u_ShadowMaps[MAX_SHADOWMAPPED_LIGHTS];
+uniform float u_NumShadowMaps;
+
 Material material;
 
 
