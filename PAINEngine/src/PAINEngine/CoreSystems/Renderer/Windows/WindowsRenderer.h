@@ -20,7 +20,6 @@
 
 namespace PAIN {
 	extern Material material;
-	extern Light light;
 };
 
 
@@ -113,7 +112,7 @@ namespace PAIN {
 			NUM_MOVE_MODES,
 		};
 
-		MOVE_MODES move_mode = ORBIT_ORIGIN;
+		MOVE_MODES move_mode = FPS;
 
 		float speed = 15.f;
 

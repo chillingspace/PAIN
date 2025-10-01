@@ -118,6 +118,7 @@ using json = nlohmann::json;
 #include <limits>
 #include <random>
 #include <bitset>
+#include <functional>
 
  /*****************************************************************//**
  * UTILITY

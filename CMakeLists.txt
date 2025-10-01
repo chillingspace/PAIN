@@ -51,6 +51,11 @@ if (NOT ANDROID)
 	endforeach()
 endif()
 
+# ======================= Output Directories  =========================
+
+add_subdirectory(Tools)
+include(AssetsCompiler)
+
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
 add_subdirectory(Game)
