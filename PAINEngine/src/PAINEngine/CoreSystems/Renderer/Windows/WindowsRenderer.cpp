@@ -239,6 +239,12 @@ namespace PAIN {
 		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
 #endif
 
+#ifdef PN_PLATFORM_WINDOWS
+		shadow_shader = Shader::LoadShaders("shadow.vert", "shadow.frag");
+#else
+		shadow_shader = Shader::LoadShaders("android_shadow.vert", "android_shadow.frag");
+#endif
+
 		glGenVertexArrays(1, &empty_vao);
 		if (empty_vao == 0) {
 			PN_CORE_ERROR("Failed to create empty VAO");

@@ -8,9 +8,11 @@
 
 layout(location=0) out vec3 fFragPos;
 
+uniform mat4 u_M;       // light only 
+uniform mat4 u_V;
+uniform mat4 u_P;
 
-layout(location=1) uniform mat4 u_V;
-layout(location=2) uniform mat4 u_P;
+uniform float u_ShadowPass;
 
 
 void main() {
@@ -56,6 +58,11 @@ void main() {
     mat4 xform = trans * rot * scale;
 
     vec4 world_pos = xform * vec4(pos, 0, 1);
+
+    if (u_ShadowPass > 0.0) {
+        gl_Position = u_P * u_V * u_M * world_pos;
+        return;
+    }
 
     fFragPos = world_pos.xyz;
 

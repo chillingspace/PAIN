@@ -107,6 +107,7 @@ namespace PAIN {
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
+		std::unique_ptr<Shader> shadow_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
