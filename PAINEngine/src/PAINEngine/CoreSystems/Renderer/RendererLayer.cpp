@@ -182,6 +182,7 @@ namespace PAIN {
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
 		lcam.position = Camera::get().pos;
+		lcam.position.y += 0.1f;	// light on camera = grainy
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {

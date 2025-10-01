@@ -62,7 +62,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l = lightPositionInView - position;
     float dist = length(l);
     l = normalize(l);
-    lightI *= 100.0 / (dist * dist); // Intensity is normalized, so scale up by 100 first
+    lightI *= 100.0 / (dist * dist + 100.0); // Intensity is normalized, so scale up by 100 first
 
     vec3 v = normalize(-position);
     vec3 h = normalize(v + l);
