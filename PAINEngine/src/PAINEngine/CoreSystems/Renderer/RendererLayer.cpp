@@ -15,6 +15,8 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 
 
+#include "CoreSystems/Path/Path.h"
+
 namespace PAIN {
 
 	void RendererLayer::onAttach() {

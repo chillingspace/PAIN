@@ -100,7 +100,7 @@ namespace PAIN {
 		addCoreSystem(app_audio);
 
 		//Audio testing.
-		auto asset_path = services->get<Path::Path>()->resolvePath("assets://audio/Music/Boss_Music.wav");
+		auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/Music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
 		// app_audio->play(asset_path);
