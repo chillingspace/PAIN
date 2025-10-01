@@ -232,6 +232,7 @@ namespace PAIN {
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
 		lcam.L_intensity = glm::vec3(0.1f);
+		lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");

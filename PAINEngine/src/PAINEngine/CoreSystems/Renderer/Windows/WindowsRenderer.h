@@ -90,13 +90,13 @@ namespace PAIN {
 		unsigned int final_texture = 0;		// for imgui
 
 		// for easy access to clear memory
-		std::array<unsigned int*, 3> fbos{ 
+		std::array<unsigned int*, 2> fbos{ 
 			&ds_fbo, 
 			//&shadow_fbo, 
 			&final_fbo 
 		};
 		std::array<unsigned int*, 1> rbos{ &ds_rbo };
-		std::array<unsigned int*, 5> texs{
+		std::array<unsigned int*, 4> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
@@ -177,37 +177,6 @@ namespace PAIN {
 			static Camera instance;
 			return instance;
 		}
-	};
-}
-
-namespace PAIN {
-	class GraphicsSettings {
-	private:
-		GraphicsSettings() = default;
-		~GraphicsSettings() = default;
-	public:
-		static GraphicsSettings& get() {
-			static GraphicsSettings instance;
-			return instance;
-		}
-
-		// softer shadows look better, but requires more VRAM
-		enum class SHADOW_TYPES {
-			SOFTEST,
-			SOFT,
-			HARD
-		};
-
-		// width = height for shadow maps. dont follow screen resolution
-		const std::unordered_map<SHADOW_TYPES, int> SHADOW_MAP_WIDTHS{
-			{SHADOW_TYPES::SOFTEST, 4096},
-			{SHADOW_TYPES::SOFT, 2048},
-			{SHADOW_TYPES::HARD, 1024}
-		};
-
-		// actual settings
-		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
-
 	};
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "./CoreSystems/Renderer/Windows/WindowsRenderer.h"
+#include "./CoreSystems/Renderer/GraphicsSettings.h"
 
 namespace PAIN {
 
