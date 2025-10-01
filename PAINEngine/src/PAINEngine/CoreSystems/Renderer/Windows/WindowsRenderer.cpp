@@ -230,19 +230,18 @@ namespace PAIN {
 		LightSources::get().create("cam");
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.2f);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
 		Light& la = ola.value();
-		la.position = glm::vec3(2.f, 3.f, 2.f);
-		la.L_intensity = glm::vec3(0.1f);
+		la.position = glm::vec3(2.f, 8.f, 2.f);
+		la.L_intensity = glm::vec3(0.2f);
 
 		LightSources::get().create("b");
 		auto olb = LightSources::get().get("b");
 		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -5.f);
-		lb.L_intensity = glm::vec3(0.1f);
+		lb.position = glm::vec3(-4.f, 4.f, -8.f);
+		lb.L_intensity = glm::vec3(0.2f);
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
