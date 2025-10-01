@@ -70,8 +70,6 @@ namespace PAIN {
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
 
-		//#else
-		//if (w_renderer) 
 		{
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();

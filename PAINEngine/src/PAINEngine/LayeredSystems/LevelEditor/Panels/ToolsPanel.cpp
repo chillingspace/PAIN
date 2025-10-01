@@ -62,6 +62,15 @@ namespace PAIN {
                                 m_scene->AddObject(Mesh::LoadObj(), transform);
                             }
                         }
+                        if (ImGui::MenuItem("Delete Game Object")) {
+                            PN_CORE_INFO("Deleted last obj");
+                            auto m_scene = services->get<Scene>();
+                            size_t i = m_scene->GetObjects().size();
+
+                            if (m_scene && i != 0) {
+                                m_scene->DeleteObject();
+                            }
+                        }
 
                         ImGui::EndMenu(); 
                     }
@@ -77,13 +86,13 @@ namespace PAIN {
 
                 // Reserve space right under the main menu for the toolbar (#2)
                 float menu_h = ImGui::GetFrameHeight();
-                float toolbar_h = 34.0f;
+
                 ImGui::SetCursorPosY(menu_h); // place toolbar directly below menu
 
                 ImGuiWindowFlags toolbar_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking |
                     ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
-                ImGui::BeginChild("##TopToolbar", ImVec2(0, toolbar_h), false, toolbar_flags);
+                ImGui::BeginChild("##TopToolbar", ImVec2(0, 20.f), false, toolbar_flags);
 
                 // Center: Play / Pause / Step
                 {
