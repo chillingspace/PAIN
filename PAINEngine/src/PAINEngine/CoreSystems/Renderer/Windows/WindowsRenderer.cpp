@@ -285,54 +285,61 @@ namespace PAIN {
 		//		passthrough_shader->SetUniform("tex", 0);
 		//#else
 				// render to final framebuffer for post processing/imgui/display
-		pbr_shader->Bind();
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, pos_texture);
+		{
+			// pbr pass
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, col_texture);
+			pbr_shader->Bind();
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, norm_texture);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, pos_texture);
 
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, col_texture);
 
-		pbr_shader->SetUniform("gPos", 0);
-		pbr_shader->SetUniform("gCol", 1);
-		pbr_shader->SetUniform("gNorm", 2);
-		pbr_shader->SetUniform("gMaterial", 3);
-		pbr_shader->SetUniform("u_V", Camera::get().view());
-		pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
-		pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, norm_texture);
 
-		int i{};
-		for (const Light& l : LightSources::get().getAll()) {
-			std::stringstream ss;
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
 
-			ss << "u_Lights[" << i << "].position";
-			pbr_shader->SetUniform(ss.str(), l.position);
-			ss.str("");
-			ss.clear();
+			pbr_shader->SetUniform("gPos", 0);
+			pbr_shader->SetUniform("gCol", 1);
+			pbr_shader->SetUniform("gNorm", 2);
+			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("u_V", Camera::get().view());
+			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
-			ss << "u_Lights[" << i << "].L";
-			pbr_shader->SetUniform(ss.str(), l.L_intensity);
-			ss.str("");
-			ss.clear();
+			int i{};
+			for (const Light& l : LightSources::get().getAll()) {
+				std::stringstream ss;
 
-			i++;
+				ss << "u_Lights[" << i << "].position";
+				pbr_shader->SetUniform(ss.str(), l.position);
+				ss.str("");
+				ss.clear();
+
+				if (LightSources::get().lightsOn) {
+					ss << "u_Lights[" << i << "].L";
+					pbr_shader->SetUniform(ss.str(), l.L_intensity);
+					ss.str("");
+					ss.clear();
+				}
+
+				i++;
+			}
+
+			//auto ol = LightSources::get().get("a");
+			//Light& l = ol.value();
+			//pbr_shader->SetUniform("u_Lights[0].position", l.position);
+			//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
+
+			//#endif
+
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-
-		//auto ol = LightSources::get().get("a");
-		//Light& l = ol.value();
-		//pbr_shader->SetUniform("u_Lights[0].position", l.position);
-		//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
-
-		//#endif
-
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */

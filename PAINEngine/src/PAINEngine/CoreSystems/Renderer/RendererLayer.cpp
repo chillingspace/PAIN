@@ -104,12 +104,6 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
 
-#ifdef PN_PLATFORM_ANDROID
-		move_mode = LIGHT;
-		light.move_mode = Light::MOVE_MODES::ORBIT_ORIGIN;
-		A_KEYDOWN = true;
-#endif
-
 
 		switch (move_mode) {
 		case CAMERA:

@@ -53,7 +53,7 @@ vec3 schlickFresnel(float lDotH) {
     return f0 + (1.0 - f0) * pow(1.0 - lDotH, 5.0);
 }
 
-vec3 microfacetModel(vec3 position, vec3 n, vec3 light) {  
+vec3 microfacetModel(vec3 position, vec3 n, Light light) {  
     vec3 diffuseBrdf = material.color;
 
     vec3 lightI = light.L;

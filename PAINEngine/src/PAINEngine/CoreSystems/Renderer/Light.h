@@ -5,8 +5,8 @@
 namespace PAIN {
 
 	struct Light {
-		glm::vec3 position;
-		glm::vec3 L_intensity;
+		glm::vec3 position{};
+		glm::vec3 L_intensity = glm::vec3(0.1f);
 	};
 
 	class LightSources {
@@ -17,6 +17,8 @@ namespace PAIN {
 		std::unordered_map<std::string, Light> sources;
 
 	public:
+		bool lightsOn = true;		// global switch to toggle lights
+
 		static constexpr int MAX_LIGHT_SOURCES = 16;		// remember to set in fragment shader if this is changed
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 
@@ -45,7 +47,7 @@ namespace PAIN {
 				PN_CORE_ERROR("Too many light sources!");
 				return false;
 			}
-			sources[ref] = Light(glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f));
+			sources[ref] = Light();
 			return true;
 		}
 
