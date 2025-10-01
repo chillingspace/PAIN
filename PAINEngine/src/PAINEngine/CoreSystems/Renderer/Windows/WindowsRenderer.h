@@ -80,14 +80,20 @@ namespace PAIN {
 		unsigned int col_texture = 0;
 		unsigned int norm_texture = 0;
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
-		unsigned int shadow_texture = 0;					// shadow map
 		unsigned int ds_rbo = 0;				// depth buffer
+
+		unsigned int shadow_fbo = 0;
+		unsigned int shadow_texture = 0;					// shadow map
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
 
 		// for easy access to clear memory
-		std::array<unsigned int*, 2> fbos{ &ds_fbo, &final_fbo };
+		std::array<unsigned int*, 3> fbos{ 
+			&ds_fbo, 
+			&shadow_fbo, 
+			&final_fbo 
+		};
 		std::array<unsigned int*, 1> rbos{ &ds_rbo };
 		std::array<unsigned int*, 5> texs{
 			&pos_texture,

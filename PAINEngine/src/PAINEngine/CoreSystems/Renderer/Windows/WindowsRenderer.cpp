@@ -62,7 +62,7 @@ namespace PAIN {
 			PN_CORE_ERROR("{} channels isn't supported(by me lol not opengl so need to add)!", num_channels);
 			break;
 		};
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);		// DO NOT USE GL_LINEAR
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -90,21 +90,6 @@ namespace PAIN {
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
 
-			
-			// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
-
-			const int tex_width = GraphicsSettings::get().SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
-
-			glGenTextures(1, &shadow_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			// depth at borders of shadow. 1.0 means full depth, light not covered, no shadow as light can reach full depth
-			static constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
 			unsigned int attachments[4] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
@@ -124,6 +109,43 @@ namespace PAIN {
 				return;
 			}
 			PN_CORE_INFO("G-buffer FBO is complete");
+
+			// shadow map
+			{
+				glGenFramebuffers(1, &shadow_fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+
+				const int tex_width = GraphicsSettings::get().SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
+
+				// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
+				glGenTextures(1, &shadow_texture);
+				glBindTexture(GL_TEXTURE_2D, shadow_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+				// depth at borders of shadow. 1.0 means full depth, light not covered, no shadow as light can reach full depth
+				static constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+				glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_texture, 0);
+
+				GLenum err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after glFramebufferTexture2D: 0x{:x}", err);
+				}
+
+				glDrawBuffer(GL_NONE);
+			}
+
+			status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("Shadow FBO is incomplete! Status: 0x{:x}", status);
+				return;
+			}
+			PN_CORE_INFO("Shadow FBO is complete");
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		// final fbo/texture(final output, for rendering)
