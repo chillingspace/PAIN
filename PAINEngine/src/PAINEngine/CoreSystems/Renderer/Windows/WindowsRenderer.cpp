@@ -110,39 +110,6 @@ namespace PAIN {
 			}
 			PN_CORE_INFO("G-buffer FBO is complete");
 
-			// shadow map
-			{
-				glGenFramebuffers(1, &shadow_fbo);
-				glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-
-				const int tex_width = GraphicsSettings::get().SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
-
-				// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
-				glGenTextures(1, &shadow_texture);
-				glBindTexture(GL_TEXTURE_2D, shadow_texture);
-
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_texture, 0);
-
-				GLenum err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL error after glFramebufferTexture2D: 0x{:x}", err);
-				}
-
-				//glDrawBuffers(0, nullptr);
-			}
-
-			status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-			if (status != GL_FRAMEBUFFER_COMPLETE) {
-				PN_CORE_ERROR("Shadow FBO is incomplete! Status: 0x{:x}", status);
-				//return;
-			}
-			PN_CORE_INFO("Shadow FBO is complete");
-
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
@@ -280,6 +247,24 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
+
+		if (!scene) {
+			return;
+		}
+
+		// populate shadow map first
+
+		for (const Light& l : LightSources::get().getAll()) {
+			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+				glClear(GL_DEPTH_BUFFER_BIT);
+				for (auto& obj : scene->GetObjects()) {
+					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
+				}
+			}
+		}
+
+		// actually draw
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -300,12 +285,9 @@ namespace PAIN {
 		}
 
 		// render scene
-		if (scene)
+		for (auto& obj : scene->GetObjects())
 		{
-			for (auto& obj : scene->GetObjects())
-			{
-				RenderMesh(obj.mesh, obj.transform); // uses geometry_shader
-			}
+			RenderGeometry(obj.mesh, obj.transform); // uses geometry_shader
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -402,7 +384,7 @@ namespace PAIN {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
+	void WindowsRenderer::RenderGeometry(Mesh* mesh, const glm::mat4& model)
 	{
 		if (!mesh || !geometry_shader) return;
 
@@ -419,12 +401,24 @@ namespace PAIN {
 		mesh->Draw();
 	}
 
+	void WindowsRenderer::RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light) {
+		if (!mesh || !shadow_shader) return;
+
+		shadow_shader->Bind();
+
+		shadow_shader->SetUniform("u_M", model);
+		shadow_shader->SetUniform("u_V", light.view());
+		shadow_shader->SetUniform("u_P", light.projection());
+
+		mesh->Draw();
+	}
+
 	//void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
 	//{
 
 	//	for (auto& obj : scene.get()->GetObjects()) {
 
-	//		RenderMesh(obj.mesh, obj.transform);
+	//		RenderGeometry(obj.mesh, obj.transform);
 	//	}
 	//}
 

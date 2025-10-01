@@ -49,7 +49,8 @@ namespace PAIN {
 
 		void Init();
 		void Render(std::shared_ptr<Scene> scene);
-		void RenderMesh(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometry(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
 		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
@@ -82,8 +83,8 @@ namespace PAIN {
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
 		unsigned int ds_rbo = 0;				// depth buffer
 
-		unsigned int shadow_fbo = 0;
-		unsigned int shadow_texture = 0;					// shadow map
+		//unsigned int shadow_fbo = 0;
+		//unsigned int shadow_texture = 0;					// shadow map
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
@@ -91,7 +92,7 @@ namespace PAIN {
 		// for easy access to clear memory
 		std::array<unsigned int*, 3> fbos{ 
 			&ds_fbo, 
-			&shadow_fbo, 
+			//&shadow_fbo, 
 			&final_fbo 
 		};
 		std::array<unsigned int*, 1> rbos{ &ds_rbo };
@@ -100,7 +101,7 @@ namespace PAIN {
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
-			&shadow_texture
+			//&shadow_texture
 		};
 
 		std::unique_ptr<Shader> pbr_shader = nullptr;
