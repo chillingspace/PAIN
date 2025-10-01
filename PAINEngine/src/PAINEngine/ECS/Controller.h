@@ -3,10 +3,11 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include <memory>
-#include <vector>
-
+#include "pch.h"
 #include "Applications/AppSystem.h"
+
+// ECS files
+#include "Entity/sEntity.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -17,8 +18,11 @@ namespace PAIN {
 			//Vector of systems
 			std::vector<std::shared_ptr<ISystem>> systems;
 
+			// Unique ptr of ECS coordinators
+			std::unique_ptr<Entity::Service> entity_service;
+
 		public:
-			Controller() = default;
+			Controller();
 			~Controller() override = default;
 
 			//Dispatch events to layers

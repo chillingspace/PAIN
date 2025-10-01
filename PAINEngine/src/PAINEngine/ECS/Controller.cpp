@@ -3,6 +3,9 @@
 
 namespace PAIN {
 	namespace ECS {
+		Controller::Controller() : entity_service{ std::make_unique<Entity::Service>() }
+		{
+		}
 
 		void Controller::dispatchToLayers(Event::Event& e) {
 			for (auto it = systems.begin(); it != systems.end(); ++it) {
@@ -25,6 +28,7 @@ namespace PAIN {
 
 		void Controller::addSystems(std::shared_ptr<ISystem> system) {
 			systems.push_back(system);
+			system->onAttach();
 		}
 
 		void Controller::onUpdate(AppTiming timing) {
