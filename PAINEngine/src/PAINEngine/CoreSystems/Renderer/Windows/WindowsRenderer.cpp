@@ -39,6 +39,37 @@ namespace PAIN {
 		Cleanup();
 	}
 
+	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment) {
+		glGenTextures(1, &tex);
+		if (!tex) {
+			PN_CORE_ERROR("Failed to gen texture");
+			return;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, tex);
+
+		switch (num_channels) {
+		case 2:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
+			break;
+		case 3:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			break;
+		case 4:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			break;
+		default:
+			PN_CORE_ERROR("{} channels isn't supported(by me lol not opengl so need to add)!", num_channels);
+			break;
+		};
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, gl_color_attachment, GL_TEXTURE_2D, tex, 0);
+	}
+
 	void WindowsRenderer::_initDeferredShadingBuffers() {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}", winWidth, winHeight);
 
@@ -54,61 +85,25 @@ namespace PAIN {
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
-			glGenTextures(1, &pos_texture);
-			if (pos_texture == 0) {
-				PN_CORE_ERROR("Failed to create position texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pos_texture, 0);
+			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
+			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
+			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(shadow_texture, 3, GL_COLOR_ATTACHMENT4);
 
-			glGenTextures(1, &col_texture);
-			if (col_texture == 0) {
-				PN_CORE_ERROR("Failed to create color texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, col_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, col_texture, 0);
+			unsigned int attachments[5] = {
+				GL_COLOR_ATTACHMENT0,
+				GL_COLOR_ATTACHMENT1,
+				GL_COLOR_ATTACHMENT2,
+				GL_COLOR_ATTACHMENT3,
+				GL_COLOR_ATTACHMENT4
+			};
+			glDrawBuffers(5, attachments);
 
-			glGenTextures(1, &norm_texture);
-			if (norm_texture == 0) {
-				PN_CORE_ERROR("Failed to create normal texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, norm_texture, 0);
-
-			glGenTextures(1, &material_properties_texture);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, material_properties_texture, 0);
-
-			unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(4, attachments);
-
-			glGenRenderbuffers(1, &rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+			glGenRenderbuffers(1, &ds_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, ds_rbo);
 
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -423,44 +418,25 @@ namespace PAIN {
 			m_mesh.reset();
 		}
 
-		if (ds_fbo != 0) {
-			glDeleteFramebuffers(1, &ds_fbo);
-			ds_fbo = 0;
+		for (unsigned int* fbo : fbos) {
+			if (*fbo != 0) {
+				glDeleteFramebuffers(1, fbo);
+				*fbo = 0;
+			}
 		}
 
-		if (final_fbo) {
-			glDeleteFramebuffers(1, &final_fbo);
-			final_fbo = 0;
+		for (unsigned int* tex : texs) {
+			if (*tex) {
+				glDeleteTextures(1, tex);
+				*tex = 0;
+			}
 		}
 
-		if (rbo) {
-			glDeleteRenderbuffers(1, &rbo);
-			rbo = 0;
-		}
-
-		if (pos_texture) {
-			glDeleteTextures(1, &pos_texture);
-			pos_texture = 0;
-		}
-
-		if (col_texture) {
-			glDeleteTextures(1, &col_texture);
-			col_texture = 0;
-		}
-
-		if (norm_texture) {
-			glDeleteTextures(1, &norm_texture);
-			col_texture = 0;
-		}
-
-		if (material_properties_texture) {
-			glDeleteTextures(1, &material_properties_texture);
-			material_properties_texture = 0;
-		}
-
-		if (final_texture) {
-			glDeleteTextures(1, &final_texture);
-			final_texture = 0;
+		for (unsigned int* rbo : rbos) {
+			if (*rbo) {
+				glDeleteRenderbuffers(1, rbo);
+				*rbo = 0;
+			}
 		}
 	}
 }

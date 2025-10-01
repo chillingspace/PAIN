@@ -40,11 +40,11 @@ namespace PAIN {
 		//	GL_TEXTURE_2D, fboTexture, 0);
 
 		//// Create depth-stencil buffer
-		//glGenRenderbuffers(1, &rbo);
-		//glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		//glGenRenderbuffers(1, &ds_rbo);
+		//glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
 		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-		//	GL_RENDERBUFFER, rbo);
+		//	GL_RENDERBUFFER, ds_rbo);
 
 		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		//	PN_CORE_ERROR("Framebuffer is not complete!");
