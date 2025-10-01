@@ -120,7 +120,8 @@ namespace PAIN {
 				// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
 				glGenTextures(1, &shadow_texture);
 				glBindTexture(GL_TEXTURE_2D, shadow_texture);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -132,13 +133,13 @@ namespace PAIN {
 					PN_CORE_ERROR("OpenGL error after glFramebufferTexture2D: 0x{:x}", err);
 				}
 
-				glDrawBuffers(0, nullptr);
+				//glDrawBuffers(0, nullptr);
 			}
 
 			status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("Shadow FBO is incomplete! Status: 0x{:x}", status);
-				return;
+				//return;
 			}
 			PN_CORE_INFO("Shadow FBO is complete");
 
