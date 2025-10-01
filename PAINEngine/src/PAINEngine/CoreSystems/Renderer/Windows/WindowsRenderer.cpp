@@ -245,6 +245,12 @@ namespace PAIN {
 		Light& lb = olb.value();
 		lb.position = glm::vec3(-4.f, 4.f, -8.f);
 		lb.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("c");
+		auto olc = LightSources::get().get("c");
+		Light& lc = olc.value();
+		lc.position = glm::vec3(-1.f, 2.f, 0.f);
+		lc.L_intensity = glm::vec3(0.f, 0.2f, 0.f);
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
@@ -320,6 +326,21 @@ namespace PAIN {
 
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+			int tex_id = 4;
+			for (const Light& l : LightSources::get().getAll()) {
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					glActiveTexture(GL_TEXTURE0 + tex_id);
+					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+
+					std::stringstream ss;
+					ss << "u_ShadowMap[" << (tex_id - 4) << "]";
+
+					pbr_shader->SetUniform(ss.str(), tex_id);
+
+					++tex_id;
+				}
+			}
 
 			pbr_shader->SetUniform("gPos", 0);
 			pbr_shader->SetUniform("gCol", 1);

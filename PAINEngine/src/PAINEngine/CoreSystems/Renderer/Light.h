@@ -229,5 +229,7 @@ namespace PAIN {
 		}
 	};
 
+	inline int Light::num_shadowmapped_lights = 0;
+
 }
 
