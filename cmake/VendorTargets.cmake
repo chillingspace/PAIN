@@ -161,3 +161,32 @@ elseif(ANDROID)
   # NDK system libs FMOD needs on Android
   target_link_libraries(FMOD::core INTERFACE log android)
 endif()
+
+# ======================= Assimp Vendor  =========================
+# Build from source in vendor/assimp
+if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
+  # Keep the build small (importers only, no tools/tests/install)
+  set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_INSTALL            OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+  set(ASSIMP_NO_EXPORT          ON  CACHE BOOL "" FORCE)   # optional: no exporters
+  set(BUILD_SHARED_LIBS         OFF CACHE BOOL "" FORCE)   # static is fine for tools
+
+  add_subdirectory("${VENDOR_DIR}/assimp" "${CMAKE_BINARY_DIR}/vendor_assimp" EXCLUDE_FROM_ALL)
+
+  if (NOT TARGET assimp::assimp)
+    add_library(assimp::assimp ALIAS assimp)
+  endif()
+else()
+  message(FATAL_ERROR "Assimp not found at ${VENDOR_DIR}/assimp")
+endif()
+
+# Link Assimp to the offline AssetCompiler (desktop only), but only if the
+# AssetCompiler target is already defined in this configure step.
+if (NOT ANDROID AND TARGET AssetCompiler)
+  target_link_libraries(AssetCompiler PRIVATE assimp::assimp)
+  if (MSVC)
+    target_compile_definitions(AssetCompiler PRIVATE NOMINMAX)
+  endif()
+endif()
