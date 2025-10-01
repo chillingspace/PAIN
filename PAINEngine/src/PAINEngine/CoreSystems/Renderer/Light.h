@@ -18,7 +18,7 @@ namespace PAIN {
 
 	public:
 		static constexpr int MAX_LIGHT_SOURCES = 16;		// remember to set in fragment shader if this is changed
-		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.1f, 0.1f, 0.1f);
+		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 
 		/**
 		 * get singleton instance.
@@ -67,7 +67,18 @@ namespace PAIN {
 			std::vector<std::reference_wrapper<Light>> out;
 			out.reserve(sources.size());
 
-			for (auto [k, v] : sources) {
+			for (auto& [k, v] : sources) {
+				out.push_back(std::ref(v));
+			}
+
+			return out;
+		}
+
+		std::vector<Light> getAllCopy() {
+			std::vector<Light> out;
+			out.reserve(sources.size());
+
+			for (const auto [k, v] : sources) {
 				out.push_back(std::ref(v));
 			}
 

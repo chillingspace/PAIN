@@ -102,4 +102,6 @@ void main() {
         color += microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
     }
     FragColor = vec4(color, 1.0);
+
+    // FragColor = vec4(u_NumLights, u_NumLights, u_NumLights, 1.0);
 }

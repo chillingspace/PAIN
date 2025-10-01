@@ -295,23 +295,31 @@ namespace PAIN {
 		pbr_shader->SetUniform("gNorm", 2);
 		pbr_shader->SetUniform("gMaterial", 3);
 		pbr_shader->SetUniform("u_V", Camera::get().view());
-		pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount());
+		pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 		pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
 		int i{};
 		for (const Light& l : LightSources::get().getAll()) {
-			static std::stringstream ss;
+			std::stringstream ss;
 
 			ss << "u_Lights[" << i << "].position";
 			pbr_shader->SetUniform(ss.str(), l.position);
+			ss.str("");
 			ss.clear();
 
 			ss << "u_Lights[" << i << "].L";
 			pbr_shader->SetUniform(ss.str(), l.L_intensity);
+			ss.str("");
 			ss.clear();
 
 			i++;
 		}
+
+		//auto ol = LightSources::get().get("a");
+		//Light& l = ol.value();
+		//pbr_shader->SetUniform("u_Lights[0].position", l.position);
+		//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
+
 		//#endif
 
 		glBindVertexArray(passthrough_vao);
@@ -352,6 +360,10 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_M", model);
 		geometry_shader->SetUniform("u_V", Camera::get().view());
 		geometry_shader->SetUniform("u_P", Camera::get().projection());
+
+		geometry_shader->SetUniform("material.rough", material.rough);
+		geometry_shader->SetUniform("material.metal", material.metal);
+		geometry_shader->SetUniform("material.color", material.color);
 
 		mesh->Draw();
 	}
