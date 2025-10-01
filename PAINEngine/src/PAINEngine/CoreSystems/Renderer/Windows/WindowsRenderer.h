@@ -191,10 +191,10 @@ namespace PAIN {
 		};
 
 		// width = height for shadow maps. dont follow screen resolution
-		static const std::unordered_map<SHADOW_TYPES, int> SHADOW_MAP_WIDTHS{
+		const std::unordered_map<SHADOW_TYPES, int> SHADOW_MAP_WIDTHS{
 			{SHADOW_TYPES::SOFTEST, 4096},
 			{SHADOW_TYPES::SOFT, 2048},
-			{SHADOW_TYPES::HARD, 1096}
+			{SHADOW_TYPES::HARD, 1024}
 		};
 
 		// actual settings

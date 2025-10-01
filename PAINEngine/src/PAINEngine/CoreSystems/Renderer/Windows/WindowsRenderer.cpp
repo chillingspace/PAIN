@@ -93,17 +93,17 @@ namespace PAIN {
 			
 			// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
 
-			//const int tex_width = GraphicsSettings::SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
+			const int tex_width = GraphicsSettings::get().SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
 
-			//glGenTextures(1, &shadow_texture);
-			//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			//// depth at borders of shadow. 1.0 means full depth, light not covered, no shadow as light can reach full depth
-			//static constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-			//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+			glGenTextures(1, &shadow_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			// depth at borders of shadow. 1.0 means full depth, light not covered, no shadow as light can reach full depth
+			static constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 			unsigned int attachments[4] = {
 				GL_COLOR_ATTACHMENT0,
