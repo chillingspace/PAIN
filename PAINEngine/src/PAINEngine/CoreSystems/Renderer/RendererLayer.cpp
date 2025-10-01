@@ -164,60 +164,6 @@ namespace PAIN {
 				}
 			}
 			break;
-		case LIGHT:
-			static constexpr float light_speed = 15.f;
-			static constexpr float angle_speed = 1.5f; // radians per second
-
-			glm::vec3 forward, right, up;
-
-			if (light.move_mode == Light::FREE) {
-				forward = glm::vec3(0.f, 0.f, -1.f);
-				right = glm::vec3(1.f, 0.f, 0.f);
-				up = glm::vec3(0.f, 1.f, 0.f);
-
-				if (W_KEYDOWN) {
-					light.position += forward * light_speed * dt;
-				}
-				if (S_KEYDOWN) {
-					light.position += -forward * light_speed * dt;
-				}
-				if (A_KEYDOWN) {
-					light.position += -right * light_speed * dt;
-				}
-				if (D_KEYDOWN) {
-					light.position += right * light_speed * dt;
-				}
-				if (SPACE_KEYDOWN) {
-					light.position += up * light_speed * dt;
-				}
-				if (LCTRL_KEYDOWN) {
-					light.position += -up * light_speed * dt;
-				}
-			}
-			else if (light.move_mode == Light::ORBIT_ORIGIN) {
-				// Convert current position to spherical
-				float radius = glm::length(light.position);
-				float theta = atan2(light.position.z, light.position.x);
-				float phi = acos(light.position.y / radius);
-
-				// Modify spherical coordinates
-				if (W_KEYDOWN) radius -= light_speed * dt;
-				if (S_KEYDOWN) radius += light_speed * dt;
-				if (A_KEYDOWN) theta += angle_speed * dt;
-				if (D_KEYDOWN) theta -= angle_speed * dt;
-				if (SPACE_KEYDOWN) phi -= angle_speed * dt;
-				if (LCTRL_KEYDOWN) phi += angle_speed * dt;
-
-				// Clamp phi to avoid flipping
-				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
-
-				// Convert back to Cartesian
-				light.position.x = radius * sin(phi) * cos(theta);
-				light.position.y = radius * cos(phi);
-				light.position.z = radius * sin(phi) * sin(theta);
-			}
-
-			break;
 		}
 
 		if (mouseButtonDown && xOffset != 0.f) {
@@ -304,7 +250,6 @@ namespace PAIN {
 				break;
 			case PAIN_KEY_O:
 				Camera::get().move_mode = static_cast<Camera::MOVE_MODES>((Camera::get().move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
-				light.move_mode = static_cast<Light::MOVE_MODES>((light.move_mode + 1) % Light::MOVE_MODES::NUM_MOVE_MODES);
 				break;
 			default:
 				break;

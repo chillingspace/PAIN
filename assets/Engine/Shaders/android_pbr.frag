@@ -17,7 +17,11 @@ struct Light {
     vec3 L;         // light intensity
 };
 
-uniform Light light[1];
+#define MAX_LIGHTS 16
+uniform Light u_Lights[MAX_LIGHTS];
+uniform float u_NumLights;
+uniform vec3 u_AmbientLight;
+
 uniform mat4 u_M;
 uniform mat4 u_V;
 uniform mat4 u_P;
@@ -49,11 +53,11 @@ vec3 schlickFresnel(float lDotH) {
     return f0 + (1.0 - f0) * pow(1.0 - lDotH, 5.0);
 }
 
-vec3 microfacetModel(vec3 position, vec3 n) {  
+vec3 microfacetModel(vec3 position, vec3 n, vec3 light) {  
     vec3 diffuseBrdf = material.color;
 
-    vec3 lightI = light[0].L;
-    vec3 lightPositionInView = (u_V * vec4(light[0].position, 1.0)).xyz;
+    vec3 lightI = light.L;
+    vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
 
     vec3 l = lightPositionInView - position;
     float dist = length(l);
@@ -84,6 +88,9 @@ void main() {
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
     vec3 viewNormal = mat3(u_V) * normalize(normal);
 
-    vec3 color = microfacetModel(viewFragPos, viewNormal);
+    vec3 color = material.color * u_AmbientLight;
+    for (int i=0; i < int(u_NumLights); i++) {
+        color += microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
+    }
     FragColor = vec4(color, 1.0);
 }

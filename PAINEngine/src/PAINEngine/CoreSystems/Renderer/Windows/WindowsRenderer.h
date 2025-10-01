@@ -20,7 +20,6 @@
 
 namespace PAIN {
 	extern Material material;
-	extern Light light;
 };
 
 
