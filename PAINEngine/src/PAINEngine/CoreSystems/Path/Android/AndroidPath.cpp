@@ -116,7 +116,9 @@ namespace PAIN {
 			}
 
 			//Special case: manually register asset path
-			virtual_paths["assets"] = assets_path;
+			//virtual_paths["assets"] = assets_path;
+			virtual_paths["game_assets"] = assets_path + "/raw/Game";
+			virtual_paths["engine_assets"] = assets_path + "/raw/Engine";
 
 			// Register default virtual paths
 			registerVirtualPath("internal", internal_path, true);
@@ -316,7 +318,7 @@ namespace PAIN {
 		}
 
 		bool AndroidPath::isAssetPath(const std::string& virtualPath) const {
-			return parseVirtualPath(virtualPath).first == "assets";
+			return parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
 		}
 	}
 }

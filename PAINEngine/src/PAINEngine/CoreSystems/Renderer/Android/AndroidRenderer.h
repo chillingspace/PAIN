@@ -2,7 +2,7 @@
 #ifdef PN_PLATFORM_ANDROID
 #include "pch.h"
 
-
+#include "Applications/AppSystem.h"
 #include "../Shader.h"
 
 namespace PAIN {
@@ -11,7 +11,7 @@ namespace PAIN {
         AndroidRenderer();
         ~AndroidRenderer();
 
-        bool Init();
+        bool Init(std::shared_ptr<Services> app_services);
         void Render();
         void Cleanup();
 
@@ -28,6 +28,8 @@ namespace PAIN {
         unsigned int program = 0;
 
         std::unique_ptr<Shader> m_shaders;
+
+        std::shared_ptr<Services> services;
     };
 
 }

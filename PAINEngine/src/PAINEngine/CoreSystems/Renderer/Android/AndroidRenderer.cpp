@@ -16,7 +16,8 @@ namespace PAIN {
         Cleanup();
     }
 
-    bool AndroidRenderer::Init() {
+    bool AndroidRenderer::Init(std::shared_ptr<Services> app_services) {
+        services = app_services;
         if (!createShaders()) {
             PN_CORE_ERROR("Failed to create shaders");
             return false;
