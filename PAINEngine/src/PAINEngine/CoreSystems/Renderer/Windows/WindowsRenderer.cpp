@@ -123,11 +123,8 @@ namespace PAIN {
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-				// depth at borders of shadow. 1.0 means full depth, light not covered, no shadow as light can reach full depth
-				static constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-				glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_texture, 0);
 
 				GLenum err = glGetError();
@@ -135,7 +132,7 @@ namespace PAIN {
 					PN_CORE_ERROR("OpenGL error after glFramebufferTexture2D: 0x{:x}", err);
 				}
 
-				glDrawBuffer(GL_NONE);
+				glDrawBuffers(0, nullptr);
 			}
 
 			status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
