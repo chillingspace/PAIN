@@ -14,7 +14,7 @@ namespace PAIN {
 			class DebugPanel : public IPanel {
 			public:
 				DebugPanel();
-
+				~DebugPanel() override = default;
 				void nextWindowSettings() override; 
 				void onUpdate(AppTiming timing) override;
 			};

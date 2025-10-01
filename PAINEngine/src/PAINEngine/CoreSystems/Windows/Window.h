@@ -33,6 +33,8 @@ namespace PAIN {
 		public:
 			virtual ~Window() = default;
 
+			virtual void onAttach() override {}
+			virtual void onDetach() override = 0;
 
 			//Update window
 			virtual void onFixedUpdate(AppTiming timing) override {}

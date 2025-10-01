@@ -187,12 +187,12 @@ namespace PAIN {
             // stop all first
             stopAll();
 
-            // release sounds
+            //release sounds
             for (auto& kv : impl_->sounds)
                 if (kv.second.sound) kv.second.sound->release();
             impl_->sounds.clear();
 
-            // release groups
+            //release groups
             for (auto& kv : impl_->groups)
                 if (kv.second.cg) kv.second.cg->release();
             impl_->groups.clear();

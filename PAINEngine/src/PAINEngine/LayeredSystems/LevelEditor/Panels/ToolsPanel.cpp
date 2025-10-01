@@ -58,6 +58,8 @@ namespace PAIN {
                     ImGui::EndMenuBar();
                 }
 
+
+
                 // Reserve space right under the main menu for the toolbar (#2)
                 float menu_h = ImGui::GetFrameHeight();
                 float toolbar_h = 34.0f;

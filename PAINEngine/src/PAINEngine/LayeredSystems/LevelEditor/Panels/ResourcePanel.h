@@ -15,6 +15,7 @@ namespace PAIN {
                 // Core Overrides
                 // ----------------------------
                 ResourcePanel();
+                ~ResourcePanel() override = default;
                 void nextWindowSettings() override;
                 void onUpdate(AppTiming timing) override;
 

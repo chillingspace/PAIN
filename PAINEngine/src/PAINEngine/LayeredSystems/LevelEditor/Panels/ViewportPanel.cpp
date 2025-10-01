@@ -31,6 +31,9 @@ namespace PAIN {
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 
+				ImVec2 initialSize(800, 600);
+				ImGui::SetNextWindowSize(initialSize, ImGuiCond_FirstUseEver);
+
 				// Begin viewport window
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 					ImVec2 avail = ImGui::GetContentRegionAvail();

@@ -51,10 +51,26 @@ namespace PAIN {
 	}
 	std::unique_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
 	{
-
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		bool file_ok = false;
 
+#ifdef PN_PLATFORM_ANDROID
+		PN_CORE_INFO("Using Android asset manager for mesh");
+		std::string mesh_data = ReadFileAndroid("Meshes/" + mesh_file);
+		if (mesh_data.empty()) {
+			PN_CORE_ERROR("Failed to read mesh data from Android assets: {0}", mesh_file);
+		}
+		else {
+			PN_CORE_INFO("Successfully read mesh data from Android assets: {0}", mesh_file);
+			PN_CORE_INFO("Mesh data size: {0} bytes", mesh_data.size());
+			file_ok = true;
+		}
+#endif
+
+
+
+#ifdef PN_PLATFORM_WINDOWS
 		// Get current working directory and build paths from there
 		std::filesystem::path current_path = std::filesystem::current_path();
 		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
@@ -71,7 +87,10 @@ namespace PAIN {
 
 		std::filesystem::path mesh_full = project_root / "assets" / "Meshes" / mesh_file;
 
-		if (!std::filesystem::exists(mesh_full) || mesh_file == "")
+		file_ok = std::filesystem::exists(mesh_full) && mesh_file != "";
+#endif
+
+		if (!file_ok)
 		{
 			PN_CORE_ERROR("Mesh file not found: {}, loading default mesh", mesh_file == "" ? "No mesh file given" : mesh_file);
 			vertices = {
@@ -146,11 +165,15 @@ namespace PAIN {
 		std::vector<glm::vec3> positions;
 		std::vector<glm::vec3> normals;
 
+#ifdef PN_PLATFORM_WINDOWS
 		std::ifstream objStream(mesh_full);
 		if (!objStream) {
 			PN_CORE_ERROR("Could not open {}", mesh_full.string());
 			assert(false);
 		}
+#else
+		std::istringstream objStream(mesh_data);
+#endif
 
 		std::string line;
 		while (std::getline(objStream, line)) {

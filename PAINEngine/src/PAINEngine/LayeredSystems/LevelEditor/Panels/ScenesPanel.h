@@ -30,6 +30,7 @@ namespace PAIN {
             class ScenesPanel : public IPanel {
             public:
                 ScenesPanel(ScenesHooks hooks = {});
+                ~ScenesPanel() override = default;
 
                 void nextWindowSettings() override;   
                 void setHooks(ScenesHooks h) { hooks_ = std::move(h); }

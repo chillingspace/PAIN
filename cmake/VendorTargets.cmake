@@ -4,7 +4,7 @@ endif()
 
 # ======================= Header Only Vendors  =========================
 add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE "${VENDOR_DIR}/glm")
+target_include_directories(glm INTERFACE "${VENDOR_DIR}")
 
 add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE "${VENDOR_DIR}/nlohmann/include")
@@ -20,6 +20,10 @@ target_include_directories(FileWatch_header_only INTERFACE "${VENDOR_DIR}/FileWa
 
 add_library(gl_headers INTERFACE)
 target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
+
+add_library(gli_headers INTERFACE)
+target_include_directories(gli_headers INTERFACE "${VENDOR_DIR}/gli")
+target_link_libraries(gli_headers INTERFACE glm) 
 
 # ======================= GLEW Vendor  =========================
 
