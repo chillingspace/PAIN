@@ -230,6 +230,7 @@ namespace PAIN {
 		LightSources::get().create("cam");
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
+		lcam.L_intensity = glm::vec3(0.2f);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
