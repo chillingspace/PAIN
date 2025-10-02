@@ -210,6 +210,8 @@ namespace PAIN {
 				out.push_back(std::ref(v));
 			}
 
+			//PN_CORE_INFO("Z");
+
 			return out;
 		}
 

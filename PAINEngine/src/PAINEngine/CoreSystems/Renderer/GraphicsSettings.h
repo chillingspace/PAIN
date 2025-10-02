@@ -40,5 +40,8 @@ namespace PAIN {
 		// actual settings
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 
+		int getShadowMapWidth() const {
+			return SHADOW_MAP_WIDTHS.at(shadow_type);
+		}
 	};
 }

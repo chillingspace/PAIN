@@ -131,7 +131,11 @@ namespace PAIN {
 namespace PAIN {
 	class Camera {
 	private:
-		Camera() = default;
+		Camera() {
+			width_ratio = winWidth;
+			height_ratio = winHeight;
+			aspect_ratio = width_ratio / height_ratio;
+		};
 		~Camera() = default;
 	public:
 		enum MOVE_MODES {

@@ -232,6 +232,7 @@ namespace PAIN {
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
 		lcam.L_intensity = glm::vec3(0.1f);
+		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
@@ -262,15 +263,18 @@ namespace PAIN {
 
 		// populate shadow map first
 
+		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
 		for (const Light& l : LightSources::get().getAll()) {
 			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+				glClearDepth(1.0f);  // Explicitly set clear value
 				glClear(GL_DEPTH_BUFFER_BIT);
 				for (auto& obj : scene->GetObjects()) {
 					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
 				}
 			}
 		}
+		glViewport(0, 0, winWidth, winHeight);
 
 		// actually draw
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -336,7 +340,7 @@ namespace PAIN {
 					glActiveTexture(GL_TEXTURE0 + tex_id);
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
-					ss << "u_ShadowMap[" << (tex_id - 4) << "]";
+					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
 					pbr_shader->SetUniform(ss.str(), tex_id);
 					ss.str("");
 					ss.clear();

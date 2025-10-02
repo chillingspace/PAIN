@@ -99,19 +99,30 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     float shadow_map_depth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy).r;
     float frag_depth = projCoords.z;
+    
+    // If shadow map is empty (cleared to 1.0), no shadows
+    if (shadow_map_depth >= 0.99) {
+        return 0.0; // No shadow
+    }
 
     // bias to prevent shadow acne
     vec3 light_dir = normalize(light.position - fragPos);
     float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
+
+    return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
 
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(u_ShadowMaps[shadow_map_idx], 0);
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(u_ShadowMaps[shadow_map_idx], 
-                                    projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += frag_depth - bias > pcfDepth ? 1.0 : 0.0;
+            float pcfDepth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy + vec2(x, y) * texelSize).r;
+            // If shadow map is empty (no depth written), don't cast shadows
+            if (pcfDepth >= 0.999) {
+                shadow += 0.0;  // No shadow from empty depth
+            } else {
+                shadow += frag_depth - bias > pcfDepth ? 1.0 : 0.0;
+            }
         }
     }
     shadow /= 9.0;
@@ -153,4 +164,5 @@ void main() {
     FragColor = vec4(color, 1.0);
 
     // FragColor = vec4(u_NumShadowMaps, u_NumShadowMaps, u_NumShadowMaps, 1.0);
+    // FragColor = vec4(1, 0, 0, 1);
 }
