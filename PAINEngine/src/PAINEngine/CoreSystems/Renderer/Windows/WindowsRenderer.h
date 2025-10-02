@@ -49,7 +49,8 @@ namespace PAIN {
 
 		void Init();
 		void Render(std::shared_ptr<Scene> scene);
-		void RenderMesh(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
+		void RenderGeometry(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
 		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
@@ -80,19 +81,47 @@ namespace PAIN {
 		unsigned int col_texture = 0;
 		unsigned int norm_texture = 0;
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
-		unsigned int rbo = 0;				// depth buffer
+		unsigned int ds_rbo = 0;				// depth buffer
+
+		//unsigned int shadow_fbo = 0;
+		//unsigned int shadow_texture = 0;					// shadow map
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
 		
 		std::unique_ptr<Camera> active_cam = nullptr;
+
+		// for easy access to clear memory
+		std::array<unsigned int*, 2> fbos{ 
+			&ds_fbo, 
+			//&shadow_fbo, 
+			&final_fbo 
+		};
+		std::array<unsigned int*, 1> rbos{ &ds_rbo };
+		std::array<unsigned int*, 4> texs{
+			&pos_texture,
+			&col_texture,
+			&norm_texture,
+			&material_properties_texture,
+			//&shadow_texture
+		};
+
 		std::unique_ptr<Shader> pbr_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
+		std::unique_ptr<Shader> shadow_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
+		/**
+		 * .
+		 *
+		 * \param tex
+		 * \param num_i channels
+		 * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n` HERE.
+		 */
+		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment);
 		void _initDeferredShadingBuffers();
 	};
 }
@@ -101,8 +130,60 @@ namespace PAIN {
 #endif // PN_PLATFORM_WINDFOWS
 
 
-namespace PAIN {
-	
-}
+// namespace PAIN {
+// 	class Camera {
+// 	private:
+// 		Camera() {
+// 			width_ratio = winWidth;
+// 			height_ratio = winHeight;
+// 			aspect_ratio = width_ratio / height_ratio;
+// 		};
+// 		~Camera() = default;
+// 	public:
+// 		enum MOVE_MODES {
+// 			FPS,
+// 			ORBIT_ORIGIN,
+// 			NUM_MOVE_MODES,
+// 		};
 
-//#endif // __WINDOWS_RENDERER_H__
+// 		MOVE_MODES move_mode = FPS;
+
+// 		float speed = 15.f;
+
+// 		float sensitivity = 0.1f;
+
+// 		glm::vec3 pos{ 0.f, 2.f, 4.f };
+// 		glm::vec3 forward{ -glm::normalize(pos) };
+// 		glm::vec3 up{ 0.f, 1.f, 0.f };
+
+// 		float fov{ 90.f };
+// 		float near_plane{ 0.1f };		// closest distance camera can see
+// 		float far_plane{ 100.f };		// furthest distance camera can see
+
+// 		float width_ratio{ 16.f };
+// 		float height_ratio{ 9.f };
+// 		float aspect_ratio{ width_ratio / height_ratio };
+
+// 		// temp
+// 		glm::mat4 model() const {
+// 			glm::mat4 m = glm::mat4(1.f);
+// 			m = glm::translate(m, glm::vec3(0.f, 1.f, 0.f));
+// 			return m;
+// 		}
+
+// 		glm::mat4 view() const {
+// 			return glm::lookAt(pos, pos + forward, up);
+// 		}
+
+// 		glm::mat4 projection() const {
+// 			return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
+// 		}
+
+// 		static Camera& get() {
+// 			static Camera instance;
+// 			return instance;
+// 		}
+// 	};
+// }
+
+// //#endif // __WINDOWS_RENDERER_H__
