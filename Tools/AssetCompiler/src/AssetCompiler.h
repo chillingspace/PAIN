@@ -91,6 +91,9 @@ private:
     //Delete file
     bool deleteFile(std::filesystem::path const& file_path) const;
 
+    //Create or rename folder
+    void instantiateFolder(std::filesystem::path const& path) const;
+
     //Check asset is in right directory and reposition
     void enforceGameAssetLocation(AssetInfo& asset) const;
     void enforceEngineAssetLocation(AssetInfo& asset) const;

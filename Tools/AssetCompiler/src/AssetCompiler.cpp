@@ -48,33 +48,28 @@ void AssetCompiler::initEngineFolders() {
 }
 
 void AssetCompiler::enforceStandardStructure() {
+
+    //Ensure creation of base folders
+    instantiateFolder(raw_path);
+    instantiateFolder(desc_path);
+    instantiateFolder(raw_path / game_folder);
+    instantiateFolder(raw_path / engine_folder);
+    instantiateFolder(desc_path / game_folder);
+    instantiateFolder(desc_path / engine_folder);
+
     //Ensure standard structure for game directory
     for (const auto& dir : game_dir) {
 
         //Ensure raw directory exists
         std::filesystem::path fullPath = raw_path / dir.second;
-        if (!std::filesystem::exists(fullPath)) {
-            try {
-                std::filesystem::create_directories(fullPath);
-            }
-            catch (const std::exception& e) {
-                std::cout << "  Failed to create: Raw/" << dir.second << " - " << e.what() << std::endl;
-            }
-        }
+        instantiateFolder(fullPath);
 
         //Check if directory belongs to assets that is Compilable
         if (!isAssetCompilable(dir.first)) continue;
 
         //Ensure descriptor directory exists
         fullPath = desc_path / dir.second;
-        if (!std::filesystem::exists(fullPath)) {
-            try {
-                std::filesystem::create_directories(fullPath);
-            }
-            catch (const std::exception& e) {
-                std::cout << "  Failed to create: Raw/" << dir.second << " - " << e.what() << std::endl;
-            }
-        }
+        instantiateFolder(fullPath);
     }
 
     //Ensure standard structure for engine directory
@@ -82,28 +77,14 @@ void AssetCompiler::enforceStandardStructure() {
 
         //Ensure raw directory exists
         std::filesystem::path fullPath = raw_path / dir.second;
-        if (!std::filesystem::exists(fullPath)) {
-            try {
-                std::filesystem::create_directories(fullPath);
-            }
-            catch (const std::exception& e) {
-                std::cout << "  Failed to create: Raw/" << dir.second << " - " << e.what() << std::endl;
-            }
-        }
+        instantiateFolder(fullPath);
 
         //Check if directory belongs to assets that is Compilable
         if (!isAssetCompilable(dir.first)) continue;
 
         //Ensure descriptor directory exists
         fullPath = desc_path / dir.second;
-        if (!std::filesystem::exists(fullPath)) {
-            try {
-                std::filesystem::create_directories(fullPath);
-            }
-            catch (const std::exception& e) {
-                std::cout << "  Failed to create: Raw/" << dir.second << " - " << e.what() << std::endl;
-            }
-        }
+        instantiateFolder(fullPath);
     }
 }
 
@@ -179,6 +160,27 @@ bool AssetCompiler::deleteFile(std::filesystem::path const& file_path) const {
     catch (const std::filesystem::filesystem_error& e) {
         std::cout << file_path << " - Deletion Failed." << std::endl;
         return false;
+    }
+}
+
+void AssetCompiler::instantiateFolder(std::filesystem::path const& path) const {
+    if (!std::filesystem::exists(path)) {
+        try {
+            std::filesystem::create_directories(path);
+        }
+        catch (const std::exception& e) {
+            std::cout << "Failed to create new directory. Directory missing!" << std::endl;
+        }
+    }
+    else {
+        try {
+            std::filesystem::path temp = path.parent_path() / (path.filename().string() + "_TEMP_");
+            std::filesystem::rename(path, temp);
+            std::filesystem::rename(temp, path);
+        }
+        catch (const std::exception& e) {
+            std::cout << "Folder rename failed. Unable to ensure correct folder convention." << std::endl;
+        }
     }
 }
 
