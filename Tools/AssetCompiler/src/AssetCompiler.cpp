@@ -365,6 +365,44 @@ void AssetCompiler::scanAssetDirectories() {
     //recursiveScanAllDirectories(desc_path, [&](std::filesystem::path const& file) {
 
     //});
+
+
+    //Tidy up additional directories
+    for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
+        if (entry.is_directory()) {
+            if (entry.path().filename() != raw_folder && entry.path().filename() != desc_folder) {
+                deleteFile(entry.path());
+            }
+        }
+    }
+
+    for (const auto& entry : std::filesystem::directory_iterator(raw_path / game_folder)) {
+        if (entry.is_directory()) {
+
+            bool b_found = false;
+            for (const auto& dir : game_dir) {
+                if (raw_path / dir.second == entry.path()) {
+                    b_found = true;
+                    break;
+                }
+            }
+            if(!b_found) deleteFile(entry.path());
+        }
+    }
+
+    for (const auto& entry : std::filesystem::directory_iterator(raw_path / engine_folder)) {
+        if (entry.is_directory()) {
+
+            bool b_found = false;
+            for (const auto& dir : engine_dir) {
+                if (raw_path / dir.second == entry.path()) {
+                    b_found = true;
+                    break;
+                }
+            }
+            if (!b_found) deleteFile(entry.path());
+        }
+    }
 }
 
 void AssetCompiler::generateMissingDescriptors() {

@@ -105,7 +105,6 @@ public:
     //core functions
     void scanAssetDirectories();
     void generateMissingDescriptors();
-
 };
 
 #endif
