@@ -232,7 +232,6 @@ namespace PAIN {
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
 		lcam.L_intensity = glm::vec3(0.1f);
-		lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
@@ -251,6 +250,8 @@ namespace PAIN {
 		Light& lc = olc.value();
 		lc.position = glm::vec3(-1.f, 2.f, 0.f);
 		lc.L_intensity = glm::vec3(0.f, 0.2f, 0.f);
+		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+		lc.target = -lc.position;				// origin. required for shadows
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
@@ -328,34 +329,44 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
 
 			int tex_id = 4;
+			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
+				std::stringstream ss;
 				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					glActiveTexture(GL_TEXTURE0 + tex_id);
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
-					std::stringstream ss;
 					ss << "u_ShadowMap[" << (tex_id - 4) << "]";
-
 					pbr_shader->SetUniform(ss.str(), tex_id);
+					ss.str("");
+					ss.clear();
+
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					ss.str("");
+					ss.clear();
 
 					++tex_id;
 				}
-			}
-
-			pbr_shader->SetUniform("gPos", 0);
-			pbr_shader->SetUniform("gCol", 1);
-			pbr_shader->SetUniform("gNorm", 2);
-			pbr_shader->SetUniform("gMaterial", 3);
-			pbr_shader->SetUniform("u_V", Camera::get().view());
-			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
-			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
-
-			int i{};
-			for (const Light& l : LightSources::get().getAll()) {
-				std::stringstream ss;
+				else {
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), -1.f);
+					ss.str("");
+					ss.clear();
+				}
 
 				ss << "u_Lights[" << i << "].position";
 				pbr_shader->SetUniform(ss.str(), l.position);
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].V";
+				pbr_shader->SetUniform(ss.str(), l.view());
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].P";
+				pbr_shader->SetUniform(ss.str(), l.projection());
 				ss.str("");
 				ss.clear();
 
@@ -368,11 +379,15 @@ namespace PAIN {
 
 				i++;
 			}
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
 
-			//auto ol = LightSources::get().get("a");
-			//Light& l = ol.value();
-			//pbr_shader->SetUniform("u_Lights[0].position", l.position);
-			//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
+			pbr_shader->SetUniform("gPos", 0);
+			pbr_shader->SetUniform("gCol", 1);
+			pbr_shader->SetUniform("gNorm", 2);
+			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("u_V", Camera::get().view());
+			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
 			//#endif
 

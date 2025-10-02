@@ -116,7 +116,7 @@ namespace PAIN {
 		 * .
 		 *
 		 * \param tex
-		 * \param num_channels
+		 * \param num_i channels
 		 * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n` HERE.
 		 */
 		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment);
