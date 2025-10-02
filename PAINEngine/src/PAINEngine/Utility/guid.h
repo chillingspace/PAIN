@@ -2,7 +2,7 @@
 #include "pch.h"
 
 namespace PAIN::Util {
-    inline std::string make_uuid_v4() {
+    inline std::string make_guid_v4() {
         static thread_local std::mt19937_64 rng{ std::random_device{}() };
         std::uniform_int_distribution<uint64_t> dist;
         auto a = dist(rng), b = dist(rng);
