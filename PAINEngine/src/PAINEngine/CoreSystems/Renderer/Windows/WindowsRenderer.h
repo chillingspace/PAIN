@@ -49,7 +49,7 @@ namespace PAIN {
 
 		void Init();
 		void Render(std::shared_ptr<Scene> scene);
-		void RenderMesh(Mesh* mesh, const glm::mat4& model);
+		void RenderMesh(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
 		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
@@ -84,7 +84,8 @@ namespace PAIN {
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
-
+		
+		std::unique_ptr<Camera> active_cam = nullptr;
 		std::unique_ptr<Shader> pbr_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
@@ -101,55 +102,7 @@ namespace PAIN {
 
 
 namespace PAIN {
-	class Camera {
-	private:
-		Camera() = default;
-		~Camera() = default;
-	public:
-		enum MOVE_MODES {
-			FPS,
-			ORBIT_ORIGIN,
-			NUM_MOVE_MODES,
-		};
-
-		MOVE_MODES move_mode = FPS;
-
-		float speed = 15.f;
-
-		float sensitivity = 0.1f;
-
-		glm::vec3 pos{ 0.f, 2.f, 4.f };
-		glm::vec3 forward{ -glm::normalize(pos) };
-		glm::vec3 up{ 0.f, 1.f, 0.f };
-
-		float fov{ 90.f };
-		float near_plane{ 0.1f };		// closest distance camera can see
-		float far_plane{ 100.f };		// furthest distance camera can see
-
-		float width_ratio{ 16.f };
-		float height_ratio{ 9.f };
-		float aspect_ratio{ width_ratio / height_ratio };
-
-		// temp
-		glm::mat4 model() const {
-			glm::mat4 m = glm::mat4(1.f);
-			m = glm::translate(m, glm::vec3(0.f, 1.f, 0.f));
-			return m;
-		}
-
-		glm::mat4 view() const {
-			return glm::lookAt(pos, pos + forward, up);
-		}
-
-		glm::mat4 projection() const {
-			return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
-		}
-
-		static Camera& get() {
-			static Camera instance;
-			return instance;
-		}
-	};
+	
 }
 
 //#endif // __WINDOWS_RENDERER_H__

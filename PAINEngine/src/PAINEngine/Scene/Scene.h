@@ -3,7 +3,7 @@
 
 
 #include "../CoreSystems/Renderer/Mesh.h"
-
+#include "Camera.h"
 
 namespace PAIN {
 
@@ -24,6 +24,7 @@ namespace PAIN {
 		void DeleteObject();
 
 		const std::vector<SceneObject>& GetObjects() const;
+		Camera* GetActiveCamera();
 
 		//Entity CreateEntity(const std::string name);
 		//void DestroyEntity(Entity entity);
@@ -31,6 +32,11 @@ namespace PAIN {
 	private:
 		std::vector<std::unique_ptr<Mesh>> m_Meshes;
 		std::vector<SceneObject> m_Objects;
+		std::unique_ptr<Camera> camera;
+
+		//std::vector<Camera*> cameras; // multiple cams impl
+		
+		
 		//std::unique_ptr<ECS::Controller> ecs;
 	};
 }
