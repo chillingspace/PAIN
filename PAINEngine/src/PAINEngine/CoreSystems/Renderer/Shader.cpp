@@ -78,8 +78,8 @@ namespace PAIN {
 			search_path = search_path.parent_path();
 		}
 
-		std::filesystem::path vert_full = project_root / "assets" / "Raw" / "Engine" / "Shaders" / vert_file;
-		std::filesystem::path frag_full = project_root / "assets" / "Raw" / "Engine" / "Shaders" / frag_file;
+		std::filesystem::path vert_full = project_root / "assets" / "Raw" / "Engine" / "shaders" / vert_file;
+		std::filesystem::path frag_full = project_root / "assets" / "Raw" / "Engine" / "shaders" / frag_file;
 
 		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
 
