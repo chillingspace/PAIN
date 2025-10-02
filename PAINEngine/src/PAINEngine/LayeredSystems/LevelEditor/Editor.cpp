@@ -10,6 +10,7 @@
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
 #include "Panels/ViewportPanel.h"
+#include "Panels/EntityPanel.h"
 
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
 
@@ -39,10 +40,13 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
+            registerPanel(std::make_shared<Panel::EntityPanel>());
+
 
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
+
 
             //toggleVisible();
         }
