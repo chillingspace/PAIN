@@ -109,7 +109,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     vec3 light_dir = normalize(light.position - fragPos);
     float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
 
-    return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
+    // return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
 
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;

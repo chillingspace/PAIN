@@ -267,7 +267,7 @@ namespace PAIN {
 		for (const Light& l : LightSources::get().getAll()) {
 			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-				glClearDepth(1.0f);  // Explicitly set clear value
+				//glClearDepth(1.0f);  // Explicitly set clear value
 				glClear(GL_DEPTH_BUFFER_BIT);
 				for (auto& obj : scene->GetObjects()) {
 					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
@@ -340,7 +340,12 @@ namespace PAIN {
 					glActiveTexture(GL_TEXTURE0 + tex_id);
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
+#ifdef PN_PLATFORM_WINDOWS
 					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+#else
+					ss << "u_ShadowMap" << (tex_id - 4);
+#endif
+					
 					pbr_shader->SetUniform(ss.str(), tex_id);
 					ss.str("");
 					ss.clear();
