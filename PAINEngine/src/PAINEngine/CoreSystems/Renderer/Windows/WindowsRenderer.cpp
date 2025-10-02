@@ -39,6 +39,37 @@ namespace PAIN {
 		Cleanup();
 	}
 
+	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment) {
+		glGenTextures(1, &tex);
+		if (!tex) {
+			PN_CORE_ERROR("Failed to gen texture");
+			return;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, tex);
+
+		switch (num_channels) {
+		case 2:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
+			break;
+		case 3:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+			break;
+		case 4:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			break;
+		default:
+			PN_CORE_ERROR("{} channels isn't supported(by me lol not opengl so need to add)!", num_channels);
+			break;
+		};
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);		// DO NOT USE GL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, gl_color_attachment, GL_TEXTURE_2D, tex, 0);
+	}
+
 	void WindowsRenderer::_initDeferredShadingBuffers() {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}", winWidth, winHeight);
 
@@ -54,61 +85,23 @@ namespace PAIN {
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
-			glGenTextures(1, &pos_texture);
-			if (pos_texture == 0) {
-				PN_CORE_ERROR("Failed to create position texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pos_texture, 0);
+			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
+			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
+			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
 
-			glGenTextures(1, &col_texture);
-			if (col_texture == 0) {
-				PN_CORE_ERROR("Failed to create color texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, col_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, col_texture, 0);
-
-			glGenTextures(1, &norm_texture);
-			if (norm_texture == 0) {
-				PN_CORE_ERROR("Failed to create normal texture");
-				return;
-			}
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, norm_texture, 0);
-
-			glGenTextures(1, &material_properties_texture);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, material_properties_texture, 0);
-
-			unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+			unsigned int attachments[4] = {
+				GL_COLOR_ATTACHMENT0,
+				GL_COLOR_ATTACHMENT1,
+				GL_COLOR_ATTACHMENT2,
+				GL_COLOR_ATTACHMENT3,
+			};
 			glDrawBuffers(4, attachments);
 
-			glGenRenderbuffers(1, &rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+			glGenRenderbuffers(1, &ds_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, ds_rbo);
 
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -116,6 +109,8 @@ namespace PAIN {
 				return;
 			}
 			PN_CORE_INFO("G-buffer FBO is complete");
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		// final fbo/texture(final output, for rendering)
@@ -131,8 +126,8 @@ namespace PAIN {
 			}
 			glBindTexture(GL_TEXTURE_2D, final_texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
@@ -211,6 +206,12 @@ namespace PAIN {
 		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
 #endif
 
+#ifdef PN_PLATFORM_WINDOWS
+		shadow_shader = Shader::LoadShaders("shadow.vert", "shadow.frag");
+#else
+		shadow_shader = Shader::LoadShaders("android_shadow.vert", "android_shadow.frag");
+#endif
+
 		glGenVertexArrays(1, &empty_vao);
 		if (empty_vao == 0) {
 			PN_CORE_ERROR("Failed to create empty VAO");
@@ -230,12 +231,13 @@ namespace PAIN {
 		LightSources::get().create("cam");
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.1f);
+		lcam.L_intensity = glm::vec3(0.01f);
+		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
 		Light& la = ola.value();
-		la.position = glm::vec3(2.f, 8.f, 2.f);
+		la.position = glm::vec3(4.f, 4.f, -8.f);
 		la.L_intensity = glm::vec3(0.2f);
 
 		LightSources::get().create("b");
@@ -243,9 +245,38 @@ namespace PAIN {
 		Light& lb = olb.value();
 		lb.position = glm::vec3(-4.f, 4.f, -8.f);
 		lb.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("c");
+		auto olc = LightSources::get().get("c");
+		Light& lc = olc.value();
+		lc.position = glm::vec3(0.f, 3.f, 2.f);
+		lc.L_intensity = glm::vec3(0.1f);
+		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+		lc.target = -lc.position;				// origin. required for shadows
 	}
 
 	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
+
+		if (!scene) {
+			return;
+		}
+
+		// populate shadow map first
+
+		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+		for (const Light& l : LightSources::get().getAll()) {
+			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+				glClearDepth(1.0f);  // Explicitly set clear value
+				glClear(GL_DEPTH_BUFFER_BIT);
+				for (auto& obj : scene->GetObjects()) {
+					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
+				}
+			}
+		}
+		glViewport(0, 0, winWidth, winHeight);
+
+		// actually draw
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -266,12 +297,9 @@ namespace PAIN {
 		}
 
 		// render scene
-		if (scene)
+		for (auto& obj : scene->GetObjects())
 		{
-			for (auto& obj : scene->GetObjects())
-			{
-				RenderMesh(obj.mesh, obj.transform); // uses geometry_shader
-			}
+			RenderGeometry(obj.mesh, obj.transform); // uses geometry_shader
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -304,20 +332,45 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
 
-			pbr_shader->SetUniform("gPos", 0);
-			pbr_shader->SetUniform("gCol", 1);
-			pbr_shader->SetUniform("gNorm", 2);
-			pbr_shader->SetUniform("gMaterial", 3);
-			pbr_shader->SetUniform("u_V", Camera::get().view());
-			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
-			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
-
+			int tex_id = 4;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					glActiveTexture(GL_TEXTURE0 + tex_id);
+					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+
+					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+					pbr_shader->SetUniform(ss.str(), tex_id);
+					ss.str("");
+					ss.clear();
+
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					ss.str("");
+					ss.clear();
+
+					++tex_id;
+				}
+				else {
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), -1.f);
+					ss.str("");
+					ss.clear();
+				}
 
 				ss << "u_Lights[" << i << "].position";
 				pbr_shader->SetUniform(ss.str(), l.position);
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].V";
+				pbr_shader->SetUniform(ss.str(), l.view());
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].P";
+				pbr_shader->SetUniform(ss.str(), l.projection());
 				ss.str("");
 				ss.clear();
 
@@ -330,11 +383,15 @@ namespace PAIN {
 
 				i++;
 			}
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
 
-			//auto ol = LightSources::get().get("a");
-			//Light& l = ol.value();
-			//pbr_shader->SetUniform("u_Lights[0].position", l.position);
-			//pbr_shader->SetUniform("u_Lights[0].L", l.L_intensity);
+			pbr_shader->SetUniform("gPos", 0);
+			pbr_shader->SetUniform("gCol", 1);
+			pbr_shader->SetUniform("gNorm", 2);
+			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("u_V", Camera::get().view());
+			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
 			//#endif
 
@@ -368,7 +425,7 @@ namespace PAIN {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void WindowsRenderer::RenderMesh(Mesh* mesh, const glm::mat4& model)
+	void WindowsRenderer::RenderGeometry(Mesh* mesh, const glm::mat4& model)
 	{
 		if (!mesh || !geometry_shader) return;
 
@@ -385,12 +442,24 @@ namespace PAIN {
 		mesh->Draw();
 	}
 
+	void WindowsRenderer::RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light) {
+		if (!mesh || !shadow_shader) return;
+
+		shadow_shader->Bind();
+
+		shadow_shader->SetUniform("u_M", model);
+		shadow_shader->SetUniform("u_V", light.view());
+		shadow_shader->SetUniform("u_P", light.projection());
+
+		mesh->Draw();
+	}
+
 	//void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
 	//{
 
 	//	for (auto& obj : scene.get()->GetObjects()) {
 
-	//		RenderMesh(obj.mesh, obj.transform);
+	//		RenderGeometry(obj.mesh, obj.transform);
 	//	}
 	//}
 
@@ -423,44 +492,25 @@ namespace PAIN {
 			m_mesh.reset();
 		}
 
-		if (ds_fbo != 0) {
-			glDeleteFramebuffers(1, &ds_fbo);
-			ds_fbo = 0;
+		for (unsigned int* fbo : fbos) {
+			if (*fbo != 0) {
+				glDeleteFramebuffers(1, fbo);
+				*fbo = 0;
+			}
 		}
 
-		if (final_fbo) {
-			glDeleteFramebuffers(1, &final_fbo);
-			final_fbo = 0;
+		for (unsigned int* tex : texs) {
+			if (*tex) {
+				glDeleteTextures(1, tex);
+				*tex = 0;
+			}
 		}
 
-		if (rbo) {
-			glDeleteRenderbuffers(1, &rbo);
-			rbo = 0;
-		}
-
-		if (pos_texture) {
-			glDeleteTextures(1, &pos_texture);
-			pos_texture = 0;
-		}
-
-		if (col_texture) {
-			glDeleteTextures(1, &col_texture);
-			col_texture = 0;
-		}
-
-		if (norm_texture) {
-			glDeleteTextures(1, &norm_texture);
-			col_texture = 0;
-		}
-
-		if (material_properties_texture) {
-			glDeleteTextures(1, &material_properties_texture);
-			material_properties_texture = 0;
-		}
-
-		if (final_texture) {
-			glDeleteTextures(1, &final_texture);
-			final_texture = 0;
+		for (unsigned int* rbo : rbos) {
+			if (*rbo) {
+				glDeleteRenderbuffers(1, rbo);
+				*rbo = 0;
+			}
 		}
 	}
 }

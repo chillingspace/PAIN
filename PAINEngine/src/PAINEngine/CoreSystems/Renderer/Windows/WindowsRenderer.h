@@ -49,7 +49,8 @@ namespace PAIN {
 
 		void Init();
 		void Render(std::shared_ptr<Scene> scene);
-		void RenderMesh(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometry(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
 		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
@@ -80,18 +81,45 @@ namespace PAIN {
 		unsigned int col_texture = 0;
 		unsigned int norm_texture = 0;
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
-		unsigned int rbo = 0;				// depth buffer
+		unsigned int ds_rbo = 0;				// depth buffer
+
+		//unsigned int shadow_fbo = 0;
+		//unsigned int shadow_texture = 0;					// shadow map
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
+
+		// for easy access to clear memory
+		std::array<unsigned int*, 2> fbos{ 
+			&ds_fbo, 
+			//&shadow_fbo, 
+			&final_fbo 
+		};
+		std::array<unsigned int*, 1> rbos{ &ds_rbo };
+		std::array<unsigned int*, 4> texs{
+			&pos_texture,
+			&col_texture,
+			&norm_texture,
+			&material_properties_texture,
+			//&shadow_texture
+		};
 
 		std::unique_ptr<Shader> pbr_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
+		std::unique_ptr<Shader> shadow_shader = nullptr;
 
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
+		/**
+		 * .
+		 *
+		 * \param tex
+		 * \param num_i channels
+		 * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n` HERE.
+		 */
+		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment);
 		void _initDeferredShadingBuffers();
 	};
 }
@@ -103,7 +131,11 @@ namespace PAIN {
 namespace PAIN {
 	class Camera {
 	private:
-		Camera() = default;
+		Camera() {
+			width_ratio = winWidth;
+			height_ratio = winHeight;
+			aspect_ratio = width_ratio / height_ratio;
+		};
 		~Camera() = default;
 	public:
 		enum MOVE_MODES {
