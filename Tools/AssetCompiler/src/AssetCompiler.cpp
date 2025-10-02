@@ -7,40 +7,44 @@ bool AssetCompiler::isAssetCompilable(AssetType type) const {
 void AssetCompiler::initExtensions() {
 
     //Compiled assets extensions
-    texture_exts = { ".png", ".jpg", ".jpeg" };
-    model_exts = { ".obj" };
-    audio_exts = { ".wav", ".mp3", ".ogg" };
+    extensions[AssetType::Texture] = {".png", ".jpg", ".jpeg"};
+    extensions[AssetType::Model] = { ".obj" };
+    extensions[AssetType::Audio] = { ".wav", ".mp3", ".ogg" };
 
     //Non compiled assets extensions
-    script_exts = { ".lua" };
-    data_exts = { ".json" };
-    shader_exts = { ".vert", ".frag" };
+    extensions[AssetType::Script] = { ".lua" };
+    extensions[AssetType::Data] = { ".json" };
+    extensions[AssetType::Shader] = { ".vert", ".frag" };
 
     //Desc file extension
     desc_ext = ".desc";
+
+    //Set root folder names
+    raw_folder = "Raw";
+    desc_folder = "Descriptors";
 }
 
 void AssetCompiler::initGameFolders() {
-    std::filesystem::path game_path = "Game";
+    game_folder = "Game";
 
-    game_dir.emplace(AssetType::Texture, game_path / "Textures");
-    game_dir.emplace(AssetType::Model, game_path / "Models");
-    game_dir.emplace(AssetType::Audio, game_path / "Audio");
-    game_dir.emplace(AssetType::Script, game_path / "Scripts");
-    game_dir.emplace(AssetType::Data, game_path / "Data");
-    game_dir.emplace(AssetType::Other, game_path / "Others");
+    game_dir.emplace(AssetType::Texture, game_folder / "Textures");
+    game_dir.emplace(AssetType::Model, game_folder / "Models");
+    game_dir.emplace(AssetType::Audio, game_folder / "Audio");
+    game_dir.emplace(AssetType::Script, game_folder / "Scripts");
+    game_dir.emplace(AssetType::Data, game_folder / "Data");
+    game_dir.emplace(AssetType::Other, game_folder / "Others");
 }
 
 void AssetCompiler::initEngineFolders() {
-    std::filesystem::path engine_path = "Engine";
+    engine_folder = "Engine";
 
-    engine_dir.emplace(AssetType::Texture, engine_path / "Textures");
-    engine_dir.emplace(AssetType::Model, engine_path / "Models");
-    engine_dir.emplace(AssetType::Audio, engine_path / "Audio");
-    engine_dir.emplace(AssetType::Script, engine_path / "Scripts");
-    engine_dir.emplace(AssetType::Data, engine_path / "Data");
-    engine_dir.emplace(AssetType::Shader, engine_path / "Shaders");
-    engine_dir.emplace(AssetType::Other, engine_path / "Others");
+    engine_dir.emplace(AssetType::Texture, engine_folder / "Textures");
+    engine_dir.emplace(AssetType::Model, engine_folder / "Models");
+    engine_dir.emplace(AssetType::Audio, engine_folder / "Audio");
+    engine_dir.emplace(AssetType::Script, engine_folder / "Scripts");
+    engine_dir.emplace(AssetType::Data, engine_folder / "Data");
+    engine_dir.emplace(AssetType::Shader, engine_folder / "Shaders");
+    engine_dir.emplace(AssetType::Other, engine_folder / "Others");
 }
 
 void AssetCompiler::enforceStandardStructure() {
@@ -123,60 +127,171 @@ bool AssetCompiler::isPathPartOfRoot(std::filesystem::path const& path, std::fil
     return currentPath == absRoot;
 }
 
-bool AssetCompiler::deleteFile(std::filesystem::path const& file_path) {
+std::string AssetCompiler::toLowerCase(std::string const& string) const {
+    std::string new_string;
+    for (auto c : string) {
+        new_string += __ascii_tolower(c);
+    }
+    return new_string;
+}
+
+AssetType AssetCompiler::getAssetType(std::filesystem::path const& file) const {
+
+    //Ensure that file is a standard type
+    auto ext = toLowerCase(file.extension().string());
+
+    //return type based on ext
+    for (auto const& asset_ext : extensions) {
+
+        //Asset type found
+        if (asset_ext.second.find(ext) != asset_ext.second.end()) {
+            return asset_ext.first;
+        }
+    }
+
+    //Other asset type found
+    return AssetType::Other;
+}
+
+bool AssetCompiler::repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const {
+    try {
+        std::filesystem::rename(file_path, target_path);
+        std::cout << "File Moved From: " << file_path << " To: " << target_path << std::endl;
+        return true;
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        std::cout << file_path << "Reposition Failed." << std::endl;
+        return false;
+    }
+}
+
+bool AssetCompiler::deleteFile(std::filesystem::path const& file_path) const {
     try {
         if (std::filesystem::remove(file_path)) {
             std::cout << file_path << " - Deleted." << std::endl;
             return true;
         }
         else {
-            std::cout << file_path << " - Unable To Delete." << std::endl;
+            std::cout << file_path << " - Deletion Failed." << std::endl;
             return false;
         }
     }
     catch (const std::filesystem::filesystem_error& e) {
-        std::cout << file_path << " - Unable To Delete." << std::endl;
+        std::cout << file_path << " - Deletion Failed." << std::endl;
         return false;
     }
 }
 
-void AssetCompiler::recursiveScanAllDirectories(std::filesystem::path const& path) {
+void AssetCompiler::enforceGameAssetLocation(AssetInfo& asset) const {
+
+    //Check if game dir has asset type
+    if (game_dir.find(asset.type) != game_dir.end()) {
+
+        //Get engine dir
+        auto dir_path = game_dir.at(asset.type);
+
+        //Check if asset is in the right directory
+        if (!isPathPartOfRoot(asset.relative_path, dir_path)) {
+
+            //Get target path
+            auto target = raw_path / dir_path / asset.asset_id;
+
+            //Reposition asset into the right directory
+            if (repositionFile(asset.file_path, target)) {
+
+                //Update asset details
+                asset.file_path = target;
+                asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
+                asset.directory_path = asset.relative_path.parent_path();
+            }
+        }
+    }
+    else {
+        //Get engine dir
+        auto dir_path = engine_dir.at(asset.type);
+
+        //Check if asset is in the right directory
+        if (!isPathPartOfRoot(asset.relative_path, dir_path)) {
+
+            //Get target path
+            auto target = raw_path / dir_path / asset.asset_id;
+
+            //Reposition asset into the right directory
+            if (repositionFile(asset.file_path, target)) {
+
+                //Update asset details
+                asset.file_path = target;
+                asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
+                asset.directory_path = asset.relative_path.parent_path();
+            }
+        }
+    }
+}
+
+void AssetCompiler::enforceEngineAssetLocation(AssetInfo& asset) const {
+
+    //Check if game dir has asset type
+    if (engine_dir.find(asset.type) != engine_dir.end()) {
+
+        //Get engine dir
+        auto dir_path = engine_dir.at(asset.type);
+
+        //Check if asset is in the right directory
+        if (!isPathPartOfRoot(asset.relative_path, dir_path)) {
+
+            //Get target path
+            auto target = raw_path / dir_path / asset.asset_id;
+
+            //Reposition asset into the right directory
+            if (repositionFile(asset.file_path, target)) {
+
+                //Update asset details
+                asset.file_path = target;
+                asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
+                asset.directory_path = asset.relative_path.parent_path();
+            }
+        }
+    }
+    else {
+
+        //Get engine dir
+        auto dir_path = game_dir.at(asset.type);
+
+        //Check if asset is in the right directory
+        if (!isPathPartOfRoot(asset.relative_path, dir_path)) {
+
+            //Get target path
+            auto target = raw_path / dir_path / asset.asset_id;
+
+            //Reposition asset into the right directory
+            if (repositionFile(asset.file_path, target)) {
+
+                //Update asset details
+                asset.file_path = target;
+                asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
+                asset.directory_path = asset.relative_path.parent_path();
+            }
+        }
+    }
+}
+
+void AssetCompiler::recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func) {
 
     //Look for Engine and Game directories
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
 
         //Directory actions
         if (entry.is_directory()) {
-            //Get directory name and log
-            std::string dirName = entry.path().filename().string();
-            std::cout << dirName << std::endl;
 
             //Scan all directories
-            recursiveScanAllDirectories(entry.path());
+            recursiveScanAllDirectories(entry.path(), func);
         }
 
         //File actions
-        else {
+        if (entry.is_regular_file()) {
 
-            std::cout << entry.path().extension().string() << std::endl;
-
-            //Check for current directory
-            //if (isPathPartOfRoot(entry.path(), desc_path)) {
-
-            //    std::string ext = entry.path().extension().string();
-            //}
-            //else {
-
-            //}
-
-            ////Identify file type
-            //AssetInfo info;
-            //info.file_path = entry.path();
-            //info.relative_path = std::filesystem::relative(entry.path(), rawDir);
-            //info.type = detectAssetType(entry.path());
-            //info. = needsDescriptor(info.type);
-            //info.assetId = generateAssetId(entry.path(), rawDir);
-
+            //Execute action if its a file
+            func(entry.path());
         }
     }
 }
@@ -187,8 +302,8 @@ AssetCompiler::AssetCompiler(std::filesystem::path const& assets_root) : assets_
     initExtensions();
     
     //Set paths
-    raw_path = assets_root / "Raw";
-    desc_path = assets_root / "Descriptors";
+    raw_path = assets_root / raw_folder;
+    desc_path = assets_root / desc_folder;
 
     //Configure folders
     initGameFolders();
@@ -205,8 +320,50 @@ void AssetCompiler::scanAssetDirectories() {
     //Clear all outstanding assets
     assets.clear();
 
-    //Look for Engine and Game directories
-    recursiveScanAllDirectories(assets_root);
+    //Tidy up root directory
+    for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
+        //Directory actions
+        if (entry.is_directory()) {
+            if (entry.path().filename() != raw_folder || entry.path().filename() != desc_folder) {
+                //Handle invalid folders
+            }
+        }
+        if (entry.is_regular_file()) {
+            //Handle files by placing them in correct directories
+        }
+    }
+
+    //Scan raw asset directory
+    recursiveScanAllDirectories(raw_path, [&](std::filesystem::path const& file) {
+
+        //create asset info
+        AssetInfo asset;
+        asset.file_path = file;
+        asset.asset_id = file.filename().string();
+        asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
+        asset.directory_path = asset.relative_path.parent_path();
+        asset.type = getAssetType(file);
+
+        //Check if asset is in engine or game
+        if (isPathPartOfRoot(asset.relative_path, game_folder)) {
+
+            //Enforce asset location
+            enforceGameAssetLocation(asset);
+
+            //Create desc files for assets with
+        }
+        if (isPathPartOfRoot(asset.relative_path, engine_folder)) {
+
+            //Enforce asset location
+            enforceEngineAssetLocation(asset);
+        }
+
+    });
+
+    //Scan desc asset directory
+    //recursiveScanAllDirectories(desc_path, [&](std::filesystem::path const& file) {
+
+    //});
 }
 
 void AssetCompiler::generateMissingDescriptors() {
