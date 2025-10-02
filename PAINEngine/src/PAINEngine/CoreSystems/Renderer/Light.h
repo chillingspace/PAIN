@@ -157,7 +157,7 @@ namespace PAIN {
 		bool lightsOn = true;		// global switch to toggle lights
 
 		static constexpr int MAX_LIGHT_SOURCES = 16;		// remember to set in fragment shader if this is changed
-		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.1f);
+		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 
 		/**
 		 * get singleton instance.
