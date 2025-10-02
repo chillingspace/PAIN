@@ -58,11 +58,13 @@ namespace PAIN {
 
 		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
+		glm::mat4 transform3 = glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 1.f, 0.f));
 
 
 		if (m_Scene) {
 			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform1);
-			//m_Scene->AddObject(Mesh::LoadObj(), transform2);
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform2);
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform3);
 		}
 
 	}
