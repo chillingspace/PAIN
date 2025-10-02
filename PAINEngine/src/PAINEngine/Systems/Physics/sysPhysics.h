@@ -24,7 +24,7 @@ namespace PAIN {
 
 	namespace Physics {
 
-		class System : public ECS::ISystem
+		class System : public ECS::System::ISystem
 		{
 		public:
 			System();
@@ -35,7 +35,7 @@ namespace PAIN {
 			void onAttach() override;
 
 			void onDetach() override;
-			std::string getSysName() { return "Physics System"; }
+			std::string getSysName() override { return "Physics System"; }
 
 		private:
 

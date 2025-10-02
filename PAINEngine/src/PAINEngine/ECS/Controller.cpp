@@ -26,7 +26,7 @@ namespace PAIN {
 			}
 		}
 
-		void Controller::addSystems(std::shared_ptr<ISystem> system) {
+		void Controller::addSystems(std::shared_ptr<System::ISystem> system) {
 			systems.push_back(system);
 			system->onAttach();
 		}

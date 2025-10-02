@@ -9,6 +9,7 @@
 // ECS files
 #include "Entity/sEntity.h"
 #include "Components/sComponents.h"
+#include "System/sSystem.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -29,7 +30,7 @@ namespace PAIN {
 		private:
 
 			//Vector of systems
-			std::vector<std::shared_ptr<ISystem>> systems;
+			std::vector<std::shared_ptr<System::ISystem>> systems;
 
 			// Unique ptr of ECS coordinators
 			std::unique_ptr<Entity::Service> entity_service;
@@ -46,7 +47,7 @@ namespace PAIN {
 			void dispatchToLayersReversed(Event::Event& e);
 
 			//Add systems
-			void addSystems(std::shared_ptr<ISystem> system);
+			void addSystems(std::shared_ptr<System::ISystem> system);
 
 			//Update function
 			void onFixedUpdate(AppTiming timing) override {}
