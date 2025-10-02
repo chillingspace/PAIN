@@ -6,7 +6,6 @@
 #include "CoreSystems/Renderer/Mesh.h"
 #include "Applications/Application.h"
 
-
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/Material.h"
 
@@ -109,14 +108,14 @@ namespace PAIN {
 
 		switch (move_mode) {
 		case CAMERA:
-			if (Camera::get().move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
+			if (m_Scene->GetActiveCamera()->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
 				// spherical
-				float radius = glm::length(Camera::get().pos);
-				float theta = atan2(Camera::get().pos.z, Camera::get().pos.x);
-				float phi = acos(Camera::get().pos.y / radius);
+				float radius = glm::length(m_Scene->GetActiveCamera()->pos);
+				float theta = atan2(m_Scene->GetActiveCamera()->pos.z, m_Scene->GetActiveCamera()->pos.x);
+				float phi = acos(m_Scene->GetActiveCamera()->pos.y / radius);
 
-				if (W_KEYDOWN) radius -= Camera::get().speed * dt;
-				if (S_KEYDOWN) radius += Camera::get().speed * dt;
+				if (W_KEYDOWN) radius -= m_Scene->GetActiveCamera()->speed * dt;
+				if (S_KEYDOWN) radius += m_Scene->GetActiveCamera()->speed * dt;
 				if (A_KEYDOWN) theta += 1.5f * dt;
 				if (D_KEYDOWN) theta -= 1.5f * dt;
 				if (SPACE_KEYDOWN) phi -= 1.5f * dt;
@@ -126,38 +125,38 @@ namespace PAIN {
 				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
 
 				// cartesian
-				Camera::get().pos.x = radius * sin(phi) * cos(theta);
-				Camera::get().pos.y = radius * cos(phi);
-				Camera::get().pos.z = radius * sin(phi) * sin(theta);
+				m_Scene->GetActiveCamera()->pos.x = radius * sin(phi) * cos(theta);
+				m_Scene->GetActiveCamera()->pos.y = radius * cos(phi);
+				m_Scene->GetActiveCamera()->pos.z = radius * sin(phi) * sin(theta);
 
 				// look at origin
-				Camera::get().forward = -glm::normalize(Camera::get().pos);
+				m_Scene->GetActiveCamera()->forward = -glm::normalize(m_Scene->GetActiveCamera()->pos);
 			}
 			else {
 				static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 				if (W_KEYDOWN) {
-					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(Camera::get().forward, 1.f)) * Camera::get().speed * dt;
-					Camera::get().pos += offset;
+					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(m_Scene->GetActiveCamera()->forward, 1.f)) * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos += offset;
 				}
 				if (S_KEYDOWN) {
-					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(Camera::get().forward, 1.f)) * Camera::get().speed * dt;
-					Camera::get().pos -= offset;
+					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(m_Scene->GetActiveCamera()->forward, 1.f)) * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos -= offset;
 				}
 				if (A_KEYDOWN) {
-					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
-					Camera::get().pos -= offset;
+					glm::vec3 offset = glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up)) * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos -= offset;
 				}
 				if (D_KEYDOWN) {
-					glm::vec3 offset = glm::normalize(glm::cross(Camera::get().forward, Camera::get().up)) * Camera::get().speed * dt;
-					Camera::get().pos += offset;
+					glm::vec3 offset = glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up)) * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos += offset;
 				}
 				if (SPACE_KEYDOWN) {
-					glm::vec3 offset = Camera::get().up * Camera::get().speed * dt;
-					Camera::get().pos += offset;
+					glm::vec3 offset = m_Scene->GetActiveCamera()->up * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos += offset;
 				}
 				if (LCTRL_KEYDOWN) {
-					glm::vec3 offset = Camera::get().up * Camera::get().speed * dt;
-					Camera::get().pos -= offset;
+					glm::vec3 offset = m_Scene->GetActiveCamera()->up * m_Scene->GetActiveCamera()->speed * dt;
+					m_Scene->GetActiveCamera()->pos -= offset;
 				}
 			}
 			break;
@@ -165,14 +164,14 @@ namespace PAIN {
 
 		if (mouseButtonDown && xOffset != 0.f) {
 			// transformation matrix(rotate)
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-Camera::get().sensitivity * xOffset), Camera::get().up);
-			Camera::get().forward = glm::normalize(glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f)));
+			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-m_Scene->GetActiveCamera()->sensitivity * xOffset), m_Scene->GetActiveCamera()->up);
+			m_Scene->GetActiveCamera()->forward = glm::normalize(glm::vec3(rot * glm::vec4(m_Scene->GetActiveCamera()->forward, 0.f)));
 		}
 		if (mouseButtonDown && yOffset != 0.f) {
 			// transformation matrix(rotate)
-			const glm::vec3 right = -glm::normalize(glm::cross(Camera::get().forward, Camera::get().up));
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-Camera::get().sensitivity * yOffset), right);
-			Camera::get().forward = glm::normalize(glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f)));
+			const glm::vec3 right = -glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up));
+			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-m_Scene->GetActiveCamera()->sensitivity * yOffset), right);
+			m_Scene->GetActiveCamera()->forward = glm::normalize(glm::vec3(rot * glm::vec4(m_Scene->GetActiveCamera()->forward, 0.f)));
 		}
 		xOffset = 0.f;
 		yOffset = 0.f;
@@ -182,11 +181,11 @@ namespace PAIN {
 		// set cam light to cam
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
-		lcam.position = Camera::get().pos;
+		lcam.position = m_Scene->GetActiveCamera()->pos;
 		lcam.position.y += 0.1f;	// light on camera = grainy
-		lcam.fov = Camera::get().fov;
-		lcam.target = Camera::get().forward;
-		lcam.aspect_ratio = Camera::get().aspect_ratio;
+		lcam.fov = m_Scene->GetActiveCamera()->fov;
+		lcam.target = m_Scene->GetActiveCamera()->forward;
+		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {
@@ -256,7 +255,7 @@ namespace PAIN {
 				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
 				break;
 			case PAIN_KEY_O:
-				Camera::get().move_mode = static_cast<Camera::MOVE_MODES>((Camera::get().move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
+				m_Scene->GetActiveCamera()->move_mode = static_cast<Camera::MOVE_MODES>((m_Scene->GetActiveCamera()->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
 				break;
 			default:
 				break;

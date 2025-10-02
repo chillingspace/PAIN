@@ -49,7 +49,7 @@ namespace PAIN {
 
 		void Init();
 		void Render(std::shared_ptr<Scene> scene);
-		void RenderGeometry(Mesh* mesh, const glm::mat4& model);
+		void RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
 		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
 		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
@@ -88,6 +88,8 @@ namespace PAIN {
 
 		unsigned int final_fbo = 0;
 		unsigned int final_texture = 0;		// for imgui
+		
+		std::unique_ptr<Camera> active_cam = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{ 
@@ -128,60 +130,60 @@ namespace PAIN {
 #endif // PN_PLATFORM_WINDFOWS
 
 
-namespace PAIN {
-	class Camera {
-	private:
-		Camera() {
-			width_ratio = winWidth;
-			height_ratio = winHeight;
-			aspect_ratio = width_ratio / height_ratio;
-		};
-		~Camera() = default;
-	public:
-		enum MOVE_MODES {
-			FPS,
-			ORBIT_ORIGIN,
-			NUM_MOVE_MODES,
-		};
+// namespace PAIN {
+// 	class Camera {
+// 	private:
+// 		Camera() {
+// 			width_ratio = winWidth;
+// 			height_ratio = winHeight;
+// 			aspect_ratio = width_ratio / height_ratio;
+// 		};
+// 		~Camera() = default;
+// 	public:
+// 		enum MOVE_MODES {
+// 			FPS,
+// 			ORBIT_ORIGIN,
+// 			NUM_MOVE_MODES,
+// 		};
 
-		MOVE_MODES move_mode = FPS;
+// 		MOVE_MODES move_mode = FPS;
 
-		float speed = 15.f;
+// 		float speed = 15.f;
 
-		float sensitivity = 0.1f;
+// 		float sensitivity = 0.1f;
 
-		glm::vec3 pos{ 0.f, 2.f, 4.f };
-		glm::vec3 forward{ -glm::normalize(pos) };
-		glm::vec3 up{ 0.f, 1.f, 0.f };
+// 		glm::vec3 pos{ 0.f, 2.f, 4.f };
+// 		glm::vec3 forward{ -glm::normalize(pos) };
+// 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
-		float fov{ 90.f };
-		float near_plane{ 0.1f };		// closest distance camera can see
-		float far_plane{ 100.f };		// furthest distance camera can see
+// 		float fov{ 90.f };
+// 		float near_plane{ 0.1f };		// closest distance camera can see
+// 		float far_plane{ 100.f };		// furthest distance camera can see
 
-		float width_ratio{ 16.f };
-		float height_ratio{ 9.f };
-		float aspect_ratio{ width_ratio / height_ratio };
+// 		float width_ratio{ 16.f };
+// 		float height_ratio{ 9.f };
+// 		float aspect_ratio{ width_ratio / height_ratio };
 
-		// temp
-		glm::mat4 model() const {
-			glm::mat4 m = glm::mat4(1.f);
-			m = glm::translate(m, glm::vec3(0.f, 1.f, 0.f));
-			return m;
-		}
+// 		// temp
+// 		glm::mat4 model() const {
+// 			glm::mat4 m = glm::mat4(1.f);
+// 			m = glm::translate(m, glm::vec3(0.f, 1.f, 0.f));
+// 			return m;
+// 		}
 
-		glm::mat4 view() const {
-			return glm::lookAt(pos, pos + forward, up);
-		}
+// 		glm::mat4 view() const {
+// 			return glm::lookAt(pos, pos + forward, up);
+// 		}
 
-		glm::mat4 projection() const {
-			return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
-		}
+// 		glm::mat4 projection() const {
+// 			return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
+// 		}
 
-		static Camera& get() {
-			static Camera instance;
-			return instance;
-		}
-	};
-}
+// 		static Camera& get() {
+// 			static Camera instance;
+// 			return instance;
+// 		}
+// 	};
+// }
 
-//#endif // __WINDOWS_RENDERER_H__
+// //#endif // __WINDOWS_RENDERER_H__
