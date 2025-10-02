@@ -19,6 +19,7 @@ namespace PAIN {
 
 		public:
 			Controller() = default;
+			~Controller() override = default;
 
 			//Dispatch events to layers
 			void dispatchToLayers(Event::Event& e);

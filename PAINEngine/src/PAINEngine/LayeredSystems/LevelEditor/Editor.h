@@ -27,7 +27,7 @@ namespace PAIN {
         class Editor : public AppSystem {
         public:
             Editor(void* window);
-            ~Editor();                       // no override
+            ~Editor() override;
 
             void onAttach() override;
             void onDetach() override;
@@ -58,7 +58,7 @@ namespace PAIN {
 
             void buildDockspace();
 
-            bool editor_visible = false;
+            bool editor_visible = true;
         };
     }
 } 

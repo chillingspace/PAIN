@@ -14,6 +14,7 @@ namespace PAIN {
 			private:
 			public:
 				Tools();
+				~Tools() override = default;
 
 				void nextWindowSettings() override;
 

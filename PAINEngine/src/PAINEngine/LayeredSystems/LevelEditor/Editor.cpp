@@ -109,6 +109,9 @@ namespace PAIN {
                 PN_CORE_INFO("[Editor] Requesting save on detach");
                 ser->saveCurrentScene();
             }
+            panels = nullptr;
+            platform = nullptr;
+            command_manager = nullptr;
         }
 
         void Editor::onUpdate(AppTiming timing) {
@@ -118,12 +121,50 @@ namespace PAIN {
             // Begin IMGUI Frame
             platform->beginFrame();
 
+#ifdef PN_PLATFORM_ANDROID
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
             }
+#else
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+            }
+#endif
+
+
+#ifdef PN_PLATFORM_ANDROID
+            // --- ADD BUTTON HERE ---
+            {
+                ImGuiViewport* vp = ImGui::GetMainViewport();
+                ImVec2 windowPos;
+                ImVec2 windowPadding(10, 10); // distance from edges
+
+                // Bottom-left corner
+                windowPos.x = vp->Pos.x + windowPadding.x;
+                windowPos.y = vp->Pos.y + vp->Size.y - windowPadding.y; // start from bottom
+
+                ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+                // ImVec2(0.0f, 1.0f) pivots the window at its bottom-left corner
+
+                ImGui::Begin("##EditorToggleWindow", nullptr,
+                    ImGuiWindowFlags_NoDecoration |
+                    ImGuiWindowFlags_AlwaysAutoResize |
+                    ImGuiWindowFlags_NoMove);
+
+                if (ImGui::Button(editor_visible ? "Hide Editor" : "Show Editor")) {
+                    toggleVisible();
+                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+                }
+
+                ImGui::End();
+            }
+            // --- END BUTTON ---
+#endif
 
             if (editor_visible) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 // Build docking space
                 buildDockspace();
@@ -148,6 +189,7 @@ namespace PAIN {
 
             platform->endFrame();
         }
+
 
 
 

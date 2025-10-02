@@ -5,35 +5,38 @@
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/RendererLayer.h"
 #include "CoreSystems/Audio/Audio.h"
-#include "ECS/Controller.h"
-#include "LayeredSystems/LevelEditor/Editor.h"
 #include "CoreSystems/Audio/AudioManager.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
+
+#include "ECS/Controller.h"
+
+#include "Scene/Scene.h"
 
 // Assets
 #include "CoreSystems/Assets/sPath.h"
 #include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
+#include "CoreSystems/Path/Path.h"
 
 
 namespace PAIN {
 
-	Application::Application()
-	{
+	Application::Application() {
 		//Create default services
 		services = std::make_shared<Services>();
 	}
 
-	Application::~Application()
-	{
+	Application::~Application() {
 		//Destroy top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->services = nullptr;
+			(*it).lock()->onDetach();
 		}
 		layer_stack.clear();
 
@@ -41,25 +44,29 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//On detach
-			(*it)->onDetach();
+			(*it).lock()->services = nullptr;
+			(*it).lock()->onDetach();
 		}
 		core_stack.clear();
 	}
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		PN_CORE_INFO("jspoh addcore");
 		core_system->services = services;
+		PN_CORE_INFO("jspoh addcore after services");
 		core_system->onAttach();
-		core_stack.push_back(core_system);
+		PN_CORE_INFO("jspoh addcore after onAttach");
 		services->set<T>(core_system);
+		core_stack.push_back(services->get<T>());
 	}
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
 		layer_system->services = services;
 		layer_system->onAttach();
-		layer_stack.push_back(layer_system);
 		services->set<T>(layer_system);
+		layer_stack.push_back(services->get<T>());
 	}
 
 	void Application::Init(void* app) {
@@ -72,44 +79,53 @@ namespace PAIN {
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// Match viewport to window size
+		auto window = services->get<Window::Window>();
+#ifdef PN_PLATFORM_WINDOWS
+		glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
+		glViewport(0, 0, winWidth, winHeight);
+#else
+		ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
+		winWidth = ANativeWindow_getWidth(nativeWindow);
+		winHeight = ANativeWindow_getHeight(nativeWindow);
+		glViewport(0, 0, winWidth, winHeight);
+#endif
+
 		// Create and add the AudioManager to the core systems
+		//Create path service
+		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
+		services->get<Path::Path>()->logVirtualPaths();
+
+		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
 		//Audio testing.
-#ifdef PN_PLATFORM_ANDROID
-
-		//Android specific paths, will need to abstract this out
-		app_audio->loadSound("file:///android_asset/audio/Music/Boss_Music.wav", true, false, false);
-		app_audio->play("file:///android_asset/audio/Music/Boss_Music.wav");
-#else
-		app_audio->loadSound("assets/audio/Music/Boss_Music.wav", true, false, false);
-		//app_audio->play("assets/audio/Music/Boss_Music.wav");
-#endif
+		auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/Music/Boss_Music.wav");
+		PN_CORE_INFO(asset_path);
+		app_audio->loadSound(asset_path, true, false, false);
+		// app_audio->play(asset_path);
 
 		//Push other core systems into the stack
-		//addCoreSystem(window_app);
 		addCoreSystem(std::make_shared<ECS::Controller>());
 
 		// Add Serialization 
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		// Windows only have paths, andriods have to use AASettmanager
-		#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Path::Service>());
 		services->get<Path::Service>()->init("assets/Config.json");
 		addCoreSystem(std::make_shared<Assets::Service>());
-		addCoreSystem(std::make_shared<Loader::Service>());
 		addCoreSystem(std::make_shared<Compiler::Service>());
-		#endif
-
-#ifdef PN_PLATFORM_ANDROID
-		auto renderer = std::make_shared<RendererLayer>();
-        addCoreSystem(renderer);
-#else
-		auto renderer = std::make_shared<RendererLayer>();
-		addCoreSystem(renderer);
 #endif
+
+		PN_CORE_INFO("jspoh1");
+		auto renderer = std::make_shared<RendererLayer>();
+		PN_CORE_INFO("jspoh2");
+		addCoreSystem(renderer);
+		PN_CORE_INFO("jspoh3");
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -122,6 +138,10 @@ namespace PAIN {
 	}
 
 	void Application::Run() {
+
+		Scene scene;
+		scene.Init();
+
 
 		//Set last time
 		last_time = std::chrono::steady_clock::now();
@@ -159,11 +179,14 @@ namespace PAIN {
 			int steps = 0;
 			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
+
 				//Update all core systems
-				for (auto& core : core_stack) core->onFixedUpdate(timing);
+				for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
 
 				//Update all layered systems
-				for (auto& layer : layer_stack) layer->onFixedUpdate(timing);
+				for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
+
+
 
 				accumulator -= timing.fixed_dt;
 				++steps;
@@ -173,14 +196,18 @@ namespace PAIN {
 			timing.steps_this_frame = steps;
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
+			scene.OnUpdate();
+
 			//Update all core systems
-			for (auto& core : core_stack) core->onUpdate(timing);
+			for (auto& core : core_stack) core.lock()->onUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) layer->onUpdate(timing);
+			for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
+
+			//PN_CORE_INFO("LOOP");
 		};
 	}
 
@@ -196,7 +223,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -208,7 +235,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -222,7 +249,7 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -234,7 +261,7 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it)->onEvent(e);
+			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
 			if (handled) break;
 		}
@@ -256,7 +283,7 @@ namespace PAIN {
 
 	void Application::pushEventQueue(std::shared_ptr<Event::Event> e) {
 		event_queue.push(e);
-	}
+	}	
 
 	void Application::drainEventQueue() {
 

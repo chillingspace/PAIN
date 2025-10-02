@@ -15,6 +15,7 @@
 #define S_ASSET_COMPILER_H
 
 #include "Applications/AppSystem.h"
+#include "Utility/guid.h"
 
 //#ifdef PN_PLATFORM_ANDROID
 //#include <android/asset_manager.h>
@@ -24,39 +25,39 @@
 namespace PAIN {
 	namespace Compiler {
 
-		enum class ASSET_TYPE {
+		enum class COMPILE_ASSET_TYPE {
 			Texture,
-			Audio,
+			Object,
 			Shader,
 			None
 		};
+
+		static json readDescFile(const std::string& input_path)
+		{
+
+			// Read descriptor JSON
+			std::ifstream input_file(input_path);
+			if (!input_file.is_open()) {
+				PN_CORE_WARN("Cannot open descriptor: {}", input_path);
+				return json{};
+			}
+
+			json json_file;
+			try {
+				input_file >> json_file;
+			}
+			catch (const nlohmann::json::exception& e) {
+				PN_CORE_WARN("Failed to parse JSON: {}", e.what());
+				return json{};
+			}
+
+			return json_file;
+		}
 
 		class IAssetCompiler{
 		public:
 			virtual ~IAssetCompiler() = default;
 			virtual void compile(const std::string& desc_path) = 0;
-
-			static json readDescFile(const std::string& input_path)
-			{
-
-				// Read descriptor JSON
-				std::ifstream input_file(input_path);
-				if (!input_file.is_open()) {
-					PN_CORE_WARN("Cannot open descriptor: {}", input_path);
-					return json{};
-				}
-
-				json json_file;
-				try {
-					input_file >> json_file;
-				}
-				catch (const nlohmann::json::exception& e) {
-					PN_CORE_WARN("Failed to parse JSON: {}", e.what());
-					return json{};
-				}
-
-				return json_file;
-			}
 		};
 
 		class TextureCompiler : public IAssetCompiler {
@@ -69,7 +70,7 @@ namespace PAIN {
 			void compile(const std::string& desc_path) override;
 		};
 
-		class AudioCompiler : public IAssetCompiler {
+		class ObjectMeshCompiler : public IAssetCompiler {
 		public:
 			void compile(const std::string& desc_path) override;
 		};
@@ -80,12 +81,12 @@ namespace PAIN {
 
 			void scanAssetDirectory(std::string const& virtual_path, bool b_diretory_tree);
 
-			void compileAsset(ASSET_TYPE type, const std::string& desc_file_path);
+			void compileAsset(COMPILE_ASSET_TYPE type, const std::string& desc_file_path);
 
 			// Helper function
 			std::string getIDFromPath(std::string const& path);
-			std::string typeToString(ASSET_TYPE type) const;
-			ASSET_TYPE getAssetType(std::filesystem::path const& path) const;
+			std::string typeToString(COMPILE_ASSET_TYPE type) const;
+			COMPILE_ASSET_TYPE getAssetType(std::filesystem::path const& path) const;
 
 			void processAssetFile(std::filesystem::path const& file_path);
 			void addValidExtensions(std::string const& ext);
@@ -104,7 +105,7 @@ namespace PAIN {
 #define PN_PATH_SERVICE  services->get<Path::Service>()
 
 		private:
-			std::unordered_map<ASSET_TYPE, std::unique_ptr<IAssetCompiler>> compilers;
+			std::unordered_map<COMPILE_ASSET_TYPE, std::unique_ptr<IAssetCompiler>> compilers;
 
 			//List of valid extension
 			std::set<std::string> valid_extensions;

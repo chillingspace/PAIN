@@ -20,33 +20,50 @@
 
 namespace PAIN {
 	extern Material material;
-	extern Light light;
 };
 
 
-#ifdef PN_PLATFORM_WINDOWS
+//#ifdef PN_PLATFORM_WINDOWS
 
 
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
-#include "../../../Applications/AppSystem.h"
+#include "Applications/AppSystem.h"
+#include "Scene/Scene.h"
 
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
 	class WindowsRenderer {
-	public:
+	private:
 		WindowsRenderer();
 		~WindowsRenderer();
 
+	public:
+
+		static WindowsRenderer& get() {
+			static WindowsRenderer instance;
+			return instance;
+		}
+
 		void Init();
-		void Render();
+		void Render(std::shared_ptr<Scene> scene);
+		void RenderMesh(Mesh* mesh, const glm::mat4& model);
+		//void RenderScene(std::shared_ptr<Scene> scene);
 		void Cleanup();
 
 		/*bool InitGLFW();
 		void SetWindow(GLFWwindow* window);
 		GLFWwindow* GetWindow() const { return window; };*/
+
+		unsigned int getFinalFbo() const {
+			return final_fbo;
+		}
+
+		unsigned int getFinalTexture() const {
+			return final_texture;
+		}
 
 	private:
 		unsigned int vao = 0;
@@ -55,13 +72,27 @@ namespace PAIN {
 
 		unsigned int empty_vao = 0;
 
-		unsigned int fbo = 0;
+		unsigned int passthrough_vao = 0;
+		unsigned int passthrough_vbo = 0;
 
-		std::unique_ptr<Shader> m_shader = nullptr;
+		unsigned int ds_fbo = 0;			// deferred shading framebuffer
+		unsigned int pos_texture = 0;
+		unsigned int col_texture = 0;
+		unsigned int norm_texture = 0;
+		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
+		unsigned int rbo = 0;				// depth buffer
+
+		unsigned int final_fbo = 0;
+		unsigned int final_texture = 0;		// for imgui
+
+		std::unique_ptr<Shader> pbr_shader = nullptr;
+		std::unique_ptr<Shader> geometry_shader = nullptr;
+		std::unique_ptr<Shader> floor_shader = nullptr;
+		std::unique_ptr<Shader> passthrough_shader = nullptr;
+
 		std::unique_ptr<Mesh> m_mesh = nullptr;
 
-		std::unique_ptr<Shader> sphere_shader = nullptr;
-		std::unique_ptr<Shader> floor_shader = nullptr;
+		void _initDeferredShadingBuffers();
 	};
 }
 
@@ -81,13 +112,13 @@ namespace PAIN {
 			NUM_MOVE_MODES,
 		};
 
-		MOVE_MODES move_mode = ORBIT_ORIGIN;
+		MOVE_MODES move_mode = FPS;
 
 		float speed = 15.f;
 
 		float sensitivity = 0.1f;
 
-		glm::vec3 pos{ 0.f, 5.f, 7.f };
+		glm::vec3 pos{ 0.f, 2.f, 4.f };
 		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
@@ -121,4 +152,4 @@ namespace PAIN {
 	};
 }
 
-#endif // __WINDOWS_RENDERER_H__
+//#endif // __WINDOWS_RENDERER_H__

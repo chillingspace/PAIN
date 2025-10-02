@@ -28,7 +28,7 @@ namespace PAIN {
 			//Set style
 			ImGui::StyleColorsDark();
 
-			//Initialize platform and renderer backends
+			//Initialize    platform and renderer backends
 			ImGui_ImplAndroid_Init(a_window);
 			ImGui_ImplOpenGL3_Init("#version 300 es");
 		}

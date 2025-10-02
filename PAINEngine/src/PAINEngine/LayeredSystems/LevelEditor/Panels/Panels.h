@@ -80,6 +80,7 @@ namespace PAIN {
 
 				//Constructor
 				IPanel() = default;
+				virtual ~IPanel() = default;
 
 				//Get panel name
 				std::string getPanelName() const { return name; }

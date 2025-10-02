@@ -2,6 +2,7 @@
 #include <android/log.h>
 #include <android/native_activity.h>
 #include <android_native_app_glue.h> // provides android_main() dispatch
+#include <android/asset_manager.h>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 
@@ -12,7 +13,10 @@
 
 extern PAIN::Application* PAIN::CreateApplication();
 
+AAssetManager* assetManager = nullptr;
+
 extern "C" void android_main(android_app* app) {
+    assetManager = app->activity->assetManager;
 
     //Game entry
     PAIN::Application* game = PAIN::CreateApplication();
