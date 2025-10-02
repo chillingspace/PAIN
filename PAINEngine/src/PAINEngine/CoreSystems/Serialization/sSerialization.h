@@ -28,6 +28,21 @@ namespace PAIN {
         template <typename T>
         void from_json_reflected(T& obj, const nlohmann::json& j);
 
+        struct SceneDoc {
+            int grid_id = 0;
+            std::string active_cam_id;
+            std::vector<std::string> meta_tags;
+
+            struct Layer {
+                int id = 0;         
+                int mask = 1;        
+                bool enabled = true; // B_State (visibility)
+                // @todo add entities later
+            };
+            std::vector<Layer> layers;
+            std::vector<std::vector<bool>> mask_matrix;
+            bool dirty = false;
+        };
 
         // ----------------------------
         // Service (inherits AppSystem)
@@ -40,12 +55,13 @@ namespace PAIN {
 
             // AppSystem lifecycle
             void onAttach() override;         
-            void onDetach() override {}               
+            void onDetach() override;
             void onFixedUpdate(AppTiming tinming) override {}  
             void onUpdate(AppTiming tinming) override {}       
             void onAppPause() override {}
             void onAppResume() override {}
             void onEvent(Event::Event& e) override {}
+            void modifyScene() { isModifiedScene = true; }
 
             // File helpers
             bool saveJsonFile(const std::string& file_path, const nlohmann::json& data);
@@ -56,8 +72,21 @@ namespace PAIN {
             bool loadSceneFromFile(const std::string& file_path);
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
-
             static std::string MakeScenePathFromBase(std::string_view base); 
+
+            const SceneDoc& doc() const { return doc_; }
+
+            // Mutators
+            void setGrid(int g);
+            void setActiveCam(std::string id);
+            void setTags(std::vector<std::string> t);
+
+            void addLayer();
+            void removeLayer(unsigned idx);
+            void setLayerVisible(unsigned idx, bool v);
+            void setLayerYSort(unsigned idx, bool v);
+            void setMask(unsigned i, unsigned j, bool v);
+            void ensureMaskSize();
 
             bool createNewScene(std::string_view baseName);  
             bool saveCurrentScene(); 
@@ -67,6 +96,12 @@ namespace PAIN {
 
         private:
             std::string curr_scene_file_;
+            bool isModifiedScene = false;
+            SceneDoc doc_;
+
+            // helpers to convert 
+            nlohmann::json to_json_from_doc_() const;
+            void           doc_from_json_(const nlohmann::json& j);
         };
 
         // ----------------------------------------

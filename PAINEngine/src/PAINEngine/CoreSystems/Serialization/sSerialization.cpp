@@ -75,6 +75,17 @@ namespace PAIN {
             }
         }
 
+        void PAIN::Serialization::Service::onDetach() {
+            if (!curr_scene_file_.empty()) {
+                if (isModifiedScene) {
+                    PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
+                    if (!saveCurrentScene()) {
+                        PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
+                    }
+                }
+            }
+        }
+
         /*void PAIN::Serialization::Service::onAttach() {
            
             // 1) Write a minimal scene file
@@ -162,27 +173,15 @@ namespace PAIN {
             // TO DO: ADD THIS ONCE ENTITY AND SCENE ARE READY
             //return false;
 
-            // placeholder minimal json to test
-            nlohmann::json layer0 = {
-                { "Layer", {
-                    { "ID",      0 },
-                    { "Mask",    1 },
-                    { "B_State", true },
-                    { "B_YSort", false },
-                    { "Entities", nlohmann::json::array() }
-                }}
-            };
+            // Convert our in-memory document to JSON
+            nlohmann::json scene = to_json_from_doc_();
 
-            nlohmann::json scene = nlohmann::json::array({
-                { { "Grid ID", 0 } },
-                { { "Camera",  { { "Active Cam ID", "" } } } },
-                { { "MetaData",{ { "Entity_Tags", nlohmann::json::array() } } } },
-                { { "Layer Count", 1 } },
-                layer0
-                });
-
+            // Write to disk
             const bool ok = saveJsonFile(file_path, scene);
-            if (ok) curr_scene_file_ = file_path;
+            if (ok) {
+                curr_scene_file_ = file_path;
+                isModifiedScene = false;   // clear dirty flag after saving
+            }
             return ok;
         }
 
@@ -254,7 +253,6 @@ namespace PAIN {
                 Lout["ID"] = L.value("ID", 0);
                 Lout["Mask"] = L.value("Mask", 0);
                 Lout["B_State"] = L.value("B_State", true);
-                Lout["B_YSort"] = L.value("B_YSort", false);
 
                 // Entities
                 nlohmann::json ents_out = nlohmann::json::array();
@@ -304,9 +302,9 @@ namespace PAIN {
             size_t lidx = 0;
             for (const auto& L : report["layers"]) {
                 if (lidx++ >= max_layers_log) break;
-                PN_CORE_INFO("  [Layer ID={0} Mask={1} YSort={2}] entities={3}",
+                PN_CORE_INFO("  [Layer ID={0} Mask={1} entities={2}",
                     L["ID"].get<int>(), L["Mask"].get<int>(),
-                    L["B_YSort"].get<bool>(), L["entity_count"].get<size_t>());
+                    L["entity_count"].get<size_t>());
                 size_t eidx = 0;
                 for (const auto& E : L["Entities"]) {
                     if (eidx++ >= max_ents_log) break;
@@ -315,10 +313,12 @@ namespace PAIN {
                 }
             }
 
-            // Save a pretty report next to the scene (so you can inspect with any JSON viewer)
+#ifdef _DEBUG
+            // Save a report next to the scene (so can inspect with any JSON viewer)
             const std::string report_path = file_path + ".report.json";
             saveJsonFile(report_path, report);
             PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
+#endif
 
             curr_scene_file_ = file_path;
             return true;
@@ -327,7 +327,7 @@ namespace PAIN {
         std::string Service::MakeScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/Scenes/") + b + ".scn.json";
+            return std::string("assets/Scenes/") + b + ".scn";
         }
 
         bool Service::createNewScene(std::string_view baseName)
@@ -373,5 +373,166 @@ namespace PAIN {
             return true;
         }
 
+        nlohmann::json Service::to_json_from_doc_() const
+        {
+            json scene = json::array();
+
+            scene.push_back(json{ {"Grid ID", doc_.grid_id} });
+            scene.push_back(json{ {"Camera",  json{ {"Active Cam ID", doc_.active_cam_id} } } });
+            scene.push_back(json{ {"MetaData", json{ {"Entity_Tags", doc_.meta_tags} } } });
+            scene.push_back(json{ {"Layer Count", int(doc_.layers.size())} });
+
+            for (const auto& L : doc_.layers) {
+                json Lobj = {
+                    {"ID",      L.id},
+                    {"Mask",    L.mask},
+                    {"B_State", L.enabled},
+                    {"Entities", json::array()} // fill when wire ECS
+                };
+                scene.push_back(json{ {"Layer", std::move(Lobj)} });
+            }
+
+            // mask grid, can remove if dw
+            if (!doc_.mask_matrix.empty()) {
+                json m = json::array();
+                for (auto& row : doc_.mask_matrix) m.push_back(row);
+                scene.push_back(json{ {"LayerMaskMatrix", m} });
+            }
+
+            return scene;
+        }
+
+        void Service::doc_from_json_(const nlohmann::json& j)
+        {
+            doc_ = {}; // reset
+            doc_.grid_id = 0;
+            doc_.active_cam_id.clear();
+            doc_.meta_tags.clear();
+            doc_.layers.clear();
+            doc_.mask_matrix.clear();
+
+            auto findSection = [&](const char* key)->const json* {
+                for (const auto& elem : j) {
+                    if (!elem.is_object()) continue;
+                    auto it = elem.find(key);
+                    if (it != elem.end()) return &(*it);
+                }
+                return nullptr;
+                };
+
+            if (auto g = findSection("Grid ID"); g && g->is_number_integer())
+                doc_.grid_id = g->get<int>();
+
+            if (auto c = findSection("Camera"); c && c->is_object()) {
+                auto it = c->find("Active Cam ID");
+                if (it != c->end() && it->is_string()) doc_.active_cam_id = it->get<std::string>();
+            }
+            if (auto m = findSection("MetaData"); m && m->is_object()) {
+                auto it = m->find("Entity_Tags");
+                if (it != m->end() && it->is_array()) doc_.meta_tags = it->get<std::vector<std::string>>();
+            }
+
+            // layers
+            for (const auto& elem : j) {
+                auto it = elem.find("Layer");
+                if (it == elem.end() || !it->is_object()) continue;
+                const auto& L = *it;
+                SceneDoc::Layer out;
+                out.id = L.value("ID", 0);
+                out.mask = L.value("Mask", 1);
+                out.enabled = L.value("B_State", true);
+                doc_.layers.push_back(std::move(out));
+            }
+
+            // mask also, can remove
+            if (auto mm = findSection("LayerMaskMatrix"); mm && mm->is_array()) {
+                doc_.mask_matrix.clear();
+                for (const auto& row : *mm) {
+                    doc_.mask_matrix.push_back(row.get<std::vector<bool>>());
+                }
+            }
+
+            doc_.dirty = false;
+        }
+
+        void Service::setGrid(int g)
+        {
+            doc_.grid_id = g;
+        }
+
+        void Service::setActiveCam(std::string id)
+        {
+            doc_.active_cam_id = id;
+        }
+
+        void Service::setTags(std::vector<std::string> t)
+        {
+            doc_.meta_tags = t;
+        }
+
+        void Service::addLayer()
+        {
+            int next_id = doc_.layers.empty() ? 0 : (doc_.layers.back().id + 1);
+            doc_.layers.push_back(SceneDoc::Layer{ next_id, 
+                                                   1, 
+                                                   true
+                                                    });
+        }
+
+        void Service::removeLayer(unsigned idx)
+        {
+            if (idx >= doc_.layers.size() || doc_.layers.size() == 1) return;
+            doc_.layers.erase(doc_.layers.begin() + idx);
+            for (unsigned i = 0;i < doc_.layers.size();++i) doc_.layers[i].id = int(i);
+        }
+
+        void Service::setLayerVisible(unsigned idx, bool v)
+        {
+            if (idx >= doc_.layers.size()) return;
+            doc_.layers[idx].enabled = v;
+            doc_.dirty = true;
+        }
+
+        void Service::setLayerYSort(unsigned idx, bool v)
+        {
+            if (idx >= doc_.layers.size()) return;
+            doc_.dirty = true;
+        }
+
+        void Service::setMask(unsigned i, unsigned j, bool v)
+        {
+            ensureMaskSize();
+            const size_t n = doc_.layers.size();
+            if (i >= n || j >= n || i == j) return;
+
+            doc_.mask_matrix[i][j] = v;
+            doc_.mask_matrix[j][i] = v;   
+            doc_.dirty = true;
+            isModifiedScene = true;
+        }
+        void Service::ensureMaskSize()
+        {
+            const size_t n = doc_.layers.size();
+
+            if (doc_.mask_matrix.size() < n)
+                doc_.mask_matrix.resize(n);
+
+            for (size_t i = 0; i < n; ++i) {
+                if (doc_.mask_matrix[i].size() < n)
+                    doc_.mask_matrix[i].resize(n, false);
+                // force diagonal off
+                if (i < doc_.mask_matrix[i].size())
+                    doc_.mask_matrix[i][i] = false;
+            }
+
+            if (doc_.mask_matrix.size() > n)
+                doc_.mask_matrix.resize(n);
+            for (size_t i = 0; i < n; ++i) {
+                if (doc_.mask_matrix[i].size() > n)
+                    doc_.mask_matrix[i].resize(n);
+                if (i < doc_.mask_matrix[i].size())
+                    doc_.mask_matrix[i][i] = false;
+            }
+        }
     }
 }

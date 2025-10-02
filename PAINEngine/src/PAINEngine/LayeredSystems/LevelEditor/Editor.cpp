@@ -71,6 +71,20 @@ namespace PAIN {
                     PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
                 }
                 };
+            hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
+            hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
+                ser->setMask(i, j, v);      
+                ser->modifyScene();         
+                };
+
+            hooks.onLayerVisibleChanged = [ser](unsigned idx, bool vis) {
+                ser->setLayerVisible(idx, vis); 
+                ser->modifyScene();
+                };
+            hooks.onDirty = [ser]() { ser->modifyScene(); };
+
+
+
 
             auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
 
@@ -90,6 +104,11 @@ namespace PAIN {
         }
 
         void Editor::onDetach() {
+            auto ser = services->get<PAIN::Serialization::Service>();
+            if (ser) {
+                PN_CORE_INFO("[Editor] Requesting save on detach");
+                ser->saveCurrentScene();
+            }
         }
 
         void Editor::onUpdate(AppTiming timing) {
