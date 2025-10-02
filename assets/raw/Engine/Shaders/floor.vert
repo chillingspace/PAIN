@@ -8,9 +8,8 @@
 
 layout(location=0) out vec3 fFragPos;
 
-
-layout(location=1) uniform mat4 u_V;
-layout(location=2) uniform mat4 u_P;
+uniform mat4 u_V;
+uniform mat4 u_P;
 
 
 void main() {

@@ -12,9 +12,6 @@
 #ifdef PN_PLATFORM_WINDOWS
 
 namespace PAIN {
-
-
-
 	std::unordered_map<std::string, std::filesystem::path> const& Path::Service::getAllRegisteredVirtualPaths()
 	{
 		return virtual_paths;
@@ -24,7 +21,6 @@ namespace PAIN {
 	{
 		return dir_watchers;
 	}
-
 
 	void Path::Service::init(std::string const& config_path) {
 	 	//Identify current working directory

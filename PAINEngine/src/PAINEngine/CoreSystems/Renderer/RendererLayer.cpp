@@ -40,11 +40,11 @@ namespace PAIN {
 		//	GL_TEXTURE_2D, fboTexture, 0);
 
 		//// Create depth-stencil buffer
-		//glGenRenderbuffers(1, &rbo);
-		//glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		//glGenRenderbuffers(1, &ds_rbo);
+		//glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
 		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-		//	GL_RENDERBUFFER, rbo);
+		//	GL_RENDERBUFFER, ds_rbo);
 
 		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		//	PN_CORE_ERROR("Framebuffer is not complete!");
@@ -54,15 +54,17 @@ namespace PAIN {
 		//#endif
 
 		//Init scene
-		m_Scene = std::make_shared<Scene>();
+		m_Scene = services->get<Scene>();
 
 		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
+		glm::mat4 transform3 = glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 1.f, 0.f));
 
 
 		if (m_Scene) {
 			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform1);
-			m_Scene->AddObject(Mesh::LoadObj(), transform2);
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform2);
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform3);
 		}
 
 	}
@@ -70,8 +72,6 @@ namespace PAIN {
 	void RendererLayer::onUpdate(AppTiming timing) {
 		const float dt = timing.dt;
 
-		//#else
-		//if (w_renderer) 
 		{
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
@@ -134,12 +134,13 @@ namespace PAIN {
 				Camera::get().forward = -glm::normalize(Camera::get().pos);
 			}
 			else {
+				static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 				if (W_KEYDOWN) {
-					glm::vec3 offset = Camera::get().forward * Camera::get().speed * dt;
+					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(Camera::get().forward, 1.f)) * Camera::get().speed * dt;
 					Camera::get().pos += offset;
 				}
 				if (S_KEYDOWN) {
-					glm::vec3 offset = Camera::get().forward * Camera::get().speed * dt;
+					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(Camera::get().forward, 1.f)) * Camera::get().speed * dt;
 					Camera::get().pos -= offset;
 				}
 				if (A_KEYDOWN) {
@@ -165,13 +166,13 @@ namespace PAIN {
 		if (mouseButtonDown && xOffset != 0.f) {
 			// transformation matrix(rotate)
 			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-Camera::get().sensitivity * xOffset), Camera::get().up);
-			Camera::get().forward = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
+			Camera::get().forward = glm::normalize(glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f)));
 		}
 		if (mouseButtonDown && yOffset != 0.f) {
 			// transformation matrix(rotate)
 			const glm::vec3 right = -glm::normalize(glm::cross(Camera::get().forward, Camera::get().up));
 			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-Camera::get().sensitivity * yOffset), right);
-			Camera::get().forward = glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f));
+			Camera::get().forward = glm::normalize(glm::vec3(rot * glm::vec4(Camera::get().forward, 0.f)));
 		}
 		xOffset = 0.f;
 		yOffset = 0.f;
@@ -183,6 +184,9 @@ namespace PAIN {
 		Light& lcam = olcam.value();
 		lcam.position = Camera::get().pos;
 		lcam.position.y += 0.1f;	// light on camera = grainy
+		lcam.fov = Camera::get().fov;
+		lcam.target = Camera::get().forward;
+		lcam.aspect_ratio = Camera::get().aspect_ratio;
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {

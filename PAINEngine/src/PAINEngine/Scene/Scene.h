@@ -21,6 +21,8 @@ namespace PAIN {
 		void OnUpdate();
 
 		Mesh* AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform);
+		void DeleteObject();
+
 		const std::vector<SceneObject>& GetObjects() const;
 
 		//Entity CreateEntity(const std::string name);

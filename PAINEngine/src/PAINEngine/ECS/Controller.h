@@ -3,13 +3,27 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include <memory>
-#include <vector>
-
+#include "pch.h"
 #include "Applications/AppSystem.h"
+
+// ECS files
+#include "Entity/sEntity.h"
+#include "Components/sComponents.h"
 
 namespace PAIN {
 	namespace ECS {
+
+#ifdef PN_PLATFORM_WINDOWS
+		struct EntitiesChanged : public PAIN::Event::Event {
+			std::set<Entity::Type> entities;
+			EntitiesChanged() = default;
+			EntitiesChanged(std::set<Entity::Type> entities) : entities{ entities } {}
+
+			//Register Event
+			EVENT_CLASS_TYPE(EntitiesChange);
+			EVENT_CLASS_CATEGORY(PAIN::Event::Category::EntityChange);
+		};
+#endif
 
 		class Controller : public AppSystem {
 		private:
@@ -17,8 +31,12 @@ namespace PAIN {
 			//Vector of systems
 			std::vector<std::shared_ptr<ISystem>> systems;
 
+			// Unique ptr of ECS coordinators
+			std::unique_ptr<Entity::Service> entity_service;
+			std::unique_ptr<Component::Service> components_service;
+
 		public:
-			Controller() = default;
+			Controller();
 			~Controller() override = default;
 
 			//Dispatch events to layers

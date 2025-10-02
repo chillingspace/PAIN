@@ -30,6 +30,11 @@ namespace PAIN {
 		m_Objects.push_back({ raw, transform });
 		return raw;
 	}
+	void Scene::DeleteObject()
+	{
+		m_Objects.pop_back();
+	}
+
 	const std::vector<SceneObject>& Scene::GetObjects() const
 	{
 		return m_Objects;

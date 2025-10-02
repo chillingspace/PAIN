@@ -7,6 +7,7 @@
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
 #include "CoreSystems/Windows/Window.h"
+#include "Scene/Scene.h"
 
 //Panels headers
 #include "Panels/Panels.h"
@@ -29,12 +30,15 @@ namespace PAIN {
             Editor(void* window);
             ~Editor() override;
 
+            std::shared_ptr<Scene> m_Scene;
+
             void onAttach() override;
             void onDetach() override;
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
             void onEvent(Event::Event& event) override;
 
+            void SetScene(const std::shared_ptr<Scene>& scene) { m_Scene = scene; }
             bool isVisible() const { return editor_visible; }
             void toggleVisible() { editor_visible = !editor_visible; }
 
