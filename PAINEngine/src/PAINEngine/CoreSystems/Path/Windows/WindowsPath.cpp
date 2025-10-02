@@ -71,8 +71,8 @@ namespace PAIN {
             registerVirtualPath("game", game_path);
 
             //Temp paths to be changed
-            registerVirtualPath("game_assets", game_path + "/assets/raw/Game", true);
-            registerVirtualPath("engine_assets", game_path + "/assets/raw/Engine", true);
+            registerVirtualPath("game_assets", game_path + "/assets" + relative_game_folder, true);
+            registerVirtualPath("engine_assets", game_path + "/assets" + relative_engine_folder, true);
             registerVirtualPath("local", localdata_path + "/" + app_name, true);
             registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
             registerVirtualPath("documents", documents_path + "/" + app_name, true);

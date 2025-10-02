@@ -78,8 +78,8 @@ namespace PAIN {
 			search_path = search_path.parent_path();
 		}
 
-		std::filesystem::path vert_full = project_root / "assets" / "raw" / "Engine" / "shaders" / vert_file;
-		std::filesystem::path frag_full = project_root / "assets" / "raw" / "Engine" / "shaders" / frag_file;
+		std::filesystem::path vert_full = project_root / "assets" / "Raw" / "Engine" / "shaders" / vert_file;
+		std::filesystem::path frag_full = project_root / "assets" / "Raw" / "Engine" / "shaders" / frag_file;
 
 		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
 
@@ -90,8 +90,8 @@ namespace PAIN {
 #else
 		PN_CORE_INFO("Using Android asset manager for shaders");
 
-		std::string vert_code = ReadFileAndroid("raw/Engine/Shaders/" + vert_file);
-		std::string frag_code = ReadFileAndroid("raw/Engine/Shaders/" + frag_file);
+		std::string vert_code = ReadFileAndroid("Raw/Engine/Shaders/" + vert_file);
+		std::string frag_code = ReadFileAndroid("Raw/Engine/Shaders/" + frag_file);
 #endif
 
 		return std::make_unique<Shader>(vert_code, frag_code);

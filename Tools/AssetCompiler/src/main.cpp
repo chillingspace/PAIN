@@ -1,46 +1,76 @@
 
-#include <iostream>
+#include "AssetCompiler.h"
 
-void showUsage() {
-    std::cout << "PAINEngine Dynamic Asset Compiler" << std::endl;
-    std::cout << "Usage: AssetCompilerTool <platform> <assets_root> <output_root> [--auto-discover]" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Arguments:" << std::endl;
-    std::cout << "  platform      Target platform (windows|android)" << std::endl;
-    std::cout << "  assets_root   Root assets directory (e.g., 'Assets/')" << std::endl;
-    std::cout << "  output_root   Root output directory (e.g., 'bin/Debug/assets/')" << std::endl;
-    std::cout << "  --auto-discover  Automatically discover Engine/Game directories and create structure" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Examples:" << std::endl;
-    std::cout << "  AssetCompilerTool windows Assets/ bin/Debug/assets/ --auto-discover" << std::endl;
-    std::cout << "  AssetCompilerTool android Assets/ android/app/src/main/assets/ --auto-discover" << std::endl;
+#include <iostream>
+#include <filesystem>
+
+#ifdef _WIN32
+#include <windows.h>
+#elif __linux__ || __APPLE__
+#include <unistd.h>
+#include <limits.h>
+#endif
+
+std::filesystem::path getExecutablePath() {
+#ifdef _WIN32
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    return std::filesystem::path(buffer).parent_path();
+#elif __linux__
+    char buffer[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    if (len != -1) {
+        buffer[len] = '\0';
+        return std::filesystem::path(buffer).parent_path();
+    }
+    return std::filesystem::current_path();
+#elif __APPLE__
+    char buffer[PATH_MAX];
+    uint32_t size = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &size) == 0) {
+        return std::filesystem::path(buffer).parent_path();
+    }
+    return std::filesystem::current_path();
+#else
+    return std::filesystem::current_path();
+#endif
 }
 
+std::filesystem::path findProjectRoot() {
+    // Get the actual executable directory
+    std::filesystem::path execDir = getExecutablePath();
 
-int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        showUsage();
-        return 1;
-    }
+    std::cout << "Executable directory: " << execDir << std::endl;
 
-    std::string platform = argv[1];
-    std::string assetsRoot = argv[2];
-    std::string outputRoot = argv[3];
+    // Search upward from executable location
+    std::filesystem::path currentPath = execDir;
 
-    bool autoDiscover = false;
-    for (int i = 4; i < argc; i++) {
-        if (std::string(argv[i]) == "--auto-discover") {
-            autoDiscover = true;
+    for (int levels = 0; levels < 10; levels++) {
+        std::filesystem::path assetsPath = currentPath / "assets";
+
+
+        if (std::filesystem::exists(assetsPath)) {
+            std::cout << "Found project root: " << currentPath << std::endl;
+            return currentPath;
+        }
+
+        currentPath = currentPath.parent_path();
+        if (currentPath.empty() || currentPath == currentPath.root_path()) {
             break;
         }
     }
 
-    //Platform targetPlatform = parsePlatform(platform);
-    //if (targetPlatform == Platform::Unknown) {
-    //    std::cerr << "ERROR: Unknown platform: " << platform << std::endl;
-    //    return 1;
-    //}
+    throw std::runtime_error("Could not find project root containing Assets/ directory");
+}
 
-    //DynamicAssetCompiler compiler(targetPlatform, assetsRoot, outputRoot, autoDiscover);
-    //return compiler.processAllAssets();
+int main(int argc, char* argv[]) {
+
+    //Auto-discover project root from executable location
+    std::filesystem::path projectRoot = findProjectRoot();
+    std::filesystem::path assetsRoot = projectRoot / "assets";
+
+	//create assset compiler
+	AssetCompiler* compiler = new AssetCompiler(assetsRoot);
+    compiler->scanAssetDirectories();
+	delete compiler;
 }

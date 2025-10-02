@@ -13,6 +13,10 @@ namespace PAIN {
 			//Virtual paths
 			std::unordered_map<std::string, std::string> virtual_paths;
 
+			//Game folder relative to asset
+			std::string relative_game_folder = "/Raw/Game";
+			std::string relative_engine_folder = "/Raw/Engine";
+
 			//Parsing virtual functions
 			std::pair<std::string, std::string> parseVirtualPath(const std::string& virtualPath) const {
 				auto separatorPos = virtualPath.find(getVirtualSymbol());

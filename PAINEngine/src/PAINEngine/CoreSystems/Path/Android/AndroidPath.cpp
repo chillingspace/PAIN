@@ -117,8 +117,8 @@ namespace PAIN {
 
 			//Special case: manually register asset path
 			//virtual_paths["assets"] = assets_path;
-			virtual_paths["game_assets"] = assets_path + "/raw/Game";
-			virtual_paths["engine_assets"] = assets_path + "/raw/Engine";
+			virtual_paths["game_assets"] = assets_path + relative_game_folder;
+			virtual_paths["engine_assets"] = assets_path + relative_engine_folder;
 
 			// Register default virtual paths
 			registerVirtualPath("internal", internal_path, true);
