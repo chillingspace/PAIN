@@ -8,13 +8,14 @@
 
 #include "../ECSTypes.h"
 #include "CoreSystems/Events/Event.h"
+#include <Applications/AppSystem.h>
 
 
 namespace PAIN {
 	namespace ECS {
 		namespace System {
 			//Base ECS Class
-			class ISystem {
+			class ISystem : public AppSystem {
 			protected:
 				//System signature
 				Component::Signature system_signature;
@@ -33,11 +34,6 @@ namespace PAIN {
 
 				//Constructor
 				ISystem() : system_signature{}, b_components_linked{ true }, b_system_active{ true } {}
-
-				//Optional virtual functions
-				virtual void onAttach() {}
-				virtual void onDetach() {}
-				virtual void onUpdate() = 0;
 
 				// Get system name
 				virtual std::string getSysName() = 0;
@@ -127,7 +123,7 @@ namespace PAIN {
 					std::shared_ptr<T> system = std::make_shared<T>();
 
 					//Init system
-					system->init();
+					system->onAttach();
 
 					//Set system components linked
 					system->setComponentsLinked(components_linked);
@@ -231,7 +227,7 @@ namespace PAIN {
 				void entityDestroyed(Entity::Type entity);
 
 				//Update all systems
-				void updateSystems();
+				void updateSystems(AppTiming time);
 
 				//Get all systems
 				std::vector<std::shared_ptr<System::ISystem>>& getAllSystems();
