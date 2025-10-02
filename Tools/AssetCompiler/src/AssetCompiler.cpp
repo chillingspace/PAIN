@@ -325,7 +325,7 @@ void AssetCompiler::scanAssetDirectories() {
         //Directory actions
         if (entry.is_directory()) {
             if (entry.path().filename() != raw_folder || entry.path().filename() != desc_folder) {
-                //Handle invalid folders
+                //Recursively handle all assets and delete directory
             }
         }
         if (entry.is_regular_file()) {
@@ -339,10 +339,10 @@ void AssetCompiler::scanAssetDirectories() {
         //create asset info
         AssetInfo asset;
         asset.file_path = file;
-        asset.asset_id = file.filename().string();
+        asset.asset_id = asset.file_path.filename().string();
         asset.relative_path = std::filesystem::relative(asset.file_path, raw_path);
         asset.directory_path = asset.relative_path.parent_path();
-        asset.type = getAssetType(file);
+        asset.type = getAssetType(asset.file_path);
 
         //Check if asset is in engine or game
         if (isPathPartOfRoot(asset.relative_path, game_folder)) {
@@ -351,6 +351,7 @@ void AssetCompiler::scanAssetDirectories() {
             enforceGameAssetLocation(asset);
 
             //Create desc files for assets with
+
         }
         if (isPathPartOfRoot(asset.relative_path, engine_folder)) {
 
