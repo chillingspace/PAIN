@@ -31,10 +31,14 @@ namespace PAIN {
 			~System();
 
 			// To add virtual and override in when abstract systems come in
-			void onUpdate() override;
+			void onFixedUpdate(AppTiming timing) override;
+			void onUpdate(AppTiming timing) override;
 			void onAttach() override;
 
 			void onDetach() override;
+
+			//Event handler for app layer
+			void onEvent(Event::Event& e) override;
 			std::string getSysName() override { return "Physics System"; }
 
 		private:

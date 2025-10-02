@@ -105,7 +105,7 @@ namespace PAIN {
                 }
             }
 
-            void Service::updateSystems() {
+            void Service::updateSystems(AppTiming time) {
                 // Pre-allocate vector for performance
                 std::vector<double> system_times;
                 system_times.reserve(systems.size());
@@ -113,10 +113,11 @@ namespace PAIN {
                 // Update all active systems
                 for (auto const& system : systems) {
                     if (system->getActiveState()) {
+                        
                         auto system_start_time = std::chrono::steady_clock::now();
-
+                        
                         // Update the system
-                        system->onUpdate();  // Match your header declaration
+                        system->onUpdate(time);  // Match your header declaration
 
                         auto system_end_time = std::chrono::steady_clock::now();
                         std::chrono::duration<double, std::milli> system_duration =

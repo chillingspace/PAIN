@@ -11,28 +11,21 @@
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
-#include "Jolt/Jolt.h"
-#include <Jolt/Core/Factory.h>          
-#include <Jolt/RegisterTypes.h>         
-#include <Jolt/Physics/PhysicsSystem.h> 
-#include <Jolt/Physics/Body/Body.h>     
-#include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Core/JobSystemThreadPool.h> 
-#include <Jolt/Physics/Collision/ObjectLayer.h>
-#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
-
 namespace PAIN {
 
 	/******************************************************************************************
 	* Note: When creating components, try to stack them properly to properly optimise memory
 	* (Place largest type var (Double) first, then followed by smallest.
 	*****************************************************************************************/
+	namespace Transform {
+		struct Transform {
+			glm::f32quat rotation;
+			glm::f32vec3 position;
+			glm::f32vec3 scale{ 1, 1, 1 };
+		};
+	}
 
-	struct Transform {
-		glm::f32quat rotation;
-		glm::f32vec3 position;
-		glm::f32vec3 scale{1, 1, 1};
-	};
+
 }
 
 #endif
