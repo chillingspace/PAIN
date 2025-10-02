@@ -301,7 +301,7 @@ namespace PAIN {
 		for (auto& obj : scene->GetObjects())
 		{
 
-			RenderMesh(scene, obj.mesh, obj.transform); // uses geometry_shader
+			RenderGeometry(scene, obj.mesh, obj.transform); // uses geometry_shader
 			
 		}
 
@@ -397,7 +397,7 @@ namespace PAIN {
 			pbr_shader->SetUniform("gCol", 1);
 			pbr_shader->SetUniform("gNorm", 2);
 			pbr_shader->SetUniform("gMaterial", 3);
-			pbr_shader->SetUniform("u_V", Camera::get().view());
+			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
@@ -433,7 +433,7 @@ namespace PAIN {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void WindowsRenderer::RenderGeometry(Mesh* mesh, const glm::mat4& model)
+	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
 	{
 		if (!mesh || !geometry_shader) return;
 
