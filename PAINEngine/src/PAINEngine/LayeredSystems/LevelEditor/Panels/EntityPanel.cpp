@@ -31,7 +31,7 @@ namespace PAIN {
                 }
             }
 
-            void EntityPanel::onUpdate() {
+            void EntityPanel::onUpdate(PAIN::AppTiming timing) {
                 if (ImGui::Begin("Entity Panel", nullptr, flags)) {
                     ImGui::Text("Entities:");
 
