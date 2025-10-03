@@ -38,7 +38,6 @@ namespace PAIN {
 
 		public:
 			Controller();
-			~Controller() override = default;
 
 			//Dispatch events to layers
 			void dispatchToLayers(Event::Event& e);
@@ -222,8 +221,6 @@ namespace PAIN {
 			void setSystemState(bool state) {
 				system_service->setSystemState<T>(state);
 			}
-
-			void updateSystems();
 
 			// Get all systems
 			std::vector<std::shared_ptr<System::ISystem>>& getAllSystems();
