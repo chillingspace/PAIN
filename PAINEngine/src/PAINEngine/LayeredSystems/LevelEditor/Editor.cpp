@@ -11,6 +11,8 @@
 #include "Panels/ResourcePanel.h"
 #include "Panels/ViewportPanel.h"
 #include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
+#include "Panels/EntityPanel.h"
+
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
 
 #define PN_CORE_ASSERT(cond, msg) \
@@ -95,10 +97,13 @@ namespace PAIN {
             registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
+            registerPanel(std::make_shared<Panel::EntityPanel>());
+
 
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
+
 
             //toggleVisible();
         }

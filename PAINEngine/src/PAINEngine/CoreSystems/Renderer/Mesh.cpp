@@ -57,7 +57,7 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
 		PN_CORE_INFO("Using Android asset manager for mesh");
-		std::string mesh_data = ReadFileAndroid("Raw/Game/Meshes/" + mesh_file);
+		std::string mesh_data = ReadFileAndroid("Raw/Game/Models/" + mesh_file);
 		if (mesh_data.empty()) {
 			PN_CORE_ERROR("Failed to read mesh data from Android assets: {0}", mesh_file);
 		}
@@ -85,7 +85,7 @@ namespace PAIN {
 			search_path = search_path.parent_path();
 		}
 
-		std::filesystem::path mesh_full = project_root / "assets" / "Raw" / "Game" / "Meshes" / mesh_file;
+		std::filesystem::path mesh_full = project_root / "assets" / "Raw" / "Game" / "Models" / mesh_file;
 
 		file_ok = std::filesystem::exists(mesh_full) && mesh_file != "";
 #endif

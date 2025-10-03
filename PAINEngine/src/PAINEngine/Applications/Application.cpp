@@ -15,12 +15,16 @@
 
 #include "Scene/Scene.h"
 
+#include "Core.h"
+
 // Assets
 #include "CoreSystems/Assets/sPath.h"
 #include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sAssetCompiler.h"
 #include "CoreSystems/Path/Path.h"
+
+#include "Systems/Physics/sysPhysics.h"
 
 
 namespace PAIN {
@@ -112,6 +116,15 @@ namespace PAIN {
 
 		// Add Serialization 
 		addCoreSystem(std::make_shared<Serialization::Service>());
+		// Add systems here
+
+		// Physics system not cross platform yet
+#ifdef PN_PLATFORM_WINDOWS
+		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);
+#endif
+
+		// Register components here
+		services->get<ECS::Controller>()->registerComponent<Transform::Transform>();
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS
