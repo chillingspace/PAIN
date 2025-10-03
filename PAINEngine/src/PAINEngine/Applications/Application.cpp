@@ -10,6 +10,7 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 
 #include "ECS/Controller.h"
+#include "ECS/sMetaData.h"
 
 #include "Scene/Scene.h"
 
@@ -111,6 +112,7 @@ namespace PAIN {
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(std::make_shared<MetaData::Service>());
 
 		// Add systems here
 
