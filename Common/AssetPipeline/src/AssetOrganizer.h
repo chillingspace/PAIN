@@ -13,16 +13,7 @@
 
 //Include asset compiler
 #include "AssetCompiler.h"
-
-enum class AssetType {
-    Texture,    // .png, .jpg
-    Model,      // .obj
-    Audio,      // .wav, .mp3, .ogg
-    Script,     // .lua
-    Data,       // .json
-    Shader,     // .vert, .frag
-    Other
-};
+#include "AssetTypes.h"
 
 struct AssetInfo {
     std::filesystem::path file_path;
