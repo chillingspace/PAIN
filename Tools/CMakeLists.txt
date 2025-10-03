@@ -1,2 +1,7 @@
-# Build all tools
-add_subdirectory(AssetCompiler)
+# Build all tools (only on host platforms)
+if(NOT ANDROID)
+    message(STATUS "Building PAIN Tools for asset pipeline")
+    add_subdirectory(AssetCompiler)
+else()
+    message(STATUS "Skipping Tools for Android target")
+endif()

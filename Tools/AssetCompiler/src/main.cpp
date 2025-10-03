@@ -1,5 +1,5 @@
 
-#include "AssetCompiler.h"
+#include "AssetOrganizer.h"
 
 #include <iostream>
 #include <filesystem>
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path assetsRoot = projectRoot / "assets";
 
 	//create assset compiler
-	AssetCompiler* compiler = new AssetCompiler(assetsRoot);
+    AssetOrganizer* compiler = new AssetOrganizer(assetsRoot);
 
     //Desc file extension
     compiler->desc_ext = ".desc";

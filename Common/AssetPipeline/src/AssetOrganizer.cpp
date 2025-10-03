@@ -1,11 +1,11 @@
-#include "AssetCompiler.h"
+#include "AssetOrganizer.h"
 
-bool AssetCompiler::isAssetCompilable(AssetType type) const {
+bool AssetOrganizer::isAssetCompilable(AssetType type) const {
     if (type == AssetType::Texture || type == AssetType::Model || type == AssetType::Audio) return true;
     return false;
 }
 
-bool AssetCompiler::isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const {
+bool AssetOrganizer::isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const {
 
     // Convert both paths to absolute to avoid issues with relative paths
     std::filesystem::path absFile = std::filesystem::absolute(path);
@@ -25,7 +25,7 @@ bool AssetCompiler::isPathPartOfRoot(std::filesystem::path const& path, std::fil
     return currentPath == absRoot;
 }
 
-std::string AssetCompiler::toLowerCase(std::string const& string) const {
+std::string AssetOrganizer::toLowerCase(std::string const& string) const {
     std::string new_string;
     for (auto c : string) {
         new_string += __ascii_tolower(c);
@@ -33,7 +33,7 @@ std::string AssetCompiler::toLowerCase(std::string const& string) const {
     return new_string;
 }
 
-AssetType AssetCompiler::getAssetType(std::filesystem::path const& file) const {
+AssetType AssetOrganizer::getAssetType(std::filesystem::path const& file) const {
 
     //Ensure that file is a standard type
     auto ext = toLowerCase(file.extension().string());
@@ -51,7 +51,7 @@ AssetType AssetCompiler::getAssetType(std::filesystem::path const& file) const {
     return AssetType::Other;
 }
 
-bool AssetCompiler::repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const {
+bool AssetOrganizer::repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const {
     try {
         std::filesystem::rename(file_path, target_path);
         std::cout << "File Moved From: " << file_path << " To: " << target_path << std::endl;
@@ -63,7 +63,7 @@ bool AssetCompiler::repositionFile(std::filesystem::path const& file_path, std::
     }
 }
 
-bool AssetCompiler::deleteFile(std::filesystem::path const& file_path) const {
+bool AssetOrganizer::deleteFile(std::filesystem::path const& file_path) const {
     try {
         if (std::filesystem::remove(file_path)) {
             std::cout << file_path << " - Deleted." << std::endl;
@@ -80,7 +80,7 @@ bool AssetCompiler::deleteFile(std::filesystem::path const& file_path) const {
     }
 }
 
-void AssetCompiler::instantiateFolder(std::filesystem::path const& path) const {
+void AssetOrganizer::instantiateFolder(std::filesystem::path const& path) const {
     if (!std::filesystem::exists(path)) {
         try {
             std::filesystem::create_directories(path);
@@ -101,7 +101,7 @@ void AssetCompiler::instantiateFolder(std::filesystem::path const& path) const {
     }
 }
 
-void AssetCompiler::enforceGameAssetLocation(AssetInfo& asset) const {
+void AssetOrganizer::enforceGameAssetLocation(AssetInfo& asset) const {
 
     //Check if game dir has asset type
     if (game_dir.find(asset.type) != game_dir.end()) {
@@ -147,7 +147,7 @@ void AssetCompiler::enforceGameAssetLocation(AssetInfo& asset) const {
     }
 }
 
-void AssetCompiler::enforceEngineAssetLocation(AssetInfo& asset) const {
+void AssetOrganizer::enforceEngineAssetLocation(AssetInfo& asset) const {
 
     //Check if game dir has asset type
     if (engine_dir.find(asset.type) != engine_dir.end()) {
@@ -194,7 +194,7 @@ void AssetCompiler::enforceEngineAssetLocation(AssetInfo& asset) const {
     }
 }
 
-void AssetCompiler::recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func) {
+void AssetOrganizer::recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func) {
 
     //Look for Engine and Game directories
     for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -215,22 +215,22 @@ void AssetCompiler::recursiveScanAllDirectories(std::filesystem::path const& pat
     }
 }
 
-AssetCompiler::AssetCompiler(std::filesystem::path const& assets_root) : assets_root{ assets_root } {
+AssetOrganizer::AssetOrganizer(std::filesystem::path const& assets_root) : assets_root{ assets_root } {
 }
 
-void AssetCompiler::initExtensions(AssetType type, std::set<std::string> ext_set) {
+void AssetOrganizer::initExtensions(AssetType type, std::set<std::string> ext_set) {
     extensions.emplace(type, ext_set);
 }
 
-void AssetCompiler::initGameFolders(AssetType type, std::string const& folder) {
+void AssetOrganizer::initGameFolders(AssetType type, std::string const& folder) {
     game_dir.emplace(type, game_folder / folder);
 }
 
-void AssetCompiler::initEngineFolders(AssetType type, std::string const& folder) {
+void AssetOrganizer::initEngineFolders(AssetType type, std::string const& folder) {
     engine_dir.emplace(type, engine_folder / folder);
 }
 
-void AssetCompiler::enforceStandardStructure() {
+void AssetOrganizer::enforceStandardStructure() {
 
     //Setup raw & desc path
     raw_path = assets_root / raw_folder;
@@ -276,7 +276,7 @@ void AssetCompiler::enforceStandardStructure() {
 }
 
 
-void AssetCompiler::scanAssetDirectories() {
+void AssetOrganizer::scanAssetDirectories() {
     std::cout << "=== Scanning Asset Directories ===" << std::endl;
     std::cout << "Assets Root: " << assets_root << std::endl;
 
@@ -330,7 +330,7 @@ void AssetCompiler::scanAssetDirectories() {
     //});
 }
 
-void AssetCompiler::tidyUpDirectories() {
+void AssetOrganizer::tidyUpDirectories() {
     //Tidy up additional directories
     for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
         if (entry.is_directory()) {

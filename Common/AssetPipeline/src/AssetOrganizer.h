@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ASSET_COMPILER_HPP
-#define ASSET_COMPILER_HPP
+#ifndef ASSET_ORGANIZER_HPP
+#define ASSET_ORGANIZER_HPP
 
 #include <filesystem>
 #include <string>
@@ -10,6 +10,9 @@
 #include <iostream>
 #include <unordered_map>
 #include <functional>
+
+//Include asset compiler
+#include "AssetCompiler.h"
 
 enum class AssetType {
     Texture,    // .png, .jpg
@@ -35,7 +38,7 @@ struct AssetInfo {
 };
 
 //Asset compiler class
-class AssetCompiler {
+class AssetOrganizer {
 private:
     //Assets info for sorting
     std::vector<AssetInfo> assets;
@@ -81,8 +84,8 @@ private:
     void recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func);
 
 public:
-	AssetCompiler(std::filesystem::path const& assets_root);
-	~AssetCompiler() = default;
+    AssetOrganizer(std::filesystem::path const& assets_root);
+	~AssetOrganizer() = default;
 
     //Desc file extension
     std::string desc_ext;
