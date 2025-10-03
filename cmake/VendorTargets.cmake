@@ -172,7 +172,6 @@ target_compile_definitions(stb INTERFACE
 )
 
 # ======================= Assimp Vendor  =========================
-
 if (WIN32 AND NOT ANDROID)
     # Check if assimp exists as submodule or prebuilt
     if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
@@ -199,8 +198,10 @@ if (WIN32 AND NOT ANDROID)
         set_property(TARGET assimp PROPERTY
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
             
-        # Create alias for consistency
-        add_library(assimp::assimp ALIAS assimp)
+        # DON'T create alias - assimp already creates assimp::assimp for us!
+        # The alias is automatically created by assimp's CMakeLists.txt
+        
+        message(STATUS "Assimp built from source - assimp::assimp target available")
         
     elseif (EXISTS "${VENDOR_DIR}/assimp/lib")
         # Use prebuilt libraries
@@ -210,10 +211,12 @@ if (WIN32 AND NOT ANDROID)
             IMPORTED_LOCATION_RELEASE   "${VENDOR_DIR}/assimp/lib/assimp-vc142-mt.lib"
             INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/assimp/include"
         )
+        
+        # Only create alias for prebuilt version
         add_library(assimp::assimp ALIAS assimp)
+        message(STATUS "Assimp using prebuilt libraries - assimp::assimp alias created")
+        
     else()
         message(STATUS "Assimp not found - 3D model import will be disabled")
     endif()
 endif()
-
-# Android doesn't need assimp for runtime (assets pre-compiled on host)
