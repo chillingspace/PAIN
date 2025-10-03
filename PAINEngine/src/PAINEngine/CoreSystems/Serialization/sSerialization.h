@@ -12,6 +12,9 @@
 #define SERIALIZATION_SERVICE_H
 #include "pch.h"
 #include "Applications/AppSystem.h"
+#include "PAINEngine/ECS/Controller.h"
+#include "PAINEngine/ECS/Components/cTransform.h"
+
 
 namespace PAIN {
     namespace Serialization {
@@ -50,7 +53,6 @@ namespace PAIN {
         class Service : public AppSystem {
         public:
             Service() = default;
-            // If you did Option A above, keep override; otherwise drop it
             ~Service() = default;
 
             // AppSystem lifecycle

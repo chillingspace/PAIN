@@ -216,11 +216,19 @@ namespace PAIN {
 
                 ImGui::InputText("Scene name", nameBuf_, IM_ARRAYSIZE(nameBuf_));
 
+                // Create New Scene
                 if (ImGui::Button("Create New Scene")) { 
                     if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
                     currSceneId_ = std::string{ nameBuf_ } + ".scn";
                     ser->setGrid(0);
                     if (doc.layers.empty()) ser->addLayer();
+                }
+
+                // Load Scene
+                if (ImGui::Button("Load Scene")) {
+                    const std::string id = std::string{ nameBuf_ } + ".scn"; 
+                    if (hooks_.onChange) hooks_.onChange(id);               // -> Service::loadSceneById
+                    currSceneId_ = id;                                      // update panel label
                 }
 
                 if (!currSceneId_.empty()) {

@@ -14,6 +14,7 @@
 #include "Panels/EntityPanel.h"
 
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+#include "PAINEngine/ECS/Controller.h"
 
 #define PN_CORE_ASSERT(cond, msg) \
     do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
@@ -38,6 +39,9 @@ namespace PAIN {
 
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();
+
+            // Get ECS Service
+            auto ecs = services->get<PAIN::ECS::Controller>();
 
             // get serialization service
             auto ser = services->get<PAIN::Serialization::Service>();
