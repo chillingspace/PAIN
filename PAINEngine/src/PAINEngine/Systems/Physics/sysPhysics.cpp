@@ -45,6 +45,19 @@ namespace PAIN {
 		System::~System()
 		{
 			// Cleanup
+			// 1. Destroy PhysicsSystem first (before destroying allocators it depends on)
+			jolt_physics.reset();
+
+			// 2. Destroy job system and temp allocator
+			job_system.reset();
+			temp_allocator.reset();
+
+			// 3. Unregister all types and clean up default material
+			JPH::UnregisterTypes();
+
+			// 4. Delete the factory instance
+			delete JPH::Factory::sInstance;
+			JPH::Factory::sInstance = nullptr;
 		}
 
 		void System::onUpdate(AppTiming timing)

@@ -12,6 +12,7 @@
 #include "LayeredSystems/LevelEditor/Editor.h"
 
 #include "ECS/Controller.h"
+#include "ECS/sMetaData.h"
 
 #include "Scene/Scene.h"
 
@@ -56,11 +57,9 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
-		PN_CORE_INFO("jspoh addcore");
+
 		core_system->services = services;
-		PN_CORE_INFO("jspoh addcore after services");
 		core_system->onAttach();
-		PN_CORE_INFO("jspoh addcore after onAttach");
 		services->set<T>(core_system);
 		core_stack.push_back(services->get<T>());
 	}
@@ -113,6 +112,7 @@ namespace PAIN {
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(std::make_shared<MetaData::Service>());
 
 		// Add Serialization 
 		addCoreSystem(std::make_shared<Serialization::Service>());

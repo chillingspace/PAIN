@@ -104,6 +104,9 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
 
+            // Load ImGui settings (layout, window positions, etc.)
+            ImGui::LoadIniSettingsFromDisk("assets/imgui_layout.ini");
+
 
             //toggleVisible();
         }
@@ -114,6 +117,7 @@ namespace PAIN {
                 PN_CORE_INFO("[Editor] Requesting save on detach");
                 ser->saveCurrentScene();
             }
+            ImGui::SaveIniSettingsToDisk("assets/imgui_layout.ini");
             panels = nullptr;
             platform = nullptr;
             command_manager = nullptr;

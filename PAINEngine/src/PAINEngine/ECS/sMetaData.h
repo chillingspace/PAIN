@@ -11,20 +11,19 @@
 #ifndef M_METADATA_HPP
 #define M_METADATA_HPP
 
-#include "Controller.h"
-
 namespace PAIN {
 	namespace MetaData {
         // Parent-child relationship for entities
         struct Parent {
-            std::set<ECS::Entity::Type> children;
+            std::set<std::string> childrens;
             Parent() = default;
         };
 
         struct Child {
-            ECS::Entity::Type parent;
-            Child() : parent(0) {}
-            explicit Child(ECS::Entity::Type p) : parent(p) {}
+            std::string parent;
+
+            Child() : parent{ "" } {}
+
         };
 
         // Group struct for organizing entities
@@ -41,8 +40,33 @@ namespace PAIN {
                 : name(group_name), expanded(true) {
             }
 
-            nlohmann::json serialize() const;
-            void deserialize(nlohmann::json const& data);
+            // In Group struct implementation
+            nlohmann::json serialize() const {
+                nlohmann::json data;
+                data["name"] = name;
+                data["parent_group"] = parent_group.has_value() ? parent_group.value() : "";
+                data["child_groups"] = child_groups;
+                data["entities"] = entities;
+                data["expanded"] = expanded;
+                return data;
+            }
+
+            void deserialize(nlohmann::json const& data) {
+                name = data.value("name", "");
+
+                std::string parent = data.value("parent_group", "");
+                parent_group = parent.empty() ? std::nullopt : std::optional<std::string>(parent);
+
+                if (data.contains("child_groups")) {
+                    child_groups = data["child_groups"].get<std::set<std::string>>();
+                }
+
+                if (data.contains("entities")) {
+                    entities = data["entities"].get<std::set<ECS::Entity::Type>>();
+                }
+
+                expanded = data.value("expanded", true);
+            }
         };
 
         // Core entity metadata
@@ -55,8 +79,9 @@ namespace PAIN {
             nlohmann::json prefab_override;
 
             // Editor properties
-            bool locked;
-            bool visible;
+            //Boolean for locking entities in editor
+            bool b_locked;
+            bool b_visible;
 
             // Layer system
             unsigned int layer_id;
@@ -66,27 +91,71 @@ namespace PAIN {
             std::set<std::string> tags;
 
             // Parent-child hierarchy
-            std::variant<Parent, Child> relation;
+            std::optional<std::variant<Parent, Child>> relation;
 
             // Group assignment
             std::optional<std::string> group_id;
 
             // Constructors
             EntityData()
-                : name("entity_"), prefab_id(""), locked(false),
-                visible(true), layer_id(0), layer_order(0),
+                : name("entity_"), prefab_id(""), b_locked(false),
+                b_visible(true), layer_id(0), layer_order(0),
                 relation(Parent()) {
             }
 
             explicit EntityData(std::string const& n)
-                : name(n), prefab_id(""), locked(false),
-                visible(true), layer_id(0), layer_order(0),
+                : name(n), prefab_id(""), b_locked(false),
+                b_visible(true), layer_id(0), layer_order(0),
                 relation(Parent()) {
             }
 
             // Serialization
-            nlohmann::json serialize() const;
-            void deserialize(nlohmann::json const& data);
+            nlohmann::json serialize() const {
+                nlohmann::json data;
+                data["Name"] = name;
+                data["Prefab_ID"] = prefab_id;
+                data["Prefab_Override"] = prefab_override;
+                data["B_Locked"] = b_locked;
+                data["B_Visible"] = b_visible;
+                data["Layer_ID"] = layer_id;
+                data["Layer_Order"] = layer_order;
+                data["Tags"] = tags;
+
+                // Serialize relation
+                if (relation.has_value()) {
+                    if (auto* child = std::get_if<Child>(&relation.value())) {
+                        data["Parent"] = child->parent;
+                    }
+                }
+
+                return data;
+            }
+
+            void deserialize(nlohmann::json const& data) {
+                name = data.value("Name", "entity_");
+                prefab_id = data.value("Prefab_ID", "");
+                prefab_override = data.value("Prefab_Override", nlohmann::json());
+                b_locked = data.value("B_Locked", false);
+                b_visible = data.value("B_Visible", true);
+                layer_id = data.value("Layer_ID", static_cast<unsigned int>(0));
+                layer_order = data.value("Layer_Order", static_cast<size_t>(0));
+
+                // Deserialize tags
+                if (data.contains("Tags") && data["Tags"].is_array()) {
+                    tags = data["Tags"].get<std::set<std::string>>();
+                }
+
+                // Deserialize relation
+                if (data.contains("Parent")) {
+                    Child temp_child;
+                    temp_child.parent = data["Parent"].get<std::string>();
+                    relation = temp_child;
+                }
+                else {
+                    relation = Parent();
+                }
+            }
+
         };
 
         // Metadata Service
@@ -95,9 +164,6 @@ namespace PAIN {
             // Delete copy operations
             Service(Service const& copy) = delete;
             void operator=(Service const& copy) = delete;
-
-            // Default entity name
-            std::string default_entity_name;
 
             // Entity storage
             struct EntitySorter {
@@ -110,12 +176,11 @@ namespace PAIN {
             // Name mapping for quick lookup
             std::unordered_map<std::string,  ECS::Entity::Type> entity_names;
 
-            // Tag registry
-            std::set<std::string> registered_tags;
-
-
             //Ecs entities
             std::set<ECS::Entity::Type> ecs_entities;
+
+            //Entity Types
+            std::set<std::string> entity_tags;
 
             // Group management
             std::unordered_map<std::string, Group> groups;
@@ -137,10 +202,15 @@ namespace PAIN {
             Service() = default;
 
             // Initialization
-            void init(std::string const& def_entity_name = "entity_");
+            void onAttach() override; 
 
             // Update
             void onUpdate(AppTiming timing) override;
+
+            void onDetach() override;
+            void onFixedUpdate(AppTiming timing) override {}
+            void onAppPause() override;
+            void onAppResume() override;
 
             // === Entity Management ===
 
@@ -153,11 +223,12 @@ namespace PAIN {
             std::optional< ECS::Entity::Type> getEntityByName(std::string const& name) const;
 
             // Visibility
-            void setEntityVisible( ECS::Entity::Type entity, bool visible);
-            bool isEntityVisible( ECS::Entity::Type entity) const;
+            void setEntityVisible(ECS::Entity::Type entity, bool visible);
+            bool isEntityVisible(ECS::Entity::Type entity) const;
 
             // Locking
             void setEntityLocked( ECS::Entity::Type entity, bool locked);
+
             bool isEntityLocked( ECS::Entity::Type entity) const;
             void setAllEntitiesLocked(bool locked);
 
@@ -167,10 +238,10 @@ namespace PAIN {
 
             // === Prefab System ===
 
-            void setEntityPrefabID( ECS::Entity::Type entity, std::string const& prefab_id);
-            std::string getEntityPrefabID( ECS::Entity::Type entity) const;
-            void setEntityPrefabOverride( ECS::Entity::Type entity, nlohmann::json const& data);
-            nlohmann::json getEntityPrefabOverride( ECS::Entity::Type entity) const;
+            //void setEntityPrefabID( ECS::Entity::Type entity, std::string const& prefab_id);
+            //std::string getEntityPrefabID( ECS::Entity::Type entity) const;
+            //void setEntityPrefabOverride( ECS::Entity::Type entity, nlohmann::json const& data);
+            //nlohmann::json getEntityPrefabOverride( ECS::Entity::Type entity) const;
 
             // === Tag System ===
 
@@ -187,21 +258,26 @@ namespace PAIN {
 
             // === Layer System ===
 
-            void setEntityLayerID( ECS::Entity::Type entity, unsigned int layer_id);
-            unsigned int getEntityLayerID( ECS::Entity::Type entity) const;
-            void setEntityLayerOrder( ECS::Entity::Type entity, size_t order);
-            size_t getEntityLayerOrder( ECS::Entity::Type entity) const;
+            //void setEntityLayerID( ECS::Entity::Type entity, unsigned int layer_id);
+            //unsigned int getEntityLayerID( ECS::Entity::Type entity) const;
+            //void setEntityLayerOrder( ECS::Entity::Type entity, size_t order);
+            //size_t getEntityLayerOrder( ECS::Entity::Type entity) const;
 
             // === Parent-Child Hierarchy ===
 
             void setEntityAsParent( ECS::Entity::Type entity);
-            void setEntityAsChild( ECS::Entity::Type entity,  ECS::Entity::Type parent);
+            void setEntityAsChild(ECS::Entity::Type entity, ECS::Entity::Type parent);
             void detachEntityFromParent( ECS::Entity::Type entity);
             bool isParent( ECS::Entity::Type entity) const;
+
+            //Check if parent is valid
+            bool isParent(std::string const& parent_name) const;
             bool isChild( ECS::Entity::Type entity) const;
             std::optional< ECS::Entity::Type> getEntityParent( ECS::Entity::Type entity) const;
             std::set< ECS::Entity::Type> getEntityChildren( ECS::Entity::Type entity) const;
-            std::variant<Parent, Child> getEntityRelation( ECS::Entity::Type entity) const;
+            std::optional<std::variant<Parent, Child>> getEntityRelation( ECS::Entity::Type entity) const;
+
+            void updateRelation();
 
             // === Group/Folder System ===
 

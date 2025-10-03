@@ -8,11 +8,8 @@ namespace PAIN {
             EntityPanel::EntityPanel() {
                 name = "Entity Panel";
                 flags = ImGuiWindowFlags_None;
-
+                
                 // Seed with some entities for UI to be usable immediately
-                entities.push_back("Player");
-                entities.push_back("Enemy1");
-                entities.push_back("Tree");
             }
 
             void EntityPanel::nextWindowSettings() {
@@ -20,18 +17,40 @@ namespace PAIN {
             }
 
             void EntityPanel::createEntity() {
+                auto scene = services->get<Scene>();
+                int total_entities = scene->GetObjects().size();
                 // For simplicity, just add a new entity with a generic name
-                entities.push_back("New Entity");
+                glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * total_entities));
+
+                if (scene) {
+                    scene->AddObject(Mesh::LoadObj(), transform);
+                }
+
             }
 
             void EntityPanel::removeEntity() {
                 if (selectedEntityIndex != -1) {
-                    entities.erase(entities.begin() + selectedEntityIndex);
-                    selectedEntityIndex = -1;  // Deselect after removal
+                    auto scene = services->get<Scene>();
+                    scene->DeleteObject(selectedEntityIndex);
                 }
             }
 
-            void EntityPanel::onUpdate(PAIN::AppTiming timing) {
+            void EntityPanel::onUpdate() {
+
+                // Update entity list
+                auto scene = services->get<Scene>();
+                if (total_entities != scene->GetObjects().size()) {
+                    total_entities = scene->GetObjects().size();
+                    entities.clear();
+
+                    for (int i = 0; i < total_entities; i++) {
+
+                        std::string entity_name = "Entity " + std::to_string(i);
+                        entities.push_back(entity_name);
+                    }
+
+                }
+
                 if (ImGui::Begin("Entity Panel", nullptr, flags)) {
                     ImGui::Text("Entities:");
 

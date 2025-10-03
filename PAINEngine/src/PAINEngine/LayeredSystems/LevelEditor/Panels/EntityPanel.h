@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Panels.h"
+#include "Scene/Scene.h"
 #include <vector>
 #include <string>
 
@@ -16,6 +17,9 @@ namespace PAIN {
 
             private:
                 std::vector<std::string> entities;  // List of entities
+
+
+                int total_entities;
                 int selectedEntityIndex = -1;       // Selected entity index
 
                 // Button actions

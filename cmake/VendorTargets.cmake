@@ -162,31 +162,64 @@ elseif(ANDROID)
   target_link_libraries(FMOD::core INTERFACE log android)
 endif()
 
+# ======================= STB (Image Loading) Vendor  =========================
+
+# STB is header-only, but we need to avoid symbol conflicts with assimp
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE "${VENDOR_DIR}/stb")
+
+# Important: Define STB_IMAGE_IMPLEMENTATION only in one compilation unit
+# This will be handled in the AssetPipeline source files
+target_compile_definitions(stb INTERFACE 
+    STB_AVAILABLE=1
+)
+
 # ======================= Assimp Vendor  =========================
-# Build from source in vendor/assimp
-if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
-  # Keep the build small (importers only, no tools/tests/install)
-  set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_TESTS        OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_INSTALL            OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
-  set(ASSIMP_NO_EXPORT          ON  CACHE BOOL "" FORCE)   # optional: no exporters
-  set(BUILD_SHARED_LIBS         OFF CACHE BOOL "" FORCE)   # static is fine for tools
-
-  add_subdirectory("${VENDOR_DIR}/assimp" "${CMAKE_BINARY_DIR}/vendor_assimp" EXCLUDE_FROM_ALL)
-
-  if (NOT TARGET assimp::assimp)
-    add_library(assimp::assimp ALIAS assimp)
-  endif()
-else()
-  message(FATAL_ERROR "Assimp not found at ${VENDOR_DIR}/assimp")
-endif()
-
-# Link Assimp to the offline AssetCompiler (desktop only), but only if the
-# AssetCompiler target is already defined in this configure step.
-if (NOT ANDROID AND TARGET AssetCompiler)
-  target_link_libraries(AssetCompiler PRIVATE assimp::assimp)
-  if (MSVC)
-    target_compile_definitions(AssetCompiler PRIVATE NOMINMAX)
-  endif()
+if (WIN32 AND NOT ANDROID)
+    # Check if assimp exists as submodule or prebuilt
+    if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
+        # Build from source (recommended for asset pipeline)
+        
+        # Configure assimp options before adding subdirectory
+        set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+        
+        # Important: Disable assimp's embedded stb to avoid conflicts
+        set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL "" FORCE)
+        
+        # Add assimp subdirectory
+        add_subdirectory("${VENDOR_DIR}/assimp" "${CMAKE_BINARY_DIR}/vendor_assimp" EXCLUDE_FROM_ALL)
+        
+        # Set runtime library to match your project
+        set_property(TARGET assimp PROPERTY
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+            
+        # DON'T create alias - assimp already creates assimp::assimp for us!
+        # The alias is automatically created by assimp's CMakeLists.txt
+        
+        message(STATUS "Assimp built from source - assimp::assimp target available")
+        
+    elseif (EXISTS "${VENDOR_DIR}/assimp/lib")
+        # Use prebuilt libraries
+        add_library(assimp STATIC IMPORTED GLOBAL)
+        set_target_properties(assimp PROPERTIES
+            IMPORTED_LOCATION_DEBUG     "${VENDOR_DIR}/assimp/lib/assimp-vc142-mtd.lib"
+            IMPORTED_LOCATION_RELEASE   "${VENDOR_DIR}/assimp/lib/assimp-vc142-mt.lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/assimp/include"
+        )
+        
+        # Only create alias for prebuilt version
+        add_library(assimp::assimp ALIAS assimp)
+        message(STATUS "Assimp using prebuilt libraries - assimp::assimp alias created")
+        
+    else()
+        message(STATUS "Assimp not found - 3D model import will be disabled")
+    endif()
 endif()

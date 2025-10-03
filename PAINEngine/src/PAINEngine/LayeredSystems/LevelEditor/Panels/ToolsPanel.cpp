@@ -62,15 +62,6 @@ namespace PAIN {
                                 m_scene->AddObject(Mesh::LoadObj(), transform);
                             }
                         }
-                        if (ImGui::MenuItem("Delete Game Object")) {
-                            PN_CORE_INFO("Deleted last obj");
-                            auto m_scene = services->get<Scene>();
-                            size_t i = m_scene->GetObjects().size();
-
-                            if (m_scene && i != 0) {
-                                m_scene->DeleteObject();
-                            }
-                        }
 
                         ImGui::EndMenu(); 
                     }
