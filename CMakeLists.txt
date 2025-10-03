@@ -53,7 +53,14 @@ endif()
 
 # ======================= Output Directories  =========================
 
+add_subdirectory(Common/AssetTypes)
+add_subdirectory(Common/AssetPipeline)
+
+if (NOT ANDROID)
 add_subdirectory(Tools)
+endif()
+
+# Include asset compilation integration
 include(AssetsCompiler)
 
 # --- Add Subprojects ---
