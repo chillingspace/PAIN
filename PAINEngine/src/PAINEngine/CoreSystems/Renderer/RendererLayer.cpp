@@ -21,36 +21,6 @@ namespace PAIN {
 	void RendererLayer::onAttach() {
 
 		WindowsRenderer::get().Init();
-				
-		//PN_CORE_INFO("jspoh attach r2");
-
-		// Create framebuffer for ImGui viewport
-		//glGenFramebuffers(1, &fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-		//// Create color texture
-		//glGenTextures(1, &fboTexture);
-		//glBindTexture(GL_TEXTURE_2D, fboTexture);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fbWidth, fbHeight, 0,
-		//	GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-		//	GL_TEXTURE_2D, fboTexture, 0);
-
-		//// Create depth-stencil buffer
-		//glGenRenderbuffers(1, &ds_rbo);
-		//glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
-		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fbWidth, fbHeight);
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-		//	GL_RENDERBUFFER, ds_rbo);
-
-		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		//	PN_CORE_ERROR("Framebuffer is not complete!");
-		//}
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//#endif
 
 		//Init scene
 		m_Scene = services->get<Scene>();

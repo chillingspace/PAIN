@@ -100,14 +100,12 @@ namespace PAIN {
 
 	uint32_t Shader::CompileShader(unsigned int type, const std::string& source)
 	{
-		PN_CORE_INFO("Compiling shader of type: {0}");
-
 		// Create vert & frag shaders
 		uint32_t shader = glCreateShader(type);
 		const char* src = source.c_str();
 
-		PN_CORE_INFO("Compiling {0} shader", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
-		PN_CORE_INFO("Shader source:\n{0}", source);
+		PN_CORE_INFO("Compiling {} shader", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
+		// PN_CORE_INFO("Shader source:\n{0}", source);
 
 		glShaderSource(shader, 1, &src, nullptr);
 		glCompileShader(shader);
@@ -143,7 +141,7 @@ namespace PAIN {
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetShaderInfoLog(shader, len, nullptr, log.data());
 #ifdef PN_PLATFORM_ANDROID
-		PN_CORE_ERROR("[Shader] Compile failed: ");
+		PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
 #else
 		PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
 #endif
@@ -160,7 +158,7 @@ namespace PAIN {
 		std::string log(len ? len - 1 : 0, '\0');
 		if (len > 1) glGetProgramInfoLog(program, len, nullptr, log.data());
 #ifdef PN_PLATFORM_ANDROID
-		PN_CORE_ERROR("[Shader] Link failed: ");
+		PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
 #else
 		PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
 #endif
