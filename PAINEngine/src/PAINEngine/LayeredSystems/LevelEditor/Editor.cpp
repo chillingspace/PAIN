@@ -47,11 +47,15 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
 
+            // Load ImGui settings (layout, window positions, etc.)
+            ImGui::LoadIniSettingsFromDisk("imgui_layout.ini");
+
 
             //toggleVisible();
         }
 
         void Editor::onDetach() {
+            ImGui::SaveIniSettingsToDisk("imgui_layout.ini");
             panels = nullptr;
             platform = nullptr;
             command_manager = nullptr;
