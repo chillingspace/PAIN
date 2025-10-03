@@ -21,7 +21,7 @@ namespace PAIN {
 		void OnUpdate();
 
 		Mesh* AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform);
-		void DeleteObject();
+		void DeleteObject(int index);
 
 		const std::vector<SceneObject>& GetObjects() const;
 		Camera* GetActiveCamera();

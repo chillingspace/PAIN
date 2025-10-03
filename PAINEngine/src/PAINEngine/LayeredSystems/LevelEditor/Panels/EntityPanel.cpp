@@ -30,12 +30,14 @@ namespace PAIN {
 
             void EntityPanel::removeEntity() {
                 if (selectedEntityIndex != -1) {
-                    entities.erase(entities.begin() + selectedEntityIndex);
-                    selectedEntityIndex = -1;  // Deselect after removal
+                    auto scene = services->get<Scene>();
+                    scene->DeleteObject(selectedEntityIndex);
                 }
             }
 
             void EntityPanel::onUpdate() {
+
+                // Update entity list
                 auto scene = services->get<Scene>();
                 if (total_entities != scene->GetObjects().size()) {
                     total_entities = scene->GetObjects().size();
@@ -48,9 +50,6 @@ namespace PAIN {
                     }
 
                 }
-
-
-                
 
                 if (ImGui::Begin("Entity Panel", nullptr, flags)) {
                     ImGui::Text("Entities:");
