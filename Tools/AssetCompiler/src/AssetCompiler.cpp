@@ -4,89 +4,6 @@ bool AssetCompiler::isAssetCompilable(AssetType type) const {
     if (type == AssetType::Texture || type == AssetType::Model || type == AssetType::Audio) return true;
     return false;
 }
-void AssetCompiler::initExtensions() {
-
-    //Compiled assets extensions
-    extensions[AssetType::Texture] = {".png", ".jpg", ".jpeg"};
-    extensions[AssetType::Model] = { ".obj" };
-    extensions[AssetType::Audio] = { ".wav", ".mp3", ".ogg" };
-
-    //Non compiled assets extensions
-    extensions[AssetType::Script] = { ".lua" };
-    extensions[AssetType::Data] = { ".json" };
-    extensions[AssetType::Shader] = { ".vert", ".frag" };
-
-    //Desc file extension
-    desc_ext = ".desc";
-
-    //Set root folder names
-    raw_folder = "Raw";
-    desc_folder = "Descriptors";
-}
-
-void AssetCompiler::initGameFolders() {
-    game_folder = "Game";
-
-    game_dir.emplace(AssetType::Texture, game_folder / "Textures");
-    game_dir.emplace(AssetType::Model, game_folder / "Models");
-    game_dir.emplace(AssetType::Audio, game_folder / "Audio");
-    game_dir.emplace(AssetType::Script, game_folder / "Scripts");
-    game_dir.emplace(AssetType::Data, game_folder / "Data");
-    game_dir.emplace(AssetType::Other, game_folder / "Others");
-}
-
-void AssetCompiler::initEngineFolders() {
-    engine_folder = "Engine";
-
-    engine_dir.emplace(AssetType::Texture, engine_folder / "Textures");
-    engine_dir.emplace(AssetType::Model, engine_folder / "Models");
-    engine_dir.emplace(AssetType::Audio, engine_folder / "Audio");
-    engine_dir.emplace(AssetType::Script, engine_folder / "Scripts");
-    engine_dir.emplace(AssetType::Data, engine_folder / "Data");
-    engine_dir.emplace(AssetType::Shader, engine_folder / "Shaders");
-    engine_dir.emplace(AssetType::Other, engine_folder / "Others");
-}
-
-void AssetCompiler::enforceStandardStructure() {
-
-    //Ensure creation of base folders
-    instantiateFolder(raw_path);
-    instantiateFolder(desc_path);
-    instantiateFolder(raw_path / game_folder);
-    instantiateFolder(raw_path / engine_folder);
-    instantiateFolder(desc_path / game_folder);
-    instantiateFolder(desc_path / engine_folder);
-
-    //Ensure standard structure for game directory
-    for (const auto& dir : game_dir) {
-
-        //Ensure raw directory exists
-        std::filesystem::path fullPath = raw_path / dir.second;
-        instantiateFolder(fullPath);
-
-        //Check if directory belongs to assets that is Compilable
-        if (!isAssetCompilable(dir.first)) continue;
-
-        //Ensure descriptor directory exists
-        fullPath = desc_path / dir.second;
-        instantiateFolder(fullPath);
-    }
-
-    //Ensure standard structure for engine directory
-    for (const auto& dir : engine_dir) {
-
-        //Ensure raw directory exists
-        std::filesystem::path fullPath = raw_path / dir.second;
-        instantiateFolder(fullPath);
-
-        //Check if directory belongs to assets that is Compilable
-        if (!isAssetCompilable(dir.first)) continue;
-
-        //Ensure descriptor directory exists
-        fullPath = desc_path / dir.second;
-        instantiateFolder(fullPath);
-    }
-}
 
 bool AssetCompiler::isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const {
 
@@ -299,21 +216,65 @@ void AssetCompiler::recursiveScanAllDirectories(std::filesystem::path const& pat
 }
 
 AssetCompiler::AssetCompiler(std::filesystem::path const& assets_root) : assets_root{ assets_root } {
+}
 
-    //Initialize extensions
-    initExtensions();
-    
-    //Set paths
+void AssetCompiler::initExtensions(AssetType type, std::set<std::string> ext_set) {
+    extensions.emplace(type, ext_set);
+}
+
+void AssetCompiler::initGameFolders(AssetType type, std::string const& folder) {
+    game_dir.emplace(type, game_folder / folder);
+}
+
+void AssetCompiler::initEngineFolders(AssetType type, std::string const& folder) {
+    engine_dir.emplace(type, engine_folder / folder);
+}
+
+void AssetCompiler::enforceStandardStructure() {
+
+    //Setup raw & desc path
     raw_path = assets_root / raw_folder;
     desc_path = assets_root / desc_folder;
 
-    //Configure folders
-    initGameFolders();
-    initEngineFolders();
+    //Ensure creation of base folders
+    instantiateFolder(raw_path);
+    instantiateFolder(desc_path);
+    instantiateFolder(raw_path / game_folder);
+    instantiateFolder(raw_path / engine_folder);
+    instantiateFolder(desc_path / game_folder);
+    instantiateFolder(desc_path / engine_folder);
 
-    //Ensure proper folder structure
-    enforceStandardStructure();
+    //Ensure standard structure for game directory
+    for (const auto& dir : game_dir) {
+
+        //Ensure raw directory exists
+        std::filesystem::path fullPath = raw_path / dir.second;
+        instantiateFolder(fullPath);
+
+        //Check if directory belongs to assets that is Compilable
+        if (!isAssetCompilable(dir.first)) continue;
+
+        //Ensure descriptor directory exists
+        fullPath = desc_path / dir.second;
+        instantiateFolder(fullPath);
+    }
+
+    //Ensure standard structure for engine directory
+    for (const auto& dir : engine_dir) {
+
+        //Ensure raw directory exists
+        std::filesystem::path fullPath = raw_path / dir.second;
+        instantiateFolder(fullPath);
+
+        //Check if directory belongs to assets that is Compilable
+        if (!isAssetCompilable(dir.first)) continue;
+
+        //Ensure descriptor directory exists
+        fullPath = desc_path / dir.second;
+        instantiateFolder(fullPath);
+    }
 }
+
 
 void AssetCompiler::scanAssetDirectories() {
     std::cout << "=== Scanning Asset Directories ===" << std::endl;
@@ -367,8 +328,9 @@ void AssetCompiler::scanAssetDirectories() {
     //recursiveScanAllDirectories(desc_path, [&](std::filesystem::path const& file) {
 
     //});
+}
 
-
+void AssetCompiler::tidyUpDirectories() {
     //Tidy up additional directories
     for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
         if (entry.is_directory()) {
@@ -388,7 +350,7 @@ void AssetCompiler::scanAssetDirectories() {
                     break;
                 }
             }
-            if(!b_found) deleteFile(entry.path());
+            if (!b_found) deleteFile(entry.path());
         }
     }
 
@@ -405,8 +367,4 @@ void AssetCompiler::scanAssetDirectories() {
             if (!b_found) deleteFile(entry.path());
         }
     }
-}
-
-void AssetCompiler::generateMissingDescriptors() {
-
 }

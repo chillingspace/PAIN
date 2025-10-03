@@ -52,29 +52,8 @@ private:
     //Compilation extensions
     std::unordered_map<AssetType, std::set<std::string>> extensions;
 
-    //Desc file extension
-    std::string desc_ext;
-
-    //Folder names
-    std::filesystem::path raw_folder;
-    std::filesystem::path desc_folder;
-    std::filesystem::path game_folder;
-    std::filesystem::path engine_folder;
-
     //Function to check if asset is compilable
     bool isAssetCompilable(AssetType type) const;
-    
-    //Extension types
-    void initExtensions();
-
-    //Game folders
-    void initGameFolders();
-
-    //Engine folders
-    void initEngineFolders();
-
-    //Create standard structure
-    void enforceStandardStructure();
 
     //Check if path is derived
     bool isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const;
@@ -105,9 +84,32 @@ public:
 	AssetCompiler(std::filesystem::path const& assets_root);
 	~AssetCompiler() = default;
 
+    //Desc file extension
+    std::string desc_ext;
+
+    //Folder names
+    std::filesystem::path raw_folder;
+    std::filesystem::path desc_folder;
+    std::filesystem::path game_folder;
+    std::filesystem::path engine_folder;
+
+    //Extension types
+    void initExtensions(AssetType type, std::set<std::string> ext_set);
+
+    //Game folders
+    void initGameFolders(AssetType type, std::string const& folder);
+
+    //Engine folders
+    void initEngineFolders(AssetType type, std::string const& folder);
+
+    //Create standard structure
+    void enforceStandardStructure();
+
     //core functions
     void scanAssetDirectories();
-    void generateMissingDescriptors();
+
+    //Tidy additional directories
+    void tidyUpDirectories();
 };
 
 #endif
