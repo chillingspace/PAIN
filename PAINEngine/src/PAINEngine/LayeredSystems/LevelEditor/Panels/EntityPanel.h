@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Panels.h"
-#include "Scene/Scene.h"
-#include <vector>
-#include <string>
+#include "CoreSystems/Scene/Scene.h"
 
 namespace PAIN {
     namespace Editor {

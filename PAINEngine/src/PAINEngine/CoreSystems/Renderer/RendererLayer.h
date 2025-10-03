@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Scene/Scene.h"
+#include "../Scene/Scene.h"
 #include "Applications/AppSystem.h"
 #include "imgui.h"
 
@@ -18,7 +18,7 @@ namespace PAIN {
 
 		std::shared_ptr<Scene> m_Scene;
 
-        void onDetach() override { }
+		void onDetach() override;
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
