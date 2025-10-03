@@ -48,14 +48,14 @@ namespace PAIN {
             #endif
 
             // Load ImGui settings (layout, window positions, etc.)
-            ImGui::LoadIniSettingsFromDisk("imgui_layout.ini");
+            ImGui::LoadIniSettingsFromDisk("assets/imgui_layout.ini");
 
 
             //toggleVisible();
         }
 
         void Editor::onDetach() {
-            ImGui::SaveIniSettingsToDisk("imgui_layout.ini");
+            ImGui::SaveIniSettingsToDisk("assets/imgui_layout.ini");
             panels = nullptr;
             platform = nullptr;
             command_manager = nullptr;
