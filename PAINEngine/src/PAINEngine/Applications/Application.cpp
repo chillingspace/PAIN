@@ -117,7 +117,7 @@ namespace PAIN {
 
 		// Add Serialization
 #ifdef PN_PLATFORM_WINDOWS
-		addCoreSystem(std::make_shared<Serialization::Service>());
+		//addCoreSystem(std::make_shared<Serialization::Service>());
 		// Add systems here
 
 		// Physics system not cross platform yet

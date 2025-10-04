@@ -362,7 +362,7 @@ namespace PAIN {
                                     auto scl = obj.value("scale", nlohmann::json::array());
 
                                     if (rot.size() == 4 && pos.size() == 3 && scl.size() == 3) {
-                                        PAIN::Transform::Transform t;
+                                        Transform t;
 
                                         // JSON saved as [x,y,z,w]
                                         t.rotation = glm::f32quat{
@@ -375,7 +375,7 @@ namespace PAIN {
                                         t.position = { pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>() };
                                         t.scale = { scl[0].get<float>(), scl[1].get<float>(), scl[2].get<float>() };
 
-                                        ecs->addEntityComponent<PAIN::Transform::Transform>(e, std::move(t));
+                                        ecs->addEntityComponent<PAIN::Transform>(e, std::move(t));
                                     }
                                 }
 
@@ -470,7 +470,7 @@ namespace PAIN {
                         json C = json::object();
 
                         // Transform (quat + vec3)
-                        if (auto t = ecs->getEntityComponent<PAIN::Transform::Transform>(e)) {
+                        if (auto t = ecs->getEntityComponent<Transform>(e)) {
                             const auto& tr = t->get();
                             // Store rotation as [x,y,z,w], position/scale as [x,y,z]
                             C["Transform::Transform"] = {
