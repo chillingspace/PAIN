@@ -70,6 +70,11 @@ namespace PAIN {
                     if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Window")) { ImGui::MenuItem("Layouts"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Help")) { ImGui::MenuItem("About"); ImGui::EndMenu(); }
+                    // Display FPS on the right side of the menu bar
+                    float fps = 1.0f / timing.dt;
+                    float text_width = 150.0f; // Approximate width for the FPS text
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - text_width);
+                    ImGui::Text("FPS: %.1f (%.2f ms)", fps, timing.dt * 1000.0f);
                     ImGui::EndMenuBar();
                 }
 
