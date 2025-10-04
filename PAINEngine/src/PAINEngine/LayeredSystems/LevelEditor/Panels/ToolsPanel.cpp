@@ -54,13 +54,13 @@ namespace PAIN {
                     if (ImGui::BeginMenu("GameObject")) { 
                         if (ImGui::MenuItem("Create Empty")){
                             PN_CORE_INFO("Added new obj");
-                            auto m_scene = services->get<Scene>();
-                            size_t i = m_scene->GetObjects().size();
-                            glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * i));
+                            //auto m_scene = services->get<Scene>();
+                            //size_t i = m_scene->GetObjects().size();
+                            //glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * i));
 
-                            if (m_scene) {
-                                m_scene->AddObject(Mesh::LoadObj(), transform);
-                            }
+                            //if (m_scene) {
+                            //    m_scene->AddObject(Mesh::LoadObj(), transform);
+                            //}
                         }
 
                         ImGui::EndMenu(); 

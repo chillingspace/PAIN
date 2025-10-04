@@ -9,6 +9,8 @@
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/Material.h"
 
+#include "ECS/Controller.h"
+
 //For imgui viewport
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -27,15 +29,10 @@ namespace PAIN {
 		//Init scene
 		m_Scene = services->get<Scene>();
 
-		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
-		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
-		glm::mat4 transform3 = glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 1.f, 0.f));
-
-
 		if (m_Scene) {
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform1);
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform2);
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform3);
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
 
 	}
@@ -71,8 +68,21 @@ namespace PAIN {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Render skybox and light
-			WindowsRenderer::get().Render(m_Scene);
+			// Render all
+			WindowsRenderer::get().BeginRendering(m_Scene);
+			// render scene
+
+			auto ecs = services->get<ECS::Controller>();
+			for (auto entity : ecs->getAllEntities()) {
+				auto transform = ecs->getEntityComponent<Transform>(entity)->get();
+				glm::mat4 model = transform.getMatrix();
+				WindowsRenderer::get().RenderGeometry(m_Scene, m_Scene->m_Meshes[0].get(), model); // uses geometry_shader
+
+			}
+			
+
+			
+			WindowsRenderer::get().EndRendering(m_Scene);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -158,6 +168,17 @@ namespace PAIN {
 		lcam.fov = m_Scene->GetActiveCamera()->fov;
 		lcam.target = m_Scene->GetActiveCamera()->forward;
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
+	}
+
+	void RendererLayer::renderScene()
+	{
+		//auto ecs = services->get<ECS::Controller>();
+		//auto drawable_entities = ecs->getEntitiesWithComponents<Transform>();
+
+		//for (auto entity : drawable_entities) {
+		//	auto& transform = ecs->getEntityComponent<Transform>(entity)->get();
+		//	RenderGeometry(scene, mesh, transform.matrix); // or however your Transform stores it
+		//}
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {

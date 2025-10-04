@@ -121,7 +121,8 @@ namespace PAIN {
 #endif
 
 		// Register components here
-		services->get<ECS::Controller>()->registerComponent<Transform::Transform>();
+		services->get<ECS::Controller>()->registerComponent<Transform>();
+
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS

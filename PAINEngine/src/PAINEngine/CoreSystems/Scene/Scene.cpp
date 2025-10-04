@@ -1,5 +1,6 @@
 
 #include "Scene.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
 	void Scene::onDetach() {}
@@ -22,13 +23,16 @@ namespace PAIN {
 	void Scene::onUpdate(AppTiming timing) {}
 	void Scene::onEvent(Event::Event& e) {}
 
-	Mesh* Scene::AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform)
+	Mesh* Scene::AddObject(std::unique_ptr<Mesh> mesh, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
-		//auto ecs = services->get<ECS::Controller>();
+		auto ecs = services->get<ECS::Controller>();
+		ECS::Entity::Type entity = ecs->createEntity();
+		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 
+		
 		Mesh* raw = mesh.get();
 		m_Meshes.push_back(std::move(mesh));
-		m_Objects.push_back({ raw, transform });
+
 		return raw;
 	}
 	void Scene::DeleteObject(int index)

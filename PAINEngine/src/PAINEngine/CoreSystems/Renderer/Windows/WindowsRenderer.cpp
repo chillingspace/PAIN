@@ -163,6 +163,180 @@ namespace PAIN {
 		}
 	}
 
+	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
+	{
+		// populate shadow map first
+
+		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+		for (const Light& l : LightSources::get().getAll()) {
+			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+				//glClearDepth(1.0f);  // Explicitly set clear value
+				glClear(GL_DEPTH_BUFFER_BIT);
+				for (auto& obj : scene->GetObjects()) {
+					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
+				}
+			}
+		}
+
+
+		glViewport(0, 0, winWidth, winHeight);
+
+		// Setup framebuffers, clear buffers
+		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void WindowsRenderer::EndRendering(std::shared_ptr<Scene> scene)
+	{
+		
+
+		// draw floor
+		{
+			if (!floor_shader) {
+				PN_CORE_ERROR("Unable to find floor_shader");
+				return;
+			}
+
+
+			floor_shader->Bind();
+			floor_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+			floor_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//#ifdef JS_DEBUG
+		//		passthrough_shader->Bind();
+		//		glActiveTexture(GL_TEXTURE0);
+		//		glBindTexture(GL_TEXTURE_2D, col_texture);
+		//		passthrough_shader->SetUniform("tex", 0);
+		//#else
+				// render to final framebuffer for post processing/imgui/display
+
+		{
+			// pbr pass
+
+			pbr_shader->Bind();
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, pos_texture);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, col_texture);
+
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, norm_texture);
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+			int tex_id = 4;
+			int i{};
+			for (const Light& l : LightSources::get().getAll()) {
+				std::stringstream ss;
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					glActiveTexture(GL_TEXTURE0 + tex_id);
+					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+
+#ifdef PN_PLATFORM_WINDOWS
+					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+#else
+					ss << "u_ShadowMap" << (tex_id - 4);
+#endif
+
+					pbr_shader->SetUniform(ss.str(), tex_id);
+					ss.str("");
+					ss.clear();
+
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					ss.str("");
+					ss.clear();
+
+					++tex_id;
+				}
+				else {
+					ss << "u_Lights[" << i << "].shadowMapIdx";
+					pbr_shader->SetUniform(ss.str(), -1.f);
+					ss.str("");
+					ss.clear();
+				}
+
+				ss << "u_Lights[" << i << "].position";
+				pbr_shader->SetUniform(ss.str(), l.position);
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].V";
+				pbr_shader->SetUniform(ss.str(), l.view());
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].P";
+				pbr_shader->SetUniform(ss.str(), l.projection());
+				ss.str("");
+				ss.clear();
+
+				if (LightSources::get().lightsOn) {
+					ss << "u_Lights[" << i << "].L";
+					pbr_shader->SetUniform(ss.str(), l.L_intensity);
+					ss.str("");
+					ss.clear();
+				}
+
+				i++;
+			}
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
+
+			pbr_shader->SetUniform("gPos", 0);
+			pbr_shader->SetUniform("gCol", 1);
+			pbr_shader->SetUniform("gNorm", 2);
+			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
+
+			//#endif
+
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+
+		//{
+		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
+
+		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//	passthrough_shader->Bind();
+
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_2D, col_texture);
+
+		//	glBindVertexArray(passthrough_vao);
+		//	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//	return;
+		//}
+
+
+		// render to actual screen
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		passthrough_shader->Bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, final_texture);
+
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
 	void WindowsRenderer::Init() {
 #ifdef PN_PLATFORM_WINDOWS
 		pbr_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
@@ -253,182 +427,6 @@ namespace PAIN {
 		lc.target = -lc.position;				// origin. required for shadows
 	}
 
-	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
-
-		if (!scene) {
-			return;
-		}
-
-		// populate shadow map first
-
-		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
-		for (const Light& l : LightSources::get().getAll()) {
-			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-				//glClearDepth(1.0f);  // Explicitly set clear value
-				glClear(GL_DEPTH_BUFFER_BIT);
-				for (auto& obj : scene->GetObjects()) {
-					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
-				}
-			}
-		}
-		glViewport(0, 0, winWidth, winHeight);
-
-		// actually draw
-		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// draw floor
-		{
-			if (!floor_shader) {
-				PN_CORE_ERROR("Unable to find floor_shader");
-				return;
-			}
-
-
-			floor_shader->Bind();
-			floor_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-			floor_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
-			glBindVertexArray(empty_vao);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
-		}
-
-		// render scene
-		for (auto& obj : scene->GetObjects())
-		{
-
-			RenderGeometry(scene, obj.mesh, obj.transform); // uses geometry_shader
-			
-		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		//#ifdef JS_DEBUG
-		//		passthrough_shader->Bind();
-		//		glActiveTexture(GL_TEXTURE0);
-		//		glBindTexture(GL_TEXTURE_2D, col_texture);
-		//		passthrough_shader->SetUniform("tex", 0);
-		//#else
-				// render to final framebuffer for post processing/imgui/display
-
-		{
-			// pbr pass
-
-			pbr_shader->Bind();
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, col_texture);
-
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
-
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
-
-			int tex_id = 4;
-			int i{};
-			for (const Light& l : LightSources::get().getAll()) {
-				std::stringstream ss;
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					glActiveTexture(GL_TEXTURE0 + tex_id);
-					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-
-#ifdef PN_PLATFORM_WINDOWS
-					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
-#else
-					ss << "u_ShadowMap" << (tex_id - 4);
-#endif
-					
-					pbr_shader->SetUniform(ss.str(), tex_id);
-					ss.str("");
-					ss.clear();
-
-					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
-					ss.str("");
-					ss.clear();
-
-					++tex_id;
-				}
-				else {
-					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), -1.f);
-					ss.str("");
-					ss.clear();
-				}
-
-				ss << "u_Lights[" << i << "].position";
-				pbr_shader->SetUniform(ss.str(), l.position);
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].V";
-				pbr_shader->SetUniform(ss.str(), l.view());
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].P";
-				pbr_shader->SetUniform(ss.str(), l.projection());
-				ss.str("");
-				ss.clear();
-
-				if (LightSources::get().lightsOn) {
-					ss << "u_Lights[" << i << "].L";
-					pbr_shader->SetUniform(ss.str(), l.L_intensity);
-					ss.str("");
-					ss.clear();
-				}
-
-				i++;
-			}
-			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
-
-			pbr_shader->SetUniform("gPos", 0);
-			pbr_shader->SetUniform("gCol", 1);
-			pbr_shader->SetUniform("gNorm", 2);
-			pbr_shader->SetUniform("gMaterial", 3);
-			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
-			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
-
-			//#endif
-
-			glBindVertexArray(passthrough_vao);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-
-		//{
-		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
-
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//	passthrough_shader->Bind();
-
-		//	glActiveTexture(GL_TEXTURE0);
-		//	glBindTexture(GL_TEXTURE_2D, col_texture);
-
-		//	glBindVertexArray(passthrough_vao);
-		//	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		//	return;
-		//}
-
-		// render to actual screen
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		passthrough_shader->Bind();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, final_texture);
-
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}
 
 	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
 	{
@@ -458,15 +456,6 @@ namespace PAIN {
 
 		mesh->Draw();
 	}
-
-	//void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
-	//{
-
-	//	for (auto& obj : scene.get()->GetObjects()) {
-
-	//		RenderGeometry(obj.mesh, obj.transform);
-	//	}
-	//}
 
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {

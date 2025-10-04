@@ -23,6 +23,8 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
+		void renderScene();
+
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		ImTextureID getFramebufferTexture() const {

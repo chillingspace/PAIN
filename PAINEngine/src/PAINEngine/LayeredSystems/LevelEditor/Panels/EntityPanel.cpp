@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "EntityPanel.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
     namespace Editor {
@@ -17,30 +18,33 @@ namespace PAIN {
             }
 
             void EntityPanel::createEntity() {
+                auto ecs = services->get<ECS::Controller>();
                 auto scene = services->get<Scene>();
-                int total_entities = scene->GetObjects().size();
+                int total_entities = ecs->getAllEntities().size();
                 // For simplicity, just add a new entity with a generic name
-                glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * total_entities));
-
+                glm::vec3 pos = glm::vec3(1.f, 1.f, 1.f * total_entities);
+                glm::quat rot = {0.f,0.f,0.f, 0.f};
+                glm::vec3 scale = { 1.f, 1.f, 1.f };
                 if (scene) {
-                    scene->AddObject(Mesh::LoadObj(), transform);
+                    scene->AddObject(Mesh::LoadObj(), pos, rot, scale);
                 }
 
             }
 
             void EntityPanel::removeEntity() {
                 if (selectedEntityIndex != -1) {
-                    auto scene = services->get<Scene>();
-                    scene->DeleteObject(selectedEntityIndex);
+                    //auto scene = services->get<Scene>();
+                    //scene->DeleteObject(selectedEntityIndex);
                 }
             }
 
             void EntityPanel::onUpdate() {
 
                 // Update entity list
+                auto ecs = services->get<ECS::Controller>();
                 auto scene = services->get<Scene>();
-                if (total_entities != scene->GetObjects().size()) {
-                    total_entities = scene->GetObjects().size();
+                if (total_entities != ecs->getAllEntities().size()) {
+                    total_entities = ecs->getAllEntities().size();
                     entities.clear();
 
                     for (int i = 0; i < total_entities; i++) {

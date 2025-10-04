@@ -7,3 +7,4 @@
 // Components
 #include "ECS/Components/cPhysics.h"
 #include "ECS/Components/cTransform.h"
+#include "ECS/Components/cMeshRenderer.h"

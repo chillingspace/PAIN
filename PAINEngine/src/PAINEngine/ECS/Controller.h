@@ -114,7 +114,14 @@ namespace PAIN {
 
 				//Set bit signature of component to true
 				Component::Signature sign = entity_service->getSignature(entity);
-				sign.set(component_service->getComponentType<T>(), true);
+
+				auto comp_type_opt = component_service->getComponentType<T>();
+				if (!comp_type_opt.has_value()) {
+					PN_CORE_ERROR("Component type not registered!");
+					return;
+				}
+
+				sign.set(static_cast<std::size_t>(comp_type_opt.value()), true);
 				entity_service->setSignature(entity, sign);
 
 				//Update entities list
@@ -130,7 +137,13 @@ namespace PAIN {
 
 				//Set bit signature of component to false
 				Component::Signature sign = entity_service->getSignature(entity);
-				sign.set(component_service->getComponentType<T>(), false);
+
+				auto comp_type_opt = component_service->getComponentType<T>();
+				if (comp_type_opt.has_value()) {
+					sign.set(static_cast<std::size_t>(comp_type_opt.value()), false);
+				}
+
+
 				entity_service->setSignature(entity, sign);
 
 				//Update entities list
