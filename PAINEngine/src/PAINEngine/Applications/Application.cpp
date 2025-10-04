@@ -116,9 +116,10 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
 		// Add Serialization
+		addCoreSystem(std::make_shared<Serialization::Service>());
+
+		
 #ifdef PN_PLATFORM_WINDOWS
-		//addCoreSystem(std::make_shared<Serialization::Service>());
-		// Add systems here
 
 		// Physics system not cross platform yet
 		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);

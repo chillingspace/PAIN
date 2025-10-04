@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ScenesPanel.h"
 
-#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 #include "CoreSystems/Serialization/sSerialization.h"
 
@@ -299,5 +298,4 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif

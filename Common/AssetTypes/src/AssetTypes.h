@@ -7,6 +7,8 @@
 #include <set>
 #include <string>
 #include <filesystem>
+#include <iostream>
+#include <fstream>
 
 namespace PAIN {
 
@@ -54,6 +56,35 @@ namespace PAIN {
             Scenes,
             Other
         };
+
+        static std::unordered_map<Type, std::string> getTypeStringMapping() {
+            std::unordered_map<Type, std::string> temp;
+
+            temp[Type::Texture] = "Texture";
+            temp[Type::Model] = "Model";
+            temp[Type::Audio] = "Audio";
+            temp[Type::Script] = "Script";
+            temp[Type::Data] = "Data";
+            temp[Type::Shader] = "Shader";
+            temp[Type::Scenes] = "Scenes";
+            temp[Type::Other] = "Other";
+
+            return temp;
+        }
+
+        static std::string assetTypeToString(Type type) {
+            auto map = getTypeStringMapping();
+            return map.at(type);
+        }
+
+        static Type stringToAssetType(std::string const& string) {
+            auto map = getTypeStringMapping();
+            for (auto entry : map) {
+                if (entry.second == string) return entry.first;
+            }
+
+            return Type::Other;
+        }
 
         //Boolean to check if the asset is compilable
         static bool isAssetCompilable(Type type) {
@@ -140,6 +171,20 @@ namespace PAIN {
 
             //Other asset type found
             return Type::Other;
+        }
+
+        static uint64_t getFileLastModified(std::filesystem::path const& file) {
+            try {
+                auto file_time = std::filesystem::last_write_time(file);
+
+                // Convert to nanoseconds since the file_time_type epoch
+                // This gives us a comparable number without clock conversion complexity
+                auto duration = file_time.time_since_epoch();
+                return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            }
+            catch (const std::filesystem::filesystem_error&) {
+                return 0; // File doesn't exist or access denied
+            }
         }
 
         //Asset info

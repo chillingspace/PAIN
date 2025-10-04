@@ -10,6 +10,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <functional>
+#include <memory>
 
 //Include asset compiler
 #include "AssetCompiler.h"
@@ -21,7 +22,12 @@ namespace PAIN {
         //Asset compiler class
         class AssetOrganizer {
         private:
+
+            //Assset compiler
+            std::unique_ptr<Compiler> compiler;
+
             //Assets info for sorting
+            std::unordered_map<std::filesystem::path, GUID> guid_cache;
             std::vector<Info> assets;
 
             //Assets root path

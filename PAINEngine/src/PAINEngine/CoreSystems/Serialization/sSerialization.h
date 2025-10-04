@@ -8,14 +8,12 @@
  * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 #pragma once
-#ifdef PN_PLATFORM_WINDOWS
 #ifndef SERIALIZATION_SERVICE_H
 #define SERIALIZATION_SERVICE_H
 #include "pch.h"
 #include "Applications/AppSystem.h"
 #include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/Components/cTransform.h"
-
 
 namespace PAIN {
     namespace Serialization {
@@ -111,16 +109,32 @@ namespace PAIN {
         // Reflection helpers (header-only templates)
         // ----------------------------------------
         namespace detail {
+            //template <typename ConstString>
+            //inline std::string name_to_string(ConstString cs) {
+            //    // refl::const_string supports .c_str() (or .str() depending on version).
+            //    // Prefer .c_str() if available, else fall back to .str().
+            //    if constexpr (requires { cs.c_str(); }) {
+            //        return std::string(cs.c_str());
+            //    }
+            //    else {
+            //        return std::string(cs.str());
+            //    }
+            //}
+
+            template <typename T>
+            auto name_to_string_impl(const T& cs, int) -> decltype(cs.c_str(), std::string{}) {
+                return std::string(cs.c_str());
+            }
+
+            template <typename T>
+            auto name_to_string_impl(const T& cs, ...) -> std::string {
+                // fallback for types exposing .str()
+                return std::string(cs.str());
+            }
+
             template <typename ConstString>
-            inline std::string name_to_string(ConstString cs) {
-                // refl::const_string supports .c_str() (or .str() depending on version).
-                // Prefer .c_str() if available, else fall back to .str().
-                if constexpr (requires { cs.c_str(); }) {
-                    return std::string(cs.c_str());
-                }
-                else {
-                    return std::string(cs.str());
-                }
+            inline std::string name_to_string(const ConstString& cs) {
+                return name_to_string_impl(cs, 0);
             }
 
             // Forward decls
@@ -227,7 +241,8 @@ namespace PAIN {
             template <typename E>
             void enum_from_json(E& out, const nlohmann::json& j, std::true_type /*is_enum*/) {
                 using U = std::underlying_type_t<E>;
-                out = static_cast<E>(j.get<U>());
+                //out = static_cast<E>(j.get<U>());
+                out = static_cast<E>(j.template get<U>());
             }
             template <typename T>
             void enum_from_json(T& out, const nlohmann::json& j, std::false_type /*not enum*/) {
@@ -260,7 +275,8 @@ namespace PAIN {
                 }
                 else {
                     // Fallback to nlohmann's get
-                    out = j.get<T>();
+                    //out = j.get<T>();
+                    out = j.template get<T>();
                 }
             }
         } // namespace detail
@@ -326,7 +342,8 @@ namespace PAIN {
                     if constexpr (std::is_arithmetic_v<Field> ||
                         std::is_same_v<Field, std::string> ||
                         std::is_same_v<Field, bool>) {
-                        field_ref = j.at(key).get<Field>();
+                        //field_ref = j.at(key).get<Field>();
+                        field_ref = j.at(key).template get<Field>();
                     }
                     else {
                         detail::from_json_value(static_cast<Field&>(field_ref), j.at(key));
@@ -357,5 +374,4 @@ namespace PAIN {
 
     }
 }
-#endif
 #endif

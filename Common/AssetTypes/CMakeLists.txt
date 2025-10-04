@@ -9,6 +9,8 @@ message(STATUS "=== Building PAINAssetTypes ===")
 file(GLOB_RECURSE ASSET_TYPES_HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
 message(STATUS "Found AssetTypes headers: ${ASSET_TYPES_HEADERS}")
