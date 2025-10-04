@@ -34,16 +34,6 @@ namespace PAIN {
 		int getFramebufferHeight() const { return winHeight; }
 
 
-	private:
-
-		//std::unique_ptr<WindowsRenderer> w_renderer;
-		
-		enum MOVE_MODES {
-			CAMERA,
-			NUM_MOVE_MODES
-		};
-		MOVE_MODES move_mode = CAMERA;
-
 		bool W_KEYDOWN = false;
 		bool A_KEYDOWN = false;
 		bool S_KEYDOWN = false;
@@ -55,6 +45,17 @@ namespace PAIN {
 		bool mouseButtonDown = false;
 		float xOffset = 0.0f;
 		float yOffset = 0.0f;
+
+	private:
+
+		//std::unique_ptr<WindowsRenderer> w_renderer;
+		
+		enum MOVE_MODES {
+			CAMERA,
+			NUM_MOVE_MODES
+		};
+		MOVE_MODES move_mode = CAMERA;
+
 
 		//unsigned int fbo = 0;
 		//unsigned int fboTexture = 0;
