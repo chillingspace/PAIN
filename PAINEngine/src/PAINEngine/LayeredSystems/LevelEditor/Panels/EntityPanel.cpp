@@ -54,6 +54,7 @@ namespace PAIN {
                             glm::vec3 scale = { 1.f, 1.f, 1.f };
 
                             ECS::Entity::Type entity = ecs->createEntity();
+                            ecs->addEntityComponent(entity, Metadata{ entity_name });
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, MeshRenderer{ Mesh::LoadObj() });
 
@@ -99,7 +100,7 @@ namespace PAIN {
                 return [this, popup_id]() {
 
                     //Selected entity name
-                    std::string selected_name = PN_METADATA_SERVICE->getEntityName(selected_entity);
+                    std::string selected_name = PN_ECS_SERVICE->getEntityComponent<Metadata>(selected_entity).value().get().name;
 
                     //Confirm removal of entity
                     ImGui::Text("Are you sure you want to remove %s?", selected_name.c_str());
@@ -143,12 +144,12 @@ namespace PAIN {
                         remove.do_action = [&, shared_id]() {
 
                             //Check if entity is still alive
-                            auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
+                            auto entity = PN_ECS_SERVICE->checkEntity(selected_entity);
 
-                            if (entity.has_value()) {
+                            if (entity) {
                                 //Destroy new entity
-                                PN_ECS_SERVICE->destroyEntity(entity.value());
-                                PN_METADATA_SERVICE->updateData();
+                                PN_ECS_SERVICE->destroyEntity(selected_entity);
+
                             }
 
                             //Set selected entity to an invalid entity
@@ -289,13 +290,16 @@ namespace PAIN {
                 auto ecs = services->get<ECS::Controller>();
                 auto scene = services->get<Scene>();
                 if (total_entities != ecs->getAllEntities().size()) {
-                    total_entities = ecs->getAllEntities().size();
-                    entities.clear();
+                    auto ecs_entities = ecs->getAllEntities();
+                    total_entities = ecs_entities.size();
+                    editor_entities.clear();
 
-                    for (int i = 0; i < total_entities; i++) {
-
-                        std::string entity_name = "Entity " + std::to_string(i);
-                        entities.push_back(entity_name);
+                    for (auto& e : ecs_entities) {
+                        // Try to get metadata (name + tags)
+                        auto meta = ecs->getEntityComponent<Metadata>(e);
+                        if (meta) {
+                            editor_entities.push_back(std::pair<ECS::Entity::Type, std::string>{e, meta.value().get().name});
+                        }
                     }
 
                 }
@@ -319,10 +323,13 @@ namespace PAIN {
 
 
                 // Iterate through all entities directly (no layering)
-                for (size_t i = 0; i < entities.size(); ++i) {
+                for (size_t i = 0; i < editor_entities.size(); ++i) {
                     bool isSelected = (i == selectedEntityIndex);
-                    if (ImGui::Selectable(entities[i].c_str(), isSelected)) {
+                    std::string label = editor_entities[i].second + "##" + std::to_string(editor_entities[i].first);
+
+                    if (ImGui::Selectable(label.c_str(), isSelected)) {
                         selectedEntityIndex = i;  // Select the entity
+                        selected_entity = editor_entities[i].first;
                     }
                 }
 

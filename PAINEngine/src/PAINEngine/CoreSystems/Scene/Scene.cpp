@@ -27,6 +27,7 @@ namespace PAIN {
 	{
 		auto ecs = services->get<ECS::Controller>();
 		ECS::Entity::Type entity = ecs->createEntity();
+		ecs->addEntityComponent(entity, Metadata{ "Example Ogre" });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh});
 		

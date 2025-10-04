@@ -31,7 +31,7 @@ namespace PAIN {
                 bool isEntityChanged() const;
 
             private:
-                std::vector<std::string> entities;
+                std::vector<std::pair<ECS::Entity::Type, std::string>> editor_entities;
 
                 //Selected entity
                 ECS::Entity::Type selected_entity;
