@@ -48,12 +48,6 @@ namespace PAIN {
             //Check if path is derived
             bool isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const;
 
-            //Internal to lower case for string
-            std::string toLowerCase(std::string const& string) const;
-
-            //Get Asset type from path
-            Type getAssetType(std::filesystem::path const& file) const;
-
             //Reposition file
             bool repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const;
 

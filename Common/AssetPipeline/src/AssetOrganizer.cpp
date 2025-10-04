@@ -23,32 +23,6 @@ namespace PAIN {
             return currentPath == absRoot;
         }
 
-        std::string AssetOrganizer::toLowerCase(std::string const& string) const {
-            std::string new_string;
-            for (auto c : string) {
-                new_string += __ascii_tolower(c);
-            }
-            return new_string;
-        }
-
-        Type AssetOrganizer::getAssetType(std::filesystem::path const& file) const {
-
-            //Ensure that file is a standard type
-            auto ext = toLowerCase(file.extension().string());
-
-            //return type based on ext
-            for (auto const& asset_ext : extensions) {
-
-                //Asset type found
-                if (asset_ext.second.find(ext) != asset_ext.second.end()) {
-                    return asset_ext.first;
-                }
-            }
-
-            //Other asset type found
-            return Type::Other;
-        }
-
         bool AssetOrganizer::repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const {
             try {
                 std::filesystem::rename(file_path, target_path);
@@ -283,7 +257,6 @@ namespace PAIN {
             }
         }
 
-
         void AssetOrganizer::scanAssetDirectories() {
             std::cout << "=== Scanning Asset Directories ===" << std::endl;
             std::cout << "Assets Root: " << assets_root << std::endl;
@@ -330,11 +303,6 @@ namespace PAIN {
                 }
 
                 });
-
-            //Scan desc asset directory
-            //recursiveScanAllDirectories(desc_path, [&](std::filesystem::path const& file) {
-
-            //});
         }
 
         void AssetOrganizer::tidyUpDirectories() {

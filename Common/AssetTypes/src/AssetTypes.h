@@ -51,6 +51,7 @@ namespace PAIN {
             Script,     // .lua
             Data,       // .json
             Shader,     // .vert, .frag
+            Scenes,
             Other
         };
 
@@ -75,6 +76,7 @@ namespace PAIN {
             temp[Type::Script] = { ".lua" };
             temp[Type::Data] = { ".json" };
             temp[Type::Shader] = { ".vert", ".frag" };
+            temp[Type::Scenes] = { ".scn" };
 
             return temp;
         }
@@ -95,6 +97,7 @@ namespace PAIN {
             temp[Type::Audio] = game_assets_folder / "Audio";
             temp[Type::Script] = game_assets_folder / "Scripts";
             temp[Type::Data] = game_assets_folder / "Data";
+            temp[Type::Scenes] = game_assets_folder / "Scenes";
             temp[Type::Other] = game_assets_folder / "Others";
 
             return temp;
@@ -111,6 +114,32 @@ namespace PAIN {
             temp[Type::Other] = engine_assets_folder / "Others";
 
             return temp;
+        }
+
+        static std::string toLowerCase(std::string const& string) {
+            std::string new_string;
+            for (auto c : string) {
+                new_string += __ascii_tolower(c);
+            }
+            return new_string;
+        }
+
+        static Type getAssetType(std::filesystem::path const& file) {
+
+            //Ensure that file is a standard type
+            auto ext = toLowerCase(file.extension().string());
+
+            //return type based on ext
+            for (auto const& asset_ext : getAllExtensions()) {
+
+                //Asset type found
+                if (asset_ext.second.find(ext) != asset_ext.second.end()) {
+                    return asset_ext.first;
+                }
+            }
+
+            //Other asset type found
+            return Type::Other;
         }
 
         //Asset info

@@ -41,8 +41,8 @@ namespace PAIN {
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
 			//On detach
-			(*it).lock()->services = nullptr;
 			(*it).lock()->onDetach();
+			(*it).lock()->services = nullptr;
 		}
 		layer_stack.clear();
 
@@ -50,8 +50,8 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//On detach
-			(*it).lock()->services = nullptr;
 			(*it).lock()->onDetach();
+			(*it).lock()->services = nullptr;
 		}
 		core_stack.clear();
 	}

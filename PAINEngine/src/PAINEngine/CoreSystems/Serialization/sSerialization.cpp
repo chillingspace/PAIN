@@ -391,7 +391,7 @@ namespace PAIN {
         std::string Service::MakeScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/Scenes/") + b + ".scn";
+            return std::string("assets/Raw/Game/Scenes/") + b + ".scn";
         }
 
         bool Service::createNewScene(std::string_view baseName)
