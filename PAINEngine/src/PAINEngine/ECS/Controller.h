@@ -22,7 +22,6 @@ namespace PAIN {
 
 			//Register Event
 			EVENT_CLASS_TYPE(EntitiesChange);
-			EVENT_CLASS_CATEGORY(PAIN::Event::Category::EntityChange);
 		};
 #endif
 

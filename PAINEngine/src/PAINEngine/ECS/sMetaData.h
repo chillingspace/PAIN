@@ -192,8 +192,7 @@ namespace PAIN {
             // Pending operations
             std::set< ECS::Entity::Type> entities_to_destroy;
 
-            // Helper functions
-            void updateData();
+
             std::string generateUniqueName(std::string const& base_name) const;
             void removeEntityFromGroup( ECS::Entity::Type entity);
 
@@ -203,6 +202,9 @@ namespace PAIN {
 
             // Initialization
             void onAttach() override; 
+
+            // Helper functions
+            void updateData();
 
             // Update
             void onUpdate(AppTiming timing) override;

@@ -112,11 +112,9 @@ namespace PAIN {
 		void Service::onEvent(Event::Event& e) {
 #ifdef PN_PLATFORM_WINDOWS
 			Event::Dispatcher dispatcher(e);
-			// Check if it's an EntitiesChanged event
-			if (e.getType() == Event::Type::EntitiesChange) {
-				// Cast to the specific event type
-				PAIN::ECS::EntitiesChanged& entities_changed = static_cast<PAIN::ECS::EntitiesChanged&>(e);
 
+			// Dispatch EntitiesChanged event
+			dispatcher.Dispatch<PAIN::ECS::EntitiesChanged>([&](PAIN::ECS::EntitiesChanged& entities_changed) {
 				// Update our copy of active entities
 				ecs_entities = entities_changed.entities;
 
@@ -142,11 +140,18 @@ namespace PAIN {
 
 				// Update metadata for any new entities
 				updateData();
-			}
+
+				return true;
+			});
 #endif
 		}
 
+
 		void Service::updateData() {
+
+			// CRITICAL FIX: Get current entities from ECS directly, not from cached ecs_entities
+			ecs_entities = PN_ECS_SERVICE->getAllEntities();
+
 			// Clear entity names & repopulate them with updated names
 			entity_names.clear();
 

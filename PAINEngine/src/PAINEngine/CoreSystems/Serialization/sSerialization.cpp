@@ -64,7 +64,7 @@ namespace PAIN {
 
         void PAIN::Serialization::Service::onAttach() {
             // Placeholder path
-            const std::string scenePath = MakeScenePathFromBase("lvl1_1");
+            const std::string scenePath; // MakeScenePathFromBase("lvl1_1");
 
             PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
 

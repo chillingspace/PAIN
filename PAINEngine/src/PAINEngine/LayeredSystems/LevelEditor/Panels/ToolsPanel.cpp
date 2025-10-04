@@ -85,18 +85,18 @@ namespace PAIN {
                     ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
                 ImGui::BeginChild("##TopToolbar", ImVec2(0, 20.f), false, toolbar_flags);
 
-                // Center: Play / Pause / Step
-                {
-                    ImGui::SameLine(0, 800);
-                    if (ImGui::Button("Play")) {
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Pause")) {
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Stop")) {
-                    }
-                }
+                //// Center: Play / Pause / Step
+                //{
+                //    ImGui::SameLine(0, 800);
+                //    if (ImGui::Button("Play")) {
+                //    }
+                //    ImGui::SameLine();
+                //    if (ImGui::Button("Pause")) {
+                //    }
+                //    ImGui::SameLine();
+                //    if (ImGui::Button("Stop")) {
+                //    }
+                //}
 
                 ImGui::EndChild();
 			}
