@@ -38,7 +38,7 @@ namespace PAIN {
                 }
             }
 
-            void EntityPanel::onUpdate() {
+            void EntityPanel::onUpdate(PAIN::AppTiming timing) {
 
                 // Update entity list
                 auto ecs = services->get<ECS::Controller>();

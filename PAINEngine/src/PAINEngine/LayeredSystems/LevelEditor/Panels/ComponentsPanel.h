@@ -38,7 +38,7 @@ public:
     ~ComponentsPanel() override = default;
 
     void nextWindowSettings() override;   // default
-    void onUpdate() override;             // draw inside panel window
+    void onUpdate(AppTiming timing) override;             // draw inside panel window
 
     static constexpr const char* getStaticName() { return "##ComponentsPanel"; }
 

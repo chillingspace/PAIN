@@ -124,6 +124,9 @@ namespace PAIN {
 				sign.set(static_cast<std::size_t>(comp_type_opt.value()), true);
 				entity_service->setSignature(entity, sign);
 
+				//sign.set(component_service->getComponentType<T>(), true);
+				//entity_service->setSignature(entity, sign);
+
 				//Update entities list
 				system_service->updateEntitiesList(entity, sign);
 			}

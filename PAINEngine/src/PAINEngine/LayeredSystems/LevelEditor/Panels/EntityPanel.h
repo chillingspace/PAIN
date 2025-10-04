@@ -10,7 +10,7 @@ namespace PAIN {
             class EntityPanel : public IPanel {
             public:
                 EntityPanel();
-                void onUpdate() override;
+                void onUpdate(PAIN::AppTiming timing) override;
                 void nextWindowSettings() override;
 
             private:

@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef ASSET_EVENTS_HPP
 #define ASSET_EVENTS_HPP
 
@@ -30,5 +31,6 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif
 

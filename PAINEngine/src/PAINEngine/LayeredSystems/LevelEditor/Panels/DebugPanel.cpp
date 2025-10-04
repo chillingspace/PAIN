@@ -23,7 +23,7 @@ namespace PAIN {
 				// Default behavior (no fullscreen/docking hacks needed)
 			}
 
-			void DebugPanel::onUpdate() {
+			void DebugPanel::onUpdate(AppTiming timing) {
 
 				//if (ImGui::Begin("Audio Controls")) {
 				//	AudioManager& audio = PAIN::Application::Get().GetAudioManager();

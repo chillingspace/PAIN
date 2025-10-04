@@ -10,9 +10,15 @@
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
 #include "Panels/ViewportPanel.h"
+#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 #include "Panels/EntityPanel.h"
 
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+#include "PAINEngine/ECS/Controller.h"
+
+#define PN_CORE_ASSERT(cond, msg) \
+    do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
+
 
 namespace PAIN {
 
@@ -34,10 +40,65 @@ namespace PAIN {
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();
 
+            // Get ECS Service
+            auto ecs = services->get<PAIN::ECS::Controller>();
+
+            // get serialization service
+            auto ser = services->get<PAIN::Serialization::Service>();
+            PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
+
+            // if ScenesPanel uses a hooks struct, fill it:
+            Panel::ScenesHooks hooks{};
+            hooks.onCreate = [ser](const std::string& base) {
+                if (!ser->createNewScene(base)) {
+                    PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveAs = [ser](const std::string& base) {
+                if (!ser->saveSceneAs(base)) {
+                    PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveCurrent = [ser](const std::string& /*currSceneId*/) {
+                if (!ser->saveCurrentScene()) {
+                    PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
+                }
+                };
+            hooks.onDelete = [ser](const std::string& sceneId) {
+                if (!ser->deleteSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
+                }
+                };
+            hooks.onChange = [ser](const std::string& sceneId) {
+                if (!ser->loadSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
+                }
+                else {
+                    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
+                }
+                };
+            hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
+            hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
+                ser->setMask(i, j, v);      
+                ser->modifyScene();         
+                };
+
+            hooks.onLayerVisibleChanged = [ser](unsigned idx, bool vis) {
+                ser->setLayerVisible(idx, vis); 
+                ser->modifyScene();
+                };
+            hooks.onDirty = [ser]() { ser->modifyScene(); };
+
+
+
+
+            auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
+
             //Register panels
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::DebugAudioPanel>());
-            registerPanel(std::make_shared<Panel::ScenesPanel>());
+            //registerPanel(std::make_shared<Panel::ScenesPanel>());
+            registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
             registerPanel(std::make_shared<Panel::EntityPanel>());
@@ -55,6 +116,11 @@ namespace PAIN {
         }
 
         void Editor::onDetach() {
+            auto ser = services->get<PAIN::Serialization::Service>();
+            if (ser) {
+                PN_CORE_INFO("[Editor] Requesting save on detach");
+                ser->saveCurrentScene();
+            }
             ImGui::SaveIniSettingsToDisk("assets/imgui_layout.ini");
             panels = nullptr;
             platform = nullptr;
@@ -125,9 +191,10 @@ namespace PAIN {
                 }
 
                 // Iterate through all panels
-                panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
-                    panel->drawWindow();
+                panels->forEachOfType<Panel::IPanel>([&, timing](std::shared_ptr<Panel::IPanel> panel) {
+                    panel->drawWindow(timing);
                     });
+
 
                 static bool show_demo = false; // can toggle to true if want demo
                 if (show_demo) ImGui::ShowDemoWindow(&show_demo);

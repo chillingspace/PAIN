@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef KEY_EVENTS_HPP
 #define KEY_EVENTS_HPP
 
@@ -98,4 +99,5 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif

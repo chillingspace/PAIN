@@ -8,7 +8,7 @@ namespace PAIN {
 		namespace Panel {
 
 			//Draw window of panel
-			void IPanel::drawWindow() {
+			void IPanel::drawWindow(PAIN::AppTiming timing) {
 
                 //Next window settings ( Optional )
                 nextWindowSettings();
@@ -24,7 +24,7 @@ namespace PAIN {
                     if (!b_check_active) { ImGui::End(); return; }
 
                     //Update panel
-                    onUpdate();
+                    onUpdate(timing);
 
                     // Popups requested during OnGUI()/Update()
                     drawPopUps();
