@@ -17,7 +17,9 @@
 #include "CoreSystems/Path/Path.h"
 
 namespace PAIN {
-
+	void RendererLayer::onDetach()
+	{
+	}
 	void RendererLayer::onAttach() {
 
 		WindowsRenderer::get().Init();

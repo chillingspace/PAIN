@@ -6,6 +6,7 @@
 #include "CoreSystems/Renderer/RendererLayer.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Audio/AudioManager.h"
+#include "CoreSystems/Scene/Scene.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -14,7 +15,7 @@
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
 
-#include "Scene/Scene.h"
+
 
 #include "Core.h"
 
@@ -134,14 +135,10 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Compiler::Service>());
 #endif
 		// Scenes
-		std::shared_ptr<Scene> scene = std::make_shared<Scene>();;
-		services->set<Scene>(scene);
-		scene.get()->Init();
+		addCoreSystem(std::make_shared<Scene>());
 
 		// Renderer
-		auto renderer = std::make_shared<RendererLayer>();
-
-		addCoreSystem(renderer);
+		addCoreSystem(std::make_shared<RendererLayer>());
 
 
 		//Editor only added when debug mode

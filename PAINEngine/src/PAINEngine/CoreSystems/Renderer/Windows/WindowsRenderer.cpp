@@ -13,10 +13,7 @@
  //#ifdef PN_PLATFORM_WINDOWS
 
 #include "WindowsRenderer.h"
-#include <cstring>
-#include "Applications/Application.h"
-#include "CoreSystems/Events/GLFW/KeyEvents.h"
-#include "Scene/Camera.h"
+
 
 namespace PAIN {
 

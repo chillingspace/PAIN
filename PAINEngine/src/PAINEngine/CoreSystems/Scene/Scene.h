@@ -2,7 +2,7 @@
 #include "pch.h"
 
 
-#include "../CoreSystems/Renderer/Mesh.h"
+#include "CoreSystems/Renderer/Mesh.h"
 #include "Camera.h"
 
 namespace PAIN {
@@ -12,13 +12,16 @@ namespace PAIN {
 		glm::mat4 transform;  // model matrix
 	};
 
-	class Scene {
+	class Scene : public AppSystem {
 	public:
 		Scene() = default;
 		~Scene() = default;
 
-		void Init();
-		void OnUpdate();
+		void onDetach() override;
+		void onAttach() override;
+		void onFixedUpdate(AppTiming timing) override {};
+		void onUpdate(AppTiming timing) override;
+		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		Mesh* AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform);
 		void DeleteObject(int index);

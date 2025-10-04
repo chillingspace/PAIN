@@ -15,6 +15,10 @@
 #ifndef __WINDOWS_RENDERER_H__
 #define __WINDOWS_RENDERER_H__
 
+#include "Applications/Application.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
+#include "CoreSystems/Scene/Camera.h"
+
 #include "../Light.h"
 #include "../Material.h"
 
@@ -30,7 +34,7 @@ namespace PAIN {
 #include "../Shader.h"
 #include "../Mesh.h"
 #include "Applications/AppSystem.h"
-#include "Scene/Scene.h"
+#include "CoreSystems/Scene/Scene.h"
 
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)

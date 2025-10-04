@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ToolsPanel.h"
-#include "ECS/Controller.h"
-#include "Scene/Scene.h"
+
+
 #ifdef _DEBUG
 
 namespace PAIN {

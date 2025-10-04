@@ -5,6 +5,8 @@
 #define TOOLS_PANELS_HPP
 
 #include "Panels.h"
+#include "CoreSystems/Scene/Scene.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
 	namespace Editor {
