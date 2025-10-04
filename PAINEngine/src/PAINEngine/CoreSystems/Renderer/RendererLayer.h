@@ -54,12 +54,14 @@ namespace PAIN {
 		float xOffset = 0.0f;
 		float yOffset = 0.0f;
 
+		// Audio mute state for Windows keybinds
+		bool m_musicMuted = false;
+		bool m_sfxMuted = false;
+
 		//unsigned int fbo = 0;
 		//unsigned int fboTexture = 0;
 		//unsigned int rbo = 0;
 		//int fbWidth = 1280;
 		//int fbHeight = 720;
-
 	};
-
 }

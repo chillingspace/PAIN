@@ -13,8 +13,8 @@
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 
-
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {
 	void RendererLayer::onDetach()
@@ -37,7 +37,19 @@ namespace PAIN {
 			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform2);
 			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform3);
 		}
-
+/*
+#ifdef PN_PLATFORM_WINDOWS
+		// Set initial mute state for Windows only
+		auto audioManager = services->get<Audio::Audio>();
+		if (audioManager)
+		{
+			m_musicMuted = true;
+			m_sfxMuted = true;
+			audioManager->setGroupVolumeDb("music", -80.0f);
+			audioManager->setGroupVolumeDb("sfx", -80.0f);
+		}
+#endif
+*/
 	}
 
 	void RendererLayer::onUpdate(AppTiming timing) {
@@ -222,6 +234,7 @@ namespace PAIN {
 
 		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
 
+#ifdef PN_PLATFORM_WINDOWS
 			switch (e.getKeyCode()) {
 			case PAIN_KEY_TAB:
 				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
@@ -229,10 +242,30 @@ namespace PAIN {
 			case PAIN_KEY_O:
 				m_Scene->GetActiveCamera()->move_mode = static_cast<Camera::MOVE_MODES>((m_Scene->GetActiveCamera()->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
 				break;
+			case PAIN_KEY_M: { // M key to toggle music
+				m_musicMuted = !m_musicMuted;
+				auto audioManager = services->get<Audio::Audio>();
+				if (audioManager) {
+					// -80.0f is effectively mute, 0.0f is full volume
+					audioManager->setGroupVolumeDb("music", m_musicMuted ? -80.0f : 0.0f);
+					PN_CORE_INFO("Music group muted: {}", m_musicMuted);
+				}
+				break;
+			}
+			case PAIN_KEY_N: { // N key to toggle SFX (footsteps)
+				m_sfxMuted = !m_sfxMuted;
+				auto audioManager = services->get<Audio::Audio>();
+				if (audioManager) {
+					// -80.0f is effectively mute, 0.0f is full volume
+					audioManager->setGroupVolumeDb("sfx", m_sfxMuted ? -80.0f : 0.0f);
+					PN_CORE_INFO("SFX group muted: {}", m_sfxMuted);
+				}
+				break;
+			}
 			default:
 				break;
 			}
-
+#endif
 			return false;
 			});
 

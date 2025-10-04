@@ -38,7 +38,8 @@ namespace PAIN {
 
             // assets
             virtual AudioResult loadSound(std::string_view path,
-                bool is3D = true, bool looping = false, bool stream = false) = 0;
+                bool is3D = true, bool looping = false, bool stream = false, 
+                float minDistance = 1.0f, float maxDistance = 50.0f) = 0;
             virtual AudioResult loadPlaylist(const PlaylistDesc& desc) = 0;
 
             // playback

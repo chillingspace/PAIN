@@ -30,7 +30,7 @@ namespace PAIN {
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
 
-            AudioResult loadSound(std::string_view, bool, bool, bool) override;
+            AudioResult loadSound(std::string_view, bool, bool, bool, float, float) override;
             AudioResult loadPlaylist(const PlaylistDesc&) override;
 
             std::optional<AudioChannelId> play(std::string_view, const glm::vec3&, float) override;
@@ -51,8 +51,6 @@ namespace PAIN {
             void onAppPause() override;
             void onAppResume() override;
         };
-
-
 	}
 }
 

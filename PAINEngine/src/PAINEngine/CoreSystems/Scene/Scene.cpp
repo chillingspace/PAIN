@@ -1,25 +1,124 @@
-
 #include "Scene.h"
+#include "CoreSystems/Path/Path.h"
 
 namespace PAIN {
 	void Scene::onDetach() {}
 
 	void Scene::onAttach()
 	{
+		// --- Original Camera and Scene Setup ---
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
 		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 
 		float fov{ 90.f };
-		float near_plane{ 0.1f };		// closest distance camera can see
-		float far_plane{ 100.f };		// furthest distance camera can see
-
+		float near_plane{ 0.1f };
+		float far_plane{ 100.f };
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
 
 		camera = std::make_unique<Camera>(pos, forward, up, fov, near_plane, far_plane, width_ratio, height_ratio);
+
+		// Keep original objects, but designate the first one as our audio source
+		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
+		glm::mat4 transform3 = glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 1.f, 0.f));
+
+		AddObject(Mesh::LoadObj("ogre.obj"), transform1);
+		audioSourceObjectIndex = 0; // The first object is our audio source
+		AddObject(Mesh::LoadObj("ogre.obj"), transform2);
+		AddObject(Mesh::LoadObj("ogre.obj"), transform3);
+
+		// --- Audio Demo Initialization ---
+		auto audioManager = services->get<Audio::Audio>();
+		if (audioManager)
+		{
+			// Define the rectangular path centered at the world origin
+			float pathWidth = 18.0f;
+			float pathDepth = 12.0f;
+			glm::vec3 pathCenter = { 0.0f, 1.0f, 0.0f };
+
+			pathCorners = {
+				pathCenter + glm::vec3(-pathWidth / 2, 0.0f, -pathDepth / 2), // North-West
+				pathCenter + glm::vec3( pathWidth / 2, 0.0f, -pathDepth / 2), // North-East
+				pathCenter + glm::vec3( pathWidth / 2, 0.0f,  pathDepth / 2), // South-East
+				pathCenter + glm::vec3(-pathWidth / 2, 0.0f,  pathDepth / 2)  // South-West
+			};
+
+			// Position the audio source object at its starting corner
+			if (audioSourceObjectIndex != -1) {
+				m_Objects[audioSourceObjectIndex].transform[3] = glm::vec4(pathCorners[0], 1.0f);
+			}
+
+			// 1. Load and play the looping music
+			std::string loopingSoundPath = services->get<Path::Path>()->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+			audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f);
+			auto channelOpt = audioManager->play(loopingSoundPath, pathCorners[0], 0.0f);
+			if (channelOpt.has_value()) {
+				audioSourceChannel = channelOpt.value();
+			}
+
+			// 2. Load the footstep playlist
+			Audio::PlaylistDesc footstepPlaylist;
+			footstepPlaylist.name = "FootstepsGrass";
+			for (int i = 1; i <= 8; ++i)
+			{
+				std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".wav";
+				std::string footstepPath = services->get<Path::Path>()->resolvePath("game_assets://Audio/SFX/MovingSFX/" + footstepFile);
+				// Pre-load sounds with 3D attenuation settings
+				audioManager->loadSound(footstepPath, true, false, false, 1.0f, 15.0f);
+				footstepPlaylist.paths.push_back(footstepPath);
+			}
+			audioManager->loadPlaylist(footstepPlaylist);
+		}
 	}
-	void Scene::onUpdate(AppTiming timing) {}
+	void Scene::onUpdate(AppTiming timing) 
+	{
+		auto audioManager = services->get<Audio::Audio>();
+		if (!audioManager || audioSourceObjectIndex == -1) return;
+
+		// --- Update Listener Position ---
+		// Update FMOD listener to match the camera's current state
+		glm::vec3 camPos = camera->pos;
+		glm::vec3 camVel = { 0, 0, 0 }; // Velocity is zero for a stationary listener
+		glm::vec3 camFwd = camera->forward;
+		glm::vec3 camUp = camera->up;
+		audioManager->setListener(camPos, camVel, camFwd, camUp);
+
+		// --- Animate Audio Source Object ---
+		demoTime += timing.dt;
+		float progress = fmod(demoTime, segmentDuration) / segmentDuration;
+
+		// Determine which segment of the path we are on
+		int segment = static_cast<int>(demoTime / segmentDuration) % 4;
+		if (segment != currentPathSegment) {
+			currentPathSegment = segment;
+		}
+
+		// Interpolate between the current segment's start and end corners
+		glm::vec3 startPos = pathCorners[currentPathSegment];
+		glm::vec3 endPos = pathCorners[(currentPathSegment + 1) % 4];
+		glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
+
+		// Update the visual transform of the audio source object
+		m_Objects[audioSourceObjectIndex].transform[3] = glm::vec4(currentPosition, 1.0f);
+
+		// --- Update FMOD Sound Positions ---
+		// Update the 3D position of the looping music channel
+		if (isValid(audioSourceChannel)) {
+			audioManager->setPosition(audioSourceChannel, currentPosition);
+		}
+
+		// --- Handle Footstep Playback ---
+		footstepTimer -= timing.dt;
+		if (footstepTimer <= 0.0f)
+		{
+			// Play a random footstep from the playlist at the object's current position
+			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
+			// Reset the timer for the next footstep
+			footstepTimer = footstepInterval;
+		}
+	}
 	void Scene::onEvent(Event::Event& e) {}
 
 	Mesh* Scene::AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform)
@@ -45,4 +144,3 @@ namespace PAIN {
 		return camera.get();
 	}
 }
-
