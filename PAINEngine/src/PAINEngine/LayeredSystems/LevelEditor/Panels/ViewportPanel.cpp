@@ -28,7 +28,7 @@ namespace PAIN {
 				texHeight = height;
 			}
 
-			void ViewportPanel::onUpdate() {
+			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 
 				ImVec2 initialSize(800, 600);

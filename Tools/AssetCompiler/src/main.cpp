@@ -70,41 +70,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path assetsRoot = projectRoot / "assets";
 
 	//create assset compiler
-    AssetOrganizer* compiler = new AssetOrganizer(assetsRoot);
-
-    //Desc file extension
-    compiler->desc_ext = ".desc";
-
-    //Set up extensions for asset types
-    compiler->initExtensions(AssetType::Texture, { ".png", ".jpg", ".jpeg" });
-    compiler->initExtensions(AssetType::Model, { ".obj" });
-    compiler->initExtensions(AssetType::Audio, { ".wav", ".mp3", ".ogg" });
-    compiler->initExtensions(AssetType::Script, { ".lua" });
-    compiler->initExtensions(AssetType::Data, { ".json" });
-    compiler->initExtensions(AssetType::Shader, { ".vert", ".frag" });
-
-    //Set root folder names
-    compiler->raw_folder = "Raw";
-    compiler->desc_folder = "Descriptors";
-    compiler->game_folder = "Game";
-    compiler->engine_folder = "Engine";
-
-    //Init game folders
-    compiler->initGameFolders(AssetType::Texture, "Textures");
-    compiler->initGameFolders(AssetType::Model, "Models");
-    compiler->initGameFolders(AssetType::Audio, "Audio");
-    compiler->initGameFolders(AssetType::Script, "Scripts");
-    compiler->initGameFolders(AssetType::Data, "Data");
-    compiler->initGameFolders(AssetType::Other, "Others");
-
-    //Init engine folders
-    compiler->initEngineFolders(AssetType::Texture, "Textures");
-    compiler->initEngineFolders(AssetType::Model, "Models");
-    compiler->initEngineFolders(AssetType::Audio, "Audio");
-    compiler->initEngineFolders(AssetType::Script, "Scripts");
-    compiler->initEngineFolders(AssetType::Data, "Data");
-    compiler->initEngineFolders(AssetType::Shader, "Shaders");
-    compiler->initEngineFolders(AssetType::Other, "Others");
+    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(assetsRoot);
 
     //Enforce a standard structure for assets
     compiler->enforceStandardStructure();

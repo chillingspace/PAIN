@@ -114,8 +114,19 @@ namespace PAIN {
 
 				//Set bit signature of component to true
 				Component::Signature sign = entity_service->getSignature(entity);
-				sign.set(component_service->getComponentType<T>(), true);
+
+				#define PN_CORE_ASSERT(cond, msg) \
+					do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
+
+				auto typeOpt = component_service->getComponentType<T>();
+				PN_CORE_ASSERT(typeOpt.has_value(), "Component type not registered before use");
+				const size_t compIdx = static_cast<size_t>(typeOpt.value());
+
+				sign.set(compIdx, true);              // size_t index, not optional
 				entity_service->setSignature(entity, sign);
+
+				//sign.set(component_service->getComponentType<T>(), true);
+				//entity_service->setSignature(entity, sign);
 
 				//Update entities list
 				system_service->updateEntitiesList(entity, sign);

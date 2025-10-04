@@ -3,7 +3,9 @@
 #ifndef ASSET_COMPILER_HPP
 #define ASSET_COMPILER_HPP
 
-#include "AssetOrganizer.h"
+#include "AssetTypes.h"
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
 
 class AssetCompiler {
 private:

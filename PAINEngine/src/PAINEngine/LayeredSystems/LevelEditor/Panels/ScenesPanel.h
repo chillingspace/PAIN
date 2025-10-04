@@ -25,6 +25,11 @@ namespace PAIN {
                 std::function<void(const std::string& sceneId)> onDelete;
                 // Called when user requests a scene change (id with extension)
                 std::function<void(const std::string& sceneId)> onChange;
+
+                std::function<void(const std::string& sceneId)> onModifyScene; // for modified scene, but havent changed scene file
+                std::function<void(unsigned i, unsigned j, bool v)> onMaskChanged;
+                std::function<void(unsigned idx, bool visible)>     onLayerVisibleChanged;
+                std::function<void()>                               onDirty;
             };
 
             class ScenesPanel : public IPanel {
@@ -33,7 +38,8 @@ namespace PAIN {
                 ~ScenesPanel() override = default;
 
                 void nextWindowSettings() override;   
-                void onUpdate() override;             
+                void setHooks(ScenesHooks h) { hooks_ = std::move(h); }
+                void onUpdate(AppTiming timing) override;
 
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }
 
@@ -57,6 +63,7 @@ namespace PAIN {
 
                 // Hooks for future backend integration 
                 ScenesHooks hooks_;
+                char nameBuf_[64] = "Level01";  
 
             private:
                 // helpers

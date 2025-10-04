@@ -16,7 +16,7 @@ namespace PAIN {
 				DebugPanel();
 				~DebugPanel() override = default;
 				void nextWindowSettings() override; 
-				void onUpdate() override;
+				void onUpdate(AppTiming timing) override;
 			};
 
 		} // namespace Panel
