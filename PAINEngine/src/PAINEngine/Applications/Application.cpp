@@ -116,16 +116,23 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
 		// Add Serialization
-#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Serialization::Service>());
-		// Add systems here
+
+		
+#ifdef PN_PLATFORM_WINDOWS
 
 		// Physics system not cross platform yet
 		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);
 #endif
 
 		// Register components here
-		services->get<ECS::Controller>()->registerComponent<Transform::Transform>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::EntityName>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Tag>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::EditorVisible>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Relation>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Group>();
+		services->get<ECS::Controller>()->registerComponent<Transform>();
+		services->get<ECS::Controller>()->registerComponent<MeshRenderer>();
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS

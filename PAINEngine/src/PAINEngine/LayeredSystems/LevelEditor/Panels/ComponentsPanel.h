@@ -4,72 +4,74 @@
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
 
 #include "Panels.h"
-#include <functional>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include "ECS/ECSTypes.h"
+#include "Utility/ECSUtility.h"
 
 namespace PAIN {
-namespace Editor {
-namespace Panel {
+	namespace Editor {		
 
-// Optional hooks you can fill later to connect to your ECS.
-// Leave nullptr/empty to keep the placeholder behavior.
-struct ComponentsHooks {
-    // return list of available component type names
-    std::function<std::vector<std::string>()> listAvailable;
+		namespace Panel {
+			class EntityPanel;
 
-    // return list of components currently on the selected entity
-    std::function<std::vector<std::string>()> listOnEntity;
+			class ComponentsPanel : public IPanel {
+			public:
+				ComponentsPanel();
+				~ComponentsPanel() override = default;
 
-    // add/remove on the selected entity
-    std::function<void(const std::string& type)> add;
-    std::function<void(const std::string& type)> remove;
+				void nextWindowSettings() override;   // default
 
-    // per-component UI (type -> draw func)
-    // void(ImGui&) style placeholder: args are optional, adapt later if needed
-    std::function<void(const std::string& type)> drawUI;
-};
+				void onAttach() override;
+				void onUpdate(AppTiming timing) override;             // draw inside panel window
 
-class ComponentsPanel : public IPanel {
-public:
-    ComponentsPanel(ComponentsHooks hooks = {});
-    ~ComponentsPanel() override = default;
+				static constexpr const char* getStaticName() { return "##ComponentsPanel"; }
 
-    void nextWindowSettings() override;   // default
-    void onUpdate(AppTiming timing) override;             // draw inside panel window
 
-    static constexpr const char* getStaticName() { return "##ComponentsPanel"; }
+				//Set comp removal string reference
+				void setCompStringRef(std::string const& to_set);
 
-private:
-    // Placeholder “entity” state
-    std::vector<std::string> available_;     // all possible component types
-    std::vector<std::string> onEntity_;      // components currently attached
-    std::string pendingRemove_;              // which comp to remove
+				//Add component UI function
+				template<typename T>
+				void registerCompUIFunc(std::function<void(ComponentsPanel&, T&)> comp_func) {
+					if (comps_ui.find(ECS::Utility::convertTypeString(typeid(T).name())) != comps_ui.end()) {
+						throw std::runtime_error("Component UI function already registered");
+					}
 
-    // UI state
-    bool showAddModal_     = false;
-    bool showRemoveModal_  = false;
+					comps_ui.emplace(ECS::Utility::convertTypeString(typeid(T).name()), [comp_func](ComponentsPanel& comp_panel, void* comp) { comp_func(comp_panel, *static_cast<T*>(comp)); });
+				}
 
-    // hooks for future integration
-    ComponentsHooks hooks_;
+				void renderEntityComponents(ECS::Entity::Type entity);
 
-private:
-    // modal drawers
-    void drawAddModal();
-    void drawRemoveModal();
 
-    // refresh lists from hooks (or seed defaults)
-    void refreshAvailable();
-    void refreshOnEntity();
+			private:
+				std::string comp_string_ref;
 
-    // helpers
-    static bool contains(const std::vector<std::string>& v, const std::string& s);
-};
+				//Component setting error message ( Usage: Editing error popup message )
+				std::shared_ptr<std::string> error_msg;
 
-} // namespace Panel
-} // namespace Editor
+				//Component setting success message ( Usage: Editing success popup message )
+				std::shared_ptr<std::string> success_msg;
+
+				std::function<void()> addComponentPopUp(std::string const& popup_id);
+
+
+				std::function<void()> removeComponentPopUp(std::string const& popup_id);
+
+				bool should_open_remove_popup = false;
+
+
+
+				//Components Map
+				std::unordered_map<std::string, ECS::Component::Type> comps;
+
+				//Components to UI Function map
+				std::unordered_map<std::string, std::function<void(ComponentsPanel&, void*)>> comps_ui;
+
+				std::weak_ptr<EntityPanel> entities_panel;
+
+			};
+
+		} // namespace Panel
+	} // namespace Editor
 } // namespace PAIN
 
 #endif

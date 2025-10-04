@@ -89,6 +89,9 @@ namespace PAIN {
 				unsigned int getDockID() const { return dock_id; }
 
 				//Virtual panel update
+				virtual void onAttach() = 0;
+
+				//Virtual panel update
 				virtual void onUpdate(AppTiming timing) = 0;
 
 				//Draw panel window

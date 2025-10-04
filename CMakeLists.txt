@@ -48,7 +48,7 @@ if (NOT ANDROID)
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 
-	foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+	foreach(cfg Debug Release)
 	  string(TOUPPER "${cfg}" CFG)
 	  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")
 	  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")

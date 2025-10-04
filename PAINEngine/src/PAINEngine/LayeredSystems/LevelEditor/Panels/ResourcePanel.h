@@ -22,7 +22,8 @@ namespace PAIN {
                 // ----------------------------
                 // Life Cycle
                 // ----------------------------
-                void init();
+
+                void onAttach() override;
                 void render();
 
                 // ----------------------------

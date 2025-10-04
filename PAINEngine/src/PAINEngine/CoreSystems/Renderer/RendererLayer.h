@@ -23,6 +23,8 @@ namespace PAIN {
         void onFixedUpdate(AppTiming timing) override {};
         void onUpdate(AppTiming timing) override;
 
+		void renderScene();
+
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		ImTextureID getFramebufferTexture() const {
@@ -31,16 +33,6 @@ namespace PAIN {
 		int getFramebufferWidth() const { return winWidth; }
 		int getFramebufferHeight() const { return winHeight; }
 
-
-	private:
-
-		//std::unique_ptr<WindowsRenderer> w_renderer;
-		
-		enum MOVE_MODES {
-			CAMERA,
-			NUM_MOVE_MODES
-		};
-		MOVE_MODES move_mode = CAMERA;
 
 		bool W_KEYDOWN = false;
 		bool A_KEYDOWN = false;
@@ -57,6 +49,16 @@ namespace PAIN {
 		// Audio mute state for Windows keybinds
 		bool m_musicMuted = false;
 		bool m_sfxMuted = false;
+
+	private:
+		//std::unique_ptr<WindowsRenderer> w_renderer;
+		
+		enum MOVE_MODES {
+			CAMERA,
+			NUM_MOVE_MODES
+		};
+		MOVE_MODES move_mode = CAMERA;
+
 
 		//unsigned int fbo = 0;
 		//unsigned int fboTexture = 0;

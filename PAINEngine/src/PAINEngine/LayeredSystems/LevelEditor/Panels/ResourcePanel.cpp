@@ -44,7 +44,6 @@ namespace PAIN {
                 //// Currently empty, could be used for background updates
                 static bool initialized = false;
                 if (!initialized) {
-                    init();
                     initialized = true;
                 }
 
@@ -561,7 +560,7 @@ namespace PAIN {
 				file_event_queue.push(std::move(callback));
 			}
 
-			void ResourcePanel::init() {
+			void ResourcePanel::onAttach() {
 
 				//Setup events listening
 				/*std::shared_ptr<LevelEditor::ResourcePanel> resourcepanel_wrapped(this, [](LevelEditor::ResourcePanel*) {});
@@ -671,6 +670,7 @@ namespace PAIN {
 					}
 				});*/
 			}
+
 
 			void ResourcePanel::render() {
 

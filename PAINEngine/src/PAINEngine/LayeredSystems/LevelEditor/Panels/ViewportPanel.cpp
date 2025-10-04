@@ -28,6 +28,10 @@ namespace PAIN {
 				texHeight = height;
 			}
 
+			void ViewportPanel::onAttach()
+			{
+			}
+
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 
@@ -49,6 +53,49 @@ namespace PAIN {
 
 					// Flip Y because ImGui expects UVs differently than many renderers
 					ImGui::Image(renderTexture, size, ImVec2(0, 1), ImVec2(1, 0));
+
+					contentHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup
+						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+
+					// Forward input only when the viewport wants it
+					if (wantsInput()) {
+						ImGuiIO& io = ImGui::GetIO();
+
+						// Get your RendererLayer however you access services.
+						// If your Panel base provides `services`, use it. Otherwise,
+						// expose a getter on Editor to reach RendererLayer.
+						auto renderer = services->get<RendererLayer>(); // adjust if needed
+						if (renderer) {
+							// Keyboard
+							renderer->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+							renderer->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+							renderer->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+							renderer->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+							renderer->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							renderer->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+
+
+							// Mouse (LMB drag rotates in your code)
+							renderer->mouseButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+
+							// Provide per-frame mouse movement (your RendererLayer consumes xOffset/yOffset and then resets)
+							if (renderer->mouseButtonDown) {
+								renderer->xOffset = io.MouseDelta.x;
+								renderer->yOffset = io.MouseDelta.y;
+							}
+						}
+					}
+					else {
+						// When viewport loses focus/hover, ensure keys don’t “stick”
+						if (auto renderer = services->get<RendererLayer>()) {
+							renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
+							renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
+							renderer->mouseButtonDown = false;
+						}
+					}
+
+
 				}
 				ImGui::End();
 			}

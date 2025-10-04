@@ -23,17 +23,17 @@ namespace PAIN {
 		void onUpdate(AppTiming timing) override;
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
-		Mesh* AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform);
+		std::shared_ptr<Mesh> AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
 		void DeleteObject(int index);
 
 		const std::vector<SceneObject>& GetObjects() const;
 		Camera* GetActiveCamera();
-
+		std::vector<Mesh*> m_Meshes;
 		//Entity CreateEntity(const std::string name);
 		//void DestroyEntity(Entity entity);
 
 	private:
-		std::vector<std::unique_ptr<Mesh>> m_Meshes;
+
 		std::vector<SceneObject> m_Objects;
 		std::unique_ptr<Camera> camera;
 

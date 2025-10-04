@@ -5,6 +5,7 @@
 #define VIEWPORT_PANEL_HPP
 
 #include "Panels.h"
+#include "CoreSystems/Renderer/RendererLayer.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -15,12 +16,20 @@ namespace PAIN {
 				ViewportPanel();
 
 				void nextWindowSettings() override;
+
+
+				void onAttach() override;
+
 				void onUpdate(AppTiming timing) override;
 
 				// Provide texture from renderer
 				void setRenderTexture(ImTextureID texID, int width, int height);
 
-				ImVec2 getViewportSize();
+				//ImVec2 getViewportSize();
+
+				bool isFocused = false;        // window focus (incl. children)
+				bool contentHovered = false;   // mouse over the image area
+				bool wantsInput() const { return isFocused || contentHovered; }
 
 			private:
 				ImTextureID renderTexture;

@@ -163,120 +163,21 @@ namespace PAIN {
 		}
 	}
 
-	void WindowsRenderer::Init() {
-#ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
-#else
-		pbr_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
-#endif
+	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
+	{
 
-		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = Shader::LoadShaders("geometry.vert", "geometry.frag");
-#else
-		geometry_shader = Shader::LoadShaders("android_geometry.vert", "android_geometry.frag");
-#endif
 
-		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
 
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-#ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = Shader::LoadShaders("texture.vert", "texture.frag");
-#else
-		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
-#endif
-
-#ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = Shader::LoadShaders("shadow.vert", "shadow.frag");
-#else
-		shadow_shader = Shader::LoadShaders("android_shadow.vert", "android_shadow.frag");
-#endif
-
-		glGenVertexArrays(1, &empty_vao);
-		if (empty_vao == 0) {
-			PN_CORE_ERROR("Failed to create empty VAO");
-			return;
-		}
-
-		_initDeferredShadingBuffers();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-
-		m_mesh = Mesh::LoadObj();
-		
-		// init light source(s)
-
-		LightSources::get().create("cam");
-		auto olcam = LightSources::get().get("cam");
-		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.01f);
-		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
-
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(4.f, 4.f, -8.f);
-		la.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("b");
-		auto olb = LightSources::get().get("b");
-		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		lb.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("c");
-		auto olc = LightSources::get().get("c");
-		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 3.f, 2.f);
-		lc.L_intensity = glm::vec3(0.1f);
-		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.target = -lc.position;				// origin. required for shadows
-	}
-
-	void WindowsRenderer::Render(std::shared_ptr<Scene> scene) {
-
-		if (!scene) {
-			return;
-		}
-
-		// populate shadow map first
-
-		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
-		for (const Light& l : LightSources::get().getAll()) {
-			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-				//glClearDepth(1.0f);  // Explicitly set clear value
-				glClear(GL_DEPTH_BUFFER_BIT);
-				for (auto& obj : scene->GetObjects()) {
-					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
-				}
-			}
-		}
 		glViewport(0, 0, winWidth, winHeight);
 
-		// actually draw
+		// Setup framebuffers, clear buffers
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void WindowsRenderer::EndRendering(std::shared_ptr<Scene> scene)
+	{
+		
 
 		// draw floor
 		{
@@ -292,14 +193,6 @@ namespace PAIN {
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
-		}
-
-		// render scene
-		for (auto& obj : scene->GetObjects())
-		{
-
-			RenderGeometry(scene, obj.mesh, obj.transform); // uses geometry_shader
-			
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -345,7 +238,7 @@ namespace PAIN {
 #else
 					ss << "u_ShadowMap" << (tex_id - 4);
 #endif
-					
+
 					pbr_shader->SetUniform(ss.str(), tex_id);
 					ss.str("");
 					ss.clear();
@@ -404,6 +297,7 @@ namespace PAIN {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
+
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
 
@@ -419,6 +313,7 @@ namespace PAIN {
 		//	return;
 		//}
 
+
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
@@ -429,6 +324,95 @@ namespace PAIN {
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
+
+	void WindowsRenderer::Init() {
+#ifdef PN_PLATFORM_WINDOWS
+		pbr_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
+#else
+		pbr_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
+#endif
+
+		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+		else {
+			PN_CORE_INFO("Successfully linked shader");
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		geometry_shader = Shader::LoadShaders("geometry.vert", "geometry.frag");
+#else
+		geometry_shader = Shader::LoadShaders("android_geometry.vert", "android_geometry.frag");
+#endif
+
+		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+#else
+		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
+#endif
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+#ifdef PN_PLATFORM_WINDOWS
+		passthrough_shader = Shader::LoadShaders("texture.vert", "texture.frag");
+#else
+		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
+#endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		shadow_shader = Shader::LoadShaders("shadow.vert", "shadow.frag");
+#else
+		shadow_shader = Shader::LoadShaders("android_shadow.vert", "android_shadow.frag");
+#endif
+
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
+		_initDeferredShadingBuffers();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		
+		// init light source(s)
+
+		LightSources::get().create("cam");
+		auto olcam = LightSources::get().get("cam");
+		Light& lcam = olcam.value();
+		lcam.L_intensity = glm::vec3(0.01f);
+		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
+
+		LightSources::get().create("a");
+		auto ola = LightSources::get().get("a");
+		Light& la = ola.value();
+		la.position = glm::vec3(4.f, 4.f, -8.f);
+		la.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("b");
+		auto olb = LightSources::get().get("b");
+		Light& lb = olb.value();
+		lb.position = glm::vec3(-4.f, 4.f, -8.f);
+		lb.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("c");
+		auto olc = LightSources::get().get("c");
+		Light& lc = olc.value();
+		lc.position = glm::vec3(0.f, 3.f, 2.f);
+		lc.L_intensity = glm::vec3(0.1f);
+		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+		lc.target = -lc.position;				// origin. required for shadows
+	}
+
 
 	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
 	{
@@ -459,15 +443,6 @@ namespace PAIN {
 		mesh->Draw();
 	}
 
-	//void WindowsRenderer::RenderScene(std::shared_ptr<Scene> scene)
-	//{
-
-	//	for (auto& obj : scene.get()->GetObjects()) {
-
-	//		RenderGeometry(obj.mesh, obj.transform);
-	//	}
-	//}
-
 	void WindowsRenderer::Cleanup() {
 		if (vao != 0) {
 			glDeleteVertexArrays(1, &vao);
@@ -491,10 +466,6 @@ namespace PAIN {
 
 		if (pbr_shader) {
 			pbr_shader.reset();
-		}
-
-		if (m_mesh) {
-			m_mesh.reset();
 		}
 
 		for (unsigned int* fbo : fbos) {

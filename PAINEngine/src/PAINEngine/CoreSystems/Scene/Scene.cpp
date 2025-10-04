@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include "CoreSystems/Path/Path.h"
+#include "ECS/Controller.h"
+#include "ECS/Components/cMetaData.h"
 
 namespace PAIN {
 	void Scene::onDetach() {}
@@ -121,14 +123,16 @@ namespace PAIN {
 	}
 	void Scene::onEvent(Event::Event& e) {}
 
-	Mesh* Scene::AddObject(std::unique_ptr<Mesh> mesh, glm::mat4 transform)
+	std::shared_ptr<Mesh> Scene::AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
-		//auto ecs = services->get<ECS::Controller>();
+		auto ecs = services->get<ECS::Controller>();
+		ECS::Entity::Type entity = ecs->createEntity();
+		ecs->addEntityComponent(entity, MetaData::EntityName{ "Example Ogre" });
+		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, MeshRenderer{ mesh});
+		
 
-		Mesh* raw = mesh.get();
-		m_Meshes.push_back(std::move(mesh));
-		m_Objects.push_back({ raw, transform });
-		return raw;
+		return mesh;
 	}
 	void Scene::DeleteObject(int index)
 	{

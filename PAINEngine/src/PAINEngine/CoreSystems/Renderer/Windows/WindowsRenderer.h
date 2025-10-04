@@ -15,26 +15,25 @@
 #ifndef __WINDOWS_RENDERER_H__
 #define __WINDOWS_RENDERER_H__
 
-#include "Applications/Application.h"
-#include "CoreSystems/Events/GLFW/KeyEvents.h"
-#include "CoreSystems/Scene/Camera.h"
-
-#include "../Light.h"
-#include "../Material.h"
-
-namespace PAIN {
-	extern Material material;
-};
-
-
 //#ifdef PN_PLATFORM_WINDOWS
-
 
 #include "pch.h"
 #include "../Shader.h"
 #include "../Mesh.h"
+
+#include "../Light.h"
+#include "../Material.h"
+
 #include "Applications/AppSystem.h"
+#include "Applications/Application.h"
+
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Events/GLFW/KeyEvents.h"
+#include "CoreSystems/Scene/Camera.h"
+
+namespace PAIN {
+	extern Material material;
+};
 
 namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
@@ -52,7 +51,10 @@ namespace PAIN {
 		}
 
 		void Init();
-		void Render(std::shared_ptr<Scene> scene);
+
+		void BeginRendering(std::shared_ptr<Scene> scene);
+		void EndRendering(std::shared_ptr<Scene> scene);
+
 		void RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
 		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
 		//void RenderScene(std::shared_ptr<Scene> scene);
@@ -115,8 +117,6 @@ namespace PAIN {
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
 		std::unique_ptr<Shader> shadow_shader = nullptr;
-
-		std::unique_ptr<Mesh> m_mesh = nullptr;
 
 		/**
 		 * .

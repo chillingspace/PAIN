@@ -1,4 +1,5 @@
 #include "RendererLayer.h"
+#include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
@@ -8,6 +9,8 @@
 
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/Material.h"
+
+#include "ECS/Controller.h"
 
 //For imgui viewport
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -26,16 +29,12 @@ namespace PAIN {
 
 		//Init scene
 		m_Scene = services->get<Scene>();
-
-		glm::mat4 transform1 = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 1.f, 0.f));
-		glm::mat4 transform2 = glm::translate(glm::mat4(1.f), glm::vec3(2.f, 1.f, 0.f));
-		glm::mat4 transform3 = glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 1.f, 0.f));
-
+		auto ogre_obj = Mesh::LoadObj("ogre.obj");
 
 		if (m_Scene) {
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform1);
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform2);
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), transform3);
+			m_Scene->AddObject(ogre_obj, {0.f, 1.f, 0.f}, {0.f,0.f,0.f, 0.f}, {1.f, 1.f, 1.f});
+			m_Scene->AddObject(ogre_obj, { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			m_Scene->AddObject(ogre_obj, { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
 /*
 #ifdef PN_PLATFORM_WINDOWS
@@ -56,8 +55,12 @@ namespace PAIN {
 		const float dt = timing.dt;
 
 		{
+#ifdef DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
+#else
+			bool editor_visible = false;
+#endif
 
 			if (editor_visible) {
 				glBindFramebuffer(GL_FRAMEBUFFER, WindowsRenderer::get().getFinalFbo());
@@ -83,8 +86,72 @@ namespace PAIN {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Render skybox and light
-			WindowsRenderer::get().Render(m_Scene);
+			// Render all
+			// populate shadow map first
+			auto ecs = services->get<ECS::Controller>();
+
+			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+
+			// Im sure there is a better way to render shadows
+			for (const Light& l : LightSources::get().getAll()) {
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+					//glClearDepth(1.0f);  // Explicitly set clear value
+					glClear(GL_DEPTH_BUFFER_BIT);
+
+					for (auto entity : ecs->getAllEntities()) {
+						auto transform = ecs->getEntityComponent<Transform>(entity);
+
+						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+
+						glm::mat4 model;
+						if (transform.has_value())
+						{
+							model = transform.value().get().getMatrix();
+						}
+
+						if (mesh)
+						{
+							if (mesh.value().get().mesh)
+							{
+								WindowsRenderer::get().RenderGeometryShadows(mesh.value().get().mesh.get(), model, l); // uses shadow_shader
+							}	
+						}
+						
+
+					}
+					
+				}
+			}
+
+			WindowsRenderer::get().BeginRendering(m_Scene);
+			// render scene
+
+
+			for (auto entity : ecs->getAllEntities()) {
+				auto transform = ecs->getEntityComponent<Transform>(entity);
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+				glm::mat4 model;
+				if (transform.has_value())
+				{
+					model = transform.value().get().getMatrix();
+				}
+				if (mesh)
+				{
+					if (mesh.value().get().mesh)
+					{
+						// uses geometry_shader
+						WindowsRenderer::get().RenderGeometry(m_Scene, mesh.value().get().mesh.get(), model);
+					}
+					
+				}
+				
+
+			}
+			
+
+			
+			WindowsRenderer::get().EndRendering(m_Scene);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -172,8 +239,19 @@ namespace PAIN {
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
 	}
 
+	void RendererLayer::renderScene()
+	{
+		//auto ecs = services->get<ECS::Controller>();
+		//auto drawable_entities = ecs->getEntitiesWithComponents<Transform>();
+
+		//for (auto entity : drawable_entities) {
+		//	auto& transform = ecs->getEntityComponent<Transform>(entity)->get();
+		//	RenderGeometry(scene, mesh, transform.matrix); // or however your Transform stores it
+		//}
+	}
+
 	void RendererLayer::onEvent(Event::Event& e) {
-		#ifndef PN_PLATFORM_ANDROID
+#ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);
 
 		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
@@ -306,6 +384,6 @@ namespace PAIN {
 			PN_CORE_INFO(e.toString());
 			return false;
 			});
-		#endif
+#endif
 	}
 }
