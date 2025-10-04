@@ -11,10 +11,10 @@ namespace PAIN {
 	namespace Editor {
 		namespace Panel {
 
-			class DebugAudioPanel : public IPanel {
+			class AudioPanel : public IPanel {
 			public:
-				DebugAudioPanel();
-				~DebugAudioPanel() override = default;
+				AudioPanel();
+				~AudioPanel() override = default;
 
 				void nextWindowSettings() override; 
 				void onUpdate(AppTiming timing) override;

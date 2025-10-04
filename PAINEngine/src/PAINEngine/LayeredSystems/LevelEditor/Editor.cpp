@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Editor.h"
+#include <filesystem> 
 
 #ifdef _DEBUG
 
@@ -12,6 +13,7 @@
 #include "Panels/ViewportPanel.h"
 #include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 #include "Panels/EntityPanel.h"
+#include "Panels/DebugPanel.h"
 
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
 #include "PAINEngine/ECS/Controller.h"
@@ -31,9 +33,12 @@ namespace PAIN {
 
             //Create panels ptr
             panels = std::make_shared<PanelsMap>();
+
         }
 
-        Editor::~Editor() {}
+        Editor::~Editor() {
+        }
+
 
         void Editor::onAttach() {
 
@@ -96,12 +101,13 @@ namespace PAIN {
 
             //Register panels
             registerPanel(std::make_shared<Panel::Tools>());
-            registerPanel(std::make_shared<Panel::DebugAudioPanel>());
+            registerPanel(std::make_shared<Panel::AudioPanel>());
             //registerPanel(std::make_shared<Panel::ScenesPanel>());
             //registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
             registerPanel(std::make_shared<Panel::EntityPanel>());
+            registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
             #ifdef PN_PLATFORM_WINDOWS
@@ -109,7 +115,7 @@ namespace PAIN {
             #endif
 
             // Load ImGui settings (layout, window positions, etc.)
-            ImGui::LoadIniSettingsFromDisk("assets/imgui_layout.ini");
+            ImGui::LoadIniSettingsFromDisk("../assets/imgui_layout.ini");
 
 
             //toggleVisible();
@@ -121,7 +127,9 @@ namespace PAIN {
                 PN_CORE_INFO("[Editor] Requesting save on detach");
                 ser->saveCurrentScene();
             }*/
-            ImGui::SaveIniSettingsToDisk("assets/imgui_layout.ini");
+
+            ImGui::SaveIniSettingsToDisk("../assets/imgui_layout.ini");
+
             panels = nullptr;
             platform = nullptr;
             command_manager = nullptr;
