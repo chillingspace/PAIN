@@ -10,6 +10,9 @@ namespace PAIN {
 
             //Max number of entities to be created at a single point
             const Type MAX = 3000;
+
+            //iNVALID COMP TO BE ASSIGNED WITH A HUGE NUMBER
+            const Type INVALID = UINT16_MAX;
         }
 
         namespace Component {

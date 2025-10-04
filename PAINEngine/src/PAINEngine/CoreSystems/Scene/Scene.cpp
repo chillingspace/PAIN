@@ -1,6 +1,7 @@
 
 #include "Scene.h"
 #include "ECS/Controller.h"
+#include "ECS/Components/cMetaData.h"
 
 namespace PAIN {
 	void Scene::onDetach() {}
@@ -27,7 +28,7 @@ namespace PAIN {
 	{
 		auto ecs = services->get<ECS::Controller>();
 		ECS::Entity::Type entity = ecs->createEntity();
-		ecs->addEntityComponent(entity, Metadata{ "Example Ogre" });
+		ecs->addEntityComponent(entity, MetaData::EntityName{ "Example Ogre" });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh});
 		

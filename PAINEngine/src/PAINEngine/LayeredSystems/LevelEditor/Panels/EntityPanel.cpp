@@ -2,6 +2,8 @@
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
+#include "ECS/Components/cMetaData.h"
+
 #ifdef _DEBUG
 
 namespace PAIN {
@@ -54,7 +56,7 @@ namespace PAIN {
                             glm::vec3 scale = { 1.f, 1.f, 1.f };
 
                             ECS::Entity::Type entity = ecs->createEntity();
-                            ecs->addEntityComponent(entity, Metadata{ entity_name });
+                            ecs->addEntityComponent(entity, MetaData::EntityName{ entity_name });
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, MeshRenderer{ Mesh::LoadObj() });
 
@@ -100,7 +102,7 @@ namespace PAIN {
                 return [this, popup_id]() {
 
                     //Selected entity name
-                    std::string selected_name = PN_ECS_SERVICE->getEntityComponent<Metadata>(selected_entity).value().get().name;
+                    std::string selected_name = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(selected_entity).value().get().name;
 
                     //Confirm removal of entity
                     ImGui::Text("Are you sure you want to remove %s?", selected_name.c_str());
@@ -124,7 +126,6 @@ namespace PAIN {
 
                             //Creat new entity 
                             ECS::Entity::Type new_id = PN_ECS_SERVICE->createEntity();
-                            PN_METADATA_SERVICE->updateData();
                             //PN_METADATA_SERVICE->setEntityLayerID(new_id, layer_id);
 
                             //Add all the comps back
@@ -203,7 +204,6 @@ namespace PAIN {
                             if (PN_ECS_SERVICE->checkEntity(clone_entity)) {
                                 //Clone entity 
                                 ECS::Entity::Type new_id = PN_ECS_SERVICE->cloneEntity(clone_entity);
-                                PN_METADATA_SERVICE->updateData();
                                 //PN_METADATA_SERVICE->setEntityLayerID(new_id, PN_METADATA_SERVICE->getEntityLayerID(clone_entity));
 
                                 //If entity name is valid
@@ -226,7 +226,6 @@ namespace PAIN {
                             if (entity.has_value()) {
                                 //Destroy new entity
                                 PN_ECS_SERVICE->destroyEntity(entity.value());
-                                PN_METADATA_SERVICE->updateData();
                             }
                             };
 
@@ -295,10 +294,22 @@ namespace PAIN {
                     editor_entities.clear();
 
                     for (auto& e : ecs_entities) {
-                        // Try to get metadata (name + tags)
-                        auto meta = ecs->getEntityComponent<Metadata>(e);
-                        if (meta) {
-                            editor_entities.push_back(std::pair<ECS::Entity::Type, std::string>{e, meta.value().get().name});
+                        // Get entity name from MetaData::EntityName component
+                        auto name_opt = ecs->getEntityComponent<MetaData::EntityName>(e);
+                        if (name_opt.has_value()) {
+                            std::string entity_name = name_opt->get().name;
+
+                            // Optionally get tags from MetaData::Tag component
+                            auto tag_opt = ecs->getEntityComponent<MetaData::Tag>(e);
+
+                            // Store entity with its name
+                            editor_entities.push_back(std::pair<ECS::Entity::Type, std::string>{e, entity_name});
+
+                            // Optional: You can also filter by tags here if needed
+                            // if (tag_opt.has_value()) {
+                            //     auto& tags = tag_opt->get().tags;
+                            //     // Do something with tags
+                            // }
                         }
                     }
 

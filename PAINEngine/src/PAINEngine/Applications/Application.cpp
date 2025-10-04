@@ -125,7 +125,11 @@ namespace PAIN {
 #endif
 
 		// Register components here
-		services->get<ECS::Controller>()->registerComponent<Metadata>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::EntityName>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Tag>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::EditorVisible>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Relation>();
+		services->get<ECS::Controller>()->registerComponent<MetaData::Group>();
 		services->get<ECS::Controller>()->registerComponent<Transform>();
 		services->get<ECS::Controller>()->registerComponent<MeshRenderer>();
 
