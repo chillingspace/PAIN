@@ -70,6 +70,11 @@ namespace PAIN {
                     if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Window")) { ImGui::MenuItem("Layouts"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Help")) { ImGui::MenuItem("About"); ImGui::EndMenu(); }
+                    // Display FPS on the right side of the menu bar
+                    float fps = 1.0f / timing.dt;
+                    float text_width = 150.0f; // Approximate width for the FPS text
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - text_width);
+                    ImGui::Text("FPS: %.1f (%.2f ms)", fps, timing.dt * 1000.0f);
                     ImGui::EndMenuBar();
                 }
 
@@ -85,18 +90,18 @@ namespace PAIN {
                     ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
                 ImGui::BeginChild("##TopToolbar", ImVec2(0, 20.f), false, toolbar_flags);
 
-                // Center: Play / Pause / Step
-                {
-                    ImGui::SameLine(0, 800);
-                    if (ImGui::Button("Play")) {
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Pause")) {
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Stop")) {
-                    }
-                }
+                //// Center: Play / Pause / Step
+                //{
+                //    ImGui::SameLine(0, 800);
+                //    if (ImGui::Button("Play")) {
+                //    }
+                //    ImGui::SameLine();
+                //    if (ImGui::Button("Pause")) {
+                //    }
+                //    ImGui::SameLine();
+                //    if (ImGui::Button("Stop")) {
+                //    }
+                //}
 
                 ImGui::EndChild();
 			}

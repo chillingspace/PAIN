@@ -30,15 +30,12 @@ namespace PAIN {
             Editor(void* window);
             ~Editor() override;
 
-            std::shared_ptr<Scene> m_Scene;
-
             void onAttach() override;
             void onDetach() override;
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
-            void onEvent(Event::Event& event) override;
 
-            void SetScene(const std::shared_ptr<Scene>& scene) { m_Scene = scene; }
+            void onEvent(Event::Event& event) override;
             bool isVisible() const { return editor_visible; }
             void toggleVisible() { editor_visible = !editor_visible; }
 

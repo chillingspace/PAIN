@@ -177,6 +177,26 @@ namespace PAIN {
 			timing.dt = std::chrono::duration<float>(now - last_time).count();
 			last_time = now;
 
+			fps = static_cast<int>(1.f / timing.dt);
+#ifdef PN_PLATFORM_WINDOWS
+			static float avgFps = 0.f;
+			static float timeSinceLastUpdate = 0.0f;
+
+			avgFps = avgFps * 0.95f + fps * 0.05f;
+			timeSinceLastUpdate += timing.dt;
+
+			if (timeSinceLastUpdate >= 0.5f) {
+				timeSinceLastUpdate = 0.0f;
+				auto window = services->get<Window::Window>();
+				std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
+				glfwSetWindowTitle(
+					reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
+					title.c_str()
+				);
+			}
+#endif
+			
+
 			//Accumulate for fixed updates
 			accumulator += timing.dt;
 

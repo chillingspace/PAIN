@@ -33,10 +33,12 @@ frag:
 - Automated garbage collection at program end to prevent memory leaks
 
 ### Debugging
-- Use `cout` and `cerr` without the `std::` prefix - logic in place to stop printing in release mode for performance 
+- Use PN_CORE_<LOG> for logging errors
 
 ### Other Notes
 - When pushing, do not push warnings and memory leaks, if need help do ask
+- When using our project, git submodule update --init --recursive for initial setup
+- <git config submodule.recurse true> use this operation to configure git to always update submodules
 
 
 
