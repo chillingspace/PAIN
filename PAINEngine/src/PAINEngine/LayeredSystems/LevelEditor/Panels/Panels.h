@@ -89,10 +89,10 @@ namespace PAIN {
 				unsigned int getDockID() const { return dock_id; }
 
 				//Virtual panel update
-				virtual void onUpdate() = 0;
+				virtual void onUpdate(AppTiming timing) = 0;
 
 				//Draw panel window
-				void drawWindow();
+				void drawWindow(PAIN::AppTiming timing);
 
 				// ----------------------------
 				// Internal PopUps

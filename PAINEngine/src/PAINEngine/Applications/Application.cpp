@@ -8,6 +8,8 @@
 #include "CoreSystems/Audio/AudioManager.h"
 #include "CoreSystems/Scene/Scene.h"
 
+// Serialization
+#include "CoreSystems/Serialization/sSerialization.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 
 #include "ECS/Controller.h"
@@ -113,6 +115,8 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
+		// Add Serialization 
+		addCoreSystem(std::make_shared<Serialization::Service>());
 		// Add systems here
 
 		// Physics system not cross platform yet

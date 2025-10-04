@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ScenesPanel.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 
 #ifdef _DEBUG
 #include <algorithm>
@@ -140,53 +141,107 @@ namespace PAIN {
 
             void ScenesPanel::drawEditMaskModal() {
                 if (!showEditMask_) return;
+
+                auto ser = services->get<PAIN::Serialization::Service>();
+                if (!ser) { showEditMask_ = false; return; }
+                const auto& doc = ser->doc(); // read-only view
+
                 ImGui::OpenPopup("Edit Layer Bit Mask");
-                if (ImGui::BeginPopupModal("Edit Layer Bit Mask", &showEditMask_, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    const unsigned n = static_cast<unsigned>(layers_.size());
-                    ImGui::TextUnformatted("Bitmask Grid:");
-                    if (ImGui::BeginTable("##BitmaskGrid", n + 1, ImGuiTableFlags_Borders)) {
+                if (!ImGui::BeginPopupModal("Edit Layer Bit Mask", &showEditMask_, ImGuiWindowFlags_AlwaysAutoResize))
+                    return;
+
+                const unsigned n = static_cast<unsigned>(doc.layers.size());
+                // make sure the service has an NxN mask (diagonal forced false)
+                ser->ensureMaskSize();
+
+                ImGui::PushID("MaskGrid");
+                ImGui::TextUnformatted("Bitmask Grid:");
+
+                if (n > 0 && ImGui::BeginTable("##BitmaskGrid", n + 1,
+                    ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame)) {
+
+                    // Header
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn(); ImGui::Text("Layer\\Mask");
+                    for (unsigned col = 0; col < n; ++col) {
+                        ImGui::TableNextColumn();
+                        ImGui::Text("L%u", doc.layers[col].id);
+                    }
+
+                    // Rows
+                    for (unsigned i = 0; i < n; ++i) {
                         ImGui::TableNextRow();
-                        ImGui::TableNextColumn(); ImGui::Text("Layer\\Mask");
-                        for (unsigned j = 0; j < n; ++j) { ImGui::TableNextColumn(); ImGui::Text("L%u", layers_[j].id); }
+                        ImGui::TableNextColumn(); ImGui::Text("L%u", doc.layers[i].id);
 
-                        for (unsigned i = 0; i < n; ++i) {
-                            ImGui::TableNextRow();
-                            ImGui::TableNextColumn(); ImGui::Text("L%u", layers_[i].id);
+                        for (unsigned j = 0; j < n; ++j) {
+                            ImGui::TableNextColumn();
 
-                            for (unsigned j = 0; j < n; ++j) {
-                                ImGui::TableNextColumn();
-                                if (i == j) { ImGui::TextUnformatted("X"); continue; }
-                                bool bit = mask_[i][j];
-                                if (ImGui::Checkbox((std::string("##m_") + std::to_string(i) + "_" + std::to_string(j)).c_str(), &bit)) {
-                                    // symmetric toggle
-                                    mask_[i][j] = mask_[j][i] = bit;
-                                }
+                            if (i == j) { ImGui::TextUnformatted("X"); continue; }
+
+                            // get current bit safely
+                            bool bit = (i < doc.mask_matrix.size() &&
+                                j < doc.mask_matrix[i].size()) ? doc.mask_matrix[i][j] : false;
+
+                            // unique ID per cell
+                            const std::string id = "##m_" + std::to_string(i) + "_" + std::to_string(j);
+                            if (ImGui::Checkbox(id.c_str(), &bit)) {
+                                // write back via service (keeps symmetry & marks dirty)
+                                ser->setMask(i, j, bit);
+                                if (hooks_.onDirty) hooks_.onDirty();
+                                if (hooks_.onMaskChanged) hooks_.onMaskChanged(i, j, bit);
                             }
                         }
-                        ImGui::EndTable();
                     }
-                    ImGui::Spacing();
-                    if (ImGui::Button("Done")) {
-                        showEditMask_ = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
+
+                    ImGui::EndTable();
                 }
+
+                ImGui::Spacing();
+                if (ImGui::Button("Done##MaskGrid")) {
+                    showEditMask_ = false;
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::PopID();
+                ImGui::EndPopup();
             }
 
             // ---------- Main draw ----------
-            void ScenesPanel::onUpdate() {
+            void ScenesPanel::onUpdate(AppTiming timing) {
+                auto ser = services->get<PAIN::Serialization::Service>();
+                const auto& doc = ser->doc(); // read for drawing
+
                 // Title & dock are handled by IPanel
                 ImGui::Text("Scene ID: %s", currSceneId_.empty() ? "(none)" : currSceneId_.c_str());
 
-                // Create / Delete / Save / Save As
-                if (ImGui::Button("Create New Scene")) { showCreate_ = true; }
+                ImGui::InputText("Scene name", nameBuf_, IM_ARRAYSIZE(nameBuf_));
+
+                // Create New Scene
+                if (ImGui::Button("Create New Scene")) { 
+                    if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
+                    currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                    ser->setGrid(0);
+                    if (doc.layers.empty()) ser->addLayer();
+                }
+
+                // Load Scene
+                if (ImGui::Button("Load Scene")) {
+                    const std::string id = std::string{ nameBuf_ } + ".scn"; 
+                    if (hooks_.onChange) hooks_.onChange(id);               // -> Service::loadSceneById
+                    currSceneId_ = id;                                      // update panel label
+                }
 
                 if (!currSceneId_.empty()) {
                     ImGui::SameLine();
-                    if (ImGui::Button("Delete Scene")) { showDelete_ = true; }
+                    if (ImGui::Button("Delete Scene")) { 
+                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
+                        currSceneId_.clear();
+                    }
 
-                    if (ImGui::Button("Save Scene As")) { showSaveAs_ = true; }
+                    if (ImGui::Button("Save Scene As")) { 
+                        if (hooks_.onSaveAs) hooks_.onSaveAs(std::string{ nameBuf_ });
+                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                    }
 
                     ImGui::SameLine();
                     if (ImGui::Button("Save Curr Scene")) {
@@ -197,35 +252,30 @@ namespace PAIN {
                 ImGui::Separator();
 
                 // Layers
-                const unsigned n = static_cast<unsigned>(layers_.size());
-                ImGui::Text("Total Layers: %u", n);
+                ImGui::Text("Total Layers: %u", (unsigned)doc.layers.size());
 
                 if (ImGui::Button("Create Layer")) {
-                    unsigned nextId = n ? (layers_.back().id + 1) : 0;
-                    layers_.push_back(Layer{ nextId, true });
-                    rebuildMaskSize(layers_.size());
+                    ser->addLayer();
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Remove Layer")) {
-                    if (layers_.size() > 1) {
-                        layers_.erase(layers_.begin() + std::min<unsigned>(selectedLayerIdx_, layers_.size() - 1));
-                        // re-number IDs compactly for this temporary model
-                        for (unsigned i = 0; i < layers_.size(); ++i) layers_[i].id = i;
-                        rebuildMaskSize(layers_.size());
-                        selectedLayerIdx_ = layers_.empty() ? 0 : std::min<unsigned>(selectedLayerIdx_, layers_.size() - 1);
-                        ensureAtLeastOneLayer();
-                    }
+                    // pick a selected index from your panel state; here assume 0 for sample
+                    unsigned sel = std::min<unsigned>(selectedLayerIdx_, (unsigned)doc.layers.size() - 1);
+                    ser->removeLayer(sel);
+                    selectedLayerIdx_ = (unsigned)std::min<size_t>(selectedLayerIdx_, doc.layers.size() ? doc.layers.size() - 1 : 0);
                 }
 
                 ImGui::TextUnformatted("Layer List:");
                 ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
-                for (unsigned i = 0; i < layers_.size(); ++i) {
-                    bool vis = layers_[i].visible;
+                for (unsigned i = 0; i < doc.layers.size(); ++i) {
+                    bool vis = doc.layers[i].enabled;
                     if (ImGui::Checkbox((std::string("##vis_") + std::to_string(i)).c_str(), &vis)) {
-                        layers_[i].visible = vis;
+                        ser->setLayerVisible(i, vis);        // <- write to service
+                        if (hooks_.onLayerVisibleChanged) hooks_.onLayerVisibleChanged(i, vis);
+                        if (hooks_.onDirty)               hooks_.onDirty();
                     }
                     ImGui::SameLine();
-                    std::string label = "Layer " + std::to_string(layers_[i].id);
+                    std::string label = "Layer " + std::to_string(doc.layers[i].id);
                     if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
                         selectedLayerIdx_ = i;
                     }

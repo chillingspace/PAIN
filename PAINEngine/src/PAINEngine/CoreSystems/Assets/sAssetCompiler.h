@@ -15,6 +15,9 @@
 #define S_ASSET_COMPILER_H
 
 #include "Applications/AppSystem.h"
+//#include <assimp/include/assimp/Importer.hpp>
+//#include <assimp/include/assimp/scene.h>
+//#include <assimp/include/assimp/postprocess.h>
 
 //#ifdef PN_PLATFORM_ANDROID
 //#include <android/asset_manager.h>
@@ -52,6 +55,7 @@ namespace PAIN {
 
 			return json_file;
 		}
+
 
 		class IAssetCompiler{
 		public:
