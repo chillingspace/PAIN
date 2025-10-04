@@ -321,6 +321,70 @@ namespace PAIN {
 #endif
 
             curr_scene_file_ = file_path;
+
+            // Rebuild ECS world from loaded JSON
+            if (auto ecs = services->get<PAIN::ECS::Controller>()) {
+                // Clear all existing entities
+                ecs->destroyAllEntities();
+
+                // Walk through all Layers in the scene JSON
+                for (const auto& elem : j) {
+                    auto it = elem.find("Layer");
+                    if (it == elem.end() || !it->is_object()) continue;
+
+                    const auto& L = *it;
+
+                    if (auto entsIt = L.find("Entities"); entsIt != L.end() && entsIt->is_array()) {
+                        for (const auto& ewrap : *entsIt) {
+                            if (!ewrap.is_object()) continue;
+
+                            auto eit = ewrap.find("Entity");
+                            if (eit == ewrap.end() || !eit->is_object()) continue;
+
+                            const auto& E = *eit;
+
+                            // Create new entity
+                            auto e = ecs->createEntity();
+
+                            // Rebuild components
+                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
+                                const auto& comps = *compsIt;
+
+                                // Transform
+                                if (auto jt = comps.find("Transform::Transform");
+                                    jt != comps.end() && jt->is_object())
+                                {
+                                    const auto& obj = *jt;
+
+                                    auto rot = obj.value("rotation", nlohmann::json::array());
+                                    auto pos = obj.value("position", nlohmann::json::array());
+                                    auto scl = obj.value("scale", nlohmann::json::array());
+
+                                    if (rot.size() == 4 && pos.size() == 3 && scl.size() == 3) {
+                                        PAIN::Transform::Transform t;
+
+                                        // JSON saved as [x,y,z,w]
+                                        t.rotation = glm::f32quat{
+                                            rot[3].get<float>(),  // w
+                                            rot[0].get<float>(),  // x
+                                            rot[1].get<float>(),  // y
+                                            rot[2].get<float>()   // z
+                                        };
+
+                                        t.position = { pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>() };
+                                        t.scale = { scl[0].get<float>(), scl[1].get<float>(), scl[2].get<float>() };
+
+                                        ecs->addEntityComponent<PAIN::Transform::Transform>(e, std::move(t));
+                                    }
+                                }
+
+                                // TODO: hydrate other component types here
+                            }
+                        }
+                    }
+                }
+            }
+
             return true;
         }
 
@@ -383,13 +447,53 @@ namespace PAIN {
             scene.push_back(json{ {"Layer Count", int(doc_.layers.size())} });
 
             for (const auto& L : doc_.layers) {
+                //json Lobj = {
+                //    {"ID",      L.id},
+                //    {"Mask",    L.mask},
+                //    {"B_State", L.enabled},
+                //    {"Entities", json::array()} // fill when wire ECS
+                //};
+                //scene.push_back(json{ {"Layer", std::move(Lobj)} });
+
+                json ents = json::array();
+
+                if (auto ecs = services->get<PAIN::ECS::Controller>()) {
+                    const auto all = ecs->getAllEntities();
+                    for (auto e : all) {
+                        json E = json::object();
+
+                        // Optional identifiers
+                        E["ID"] = int(e);
+
+                        // Components block
+                        json C = json::object();
+
+                        // Transform (quat + vec3)
+                        if (auto t = ecs->getEntityComponent<PAIN::Transform::Transform>(e)) {
+                            const auto& tr = t->get();
+                            // Store rotation as [x,y,z,w], position/scale as [x,y,z]
+                            C["Transform::Transform"] = {
+                                {"rotation", {tr.rotation.x, tr.rotation.y, tr.rotation.z, tr.rotation.w}},
+                                {"position", {tr.position.x, tr.position.y, tr.position.z}},
+                                {"scale",    {tr.scale.x,    tr.scale.y,    tr.scale.z}}
+                            };
+                        }
+
+                        // TODO: add other components in the same style
+
+                        E["Components"] = std::move(C);
+                        ents.push_back(json{ {"Entity", std::move(E)} });
+                    }
+                }
+
                 json Lobj = {
                     {"ID",      L.id},
                     {"Mask",    L.mask},
                     {"B_State", L.enabled},
-                    {"Entities", json::array()} // fill when wire ECS
+                    {"Entities", std::move(ents)}     // <-- now filled from ECS
                 };
                 scene.push_back(json{ {"Layer", std::move(Lobj)} });
+
             }
 
             // mask grid, can remove if dw
