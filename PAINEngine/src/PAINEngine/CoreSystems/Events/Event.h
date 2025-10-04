@@ -16,11 +16,6 @@ namespace PAIN {
 		//Android Event Types
 		enum class Type {
 			None = 0,
-			// Existing events
-			WindowResize, WindowFocus, WindowMove,
-			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
-			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
-			FileDrop,
 			// New Android-specific events
 			AppStart, AppResume, AppPause, AppStop, AppDestroy,
 			SurfaceCreated, SurfaceChanged, SurfaceDestroyed,

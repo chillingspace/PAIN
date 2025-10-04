@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef MOUSE_EVENTS_HPP
 #define MOUSE_EVENTS_HPP
 
@@ -127,4 +128,5 @@ namespace PAIN {
 	}
 }
 
+#endif
 #endif

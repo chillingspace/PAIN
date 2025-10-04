@@ -115,12 +115,12 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>());
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
-		// Add Serialization 
+		// Add Serialization
+#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Serialization::Service>());
 		// Add systems here
 
 		// Physics system not cross platform yet
-#ifdef PN_PLATFORM_WINDOWS
 		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);
 #endif
 
@@ -153,8 +153,6 @@ namespace PAIN {
 	}
 
 	void Application::Run() {
-
-
 
 		//Set last time
 		last_time = std::chrono::steady_clock::now();

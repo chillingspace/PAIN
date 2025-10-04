@@ -161,7 +161,7 @@ namespace PAIN {
 	}
 
 	void RendererLayer::onEvent(Event::Event& e) {
-		//#ifndef PN_PLATFORM_ANDROID
+		#ifndef PN_PLATFORM_ANDROID
 		Event::Dispatcher dispatcher(e);
 
 		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
@@ -273,6 +273,6 @@ namespace PAIN {
 			PN_CORE_INFO(e.toString());
 			return false;
 			});
-		//#endif
+		#endif
 	}
 }

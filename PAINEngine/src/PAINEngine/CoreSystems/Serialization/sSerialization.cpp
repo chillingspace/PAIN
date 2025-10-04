@@ -11,6 +11,7 @@
 #include "pch.h"
 #include "sSerialization.h"
 
+#ifdef PN_PLATFORM_WINDOWS
  // ---- quick reflected test type ----
 struct _SerSmokeTransform {
     float x{}, y{}, z{};
@@ -640,3 +641,4 @@ namespace PAIN {
         }
     }
 }
+#endif

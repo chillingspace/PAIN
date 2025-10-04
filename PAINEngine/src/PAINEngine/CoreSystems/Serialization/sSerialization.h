@@ -8,6 +8,7 @@
  * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 #pragma once
+#ifdef PN_PLATFORM_WINDOWS
 #ifndef SERIALIZATION_SERVICE_H
 #define SERIALIZATION_SERVICE_H
 #include "pch.h"
@@ -356,4 +357,5 @@ namespace PAIN {
 
     }
 }
+#endif
 #endif
