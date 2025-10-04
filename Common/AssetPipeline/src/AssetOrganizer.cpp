@@ -202,6 +202,13 @@ namespace PAIN {
 
             //Set all engine folders
             engine_dir = Assets::getAllEngineFolders();
+
+            //Setup raw & desc path
+            raw_path = assets_root / raw_folder;
+            desc_path = assets_root / desc_folder;
+
+            //Create compiler
+            compiler = std::make_unique<Compiler>(desc_path);
         }
 
         void AssetOrganizer::initGameFolders(Type type, std::string const& folder) {
@@ -213,10 +220,6 @@ namespace PAIN {
         }
 
         void AssetOrganizer::enforceStandardStructure() {
-
-            //Setup raw & desc path
-            raw_path = assets_root / raw_folder;
-            desc_path = assets_root / desc_folder;
 
             //Ensure creation of base folders
             instantiateFolder(raw_path);
@@ -286,20 +289,29 @@ namespace PAIN {
                 asset.name = asset.raw_path.filename().string();
                 asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
                 asset.type = getAssetType(asset.raw_path);
+                asset.raw_last_modified = getFileLastModified(asset.raw_path);
 
                 //Check if asset is in engine or game
                 if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
 
                     //Enforce asset location
                     enforceGameAssetLocation(asset);
-
-                    //Create desc files for assets with
-
                 }
                 if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
 
                     //Enforce asset location
                     enforceEngineAssetLocation(asset);
+                }
+
+                //Compile asset
+                compiler->processAsset(asset);
+
+                //Inser asset into assets
+                assets.push_back(asset);
+
+                //Insert GUID into cache for assets without GUID
+                if (guid_cache.find(asset.raw_path) == guid_cache.end()) {
+                    guid_cache[asset.raw_path] = GUID::Generate();
                 }
 
                 });

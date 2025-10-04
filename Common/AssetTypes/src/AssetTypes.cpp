@@ -1,4 +1,4 @@
-#include "AssetTpyes.h"
+#include "AssetTypes.h"
 
 #if defined(_WIN32)
 #include <rpc.h>
@@ -6,6 +6,8 @@
 #elif defined(__linux__) || defined(__APPLE__)
 #include <uuid/uuid.h>
 #endif
+
+#include <random>
 
 namespace PAIN {
 
