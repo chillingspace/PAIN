@@ -11,6 +11,8 @@
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+
 namespace PAIN {
 
 	/******************************************************************************************
@@ -30,8 +32,28 @@ namespace PAIN {
 			return T * R * S;
 		}
 	};
-	
 
+	// UI Registration function
+	inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
+		panel.registerCompUIFunc<Transform>([](Editor::Panel::ComponentsPanel& comp_panel, Transform& transform) {
+			ImGui::Text("Transform");
+			ImGui::Separator();
+
+			// Position - use glm::value_ptr to get float pointer
+			ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 0.1f);
+
+			// Rotation - convert quaternion to Euler angles for editing
+			glm::vec3 euler = glm::degrees(glm::eulerAngles(transform.rotation));
+			if (ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 1.0f)) {
+				// Convert back to quaternion
+				transform.rotation = glm::quat(glm::radians(euler));
+			}
+
+			// Scale - use glm::value_ptr to get float pointer
+			ImGui::DragFloat3("Scale", glm::value_ptr(transform.scale), 0.1f);
+		});
+	}
+	
 
 }
 

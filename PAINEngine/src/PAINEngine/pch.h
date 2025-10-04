@@ -59,6 +59,7 @@
 // Math Lib
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 //Memory
 #define _CRTDBG_MAP_ALLOC

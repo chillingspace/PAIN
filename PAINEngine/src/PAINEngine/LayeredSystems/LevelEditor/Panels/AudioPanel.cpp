@@ -27,6 +27,10 @@ namespace PAIN {
 				// Default behavior (no fullscreen/docking hacks needed)
 			}
 
+			void AudioPanel::onAttach()
+			{
+			}
+
 			void AudioPanel::onUpdate(AppTiming timing) {
 
 				//if (ImGui::Begin("Audio Controls")) {

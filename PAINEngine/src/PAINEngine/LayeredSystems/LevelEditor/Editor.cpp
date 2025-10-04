@@ -100,19 +100,25 @@ namespace PAIN {
          /*   auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);*/
 
             //Register panels
+            registerPanel(std::make_shared<Panel::EntityPanel>());
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             //registerPanel(std::make_shared<Panel::ScenesPanel>());
             //registerPanel(scenesPanel);
+
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
             registerPanel(std::make_shared<Panel::ViewportPanel>());
-            registerPanel(std::make_shared<Panel::EntityPanel>());
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
             #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             #endif
+
+            // Call onAttach on all registered panels
+            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
+                panel->onAttach();
+            });
 
             // Load ImGui settings (layout, window positions, etc.)
             ImGui::LoadIniSettingsFromDisk("../assets/imgui_layout.ini");
@@ -210,9 +216,6 @@ namespace PAIN {
 
             platform->endFrame();
         }
-
-
-
 
         template<typename T>
         void Editor::registerPanel(std::shared_ptr<T> panel) {

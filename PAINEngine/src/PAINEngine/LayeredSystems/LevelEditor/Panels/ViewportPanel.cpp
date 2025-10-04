@@ -28,6 +28,10 @@ namespace PAIN {
 				texHeight = height;
 			}
 
+			void ViewportPanel::onAttach()
+			{
+			}
+
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 

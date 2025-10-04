@@ -17,6 +17,10 @@ namespace PAIN {
 			void DebugPanel::nextWindowSettings() {
 			}
 
+			void DebugPanel::onAttach()
+			{
+			}
+
 			void DebugPanel::onUpdate(AppTiming timing) {
 				ImGui::Begin(name.c_str(), nullptr, flags);
 

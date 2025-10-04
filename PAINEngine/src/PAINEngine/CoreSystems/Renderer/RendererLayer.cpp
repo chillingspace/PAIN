@@ -88,10 +88,24 @@ namespace PAIN {
 					glClear(GL_DEPTH_BUFFER_BIT);
 
 					for (auto entity : ecs->getAllEntities()) {
-						auto transform = ecs->getEntityComponent<Transform>(entity)->get();
-						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity)->get();
-						glm::mat4 model = transform.getMatrix();
-						WindowsRenderer::get().RenderGeometryShadows(mesh.mesh.get(), model, l); // uses shadow_shader
+						auto transform = ecs->getEntityComponent<Transform>(entity);
+
+						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+
+						glm::mat4 model;
+						if (transform.has_value())
+						{
+							model = transform.value().get().getMatrix();
+						}
+
+						if (mesh)
+						{
+							if (mesh.value().get().mesh)
+							{
+								WindowsRenderer::get().RenderGeometryShadows(mesh.value().get().mesh.get(), model, l); // uses shadow_shader
+							}	
+						}
+						
 
 					}
 					
@@ -103,10 +117,23 @@ namespace PAIN {
 
 
 			for (auto entity : ecs->getAllEntities()) {
-				auto transform = ecs->getEntityComponent<Transform>(entity)->get();
-				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity)->get();
-				glm::mat4 model = transform.getMatrix();
-				WindowsRenderer::get().RenderGeometry(m_Scene, mesh.mesh.get(), model); // uses geometry_shader
+				auto transform = ecs->getEntityComponent<Transform>(entity);
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+				glm::mat4 model;
+				if (transform.has_value())
+				{
+					model = transform.value().get().getMatrix();
+				}
+				if (mesh)
+				{
+					if (mesh.value().get().mesh)
+					{
+						// uses geometry_shader
+						WindowsRenderer::get().RenderGeometry(m_Scene, mesh.value().get().mesh.get(), model);
+					}
+					
+				}
+				
 
 			}
 			

@@ -16,6 +16,10 @@ namespace PAIN {
 				ViewportPanel();
 
 				void nextWindowSettings() override;
+
+
+				void onAttach() override;
+
 				void onUpdate(AppTiming timing) override;
 
 				// Provide texture from renderer

@@ -39,6 +39,9 @@ namespace PAIN {
 
                 void nextWindowSettings() override;   
                 void setHooks(ScenesHooks h) { hooks_ = std::move(h); }
+
+
+                void onAttach() override;
                 void onUpdate(AppTiming timing) override;
 
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }

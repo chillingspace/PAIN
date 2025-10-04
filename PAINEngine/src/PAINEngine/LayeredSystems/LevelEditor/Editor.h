@@ -39,6 +39,17 @@ namespace PAIN {
             bool isVisible() const { return editor_visible; }
             void toggleVisible() { editor_visible = !editor_visible; }
 
+            // Template implementations must be in header or included .inl file
+            template<typename T>
+            std::shared_ptr<T> getPanel() const {
+                return panels->get<T>();
+            }
+
+            template<typename T>
+            std::weak_ptr<T> getPanelWeak() const {
+                return getPanel<T>();
+            }
+
         private:
 
             //Panels

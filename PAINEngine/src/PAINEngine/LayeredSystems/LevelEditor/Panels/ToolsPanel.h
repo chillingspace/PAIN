@@ -20,6 +20,9 @@ namespace PAIN {
 
 				void nextWindowSettings() override;
 
+
+				void onAttach() override;
+
 				void onUpdate(AppTiming timing) override;
 			};
 		}

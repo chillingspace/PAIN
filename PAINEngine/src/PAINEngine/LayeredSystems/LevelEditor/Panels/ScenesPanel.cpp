@@ -206,6 +206,10 @@ namespace PAIN {
                 ImGui::EndPopup();
             }
 
+            void ScenesPanel::onAttach()
+            {
+            }
+
             // ---------- Main draw ----------
             void ScenesPanel::onUpdate(AppTiming timing) {
                 auto ser = services->get<Serialization::Service>();

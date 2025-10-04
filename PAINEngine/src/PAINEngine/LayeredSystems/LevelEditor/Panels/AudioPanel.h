@@ -17,6 +17,8 @@ namespace PAIN {
 				~AudioPanel() override = default;
 
 				void nextWindowSettings() override; 
+
+				void onAttach() override;
 				void onUpdate(AppTiming timing) override;
 			};
 

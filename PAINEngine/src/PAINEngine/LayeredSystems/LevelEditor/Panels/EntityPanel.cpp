@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
@@ -256,17 +256,6 @@ namespace PAIN {
             void EntityPanel::nextWindowSettings() {
                 // No special behavior here
             }
-
-            void EntityPanel::createEntity() {
-
-            }
-
-            void EntityPanel::removeEntity() {
-                if (selectedEntityIndex != -1) {
-                    //auto scene = services->get<Scene>();
-                    //scene->DeleteObject(selectedEntityIndex);
-                }
-            }
             
             ECS::Entity::Type EntityPanel::getSelectedEntity() const
             {
@@ -281,6 +270,10 @@ namespace PAIN {
             bool EntityPanel::isEntityChanged() const
             {
                 return b_entity_changed;
+            }
+
+            void EntityPanel::onAttach()
+            {
             }
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
@@ -320,9 +313,6 @@ namespace PAIN {
                 //Set window dock id
                 dock_id = ImGui::GetWindowDockID();
 
-                //Reset entity changed flag
-                b_entity_changed = false;
-
                 ImGui::Spacing();
 
                 //Entities (no layering)
@@ -335,12 +325,36 @@ namespace PAIN {
 
                 // Iterate through all entities directly (no layering)
                 for (size_t i = 0; i < editor_entities.size(); ++i) {
-                    bool isSelected = (i == selectedEntityIndex);
-                    std::string label = editor_entities[i].second + "##" + std::to_string(editor_entities[i].first);
+                    ECS::Entity::Type entity_id = editor_entities[i].first;
+                    bool isSelected = (selected_entity == entity_id);
+                    std::string label = editor_entities[i].second + "##" + std::to_string(entity_id);
 
+                    // Direct selection without action
                     if (ImGui::Selectable(label.c_str(), isSelected)) {
-                        selectedEntityIndex = i;  // Select the entity
-                        selected_entity = editor_entities[i].first;
+                        if (isSelected) {
+                            // Deselect if clicking the same entity
+                            selected_entity = ECS::Entity::INVALID;
+                            selectedEntityIndex = -1;
+                        }
+                        else {
+                            // Select new entity
+                            selected_entity = entity_id;
+                            selectedEntityIndex = i;
+                        }
+                        b_entity_changed = true;
+                    }
+
+                    // Show tooltip on hover
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::Text("Entity ID: %u", static_cast<uint32_t>(entity_id));
+                        auto metadata = services->get<MetaData::Service>();
+                        if (metadata) {
+                            if (metadata->isLocked(entity_id)) {
+                                ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "LOCKED");
+                            }
+                        }
+                        ImGui::EndTooltip();
                     }
                 }
 
@@ -448,7 +462,6 @@ namespace PAIN {
 
 
                 renderPopUps();
-
                 ImGui::End();
             }
 

@@ -14,12 +14,12 @@ namespace PAIN {
             class EntityPanel : public IPanel {
             public:
                 EntityPanel();
-                void onUpdate(PAIN::AppTiming timing) override;
-                void nextWindowSettings() override;
 
-                // Button actions
-                void createEntity();
-                void removeEntity();
+
+                void onAttach() override;
+                void onUpdate(PAIN::AppTiming timing) override;
+
+                void nextWindowSettings() override;
 
                 //Get selected entity
                 ECS::Entity::Type getSelectedEntity() const;
