@@ -126,7 +126,7 @@ namespace PAIN {
 
 		// Register components here
 		services->get<ECS::Controller>()->registerComponent<Transform>();
-
+		services->get<ECS::Controller>()->registerComponent<MeshRenderer>();
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS

@@ -1,3 +1,5 @@
+#include <CoreSystems/Renderer/Mesh.h>
+
 
 namespace PAIN {
 
@@ -7,7 +9,7 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct MeshRenderer {
-
+		std::shared_ptr<Mesh> mesh;
 	};
 
 

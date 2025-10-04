@@ -49,7 +49,7 @@ namespace PAIN {
 		glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
-	std::unique_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
+	std::shared_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -145,7 +145,7 @@ namespace PAIN {
 				// Bottom (-Y)
 				20,21,22, 20,22,23
 			};
-			return std::make_unique<Mesh>(vertices, indices);
+			return std::make_shared<Mesh>(vertices, indices);
 		}
 
 		struct TempVertex {
@@ -225,6 +225,6 @@ namespace PAIN {
 		// can add generalization
 		// must add texcoords
 
-		return std::make_unique<Mesh>(vertices, indices);
+		return std::make_shared<Mesh>(vertices, indices);
 	}
 }

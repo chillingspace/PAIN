@@ -23,17 +23,15 @@ namespace PAIN {
 	void Scene::onUpdate(AppTiming timing) {}
 	void Scene::onEvent(Event::Event& e) {}
 
-	Mesh* Scene::AddObject(std::unique_ptr<Mesh> mesh, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	std::shared_ptr<Mesh> Scene::AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		ECS::Entity::Type entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-
+		ecs->addEntityComponent(entity, MeshRenderer{ mesh});
 		
-		Mesh* raw = mesh.get();
-		m_Meshes.push_back(std::move(mesh));
 
-		return raw;
+		return mesh;
 	}
 	void Scene::DeleteObject(int index)
 	{

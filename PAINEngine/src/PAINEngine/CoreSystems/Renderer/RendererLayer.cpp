@@ -1,4 +1,5 @@
 #include "RendererLayer.h"
+#include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
@@ -28,11 +29,12 @@ namespace PAIN {
 
 		//Init scene
 		m_Scene = services->get<Scene>();
+		auto ogre_obj = Mesh::LoadObj("ogre.obj");
 
 		if (m_Scene) {
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-			m_Scene->AddObject(Mesh::LoadObj("ogre.obj"), { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			m_Scene->AddObject(ogre_obj, {0.f, 1.f, 0.f}, {0.f,0.f,0.f, 0.f}, {1.f, 1.f, 1.f});
+			m_Scene->AddObject(ogre_obj, { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			m_Scene->AddObject(ogre_obj, { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
 
 	}
@@ -41,8 +43,12 @@ namespace PAIN {
 		const float dt = timing.dt;
 
 		{
+#ifdef DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
+#else
+			bool editor_visible = false;
+#endif
 
 			if (editor_visible) {
 				glBindFramebuffer(GL_FRAMEBUFFER, WindowsRenderer::get().getFinalFbo());
@@ -69,14 +75,38 @@ namespace PAIN {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Render all
+			// populate shadow map first
+			auto ecs = services->get<ECS::Controller>();
+
+			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+
+			// Im sure there is a better way to render shadows
+			for (const Light& l : LightSources::get().getAll()) {
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+					//glClearDepth(1.0f);  // Explicitly set clear value
+					glClear(GL_DEPTH_BUFFER_BIT);
+
+					for (auto entity : ecs->getAllEntities()) {
+						auto transform = ecs->getEntityComponent<Transform>(entity)->get();
+						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity)->get();
+						glm::mat4 model = transform.getMatrix();
+						WindowsRenderer::get().RenderGeometryShadows(mesh.mesh.get(), model, l); // uses shadow_shader
+
+					}
+					
+				}
+			}
+
 			WindowsRenderer::get().BeginRendering(m_Scene);
 			// render scene
 
-			auto ecs = services->get<ECS::Controller>();
+
 			for (auto entity : ecs->getAllEntities()) {
 				auto transform = ecs->getEntityComponent<Transform>(entity)->get();
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity)->get();
 				glm::mat4 model = transform.getMatrix();
-				WindowsRenderer::get().RenderGeometry(m_Scene, m_Scene->m_Meshes[0].get(), model); // uses geometry_shader
+				WindowsRenderer::get().RenderGeometry(m_Scene, mesh.mesh.get(), model); // uses geometry_shader
 
 			}
 			

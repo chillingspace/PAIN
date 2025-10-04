@@ -165,19 +165,7 @@ namespace PAIN {
 
 	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
 	{
-		// populate shadow map first
 
-		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
-		for (const Light& l : LightSources::get().getAll()) {
-			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-				glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-				//glClearDepth(1.0f);  // Explicitly set clear value
-				glClear(GL_DEPTH_BUFFER_BIT);
-				for (auto& obj : scene->GetObjects()) {
-					RenderGeometryShadows(obj.mesh, obj.transform, l);	// uses shadow_shader
-				}
-			}
-		}
 
 
 		glViewport(0, 0, winWidth, winHeight);
@@ -395,8 +383,6 @@ namespace PAIN {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-
-		m_mesh = Mesh::LoadObj();
 		
 		// init light source(s)
 
@@ -480,10 +466,6 @@ namespace PAIN {
 
 		if (pbr_shader) {
 			pbr_shader.reset();
-		}
-
-		if (m_mesh) {
-			m_mesh.reset();
 		}
 
 		for (unsigned int* fbo : fbos) {

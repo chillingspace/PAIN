@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
-
+#ifdef _DEBUG
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -19,15 +19,17 @@ namespace PAIN {
 
             void EntityPanel::createEntity() {
                 auto ecs = services->get<ECS::Controller>();
-                auto scene = services->get<Scene>();
+
                 int total_entities = ecs->getAllEntities().size();
                 // For simplicity, just add a new entity with a generic name
                 glm::vec3 pos = glm::vec3(1.f, 1.f, 1.f * total_entities);
                 glm::quat rot = {0.f,0.f,0.f, 0.f};
                 glm::vec3 scale = { 1.f, 1.f, 1.f };
-                if (scene) {
-                    scene->AddObject(Mesh::LoadObj(), pos, rot, scale);
-                }
+
+                ECS::Entity::Type entity = ecs->createEntity();
+                ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+                ecs->addEntityComponent(entity, MeshRenderer{ Mesh::LoadObj() });
+                
 
             }
 
@@ -81,3 +83,4 @@ namespace PAIN {
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN
+#endif

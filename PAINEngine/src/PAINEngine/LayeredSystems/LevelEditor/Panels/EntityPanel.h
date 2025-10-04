@@ -2,7 +2,7 @@
 
 #include "Panels.h"
 #include "CoreSystems/Scene/Scene.h"
-
+#ifdef _DEBUG
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -28,3 +28,4 @@ namespace PAIN {
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN
+#endif
