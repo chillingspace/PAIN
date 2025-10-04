@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "ScenesPanel.h"
-#include "CoreSystems/Serialization/sSerialization.h"
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
-#include <algorithm>
+#include "CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
     namespace Editor {
@@ -142,7 +142,7 @@ namespace PAIN {
             void ScenesPanel::drawEditMaskModal() {
                 if (!showEditMask_) return;
 
-                auto ser = services->get<PAIN::Serialization::Service>();
+                auto ser = services->get<Serialization::Service>();
                 if (!ser) { showEditMask_ = false; return; }
                 const auto& doc = ser->doc(); // read-only view
 
@@ -208,7 +208,7 @@ namespace PAIN {
 
             // ---------- Main draw ----------
             void ScenesPanel::onUpdate(AppTiming timing) {
-                auto ser = services->get<PAIN::Serialization::Service>();
+                auto ser = services->get<Serialization::Service>();
                 const auto& doc = ser->doc(); // read for drawing
 
                 // Title & dock are handled by IPanel
@@ -295,4 +295,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

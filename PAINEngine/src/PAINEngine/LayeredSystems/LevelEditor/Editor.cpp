@@ -116,11 +116,11 @@ namespace PAIN {
         }
 
         void Editor::onDetach() {
-            auto ser = services->get<PAIN::Serialization::Service>();
+           /* auto ser = services->get<PAIN::Serialization::Service>();
             if (ser) {
                 PN_CORE_INFO("[Editor] Requesting save on detach");
                 ser->saveCurrentScene();
-            }
+            }*/
             ImGui::SaveIniSettingsToDisk("assets/imgui_layout.ini");
             panels = nullptr;
             platform = nullptr;
