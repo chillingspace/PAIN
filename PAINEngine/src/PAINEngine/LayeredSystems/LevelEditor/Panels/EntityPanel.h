@@ -17,6 +17,10 @@ namespace PAIN {
                 void onUpdate(PAIN::AppTiming timing) override;
                 void nextWindowSettings() override;
 
+                // Button actions
+                void createEntity();
+                void removeEntity();
+
                 //Get selected entity
                 ECS::Entity::Type getSelectedEntity() const;
 
@@ -27,6 +31,7 @@ namespace PAIN {
                 bool isEntityChanged() const;
 
             private:
+                std::vector<std::string> entities;
 
                 //Selected entity
                 ECS::Entity::Type selected_entity;
