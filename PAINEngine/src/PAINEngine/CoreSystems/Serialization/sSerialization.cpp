@@ -57,12 +57,20 @@ namespace fs = std::filesystem;
 namespace PAIN {
     namespace Serialization {
 
-        inline std::string sanitize_base(std::string s) {
-            s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) {
-                return !(std::isalnum(c) || c == '_' || c == '-');
-                }), s.end());
-            return s;
-        }
+        // This function will remove commons symbols form the input string
+         inline std::string sanitize_base(std::string s) {
+        s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) {
+            return !(std::isalnum(c) || c == '_' || c == '-' || c == '.');
+            }), s.end());
+        return s;
+    }
+
+        //inline std::string sanitize_base(std::string s) {
+        //    s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) {
+        //        return !(std::isalnum(c) || c == '_' || c == '-');
+        //        }), s.end());
+        //    return s;
+        //}
 
         void PAIN::Serialization::Service::onAttach() {
             // Placeholder path
@@ -318,9 +326,9 @@ namespace PAIN {
 
 #ifdef _DEBUG
             // Save a report next to the scene (so can inspect with any JSON viewer)
-            const std::string report_path = file_path + ".report.json";
-            saveJsonFile(report_path, report);
-            PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
+            //const std::string report_path = file_path + ".report.json";
+            //saveJsonFile(report_path, report);
+            //PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
 #endif
 
             curr_scene_file_ = file_path;
@@ -394,7 +402,7 @@ namespace PAIN {
         std::string Service::MakeScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/Raw/Game/Scenes/") + b + ".scn";
+            return std::string("assets/Raw/Game/Scenes/") + b;
         }
 
         bool Service::createNewScene(std::string_view baseName)
@@ -420,13 +428,13 @@ namespace PAIN {
 
         bool Service::loadSceneById(std::string_view sceneIdWithExt)
         {
-            // panel uses "xxx.scn" as an id, map to .scn.json
-            std::string base(sceneIdWithExt);
-            // strip ".scn" if present, then build full path
-            if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
-            const std::string path = MakeScenePathFromBase(base);
+            PN_CORE_INFO("[Serialization] loadSceneById called with '{}'", sceneIdWithExt);
+            const std::string path = MakeScenePathFromBase(sceneIdWithExt); // normalizes to .scn
+            PN_CORE_INFO("[Serialization] Trying scene path: {}", path);
             return loadSceneFromFile(path);
         }
+
+
 
         bool Service::deleteSceneById(std::string_view sceneIdWithExt)
         {
