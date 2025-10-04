@@ -11,7 +11,6 @@
 #include "pch.h"
 #include "sSerialization.h"
 
-#ifdef PN_PLATFORM_WINDOWS
  // ---- quick reflected test type ----
 struct _SerSmokeTransform {
     float x{}, y{}, z{};
@@ -38,9 +37,12 @@ void DebugDumpReflectionAndJson(const T& obj, const nlohmann::json& j) {
         using MemberT = decltype(member);
         if constexpr (refl::trait::is_field_v<MemberT>) {
             // Try both .c_str() and .str() depending on refl-cpp version
-            std::string key;
-            if constexpr (requires { member.name.c_str(); }) key = member.name.c_str();
-            else key = std::string(member.name.str());
+            //std::string key;
+            //if constexpr (requires { member.name.c_str(); }) key = member.name.c_str();
+            //else key = std::string(member.name.str());
+
+            constexpr auto cname = member.name;
+            const std::string key = PAIN::Serialization::detail::name_to_string(cname);
 
 
             PN_CORE_INFO("  - field name: {0}, in JSON? {1}", key, j.contains(key) ? "yes" : "no");
@@ -641,4 +643,3 @@ namespace PAIN {
         }
     }
 }
-#endif
