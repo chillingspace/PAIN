@@ -16,6 +16,7 @@
 #include "Panels/DebugPanel.h"
 
 #include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+#include "CoreSystems/Path/Path.h"
 #include "PAINEngine/ECS/Controller.h"
 
 #define PN_CORE_ASSERT(cond, msg) \
@@ -121,7 +122,20 @@ namespace PAIN {
             });
 
             // Load ImGui settings (layout, window positions, etc.)
-            ImGui::LoadIniSettingsFromDisk("../assets/imgui_layout.ini");
+            // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
+
+            // Check if user's ini file exists; if not, copy default from config folder
+            if (!std::filesystem::exists(m_imgui_ini_path)) {
+                auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
+                if (std::filesystem::exists(default_ini_path)) {
+                    std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
+                }
+            }
+
+            // Apply to ImGui
+            ImGuiIO& io = ImGui::GetIO();
+            io.IniFilename = m_imgui_ini_path.c_str();
 
 
             //toggleVisible();
@@ -134,7 +148,7 @@ namespace PAIN {
                 ser->saveCurrentScene();
             }
 
-            ImGui::SaveIniSettingsToDisk("../assets/imgui_layout.ini");
+            // Once set from io.inifilename, do not have to call the write io again
 
             panels = nullptr;
             platform = nullptr;

@@ -50,7 +50,8 @@ namespace PAIN {
 			private:
 
 				//Unique component of same type identified by Entity type
-				std::unordered_map<Entity::Type, T> component_array;
+				std::unordered_map<Entity::Type, std::shared_ptr<T>> component_array;
+
 			public:
 				//Default constructor
 				Array() = default;
@@ -58,7 +59,7 @@ namespace PAIN {
 				//Add new component
 				void addComponent(Entity::Type entity, T&& component) {
 					// Only add if doesn't exist (won't throw)
-					component_array.try_emplace(entity, std::move(component));
+					component_array.try_emplace(entity, std::make_shared<T>(std::move(component)));
 				}
 
 				//Remove existing component
@@ -74,7 +75,7 @@ namespace PAIN {
 					if (it == component_array.end()) {
 						return std::nullopt;
 					}
-					return std::ref(it->second);
+					return std::ref(*it->second);
 				}
 
 				//Check entity component
@@ -99,10 +100,10 @@ namespace PAIN {
 				std::shared_ptr<void> getEntityComponent(Entity::Type entity) override {
 					auto it = component_array.find(entity);
 					if (it == component_array.end()) {
-						return nullptr;  // Safe - indicates not found
+						return nullptr;
 					}
-					// Return a COPY wrapped in shared_ptr, not a raw pointer
-					return std::make_shared<T>(it->second);
+					// Return the shared_ptr (type-erased to void)
+					return it->second;
 				}
 
 				//Get copied entity component
@@ -111,13 +112,14 @@ namespace PAIN {
 					if (it == component_array.end()) {
 						return nullptr;
 					}
-					return std::make_shared<T>(it->second);
+					// Create a NEW copy for this method
+					return std::make_shared<T>(*it->second);
 				}
 
 				//Set entity
 				void setEntityComponent(Entity::Type entity, std::shared_ptr<void> comp) override {
 					if (comp) {
-						component_array[entity] = *std::static_pointer_cast<T>(comp);
+						component_array[entity] = std::static_pointer_cast<T>(comp);
 					}
 				}
 
@@ -125,8 +127,8 @@ namespace PAIN {
 				void cloneEntity(Entity::Type clone, Entity::Type copy) override {
 					auto it = component_array.find(copy);
 					if (it != component_array.end()) {
-						// Simple copy
-						component_array[clone] = it->second;  
+						// Create a copy of the component for the clone
+						component_array[clone] = std::make_shared<T>(*it->second);
 					}
 				}
 
@@ -134,8 +136,7 @@ namespace PAIN {
 				// OPTIMIZED: Use try_emplace
 				void createDefEntityComponent(Entity::Type entity) override {
 					// Creates default T() if doesn't exist
-					component_array.try_emplace(entity);  
-
+					component_array.try_emplace(entity, std::make_shared<T>());
 				}
 
 				//Remove destroyed entity
