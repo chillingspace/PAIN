@@ -75,7 +75,8 @@ namespace PAIN {
 			}
 
 			void tickFades(double dt) {
-				for (auto& [name, g] : groups) {
+				for (auto& pair : groups) {
+					auto& g = pair.second;
 					if (!g.cg) continue;
 					if (std::abs(g.currentDb - g.targetDb) < 0.05f) {
 						g.currentDb = g.targetDb;
@@ -127,7 +128,7 @@ namespace PAIN {
 				PN_CORE_ERROR("Failed to attach to JVM: %d", result);
 				return;
 			}
-			
+
 			try {
 				FMOD_Android_JNI_Init(vm, m_App->activity->clazz);
 			}
@@ -209,11 +210,12 @@ namespace PAIN {
 			impl_->sys->update();
 
 			std::vector<int> toErase;
-			for (auto& [id, c] : impl_->channels) {
+			for (auto& pair : impl_->channels) {
+				auto& c = pair.second;
 				bool playing = false;
 				if (c.ch && c.ch->isPlaying(&playing) == FMOD_OK && !playing)
-					toErase.push_back(id);
-				if (!c.ch) toErase.push_back(id);
+					toErase.push_back(pair.first);
+				if (!c.ch) toErase.push_back(pair.first);
 			}
 			for (int id : toErase) impl_->channels.erase(id);
 		}
@@ -288,7 +290,7 @@ namespace PAIN {
 			if (it == impl_->playlists.end() || it->second.empty()) return std::nullopt;
 			std::uniform_int_distribution<size_t> dist(0, it->second.size() - 1);
 			const std::string& pick = it->second[dist(impl_->rng)];
-			
+
 			// Logging footstep check
 			//PN_CORE_INFO("Playing footstep: {}", pick);
 
@@ -305,9 +307,25 @@ namespace PAIN {
 		}
 
 		void FmodAudio::stopAll() {
-			for (auto& [n, g] : impl_->groups)
+			for (auto& pair : impl_->groups) {
+				auto& g = pair.second;
 				if (g.cg) g.cg->stop();
+			}
 			impl_->channels.clear();
+		}
+
+		AudioResult FmodAudio::pauseChannel(AudioChannelId chId) {
+			if (!isValid(chId)) return AudioResult::InvalidArg;
+			auto it = impl_->channels.find(chId.value);
+			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
+			return toResult(it->second.ch->setPaused(true));
+		}
+
+		AudioResult FmodAudio::resumeChannel(AudioChannelId chId) {
+			if (!isValid(chId)) return AudioResult::InvalidArg;
+			auto it = impl_->channels.find(chId.value);
+			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
+			return toResult(it->second.ch->setPaused(false));
 		}
 
 		AudioResult FmodAudio::setVolumeDb(AudioChannelId chId, float db) {

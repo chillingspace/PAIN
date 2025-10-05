@@ -108,7 +108,12 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
-            registerPanel(std::make_shared<Panel::ViewportPanel>());
+
+            // Create ViewportPanel and register it in BOTH panels and services
+            auto viewportPanel = std::make_shared<Panel::ViewportPanel>();
+            registerPanel(viewportPanel);
+            services->set<Panel::ViewportPanel>(viewportPanel);
+
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
@@ -180,14 +185,27 @@ namespace PAIN {
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+                // When hiding editor, auto-play the scene
+                if (!editor_visible) {
+                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                        viewport->setSimulationState(false); // false = playing
+                    }
+                }
             }
 #else
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+                // When hiding editor, auto-play the scene
+                if (!editor_visible) {
+                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                        viewport->setSimulationState(false); // false = playing
+                    }
+                }
             }
 #endif
-
 
 #ifdef PN_PLATFORM_ANDROID
             // --- ADD BUTTON HERE ---
@@ -201,7 +219,6 @@ namespace PAIN {
                 windowPos.y = vp->Pos.y + vp->Size.y - windowPadding.y; // start from bottom
 
                 ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, ImVec2(0.0f, 1.0f));
-                // ImVec2(0.0f, 1.0f) pivots the window at its bottom-left corner
 
                 ImGui::Begin("##EditorToggleWindow", nullptr,
                     ImGuiWindowFlags_NoDecoration |
@@ -211,12 +228,21 @@ namespace PAIN {
                 if (ImGui::Button(editor_visible ? "Hide Editor" : "Show Editor")) {
                     toggleVisible();
                     PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+                    // When hiding editor, auto-play the scene
+                    if (!editor_visible) {
+                        if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                            viewport->setSimulationState(false); // false = playing
+                        }
+                    }
                 }
 
                 ImGui::End();
             }
-            // --- END BUTTON ---
 #endif
+
+            // ... rest of the function
+
 
             if (editor_visible) {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
