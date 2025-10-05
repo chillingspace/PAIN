@@ -2,7 +2,7 @@
  * \file   sysScripting.cpp
  * \brief  Definition of scripting system states
  *
- * \author [Your Name], [ID], [email] (100%)
+ * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
  * \co-author
  * \date   October 2025
  * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
