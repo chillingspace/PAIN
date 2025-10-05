@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "pbr",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081652
+  },
+  "created_timestamp": 1759660506872,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "69c0099f-3d72-9f40-9b7e-7b70f9fa3239",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\pbr.frag"
+  }
+}

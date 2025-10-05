@@ -47,7 +47,7 @@ namespace PAIN {
                 }
             }
             catch (const std::filesystem::filesystem_error& e) {
-                std::cout << file_path << " - Deletion Failed." << std::endl;
+                std::cout << file_path << " - Deletion Failed. " << e.what() << std::endl;
                 return false;
             }
         }
@@ -251,6 +251,49 @@ namespace PAIN {
             //Scan raw asset directory
             recursiveScanAllDirectories(assets_root, [&](std::filesystem::path const& file) {
 
+                //Temp skip config.json
+                if (file.filename() == "Config.json") return;
+
+                //Check if asset is a desc file, locate raw asset in same directory
+                if (file.extension() == desc_ext) {
+
+                    try {
+                        std::ifstream stream(file);
+                        nlohmann::json desc_json;
+                        stream >> desc_json;
+
+                        Descriptor desc;
+                        desc.type = stringToAssetType(desc_json["asset_info"]["type"].get<std::string>());
+                        desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
+                        desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
+
+                        //Close file stream
+                        stream.close();
+
+                        //Try to read source
+                        if (desc.meta_data.contains("source_file")) {
+                            if (!std::filesystem::exists(desc.meta_data["source_file"])) {
+                                deleteFile(file);
+                            }
+                        }
+                        else {
+                            deleteFile(file);
+                        }
+
+                        //Verify import settings
+                        if (!compiler->verifyCompileSettings(desc.type, desc.import_settings)) {
+                            deleteFile(file);
+                        }
+                    }
+                    catch (const std::exception& e) {
+                        std::cout << "Invalid desc file." << std::endl;
+                        deleteFile(file);
+                    }
+
+                    //Return on desc extension
+                    return;
+                }
+
                 //create asset info
                 Info asset;
                 asset.raw_path = file;
@@ -276,12 +319,6 @@ namespace PAIN {
 
                 //Inser asset into assets
                 assets.push_back(asset);
-
-                //Insert GUID into cache for assets without GUID
-                if (guid_cache.find(asset.raw_path) == guid_cache.end()) {
-                    guid_cache[asset.raw_path] = GUID::Generate();
-                }
-
                 });
         }
 

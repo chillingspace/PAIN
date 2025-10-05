@@ -4,18 +4,9 @@
 #define ASSET_COMPILER_HPP
 
 #include "AssetTypes.h"
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
 
 namespace PAIN {
 	namespace Assets {
-
-		struct Descriptor {
-			GUID guid;
-			Type type;
-			nlohmann::json import_settings;
-			uint64_t raw_last_modified;
-		};
 
 		//Asset platform
 		enum class Platform {
@@ -50,13 +41,16 @@ namespace PAIN {
 			nlohmann::json generateDefaultCompileSettings(Type const& type) const;
 
 			//Create default desc file
-			Descriptor createDefaultDesc(Info const& asset) const;
+			Descriptor createDefaultDesc(Info const& asset, std::filesystem::path const& path) const;
 
 			//Read desc file
 			Descriptor readDescFile(Info const& asset, std::filesystem::path const& path) const;
 
 			//Save desc file
 			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
+
+			//Compile and ship
+			//void compileAndShip(Descriptor const& )
 
 		public:
 
@@ -80,6 +74,9 @@ namespace PAIN {
 
 			//Public process asset
 			void processAsset(Info& asset_info);
+
+			//Verify import settings
+			bool verifyCompileSettings(Type const& type, nlohmann::json const& settings) const;
 		};
 	}
 }

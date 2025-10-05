@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "lvl1_1",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081878
+  },
+  "created_timestamp": 1759660507006,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "e0e50030-c4ad-154c-8c89-0fc26905df2d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Scenes\\lvl1_1.scn"
+  }
+}

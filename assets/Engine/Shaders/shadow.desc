@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "shadow",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081653
+  },
+  "created_timestamp": 1759660506892,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "51a4270e-0b78-7749-b437-015b24618482",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\shadow.frag"
+  }
+}

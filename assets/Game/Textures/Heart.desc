@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Heart",
+    "type": "Texture"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081879
+  },
+  "created_timestamp": 1759661490063,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "b92540e7-399e-334d-81a5-45fb1200fb15",
+  "import_settings": {
+    "android_compression": "ASTC",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Textures\\Heart.png"
+  }
+}

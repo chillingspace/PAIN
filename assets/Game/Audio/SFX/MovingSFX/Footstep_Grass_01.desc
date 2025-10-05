@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "Footstep_Grass_01",
+    "type": "Audio"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081818
+  },
+  "created_timestamp": 1759661446330,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "5213a8da-4722-aa40-bbb5-68d42826bb18",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_01.wav"
+  }
+}

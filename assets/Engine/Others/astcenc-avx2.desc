@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "astcenc-avx2",
+    "type": "Other"
+  },
+  "build_data": {
+    "raw_last_modified": 13404134094370
+  },
+  "created_timestamp": 1759660506707,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "366f7784-1781-994d-856a-40cb7c110461",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
+  }
+}

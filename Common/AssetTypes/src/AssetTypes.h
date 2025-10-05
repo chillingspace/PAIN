@@ -10,6 +10,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "nlohmann/json.hpp"
+using json = nlohmann::json;
+
 namespace PAIN {
     namespace Assets {
 
@@ -87,7 +90,7 @@ namespace PAIN {
 
         //Boolean to check if the asset is compilable
         static bool isAssetCompilable(Type type) {
-            if (type == Type::Texture || type == Type::Model || type == Type::Audio) return true;
+            if (type == Type::Texture /*|| type == Type::Model || type == Type::Audio*/) return true;
             return false;
         }
 
@@ -196,21 +199,38 @@ namespace PAIN {
 
             //Raw asset details
             std::filesystem::path raw_path;
-            uint64_t raw_last_modified = 0;
-
-            //Shipped asset details
             std::filesystem::path shipped_path;
-            uint64_t shipped_last_modified = 0;
-            uint64_t file_size = 0;
 
-            //Relative folder
+            //Asset relative folder
             std::filesystem::path relative_folder;
+
+            //Build-critical timestamps
+            uint64_t raw_last_modified = 0;
+        };
+
+
+        struct Descriptor {
+
+            //Identity
+            GUID guid;
+            uint32_t descriptor_version = 1;
+            uint64_t created_timestamp = 0;
+
+            //Asset class
+            Type type;
+            std::string name;
+
+            //Import/processing settings
+            nlohmann::json import_settings;
+
+            //Build data
+            uint64_t raw_last_modified;
 
             //Dependencies
             std::vector<GUID> dependencies;
 
-            //Metadata
-            std::unordered_map<std::string, std::string> metadata;
+            //Meta data
+            nlohmann::json meta_data;
         };
     }
 }

@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_geometry",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081648
+  },
+  "created_timestamp": 1759660506781,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "3b53cf7c-0e26-7042-9cac-9cfad3fbb1d8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\android_geometry.frag"
+  }
+}

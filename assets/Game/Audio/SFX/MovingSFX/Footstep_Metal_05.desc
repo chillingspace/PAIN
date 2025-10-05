@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "Footstep_Metal_05",
+    "type": "Audio"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081837
+  },
+  "created_timestamp": 1759661446410,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "4d2a64bf-696c-9f42-953e-baaa1555519c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Metal_05.wav"
+  }
+}
