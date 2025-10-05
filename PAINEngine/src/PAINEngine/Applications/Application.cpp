@@ -26,7 +26,12 @@
 #include "CoreSystems/Assets/sAssetCompiler.h"
 #include "CoreSystems/Path/Path.h"
 
+// Systems
 #include "Systems/Physics/sysPhysics.h"
+#include "Systems/AI/sysAI.h" 
+#include "Systems/Animation/sysAnimation.h" 
+#include "Systems/Scripting/sysScripting.h" 
+#include "Systems/Logic/sysLogic.h" 
 
 
 namespace PAIN {
@@ -123,6 +128,11 @@ namespace PAIN {
 
 		// Physics system not cross platform yet
 		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);
+
+		services->get<ECS::Controller>()->registerSystem<AI::System>(false);
+		services->get<ECS::Controller>()->registerSystem<Animation::System>(false);
+		services->get<ECS::Controller>()->registerSystem<Scripting::System>(false);
+		services->get<ECS::Controller>()->registerSystem<Logic::System>(false);
 #endif
 
 		// Register components here
