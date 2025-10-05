@@ -24,14 +24,18 @@ namespace PAIN {
 		// --- Demo Object and Audio Setup ---
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
-		auto ogre_mesh = Mesh::LoadObj(pathService->resolvePath("game_assets://Models/ogre.obj"));
+		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre.obj");
+		auto ogre_mesh = Mesh::LoadObj(obj_path);
+		auto cube_mesh = Mesh::LoadObj();
 
 		// Create the audio source object and store its entity ID
-		audioSourceEntity = AddObject(ogre_mesh, { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
-		// Create the other static objects
-		AddObject(ogre_mesh, { 2.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
-		AddObject(ogre_mesh, { -2.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
+		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), {1.f, 1.f, 1.f});
 		
+		// Create the other static objects
+		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+	
 		if (audioManager)
 		{
 			// Define the rectangular path
@@ -117,11 +121,11 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	ECS::Entity::Type Scene::AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	ECS::Entity::Type Scene::AddObject(std::shared_ptr<Mesh> mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		ECS::Entity::Type entity = ecs->createEntity();
-		ecs->addEntityComponent(entity, MetaData::EntityName{ "Example Ogre" });
+		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh });
 		

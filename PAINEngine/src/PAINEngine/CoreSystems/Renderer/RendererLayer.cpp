@@ -33,14 +33,7 @@ namespace PAIN {
 
 		//Init scene
 		m_Scene = services->get<Scene>();
-		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre.obj");
-		auto ogre_obj = Mesh::LoadObj(obj_path);
-
-		if (m_Scene) {
-			m_Scene->AddObject(ogre_obj, {0.f, 1.f, 0.f}, {0.f,0.f,0.f, 0.f}, {1.f, 1.f, 1.f});
-			m_Scene->AddObject(ogre_obj, { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-			m_Scene->AddObject(ogre_obj, { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		}
+		
 /*
 #ifdef PN_PLATFORM_WINDOWS
 		// Set initial mute state for Windows only

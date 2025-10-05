@@ -20,7 +20,7 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		// Modified to return the created entity's ID
-		ECS::Entity::Type AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
+		ECS::Entity::Type AddObject(std::shared_ptr<Mesh> mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
 
 		Camera* GetActiveCamera();
 
