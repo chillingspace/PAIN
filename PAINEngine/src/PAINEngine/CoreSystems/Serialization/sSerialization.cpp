@@ -187,11 +187,21 @@ namespace PAIN {
             // Convert our in-memory document to JSON
             nlohmann::json scene = to_json_from_doc_();
 
+            // Ensure the path ends with ".scn"
+            std::string path = file_path;
+            if (path.size() < 4 || path.rfind(".scn") != path.size() - 4) {
+                path += ".scn";
+            }
+
             // Write to disk
-            const bool ok = saveJsonFile(file_path, scene);
+            const bool ok = saveJsonFile(path, scene);
             if (ok) {
                 curr_scene_file_ = file_path;
                 isModifiedScene = false;   // clear dirty flag after saving
+                PN_CORE_INFO("[Serialization] Saved scene: {}", path);
+            }
+            else {
+                PN_CORE_ERROR("[Serialization] Failed to save scene: {}", path);
             }
             return ok;
         }
@@ -428,6 +438,8 @@ namespace PAIN {
 
         bool Service::loadSceneById(std::string_view sceneIdWithExt)
         {
+            // !TODO: ADD CHECK FOR WHEN TRYING TO LOAD LEVEL THAT DOESN'T EXIST
+
             PN_CORE_INFO("[Serialization] loadSceneById called with '{}'", sceneIdWithExt);
             const std::string path = MakeScenePathFromBase(sceneIdWithExt); // normalizes to .scn
             PN_CORE_INFO("[Serialization] Trying scene path: {}", path);
@@ -436,17 +448,56 @@ namespace PAIN {
 
 
 
-        bool Service::deleteSceneById(std::string_view sceneIdWithExt)
+        //bool Service::deleteSceneById(std::string_view sceneIdWithExt)
+        //{
+        //    std::string base(sceneIdWithExt);
+        //    if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
+        //    const std::string path = MakeScenePathFromBase(base);
+        //    std::error_code ec;
+        //    std::filesystem::remove(path, ec);
+        //    if (ec) return false;
+        //    if (curr_scene_file_ == path) curr_scene_file_.clear();
+        //    return true;
+        //}
+
+        bool Service::deleteSceneById(std::string_view sceneId)
         {
-            std::string base(sceneIdWithExt);
-            if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
-            const std::string path = MakeScenePathFromBase(base);
+            // Normalize to the actual on-disk path (adds .scn if needed)
+            const std::string path = MakeScenePathFromBase(sceneId);
+            PN_CORE_INFO("[Serialization] deleteSceneById trying '{}'", path);
+
+#if !defined(PN_PLATFORM_ANDROID)
+            // Debug for desktop
+            if (!std::filesystem::exists(path)) {
+                PN_CORE_WARN("[Serialization] deleteSceneById: file does not exist: {}", path);
+                return false;
+            }
+#else
+            // On Android, you cannot delete packaged assets from the APK.
+            // Only delete files in your app's writable directory (e.g., Path::Service user dir).
+            // If 'path' points inside assets, bail:
+            // if (isInApkAssets(path)) { PN_CORE_WARN(...); return false; }
+#endif
+
             std::error_code ec;
-            std::filesystem::remove(path, ec);
-            if (ec) return false;
+            const bool removed = std::filesystem::remove(path, ec);
+
+            if (ec) {
+                PN_CORE_ERROR("[Serialization] deleteSceneById: std::filesystem::remove failed for {}: {}", path, ec.message());
+                return false;
+            }
+            if (!removed) {
+                // No error, but nothing was removed (likely didn't exist)
+                PN_CORE_WARN("[Serialization] deleteSceneById: nothing removed for {}", path);
+                return false;
+            }
+
             if (curr_scene_file_ == path) curr_scene_file_.clear();
+
+            PN_CORE_INFO("[Serialization] Deleted scene: {}", path);
             return true;
         }
+
 
         nlohmann::json Service::to_json_from_doc_() const
         {
