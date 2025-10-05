@@ -12,7 +12,6 @@
 #define META_SERVICE_H
 
 #include "Applications/AppSystem.h"
-#include "ECS/Components/cMetaData.h"
 
 namespace PAIN {
     namespace MetaData {

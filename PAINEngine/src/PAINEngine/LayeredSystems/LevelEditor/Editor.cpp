@@ -123,14 +123,25 @@ namespace PAIN {
 
             // Load ImGui settings (layout, window positions, etc.)
             // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
+
+#ifdef PN_PLATFORM_WINDOWS
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
+#else
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
+#endif
 
             // Check if user's ini file exists; if not, copy default from config folder
             if (!std::filesystem::exists(m_imgui_ini_path)) {
+#ifdef PN_PLATFORM_WINDOWS
                 auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
                 if (std::filesystem::exists(default_ini_path)) {
                     std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
                 }
+#else
+                // Have to use ASSSETmanager to copy over, so ill leave it as like this first
+
+#endif
+           
             }
 
             // Apply to ImGui

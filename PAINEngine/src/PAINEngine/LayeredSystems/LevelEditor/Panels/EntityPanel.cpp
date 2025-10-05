@@ -2,7 +2,7 @@
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
-#include "ECS/Components/cMetaData.h"
+#include "ECS/Components/cMetadata.h"
 
 #ifdef _DEBUG
 

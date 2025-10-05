@@ -9,7 +9,7 @@
 
 #include "pch.h"
 #include "sMetaData.h"
-#include "ECS/Components/cMetaData.h"
+#include "ECS/Components/cMetadata.h"
 #include "Controller.h"
 #include <algorithm>
 #include <sstream>

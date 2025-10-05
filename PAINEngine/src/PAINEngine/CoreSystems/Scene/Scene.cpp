@@ -1,7 +1,7 @@
 
 #include "Scene.h"
 #include "ECS/Controller.h"
-#include "ECS/Components/cMetaData.h"
+#include "ECS/Components/cMetadata.h"
 
 namespace PAIN {
 	void Scene::onDetach() {}
