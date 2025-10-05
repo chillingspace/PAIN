@@ -14,6 +14,8 @@
 
 #include "WindowsRenderer.h"
 
+#include "CoreSystems/Path/Path.h"
+
 
 namespace PAIN {
 
@@ -35,6 +37,64 @@ namespace PAIN {
 
 	WindowsRenderer::~WindowsRenderer() {
 		Cleanup();
+	}
+
+	std::string WindowsRenderer::ReadFile(const std::filesystem::path& path)
+	{
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			PN_CORE_WARN("Failed to open shader file: {}", path.string());
+			assert(0);
+		}
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+
+		return buffer.str();
+	}
+
+	std::unique_ptr<Shader> WindowsRenderer::LoadShaders(const std::string& vert_file, const std::string& frag_file)
+	{
+		PN_CORE_INFO("Compiling shaders {0}, {1}", vert_file, frag_file);
+
+#ifdef PN_PLATFORM_WINDOWS
+		// Get current working directory and build paths from there
+		std::filesystem::path current_path = std::filesystem::current_path();
+		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
+
+		// Or try to find the project root by looking for a marker file
+		std::filesystem::path search_path = current_path;
+		while (search_path.has_parent_path()) {
+			if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
+				project_root = search_path / "PAIN";
+				break;
+			}
+			search_path = search_path.parent_path();
+		}
+		
+		//Get path service
+		auto path_service = services->get<Path::Path>();
+
+		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
+		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+
+		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
+
+		std::string vert_code = ReadFile(vert_full);
+		PN_CORE_INFO("Successfully read vertex shader");
+		std::string frag_code = ReadFile(frag_full);
+		PN_CORE_INFO("Successfully read fragment shader");
+#else
+		PN_CORE_INFO("Using Android asset manager for shaders");
+
+        //Get path service
+        auto path_service = services->get<Path::Path>();
+        auto vert_path = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
+        auto frag_path = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+		std::string vert_code = ReadFileAndroid(vert_path);
+		std::string frag_code = ReadFileAndroid(frag_path);
+#endif
+
+		return std::make_unique<Shader>(vert_code, frag_code);
 	}
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment) {
@@ -325,11 +385,12 @@ namespace PAIN {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void WindowsRenderer::Init() {
+	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
+		services = app_services;
 #ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = Shader::LoadShaders("pbr.vert", "pbr.frag");
+		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
 #else
-		pbr_shader = Shader::LoadShaders("android_pbr.vert", "android_pbr.frag");
+		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
 #endif
 
 		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
@@ -340,9 +401,9 @@ namespace PAIN {
 			PN_CORE_INFO("Successfully linked shader");
 		}
 #ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = Shader::LoadShaders("geometry.vert", "geometry.frag");
+		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
 #else
-		geometry_shader = Shader::LoadShaders("android_geometry.vert", "android_geometry.frag");
+		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
 #endif
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
@@ -350,9 +411,9 @@ namespace PAIN {
 			return;
 		}
 #ifdef PN_PLATFORM_WINDOWS
-		floor_shader = Shader::LoadShaders("floor.vert", "floor.frag");
+		floor_shader = LoadShaders("floor.vert", "floor.frag");
 #else
-		floor_shader = Shader::LoadShaders("android_floor.vert", "android_floor.frag");
+		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
 #endif
 
 		if (!floor_shader || floor_shader->GetRendererID() == 0) {
@@ -361,15 +422,15 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = Shader::LoadShaders("texture.vert", "texture.frag");
+		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
 #else
-		passthrough_shader = Shader::LoadShaders("android_texture.vert", "android_texture.frag");
+		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
 #endif
 
 #ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = Shader::LoadShaders("shadow.vert", "shadow.frag");
+		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
 #else
-		shadow_shader = Shader::LoadShaders("android_shadow.vert", "android_shadow.frag");
+		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
 #endif
 
 		glGenVertexArrays(1, &empty_vao);

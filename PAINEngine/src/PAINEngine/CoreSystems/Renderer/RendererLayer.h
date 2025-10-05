@@ -28,7 +28,7 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		ImTextureID getFramebufferTexture() const {
-			return (ImTextureID)(intptr_t)WindowsRenderer::get().getFinalTexture();
+			return w_renderer->getFinalTexture();
 		}
 		int getFramebufferWidth() const { return winWidth; }
 		int getFramebufferHeight() const { return winHeight; }
@@ -50,8 +50,7 @@ namespace PAIN {
 		bool m_musicMuted = false;
 		bool m_sfxMuted = false;
 
-	private:
-		//std::unique_ptr<WindowsRenderer> w_renderer;
+		std::unique_ptr<WindowsRenderer> w_renderer;
 		
 		enum MOVE_MODES {
 			CAMERA,

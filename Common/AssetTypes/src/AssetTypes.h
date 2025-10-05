@@ -11,39 +11,38 @@
 #include <fstream>
 
 namespace PAIN {
-
-    struct GUID {
-        uint8_t bytes[16] = {};
-
-        //Default constructor
-        GUID() = default;
-
-        //Generate new GUID
-        static GUID Generate() noexcept;
-
-        //Construct GUID from string
-        explicit GUID(const std::string& str);
-
-        //Serialize GUID to string
-        std::string ToString(bool withHyphens = true) const;
-
-        bool IsValid() const noexcept {
-            for (auto b : bytes) {
-                if (b != 0) return true;
-            }
-            return false;
-        }
-
-        bool operator==(const GUID& other) const noexcept {
-            return std::equal(std::begin(bytes), std::end(bytes), std::begin(other.bytes));
-        }
-
-        bool operator!=(const GUID& other) const noexcept {
-            return !(*this == other);
-        }
-    };
-
     namespace Assets {
+
+        struct GUID {
+            uint8_t bytes[16] = {};
+
+            //Default constructor
+            GUID() = default;
+
+            //Generate new GUID
+            static GUID Generate() noexcept;
+
+            //Construct GUID from string
+            explicit GUID(const std::string& str);
+
+            //Serialize GUID to string
+            std::string ToString(bool withHyphens = true) const;
+
+            bool IsValid() const noexcept {
+                for (auto b : bytes) {
+                    if (b != 0) return true;
+                }
+                return false;
+            }
+
+            bool operator==(const GUID& other) const noexcept {
+                return std::equal(std::begin(bytes), std::end(bytes), std::begin(other.bytes));
+            }
+
+            bool operator!=(const GUID& other) const noexcept {
+                return !(*this == other);
+            }
+        };
 
         //Asset types
         enum class Type {
@@ -113,8 +112,6 @@ namespace PAIN {
         }
 
         //All folder types
-        static std::filesystem::path raw_assets_folder = "Raw";
-        static std::filesystem::path desc_assets_folder = "Descriptors";
         static std::filesystem::path game_assets_folder = "Game";
         static std::filesystem::path engine_assets_folder = "Engine";
 
@@ -150,7 +147,9 @@ namespace PAIN {
         static std::string toLowerCase(std::string const& string) {
             std::string new_string;
             for (auto c : string) {
-                new_string += __ascii_tolower(c);
+                //new_string += __ascii_tolower(c);
+                new_string += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
             }
             return new_string;
         }
@@ -219,8 +218,8 @@ namespace PAIN {
 //Hashing got unordered_map
 namespace std {
     template <>
-    struct hash<PAIN::GUID> {
-        size_t operator()(const PAIN::GUID& guid) const noexcept {
+    struct hash<PAIN::Assets::GUID> {
+        size_t operator()(const PAIN::Assets::GUID& guid) const noexcept {
             const uint64_t* p64 = reinterpret_cast<const uint64_t*>(guid.bytes);
             // Combine two 64-bit parts
             return std::hash<uint64_t>{}(p64[0]) ^ (std::hash<uint64_t>{}(p64[1]) << 1);

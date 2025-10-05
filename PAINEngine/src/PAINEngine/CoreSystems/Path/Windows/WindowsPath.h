@@ -14,7 +14,7 @@ namespace PAIN {
 
 			//Path variables
 			std::string app_name;
-			std::string game_path;
+			std::string out_path;
 			std::string localdata_path;
 			std::string roamingdata_path;
 			std::string documents_path;

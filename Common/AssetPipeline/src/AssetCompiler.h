@@ -32,7 +32,7 @@ namespace PAIN {
 			Platform platform;
 
 			//Paths
-			std::filesystem::path desc_path;
+			std::filesystem::path assets_root;
 
 			//Extensions
 			std::string desc_ext;
@@ -50,25 +50,25 @@ namespace PAIN {
 			nlohmann::json generateDefaultCompileSettings(Type const& type) const;
 
 			//Create default desc file
-			Descriptor createDefaultDesc(Info const& asset, std::filesystem::path const& desc_path) const;
+			Descriptor createDefaultDesc(Info const& asset) const;
 
 			//Read desc file
-			Descriptor readDescFile(Info const& asset, std::filesystem::path const& desc_path) const;
+			Descriptor readDescFile(Info const& asset, std::filesystem::path const& path) const;
 
 			//Save desc file
-			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& desc_path) const;
+			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
 
 		public:
 
 			//Default compiler
-			Compiler(std::filesystem::path const& desc_path) : desc_path{ desc_path }, desc_ext{ Assets::descriptor_ext } {
+			Compiler(std::filesystem::path const& assets_root) : assets_root{ assets_root }, desc_ext{ Assets::descriptor_ext } {
 #ifdef PN_PLATFORM_WINDOWS
 				output_dir = std::string(PAIN_ASSETS_OUTPUT_DIR);
 
 #ifdef PAIN_ASSET_DEBUG
-				output_dir = output_dir / "Debug" / "Assets" / "Raw";
+				output_dir = output_dir / "Debug" / "Assets";
 #else
-				output_dir = output_dir / "Release" / "Assets" / "Raw";
+				output_dir = output_dir / "Release" / "Assets";
 #endif
 				platform = Platform::Windows;
 #elif defined(PN_PLATFORM_ANDROID)

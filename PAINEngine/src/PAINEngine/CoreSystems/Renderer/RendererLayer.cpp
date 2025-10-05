@@ -22,14 +22,19 @@
 namespace PAIN {
 	void RendererLayer::onDetach()
 	{
+		w_renderer = nullptr;
 	}
 	void RendererLayer::onAttach() {
 
-		WindowsRenderer::get().Init();
+		//Create window render
+		w_renderer = std::make_unique<WindowsRenderer>();
+
+		w_renderer->Init(services);
 
 		//Init scene
 		m_Scene = services->get<Scene>();
-		auto ogre_obj = Mesh::LoadObj("ogre.obj");
+		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre.obj");
+		auto ogre_obj = Mesh::LoadObj(obj_path);
 
 		if (m_Scene) {
 			m_Scene->AddObject(ogre_obj, {0.f, 1.f, 0.f}, {0.f,0.f,0.f, 0.f}, {1.f, 1.f, 1.f});
@@ -63,7 +68,7 @@ namespace PAIN {
 #endif
 
 			if (editor_visible) {
-				glBindFramebuffer(GL_FRAMEBUFFER, WindowsRenderer::get().getFinalFbo());
+				glBindFramebuffer(GL_FRAMEBUFFER, w_renderer->getFinalFbo());
 				//glViewport(0, 0, fbWidth, fbHeight);
 			}
 			else {
@@ -114,7 +119,7 @@ namespace PAIN {
 						{
 							if (mesh.value().get().mesh)
 							{
-								WindowsRenderer::get().RenderGeometryShadows(mesh.value().get().mesh.get(), model, l); // uses shadow_shader
+								w_renderer->RenderGeometryShadows(mesh.value().get().mesh.get(), model, l); // uses shadow_shader
 							}	
 						}
 						
@@ -124,7 +129,7 @@ namespace PAIN {
 				}
 			}
 
-			WindowsRenderer::get().BeginRendering(m_Scene);
+			w_renderer->BeginRendering(m_Scene);
 			// render scene
 
 
@@ -141,7 +146,7 @@ namespace PAIN {
 					if (mesh.value().get().mesh)
 					{
 						// uses geometry_shader
-						WindowsRenderer::get().RenderGeometry(m_Scene, mesh.value().get().mesh.get(), model);
+						w_renderer->RenderGeometry(m_Scene, mesh.value().get().mesh.get(), model);
 					}
 					
 				}
@@ -151,7 +156,7 @@ namespace PAIN {
 			
 
 			
-			WindowsRenderer::get().EndRendering(m_Scene);
+			w_renderer->EndRendering(m_Scene);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

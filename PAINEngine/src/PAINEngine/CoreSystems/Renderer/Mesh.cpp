@@ -57,7 +57,7 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
 		PN_CORE_INFO("Using Android asset manager for mesh");
-		std::string mesh_data = ReadFileAndroid("Raw/Game/Models/" + mesh_file);
+		std::string mesh_data = ReadFileAndroid(mesh_file);
 		if (mesh_data.empty()) {
 			PN_CORE_ERROR("Failed to read mesh data from Android assets: {0}", mesh_file);
 		}
@@ -71,23 +71,23 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
-		// Get current working directory and build paths from there
-		std::filesystem::path current_path = std::filesystem::current_path();
-		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
+		//// Get current working directory and build paths from there
+		//std::filesystem::path current_path = std::filesystem::current_path();
+		//std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
 
-		// Or try to find the project root by looking for a marker file
-		std::filesystem::path search_path = current_path;
-		while (search_path.has_parent_path()) {
-			if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
-				project_root = search_path / "PAIN";
-				break;
-			}
-			search_path = search_path.parent_path();
-		}
+		//// Or try to find the project root by looking for a marker file
+		//std::filesystem::path search_path = current_path;
+		//while (search_path.has_parent_path()) {
+		//	if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
+		//		project_root = search_path / "PAIN";
+		//		break;
+		//	}
+		//	search_path = search_path.parent_path();
+		//}
 
-		std::filesystem::path mesh_full = project_root / "assets" / "Raw" / "Game" / "Models" / mesh_file;
+		std::filesystem::path mesh_full = mesh_file;
 
-		file_ok = std::filesystem::exists(mesh_full) && mesh_file != "";
+		file_ok = std::filesystem::exists(mesh_file) && mesh_file != "";
 #endif
 
 		if (!file_ok)
