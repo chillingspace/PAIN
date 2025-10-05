@@ -4,7 +4,7 @@
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "Camera.h"
-#include "ECS/ECSTypes.h" // Added for Entity::Type
+#include "ECS/ECSTypes.h"
 
 namespace PAIN {
 
@@ -19,7 +19,6 @@ namespace PAIN {
 		void onUpdate(AppTiming timing) override;
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
-		// Modified to return the created entity's ID
 		ECS::Entity::Type AddObject(std::shared_ptr<Mesh> mesh, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
 
 		Camera* GetActiveCamera();
@@ -27,8 +26,8 @@ namespace PAIN {
 	private:
 		std::unique_ptr<Camera> camera;
 
-		// --- Audio Demo State Variables ---
-		ECS::Entity::Type audioSourceEntity = ECS::Entity::INVALID; // Changed to store the entity ID
+		// Audio Demo State Variables
+		ECS::Entity::Type audioSourceEntity = ECS::Entity::INVALID;
 		Audio::AudioChannelId audioSourceChannel;
 
 		// Path animation variables

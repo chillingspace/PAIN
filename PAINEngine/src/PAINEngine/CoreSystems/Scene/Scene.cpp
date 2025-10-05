@@ -21,7 +21,7 @@ namespace PAIN {
 		float height_ratio{ 9.f };
 		camera = std::make_unique<Camera>(pos, forward, up, fov, near_plane, far_plane, width_ratio, height_ratio);
 		
-		// --- Demo Object and Audio Setup ---
+		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
 		auto ogre_mesh = Mesh::LoadObj(pathService->resolvePath("game_assets://Models/ogre.obj"));
@@ -73,10 +73,10 @@ namespace PAIN {
 		auto audioManager = services->get<Audio::Audio>();
 		if (!audioManager || audioSourceEntity == ECS::Entity::INVALID) return;
 
-		// --- Update Listener Position ---
+		// Update listener position to match the camera's current state
 		audioManager->setListener(camera->pos, { 0,0,0 }, camera->forward, camera->up);
 
-		// --- Animate Audio Source Object ---
+		// Animate the audio source object along a predefined path
 		demoTime += timing.dt;
 		float progress = fmod(demoTime, segmentDuration) / segmentDuration;
 		int segment = static_cast<int>(demoTime / segmentDuration) % 4;
@@ -87,26 +87,29 @@ namespace PAIN {
 		glm::vec3 endPos = pathCorners[(currentPathSegment + 1) % 4];
 		glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
 
-		// --- THIS IS THE FIX ---
-		// Update the Transform component in the ECS directly.
+		// Update the Transform component in the ECS for the renderer
 		auto transformTypeIdOpt = ecs->getComponentType<Transform>();
 		if (transformTypeIdOpt)
 		{
+			// Get a copy of the component
 			auto component_as_void = ecs->getCopiedEntityComponent(audioSourceEntity, *transformTypeIdOpt);
 			if (component_as_void)
 			{
+				// Cast the copy to the correct type and modify it
 				auto transformComp = std::static_pointer_cast<Transform>(component_as_void);
 				transformComp->position = currentPosition;
+				
+				// Set the modified copy back into the ECS
 				ecs->setEntityComponent(audioSourceEntity, *transformTypeIdOpt, transformComp);
 			}
 		}
 
-		// --- Update FMOD Sound Positions ---
+		// Update the 3D position of the looping music channel
 		if (isValid(audioSourceChannel)) {
 			audioManager->setPosition(audioSourceChannel, currentPosition);
 		}
 
-		// --- Handle Footstep Playback ---
+		// Handle footstep playback at intervals
 		footstepTimer -= timing.dt;
 		if (footstepTimer <= 0.0f)
 		{
@@ -125,7 +128,6 @@ namespace PAIN {
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh });
 		
-		// The line that populated the deprecated m_Objects vector has been removed.
 		return entity;
 	}
 
