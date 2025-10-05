@@ -217,63 +217,117 @@ namespace PAIN {
 
         int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)
         {
-            EventsPackage* package = (EventsPackage*)app->userData;
-            PAIN::Application* e_app = (PAIN::Application*)package->app;
+            auto* package = static_cast<EventsPackage*>(app->userData);
+            auto* e_app = static_cast<PAIN::Application*>(package->app);
 
-            //Dispatch all events
+            // Always enqueue a catch-all (useful for debugging/raw access)
             e_app->pushEventQueue(std::make_shared<Event::AllEvent>(event));
-            
-            //// Let ImGui consume it first
-            //if (ImGui_ImplAndroid_HandleInputEvent(event))
-            //    return 1; // handled
 
-            //// �your own game/editor handling�
-            return 0;
+            const int32_t type = AInputEvent_getType(event);
+            if (type == AINPUT_EVENT_TYPE_MOTION)
+            {
+                const int32_t action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
+                const float x = AMotionEvent_getX(event, 0);
+                const float y = AMotionEvent_getY(event, 0);
+                const int32_t pointerId = AMotionEvent_getPointerId(event, 0);
+
+                switch (action) {
+                case AMOTION_EVENT_ACTION_DOWN:
+                case AMOTION_EVENT_ACTION_POINTER_DOWN:
+                    e_app->pushEventQueue(std::make_shared<Event::TouchDown>(x, y, pointerId));
+                    break;
+                case AMOTION_EVENT_ACTION_UP:
+                case AMOTION_EVENT_ACTION_POINTER_UP:
+                    e_app->pushEventQueue(std::make_shared<Event::TouchUp>(x, y, pointerId));
+                    break;
+                case AMOTION_EVENT_ACTION_MOVE:
+                    e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                    break;
+                case AMOTION_EVENT_ACTION_CANCEL:
+                    e_app->pushEventQueue(std::make_shared<Event::TouchCancel>(x, y, pointerId));
+                    break;
+                default:
+                    // Unrecognized motion action; keep the AllEvent
+                    break;
+                }
+            }
+            else if (type == AINPUT_EVENT_TYPE_KEY)
+            {
+                // No dedicated key event class provided; keep raw for now
+                // The AllEvent already covers this case
+            }
+
+            return 0; // not consumed here
         }
 
+
         void Android_Window::handle_cmd(android_app* app, int32_t cmd) {
-            EventsPackage* package = (EventsPackage*)app->userData;
-            PAIN::Application* e_app = (PAIN::Application*)package->app;
-            Android_Window* e_window = (Android_Window*)package->window;
+            auto* package = static_cast<EventsPackage*>(app->userData);
+            auto* e_app = static_cast<PAIN::Application*>(package->app);
+            auto* e_window = static_cast<Android_Window*>(package->window);
+
+            // Optional: generic catch-all for diagnostics
+            // e_app->pushEventQueue(std::make_shared<Event::AllEvent>(cmd));
 
             switch (cmd) {
             case APP_CMD_INIT_WINDOW:
-
-                //Initialize window
                 e_window->init();
-
-                //Dispatch events
-
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceCreated>(e_window->getNativeWindow()));
                 break;
+
             case APP_CMD_TERM_WINDOW:
-
-                //Destroy window surface
                 e_window->destroySurface();
-
-                //Dispatch events
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceDestroyed>(e_window->getNativeWindow()));
                 break;
+
+            case APP_CMD_WINDOW_RESIZED: {
+                // If you track framebuffer size in e_window, pass the latest values
+                const EGLint w = e_window->frame_buffer.x; // or query via eglQuerySurface
+                const EGLint h = e_window->frame_buffer.y;
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceChanged>(e_window->getNativeWindow(), w, h));
+                break;
+            }
+
             case APP_CMD_GAINED_FOCUS:
-                //Dispatch events
+                e_app->pushEventQueue(std::make_shared<Event::FocusGained>());
                 break;
 
             case APP_CMD_LOST_FOCUS:
-                //Dispatch events
+                e_app->pushEventQueue(std::make_shared<Event::FocusLost>());
                 break;
 
             case APP_CMD_PAUSE:
-                //Dispatch events
+                e_app->pushEventQueue(std::make_shared<Event::AppPause>());
                 break;
 
             case APP_CMD_RESUME:
-                //Dispatch events
+                e_app->pushEventQueue(std::make_shared<Event::AppResume>());
+                break;
+
+            case APP_CMD_START:
+                e_app->pushEventQueue(std::make_shared<Event::AppStart>());
+                break;
+
+            case APP_CMD_STOP:
+                e_app->pushEventQueue(std::make_shared<Event::AppStop>());
+                break;
+
+            case APP_CMD_CONFIG_CHANGED:
+                e_app->pushEventQueue(std::make_shared<Event::ConfigurationChanged>());
+                break;
+
+            case APP_CMD_LOW_MEMORY:
+                e_app->pushEventQueue(std::make_shared<Event::LowMemory>());
                 break;
 
             case APP_CMD_DESTROY:
-
-                //Signal app to terminate as well
+                e_app->pushEventQueue(std::make_shared<Event::AppDestroy>());
                 e_app->terminate();
                 break;
+
             default:
+                // If you have an OtherCmd event, you can push it here
+                // e_app->pushEventQueue(std::make_shared<Event::OtherCmd>(cmd));
                 break;
             }
         }
