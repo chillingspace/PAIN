@@ -367,6 +367,15 @@ namespace PAIN {
                             // Create new entity
                             auto e = ecs->createEntity();
 
+                            // Name
+                            if (auto n = E.find("Name"); n != E.end() && n->is_string()) {
+                                ecs->addEntityComponent(e, MetaData::EntityName{ n->get<std::string>() });
+                            }
+                            else {
+                                // fallback: keep it deterministic or use the saved ID
+                                ecs->addEntityComponent(e, MetaData::EntityName{ "Entity " + std::to_string((int)e) });
+                            }
+
                             // Rebuild components
                             if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
                                 const auto& comps = *compsIt;
@@ -523,6 +532,16 @@ namespace PAIN {
                     const auto all = ecs->getAllEntities();
                     for (auto e : all) {
                         json E = json::object();
+
+                        // Name
+                        if (auto name = ecs->getEntityComponent<MetaData::EntityName>(e);
+                            name.has_value())
+                        {
+                            // save name
+                            E["Name"] = name->get().name;               
+                        }
+                        // fallback: if no name componen
+                         else { E["Name"] = "Entity " + std::to_string((int)e); }
 
                         // Optional identifiers
                         E["ID"] = int(e);
