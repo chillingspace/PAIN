@@ -46,7 +46,9 @@ namespace PAIN {
 		float xOffset = 0.0f;
 		float yOffset = 0.0f;
 
-	private:
+		// Audio mute state for Windows keybinds
+		bool m_musicMuted = false;
+		bool m_sfxMuted = false;
 
 		std::unique_ptr<WindowsRenderer> w_renderer;
 		
@@ -62,7 +64,5 @@ namespace PAIN {
 		//unsigned int rbo = 0;
 		//int fbWidth = 1280;
 		//int fbHeight = 720;
-
 	};
-
 }

@@ -1,5 +1,6 @@
-#include <CoreSystems/Renderer/Mesh.h>
+#pragma once
 
+#include <CoreSystems/Renderer/Mesh.h>
 
 namespace PAIN {
 

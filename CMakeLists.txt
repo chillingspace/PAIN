@@ -24,6 +24,11 @@ importDependencies() # Placeholder
 if (ANDROID)
   add_compile_definitions(PLATFORM_ANDROID)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
+  # Target a compatible instruction set for x86_64 emulators to prevent SIGILL crashes
+  if(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=westmere")
+  endif()
 endif()
 
 # Use /MD in Release and /MDd in Debug for all MSVC targets

@@ -4,6 +4,7 @@
 #ifndef KEY_EVENTS_HPP
 #define KEY_EVENTS_HPP
 
+#include <sstream>
 #include "../Event.h"
 
 namespace PAIN {

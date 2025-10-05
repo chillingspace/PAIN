@@ -1,8 +1,8 @@
 #pragma once
 #include "pch.h"
 
-
 #include "CoreSystems/Renderer/Mesh.h"
+#include "CoreSystems/Audio/Audio.h"
 #include "Camera.h"
 
 namespace PAIN {
@@ -41,6 +41,19 @@ namespace PAIN {
 		
 		
 		//std::unique_ptr<ECS::Controller> ecs;
+
+		// --- Audio Demo State Variables ---
+		int audioSourceObjectIndex = -1; // Index of the object that will be our audio source
+		Audio::AudioChannelId audioSourceChannel; // Channel ID for the looping sound
+
+		// Path animation variables
+		float demoTime = 0.0f;
+		int currentPathSegment = 0;
+		float segmentDuration = 4.0f; // Time in seconds to travel one segment
+		std::vector<glm::vec3> pathCorners;
+
+		// Footstep variables
+		float footstepTimer = 0.0f;
+		const float footstepInterval = 0.4f; // Play a footstep every 0.4 seconds
 	};
 }
-
