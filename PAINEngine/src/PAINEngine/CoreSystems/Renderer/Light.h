@@ -75,7 +75,7 @@ namespace PAIN {
 
 		// not required for point lights
 		glm::vec3 forward{0 , -1, 0};
-		float fov{ 60.f };
+		float fov{ 120.f };				// dont set larger values
 
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
