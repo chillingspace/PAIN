@@ -46,14 +46,14 @@ namespace PAIN {
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
 					{
 						// Play button
-						if (ImGui::Button("Play")) {
+						if (ImGui::Button("Enable Input")) {
 							isPaused = false;
 						}
 
 						ImGui::SameLine();
 
 						// Pause button
-						if (ImGui::Button("Pause")) {
+						if (ImGui::Button("Disable Input")) {
 							isPaused = true;
 							// Clear input state when pausing
 							if (auto renderer = services->get<RendererLayer>()) {
@@ -65,7 +65,7 @@ namespace PAIN {
 						}
 
 						ImGui::SameLine();
-						ImGui::Text(isPaused ? "| Status: Paused" : "| Status: Playing");
+						ImGui::Text(isPaused ? "| Input: Disabled" : "| Input: Enabled");
 					}
 					ImGui::EndChild();
 
