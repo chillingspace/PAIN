@@ -5,6 +5,10 @@
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 
+#ifdef _DEBUG
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+#endif
+
 namespace PAIN {
 	void Scene::onDetach() {}
 
@@ -20,7 +24,7 @@ namespace PAIN {
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
 		camera = std::make_unique<Camera>(pos, forward, up, fov, near_plane, far_plane, width_ratio, height_ratio);
-		
+
 		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
@@ -29,13 +33,13 @@ namespace PAIN {
 		auto cube_mesh = Mesh::LoadObj();
 
 		// Create the audio source object and store its entity ID
-		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), {1.f, 1.f, 1.f});
-		
+		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
+
 		// Create the other static objects
 		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-	
+
 		if (audioManager)
 		{
 			// Define the rectangular path
@@ -44,8 +48,8 @@ namespace PAIN {
 			glm::vec3 pathCenter = { 0.0f, 1.0f, 0.0f };
 			pathCorners = {
 				pathCenter + glm::vec3(-pathWidth / 2, 0.0f, -pathDepth / 2),
-				pathCenter + glm::vec3( pathWidth / 2, 0.0f, -pathDepth / 2),
-				pathCenter + glm::vec3( pathWidth / 2, 0.0f,  pathDepth / 2),
+				pathCenter + glm::vec3(pathWidth / 2, 0.0f, -pathDepth / 2),
+				pathCenter + glm::vec3(pathWidth / 2, 0.0f,  pathDepth / 2),
 				pathCenter + glm::vec3(-pathWidth / 2, 0.0f,  pathDepth / 2)
 			};
 
@@ -73,15 +77,46 @@ namespace PAIN {
 
 	void Scene::onUpdate(AppTiming timing)
 	{
+		// Get time scale from ViewportPanel (0.0 when paused, 1.0 when playing)
+		float timeScale = 1.0f;
+		bool isPaused = false;
+#ifdef _DEBUG
+		if (auto viewport = services->get<Editor::Panel::ViewportPanel>()) {
+			timeScale = viewport->getTimeScale();
+			isPaused = (timeScale == 0.0f);
+		}
+#endif
+
+		// Apply time scale to deltaTime for simulation
+		float scaledDt = timing.dt * timeScale;
+
 		auto ecs = services->get<ECS::Controller>();
 		auto audioManager = services->get<Audio::Audio>();
 		if (!audioManager || audioSourceEntity == ECS::Entity::INVALID) return;
 
-		// Update listener position to match the camera's current state
+		// Handle audio pause/resume based on simulation state
+		static bool wasPaused = false;
+		if (isPaused != wasPaused) {
+			if (isPaused) {
+				// Pause the looping music channel
+				if (isValid(audioSourceChannel)) {
+					audioManager->pauseChannel(audioSourceChannel);
+				}
+			}
+			else {
+				// Resume the looping music channel
+				if (isValid(audioSourceChannel)) {
+					audioManager->resumeChannel(audioSourceChannel);
+				}
+			}
+			wasPaused = isPaused;
+		}
+
+		// Update listener position to match the camera's current state (always runs)
 		audioManager->setListener(camera->pos, { 0,0,0 }, camera->forward, camera->up);
 
-		// Animate the audio source object along a predefined path
-		demoTime += timing.dt;
+		// Animate the audio source object along a predefined path (respects pause)
+		demoTime += scaledDt; // Changed from timing.dt
 		float progress = fmod(demoTime, segmentDuration) / segmentDuration;
 		int segment = static_cast<int>(demoTime / segmentDuration) % 4;
 		if (segment != currentPathSegment) {
@@ -102,19 +137,19 @@ namespace PAIN {
 				// Cast the copy to the correct type and modify it
 				auto transformComp = std::static_pointer_cast<Transform>(component_as_void);
 				transformComp->position = currentPosition;
-				
+
 				// Set the modified copy back into the ECS
 				ecs->setEntityComponent(audioSourceEntity, *transformTypeIdOpt, transformComp);
 			}
 		}
 
-		// Update the 3D position of the looping music channel
-		if (isValid(audioSourceChannel)) {
+		// Update the 3D position of the looping music channel (only when not paused)
+		if (!isPaused && isValid(audioSourceChannel)) {
 			audioManager->setPosition(audioSourceChannel, currentPosition);
 		}
 
-		// Handle footstep playback at intervals
-		footstepTimer -= timing.dt;
+		// Handle footstep playback at intervals (respects pause)
+		footstepTimer -= scaledDt; // Changed from timing.dt
 		if (footstepTimer <= 0.0f)
 		{
 			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
@@ -131,7 +166,7 @@ namespace PAIN {
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh });
-		
+
 		return entity;
 	}
 

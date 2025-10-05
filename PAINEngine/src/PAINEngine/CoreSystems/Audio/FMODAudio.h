@@ -6,7 +6,7 @@
 #include "Audio.h"
 
 namespace PAIN {
-	namespace Audio {
+    namespace Audio {
 
         class FmodAudio : public Audio {
         private:
@@ -38,6 +38,8 @@ namespace PAIN {
 
             AudioResult stop(AudioChannelId) override;
             void        stopAll() override;
+            AudioResult pauseChannel(AudioChannelId) override;
+            AudioResult resumeChannel(AudioChannelId) override;
             AudioResult setVolumeDb(AudioChannelId, float) override;
             AudioResult setVolumeLinear(AudioChannelId, float) override;
             AudioResult setPosition(AudioChannelId, const glm::vec3&) override;
@@ -51,7 +53,7 @@ namespace PAIN {
             void onAppPause() override;
             void onAppResume() override;
         };
-	}
+    }
 }
 
 #endif

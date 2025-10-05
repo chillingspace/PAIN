@@ -15,8 +15,6 @@
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
 
-
-
 #include "Core.h"
 
 // Assets
@@ -33,6 +31,7 @@
 #include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h" 
 
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h" 
 
 namespace PAIN {
 
@@ -171,91 +170,95 @@ namespace PAIN {
 
 	void Application::Run() {
 
-		//Set last time
-		last_time = std::chrono::steady_clock::now();
+	//Set last time
+	last_time = std::chrono::steady_clock::now();
 
-		//Application loop
-		while (b_app_running) {
+	//Application loop
+	while (b_app_running) {
 
-			//static auto last_time = std::chrono::high_resolution_clock::now();
-			//auto current_time = std::chrono::high_resolution_clock::now();
-			//float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
-			//last_time = current_time;
+		//Poll events
+		services->get<Window::Window>()->pollEvents();
 
-			//Poll events
-			services->get<Window::Window>()->pollEvents();
+		//Drain all events in queue
+		drainEventQueue();
 
-			//Drain all events in queue
-			drainEventQueue();
+		//Update delta time
+		auto now = std::chrono::steady_clock::now();
+		timing.dt = std::chrono::duration<float>(now - last_time).count();
+		last_time = now;
 
-			//Update delta time
-			auto now = std::chrono::steady_clock::now();
-			timing.dt = std::chrono::duration<float>(now - last_time).count();
-			last_time = now;
-
-			fps = static_cast<int>(1.f / timing.dt);
+		fps = static_cast<int>(1.f / timing.dt);
 #ifdef PN_PLATFORM_WINDOWS
-			static float avgFps = 0.f;
-			static float timeSinceLastUpdate = 0.0f;
+		static float avgFps = 0.f;
+		static float timeSinceLastUpdate = 0.0f;
 
-			avgFps = avgFps * 0.95f + fps * 0.05f;
-			timeSinceLastUpdate += timing.dt;
+		avgFps = avgFps * 0.95f + fps * 0.05f;
+		timeSinceLastUpdate += timing.dt;
 
-			if (timeSinceLastUpdate >= 0.5f) {
-				timeSinceLastUpdate = 0.0f;
-				auto window = services->get<Window::Window>();
-				std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
-				glfwSetWindowTitle(
-					reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
-					title.c_str()
-				);
-			}
+		if (timeSinceLastUpdate >= 0.5f) {
+			timeSinceLastUpdate = 0.0f;
+			auto window = services->get<Window::Window>();
+			std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
+			glfwSetWindowTitle(
+				reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
+				title.c_str()
+			);
+		}
 #endif
-			
+		
+		// ===== ADD THIS BLOCK: Get time scale from ViewportPanel =====
+#ifdef _DEBUG
+		float timeScale = 1.0f;
+		if (auto viewport = services->get<Editor::Panel::ViewportPanel>()) {
+			timeScale = viewport->getTimeScale();
+		}
+		
+		// Apply time scale to deltaTime for simulation
+		float scaledDt = timing.dt * timeScale;
+#else
+		// In release builds, no pause functionality
+		float scaledDt = timing.dt;
+#endif
+		// ============================================================
 
-			//Accumulate for fixed updates
-			accumulator += timing.dt;
+		//Accumulate for fixed updates (use scaled time)
+		accumulator += scaledDt;  // Changed from timing.dt
 
-			//Skip all other systems when window is not active
-			if (!services->get<Window::Window>()->getActive()) {
-				services->get<Window::Window>()->swapBuffers();
-				continue;
-			}
+		//Skip all other systems when window is not active
+		if (!services->get<Window::Window>()->getActive()) {
+			services->get<Window::Window>()->swapBuffers();
+			continue;
+		}
 
-
-			//Update fixed delta
-			int steps = 0;
-			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
-
-
-				//Update all core systems
-				for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
-
-				//Update all layered systems
-				for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
-
-
-
-				accumulator -= timing.fixed_dt;
-				++steps;
-			}
-
-			//Update timing variables
-			timing.steps_this_frame = steps;
-			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+		//Update fixed delta
+		int steps = 0;
+		while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
 			//Update all core systems
-			for (auto& core : core_stack) core.lock()->onUpdate(timing);
+			for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
+			for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
 
-			//Swap buffer
-			services->get<Window::Window>()->swapBuffers();
+			accumulator -= timing.fixed_dt;
+			++steps;
+		}
 
-			//PN_CORE_INFO("LOOP");
-		};
-	}
+		//Update timing variables
+		timing.steps_this_frame = steps;
+		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
+		//Update all core systems
+		for (auto& core : core_stack) core.lock()->onUpdate(timing);
+
+		//Update all layered systems
+		for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
+
+		//Swap buffer
+		services->get<Window::Window>()->swapBuffers();
+	};
+}
+
 
 	void Application::terminate() {
 		b_app_running = false;
