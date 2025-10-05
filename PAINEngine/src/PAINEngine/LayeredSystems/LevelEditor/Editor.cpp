@@ -110,9 +110,8 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
 
             // Create ViewportPanel and register it in BOTH panels and services
-            auto viewportPanel = std::make_shared<Panel::ViewportPanel>();
-            registerPanel(viewportPanel);
-            services->set<Panel::ViewportPanel>(viewportPanel);
+            auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
+            registerPanel(viewport_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
