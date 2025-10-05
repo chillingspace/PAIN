@@ -150,9 +150,7 @@ PAIN/
 ├── PAINENGINE/                        
 │   ├── src/                   # All C++ source files (.cpp)
 │
-├── include/                    # Header files (.h)
-│   ├── components/             # Game component definitions
-│   └── systems/                # System interfaces         
+├── vendor/                    # All our depdencies     
 │
 ├── assets/                     # Game assets
 ├── android/                    # Android-specific project files
@@ -173,7 +171,7 @@ PAIN/
 
 ### Coding Conventions
 
-Our team follows strict naming conventions to maintain code consistency across 10 contributors.
+Our team follows strict naming conventions to maintain code consistency across 12 contributors.
 
 #### Naming Standards
 
