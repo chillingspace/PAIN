@@ -127,6 +127,7 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
 #else
+            // For now i do a copy in assets folder andriod
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
 #endif
 
@@ -138,7 +139,9 @@ namespace PAIN {
                     std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
                 }
 #else
-                // Have to use ASSSETmanager to copy over, so ill leave it as like this first
+                  // Android: Copy from assets using AAssetManager (implement later)
+                // For now, ImGui will create a default ini file automatically
+                PN_CORE_INFO("No existing imgui.ini found, ImGui will create default");
 
 #endif
            
