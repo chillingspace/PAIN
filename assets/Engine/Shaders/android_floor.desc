@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_floor",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081647
+  },
+  "created_timestamp": 1759660506758,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "2c3d8c2a-60ed-bb47-9746-c2d464ecdf1d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\android_floor.frag"
+  }
+}

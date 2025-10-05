@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "ogre",
+    "type": "Model"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081875
+  },
+  "created_timestamp": 1759661446454,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "dbd90482-72a3-3848-9dce-4f776f29232a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Models\\ogre.obj"
+  }
+}

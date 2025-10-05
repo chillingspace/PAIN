@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_texture",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081650
+  },
+  "created_timestamp": 1759660506826,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "1094eab1-86cd-424d-bdf2-1366ac0c71e5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\android_texture.frag"
+  }
+}

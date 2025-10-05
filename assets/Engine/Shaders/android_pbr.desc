@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_pbr",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081648
+  },
+  "created_timestamp": 1759660506794,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "bfa338f3-e0dd-b14d-bc9b-543854fa4ab3",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\android_pbr.frag"
+  }
+}

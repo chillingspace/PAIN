@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_shadow",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404120081649
+  },
+  "created_timestamp": 1759660506810,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "07a6de86-7fb2-f94d-b599-8f05a699865a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\android_shadow.frag"
+  }
+}

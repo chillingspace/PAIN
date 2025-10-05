@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "glslangValidator",
+    "type": "Other"
+  },
+  "build_data": {
+    "raw_last_modified": 13404134094358
+  },
+  "created_timestamp": 1759660506735,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "26c2386c-fcae-9c4b-984c-1c93965b9dfd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Others\\glslangValidator.exe"
+  }
+}

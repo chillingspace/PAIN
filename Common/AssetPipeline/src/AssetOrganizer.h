@@ -13,8 +13,8 @@
 #include <memory>
 
 //Include asset compiler
-#include "AssetCompiler.h"
 #include "AssetTypes.h"
+#include "AssetCompiler.h"
 
 namespace PAIN {
     namespace Assets {
@@ -27,7 +27,6 @@ namespace PAIN {
             std::unique_ptr<Compiler> compiler;
 
             //Assets info for sorting
-            std::unordered_map<std::filesystem::path, GUID> guid_cache;
             std::vector<Info> assets;
 
             //Assets root path

@@ -24,6 +24,12 @@ namespace PAIN {
 				// Provide texture from renderer
 				void setRenderTexture(ImTextureID texID, int width, int height);
 
+				// Get time scale for simulation (0.0 when paused, 1.0 when playing)
+				float getTimeScale() const;
+
+				// Set simulation state programmatically (true = paused, false = playing)
+				void setSimulationState(bool paused) { isSimulationPaused = paused; }
+
 				bool isFocused = false;        // window focus (incl. children)
 				bool contentHovered = false;   // mouse over the image area
 				bool wantsInput() const { return isFocused || contentHovered; }
@@ -32,7 +38,8 @@ namespace PAIN {
 				ImTextureID renderTexture;
 				int texWidth;
 				int texHeight;
-				bool isPaused;  // Added: tracks play/pause state
+				bool isInputPaused;           // Controls input forwarding
+				bool isSimulationPaused; // Controls scene simulation
 			};
 
 		} // namespace Panel

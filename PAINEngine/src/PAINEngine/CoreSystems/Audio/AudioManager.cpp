@@ -181,6 +181,20 @@ void AudioManager::StopAllChannels() {
     }
 }
 
+void AudioManager::PauseChannel(int channelId) {
+    auto it = m_channels.find(channelId);
+    if (it != m_channels.end() && it->second) {
+        it->second->setPaused(true);
+    }
+}
+
+void AudioManager::ResumeChannel(int channelId) {
+    auto it = m_channels.find(channelId);
+    if (it != m_channels.end() && it->second) {
+        it->second->setPaused(false);
+    }
+}
+
 void AudioManager::SetChannelVolume(int channelId, float volumeDb) {
     auto it = m_channels.find(channelId);
     if (it != m_channels.end() && it->second) {
