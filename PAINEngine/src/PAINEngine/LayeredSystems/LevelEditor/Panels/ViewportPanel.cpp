@@ -8,7 +8,7 @@ namespace PAIN {
 		namespace Panel {
 
 			ViewportPanel::ViewportPanel()
-				: renderTexture(0), texWidth(0), texHeight(0)
+				: renderTexture(0), texWidth(0), texHeight(0), isPaused(true) // Start paused by default
 			{
 				name = "##ViewportPanel";
 
@@ -35,11 +35,40 @@ namespace PAIN {
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 
-				ImVec2 initialSize(800, 600);
+				// Larger initial size (was 800x600, now 1280x720)
+				ImVec2 initialSize(1280, 720);
 				ImGui::SetNextWindowSize(initialSize, ImGuiCond_FirstUseEver);
 
 				// Begin viewport window
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+
+					// Toolbar with Play/Pause buttons
+					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
+					{
+						// Play button
+						if (ImGui::Button("Play")) {
+							isPaused = false;
+						}
+
+						ImGui::SameLine();
+
+						// Pause button
+						if (ImGui::Button("Pause")) {
+							isPaused = true;
+							// Clear input state when pausing
+							if (auto renderer = services->get<RendererLayer>()) {
+								renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
+								renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
+								renderer->mouseButtonDown = false;
+								renderer->xOffset = renderer->yOffset = 0.0f;
+							}
+						}
+
+						ImGui::SameLine();
+						ImGui::Text(isPaused ? "| Status: Paused" : "| Status: Playing");
+					}
+					ImGui::EndChild();
+
 					ImVec2 avail = ImGui::GetContentRegionAvail();
 
 					// Maintain aspect ratio
@@ -47,7 +76,8 @@ namespace PAIN {
 					ImVec2 size = avail;
 					if (size.x / size.y > aspect) {
 						size.x = size.y * aspect;
-					} else {
+					}
+					else {
 						size.y = size.x / aspect;
 					}
 
@@ -58,14 +88,11 @@ namespace PAIN {
 						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
-					// Forward input only when the viewport wants it
-					if (wantsInput()) {
+					// Forward input only when NOT paused AND the viewport wants it
+					if (!isPaused && wantsInput()) {
 						ImGuiIO& io = ImGui::GetIO();
 
-						// Get your RendererLayer however you access services.
-						// If your Panel base provides `services`, use it. Otherwise,
-						// expose a getter on Editor to reach RendererLayer.
-						auto renderer = services->get<RendererLayer>(); // adjust if needed
+						auto renderer = services->get<RendererLayer>();
 						if (renderer) {
 							// Keyboard
 							renderer->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
@@ -75,11 +102,10 @@ namespace PAIN {
 							renderer->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
 							renderer->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
-
 							// Mouse (LMB drag rotates in your code)
 							renderer->mouseButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
 
-							// Provide per-frame mouse movement (your RendererLayer consumes xOffset/yOffset and then resets)
+							// Provide per-frame mouse movement
 							if (renderer->mouseButtonDown) {
 								renderer->xOffset = io.MouseDelta.x;
 								renderer->yOffset = io.MouseDelta.y;
@@ -87,14 +113,13 @@ namespace PAIN {
 						}
 					}
 					else {
-						// When viewport loses focus/hover, ensure keys don’t “stick”
+						// When viewport loses focus/hover OR is paused, ensure keys don't "stick"
 						if (auto renderer = services->get<RendererLayer>()) {
 							renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
 							renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
 							renderer->mouseButtonDown = false;
 						}
 					}
-
 
 				}
 				ImGui::End();

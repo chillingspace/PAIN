@@ -17,7 +17,6 @@ namespace PAIN {
 
 				void nextWindowSettings() override;
 
-
 				void onAttach() override;
 
 				void onUpdate(AppTiming timing) override;
@@ -25,16 +24,15 @@ namespace PAIN {
 				// Provide texture from renderer
 				void setRenderTexture(ImTextureID texID, int width, int height);
 
-				//ImVec2 getViewportSize();
-
 				bool isFocused = false;        // window focus (incl. children)
 				bool contentHovered = false;   // mouse over the image area
 				bool wantsInput() const { return isFocused || contentHovered; }
 
 			private:
 				ImTextureID renderTexture;
-				int texWidth = 0;
-				int texHeight = 0;
+				int texWidth;
+				int texHeight;
+				bool isPaused;  // Added: tracks play/pause state
 			};
 
 		} // namespace Panel
