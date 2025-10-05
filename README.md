@@ -109,6 +109,10 @@ git config submodule.recurse true
 ### Building for Windows
 
 ```bash
+
+# In the directory of the build.bat script, run this command first before running build.bat
+git submodule update --init --recursive
+
 # Run the automated build script
 build.bat
 
