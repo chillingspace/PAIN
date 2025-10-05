@@ -150,7 +150,9 @@ namespace PAIN {
         static std::string toLowerCase(std::string const& string) {
             std::string new_string;
             for (auto c : string) {
-                new_string += __ascii_tolower(c);
+                //new_string += __ascii_tolower(c);
+                new_string += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
             }
             return new_string;
         }
