@@ -5,6 +5,8 @@
 
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Command.h"
+#include "CoreSystems/Serialization/sSerialization.h"
+
 #ifdef _DEBUG
 
 namespace PAIN {

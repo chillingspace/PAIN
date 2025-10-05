@@ -414,7 +414,8 @@ namespace PAIN {
                     }
                 }
             }
-
+            PN_CORE_INFO("[Serialization] loadSceneFromFile OK, marking scene changed");
+            markSceneChanged();
             return true;
         }
 
@@ -719,5 +720,15 @@ namespace PAIN {
                     doc_.mask_matrix[i][i] = false;
             }
         }
+
+        void Service::markSceneChanged() {
+            scene_changed_.store(true, std::memory_order_relaxed);
+        }
+
+        bool Service::consumeSceneChanged() {
+            // atomically read+clear
+            return scene_changed_.exchange(false, std::memory_order_relaxed);
+        }
+
     }
 }

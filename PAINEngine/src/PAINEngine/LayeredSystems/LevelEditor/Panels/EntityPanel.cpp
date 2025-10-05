@@ -278,6 +278,20 @@ namespace PAIN {
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
 
+                // Detect if a scene was just loaded
+                auto ser = services->get<Serialization::Service>();
+                bool sceneChanged = ser && ser->consumeSceneChanged();
+                if (sceneChanged) {
+                    // Clear selection and force a rebuild next frame
+                    selected_entity = ECS::Entity::INVALID;  // or call unselectEntity()
+                    selectedEntityIndex = -1;
+                    editor_entities.clear();
+                    total_entities = 0;                     
+                    // forces rebuild
+                    b_entity_changed = true;
+                    PN_CORE_INFO("[EntityPanel] Scene changed detected — list reset");
+                }
+
                 // Update entity list
                 auto ecs = services->get<ECS::Controller>();
                 auto scene = services->get<Scene>();

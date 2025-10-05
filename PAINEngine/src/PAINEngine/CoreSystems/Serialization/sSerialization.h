@@ -64,6 +64,11 @@ namespace PAIN {
             void onEvent(Event::Event& e) override {}
             void modifyScene() { isModifiedScene = true; }
 
+            // Tell listeners (like the EntityPanel) that the scene graph changed.
+            void markSceneChanged();
+            // Returns true the first time after a change, then clears the flag.
+            bool consumeSceneChanged();
+
             // File helpers
             bool saveJsonFile(const std::string& file_path, const nlohmann::json& data);
             nlohmann::json loadJsonFile(const std::string& file_path);
@@ -103,6 +108,10 @@ namespace PAIN {
             // helpers to convert 
             nlohmann::json to_json_from_doc_() const;
             void           doc_from_json_(const nlohmann::json& j);
+
+            // Using atomic bool here for thread safety
+            std::atomic<bool> scene_changed_{ false };
+
         };
 
         // ----------------------------------------
