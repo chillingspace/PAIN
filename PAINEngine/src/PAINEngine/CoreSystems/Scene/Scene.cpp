@@ -1,7 +1,7 @@
 #include "Scene.h"
 #include "CoreSystems/Path/Path.h"
 #include "ECS/Controller.h"
-#include "ECS/Components/cMetaData.h"
+#include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 
