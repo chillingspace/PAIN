@@ -31,6 +31,9 @@ namespace PAIN {
 			//Shipped asset tolerence
 			const uint64_t TOLERANCE_MS = 2000;
 
+			//Get current time
+			uint64_t getCurrentTimeStamp() const;
+
 			//Verify directory
 			bool verifyDirectory(std::filesystem::path const& dest) const;
 
@@ -50,8 +53,15 @@ namespace PAIN {
 			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
 
 			//Compile and ship
-			//void compileAndShip(Descriptor const& )
+			void compileAndShip(Descriptor const& desc_file, Info& asset_info) const;
 
+			//Internal asset compilers
+			void compileTexture(Descriptor const& desc_file, Info& asset_info) const;
+			void compileAudio(Descriptor const& desc_file, Info& asset_info) const;
+			void compileModel(Descriptor const& desc_file, Info& asset_info) const;
+			std::string GetCuttlefishExecutable() const;
+			bool CompressTextureDDS(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 		public:
 
 			//Default compiler

@@ -70,6 +70,7 @@ if(TARGET assimp::assimp AND NOT ANDROID)
     message(STATUS "AssetPipeline: Assimp enabled - 3D model import available")
 endif()
 
+# Asset processing dependencies - Only for host platforms (not Android runtime)
 if(TARGET stb AND NOT ANDROID)
     target_link_libraries(PAINAssetPipeline PRIVATE stb)
     target_compile_definitions(PAINAssetPipeline PRIVATE 

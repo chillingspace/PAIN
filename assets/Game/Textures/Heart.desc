@@ -6,12 +6,12 @@
   "build_data": {
     "raw_last_modified": 13404120081879
   },
-  "created_timestamp": 1759661490063,
+  "created_timestamp": 1759662418480,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "b92540e7-399e-334d-81a5-45fb1200fb15",
+  "guid": "82ab1865-2a9c-9841-86fc-01fa09481fcb",
   "import_settings": {
-    "android_compression": "ASTC",
+    "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
     "max_size": 1024,
     "srgb": true,

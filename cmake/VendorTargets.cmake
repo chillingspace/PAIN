@@ -162,17 +162,48 @@ elseif(ANDROID)
   target_link_libraries(FMOD::core INTERFACE log android)
 endif()
 
-# ======================= STB (Image Loading) Vendor  =========================
+# ======================= STB (Image Loading & Resize) =========================
 
-# STB is header-only, but we need to avoid symbol conflicts with assimp
+# Create STB implementation library
+add_library(stb_implementation STATIC
+    "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp"
+)
+
+target_include_directories(stb_implementation PUBLIC "${VENDOR_DIR}/stb")
+
+# Create interface library for headers
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE "${VENDOR_DIR}/stb")
+target_link_libraries(stb INTERFACE stb_implementation)
 
-# Important: Define STB_IMAGE_IMPLEMENTATION only in one compilation unit
-# This will be handled in the AssetPipeline source files
-target_compile_definitions(stb INTERFACE 
-    STB_AVAILABLE=1
-)
+message(STATUS "STB configured with image loading, resize, and write support")
+
+
+# ======================= Cuttlefish (Texture Compression) Vendor  =========================
+
+if (WIN32 AND NOT ANDROID)
+    # Check if cuttlefish executable exists
+    find_program(CUTTLEFISH_EXECUTABLE 
+        NAMES cuttlefish cuttlefish.exe
+        PATHS 
+            "${VENDOR_DIR}/cuttlefish/bin"
+            "${VENDOR_DIR}/cuttlefish"
+            ENV PATH
+        DOC "Cuttlefish texture compression tool"
+    )
+    
+    if(CUTTLEFISH_EXECUTABLE)
+        # Create interface target that provides the executable path
+        add_library(Cuttlefish::Cuttlefish INTERFACE IMPORTED GLOBAL)
+        set_target_properties(Cuttlefish::Cuttlefish PROPERTIES
+            INTERFACE_COMPILE_DEFINITIONS "CUTTLEFISH_EXECUTABLE=\"${CUTTLEFISH_EXECUTABLE}\""
+        )
+        message(STATUS "Cuttlefish found: ${CUTTLEFISH_EXECUTABLE}")
+    else()
+        message(STATUS "Cuttlefish not found - BC/ASTC compression will be disabled")
+    endif()
+endif()
+
 
 # ======================= Assimp Vendor  =========================
 if (WIN32 AND NOT ANDROID)

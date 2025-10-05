@@ -53,6 +53,7 @@ namespace PAIN {
         }
 
         void AssetOrganizer::instantiateFolder(std::filesystem::path const& path) const {
+
             if (!std::filesystem::exists(path)) {
                 try {
                     std::filesystem::create_directories(path);
@@ -68,7 +69,7 @@ namespace PAIN {
                     std::filesystem::rename(temp, path);
                 }
                 catch (const std::exception& e) {
-                    std::cout << "Folder rename failed. Unable to ensure correct folder convention." << std::endl;
+                    std::cout << "Folder rename failed. Unable to ensure correct folder convention." << e.what() << std::endl;
                 }
             }
         }
