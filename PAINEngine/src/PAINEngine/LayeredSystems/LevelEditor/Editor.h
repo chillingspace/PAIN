@@ -61,6 +61,9 @@ namespace PAIN {
             //Platform editor
             std::shared_ptr<EditorPlatform> platform;
 
+            // Imgui ini file path
+            std::string m_imgui_ini_path;
+
             template<typename T>
             void registerPanel(std::shared_ptr<T> panel);
 
