@@ -46,49 +46,49 @@ namespace PAIN {
 				// Begin viewport window
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-					// Toolbar with Play/Pause buttons
-					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
-					{
-						// Simulation controls
-						if (ImGui::Button("Play Scene")) {
-							isSimulationPaused = false;
-						}
+					//// Toolbar with Play/Pause buttons
+					//ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
+					//{
+					//	// Simulation controls
+					//	if (ImGui::Button("Play Scene")) {
+					//		isSimulationPaused = false;
+					//	}
 
-						ImGui::SameLine();
+					//	ImGui::SameLine();
 
-						if (ImGui::Button("Pause Scene")) {
-							isSimulationPaused = true;
-						}
+					//	if (ImGui::Button("Pause Scene")) {
+					//		isSimulationPaused = true;
+					//	}
 
-						ImGui::SameLine();
-						ImGui::Text(isSimulationPaused ? "| Scene: Paused" : "| Scene: Playing");
+					//	ImGui::SameLine();
+					//	//ImGui::Text(isSimulationPaused ? "| Scene: Paused" : "| Scene: Playing");
 
-						ImGui::SameLine();
-						ImGui::Text("  ");  // Spacer
+					//	ImGui::SameLine();
+					//	ImGui::Text("  ");  // Spacer
 
-						// Input controls
-						ImGui::SameLine();
-						if (ImGui::Button("Enable Input")) {
-							isInputPaused = false;
-						}
+					//	// Input controls
+					//	ImGui::SameLine();
+					//	if (ImGui::Button("Enable Input")) {
+					//		isInputPaused = false;
+					//	}
 
-						ImGui::SameLine();
+					//	ImGui::SameLine();
 
-						if (ImGui::Button("Disable Input")) {
-							isInputPaused = true;
-							// Clear input state when disabling input
-							if (auto renderer = services->get<RendererLayer>()) {
-								renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
-								renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
-								renderer->mouseButtonDown = false;
-								renderer->xOffset = renderer->yOffset = 0.0f;
-							}
-						}
+					//	if (ImGui::Button("Disable Input")) {
+					//		isInputPaused = true;
+					//		// Clear input state when disabling input
+					//		if (auto renderer = services->get<RendererLayer>()) {
+					//			renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
+					//			renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
+					//			renderer->mouseButtonDown = false;
+					//			renderer->xOffset = renderer->yOffset = 0.0f;
+					//		}
+					//	}
 
-						ImGui::SameLine();
-						ImGui::Text(isInputPaused ? "| Input: Disabled" : "| Input: Enabled");
-					}
-					ImGui::EndChild();
+					//	ImGui::SameLine();
+					//	ImGui::Text(isInputPaused ? "| Input: Disabled" : "| Input: Enabled");
+					//}
+					//ImGui::EndChild();
 
 					ImVec2 avail = ImGui::GetContentRegionAvail();
 
@@ -110,7 +110,7 @@ namespace PAIN {
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
 					// Forward input only when NOT paused AND the viewport wants it
-					if (!isInputPaused && wantsInput()) {
+					if (wantsInput()) {
 						ImGuiIO& io = ImGui::GetIO();
 
 						auto renderer = services->get<RendererLayer>();
