@@ -468,10 +468,10 @@ namespace PAIN {
 		LightSources::get().create("c");
 		auto olc = LightSources::get().get("c");
 		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 3.f, 2.f);
+		lc.position = glm::vec3(0.f, 3.f, 0.f);
 		lc.L_intensity = glm::vec3(0.1f);
 		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.target = -lc.position;				// origin. required for shadows
+		//lc.forward = -lc.position;
 	}
 
 

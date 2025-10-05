@@ -74,7 +74,7 @@ namespace PAIN {
 		glm::vec3 L_intensity = glm::vec3(0.1f);
 
 		// not required for point lights
-		glm::vec3 target{};
+		glm::vec3 forward{0 , -1, 0};
 		float fov{ 60.f };
 
 		// dont touch these values unless you know what youre doing
@@ -83,10 +83,17 @@ namespace PAIN {
 		float far_plane{ 100.f };		// furthest distance light can see
 
 		glm::mat4 view() const {
+			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
+
+			// forward is parallel to up, use a different up vector
+			if (glm::abs(glm::dot(glm::normalize(forward), up_vec)) > 0.99f) {
+				up_vec = glm::vec3(0.f, 0.f, 1.f);  // Use Z-axis as up instead
+			}
+
 			return glm::lookAt(
 				position,
-				position + glm::normalize(target),
-				glm::vec3(0.f, 1.f, 0.f)
+				position + glm::normalize(forward),
+				up_vec
 			);
 		}
 
