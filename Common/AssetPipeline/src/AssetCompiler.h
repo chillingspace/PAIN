@@ -61,6 +61,8 @@ namespace PAIN {
 			void compileModel(Descriptor const& desc_file, Info& asset_info) const;
 			std::string GetCuttlefishExecutable() const;
 			bool CompressTextureDDS(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+			std::string GetASTCEncoderExecutable() const;
+			std::string ConvertToASTCBlockSize(const std::string& format) const;
 			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 		public:
 

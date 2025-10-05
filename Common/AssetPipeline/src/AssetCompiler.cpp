@@ -398,7 +398,6 @@ namespace PAIN {
                 return cuttle_fish_path.string();
             }
         
-
             std::cout << "WARNING: Cuttlefish executable not found!" << std::endl;
             return "cuttlefish"; // Fallback
         }
@@ -459,42 +458,94 @@ namespace PAIN {
             }
         }
 
+        std::string Compiler::GetASTCEncoderExecutable() const {
+
+            // Try optimized versions in order of performance
+            std::vector<std::filesystem::path> possible_paths = {
+                assets_root.parent_path() / "vendor/astc-encoder/astcenc-avx2.exe",
+                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse4.1.exe",
+                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse2.exe"
+            };
+
+            for (const auto& path : possible_paths) {
+                if (std::filesystem::exists(path)) {
+                    std::cout << "Found ASTC encoder: " << path << std::endl;
+                    return path.string();
+                }
+            }
+
+            std::cout << "WARNING: ASTC encoder (astcenc) not found!" << std::endl;
+            return "astcenc-avx2.exe"; // Fallback
+        }
+
+        std::string Compiler::ConvertToASTCBlockSize(const std::string& format) const {
+            // Convert format like "ASTC_4x4" to "4x4" for astcenc
+            if (format.find("ASTC_") == 0) {
+                return format.substr(5); // Remove "ASTC_" prefix
+            }
+
+            // Default mappings
+            if (format == "ASTC_4x4") return "4x4";
+            if (format == "ASTC_6x6") return "6x6";
+            if (format == "ASTC_8x8") return "8x8";
+
+            return "4x4"; // Default fallback
+        }
 
         bool Compiler::CompressTextureASTC(unsigned char* pixels, int width, int height, int channels,
             const std::string& output_path, const std::string& format,
             const nlohmann::json& settings) const {
             try {
-                // Build cuttlefish ASTC command
-                std::string cuttlefish_cmd = "cuttlefish";
-                cuttlefish_cmd += " -f " + format;          // ASTC_4x4, ASTC_6x6, etc.
-                cuttlefish_cmd += " -q " + settings.value("quality", "medium");
-                cuttlefish_cmd += " -o \"" + output_path + "\"";
-                cuttlefish_cmd += " -i rgba8";
-                cuttlefish_cmd += " -s " + std::to_string(width) + "x" + std::to_string(height);
+                // Get astcenc executable (ARM's ASTC Encoder)
+                std::string astcenc_exe = GetASTCEncoderExecutable();
 
-                // ASTC-specific options
-                if (settings.value("hdr", false)) {
-                    cuttlefish_cmd += " --hdr";
+                // Create temporary PNG input (astcenc works best with standard image formats)
+                std::string temp_input = "temp_astc_" + std::to_string(getCurrentTimeStamp()) + ".png";
+                if (!stbi_write_png(temp_input.c_str(), width, height, 4, pixels, width * 4)) {
+                    std::cout << "Failed to write temporary PNG for ASTC" << std::endl;
+                    return false;
                 }
 
-                // Create temporary raw input
-                std::string temp_input = "temp_astc_" + std::to_string(getCurrentTimeStamp()) + ".raw";
-                std::ofstream temp_file(temp_input, std::ios::binary);
-                temp_file.write(reinterpret_cast<char*>(pixels), width * height * channels);
-                temp_file.close();
+                // Build astcenc command with proper syntax
+                std::stringstream cmd;
 
-                cuttlefish_cmd += " \"" + temp_input + "\"";
+                // Windows system() double-quote wrapping
+                cmd << "\"";  // Start outer quotes for Windows
+                cmd << "\"" << astcenc_exe << "\"";  // Quoted executable path
 
-                std::cout << "Running ASTC: " << cuttlefish_cmd << std::endl;
-                int result = system(cuttlefish_cmd.c_str());
+                // astcenc syntax: astcenc -cl input.png output.astc block_size quality
+                cmd << " -cl";  // Compress LDR (Low Dynamic Range)
+                cmd << " \"" << temp_input << "\"";  // Input file
+                cmd << " \"" + output_path + "\"";   // Output file
+                cmd << " " << ConvertToASTCBlockSize(format);  // Block size (e.g., "4x4")
+                cmd << " -" << settings.value("quality", "medium");  // Quality: -fastest, -fast, -medium, -thorough, -exhaustive
 
-                // Clean up
+                // Additional ASTC options
+                if (settings.value("srgb", false)) {
+                    cmd << " -srgb";  // sRGB color space
+                }
+
+                cmd << "\"";  // End outer quotes for Windows
+
+                std::string final_command = cmd.str();
+                std::cout << "Running ASTC: " << final_command << std::endl;
+
+                int result = system(final_command.c_str());
+
+                // Clean up temp file
                 std::filesystem::remove(temp_input);
+
+                if (result == 0) {
+                    std::cout << "ASTC compression successful" << std::endl;
+                }
+                else {
+                    std::cout << "ASTC compression failed with code: " << result << std::endl;
+                }
 
                 return result == 0;
             }
             catch (const std::exception& e) {
-                std::cout << "Cuttlefish ASTC compression failed: " << e.what() << std::endl;
+                std::cout << "ASTC compression failed: " << e.what() << std::endl;
                 return false;
             }
         }
