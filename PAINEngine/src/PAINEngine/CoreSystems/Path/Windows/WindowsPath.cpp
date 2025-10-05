@@ -62,17 +62,17 @@ namespace PAIN {
             }
 
             //Get windows paths
-            game_path = normalizePath(std::filesystem::current_path().string());
+            out_path = normalizePath(std::filesystem::current_path().string());
             localdata_path = getKnownFolderPath(FOLDERID_LocalAppData);
             roamingdata_path = getKnownFolderPath(FOLDERID_RoamingAppData);
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
             //Register default virtual paths
-            registerVirtualPath("game", game_path);
+            registerVirtualPath("out", out_path);
 
             //Temp paths to be changed
-            registerVirtualPath("game_assets", game_path + "/assets" + relative_game_folder, true);
-            registerVirtualPath("engine_assets", game_path + "/assets" + relative_engine_folder, true);
+            registerVirtualPath("game_assets", out_path + "/assets/" + relative_game_folder, true);
+            registerVirtualPath("engine_assets", out_path + "/assets/" + relative_engine_folder, true);
             registerVirtualPath("local", localdata_path + "/" + app_name, true);
             registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
             registerVirtualPath("documents", documents_path + "/" + app_name, true);

@@ -29,8 +29,8 @@ namespace PAIN {
             try {
 
                 //Verify directory
-                if (!verifyDirectory(desc_path)) {
-                    std::cout << "Directory doesnt exist: " << desc_path << std::endl;
+                if (!verifyDirectory(dest)) {
+                    std::cout << "Directory doesnt exist: " << dest << std::endl;
                     return false;
                 }
 
@@ -83,7 +83,7 @@ namespace PAIN {
             return settings;
         }
 
-        Descriptor Compiler::createDefaultDesc(Info const& asset, std::filesystem::path const& desc_path) const {
+        Descriptor Compiler::createDefaultDesc(Info const& asset) const {
 
             //Default descriptor
             Descriptor desc;
@@ -95,9 +95,9 @@ namespace PAIN {
             return desc;
         }
 
-        Descriptor Compiler::readDescFile(Info const& asset, std::filesystem::path const& desc_path) const {
+        Descriptor Compiler::readDescFile(Info const& asset, std::filesystem::path const& path) const {
             try {
-                std::ifstream file(desc_path);
+                std::ifstream file(path);
                 nlohmann::json desc_json;
                 file >> desc_json;
 
@@ -112,16 +112,16 @@ namespace PAIN {
             }
             catch (const std::exception& e) {
                 std::cout << "Error encountered reading desc file, reverting to default." << std::endl;
-                return createDefaultDesc(asset, desc_path);
+                return createDefaultDesc(asset);
             }
         }
 
-        bool Compiler::saveDescFile(Descriptor const& desc_file, std::filesystem::path const& desc_path) const {
+        bool Compiler::saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const {
             //Save generated descriptor
             try {
                 //Verify directory
-                if (!verifyDirectory(desc_path)) {
-                    std::cout << "Directory doesnt exist: " << desc_path << std::endl;
+                if (!verifyDirectory(path)) {
+                    std::cout << "Directory doesnt exist: " << path << std::endl;
                     return false;
                 }
 
@@ -131,16 +131,16 @@ namespace PAIN {
                 desc_json["import_settings"] = desc_file.import_settings;
                 desc_json["raw_last_modified"] = desc_file.raw_last_modified;
 
-                std::ofstream file(desc_path, std::ios::out);
+                std::ofstream file(path, std::ios::out);
                 if (file << desc_json.dump(2)) {
-                    std::cout << "Descriptor file saved at: " << desc_path << std::endl;
+                    std::cout << "Descriptor file saved at: " << path << std::endl;
                     return true;
                 }
-                std::cout << "Error saving default desc file to: " << desc_path << std::endl;
+                std::cout << "Error saving default desc file to: " << path << std::endl;
                 return false;
             }
             catch (const std::exception& e) {
-                std::cout << "Error saving default desc file to: " << desc_path << std::endl;
+                std::cout << "Error saving default desc file to: " << path << std::endl;
                 return false;
             }
         }
@@ -152,7 +152,7 @@ namespace PAIN {
 
 				//Get descriptor file path for asset
 				std::string asset_name = asset_info.name.substr(0, asset_info.name.find_first_of("."));
-				auto asset_desc_path = desc_path / asset_info.relative_folder / (asset_name + desc_ext);
+				auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_name + desc_ext);
 
                 //Default desc obj
                 Descriptor desc_obj;
@@ -166,13 +166,13 @@ namespace PAIN {
                 else {
 
                     //Create a default desc file
-                    desc_obj = createDefaultDesc(asset_info, asset_desc_path);
+                    desc_obj = createDefaultDesc(asset_info);
                 }
 
                 //Compliation operation
 
                 //Save desc file
-                saveDescFile(desc_obj, asset_desc_path);
+                //saveDescFile(desc_obj, asset_desc_path);
 
                 //Update asset info
                 asset_info.guid = desc_obj.guid;

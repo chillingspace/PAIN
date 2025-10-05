@@ -32,16 +32,12 @@ namespace PAIN {
 
             //Assets root path
             std::filesystem::path assets_root;
-            std::filesystem::path raw_path;
-            std::filesystem::path desc_path;
 
             //Paths
             std::unordered_map<Type, std::filesystem::path> game_dir;
             std::unordered_map<Type, std::filesystem::path> engine_dir;
 
             //Folder names
-            std::filesystem::path raw_folder;
-            std::filesystem::path desc_folder;
             std::filesystem::path game_folder;
             std::filesystem::path engine_folder;
 

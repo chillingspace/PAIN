@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AssetTypes.h"
+
 #ifndef PATH_HPP
 #define PATH_HPP
 
@@ -14,8 +16,8 @@ namespace PAIN {
 			std::unordered_map<std::string, std::string> virtual_paths;
 
 			//Game folder relative to asset
-			std::string relative_game_folder = "/Raw/Game";
-			std::string relative_engine_folder = "/Raw/Engine";
+			std::string relative_game_folder = Assets::game_assets_folder.string();
+			std::string relative_engine_folder = Assets::engine_assets_folder.string();
 
 			//Parsing virtual functions
 			std::pair<std::string, std::string> parseVirtualPath(const std::string& virtualPath) const {

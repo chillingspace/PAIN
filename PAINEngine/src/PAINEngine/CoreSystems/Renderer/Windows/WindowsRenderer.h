@@ -39,18 +39,11 @@ namespace PAIN {
 	static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
 	class WindowsRenderer {
-	private:
+	public:
 		WindowsRenderer();
 		~WindowsRenderer();
 
-	public:
-
-		static WindowsRenderer& get() {
-			static WindowsRenderer instance;
-			return instance;
-		}
-
-		void Init();
+		void Init(std::shared_ptr<Services> app_services);
 
 		void BeginRendering(std::shared_ptr<Scene> scene);
 		void EndRendering(std::shared_ptr<Scene> scene);
@@ -117,6 +110,11 @@ namespace PAIN {
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
 		std::unique_ptr<Shader> shadow_shader = nullptr;
+
+		std::shared_ptr<Services> services;
+
+		std::string ReadFile(const std::filesystem::path& path);
+		std::unique_ptr<Shader> LoadShaders(const std::string& vert_file, const std::string& frag_file);
 
 		/**
 		 * .

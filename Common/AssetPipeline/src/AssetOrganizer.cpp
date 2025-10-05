@@ -85,14 +85,14 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = raw_path / dir_path / asset.name;
+                    auto target = assets_root / dir_path / asset.name;
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
                         //Update asset details
                         asset.raw_path = target;
-                        asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
+                        asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                     }
                 }
             }
@@ -104,14 +104,14 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = raw_path / dir_path / asset.name;
+                    auto target = assets_root / dir_path / asset.name;
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
                         //Update asset details
                         asset.raw_path = target;
-                        asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
+                        asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                     }
                 }
             }
@@ -129,14 +129,14 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = raw_path / dir_path / asset.name;
+                    auto target = assets_root / dir_path / asset.name;
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
                         //Update asset details
                         asset.raw_path = target;
-                        asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
+                        asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                     }
                 }
             }
@@ -149,14 +149,14 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = raw_path / dir_path / asset.name;
+                    auto target = assets_root / dir_path / asset.name;
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
                         //Update asset details
                         asset.raw_path = target;
-                        asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
+                        asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                     }
                 }
             }
@@ -192,8 +192,6 @@ namespace PAIN {
             extensions = Assets::getAllExtensions();
 
             //Set all folders
-            raw_folder = Assets::raw_assets_folder;
-            desc_folder = Assets::desc_assets_folder;
             game_folder = Assets::game_assets_folder;
             engine_folder = Assets::engine_assets_folder;
 
@@ -203,12 +201,8 @@ namespace PAIN {
             //Set all engine folders
             engine_dir = Assets::getAllEngineFolders();
 
-            //Setup raw & desc path
-            raw_path = assets_root / raw_folder;
-            desc_path = assets_root / desc_folder;
-
             //Create compiler
-            compiler = std::make_unique<Compiler>(desc_path);
+            compiler = std::make_unique<Compiler>(assets_root);
         }
 
         void AssetOrganizer::initGameFolders(Type type, std::string const& folder) {
@@ -222,25 +216,14 @@ namespace PAIN {
         void AssetOrganizer::enforceStandardStructure() {
 
             //Ensure creation of base folders
-            instantiateFolder(raw_path);
-            instantiateFolder(desc_path);
-            instantiateFolder(raw_path / game_folder);
-            instantiateFolder(raw_path / engine_folder);
-            instantiateFolder(desc_path / game_folder);
-            instantiateFolder(desc_path / engine_folder);
+            instantiateFolder(assets_root / game_folder);
+            instantiateFolder(assets_root / engine_folder);
 
             //Ensure standard structure for game directory
             for (const auto& dir : game_dir) {
 
                 //Ensure raw directory exists
-                std::filesystem::path fullPath = raw_path / dir.second;
-                instantiateFolder(fullPath);
-
-                //Check if directory belongs to assets that is Compilable
-                if (!isAssetCompilable(dir.first)) continue;
-
-                //Ensure descriptor directory exists
-                fullPath = desc_path / dir.second;
+                std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
             }
 
@@ -248,14 +231,7 @@ namespace PAIN {
             for (const auto& dir : engine_dir) {
 
                 //Ensure raw directory exists
-                std::filesystem::path fullPath = raw_path / dir.second;
-                instantiateFolder(fullPath);
-
-                //Check if directory belongs to assets that is Compilable
-                if (!isAssetCompilable(dir.first)) continue;
-
-                //Ensure descriptor directory exists
-                fullPath = desc_path / dir.second;
+                std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
             }
         }
@@ -270,24 +246,16 @@ namespace PAIN {
             //Tidy up root directory
             for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
                 //Directory actions
-                if (entry.is_directory()) {
-                    if (entry.path().filename() != raw_folder || entry.path().filename() != desc_folder) {
-                        //Recursively handle all assets and delete directory
-                    }
-                }
-                if (entry.is_regular_file()) {
-                    //Handle files by placing them in correct directories
-                }
             }
 
             //Scan raw asset directory
-            recursiveScanAllDirectories(raw_path, [&](std::filesystem::path const& file) {
+            recursiveScanAllDirectories(assets_root, [&](std::filesystem::path const& file) {
 
                 //create asset info
                 Info asset;
                 asset.raw_path = file;
                 asset.name = asset.raw_path.filename().string();
-                asset.relative_folder = std::filesystem::relative(asset.raw_path, raw_path).parent_path();
+                asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                 asset.type = getAssetType(asset.raw_path);
                 asset.raw_last_modified = getFileLastModified(asset.raw_path);
 
@@ -321,34 +289,18 @@ namespace PAIN {
             //Tidy up additional directories
             for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
                 if (entry.is_directory()) {
-                    if (entry.path().filename() != raw_folder && entry.path().filename() != desc_folder) {
-                        deleteFile(entry.path());
-                    }
-                }
-            }
-
-            for (const auto& entry : std::filesystem::directory_iterator(raw_path)) {
-                if (entry.is_directory()) {
                     if (entry.path().filename() != game_folder && entry.path().filename() != engine_folder) {
                         deleteFile(entry.path());
                     }
                 }
             }
 
-            for (const auto& entry : std::filesystem::directory_iterator(desc_path)) {
-                if (entry.is_directory()) {
-                    if (entry.path().filename() != game_folder && entry.path().filename() != engine_folder) {
-                        deleteFile(entry.path());
-                    }
-                }
-            }
-
-            for (const auto& entry : std::filesystem::directory_iterator(raw_path / game_folder)) {
+            for (const auto& entry : std::filesystem::directory_iterator(assets_root / game_folder)) {
                 if (entry.is_directory()) {
 
                     bool b_found = false;
                     for (const auto& dir : game_dir) {
-                        if (raw_path / dir.second == entry.path()) {
+                        if (assets_root / dir.second == entry.path()) {
                             b_found = true;
                             break;
                         }
@@ -357,12 +309,12 @@ namespace PAIN {
                 }
             }
 
-            for (const auto& entry : std::filesystem::directory_iterator(raw_path / engine_folder)) {
+            for (const auto& entry : std::filesystem::directory_iterator(assets_root / engine_folder)) {
                 if (entry.is_directory()) {
 
                     bool b_found = false;
                     for (const auto& dir : engine_dir) {
-                        if (raw_path / dir.second == entry.path()) {
+                        if (assets_root / dir.second == entry.path()) {
                             b_found = true;
                             break;
                         }
