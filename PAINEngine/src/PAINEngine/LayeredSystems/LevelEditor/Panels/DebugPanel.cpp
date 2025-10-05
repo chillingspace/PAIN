@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "DebugPanel.h"
 #include "PAINEngine/Applications/Application.h"
-#include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+#include "PAINEngine/CoreSystems/Renderer/sRenderer.h"
 
 #ifdef _DEBUG
 

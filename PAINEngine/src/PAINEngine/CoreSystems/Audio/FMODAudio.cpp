@@ -328,6 +328,22 @@ namespace PAIN {
 			return toResult(it->second.ch->setPaused(false));
 		}
 
+		void FmodAudio::pauseAll()
+		{
+			for (auto& pair : impl_->groups) {
+				auto& g = pair.second;
+				if (g.cg) g.cg->setPaused(true);
+			}
+		}
+
+		void FmodAudio::resumeAll()
+		{
+			for (auto& pair : impl_->groups) {
+				auto& g = pair.second;
+				if (g.cg) g.cg->setPaused(false);
+			}
+		}
+
 		AudioResult FmodAudio::setVolumeDb(AudioChannelId chId, float db) {
 			if (!isValid(chId)) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);

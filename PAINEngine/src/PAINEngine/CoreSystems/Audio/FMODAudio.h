@@ -40,6 +40,8 @@ namespace PAIN {
             void        stopAll() override;
             AudioResult pauseChannel(AudioChannelId) override;
             AudioResult resumeChannel(AudioChannelId) override;
+            void        pauseAll() override;
+            void        resumeAll() override;
             AudioResult setVolumeDb(AudioChannelId, float) override;
             AudioResult setVolumeLinear(AudioChannelId, float) override;
             AudioResult setPosition(AudioChannelId, const glm::vec3&) override;

@@ -3,7 +3,7 @@
 
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
-#include "CoreSystems/Renderer/RendererLayer.h"
+#include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Audio/AudioManager.h"
 #include "CoreSystems/Scene/Scene.h"
@@ -100,7 +100,7 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 #endif
 
-		// Create and add the AudioManager to the core systems
+
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
 		services->get<Path::Path>()->logVirtualPaths();
@@ -154,7 +154,7 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Scene>());
 
 		// Renderer
-		addCoreSystem(std::make_shared<RendererLayer>());
+		addCoreSystem(std::make_shared<sRenderer>());
 
 
 		//Editor only added when debug mode
@@ -205,24 +205,19 @@ namespace PAIN {
 			);
 		}
 #endif
-		
-		// ===== ADD THIS BLOCK: Get time scale from ViewportPanel =====
+	
 #ifdef _DEBUG
-		float timeScale = 1.0f;
-		if (auto viewport = services->get<Editor::Panel::ViewportPanel>()) {
-			timeScale = viewport->getTimeScale();
+		if (services->get<Editor::Editor>()->isPaused()) {
+			timing.dt = 0.0f;
+			services->get<Audio::Audio>()->pauseAll();
 		}
-		
-		// Apply time scale to deltaTime for simulation
-		float scaledDt = timing.dt * timeScale;
-#else
-		// In release builds, no pause functionality
-		float scaledDt = timing.dt;
+		else {
+			services->get<Audio::Audio>()->resumeAll();
+		}
 #endif
-		// ============================================================
 
 		//Accumulate for fixed updates (use scaled time)
-		accumulator += scaledDt;  // Changed from timing.dt
+		accumulator += timing.dt;  // Changed from timing.dt
 
 		//Skip all other systems when window is not active
 		if (!services->get<Window::Window>()->getActive()) {

@@ -37,7 +37,10 @@ namespace PAIN {
 
             void onEvent(Event::Event& event) override;
             bool isVisible() const { return editor_visible; }
+            bool isPaused() const { return editor_paused; }
             void toggleVisible() { editor_visible = !editor_visible; }
+            void togglePause() { editor_paused = !editor_paused; }
+           
 
             // Template implementations must be in header or included .inl file
             template<typename T>
@@ -74,6 +77,7 @@ namespace PAIN {
             void buildDockspace();
 
             bool editor_visible = true;
+            bool editor_paused = false;
         };
     }
 } 

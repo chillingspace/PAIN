@@ -33,6 +33,7 @@ namespace PAIN {
 		}
 	};
 
+#ifdef _DEBUG
 	// UI Registration function
 	inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
 		panel.registerCompUIFunc<Transform>([](Editor::Panel::ComponentsPanel& comp_panel, Transform& transform) {
@@ -54,6 +55,7 @@ namespace PAIN {
 		});
 	}
 	
+#endif
 
 }
 

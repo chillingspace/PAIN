@@ -15,7 +15,7 @@
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
 
-#include "PAINEngine/CoreSystems/Renderer/RendererLayer.h"
+#include "PAINEngine/CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Path/Path.h"
 #include "PAINEngine/ECS/Controller.h"
 
@@ -249,12 +249,11 @@ namespace PAIN {
                 // Build docking space
                 buildDockspace();
 
-                auto renderer = services->get<RendererLayer>();
+                auto renderer = services->get<sRenderer>();
                 auto vp = panels->get<Panel::ViewportPanel>();
+
                 if (renderer && vp) {
-                    vp->setRenderTexture(renderer->getFramebufferTexture(),
-                        renderer->getFramebufferWidth(),
-                        renderer->getFramebufferHeight());
+                    vp->setRenderTexture(renderer->getFramebufferTexture(), renderer->getFramebufferWidth(), renderer->getFramebufferHeight());
                 }
 
                 // Iterate through all panels
