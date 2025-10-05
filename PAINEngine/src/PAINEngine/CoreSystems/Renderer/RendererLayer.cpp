@@ -188,7 +188,9 @@ namespace PAIN {
 				// look at origin
 				m_Scene->GetActiveCamera()->forward = -glm::normalize(m_Scene->GetActiveCamera()->pos);
 			}
-			else {
+
+		case NUM_MOVE_MODES:
+
 				static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 				if (W_KEYDOWN) {
 					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(m_Scene->GetActiveCamera()->forward, 1.f)) * m_Scene->GetActiveCamera()->speed * dt;
@@ -214,7 +216,7 @@ namespace PAIN {
 					glm::vec3 offset = m_Scene->GetActiveCamera()->up * m_Scene->GetActiveCamera()->speed * dt;
 					m_Scene->GetActiveCamera()->pos -= offset;
 				}
-			}
+			
 			break;
 		}
 
