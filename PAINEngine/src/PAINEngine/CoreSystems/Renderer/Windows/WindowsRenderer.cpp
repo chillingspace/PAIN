@@ -475,7 +475,7 @@ namespace PAIN {
 		Light& lc = olc.value();
 		lc.position = glm::vec3(0.f, 30.f, 0.f);
 		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-		lc.L_intensity = glm::vec3(2.f);
+		lc.L_intensity = glm::vec3(0.5f);
 		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 		lc.type = Light::TYPES::DIRECTIONAL;
 		//lc.far_plane = 200.f;
