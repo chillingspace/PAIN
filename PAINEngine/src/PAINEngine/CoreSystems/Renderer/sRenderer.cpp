@@ -235,7 +235,7 @@ namespace PAIN {
 		lcam.position = m_Scene->GetActiveCamera()->pos;
 		lcam.position.y += 0.1f;	// light on camera = grainy
 		lcam.fov = m_Scene->GetActiveCamera()->fov;
-		lcam.target = m_Scene->GetActiveCamera()->forward;
+		lcam.forward = m_Scene->GetActiveCamera()->forward;
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
 	}
 
