@@ -68,7 +68,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l;
     vec3 intensity = light.L;
     
-    if (light.type == 0.0) { 
+    if (int(light.type) == 0) { 
         // point lighting
         vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
         l = lightPositionInView - position;
@@ -76,7 +76,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
         l = normalize(l);
         intensity *= 100 / (dist * dist);
     }
-    else if (light.type == 1.0) {
+    else if (int(light.type) == 1) {
         // directional lighting
         l = normalize((u_V * vec4(light.position, 0.0)).xyz);
         // attenuation not required

@@ -87,8 +87,12 @@ namespace PAIN {
 
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
+#ifdef PN_PLATFORM_WINDOWS
 		float near_plane{ 0.1f };		// closest distance light can see
-		float far_plane{ 100.f };		// furthest distance light can see
+#else
+		float near_plane{ 1.f };
+#endif
+		float far_plane{ 50.f };		// furthest distance light can see
 
 		glm::mat4 view() const {
 			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
