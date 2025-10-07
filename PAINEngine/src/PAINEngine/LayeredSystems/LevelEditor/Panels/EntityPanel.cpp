@@ -289,7 +289,7 @@ namespace PAIN {
                     total_entities = 0;                     
                     // forces rebuild
                     b_entity_changed = true;
-                    PN_CORE_INFO("[EntityPanel] Scene changed detected — list reset");
+                    PN_CORE_INFO("[EntityPanel] Scene changed detected, list reset");
                 }
 
                 // Update entity list
