@@ -22,7 +22,7 @@ namespace PAIN {
 	Material material = {
 		0.1f,		// 0.1 -> smooth, 1 -> rough
 		0.3f,
-		{0.5f,0.5f,0.5f}
+		{1.f,0.f,0.f}
 	};
 
 	//Light light = {
@@ -332,6 +332,11 @@ namespace PAIN {
 				ss.str("");
 				ss.clear();
 
+				ss << "u_Lights[" << i << "].type";
+				pbr_shader->SetUniform(ss.str(), static_cast<float>(l.type));
+				ss.str("");
+				ss.clear();
+
 				if (LightSources::get().lightsOn) {
 					ss << "u_Lights[" << i << "].L";
 					pbr_shader->SetUniform(ss.str(), l.L_intensity);
@@ -468,9 +473,12 @@ namespace PAIN {
 		LightSources::get().create("c");
 		auto olc = LightSources::get().get("c");
 		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 3.f, 2.f);
-		lc.L_intensity = glm::vec3(0.1f);
+		lc.position = glm::vec3(0.f, 30.f, 0.f);
+		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
+		lc.L_intensity = glm::vec3(2.f);
 		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+		lc.type = Light::TYPES::DIRECTIONAL;
+		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 	}
 

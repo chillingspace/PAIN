@@ -14,6 +14,13 @@ namespace PAIN {
 			NUM_SHADOW_TYPES,
 		};
 
+		enum class TYPES {
+			POINT,
+			DIRECTIONAL,
+			SPOTLIGHT,
+			NUM_TYPES,
+		};
+
 	private:
 		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;
 		static int num_shadowmapped_lights;
@@ -72,9 +79,10 @@ namespace PAIN {
 
 		glm::vec3 position{};
 		glm::vec3 L_intensity = glm::vec3(0.1f);
+		TYPES type = TYPES::POINT;
 
 		// not required for point lights
-		glm::vec3 forward{0 , -1, 0};
+		glm::vec3 forward{0 , -1, 0};	// looking down by default
 		float fov{ 120.f };				// dont set larger values
 
 		// dont touch these values unless you know what youre doing
@@ -98,6 +106,14 @@ namespace PAIN {
 		}
 
 		glm::mat4 projection() const {
+			if (type == TYPES::DIRECTIONAL) {
+				float ortho_size = 50.0f;  // based on scene size
+				return glm::ortho(
+					-ortho_size, ortho_size,   // left, right
+					-ortho_size, ortho_size,   // bottom, top
+					near_plane, far_plane      // near, far
+				);
+			}
 			return glm::perspective(
 				glm::radians(fov),
 				aspect_ratio,
