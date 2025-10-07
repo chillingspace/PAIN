@@ -1,5 +1,7 @@
 #version 300 es
 precision highp float;
+precision highp int;
+precision highp sampler2D;
 
 #define PI 3.14159265359
 
@@ -18,6 +20,7 @@ struct Light {
     mat4 V;         // view mtx
     mat4 P;         // perspective mtx
     float shadowMapIdx;
+    float type;         // light type. 0 -> point, 1 -> dir, 2 -> spotlight(cone)
 };
 
 #define MAX_LIGHTS 16
@@ -34,6 +37,7 @@ uniform sampler2D gCol;
 uniform sampler2D gNorm;
 uniform sampler2D gMaterial;
 
+#define MAX_SHADOWMAPPED_LIGHTS 4
 uniform sampler2D u_ShadowMap0;
 uniform sampler2D u_ShadowMap1;
 uniform sampler2D u_ShadowMap2;
@@ -62,16 +66,26 @@ vec3 schlickFresnel(float lDotH) {
     return f0 + (1.0 - f0) * pow(1.0 - lDotH, 5.0);
 }
 
-vec3 microfacetModel(vec3 position, vec3 n, Light light) {  
+vec3 microfacetModel(vec3 position, vec3 n, Light light) {
+    vec3 l;
+    vec3 intensity = light.L;
+    
+    if (int(light.type) == 0) { 
+        // point lighting
+        vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
+        l = lightPositionInView - position;
+        float dist = length(l);
+        l = normalize(l);
+        intensity *= 100.0 / (dist * dist);
+    }
+    else if (int(light.type) == 1) {
+        // directional lighting
+        l = normalize((u_V * vec4(light.position, 0.0)).xyz);
+        // attenuation not required
+    }
+
+
     vec3 diffuseBrdf = material.color;
-
-    vec3 lightI = light.L;
-    vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
-
-    vec3 l = lightPositionInView - position;
-    float dist = length(l);
-    l = normalize(l);
-    lightI *= 100.0 / (dist * dist); // Intensity is normalized, so scale up by 100 first
 
     vec3 v = normalize(-position);
     vec3 h = normalize(v + l);
@@ -82,7 +96,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 specBrdf = 0.25 * ggxDistribution(nDotH) * schlickFresnel(lDotH) 
                             * geomSmith(nDotL) * geomSmith(nDotV);
 
-    return (diffuseBrdf + PI * specBrdf) * lightI * nDotL;
+    return (diffuseBrdf + PI * specBrdf) * intensity * nDotL;
 }
 
 float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light) {
@@ -98,10 +112,10 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     float shadow_map_depth;
     if (shadow_map_idx == 0) shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
-    if (shadow_map_idx == 1) shadow_map_depth = texture(u_ShadowMap1, projCoords.xy).r;
-    if (shadow_map_idx == 2) shadow_map_depth = texture(u_ShadowMap2, projCoords.xy).r;
-    if (shadow_map_idx == 3) shadow_map_depth = texture(u_ShadowMap3, projCoords.xy).r;
-
+    else if (shadow_map_idx == 1) shadow_map_depth = texture(u_ShadowMap1, projCoords.xy).r;
+    else if (shadow_map_idx == 2) shadow_map_depth = texture(u_ShadowMap2, projCoords.xy).r;
+    else if (shadow_map_idx == 3) shadow_map_depth = texture(u_ShadowMap3, projCoords.xy).r;
+    
     float frag_depth = projCoords.z;
     
     // If shadow map is empty (cleared to 1.0), no shadows
@@ -117,14 +131,14 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
-
+    
     ivec2 size;
     if (shadow_map_idx == 0) size = textureSize(u_ShadowMap0, 0);
     else if (shadow_map_idx == 1) size = textureSize(u_ShadowMap1, 0);
     else if (shadow_map_idx == 2) size = textureSize(u_ShadowMap2, 0);
     else if (shadow_map_idx == 3) size = textureSize(u_ShadowMap3, 0);
     vec2 texelSize = 1.0 / vec2(size);
-
+    
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
             float pcfDepth = 0.0;
@@ -132,7 +146,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
             else if (shadow_map_idx == 1) pcfDepth = texture(u_ShadowMap1, projCoords.xy + vec2(x, y) * texelSize).r;
             else if (shadow_map_idx == 2) pcfDepth = texture(u_ShadowMap2, projCoords.xy + vec2(x, y) * texelSize).r;
             else if (shadow_map_idx == 3) pcfDepth = texture(u_ShadowMap3, projCoords.xy + vec2(x, y) * texelSize).r;
-
+            
             // If shadow map is empty (no depth written), don't cast shadows
             if (pcfDepth >= 0.999) {
                 shadow += 0.0;  // No shadow from empty depth
