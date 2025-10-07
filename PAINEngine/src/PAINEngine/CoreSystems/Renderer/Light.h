@@ -107,7 +107,7 @@ namespace PAIN {
 
 		glm::mat4 projection() const {
 			if (type == TYPES::DIRECTIONAL) {
-				float ortho_size = 50.0f;  // based on scene size
+				float ortho_size = 20.f;  // based on scene size. lower values = sharper shadows
 				return glm::ortho(
 					-ortho_size, ortho_size,   // left, right
 					-ortho_size, ortho_size,   // bottom, top
