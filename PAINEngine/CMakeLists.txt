@@ -16,7 +16,9 @@ add_library(PAINEngine STATIC ${ENGINE_SRC})
 target_include_directories(PAINEngine
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/vendor/reflcpp
     ${CMAKE_SOURCE_DIR}/vendor/FileWatch
+    ${CMAKE_SOURCE_DIR}/vendor/nlohmann
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine
 )
@@ -33,7 +35,7 @@ target_precompile_headers(PAINEngine
 target_link_libraries(PAINEngine
     PRIVATE  
         glm
-        nlohmann_json
+	nlohmann_json
         imgui::imgui
         Jolt
         FMOD::core

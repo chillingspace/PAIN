@@ -4,14 +4,14 @@
     "type": "Shader"
   },
   "build_data": {
-    "raw_last_modified": 13404145557563
+    "raw_last_modified": 13405103572769
   },
-  "created_timestamp": 1759675749598,
+  "created_timestamp": 1760637981499,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "3d7b870f-3c9d-7942-b0b4-4c9c15c09254",
+  "guid": "cda2d133-049a-924e-9611-68a3cc153fe7",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_geometry.frag"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Shaders\\android_geometry.frag"
   }
 }

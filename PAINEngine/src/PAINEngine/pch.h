@@ -14,24 +14,24 @@
  *********************************************************************/
 #define CLASS_STR(T) #T //Convert Class To Str
 
- // add headers that you want to pre-compile here
+// add headers that you want to pre-compile here
 
-  /*****************************************************************//**
-  * Physics Library
-  *********************************************************************/
-  //#include "Jolt/Jolt.h"
-  //#include <Jolt/Core/Factory.h>          
-  //#include <Jolt/RegisterTypes.h>         
-  //#include <Jolt/Physics/PhysicsSystem.h> 
-  //#include <Jolt/Physics/Body/Body.h>     
-  //#include <Jolt/Core/TempAllocator.h>
-  //#include <Jolt/Core/JobSystemThreadPool.h> 
-  //#include <Jolt/Physics/Collision/ObjectLayer.h>
-  //#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+ /*****************************************************************//**
+ * Physics Library
+ *********************************************************************/
+//#include "Jolt/Jolt.h"
+//#include <Jolt/Core/Factory.h>          
+//#include <Jolt/RegisterTypes.h>         
+//#include <Jolt/Physics/PhysicsSystem.h> 
+//#include <Jolt/Physics/Body/Body.h>     
+//#include <Jolt/Core/TempAllocator.h>
+//#include <Jolt/Core/JobSystemThreadPool.h> 
+//#include <Jolt/Physics/Collision/ObjectLayer.h>
+//#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
-   /*****************************************************************//**
-   * Engine Specific Library
-   *********************************************************************/
+ /*****************************************************************//**
+ * Engine Specific Library
+ *********************************************************************/
 
 // key events
 #include "./Utility/KeyCodes.h"
@@ -89,9 +89,11 @@
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
-/*****************************************************************//**
-* STL
-*********************************************************************/
+#include "refl.hpp"
+
+ /*****************************************************************//**
+ * STL
+ *********************************************************************/
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -122,9 +124,9 @@ using json = nlohmann::json;
 #include <functional>
 #include <variant>
 
-/*****************************************************************//**
-* UTILITY
-*********************************************************************/
+ /*****************************************************************//**
+ * UTILITY
+ *********************************************************************/
 #include "Utility/Log.h"
 
 //Ban normal logging

@@ -9,17 +9,20 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Scene/Scene.h"
 
-//Command header
-#include "Command.h"
-
 //Panels headers
-//#include "Panels/Panels.h"
+#include "Panels/Panels.h"
 
 //Platform header
 #include "Platform/EditorPlatform.h"
 
 namespace PAIN {
     namespace Editor {
+
+        //Panels map
+        class PanelsMap : public Custom::ClassMap {
+        public:
+            PanelsMap() = default;
+        };
 
         //Editor
         class Editor : public AppSystem {
@@ -53,7 +56,7 @@ namespace PAIN {
         private:
 
             //Panels
-            //std::unordered_map<std::string, std::shared_ptr<Panel::IPanel>> panels;
+            std::shared_ptr<PanelsMap> panels;
 
             //Actions manager
             std::shared_ptr<CommandManager> command_manager;

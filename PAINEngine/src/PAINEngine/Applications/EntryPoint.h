@@ -2,19 +2,19 @@
 
 #ifdef PN_PLATFORM_WINDOWS
 
-extern PAIN::Application* PAIN::CreateApplication();
+	extern PAIN::Application* PAIN::CreateApplication();
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
-	//// Enable run-time memory check for debug builds.
-#if defined(DEBUG) | defined(_DEBUG)
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
+		//// Enable run-time memory check for debug builds.
+		#if defined(DEBUG) | defined(_DEBUG)
+				_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		#endif
 
-	auto game = PAIN::CreateApplication();
-	game->Init();
-	game->Run();
-	delete game;
-}
+		auto game = PAIN::CreateApplication();
+		game->Init();
+		game->Run();
+		delete game;
+	}
 
 #endif

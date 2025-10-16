@@ -4,14 +4,14 @@
     "type": "Audio"
   },
   "build_data": {
-    "raw_last_modified": 13404145557803
+    "raw_last_modified": 13405103572931
   },
-  "created_timestamp": 1759675749676,
+  "created_timestamp": 1760637981522,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "8d757f88-0ae6-e14e-b509-d623623d9c3a",
+  "guid": "7fe52af1-1944-0c49-a608-09cccec15b7a",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_03.wav"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_03.wav"
   }
 }

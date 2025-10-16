@@ -5,7 +5,6 @@
 
 #include "AppSystem.h"
 #include "PAINEngine/CoreSystems/Events/Event.h"
-//#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #include <memory>
 #include <vector>
@@ -17,8 +16,6 @@ namespace PAIN {
 	class Application
 	{
 	private:
-		// Application instance
-		//static Application* s_Instance;
 
 		//Boolean running app running
 		bool b_app_running = false;
@@ -44,11 +41,6 @@ namespace PAIN {
 		//Event queue
 		std::queue<std::shared_ptr<Event::Event>> event_queue;
 
-		// Direct pointer to the AudioManager
-		//std::shared_ptr<AudioManager> m_AudioManager;
-
-		//std::shared_ptr<Window::Window> app_window;
-
 		//Dispatch events to layers
 		void dispatchEventsForward(Event::Event& e);
 
@@ -72,14 +64,6 @@ namespace PAIN {
 
 		//Get application state
 		bool getAppState() const { return b_app_running; }
-
-		// Static getter to access the application and audio manager
-		//inline static Application& Get() { return *s_Instance; }
-		//inline AudioManager& GetAudioManager() { return *m_AudioManager; }
-
-		//inline Window::Window& GetWindow() { return *app_window; }
-		//inline const Window::Window& GetWindow() const { return *app_window; }
-		//inline std::shared_ptr<Window::Window> GetWindowPtr() const { return app_window; }
 	};
 
 	// Defined in client

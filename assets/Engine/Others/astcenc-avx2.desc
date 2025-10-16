@@ -4,14 +4,14 @@
     "type": "Other"
   },
   "build_data": {
-    "raw_last_modified": 13404145557523
+    "raw_last_modified": 13405103572728
   },
-  "created_timestamp": 1759675749578,
+  "created_timestamp": 1760637981491,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "8d21b9f6-8c26-ac41-849c-158d16fd1385",
+  "guid": "606c4789-bd6e-ad4d-b4df-f02ccf1ff406",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
   }
 }
