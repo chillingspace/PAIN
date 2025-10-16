@@ -4,7 +4,7 @@ endif()
 
 # ======================= Header Only Vendors  =========================
 add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE "${VENDOR_DIR}/glm")
+target_include_directories(glm INTERFACE "${VENDOR_DIR}")
 
 add_library(nlohmann_json INTERFACE)
 target_include_directories(nlohmann_json INTERFACE "${VENDOR_DIR}/nlohmann/include")
@@ -14,6 +14,10 @@ target_include_directories(spdlog_header_only INTERFACE "${VENDOR_DIR}/spdlog/in
 
 add_library(gl_headers INTERFACE)
 target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
+
+add_library(gli_headers INTERFACE)
+target_include_directories(gli_headers INTERFACE "${VENDOR_DIR}/gli")
+target_link_libraries(gli_headers INTERFACE glm) 
 
 # ======================= GLEW Vendor  =========================
 
@@ -150,4 +154,97 @@ elseif(ANDROID)
 
   # NDK system libs FMOD needs on Android
   target_link_libraries(FMOD::core INTERFACE log android)
+endif()
+
+# ======================= STB (Image Loading & Resize) =========================
+
+# Create STB implementation library
+add_library(stb_implementation STATIC
+    "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp"
+)
+
+target_include_directories(stb_implementation PUBLIC "${VENDOR_DIR}/stb")
+
+# Create interface library for headers
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE "${VENDOR_DIR}/stb")
+target_link_libraries(stb INTERFACE stb_implementation)
+
+message(STATUS "STB configured with image loading, resize, and write support")
+
+
+# ======================= Cuttlefish (Texture Compression) Vendor  =========================
+
+if (WIN32 AND NOT ANDROID)
+    # Check if cuttlefish executable exists
+    find_program(CUTTLEFISH_EXECUTABLE 
+        NAMES cuttlefish cuttlefish.exe
+        PATHS 
+            "${VENDOR_DIR}/cuttlefish/bin"
+            "${VENDOR_DIR}/cuttlefish"
+            ENV PATH
+        DOC "Cuttlefish texture compression tool"
+    )
+    
+    if(CUTTLEFISH_EXECUTABLE)
+        # Create interface target that provides the executable path
+        add_library(Cuttlefish::Cuttlefish INTERFACE IMPORTED GLOBAL)
+        set_target_properties(Cuttlefish::Cuttlefish PROPERTIES
+            INTERFACE_COMPILE_DEFINITIONS "CUTTLEFISH_EXECUTABLE=\"${CUTTLEFISH_EXECUTABLE}\""
+        )
+        message(STATUS "Cuttlefish found: ${CUTTLEFISH_EXECUTABLE}")
+    else()
+        message(STATUS "Cuttlefish not found - BC/ASTC compression will be disabled")
+    endif()
+endif()
+
+
+# ======================= Assimp Vendor  =========================
+if (WIN32 AND NOT ANDROID)
+    # Check if assimp exists as submodule or prebuilt
+    if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
+        # Build from source (recommended for asset pipeline)
+        
+        # Configure assimp options before adding subdirectory
+        set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+        
+        # Important: Disable assimp's embedded stb to avoid conflicts
+        set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL "" FORCE)
+        
+        # Add assimp subdirectory
+        add_subdirectory("${VENDOR_DIR}/assimp" "${CMAKE_BINARY_DIR}/vendor_assimp" EXCLUDE_FROM_ALL)
+        
+        # Set runtime library to match your project
+        set_property(TARGET assimp PROPERTY
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+            
+        # DON'T create alias - assimp already creates assimp::assimp for us!
+        # The alias is automatically created by assimp's CMakeLists.txt
+        
+        message(STATUS "Assimp built from source - assimp::assimp target available")
+        
+    elseif (EXISTS "${VENDOR_DIR}/assimp/lib")
+        # Use prebuilt libraries
+        add_library(assimp STATIC IMPORTED GLOBAL)
+        set_target_properties(assimp PROPERTIES
+            IMPORTED_LOCATION_DEBUG     "${VENDOR_DIR}/assimp/lib/assimp-vc142-mtd.lib"
+            IMPORTED_LOCATION_RELEASE   "${VENDOR_DIR}/assimp/lib/assimp-vc142-mt.lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/assimp/include"
+        )
+        
+        # Only create alias for prebuilt version
+        add_library(assimp::assimp ALIAS assimp)
+        message(STATUS "Assimp using prebuilt libraries - assimp::assimp alias created")
+        
+    else()
+        message(STATUS "Assimp not found - 3D model import will be disabled")
+    endif()
 endif()

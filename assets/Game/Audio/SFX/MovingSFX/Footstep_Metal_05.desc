@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "Footstep_Metal_05",
+    "type": "Audio"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557828
+  },
+  "created_timestamp": 1759675749719,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "e25f9049-a27d-a141-ad2a-61425337ea1f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Metal_05.wav"
+  }
+}

@@ -37,7 +37,6 @@ target_link_libraries(PAINEngine
         imgui::imgui
         Jolt
         FMOD::core
-
 )
 
 target_link_libraries(PAINEngine
@@ -45,6 +44,8 @@ target_link_libraries(PAINEngine
         spdlog_header_only
         FileWatch_header_only
         nlohmann_json
+	    reflcpp
+        gli_headers
 )
 
 # ImGui backends compiled into the engine
@@ -71,6 +72,26 @@ else()
     target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID IMGUI_IMPL_OPENGL_ES3=1)
 endif()
+
+#Asset Pipeline
+target_link_libraries(PAINEngine
+    PUBLIC
+        PAINAssetTypes        # Basic asset types for runtime
+    PRIVATE
+        # Hot-reload support only on desktop platforms
+        $<$<AND:$<NOT:$<BOOL:${ANDROID}>>,$<CONFIG:Debug>>:PAINAssetPipeline>
+        
+        # FileWatch for hot-reload
+        $<$<NOT:$<BOOL:${ANDROID}>>:FileWatch_header_only>
+)
+
+# Add compile definitions to indicate asset system capabilities
+target_compile_definitions(PAINEngine
+    PRIVATE
+        PAIN_ASSET_SYSTEM_ENABLED=1
+        $<$<NOT:$<BOOL:${ANDROID}>>:PAIN_HOT_RELOAD_ENABLED=1>
+        $<$<AND:$<NOT:$<BOOL:${ANDROID}>>,$<CONFIG:Debug>>:PAIN_ASSET_PIPELINE_RUNTIME=1>
+)
 
 # ======================= Engine Output  =========================
 

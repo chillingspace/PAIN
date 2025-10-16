@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "lvl1_1",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557885
+  },
+  "created_timestamp": 1759675749752,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "cf793552-babf-f546-8eb1-ff26a509a747",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Scenes\\lvl1_1.scn"
+  }
+}

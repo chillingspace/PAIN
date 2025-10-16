@@ -9,7 +9,7 @@ namespace PAIN {
 		namespace Panel {
 
 
-			DebugAudioPanel::DebugAudioPanel() {
+			AudioPanel::AudioPanel() {
 
 				
 				name = "##AudioPanel";
@@ -23,11 +23,15 @@ namespace PAIN {
 			}
 
 
-			void DebugAudioPanel::nextWindowSettings() {
+			void AudioPanel::nextWindowSettings() {
 				// Default behavior (no fullscreen/docking hacks needed)
 			}
 
-			void DebugAudioPanel::onUpdate() {
+			void AudioPanel::onAttach()
+			{
+			}
+
+			void AudioPanel::onUpdate(AppTiming timing) {
 
 				//if (ImGui::Begin("Audio Controls")) {
 				//	AudioManager& audio = PAIN::Application::Get().GetAudioManager();

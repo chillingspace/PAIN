@@ -13,11 +13,40 @@
 *.opendb
 
 # ========================
+# Android Studio / IntelliJ
+# ========================
+.idea/
+*.iml
+
+# ========================
+# Android Gradle
+# ========================
+# Gradle cache
+.gradle/
+
+# Local configuration file (contains SDK path, machine-specific)
+local.properties
+
+# Build output folders
+*/build/
+captures/
+
+# APKs and App Bundles
+*.apk
+*.aab
+
+# Other build outputs
+output.json
+
+# Android Studio intermediate files for native code
+.cxx/
+
+# ========================
 # Build output folders
 # ========================
 # Engine and Sandbox outputs
-bin-*/               # Matches bin/Debug-x64/PAINEngine, etc.
-bin-int-*/           # Intermediate build files
+bin-*/
+bin-int-*/
 Debug*/
 Release*/
 x64/
@@ -42,8 +71,9 @@ out*/
 *.iopt
 
 # ========================
-# Keep third-party dependencies
+# Keep assets
 # ========================
+!Assets/**
 
 # ========================
 # Logs / Cache / Temp
@@ -58,12 +88,3 @@ out*/
 *.tmp
 *.bak
 *.swp
-
-
-# keep x64 lib for fmod
-!vendor/FMOD/
-!vendor/FMOD/windows/
-!vendor/FMOD/windows/api/
-!vendor/FMOD/windows/api/core/
-!vendor/FMOD/windows/api/core/lib/
-!vendor/FMOD/windows/api/core/lib/x64/

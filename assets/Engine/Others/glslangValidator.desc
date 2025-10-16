@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "glslangValidator",
+    "type": "Other"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557546
+  },
+  "created_timestamp": 1759675749584,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "b27258b7-5c64-c645-b52e-ae1bb1f63955",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Others\\glslangValidator.exe"
+  }
+}

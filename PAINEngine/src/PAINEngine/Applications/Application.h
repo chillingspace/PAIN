@@ -38,8 +38,8 @@ namespace PAIN {
 		std::shared_ptr<Services> services;
 
 		//Create applications stacks
-		std::vector<std::shared_ptr<AppSystem>> layer_stack;
-		std::vector<std::shared_ptr<AppSystem>> core_stack;
+		std::vector<std::weak_ptr<AppSystem>> layer_stack;
+		std::vector<std::weak_ptr<AppSystem>> core_stack;
 
 		//Event queue
 		std::queue<std::shared_ptr<Event::Event>> event_queue;

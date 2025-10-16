@@ -6,7 +6,9 @@ namespace PAIN {
 		glm::vec3 pos;
 		glm::vec3 normal;
 		//tex coords
+		glm::vec2 uv;
 	};
+
 
 	class Mesh {
 
@@ -15,7 +17,7 @@ namespace PAIN {
 		~Mesh();
 		void Draw() const;
 
-		static std::unique_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
+		static std::shared_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
 
 	private:
 

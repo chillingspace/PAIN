@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "shadow",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557580
+  },
+  "created_timestamp": 1759675749649,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "1c4e18fd-3d22-604e-8bc6-1eaca1c38ede",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\shadow.frag"
+  }
+}

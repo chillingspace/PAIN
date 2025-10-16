@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Editor.h"
+#include <filesystem> 
 
 #ifdef _DEBUG
 
@@ -14,6 +15,18 @@
 #include "Panels/AudioPanel.h"
 #include "Panels/ScenesPanel.h"
 #include "Panels/ComponentsPanel.h"
+#include "Panels/ResourcePanel.h"
+#include "Panels/ViewportPanel.h"
+#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
+#include "Panels/EntityPanel.h"
+#include "Panels/DebugPanel.h"
+
+#include "PAINEngine/CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Path/Path.h"
+#include "PAINEngine/ECS/Controller.h"
+
+#define PN_CORE_ASSERT(cond, msg) \
+    do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
 
 
 namespace PAIN {
@@ -97,9 +110,15 @@ namespace PAIN {
 
             //Construct platform
             platform = std::shared_ptr<EditorPlatform>(EditorPlatform::createEditorPlatform(window));
+
+            //Create panels ptr
+            panels = std::make_shared<PanelsMap>();
+
         }
 
-        Editor::~Editor() {}
+        Editor::~Editor() {
+        }
+
 
         void Editor::onAttach() {
 
@@ -121,57 +140,226 @@ namespace PAIN {
             //Construct command manager
             command_manager = std::make_shared<CommandManager>();
 
+            // Get ECS Service
+            auto ecs = services->get<PAIN::ECS::Controller>();
+
+            // get serialization service
+            auto ser = services->get<PAIN::Serialization::Service>();
+            PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
+
+            // if ScenesPanel uses a hooks struct, fill it:
+            Panel::ScenesHooks hooks{};
+
+            hooks.onCreate = [ser](const std::string& base) {
+                if (!ser->createNewScene(base)) {
+                    PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveAs = [ser](const std::string& base) {
+                if (!ser->saveSceneAs(base)) {
+                    PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
+                }
+                };
+            hooks.onSaveCurrent = [ser](const std::string& /*currSceneId*/) {
+                if (!ser->saveCurrentScene()) {
+                    PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
+                }
+                };
+            hooks.onDelete = [ser](const std::string& sceneId) {
+                if (!ser->deleteSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
+                }
+                };
+            hooks.onChange = [ser](const std::string& sceneId) {
+                if (!ser->loadSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
+                }
+                else {
+                    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
+                }
+                };
+            hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
+            hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
+                ser->setMask(i, j, v);      
+                ser->modifyScene();         
+                };
+
+            hooks.onLayerVisibleChanged = [ser](unsigned idx, bool vis) {
+                ser->setLayerVisible(idx, vis); 
+                ser->modifyScene();
+                };
+            hooks.onDirty = [ser]() { ser->modifyScene(); };
+
+
+
+
+            auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
+
             //Register panels
-            //panels[CLASS_STR(Panel::Tools)] = std::make_shared<Panel::Tools>(command_manager);
-            //PN_CORE_INFO(panels[CLASS_STR(Panel::Tools)]->getPanelName());
+            registerPanel(std::make_shared<Panel::EntityPanel>());
+            registerPanel(std::make_shared<Panel::Tools>());
+            registerPanel(std::make_shared<Panel::AudioPanel>());
+            registerPanel(std::make_shared<Panel::ScenesPanel>());
+            registerPanel(scenesPanel);
+            registerPanel(std::make_shared<Panel::ComponentsPanel>());
 
-            // panels[CLASS_STR(Panel::DebugAudioPanel)] = std::make_shared<Panel::DebugAudioPanel>(command_manager);
+            // Create ViewportPanel and register it in BOTH panels and services
+            auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
+            registerPanel(viewport_panel);
 
-            // panels[CLASS_STR(Panel::ScenesPanel)] = std::make_shared<Panel::ScenesPanel>(command_manager);
+            registerPanel(std::make_shared<Panel::DebugPanel>());
 
-            // panels[CLASS_STR(Panel::ComponentsPanel)] =
-            //     std::make_shared<Panel::ComponentsPanel>(command_manager);
 
+            #ifdef PN_PLATFORM_WINDOWS
+            registerPanel(std::make_shared<Panel::ResourcePanel>());
+            #endif
+
+            // Call onAttach on all registered panels
+            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
+                panel->onAttach();
+            });
+
+            // Load ImGui settings (layout, window positions, etc.)
+            // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
+
+#ifdef PN_PLATFORM_WINDOWS
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
+#else
+            // For now i do a copy in assets folder andriod
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
+#endif
+
+            // Check if user's ini file exists; if not, copy default from config folder
+            if (!std::filesystem::exists(m_imgui_ini_path)) {
+#ifdef PN_PLATFORM_WINDOWS
+                auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
+                if (std::filesystem::exists(default_ini_path)) {
+                    std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
+                }
+#else
+                  // Android: Copy from assets using AAssetManager (implement later)
+                // For now, ImGui will create a default ini file automatically
+                PN_CORE_INFO("No existing imgui.ini found, ImGui will create default");
+
+#endif
+           
+            }
+
+            // Apply to ImGui
+            ImGuiIO& io = ImGui::GetIO();
+            io.IniFilename = m_imgui_ini_path.c_str();
+
+
+            //toggleVisible();
         }
 
         void Editor::onDetach() {
+            auto ser = services->get<PAIN::Serialization::Service>();
+            if (ser) {
+                PN_CORE_INFO("[Editor] Requesting save on detach");
+                ser->saveCurrentScene();
+            }
+
+            // Once set from io.inifilename, do not have to call the write io again
+
+            panels = nullptr;
+            platform = nullptr;
+            command_manager = nullptr;
         }
 
         void Editor::onUpdate(AppTiming timing) {
+            // Update shortcuts
+            platform->updateShortCuts(command_manager);
 
-            //Update shortcuts
-            //updateShortCuts();
-
-            //Begin IMGUI Frame
+            // Begin IMGUI Frame
             platform->beginFrame();
 
-            BuildDockspace();
+#ifdef PN_PLATFORM_ANDROID
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
 
-            //Update all panels
-            //for (auto const& panel : panels) {
-            //    panel.second->drawWindow();
-            //}
+                // When hiding editor, auto-play the scene
+                if (!editor_visible) {
+                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                        viewport->setSimulationState(false); // false = playing
+                    }
+                }
+            }
+#else
+            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+                toggleVisible();
+                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+                // When hiding editor, auto-play the scene
+                if (!editor_visible) {
+                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                        viewport->setSimulationState(false); // false = playing
+                    }
+                }
+            }
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+            // --- ADD BUTTON HERE ---
+            {
+                ImGuiViewport* vp = ImGui::GetMainViewport();
+                ImVec2 windowPos;
+                ImVec2 windowPadding(10, 10); // distance from edges
+
+                // Bottom-left corner
+                windowPos.x = vp->Pos.x + windowPadding.x;
+                windowPos.y = vp->Pos.y + vp->Size.y - windowPadding.y; // start from bottom
+
+                ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+
+                ImGui::Begin("##EditorToggleWindow", nullptr,
+                    ImGuiWindowFlags_NoDecoration |
+                    ImGuiWindowFlags_AlwaysAutoResize |
+                    ImGuiWindowFlags_NoMove);
+
+                if (ImGui::Button(editor_visible ? "Hide Editor" : "Show Editor")) {
+                    toggleVisible();
+                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+                    // When hiding editor, auto-play the scene
+                    if (!editor_visible) {
+                        if (auto viewport = services->get<Panel::ViewportPanel>()) {
+                            viewport->setSimulationState(false); // false = playing
+                        }
+                    }
+                }
+
+                ImGui::End();
+            }
+#endif
+
+            // ... rest of the function
 
 
+            if (editor_visible) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            static bool show_demo = true;
-            if (show_demo) ImGui::ShowDemoWindow(&show_demo);
+                // Build docking space
+                buildDockspace();
 
-           /* ImGui::Begin("PAIN Engine Debug");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Checkbox("Show Demo Window", &show_demo);
+                auto renderer = services->get<sRenderer>();
+                auto vp = panels->get<Panel::ViewportPanel>();
 
-            auto window = services->get<Window::Window>();
-            if (!window) return;
-            bool vsync = window->is_Vsync();
-            if (ImGui::Checkbox("VSync", &vsync)) {
-                window->set_Vsync(vsync);
+                if (renderer && vp) {
+                    vp->setRenderTexture(renderer->getFramebufferTexture(), renderer->getFramebufferWidth(), renderer->getFramebufferHeight());
+                }
+
+                // Iterate through all panels
+                panels->forEachOfType<Panel::IPanel>([&, timing](std::shared_ptr<Panel::IPanel> panel) {
+                    panel->drawWindow(timing);
+                    });
+
+
+                static bool show_demo = false; // can toggle to true if want demo
+                if (show_demo) ImGui::ShowDemoWindow(&show_demo);
             }
 
-            ImGui::End();*/
-
-            //Signal end of frame for imgui
             platform->endFrame();
         }
 

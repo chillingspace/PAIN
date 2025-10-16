@@ -7,6 +7,7 @@
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
 #include "CoreSystems/Windows/Window.h"
+#include "CoreSystems/Scene/Scene.h"
 
 //Command header
 #include "Command.h"
@@ -24,13 +25,30 @@ namespace PAIN {
         class Editor : public AppSystem {
         public:
             Editor(void* window);
-            ~Editor();                       // no override
+            ~Editor() override;
 
             void onAttach() override;
             void onDetach() override;
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
+
             void onEvent(Event::Event& event) override;
+            bool isVisible() const { return editor_visible; }
+            bool isPaused() const { return editor_paused; }
+            void toggleVisible() { editor_visible = !editor_visible; }
+            void togglePause() { editor_paused = !editor_paused; }
+           
+
+            // Template implementations must be in header or included .inl file
+            template<typename T>
+            std::shared_ptr<T> getPanel() const {
+                return panels->get<T>();
+            }
+
+            template<typename T>
+            std::weak_ptr<T> getPanelWeak() const {
+                return getPanel<T>();
+            }
 
         private:
 
@@ -43,21 +61,20 @@ namespace PAIN {
             //Platform editor
             std::shared_ptr<EditorPlatform> platform;
 
-            //void updateShortCuts();
+            // Imgui ini file path
+            std::string m_imgui_ini_path;
+
+            template<typename T>
+            void registerPanel(std::shared_ptr<T> panel);
 
             void BeginFrame();
 
             void EndFrame();
 
-            void BuildDockspace();
+            void buildDockspace();
 
-            //Mapping of glfw keys to imgui keys
-            //int imguiKeyMapping(int code);
-
-            ////Events that imgui listens for
-            //void handleKeyEvents(ImGuiIO& io, Event::Event& event);
-            //void handleMouseEvents(ImGuiIO& io, Event::Event& event);
-            //void handleWindowEvents(ImGuiIO& io, Event::Event& event);
+            bool editor_visible = true;
+            bool editor_paused = false;
         };
     }
 } 

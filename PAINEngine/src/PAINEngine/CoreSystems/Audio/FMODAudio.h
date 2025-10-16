@@ -6,7 +6,7 @@
 #include "Audio.h"
 
 namespace PAIN {
-	namespace Audio {
+    namespace Audio {
 
         class FmodAudio : public Audio {
         private:
@@ -30,7 +30,7 @@ namespace PAIN {
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
 
-            AudioResult loadSound(std::string_view, bool, bool, bool) override;
+            AudioResult loadSound(std::string_view, bool, bool, bool, float, float) override;
             AudioResult loadPlaylist(const PlaylistDesc&) override;
 
             std::optional<AudioChannelId> play(std::string_view, const glm::vec3&, float) override;
@@ -38,6 +38,10 @@ namespace PAIN {
 
             AudioResult stop(AudioChannelId) override;
             void        stopAll() override;
+            AudioResult pauseChannel(AudioChannelId) override;
+            AudioResult resumeChannel(AudioChannelId) override;
+            void        pauseAll() override;
+            void        resumeAll() override;
             AudioResult setVolumeDb(AudioChannelId, float) override;
             AudioResult setVolumeLinear(AudioChannelId, float) override;
             AudioResult setPosition(AudioChannelId, const glm::vec3&) override;
@@ -51,9 +55,7 @@ namespace PAIN {
             void onAppPause() override;
             void onAppResume() override;
         };
-
-
-	}
+    }
 }
 
 #endif

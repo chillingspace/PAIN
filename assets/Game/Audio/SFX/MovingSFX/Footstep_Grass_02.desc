@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "Footstep_Grass_02",
+    "type": "Audio"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557799
+  },
+  "created_timestamp": 1759675749672,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "80065483-bce0-d344-9e7c-a7fd9a207d21",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_02.wav"
+  }
+}

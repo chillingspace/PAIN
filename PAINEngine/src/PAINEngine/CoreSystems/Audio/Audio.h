@@ -6,7 +6,7 @@
 #include "Applications/AppSystem.h"
 
 namespace PAIN {
-	namespace Audio {
+    namespace Audio {
 
         struct AudioChannelId { int value = -1; };
         inline bool operator==(AudioChannelId a, AudioChannelId b) { return a.value == b.value; }
@@ -38,7 +38,8 @@ namespace PAIN {
 
             // assets
             virtual AudioResult loadSound(std::string_view path,
-                bool is3D = true, bool looping = false, bool stream = false) = 0;
+                bool is3D = true, bool looping = false, bool stream = false,
+                float minDistance = 1.0f, float maxDistance = 50.0f) = 0;
             virtual AudioResult loadPlaylist(const PlaylistDesc& desc) = 0;
 
             // playback
@@ -52,6 +53,10 @@ namespace PAIN {
             // control (dB)
             virtual AudioResult stop(AudioChannelId ch) = 0;
             virtual void        stopAll() = 0;
+            virtual AudioResult pauseChannel(AudioChannelId ch) = 0;
+            virtual AudioResult resumeChannel(AudioChannelId ch) = 0;
+            virtual void pauseAll() = 0;
+            virtual void resumeAll() = 0;
             virtual AudioResult setVolumeDb(AudioChannelId ch, float volumeDb) = 0;
             virtual AudioResult setVolumeLinear(AudioChannelId ch, float volume01) = 0;
             virtual AudioResult setPosition(AudioChannelId ch, const glm::vec3& pos) = 0;
@@ -81,7 +86,7 @@ namespace PAIN {
             static Audio* create(void* app);
         };
 
-	}
+    }
 }
 
 #endif

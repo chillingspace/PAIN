@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "floor",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557572
+  },
+  "created_timestamp": 1759675749630,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "3422c8be-7dfe-404d-82ef-1903fdbed06c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\floor.frag"
+  }
+}

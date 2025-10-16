@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "ogre",
+    "type": "Model"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557881
+  },
+  "created_timestamp": 1759675749747,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "8766241a-09f2-704e-b15a-e3195fe76ef0",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Models\\ogre.obj"
+  }
+}

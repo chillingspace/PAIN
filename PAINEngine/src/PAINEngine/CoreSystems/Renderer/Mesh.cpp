@@ -49,29 +49,48 @@ namespace PAIN {
 		glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
-	std::unique_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
+	std::shared_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
 	{
-
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		bool file_ok = false;
 
-		// Get current working directory and build paths from there
-		std::filesystem::path current_path = std::filesystem::current_path();
-		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
-
-		// Or try to find the project root by looking for a marker file
-		std::filesystem::path search_path = current_path;
-		while (search_path.has_parent_path()) {
-			if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
-				project_root = search_path / "PAIN";
-				break;
-			}
-			search_path = search_path.parent_path();
+#ifdef PN_PLATFORM_ANDROID
+		PN_CORE_INFO("Using Android asset manager for mesh");
+		std::string mesh_data = ReadFileAndroid(mesh_file);
+		if (mesh_data.empty()) {
+			PN_CORE_ERROR("Failed to read mesh data from Android assets: {0}", mesh_file);
 		}
+		else {
+			PN_CORE_INFO("Successfully read mesh data from Android assets: {0}", mesh_file);
+			PN_CORE_INFO("Mesh data size: {0} bytes", mesh_data.size());
+			file_ok = true;
+		}
+#endif
 
-		std::filesystem::path mesh_full = project_root / "assets" / "Meshes" / mesh_file;
 
-		if (!std::filesystem::exists(mesh_full) || mesh_file == "")
+
+#ifdef PN_PLATFORM_WINDOWS
+		//// Get current working directory and build paths from there
+		//std::filesystem::path current_path = std::filesystem::current_path();
+		//std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
+
+		//// Or try to find the project root by looking for a marker file
+		//std::filesystem::path search_path = current_path;
+		//while (search_path.has_parent_path()) {
+		//	if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
+		//		project_root = search_path / "PAIN";
+		//		break;
+		//	}
+		//	search_path = search_path.parent_path();
+		//}
+
+		std::filesystem::path mesh_full = mesh_file;
+
+		file_ok = std::filesystem::exists(mesh_file) && mesh_file != "";
+#endif
+
+		if (!file_ok)
 		{
 			PN_CORE_ERROR("Mesh file not found: {}, loading default mesh", mesh_file == "" ? "No mesh file given" : mesh_file);
 			vertices = {
@@ -126,7 +145,7 @@ namespace PAIN {
 				// Bottom (-Y)
 				20,21,22, 20,22,23
 			};
-			return std::make_unique<Mesh>(vertices, indices);
+			return std::make_shared<Mesh>(vertices, indices);
 		}
 
 		struct TempVertex {
@@ -146,11 +165,15 @@ namespace PAIN {
 		std::vector<glm::vec3> positions;
 		std::vector<glm::vec3> normals;
 
+#ifdef PN_PLATFORM_WINDOWS
 		std::ifstream objStream(mesh_full);
 		if (!objStream) {
 			PN_CORE_ERROR("Could not open {}", mesh_full.string());
 			assert(false);
 		}
+#else
+		std::istringstream objStream(mesh_data);
+#endif
 
 		std::string line;
 		while (std::getline(objStream, line)) {
@@ -202,6 +225,6 @@ namespace PAIN {
 		// can add generalization
 		// must add texcoords
 
-		return std::make_unique<Mesh>(vertices, indices);
+		return std::make_shared<Mesh>(vertices, indices);
 	}
 }

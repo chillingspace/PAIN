@@ -33,7 +33,10 @@
    * Engine Specific Library
    *********************************************************************/
 
-   //Android GL vs Window GL
+// key events
+#include "./Utility/KeyCodes.h"
+
+//Android GL vs Window GL
 #ifdef PN_PLATFORM_ANDROID
 #include <android/native_window.h>
 #include <android/native_activity.h>
@@ -46,9 +49,17 @@
 #include "GLFW/glfw3.h"
 #endif
 
+ /*****************************************************************//**
+ * Asset Parser includes
+ *********************************************************************/
+#ifdef PN_PLATFORM_WINDOWS
+#include "gli/gli.hpp"
+#endif
+
 // Math Lib
-#include "glm.hpp"
-#include "gtc/quaternion.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 //Memory
 #define _CRTDBG_MAP_ALLOC
@@ -61,7 +72,7 @@
 #endif
 
  /*****************************************************************//**
- * Windows Application
+ * Filewatcher
  *********************************************************************/
 #ifdef PN_PLATFORM_WINDOWS
 #include "FileWatch.hpp"
@@ -108,6 +119,8 @@ using json = nlohmann::json;
 #include <limits>
 #include <random>
 #include <bitset>
+#include <functional>
+#include <variant>
 
 /*****************************************************************//**
 * UTILITY
@@ -117,5 +130,9 @@ using json = nlohmann::json;
 //Ban normal logging
 #define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
 #define cerr  PN_IOSTREAM_FORBIDDEN__use_logger_instead
+
+#ifdef PN_PLATFORM_ANDROID
+#include "./Utility/AndroidFs.h"
+#endif
 
 #endif //PCH_H

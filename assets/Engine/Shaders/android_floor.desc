@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_floor",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557561
+  },
+  "created_timestamp": 1759675749593,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "51ff87a9-73a2-7947-a1b8-d2667b4dcd41",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_floor.frag"
+  }
+}

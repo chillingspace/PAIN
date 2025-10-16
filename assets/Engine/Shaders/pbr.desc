@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "pbr",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557578
+  },
+  "created_timestamp": 1759675749643,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "78ac2db8-1611-0e4b-a7a9-a8549ec797f2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\pbr.frag"
+  }
+}

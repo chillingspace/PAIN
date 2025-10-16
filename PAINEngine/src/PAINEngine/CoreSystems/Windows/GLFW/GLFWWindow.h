@@ -39,7 +39,9 @@ namespace PAIN {
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
-			virtual ~GLFW_Window();	
+			~GLFW_Window() override;	
+
+			void onDetach() override { shutdown(); }
 
 			//Update
 			void onUpdate(AppTiming timing) override;

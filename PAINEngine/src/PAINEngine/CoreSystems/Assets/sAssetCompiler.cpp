@@ -205,7 +205,7 @@ namespace PAIN {
 
 
 
-		void AudioCompiler::compile(const std::string& desc_path)
+		void ObjectMeshCompiler::compile(const std::string& desc_path)
 		{
 		}
 
@@ -298,8 +298,8 @@ namespace PAIN {
 			PN_CORE_INFO("Asset Compiler init");
 
 			// Init specific asset compilers
-			compilers[ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
-			compilers[ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
+			compilers[COMPILE_ASSET_TYPE::Texture] = std::make_unique<TextureCompiler>();
+			// compilers[COMPILE_ASSET_TYPE::Shader] = std::make_unique<ShaderCompiler>();
 
 			//Texture extensions
 			addValidExtensions(".png");
@@ -316,16 +316,6 @@ namespace PAIN {
 
 			//Audio extension
 			addValidExtensions(".wav");
-
-			////Video extension
-			//addValidExtensions(".mpg");
-
-			////Other extension
-			//addValidExtensions(".prefab");
-			//addValidExtensions(".scn");
-			//addValidExtensions(".grid");
-			//addValidExtensions(".lua");
-			//addValidExtensions(".json");
 
 			for (auto const& [alias, path] : PN_PATH_SERVICE->getAllRegisteredVirtualPaths())
 			{
@@ -405,16 +395,10 @@ namespace PAIN {
 
 		}
 
-		std::string Service::typeToString(ASSET_TYPE type) const {
+		std::string Service::typeToString(COMPILE_ASSET_TYPE type) const {
 			switch (type) {
-			case ASSET_TYPE::Texture:
+			case COMPILE_ASSET_TYPE::Texture:
 				return "Texture";
-				break;
-			case ASSET_TYPE::Audio:
-				return "Music";
-				break;
-			case ASSET_TYPE::Shader:
-				return "Shader";
 				break;
 				//case Types::Scene:
 				//    return "Scene";
@@ -437,20 +421,20 @@ namespace PAIN {
 			}
 		}
 
-		Compiler::ASSET_TYPE Service::getAssetType(std::filesystem::path const& path) const {
+		Compiler::COMPILE_ASSET_TYPE Service::getAssetType(std::filesystem::path const& path) const {
 			auto ext = path.extension().string();
 			// constexpr size_t music_threshold = 5 * 1024 * 1024; // 5 MB
 			if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".tex") {
-				return Compiler::ASSET_TYPE::Texture;
+				return Compiler::COMPILE_ASSET_TYPE::Texture;
 			}
 			else if (ext == ".frag" || ext == ".vert") {
-				return Compiler::ASSET_TYPE::Shader;
+				return Compiler::COMPILE_ASSET_TYPE::Shader;
 			}
 			//else if (ext == ".ttf") {
 			//    return Assets::Types::Font;
 			//}
-			else if (ext == ".wav") {
-				return Compiler::ASSET_TYPE::Audio;
+			else if (ext == ".obj") {
+				return Compiler::COMPILE_ASSET_TYPE::Object;
 			}
 			//else if (ext == ".scn") {
 			//    return Assets::Types::Scene;
@@ -468,7 +452,7 @@ namespace PAIN {
 			//    return Assets::Types::Video;
 			//}
 			else {
-				return Compiler::ASSET_TYPE::None;
+				return Compiler::COMPILE_ASSET_TYPE::None;
 			}
 		}
 
@@ -483,7 +467,7 @@ namespace PAIN {
 			}
 
 			// Get asset type
-			ASSET_TYPE type = getAssetType(file_path);
+			COMPILE_ASSET_TYPE type = getAssetType(file_path);
 
 			std::string virtual_path = PN_PATH_SERVICE->convertToVirtualPath("Game_Assets:/", file_path.string());
 
@@ -496,7 +480,11 @@ namespace PAIN {
 			std::filesystem::path desc_file = file_path.parent_path() / (asset_name + ".desc");
 
 			// Compile (if desc exists, you could check here)
-			compileAsset(type, desc_file.string());
+			if (std::filesystem::exists(desc_file))
+			{
+				compileAsset(type, desc_file.string());
+			}
+
 		}
 
 
@@ -552,7 +540,7 @@ namespace PAIN {
 
 
 
-		void Service::compileAsset(ASSET_TYPE type, const std::string& desc_file_path)
+		void Service::compileAsset(COMPILE_ASSET_TYPE type, const std::string& desc_file_path)
 		{
 			auto it = compilers.find(type);
 			if (it != compilers.end()) {

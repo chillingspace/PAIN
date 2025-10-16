@@ -80,6 +80,7 @@ namespace PAIN {
 
 				//Constructor
 				IPanel() = default;
+				virtual ~IPanel() = default;
 
 				//Get panel name
 				std::string getPanelName() const { return name; }
@@ -88,10 +89,13 @@ namespace PAIN {
 				unsigned int getDockID() const { return dock_id; }
 
 				//Virtual panel update
-				virtual void onUpdate() = 0;
+				virtual void onAttach() = 0;
+
+				//Virtual panel update
+				virtual void onUpdate(AppTiming timing) = 0;
 
 				//Draw panel window
-				void drawWindow();
+				void drawWindow(PAIN::AppTiming timing);
 
 				// ----------------------------
 				// Internal PopUps

@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_texture",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557571
+  },
+  "created_timestamp": 1759675749613,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "5059013b-14b6-754e-8548-651d59dd0672",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_texture.frag"
+  }
+}

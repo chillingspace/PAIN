@@ -24,6 +24,11 @@ importDependencies() # Placeholder
 if (ANDROID)
   add_compile_definitions(PLATFORM_ANDROID)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
+  # Target a compatible instruction set for x86_64 emulators to prevent SIGILL crashes
+  if(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=westmere")
+  endif()
 endif()
 
 # Use /MD in Release and /MDd in Debug for all MSVC targets
@@ -43,13 +48,25 @@ if (NOT ANDROID)
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
 
-	foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+	foreach(cfg Debug Release)
 	  string(TOUPPER "${cfg}" CFG)
 	  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")
 	  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin/${cfg}")
 	  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG} "${CMAKE_SOURCE_DIR}/bin-int/${cfg}")
 	endforeach()
 endif()
+
+# ======================= Output Directories  =========================
+
+add_subdirectory(Common/AssetTypes)
+add_subdirectory(Common/AssetPipeline)
+
+if (NOT ANDROID)
+add_subdirectory(Tools)
+endif()
+
+# Include asset compilation integration
+include(AssetsCompiler)
 
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)

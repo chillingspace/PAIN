@@ -21,6 +21,7 @@ namespace PAIN {
 			// Configure ImGui
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 			// For Android, you might want to scale the UI
 			io.FontGlobalScale = 2.0f; // Adjust based on your DPI
@@ -28,7 +29,7 @@ namespace PAIN {
 			//Set style
 			ImGui::StyleColorsDark();
 
-			//Initialize platform and renderer backends
+			//Initialize    platform and renderer backends
 			ImGui_ImplAndroid_Init(a_window);
 			ImGui_ImplOpenGL3_Init("#version 300 es");
 		}

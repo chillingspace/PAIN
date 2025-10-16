@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_shadow",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557568
+  },
+  "created_timestamp": 1759675749608,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "cd0f7fc9-f819-bb42-9544-afe4866199ca",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_shadow.frag"
+  }
+}

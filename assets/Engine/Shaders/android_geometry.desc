@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_geometry",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557563
+  },
+  "created_timestamp": 1759675749598,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "3d7b870f-3c9d-7942-b0b4-4c9c15c09254",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_geometry.frag"
+  }
+}

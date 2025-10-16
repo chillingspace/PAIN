@@ -16,10 +16,15 @@ namespace PAIN {
 		int steps_this_frame = 0;
 	};
 
-	class Services : public Custom::ClassWeakMap {
+	class Services : public Custom::ClassMap {
 	public:
 		Services() = default;
+		~Services() override = default;
 	};
+
+	// !TODO: need to find a diff way to store this, else add event listener to edit this
+	inline int winWidth, winHeight;
+	inline int fps{};
 
 	class AppSystem {
 	private:
@@ -28,11 +33,14 @@ namespace PAIN {
 		std::shared_ptr<Services> services;
 	public:
 
+		AppSystem() = default;
+		virtual ~AppSystem() = default;
+
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onFixedUpdate(AppTiming tinming) = 0;
-		virtual void onUpdate(AppTiming tinming) = 0;
+		virtual void onFixedUpdate(AppTiming timing) = 0;
+		virtual void onUpdate(AppTiming timing) = 0;
 		virtual void onAppPause() {}
 		virtual void onAppResume() {}
 

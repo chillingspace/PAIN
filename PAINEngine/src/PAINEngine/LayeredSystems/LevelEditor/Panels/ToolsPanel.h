@@ -5,6 +5,8 @@
 #define TOOLS_PANELS_HPP
 
 #include "Panels.h"
+#include "CoreSystems/Scene/Scene.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -14,10 +16,14 @@ namespace PAIN {
 			private:
 			public:
 				Tools();
+				~Tools() override = default;
 
 				void nextWindowSettings() override;
 
-				void onUpdate() override;
+
+				void onAttach() override;
+
+				void onUpdate(AppTiming timing) override;
 			};
 		}
 	}

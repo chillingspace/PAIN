@@ -34,16 +34,48 @@ namespace PAIN {
 		System::System() : c_max_bodies{ 1024 }, c_num_body_mutexes{ 0 }, c_max_body_pairs{ 1024 }, c_max_contact_constraints{ 1024 },
 			temp_allocator{ nullptr }, job_system{ nullptr }, collision_steps{ 1 }
 		{
+			joltSetup();
+
 			// Above numbers are placeholders, 1024 will be swapped with ENTITY_MAX or such relavant values
 			// Allocate physics system
 			jolt_physics = std::make_unique<JPH::PhysicsSystem>();
 
-			joltSetup();
 		}
 
 		System::~System()
 		{
 			// Cleanup
+			// 1. Destroy PhysicsSystem first (before destroying allocators it depends on)
+			jolt_physics.reset();
+
+			// 2. Destroy job system and temp allocator
+			job_system.reset();
+			temp_allocator.reset();
+
+			// 3. Unregister all types and clean up default material
+			JPH::UnregisterTypes();
+
+			// 4. Delete the factory instance
+			delete JPH::Factory::sInstance;
+			JPH::Factory::sInstance = nullptr;
+		}
+
+		void System::onUpdate(AppTiming timing)
+		{
+			// To get fixed delta time here
+			// const float delta_time = 1.0f / 60.0f;
+
+			// If both unique ptrs of job system and temp allocator are valid, then jolt update
+			// Update to comment out first...
+			//if (temp_allocator && job_system)
+			//{
+			//	jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+			//}
+
+		}
+
+		void System::onFixedUpdate(AppTiming timing)
+		{
 		}
 
 		void System::onAttach()
@@ -60,26 +92,16 @@ namespace PAIN {
 			//	mObjectLayerPairFilter
 			//);
 
-			PN_INFO("PHYSICS SYSTEM INITIALIZED!");
-		}
-
-		void System::onUpdate()
-		{
-			// To get fixed delta time here
-			// const float delta_time = 1.0f / 60.0f;
-
-			// If both unique ptrs of job system and temp allocator are valid, then jolt update
-			// Update to comment out first...
-			//if (temp_allocator && job_system)
-			//{
-			//	jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
-			//}
-
+			PN_CORE_INFO("PHYSICS SYSTEM INITIALIZED!");
 		}
 
 		void System::onDetach()
 		{
 
+		}
+
+		void System::onEvent(Event::Event& e)
+		{
 		}
 
 	}

@@ -58,3 +58,7 @@ if(ANDROID)
 
     target_compile_definitions(pain PRIVATE IMGUI_IMPL_OPENGL_ES3=1)
 endif()
+
+if(ANDROID_ABI STREQUAL "x86_64" OR ANDROID_ABI STREQUAL "x86")
+    target_compile_options(pain PRIVATE -march=x86-64)
+endif()

@@ -69,9 +69,14 @@ namespace PAIN {
 
 		//Shutdown & release resource
 		void GLFW_Window::shutdown() {
-			//Clean up window
-			glfwDestroyWindow(ptr_window);
-			glfwTerminate();
+			if (b_active) {
+
+				//Clean up window
+				glfwDestroyWindow(ptr_window);
+				glfwTerminate();
+
+				b_active = false;
+			}
 		}
 
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
@@ -108,7 +113,6 @@ namespace PAIN {
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
-
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 
@@ -274,11 +278,13 @@ namespace PAIN {
 			//Dispatch window resized event
 			dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
 
-				PN_CORE_INFO(e.toString());
+				//PN_CORE_INFO(e.toString());
 
 				//Return false: continue dispatching, true = stop dispatching 
 				return false;
 				});
+
+			
 		}
 	}
 }

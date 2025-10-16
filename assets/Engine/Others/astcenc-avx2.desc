@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "astcenc-avx2",
+    "type": "Other"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557523
+  },
+  "created_timestamp": 1759675749578,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "8d21b9f6-8c26-ac41-849c-158d16fd1385",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
+  }
+}

@@ -16,11 +16,6 @@ namespace PAIN {
 		//Android Event Types
 		enum class Type {
 			None = 0,
-			// Existing events
-			WindowResize, WindowFocus, WindowMove,
-			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
-			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
-			FileDrop,
 			// New Android-specific events
 			AppStart, AppResume, AppPause, AppStop, AppDestroy,
 			SurfaceCreated, SurfaceChanged, SurfaceDestroyed,
@@ -50,7 +45,7 @@ namespace PAIN {
 			WindowResize, WindowFocus, WindowMove,
 			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
 			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
-			FileDrop
+			FileDrop, EntitiesChange
 		};
 
 		//Window Event Categories
@@ -60,13 +55,14 @@ namespace PAIN {
 			Input = 1 << 2,
 			Keyboard = 1 << 3,
 			Mouse = 1 << 4,
-			Asset = 1 << 5
+			Asset = 1 << 5,
+			EntityChange = 1 << 6
 		};
 #endif
 
 #define EVENT_CLASS_TYPE(type)\
-    static Type getStaticType() { return Type::type; }\
-    Type getType() const override { return getStaticType(); }\
+    static PAIN::Event::Type getStaticType() { return PAIN::Event::Type::type; }\
+    PAIN::Event::Type getType() const override { return getStaticType(); }\
     const char* getName() const override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category)\

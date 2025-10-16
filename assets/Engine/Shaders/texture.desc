@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "texture",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557583
+  },
+  "created_timestamp": 1759675749655,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "1af12281-4d37-3342-9f55-6f196f337026",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\texture.frag"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "Boss_Music",
+    "type": "Audio"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557792
+  },
+  "created_timestamp": 1759675749662,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "b0746fbb-e4a0-e14f-8ec3-df8125726dbd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Audio\\Music\\Boss_Music.wav"
+  }
+}

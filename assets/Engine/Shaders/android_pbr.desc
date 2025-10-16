@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "android_pbr",
+    "type": "Shader"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557566
+  },
+  "created_timestamp": 1759675749603,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "035ab43a-7280-d64d-9e49-6991456690e4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\android_pbr.frag"
+  }
+}

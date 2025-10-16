@@ -5,13 +5,13 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "glm.hpp"
+#include <glm/glm.hpp>
 #include <fmod_common.h>
 
 namespace FMOD {
-    class System;
-    class Sound;
-    class Channel;
+	class System;
+	class Sound;
+	class Channel;
 }
 
 class AudioManager : public PAIN::AppSystem {
@@ -34,6 +34,8 @@ public:
 	void SetListener(const glm::vec3& position, const glm::vec3& velocity, const glm::vec3& forward, const glm::vec3& up);
 	void StopChannel(int channelId);
 	void StopAllChannels();
+	void PauseChannel(int channelId);
+	void ResumeChannel(int channelId);
 	void SetChannelVolume(int channelId, float volumeDb);
 	void SetChannelPosition(int channelId, const glm::vec3& position);
 

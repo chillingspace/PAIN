@@ -15,13 +15,15 @@ namespace PAIN {
                 // Core Overrides
                 // ----------------------------
                 ResourcePanel();
+                ~ResourcePanel() override = default;
                 void nextWindowSettings() override;
-                void onUpdate() override;
+                void onUpdate(AppTiming timing) override;
 
                 // ----------------------------
                 // Life Cycle
                 // ----------------------------
-                void init();
+
+                void onAttach() override;
                 void render();
 
                 // ----------------------------

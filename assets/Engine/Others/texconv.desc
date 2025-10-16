@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "texconv",
+    "type": "Other"
+  },
+  "build_data": {
+    "raw_last_modified": 13404145557558
+  },
+  "created_timestamp": 1759675749588,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "5d286b86-051a-124a-ac93-7716ed851ac0",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Others\\texconv.exe"
+  }
+}
