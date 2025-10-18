@@ -4,14 +4,14 @@
     "type": "Model"
   },
   "build_data": {
-    "raw_last_modified": 13404120081875
+    "raw_last_modified": 13404145557881
   },
-  "created_timestamp": 1759661446454,
+  "created_timestamp": 1759675749747,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "dbd90482-72a3-3848-9dce-4f776f29232a",
+  "guid": "8766241a-09f2-704e-b15a-e3195fe76ef0",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Models\\ogre.obj"
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Models\\ogre.obj"
   }
 }

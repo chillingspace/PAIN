@@ -4,12 +4,12 @@
     "type": "Texture"
   },
   "build_data": {
-    "raw_last_modified": 13404120081879
+    "raw_last_modified": 13404145557887
   },
-  "created_timestamp": 1759662418480,
+  "created_timestamp": 1759675749756,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "82ab1865-2a9c-9841-86fc-01fa09481fcb",
+  "guid": "9441042f-17eb-9744-a5d8-fbb54e4d9f07",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Game\\Textures\\Heart.png"
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Textures\\Heart.png"
   }
 }

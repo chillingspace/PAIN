@@ -4,14 +4,14 @@
     "type": "Shader"
   },
   "build_data": {
-    "raw_last_modified": 13404120081653
+    "raw_last_modified": 13404145557580
   },
-  "created_timestamp": 1759660506892,
+  "created_timestamp": 1759675749649,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "51a4270e-0b78-7749-b437-015b24618482",
+  "guid": "1c4e18fd-3d22-604e-8bc6-1eaca1c38ede",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\SIT Projects\\Software Programming 5 Project\\PAIN\\assets\\Engine\\Shaders\\shadow.frag"
+    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\shadow.frag"
   }
 }

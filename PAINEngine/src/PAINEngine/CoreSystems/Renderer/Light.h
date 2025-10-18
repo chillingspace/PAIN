@@ -14,6 +14,13 @@ namespace PAIN {
 			NUM_SHADOW_TYPES,
 		};
 
+		enum class TYPES {
+			POINT,
+			DIRECTIONAL,
+			SPOTLIGHT,
+			NUM_TYPES,
+		};
+
 	private:
 		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;
 		static int num_shadowmapped_lights;
@@ -72,25 +79,45 @@ namespace PAIN {
 
 		glm::vec3 position{};
 		glm::vec3 L_intensity = glm::vec3(0.1f);
+		TYPES type = TYPES::POINT;
 
 		// not required for point lights
-		glm::vec3 target{};
-		float fov{ 60.f };
+		glm::vec3 forward{0 , -1, 0};	// looking down by default
+		float fov{ 120.f };				// dont set larger values
 
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
+#ifdef PN_PLATFORM_WINDOWS
 		float near_plane{ 0.1f };		// closest distance light can see
-		float far_plane{ 100.f };		// furthest distance light can see
+#else
+		float near_plane{ 1.f };
+#endif
+		float far_plane{ 50.f };		// furthest distance light can see
 
 		glm::mat4 view() const {
+			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
+
+			// forward is parallel to up, use a different up vector
+			if (glm::abs(glm::dot(glm::normalize(forward), up_vec)) > 0.99f) {
+				up_vec = glm::vec3(0.f, 0.f, 1.f);  // Use Z-axis as up instead
+			}
+
 			return glm::lookAt(
 				position,
-				position + glm::normalize(target),
-				glm::vec3(0.f, 1.f, 0.f)
+				position + glm::normalize(forward),
+				up_vec
 			);
 		}
 
 		glm::mat4 projection() const {
+			if (type == TYPES::DIRECTIONAL) {
+				float ortho_size = 20.f;  // based on scene size. lower values = sharper shadows
+				return glm::ortho(
+					-ortho_size, ortho_size,   // left, right
+					-ortho_size, ortho_size,   // bottom, top
+					near_plane, far_plane      // near, far
+				);
+			}
 			return glm::perspective(
 				glm::radians(fov),
 				aspect_ratio,
