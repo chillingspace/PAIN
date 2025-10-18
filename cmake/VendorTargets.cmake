@@ -234,6 +234,11 @@ if (WIN32 AND NOT ANDROID)
             
         # DON'T create alias - assimp already creates assimp::assimp for us!
         # The alias is automatically created by assimp's CMakeLists.txt
+
+        # Create a stable alias if the subproject didn't (some assimp versions dont define assimp::assimp, ensures target always exists for downstream target_link_lib calls)
+        if(NOT TARGET assimp::assimp)
+          add_library(assimp::assimp ALIAS assimp)
+        endif()
         
         message(STATUS "Assimp built from source - assimp::assimp target available")
         
