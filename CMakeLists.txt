@@ -70,6 +70,7 @@ include(AssetsCompiler)
 
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
+add_subdirectory(Tests/LuaBridgeSmoke)
 add_subdirectory(Game)
 
 if (ANDROID)
