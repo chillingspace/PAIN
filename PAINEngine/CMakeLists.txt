@@ -39,6 +39,8 @@ target_link_libraries(PAINEngine
         imgui::imgui
         Jolt
         FMOD::core
+	lua::lua
+	sol2
 )
 
 target_link_libraries(PAINEngine
@@ -73,6 +75,14 @@ if (WIN32 AND NOT ANDROID)
 else()
     target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID IMGUI_IMPL_OPENGL_ES3=1)
+endif()
+
+# Ensures Lua shared library is next to the app on Windows
+if (WIN32 AND NOT ANDROID)
+    add_custom_command(TARGET PAINEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:lua::lua>
+                $<TARGET_FILE_DIR:PAINEngine>)
 endif()
 
 #Asset Pipeline
