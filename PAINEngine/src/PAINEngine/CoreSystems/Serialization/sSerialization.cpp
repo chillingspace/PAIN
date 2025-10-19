@@ -530,8 +530,16 @@ namespace PAIN {
                 json ents = json::array();
 
                 if (auto ecs = services->get<PAIN::ECS::Controller>()) {
-                    const auto all = ecs->getAllEntities();
-                    for (auto e : all) {
+
+                    // Use EnTT view to iterate all entities with EntityName component
+                    auto& registry = ecs->getRegistry();
+                    auto view = registry.view<MetaData::EntityName>();
+
+                    for (auto entity : view) {
+
+                        // Cast to own entity type 
+                        ECS::Entity::Type e = static_cast<ECS::Entity::Type>(entity);
+
                         json E = json::object();
 
                         // Name

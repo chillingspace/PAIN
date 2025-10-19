@@ -27,7 +27,7 @@ namespace PAIN {
 			PN_CORE_TRACE("Logic System setup complete");
 		}
 
-		System::System() : c_max_logic_entities(1024), c_logic_tick_interval(0.05f), accumulated_time(0.0f)
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_logic_entities(1024), c_logic_tick_interval(0.05f), accumulated_time(0.0f)
 		{
 			logicSetup();
 		}
@@ -38,9 +38,11 @@ namespace PAIN {
 			PN_CORE_TRACE("Logic System destroyed");
 		}
 
-		void System::onUpdate(AppTiming timing)
+		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			if (!b_logic_enabled) return;
+
+			// I dont think logic ticks are needed, core run loop already has time ticks, but we shall see again -lim
 
 			// Pause-aware logic updates
 			if (game_state == GameState::Paused) return;
@@ -64,28 +66,6 @@ namespace PAIN {
 
 				accumulated_time -= c_logic_tick_interval;
 			}
-		}
-
-		void System::onFixedUpdate(AppTiming timing)
-		{
-			if (!b_logic_enabled) return;
-
-			// Optional deterministic logic here
-			// Example: fixed-step timers, deterministic triggers
-		}
-
-		void System::onAttach()
-		{
-			// Initialize world-level logic
-			// Load mission data, reset counters, setup triggers
-
-			PN_CORE_INFO("LOGIC SYSTEM INITIALIZED!");
-		}
-
-		void System::onDetach()
-		{
-			b_logic_enabled = false;
-			PN_CORE_TRACE("Logic System detached");
 		}
 
 		void System::onEvent(Event::Event& e)

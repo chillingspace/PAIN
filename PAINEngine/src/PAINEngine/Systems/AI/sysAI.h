@@ -14,7 +14,7 @@
 #define SYS_AI_H
 
 #include "pch.h"
-#include "Core.h"
+#include "ECS/System/ISystem.h"
 
 namespace PAIN {
 
@@ -23,17 +23,13 @@ namespace PAIN {
 		class System : public ECS::System::ISystem
 		{
 		public:
-			System();
+			explicit System(std::shared_ptr<Services> svc);
 			~System();
 
-			void onFixedUpdate(AppTiming timing) override;
-			void onUpdate(AppTiming timing) override;
-			void onAttach() override;
-			void onDetach() override;
-
+			void onUpdate(AppTiming timing, entt::registry& reg) override;
 			// Event handler for app layer
 			void onEvent(Event::Event& e) override;
-			std::string getSysName() override { return "AI System"; }
+			std::string getSysName() const override { return "AI System"; }
 
 			// external
 			void enableAI(bool enable);

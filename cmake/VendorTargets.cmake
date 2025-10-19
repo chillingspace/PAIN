@@ -25,6 +25,9 @@ add_library(gli_headers INTERFACE)
 target_include_directories(gli_headers INTERFACE "${VENDOR_DIR}/gli")
 target_link_libraries(gli_headers INTERFACE glm) 
 
+add_library(entt_header_only INTERFACE)
+target_include_directories(entt_header_only INTERFACE "${VENDOR_DIR}/entt/src")
+
 # ======================= GLEW Vendor  =========================
 
 if (WIN32 AND NOT ANDROID)

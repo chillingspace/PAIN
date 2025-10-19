@@ -108,16 +108,13 @@ namespace PAIN {
         void Service::unregisterTag(std::string const& tag) {
             registered_tags.erase(tag);
 
-            auto tag_type_opt = PN_ECS_SERVICE->getComponentType<MetaData::Tag>();
-            if (!tag_type_opt.has_value()) return;
+            // Remove tag from all entities
+            auto& registry = PN_ECS_SERVICE->getRegistry();
+            auto view = registry.view<MetaData::Tag>();
 
-            auto entities_with_tag = PN_ECS_SERVICE->getAllComponentEntities(tag_type_opt.value());
-
-            for (auto entity : entities_with_tag) {
-                auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
-                if (tag_comp_opt.has_value()) {
-                    tag_comp_opt->get().tags.erase(tag);
-                }
+            for (auto entity : view) {
+                auto& tag_comp = view.get<MetaData::Tag>(entity);
+                tag_comp.tags.erase(tag);
             }
         }
 
@@ -162,18 +159,13 @@ namespace PAIN {
         std::vector<ECS::Entity::Type> Service::getEntitiesByTag(std::string const& tag) const {
             std::vector<ECS::Entity::Type> result;
 
-            auto tag_type_opt = PN_ECS_SERVICE->getComponentType<MetaData::Tag>();
-            if (!tag_type_opt.has_value()) return result;
+            auto& registry = PN_ECS_SERVICE->getRegistry();
+            auto view = registry.view<MetaData::Tag>();
 
-            auto entities_with_tag = PN_ECS_SERVICE->getAllComponentEntities(tag_type_opt.value());
-
-            for (auto entity : entities_with_tag) {
-                auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
-                if (tag_comp_opt.has_value()) {
-                    auto const& tags = tag_comp_opt->get().tags;
-                    if (tags.find(tag) != tags.end()) {
-                        result.push_back(entity);
-                    }
+            for (auto entity : view) {
+                auto& tag_comp = view.get<MetaData::Tag>(entity);
+                if (tag_comp.tags.find(tag) != tag_comp.tags.end()) {
+                    result.push_back(static_cast<ECS::Entity::Type>(entity));
                 }
             }
 
@@ -339,17 +331,17 @@ namespace PAIN {
             if (it == groups.end()) return false;
 
             if (remove_entities) {
-                auto group_type_opt = PN_ECS_SERVICE->getComponentType<MetaData::Group>();
-                if (group_type_opt.has_value()) {
-                    auto entities = PN_ECS_SERVICE->getAllComponentEntities(group_type_opt.value());
 
-                    for (auto entity : entities) {
-                        auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
-                        if (group_opt.has_value() && group_opt->get().group_name == group_name) {
-                            PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
-                        }
+                auto& registry = PN_ECS_SERVICE->getRegistry();
+                auto view = registry.view<MetaData::Group>();
+
+                for (auto entity : view) {
+                    auto& group_comp = view.get<MetaData::Group>(entity);
+                    if (group_comp.group_name == group_name) {
+                        PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(static_cast<ECS::Entity::Type>(entity));
                     }
                 }
+                
             }
 
             groups.erase(it);

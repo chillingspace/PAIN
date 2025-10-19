@@ -31,7 +31,7 @@ namespace PAIN {
 				std::thread::hardware_concurrency() - 1);
 		}
 
-		System::System() : c_max_bodies{ 1024 }, c_num_body_mutexes{ 0 }, c_max_body_pairs{ 1024 }, c_max_contact_constraints{ 1024 },
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_bodies{ 1024 }, c_num_body_mutexes{ 0 }, c_max_body_pairs{ 1024 }, c_max_contact_constraints{ 1024 },
 			temp_allocator{ nullptr }, job_system{ nullptr }, collision_steps{ 1 }
 		{
 			joltSetup();
@@ -60,7 +60,7 @@ namespace PAIN {
 			JPH::Factory::sInstance = nullptr;
 		}
 
-		void System::onUpdate(AppTiming timing)
+		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			// To get fixed delta time here
 			// const float delta_time = 1.0f / 60.0f;
@@ -71,32 +71,6 @@ namespace PAIN {
 			//{
 			//	jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
 			//}
-
-		}
-
-		void System::onFixedUpdate(AppTiming timing)
-		{
-		}
-
-		void System::onAttach()
-		{
-			// TODO: Init layers
-			// Init Jolt physics world (broadphase, layers, allocators, etc.)
-			//jolt_physics->Init(
-			//	c_max_bodies,                  // max bodies
-			//	c_num_body_mutexes,                     // body mutexes (0 = auto)
-			//	c_max_body_pairs,                  // max body pairs
-			//	c_max_contact_constraints,                  // max contacts
-			//	*mBroadPhaseLayerInterface,
-			//	mObjectVsBroadPhaseLayerFilter,
-			//	mObjectLayerPairFilter
-			//);
-
-			PN_CORE_INFO("PHYSICS SYSTEM INITIALIZED!");
-		}
-
-		void System::onDetach()
-		{
 
 		}
 

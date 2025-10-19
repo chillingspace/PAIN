@@ -61,6 +61,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Entt lib
+#include <entt/entt.hpp>
+
 //Memory
 #define _CRTDBG_MAP_ALLOC
 
