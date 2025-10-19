@@ -18,7 +18,7 @@ target_include_directories(lua PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Platform toggles
 if (WIN32)
-  target_compile_definitions(lua PRIVATE LUA_BUILD_AS_DLL LUA_USE_WINDOWS)
+  target_compile_definitions(lua PRIVATE LUA_BUILD_AS_DLL)
   target_link_libraries(lua PRIVATE ws2_32)
 elseif (ANDROID)
   target_compile_definitions(lua PRIVATE LUA_USE_POSIX LUA_USE_DLOPEN)
