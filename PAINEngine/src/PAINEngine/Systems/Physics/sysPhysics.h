@@ -14,7 +14,7 @@
 #define SYS_PHYSICS_H
 
 #include "pch.h"
-#include "Core.h"
+#include "ECS/System/ISystem.h"
 #include "CoreSystems/Collision/sCollision.h"
 #include "CoreSystems/Collision/sLayer.h"
 
@@ -27,19 +27,15 @@ namespace PAIN {
 		class System : public ECS::System::ISystem
 		{
 		public:
-			System();
+			explicit System(std::shared_ptr<Services> svc);
 			~System();
 
 			// To add virtual and override in when abstract systems come in
-			void onFixedUpdate(AppTiming timing) override;
-			void onUpdate(AppTiming timing) override;
-			void onAttach() override;
-
-			void onDetach() override;
+			void onUpdate(AppTiming timing, entt::registry& reg) override;
 
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override;
-			std::string getSysName() override { return "Physics System"; }
+			std::string getSysName() const override { return "Physics System"; }
 
 		private:
 

@@ -127,20 +127,13 @@ namespace PAIN {
 		glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
 
 		// Update the Transform component in the ECS for the renderer
-		auto transformTypeIdOpt = ecs->getComponentType<Transform>();
-		if (transformTypeIdOpt)
-		{
-			// Get a copy of the component
-			auto component_as_void = ecs->getCopiedEntityComponent(audioSourceEntity, *transformTypeIdOpt);
-			if (component_as_void)
-			{
-				// Cast the copy to the correct type and modify it
-				auto transformComp = std::static_pointer_cast<Transform>(component_as_void);
-				transformComp->position = currentPosition;
-
-				// Set the modified copy back into the ECS
-				ecs->setEntityComponent(audioSourceEntity, *transformTypeIdOpt, transformComp);
-			}
+		if (auto transform = ecs->getEntityComponent<Transform>(audioSourceEntity)) {
+			transform->get().position = currentPosition;
+		}
+		else {
+			// Component doesn't exist - log warning
+			PN_CORE_WARN("Audio source entity {} has no Transform component",
+				static_cast<uint32_t>(audioSourceEntity));
 		}
 
 		// Update the 3D position of the looping music channel (only when not paused)

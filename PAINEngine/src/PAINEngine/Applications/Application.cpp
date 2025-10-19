@@ -121,32 +121,26 @@ namespace PAIN {
 #endif
 
 		//Push other core systems into the stack
-		addCoreSystem(std::make_shared<ECS::Controller>());
+		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		
-#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS	
 
 		// Physics system not cross platform yet
-		services->get<ECS::Controller>()->registerSystem<Physics::System>(false);
+		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 
-		services->get<ECS::Controller>()->registerSystem<AI::System>(false);
-		services->get<ECS::Controller>()->registerSystem<Animation::System>(false);
-		services->get<ECS::Controller>()->registerSystem<Scripting::System>(false);
-		services->get<ECS::Controller>()->registerSystem<Logic::System>(false);
+		services->get<ECS::Controller>()->registerSystem<AI::System>();
+		services->get<ECS::Controller>()->registerSystem<Animation::System>();
+		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
+		services->get<ECS::Controller>()->registerSystem<Logic::System>();
 #endif
 
 		// Register components here
-		services->get<ECS::Controller>()->registerComponent<MetaData::EntityName>();
-		services->get<ECS::Controller>()->registerComponent<MetaData::Tag>();
-		services->get<ECS::Controller>()->registerComponent<MetaData::EditorVisible>();
-		services->get<ECS::Controller>()->registerComponent<MetaData::Relation>();
-		services->get<ECS::Controller>()->registerComponent<MetaData::Group>();
-		services->get<ECS::Controller>()->registerComponent<Transform>();
-		services->get<ECS::Controller>()->registerComponent<MeshRenderer>();
+		services->get<ECS::Controller>()->registerAllComponents();
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS

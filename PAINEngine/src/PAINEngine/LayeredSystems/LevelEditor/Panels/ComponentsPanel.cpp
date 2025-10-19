@@ -26,21 +26,6 @@ namespace PAIN {
                     entities_panel = editor->getPanel<EntityPanel>();
                 }
 
-                // Get ECS and initialize components list
-                auto ecs = services->get<ECS::Controller>();
-                if (ecs) {
-                    comps = ecs->getAllComponentTypes();
-
-                    // Initialize empty UI functions for unregistered components
-                    for (auto& [comp_name, comp_type] : comps) {
-                        if (comps_ui.find(comp_name) == comps_ui.end()) {
-                            comps_ui.emplace(comp_name, [](ComponentsPanel&, void*) {
-                                ImGui::TextDisabled("No UI registered");
-                                });
-                        }
-                    }
-                }
-
                 // Register Add Component popup
                 registerPopUp("AddComponent", addComponentPopUp("AddComponent"));
 
@@ -59,7 +44,6 @@ namespace PAIN {
 
                     if (!entity_panel) {
                         ImGui::Text("EntityPanel not available");
-                        ImGui::Spacing();
                         if (ImGui::Button("Close", ImVec2(-1, 0))) {
                             closePopUp(popup_id);
                         }
@@ -68,29 +52,40 @@ namespace PAIN {
 
                     ECS::Entity::Type selected_entity = entity_panel->getSelectedEntity();
 
-                    // Title
+                    if (!ecs->checkEntity(selected_entity)) {
+                        ImGui::Text("No valid entity selected");
+                        if (ImGui::Button("Close", ImVec2(-1, 0))) {
+                            closePopUp(popup_id);
+                        }
+                        return;
+                    }
+
                     ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Add Component");
                     ImGui::Separator();
                     ImGui::Spacing();
 
-                    // Search filter
                     static char search_filter[256] = "";
                     ImGui::SetNextItemWidth(-1);
                     ImGui::InputTextWithHint("##Search", "Search components...", search_filter, 256);
                     ImGui::Spacing();
 
-                    // Scrollable component list
                     ImGui::BeginChild("##ComponentList", ImVec2(400, 350), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
                     bool found_any = false;
-                    for (const auto& [comp_name, comp_type] : comps) {
-                        // Apply search filter
+
+                    // Iterate registered component factories
+                    for (const auto& [comp_name, factory_func] : ecs->getComponentFactories()) {
+                        // Skip if entity already has this component
+                        if (ecs->hasComponentByName(selected_entity, comp_name)) {
+                            continue;
+                        }
+
+                        // Search filter
                         if (strlen(search_filter) > 0) {
                             std::string comp_lower = comp_name;
                             std::string search_lower = search_filter;
                             std::transform(comp_lower.begin(), comp_lower.end(), comp_lower.begin(), ::tolower);
                             std::transform(search_lower.begin(), search_lower.end(), search_lower.begin(), ::tolower);
-
                             if (comp_lower.find(search_lower) == std::string::npos) {
                                 continue;
                             }
@@ -98,34 +93,18 @@ namespace PAIN {
 
                         found_any = true;
 
-                        // Check if already added
-                        bool already_has = ecs->checkEntityComponent(selected_entity, comp_type);
-
-                        if (already_has) {
-                            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 0.7f));
-                            ImGui::Selectable(comp_name.c_str(), false, ImGuiSelectableFlags_Disabled);
-                            ImGui::PopStyleColor();
-                            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
-                                ImGui::SetTooltip("Component already added");
-                            }
-                        }
-                        else {
-                            // Selectable component
-                            if (ImGui::Selectable(comp_name.c_str(), false)) {
-                                ecs->addDefEntityComponent(selected_entity, comp_type);
-                                search_filter[0] = '\0';
-                                closePopUp(popup_id);
-                            }
+                        if (ImGui::Selectable(comp_name.c_str(), false)) {
+                            ecs->addComponentByName(selected_entity, comp_name);
+                            search_filter[0] = '\0';
+                            closePopUp(popup_id);
                         }
                     }
 
                     if (!found_any) {
-                        ImGui::TextDisabled("No components found");
+                        ImGui::TextDisabled("No available components");
                     }
 
                     ImGui::EndChild();
-
-                    // Bottom buttons
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
@@ -134,8 +113,9 @@ namespace PAIN {
                         search_filter[0] = '\0';
                         closePopUp(popup_id);
                     }
-                };
+                    };
             }
+
 
             std::function<void()> ComponentsPanel::removeComponentPopUp(std::string const& popup_id) {
                 return [this, popup_id]() {
@@ -203,43 +183,43 @@ namespace PAIN {
                     ImGui::PopStyleColor(3);
                     ImGui::SameLine();
 
-                    // Cancel button
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
-                    // Handle actions AFTER rendering all UI to avoid state conflicts
                     if (remove_clicked) {
-                        // Get fresh component list
-                        auto fresh_comps = ecs->getAllComponentTypes();
-                        auto it = fresh_comps.find(comp_string_ref);
-
-                        if (it != fresh_comps.end()) {
-                            if (ecs->checkEntityComponent(entity, it->second)) {
-                                ecs->removeEntityComponent(entity, it->second);
-                            }
+                        // Use new removeComponentByName method
+                        if (ecs->hasComponentByName(entity, comp_string_ref)) {
+                            ecs->removeComponentByName(entity, comp_string_ref);
                         }
 
                         closePopUp(popup_id);
-                        comp_string_ref.clear();  // Clear ref after removal
+                        comp_string_ref.clear();
                     }
 
                     if (cancel_clicked) {
                         closePopUp(popup_id);
                     }
-                    };
+                };
             }
-
 
             void ComponentsPanel::renderEntityComponents(ECS::Entity::Type entity) {
                 auto ecs = services->get<ECS::Controller>();
-                auto entity_components = ecs->getAllEntityComponents(entity);
 
-                if (entity_components.empty()) {
+                if (!ecs || !ecs->checkEntity(entity)) {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Invalid entity");
+                    return;
+                }
+
+                // Get all component names for this entity
+                auto component_names = ecs->getEntityComponentNames(entity);
+
+                if (component_names.empty()) {
                     ImGui::Spacing();
                     ImGui::TextDisabled("No components attached");
                     return;
                 }
 
-                for (auto& [comp_name, comp_type] : entity_components) {
+                for (const auto& comp_name : component_names) {
                     ImGui::PushID(comp_name.c_str());
 
                     // Component header with TreeNode (Unity style)
@@ -255,28 +235,31 @@ namespace PAIN {
 
                     // Right-click context menu
                     if (ImGui::BeginPopupContextItem()) {
-                        ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s",comp_name.c_str());
+                        ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", comp_name.c_str());
                         ImGui::Separator();
 
                         if (ImGui::MenuItem("Remove Component")) {
                             comp_string_ref = comp_name;
                             should_open_remove_popup = true;
-                            ImGui::CloseCurrentPopup();  
-
+                            ImGui::CloseCurrentPopup();
                         }
 
                         if (ImGui::MenuItem("Reset to Default")) {
-                            // TODO: Reset component
+                            // TODO: Implement reset - would need default component values
+                            // For now, could remove and re-add with defaults
+                            ecs->removeComponentByName(entity, comp_name);
+                            ecs->addComponentByName(entity, comp_name);
                         }
 
                         ImGui::Separator();
 
                         if (ImGui::MenuItem("Copy Component")) {
-                            // TODO: Copy component
+                            // TODO: Serialize component to clipboard
+                            ImGui::SetClipboardText(comp_name.c_str());
                         }
 
                         if (ImGui::MenuItem("Paste Component Values")) {
-                            // TODO: Paste component
+                            // TODO: Deserialize from clipboard
                         }
 
                         ImGui::EndPopup();
@@ -285,10 +268,13 @@ namespace PAIN {
                     if (node_open) {
                         ImGui::Spacing();
 
+                        // Get component pointer (type-erased)
+                        void* comp_ptr = ecs->getComponentPtrByName(entity, comp_name);
+
                         // Render component-specific UI
-                        if (comps_ui.find(comp_name) != comps_ui.end()) {
+                        if (comps_ui.find(comp_name) != comps_ui.end() && comp_ptr) {
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-                            comps_ui.at(comp_name)(*this, comp_type.get());
+                            comps_ui.at(comp_name)(*this, comp_ptr);
                             ImGui::PopStyleVar();
                         }
                         else {
@@ -304,62 +290,74 @@ namespace PAIN {
             }
 
 
+
             void ComponentsPanel::setCompStringRef(std::string const& to_set) {
                 comp_string_ref = to_set;
             }
 
             void ComponentsPanel::onUpdate(AppTiming timing) {
-                // Update components list if changed
                 auto ecs = services->get<ECS::Controller>();
-                if (ecs && comps.size() != ecs->getComponentsCount()) {
-                    comps = ecs->getAllComponentTypes();
+                if (!ecs) {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("ECS Controller unavailable");
+                    return;
+                }
 
-                    for (auto& [comp_name, comp_type] : comps) {
-                        if (comps_ui.find(comp_name) == comps_ui.end()) {
-                            comps_ui.emplace(comp_name, [](ComponentsPanel&, void*) {
-                                ImGui::TextDisabled("No UI registered");
-                                });
+                // Rebuild component name set
+                for (const auto& [comp_name, factory] : ecs->getComponentFactories()) {
+                    // Register default UI handlers for any components that don't have one yet
+                    if (comps_ui.find(comp_name) == comps_ui.end()) {
+                        comps_ui.emplace(comp_name, [](ComponentsPanel&, void*) {
+                            ImGui::TextDisabled("No UI registered for this component");
+                            });
+                    }
+                }
+
+                // Ensure entity panel reference is valid
+                auto entity_panel = entities_panel.lock();
+                if (!entity_panel) {
+                    // Recover weak_ptr if it expired (happens on panel reload/scene change)
+                    auto editor = services->get<PAIN::Editor::Editor>();
+                    if (editor) {
+                        auto ep = editor->getPanel<Panel::EntityPanel>();
+                        if (ep) {
+                            entities_panel = ep;
+                            entity_panel = ep;
                         }
                     }
                 }
 
-                // Get entity panel
-                auto entity_panel = entities_panel.lock();
-
-                // Bro somehow ah the weakptr expires here... have to recover it
                 if (!entity_panel) {
-
-                    // One time recovery
-                    auto editor = services->get<PAIN::Editor::Editor>();
-
-                    if (editor) {
-
-                        auto ep = editor->getPanel<Panel::EntityPanel>();
-
-                        if (ep) entities_panel = ep;
-
-                    }
-
-                    entity_panel = entities_panel.lock();
-                }
-
-                if (!entity_panel) return;
-
-                ECS::Entity::Type selected = entity_panel->getSelectedEntity();
-
-                // No entity selected
-                if (selected == ECS::Entity::INVALID || !ecs->checkEntity(selected)) {
                     ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Select an entity to inspect");
+                    ImGui::TextDisabled("Entity Panel not available");
                     return;
                 }
 
-                // Entity header
-                ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Entity: %u", static_cast<uint32_t>(selected));
+                // Get selected entity
+                ECS::Entity::Type selected = entity_panel->getSelectedEntity();
 
-                // Entity name from metadata
+                // No entity selected - show placeholder
+                if (selected == ECS::Entity::INVALID || !ecs->checkEntity(selected)) {
+                    ImGui::Spacing();
+                    ImGui::Spacing();
+
+                    // Centered placeholder text
+                    const char* placeholder = "Select an entity to inspect";
+                    float text_width = ImGui::CalcTextSize(placeholder).x;
+                    float window_width = ImGui::GetContentRegionAvail().x;
+                    float offset = (window_width - text_width) * 0.5f;
+                    if (offset > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", placeholder);
+                    return;
+                }
+
+                ImGui::Spacing();
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+                ImGui::Text("Entity ID: %u", static_cast<uint32_t>(selected));
+                ImGui::PopStyleColor();
+
+                // Display entity name from metadata
                 auto metadata = services->get<MetaData::Service>();
                 if (metadata) {
                     std::string entity_name = metadata->getEntityName(selected);
@@ -368,13 +366,21 @@ namespace PAIN {
                         ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "(%s)", entity_name.c_str());
                     }
 
-                    // Check locked state
+                    // Check if entity is locked (prevents editing)
                     if (metadata->isLocked(selected)) {
                         ImGui::SameLine();
                         ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "[LOCKED]");
+
                         ImGui::Separator();
                         ImGui::Spacing();
-                        ImGui::TextDisabled("Entity is locked. Unlock to edit components.");
+
+                        // Show lock icon/message
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
+                        ImGui::Text("Entity is locked");
+                        ImGui::PopStyleColor();
+
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("Unlock this entity in the Entity Panel to edit its components.");
                         return;
                     }
                 }
@@ -382,26 +388,30 @@ namespace PAIN {
                 ImGui::Separator();
                 ImGui::Spacing();
 
-                // Component list
                 renderEntityComponents(selected);
 
-                // Add Component button
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
 
                 ImVec2 button_size = ImVec2(ImGui::GetContentRegionAvail().x, 35);
-                if (ImGui::Button("Add Component", button_size)) {
+
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.8f, 0.8f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.6f, 0.9f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.4f, 0.7f, 1.0f));
+
+                if (ImGui::Button("+ Add Component", button_size)) {
                     openPopUp("AddComponent");
                 }
 
-                // Open remove popup if flagged (after context menu is closed)
+                ImGui::PopStyleColor(3);
+
+                // Open remove popup after context menu closes (prevents ImGui state conflicts)
                 if (should_open_remove_popup) {
                     openPopUp("RemoveComponent");
                     should_open_remove_popup = false;
                 }
 
-                // Render all registered popups
                 renderPopUps();
             }
 
