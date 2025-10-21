@@ -27,7 +27,7 @@ namespace PAIN {
 			PN_CORE_TRACE("Animation System setup complete");
 		}
 
-		System::System() : c_max_animated_entities(1024), c_animation_blend_speed(5.0f), accumulated_time(0.0f)
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_animated_entities(1024), c_animation_blend_speed(5.0f), accumulated_time(0.0f)
 		{
 			animationSetup();
 
@@ -45,7 +45,7 @@ namespace PAIN {
 			PN_CORE_TRACE("Animation System destroyed");
 		}
 
-		void System::onUpdate(AppTiming timing)
+		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			// Skip animation updates if disabled
 			if (!b_animation_enabled) return;
@@ -63,35 +63,6 @@ namespace PAIN {
 			//     blendAnimations(entity);
 			//     updateSkeletonTransforms(entity);
 			// }
-		}
-
-		void System::onFixedUpdate(AppTiming timing)
-		{
-			// Skip animation updates if disabled
-			if (!b_animation_enabled) return;
-
-			// Fixed timestep animation updates
-			// Useful for physics-driven animations or IK
-			
-			// TODO: Add fixed-timestep animation logic here
-			// Example: procedural animations, inverse kinematics
-		}
-
-		void System::onAttach()
-		{
-			// Initialize animation world state
-			// Setup animation controllers, state machines, etc.
-			// Register animation components with ECS
-
-			PN_CORE_INFO("ANIMATION SYSTEM INITIALIZED!");
-		}
-
-		void System::onDetach()
-		{
-			// Cleanup on system detachment
-			b_animation_enabled = false;
-			
-			PN_CORE_TRACE("Animation System detached");
 		}
 
 		void System::onEvent(Event::Event& e)

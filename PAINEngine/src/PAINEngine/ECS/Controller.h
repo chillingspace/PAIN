@@ -5,38 +5,37 @@
 
 #include "pch.h"
 #include "Applications/AppSystem.h"
-
-// ECS files
-#include "Entity/sEntity.h"
-#include "Components/sComponents.h"
-#include "System/sSystem.h"
+#include "System/ISystem.h"
 
 namespace PAIN {
 	namespace ECS {
 
-#ifdef PN_PLATFORM_WINDOWS
-		struct EntitiesChanged : public PAIN::Event::Event {
-			std::set<Entity::Type> entities;
-			EntitiesChanged() = default;
-			EntitiesChanged(std::set<Entity::Type> entities) : entities{ entities } {}
-
-			//Register Event
-			EVENT_CLASS_TYPE(EntitiesChange);
-		};
-#endif
-
 		class Controller : public AppSystem {
 		private:
 
-			// Unique ptr of ECS coordinators
-			std::unique_ptr<Entity::Service> entity_service;
-			std::unique_ptr<Component::Service> component_service;
-			std::unique_ptr<System::Service> system_service;
+			size_t entity_count = 0;
 
-			static int next_entity_id;
+			entt::registry entt_registry;
+
+			std::vector<std::shared_ptr<System::ISystem>> systems;
+
+			std::unordered_map<std::string, std::function<void(entt::entity)>> component_factories;
+
+			// Map component names to type check functions
+			std::unordered_map<std::string, std::function<bool(entt::entity)>> component_checkers;
+
+			// Map component names to removal functions
+			std::unordered_map<std::string, std::function<void(entt::entity)>> component_removers;
+
+			// Map component names to getter functions (returns void*)
+			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
 		public:
-			Controller();
+			explicit Controller(std::shared_ptr<Services> svc) {
+				services = svc;
+			}
+
+			int getEntitiesCount() const { return static_cast<int>(entity_count); }
 
 			//Dispatch events to layers
 			void dispatchToLayers(Event::Event& e);
@@ -48,8 +47,16 @@ namespace PAIN {
 			void onFixedUpdate(AppTiming timing) override {}
 			void onUpdate(AppTiming timing) override;
 
+			void registerAllComponents();
+
 			//Event callback
 			void onEvent(Event::Event& e) override;
+
+			// Direct registry access for advanced use cases
+			entt::registry& getRegistry() { return entt_registry; }
+
+
+			const entt::registry& getRegistry() const { return entt_registry; }
 
 			/*****************************************************************//**
 			* Entity Methods
@@ -67,178 +74,119 @@ namespace PAIN {
 			//Check entity
 			bool checkEntity(Entity::Type entity) const;
 
-			//Get entity component count
-			size_t getEntityComponentCount(Entity::Type entity) const;
-
 			//Destroy Entity
 			void destroyAllEntities();
-
-			//Get entity count
-			int getEntitiesCount() const;
-
-			//Get all active entities
-			const std::set<Entity::Type> getAllEntities() const;
 
 			/*****************************************************************//**
 			* Component Methods
 			*********************************************************************/
 			template<typename T>
-			void registerComponent() {
-				component_service->registerComponent<T>();
+			void registerComponent(const std::string& name) {
+				// Factory for creating by name
+				component_factories[name] = [this](entt::entity e) {
+					entt_registry.emplace<T>(e);
+					};
+
+				// Checker for hasComponentByName
+				component_checkers[name] = [this](entt::entity e) {
+					return entt_registry.all_of<T>(e);
+					};
+
+				// Remover for removeComponentByName
+				component_removers[name] = [this](entt::entity e) {
+					entt_registry.remove<T>(e);
+					};
+
+				// Getter for editor UI (type-erased)
+				component_getters[name] = [this](entt::entity e) -> void* {
+					return static_cast<void*>(entt_registry.try_get<T>(e));
+					};
+
+				//// Copier for cloning
+				//component_copiers[name] = [this](entt::entity src, entt::entity dst) {
+				//	if (entt_registry.all_of<T>(src)) {
+				//		const T& src_comp = entt_registry.get<T>(src);
+				//		entt_registry.emplace<T>(dst, src_comp);
+				//	}
+				//	};
 			}
-			
-			// Remove a component type (removes from all entities first)
-			template<typename T>
-			void removeComponent() {
-				// Get all entities with this component
-				Component::Type comp_type = component_service->template getComponentType<T>();
-				std::set<Entity::Type> entities =
-					component_service->getAllComponentEntities(comp_type);
 
-				// Remove component from each entity
-				for (Entity::Type entity : entities) {
-					removeEntityComponent<T>(entity);
+			// Check if component type is registered
+			bool hasComponentFactory(const std::string& name) const {
+				return component_factories.find(name) != component_factories.end();
+			}
+
+			// Create component by string name (for editor/serialization)
+			void addComponentByName(Entity::Type entity, const std::string& name) {
+				auto it = component_factories.find(name);
+				if (it != component_factories.end()) {
+					it->second(static_cast<entt::entity>(entity));
 				}
-
-				// Remove the component type from the manager
-				component_service->template unregisterComponent<T>();
 			}
 
 			// Add component to entity (move semantics for efficiency)
 			template<typename T>
 			void addEntityComponent(Entity::Type entity, T&& component) {
-
-				//Add component
-				component_service->addEntityComponent<T>(entity, std::forward<T>(component));
-
-				//Set bit signature of component to true
-				Component::Signature sign = entity_service->getSignature(entity);
-
-				auto comp_type_opt = component_service->getComponentType<T>();
-				if (!comp_type_opt.has_value()) {
-					PN_CORE_ERROR("Component type not registered!");
-					return;
-				}
-
-				sign.set(static_cast<std::size_t>(comp_type_opt.value()), true);
-				entity_service->setSignature(entity, sign);
-
-				//sign.set(component_service->getComponentType<T>(), true);
-				//entity_service->setSignature(entity, sign);
-
-				//Update entities list
-				system_service->updateEntitiesList(entity, sign);
+				entt_registry.emplace<T>(static_cast<entt::entity>(entity), std::forward<T>(component));
 			}
 
-			void addDefEntityComponent(Entity::Type entity, Component::Type type);
 
 			template<typename T>
 			void removeEntityComponent(Entity::Type entity) {
-				//Remove component
-				component_service->removeEntityComponent<T>(entity);
-
-				//Set bit signature of component to false
-				Component::Signature sign = entity_service->getSignature(entity);
-
-				auto comp_type_opt = component_service->getComponentType<T>();
-				if (comp_type_opt.has_value()) {
-					sign.set(static_cast<std::size_t>(comp_type_opt.value()), false);
-				}
-
-
-				entity_service->setSignature(entity, sign);
-
-				//Update entities list
-				system_service->updateEntitiesList(entity, sign);
+				entt_registry.remove<T>(static_cast<entt::entity>(entity));
 			}
-
-			void removeEntityComponent(Entity::Type entity, Component::Type type);
 
 			template<typename T>
 			std::optional<std::reference_wrapper<T>> getEntityComponent(Entity::Type entity) {
-				return component_service->getEntityComponent<T>(entity);
-			}
-
-			std::shared_ptr<void> getEntityComponent(Entity::Type entity, Component::Type type);
-
-			std::shared_ptr<void> getCopiedEntityComponent(Entity::Type entity, Component::Type type);
-
-			void setEntityComponent(Entity::Type entity, Component::Type type, std::shared_ptr<void> comp);
+				if (auto* comp = entt_registry.try_get<T>(static_cast<entt::entity>(entity))) {
+					return *comp;
+				}
+				return std::nullopt;
+			}	
 
 			template<typename T>
 			bool checkEntityComponent(Entity::Type entity) {
-				return entity_service->getSignature(entity).test(component_service->getComponentType<T>());
-			}
+				return entt_registry.all_of<T>(static_cast<entt::entity>(entity));
+			}		
 
-			bool checkEntityComponent(Entity::Type entity, Component::Type component_type) {
-				return entity_service->getSignature(entity).test(component_type);
-			}
+			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
 
-			template<typename T>
-			std::optional<Component::Type> getComponentType() {
-				return component_service->getComponentType<T>();
-			}
+			// Get all component names registered for an entity
+			std::vector<std::string> getEntityComponentNames(Entity::Type entity) const;
 
-			std::optional<Component::Type> getComponentType(std::string const& type) {
-				return component_service->getComponentType(type);
-			}
+			// Check if entity has a component by name (uses registered factories)
+			bool hasComponentByName(Entity::Type entity, const std::string& name) const;
 
-			bool checkComponentType(std::string const& type) const;
+			// Remove component by name (for editor use)
+			void removeComponentByName(Entity::Type entity, const std::string& name);
 
-			size_t getComponentEntitiesCount(Component::Type comp_type) const;
-
-			const std::set<Entity::Type> getAllComponentEntities(Component::Type comp_type) const;
-
-			const std::unordered_map<std::string, std::shared_ptr<void>> getAllEntityComponents(Entity::Type entity) const;
-
-			const std::unordered_map<std::string, std::shared_ptr<void>> getAllCopiedEntityComponents(Entity::Type entity) const;
-
-			const std::unordered_map<std::string, Component::Type> getAllComponentTypes() const;
-
-			size_t getComponentsCount() const;
+			// Get component pointer by name (type-erased for editor)
+			void* getComponentPtrByName(Entity::Type entity, const std::string& name);
 
 			/*****************************************************************//**
 			* System Methods
 			*********************************************************************/
 
 			// Register a system
-			template<typename T>
-			std::shared_ptr<T> registerSystem(bool components_linked = true, int index = -1) {
-				return system_service->registerSystem<T>(components_linked, index);
+			template<typename T> void registerSystem() {
+				systems.push_back(std::make_shared<T>(services));
 			}
 
-			// Remove a system
+			// Get system by type 
 			template<typename T>
-			void removeSystem() {
-				system_service->removeSystem<T>();
+			std::shared_ptr<T> getSystem() {
+				for (auto& sys : systems) {
+					if (auto casted = std::dynamic_pointer_cast<T>(sys)) {
+						return casted;
+					}
+				}	
+				return nullptr;
 			}
 
-			// Get system index in update order
-			template<typename T>
-			int getSystemIndex() const {
-				return system_service->getSystemIndex<T>();
+			// Get all systems 
+			const std::vector<std::shared_ptr<System::ISystem>>& getAllSystems() const {
+				return systems;
 			}
-
-			// Get system name
-			template<typename T>
-			std::string getSystemName() const {
-				return system_service->getSystemName<T>();
-			}
-
-			// Add component type requirement to system
-			template<typename T>
-			void addSystemComponentType(Component::Type component) {
-				system_service->addComponentType<T>(component);
-			}
-
-			// Set system active state
-			template<typename T>
-			void setSystemState(bool state) {
-				system_service->setSystemState<T>(state);
-			}
-
-			// Get all systems
-			std::vector<std::shared_ptr<System::ISystem>>& getAllSystems();
 
 		};
 

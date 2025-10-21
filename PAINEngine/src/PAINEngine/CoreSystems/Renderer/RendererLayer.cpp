@@ -97,7 +97,15 @@ namespace PAIN {
 					//glClearDepth(1.0f);  // Explicitly set clear value
 					glClear(GL_DEPTH_BUFFER_BIT);
 
-					for (auto entity : ecs->getAllEntities()) {
+					// Use EnTT view to iterate all entities with EntityName component
+					auto& registry = ecs->getRegistry();
+					auto view = registry.view<MetaData::EntityName>();
+
+					for (auto e : view) {
+
+						// Cast to own entity type 
+						ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
+
 						auto transform = ecs->getEntityComponent<Transform>(entity);
 
 						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
@@ -125,8 +133,16 @@ namespace PAIN {
 			w_renderer->BeginRendering(m_Scene);
 			// render scene
 
+			// Use EnTT view to iterate all entities with EntityName component
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<MetaData::EntityName>();
 
-			for (auto entity : ecs->getAllEntities()) {
+
+			for (auto e : view) {
+
+				// Cast to own entity type 
+				ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
+
 				auto transform = ecs->getEntityComponent<Transform>(entity);
 				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
 				glm::mat4 model;

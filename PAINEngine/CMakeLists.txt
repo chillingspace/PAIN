@@ -50,6 +50,7 @@ target_link_libraries(PAINEngine
         nlohmann_json
 	    reflcpp
         gli_headers
+        entt_header_only
 )
 
 # ImGui backends compiled into the engine
