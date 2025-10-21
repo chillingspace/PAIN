@@ -127,6 +127,14 @@ namespace PAIN {
 			// Add component to entity (move semantics for efficiency)
 			template<typename T>
 			void addEntityComponent(Entity::Type entity, T&& component) {
+
+				// Safety checks to check for valid entity before adding comp to the entity
+				if (!checkEntity(entity)) {
+					PN_CORE_ERROR("Cannot add component to invalid entity: {}",
+						static_cast<uint32_t>(entity));
+					return;
+				}
+
 				entt_registry.emplace<T>(static_cast<entt::entity>(entity), std::forward<T>(component));
 			}
 

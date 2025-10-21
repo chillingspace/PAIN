@@ -108,7 +108,6 @@ namespace PAIN {
                 }
             }
 
-            ++entity_count;
             return clone;
         }
 
