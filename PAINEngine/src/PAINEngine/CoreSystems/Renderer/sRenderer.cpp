@@ -5,7 +5,7 @@
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
-#include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Scene/Scene.h"
 #include "Applications/Application.h"
 
 #include "CoreSystems/Renderer/Light.h"
@@ -88,7 +88,7 @@ namespace PAIN {
 			// Render all
 			// populate shadow map first
 			auto ecs = services->get<ECS::Controller>();
-			auto assets = services->get<Assets::Service>();
+			auto scene = services->get<Scene>();
 
 			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
 
@@ -120,7 +120,7 @@ namespace PAIN {
 
 						if (mesh.has_value())
 						{
-							auto mesh_ptr = assets->getMesh(mesh->get().mesh_id);
+							auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
 							w_renderer->RenderGeometryShadows(mesh_ptr.get(), model, l); // uses shadow_shader
 						
 						}
@@ -152,7 +152,7 @@ namespace PAIN {
 				}
 				if (mesh.has_value())
 				{
-					auto mesh_ptr = assets->getMesh(mesh->get().mesh_id);
+					auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
 						// uses geometry_shader
 					w_renderer->RenderGeometry(m_Scene, mesh_ptr.get(), model);
 					

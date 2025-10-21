@@ -82,10 +82,6 @@ namespace PAIN {
 			//(TO DO: Register Loader)
 			//void registerLoader(Types asset_type, LoaderFunc loader); //Register loader
 
-			std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
-			uint32_t cacheMesh(const std::string& path);
-			uint32_t getMeshId(const std::string& path);
-			std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
 
 			void cacheAsset(std::string const& asset_id); //Cache asset
 			void uncacheAsset(std::string const& asset_id); //Uncache asset
@@ -196,7 +192,6 @@ namespace PAIN {
 			std::unordered_map<Types, LoaderFunc> asset_loader; //Asset loader
 			std::unordered_map<std::string, std::shared_ptr<void>> asset_cache; //Assets cache for storing assets ( Optionally change to weakptr for a more event driven approach )
 
-			std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache
 
 			// ----------------------------
 			// Helpers

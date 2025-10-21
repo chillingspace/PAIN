@@ -48,7 +48,7 @@ namespace PAIN {
                         create.do_action = [&, shared_id]() {
                             //Create new entity 
                             auto ecs = services->get<ECS::Controller>();
-                            auto assets = services->get<Assets::Service>();
+                            auto scene = services->get<Scene>();
 
                             // For simplicity, just add a new entity with a generic name
                             glm::vec3 pos = glm::vec3(1.f, 1.f, 1.f);
@@ -58,7 +58,7 @@ namespace PAIN {
                             ECS::Entity::Type entity = ecs->createEntity();
                             ecs->addEntityComponent(entity, MetaData::EntityName{ entity_name });
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-                            ecs->addEntityComponent(entity, MeshRenderer{ assets->getMeshId("")});
+                            ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("")});
 
                             };
 

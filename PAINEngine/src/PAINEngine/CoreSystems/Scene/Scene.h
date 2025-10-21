@@ -23,6 +23,14 @@ namespace PAIN {
 		// Modified to return the created entity's ID
 		ECS::Entity::Type AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
 
+		// TO BE MOVEDDDDDDDDDD INTO ASSETS LOADER
+		std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache
+
+		std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
+		uint32_t cacheMesh(const std::string& path);
+		uint32_t getMeshId(const std::string& path);
+		std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
+
 		Camera* GetActiveCamera();
 
 	private:
