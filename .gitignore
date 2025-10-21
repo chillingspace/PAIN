@@ -71,9 +71,10 @@ out*/
 *.iopt
 
 # ========================
-# Keep assets
+# Keep assets, ignore desc files
 # ========================
-!Assets/**
+
+Assets/**/*.desc
 
 # ========================
 # Logs / Cache / Temp

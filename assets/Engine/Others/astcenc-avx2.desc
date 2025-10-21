@@ -4,14 +4,14 @@
     "type": "Other"
   },
   "build_data": {
-    "raw_last_modified": 13405103572728
+    "raw_last_modified": 13404121428770
   },
-  "created_timestamp": 1760637981491,
+  "created_timestamp": 1761027223404,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "606c4789-bd6e-ad4d-b4df-f02ccf1ff406",
+  "guid": "83f0eb45-c7f0-b84c-972f-bca719f82c7c",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Engine\\Others\\astcenc-avx2.exe"
   }
 }

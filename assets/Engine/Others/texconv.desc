@@ -4,14 +4,14 @@
     "type": "Other"
   },
   "build_data": {
-    "raw_last_modified": 13405103926401
+    "raw_last_modified": 13404121428791
   },
-  "created_timestamp": 1760637981494,
+  "created_timestamp": 1761027223409,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "b1f0dbb2-a172-2442-9f32-2d70865256df",
+  "guid": "fa614d61-da02-394f-8a15-0f98b767edf1",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Others\\texconv.exe"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Engine\\Others\\texconv.exe"
   }
 }

@@ -10,7 +10,8 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct MeshRenderer {
-		std::shared_ptr<Mesh> mesh;
+		//std::shared_ptr<Mesh> mesh;
+		uint32_t mesh_id;
 	};
 
 

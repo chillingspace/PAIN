@@ -4,14 +4,14 @@
     "type": "Shader"
   },
   "build_data": {
-    "raw_last_modified": 13405103572769
+    "raw_last_modified": 13404121428833
   },
-  "created_timestamp": 1760637981515,
+  "created_timestamp": 1761027223507,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "1ed61bef-de91-3643-a127-3cd3c55c76f7",
+  "guid": "1c1fc424-fc82-ba4b-b1d6-37e354612e5d",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Shaders\\texture.frag"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Engine\\Shaders\\texture.frag"
   }
 }

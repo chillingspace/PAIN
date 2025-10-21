@@ -4,12 +4,12 @@
     "type": "Texture"
   },
   "build_data": {
-    "raw_last_modified": 13405103927044
+    "raw_last_modified": 13404121429021
   },
-  "created_timestamp": 1760637981550,
+  "created_timestamp": 1761027223568,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "bdfdeebb-aa10-7c4f-827b-ffe245166ae3",
+  "guid": "8054268f-5a95-f040-b489-207480d6fd5f",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Textures\\Heart.png"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Game\\Textures\\Heart.png"
   }
 }

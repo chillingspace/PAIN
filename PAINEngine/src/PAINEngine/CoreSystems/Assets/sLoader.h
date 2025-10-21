@@ -190,7 +190,8 @@ namespace PAIN {
 			 * \param path_to_mesh
 			 * \return success
 			 */
-			Model compileModel(const std::string& path_to_mesh);
+			std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
+
 
 			Texture loadTexture(const std::string& path_to_texture);
 		};

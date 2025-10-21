@@ -4,14 +4,14 @@
     "type": "Audio"
   },
   "build_data": {
-    "raw_last_modified": 13405103572931
+    "raw_last_modified": 13404121428955
   },
-  "created_timestamp": 1760637981518,
+  "created_timestamp": 1761027223518,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "33b79cc4-6aa6-ed42-9945-c1df66924421",
+  "guid": "df841449-822e-aa48-b79a-44f5804ce210",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Audio\\Music\\Boss_Music.wav"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Game\\Audio\\Music\\Boss_Music.wav"
   }
 }

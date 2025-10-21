@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Controller.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
@@ -14,6 +15,7 @@ namespace PAIN {
 
 	void Scene::onAttach()
 	{
+
 		// Camera and Scene Setup
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
 		glm::vec3 forward{ -glm::normalize(pos) };
@@ -28,10 +30,11 @@ namespace PAIN {
 		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
-		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre.obj");
-		auto ogre_mesh = Mesh::LoadObj(obj_path);
-		auto cube_mesh = Mesh::LoadObj();
+		auto assets = services->get<Assets::Service>();
 
+		auto cube_mesh = assets->getMeshId("");
+		auto ogre_mesh = assets->getMeshId("ogre.obj");
+		
 		// Create the audio source object and store its entity ID
 		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
 
@@ -95,22 +98,22 @@ namespace PAIN {
 		if (!audioManager || audioSourceEntity == ECS::Entity::INVALID) return;
 
 		// Handle audio pause/resume based on simulation state
-		static bool wasPaused = false;
-		if (isPaused != wasPaused) {
-			if (isPaused) {
-				// Pause the looping music channel
-				if (isValid(audioSourceChannel)) {
-					audioManager->pauseChannel(audioSourceChannel);
-				}
-			}
-			else {
-				// Resume the looping music channel
-				if (isValid(audioSourceChannel)) {
-					audioManager->resumeChannel(audioSourceChannel);
-				}
-			}
-			wasPaused = isPaused;
-		}
+		//static bool wasPaused = false;
+		//if (isPaused != wasPaused) {
+		//	if (isPaused) {
+		//		// Pause the looping music channel
+		//		if (isValid(audioSourceChannel)) {
+		//			audioManager->pauseChannel(audioSourceChannel);
+		//		}
+		//	}
+		//	else {
+		//		// Resume the looping music channel
+		//		if (isValid(audioSourceChannel)) {
+		//			audioManager->resumeChannel(audioSourceChannel);
+		//		}
+		//	}
+		//	wasPaused = isPaused;
+		//}
 
 		// Update listener position to match the camera's current state (always runs)
 		audioManager->setListener(camera->pos, { 0,0,0 }, camera->forward, camera->up);
@@ -152,7 +155,7 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	ECS::Entity::Type Scene::AddObject(std::shared_ptr<Mesh> mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	ECS::Entity::Type Scene::AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		ECS::Entity::Type entity = ecs->createEntity();

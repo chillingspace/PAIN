@@ -4,14 +4,14 @@
     "type": "Model"
   },
   "build_data": {
-    "raw_last_modified": 13405103572980
+    "raw_last_modified": 13404121428998
   },
-  "created_timestamp": 1760637981546,
+  "created_timestamp": 1761027223562,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "311f7532-9318-7143-9124-5d6ff7a41020",
+  "guid": "3861b363-85aa-c540-8bcb-67ec85b539d2",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Models\\ogre.obj"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Game\\Models\\ogre.obj"
   }
 }

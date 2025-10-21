@@ -4,14 +4,14 @@
     "type": "Audio"
   },
   "build_data": {
-    "raw_last_modified": 13405103572931
+    "raw_last_modified": 13404121428959
   },
-  "created_timestamp": 1760637981525,
+  "created_timestamp": 1761027223529,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "05fa3aa5-161a-b343-9872-57236ab37d17",
+  "guid": "de3d752f-ad2c-b147-8624-6af92bec4d38",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_05.wav"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Grass_05.wav"
   }
 }

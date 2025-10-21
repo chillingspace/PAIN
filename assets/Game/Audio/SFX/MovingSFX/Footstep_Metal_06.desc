@@ -4,14 +4,14 @@
     "type": "Audio"
   },
   "build_data": {
-    "raw_last_modified": 13405103572952
+    "raw_last_modified": 13404121428967
   },
-  "created_timestamp": 1760637981538,
+  "created_timestamp": 1761027223550,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "53721014-e3be-9b47-aef9-4d3d209f0006",
+  "guid": "60dcaa0c-2b76-7e45-a108-0693715f2d83",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Metal_06.wav"
+    "source_file": "C:\\Users\\seang\\Desktop\\School\\Y3 TRI 1\\PAIN\\assets\\Game\\Audio\\SFX\\MovingSFX\\Footstep_Metal_06.wav"
   }
 }

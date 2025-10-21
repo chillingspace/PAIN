@@ -80,7 +80,7 @@ namespace PAIN {
             return true;
         }
 
-        bool loadDDSTexture(const std::string& filepath, GLuint& out_texID, int& out_width, int& out_height, int& out_depth)
+        bool RenderLoader::loadDDSTexture(const std::string& filepath, GLuint& out_texID, int& out_width, int& out_height, int& out_depth)
         {
             gli::texture Texture = gli::load(filepath);
             if (Texture.empty()) {

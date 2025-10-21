@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+#include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "Camera.h"
@@ -20,7 +21,7 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		// Modified to return the created entity's ID
-		ECS::Entity::Type AddObject(std::shared_ptr<Mesh> mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
+		ECS::Entity::Type AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
 
 		Camera* GetActiveCamera();
 
