@@ -282,8 +282,14 @@ namespace PAIN {
             nlohmann::json ents = nlohmann::json::array();
 
             if (auto controller = services->get<PAIN::ECS::Controller>()) {
-                const auto all = controller->getAllEntities();
-                for (auto e : all) {
+                // Use EnTT view to iterate all entities with EntityName component
+                auto& registry = controller->getRegistry();
+                auto view = registry.view<MetaData::EntityName>();
+                for (auto entity : view) {
+
+                    // Cast to own entity type 
+                    ECS::Entity::Type e = static_cast<ECS::Entity::Type>(entity);
+
                     nlohmann::json E = nlohmann::json::object();
 
                     // Name
