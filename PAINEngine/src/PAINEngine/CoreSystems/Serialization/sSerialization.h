@@ -383,4 +383,24 @@ namespace PAIN {
 
     }
 }
+
+// ----------------------------------------------------------
+// Reflection metadata
+// ----------------------------------------------------------
+
+REFL_TYPE(PAIN::Serialization::SceneDoc::Layer)
+REFL_FIELD(id)
+REFL_FIELD(mask)
+REFL_FIELD(enabled)
+REFL_END
+
+REFL_TYPE(PAIN::Serialization::SceneDoc)
+REFL_FIELD(grid_id)
+REFL_FIELD(active_cam_id)
+REFL_FIELD(meta_tags)
+REFL_FIELD(layers)
+REFL_FIELD(mask_matrix)
+REFL_FIELD(dirty)
+REFL_END
+
 #endif
