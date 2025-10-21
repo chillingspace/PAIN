@@ -28,7 +28,7 @@ namespace PAIN {
 			PN_CORE_TRACE("Scripting System setup complete");
 		}
 
-		System::System() : c_max_script_entities(1024), c_max_loaded_scripts(256), accumulated_time(0.0f)
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_script_entities(1024), c_max_loaded_scripts(256), accumulated_time(0.0f)
 		{
 			scriptingSetup();
 
@@ -47,7 +47,7 @@ namespace PAIN {
 			PN_CORE_TRACE("Scripting System destroyed");
 		}
 
-		void System::onUpdate(AppTiming timing)
+		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			// Skip script updates if disabled
 			if (!b_scripting_enabled) return;
@@ -67,39 +67,6 @@ namespace PAIN {
 			
 			// TODO: Script hot-reloading support
 			// Check for modified script files and reload if needed
-		}
-
-		void System::onFixedUpdate(AppTiming timing)
-		{
-			// Skip script updates if disabled
-			if (!b_scripting_enabled) return;
-
-			// Fixed timestep script updates
-			// Useful for physics-related scripts or deterministic logic
-			
-			// TODO: Add fixed-timestep script logic here
-			// Example: physics callbacks, fixed-rate script updates
-		}
-
-		void System::onAttach()
-		{
-			// Initialize scripting world state
-			// Setup scripting API bindings (expose engine functions to scripts)
-			// Register script components with ECS
-			// Load initial scripts
-
-			PN_CORE_INFO("SCRIPTING SYSTEM INITIALIZED!");
-		}
-
-		void System::onDetach()
-		{
-			// Cleanup on system detachment
-			b_scripting_enabled = false;
-			
-			// Unload all scripts
-			// TODO: Call script cleanup callbacks
-			
-			PN_CORE_TRACE("Scripting System detached");
 		}
 
 		void System::onEvent(Event::Event& e)

@@ -3,36 +3,73 @@
 
 namespace PAIN {
 	namespace ECS {
-		Controller::Controller() : entity_service{ std::make_unique<Entity::Service>() }, component_service{ std::make_unique<Component::Service>() },
-			system_service{ std::make_unique<System::Service>() }
-		{
-		}
 
-		void Controller::dispatchToLayers(Event::Event& e) {
-            auto& systems = system_service->getAllSystems();
-			for (auto it = systems.begin(); it != systems.end(); ++it) {
 
-				//Dispatch event down layers
-				(*it)->onEvent(e);
-				if (e.checkHandled()) break;
-			}
-		}
+        void Controller::dispatchToLayers(Event::Event& e) {
+            for (auto& sys : systems) {
+                if (sys && sys->enabled) {
+                    sys->onEvent(e);
+                    if (e.checkHandled()) break;
+                }
+            }
+        }
 
-		void Controller::dispatchToLayersReversed(Event::Event& e) {
-            auto& systems = system_service->getAllSystems();
-			if (systems.empty()) return;
-			for (auto it = systems.rbegin(); it != systems.rend(); ++it) {
+        void Controller::dispatchToLayersReversed(Event::Event& e) {
+            if (systems.empty()) return;
 
-				//Dispatch event down layers
-				(*it)->onEvent(e);
-				if (e.checkHandled()) break;
-			}
-		}
+            for (auto it = systems.rbegin(); it != systems.rend(); ++it) {
+                if (*it && (*it)->enabled) {
+                    (*it)->onEvent(e);
+                    if (e.checkHandled()) break;
+                }
+            }
+        }
 
 		void Controller::onUpdate(AppTiming timing) {
 			//Iterate through all systems
-            system_service->updateSystems(timing);
+            for (auto& sys : systems) {
+
+                // Check if system is enabled or exists first before continueing
+                if (!sys || !sys->enabled) {
+                    continue;
+                }
+
+                try {
+                    sys->onUpdate(timing, entt_registry);
+                }   
+                catch (const std::exception& e) {
+                    PN_CORE_ERROR("System '{}' threw exception: {}",
+                        sys->getSysName(), e.what());
+
+                    // Disable the problematic system
+                    sys->enabled = false;
+                }
+                catch (...) {
+                    // Catch-all for non-standard exceptions (rare but possible)
+                    PN_CORE_ERROR("System '{}' threw unknown exception!",
+                        sys->getSysName());
+
+                    // Disable the problematic system
+                    sys->enabled = false;
+                }
+            }
 		}
+
+        void Controller::registerAllComponents()
+        {
+            // Core components
+            registerComponent<Transform>("Transform");
+            registerComponent<MeshRenderer>("Mesh Renderer");
+            //registerComponent<Camera>("Camera");
+            //registerComponent<RigidBody>("RigidBody");
+
+            // Metadata components
+            registerComponent<MetaData::EntityName>("Name");
+            registerComponent<MetaData::Tag>("Tag");
+            registerComponent<MetaData::Relation>("Relation");
+            registerComponent<MetaData::EditorVisible>("Editor Visiblity");
+            registerComponent<MetaData::Group>("Group");
+        }
 
 		void Controller::onEvent([[maybe_unused]] Event::Event& e) {
 
@@ -43,160 +80,106 @@ namespace PAIN {
         *********************************************************************/
 
         Entity::Type Controller::createEntity() {
-            return entity_service->createEntity();
-            // Event dispatching should be done by caller if needed
+            auto entity = static_cast<Entity::Type>(entt_registry.create());
+            ++entity_count;
+            // TODO: When create entity, default add the metadata comps
+            return entity;
+
         }
 
         Entity::Type Controller::cloneEntity(Entity::Type copy) {
-            // Validate source entity exists
-            if (!entity_service->checkEntity(copy)) {
-                PN_CORE_WARN("Cannot clone non-existent entity");
+            if (!checkEntity(copy)) {
+                PN_CORE_INFO("Cannot clone invalid entity: {}", copy);
+                return Entity::INVALID;
             }
 
-            // Create new entity
-            Entity::Type new_entity = entity_service->createEntity();
+            Entity::Type clone = createEntity();
 
-            // Copy signature first
-            entity_service->setSignature(
-                new_entity,
-                entity_service->getSignature(copy)
-            );
+            // Copy all components from source to clone, EnTT doesn't have built-in cloning, so we iterate through storage pools
+            entt::entity src_entity = static_cast<entt::entity>(copy);
+            entt::entity clone_entity = static_cast<entt::entity>(clone);
 
-            // Clone components
-            component_service->cloneEntity(new_entity, copy);
+            // Iterate all registered component types and copy if present
+            for (const auto [type_index, storage] : entt_registry.storage()) {
+                if (storage.contains(src_entity)) {
+                    // Component exists on source, copy to clone
+                    // Note: This requires components to be copy-constructible
+                    storage.push(clone_entity, storage.value(src_entity));
+                }
+            }
 
-            // Add to relevant systems
-            system_service->cloneEntity(new_entity, copy);
-
-            return new_entity;
+            ++entity_count;
+            return clone;
         }
 
         void Controller::destroyEntity(Entity::Type entity) {
-            // Validate entity exists
-            if (!entity_service->checkEntity(entity)) {
-                return;  // Already destroyed
+            if (entt_registry.valid(static_cast<entt::entity>(entity))) {
+                entt_registry.destroy(static_cast<entt::entity>(entity));
+                --entity_count;
             }
-
-            // Destroy in order: systems -> components -> entity
-            system_service->entityDestroyed(entity);
-            component_service->entityDestroyed(entity);
-            entity_service->destroyEntity(entity);
         }
 
         bool Controller::checkEntity(Entity::Type entity) const {
-            return entity_service->checkEntity(entity);
-        }
-
-        size_t Controller::getEntityComponentCount(Entity::Type entity) const {
-            return entity_service->getSignature(entity).count();
+            return entt_registry.valid(static_cast<entt::entity>(entity));
         }
 
         void Controller::destroyAllEntities() {
-            // Get copy of entities to avoid iterator invalidation
-            auto entities = entity_service->getAllEntities();
-
-            // Destroy all without individual events
-            for (auto entity : entities) {
-                system_service->entityDestroyed(entity);
-                component_service->entityDestroyed(entity);
-                entity_service->destroyEntity(entity);
-            }
-        }
-
-        int Controller::getEntitiesCount() const {
-            return entity_service->getEntitiesCount();
-        }
-
-        const std::set<Entity::Type> Controller::getAllEntities() const {
-            return entity_service->getAllEntities();
-        }
-
-        std::vector<std::shared_ptr<System::ISystem>>& Controller::getAllSystems() {
-            return system_service->getAllSystems();
+            entity_count = 0;
+            entt_registry.clear();
         }
 
         /*****************************************************************//**
         * Component Methods
         *********************************************************************/
 
-        void Controller::addDefEntityComponent(Entity::Type entity, Component::Type type) {
-            // Validate entity exists
-            if (!entity_service->checkEntity(entity)) {
-                throw std::runtime_error("Cannot add component to non-existent entity");
+        const std::unordered_map<std::string, std::function<void(entt::entity)>>& Controller::getComponentFactories() const {
+            return component_factories;
+        }
+
+        std::vector<std::string> Controller::getEntityComponentNames(Entity::Type entity) const {
+            std::vector<std::string> component_names;
+
+            if (!checkEntity(entity)) {
+                return component_names;
             }
 
-            // Add component
-            component_service->addDefEntityComponent(entity, type);
+            auto e = static_cast<entt::entity>(entity);
 
-            // Update entity signature
-            Component::Signature sign = entity_service->getSignature(entity);
-            sign.set(type, true);
-            entity_service->setSignature(entity, sign);
-
-            // Update systems
-            system_service->updateEntitiesList(entity, sign);
-        }
-
-        void Controller::removeEntityComponent(Entity::Type entity, Component::Type type) {
-            // Validate entity and component exist
-            if (!entity_service->checkEntity(entity)) {
-                return;  // Entity doesn't exist, nothing to remove
+            // Iterate all registered component checkers
+            for (const auto& [name, checker] : component_checkers) {
+                if (checker(e)) {
+                    component_names.push_back(name);
+                }
             }
 
-            // Remove component
-            component_service->removeEntityComponent(entity, type);
-
-            // Update entity signature
-            Component::Signature sign = entity_service->getSignature(entity);
-            sign.set(type, false);
-            entity_service->setSignature(entity, sign);
-
-            // Update systems
-            system_service->updateEntitiesList(entity, sign);
+            return component_names;
         }
 
-        std::shared_ptr<void> Controller::getEntityComponent(Entity::Type entity, Component::Type type) {
-            return component_service->getEntityComponent(entity, type);
+        bool Controller::hasComponentByName(Entity::Type entity, const std::string& name) const {
+            auto it = component_checkers.find(name);
+            if (it == component_checkers.end()) {
+                return false;
+            }
+
+            return it->second(static_cast<entt::entity>(entity));
         }
 
-        std::shared_ptr<void> Controller::getCopiedEntityComponent(Entity::Type entity, Component::Type type) {
-            return component_service->getCopiedEntityComponent(entity, type);
+        void Controller::removeComponentByName(Entity::Type entity, const std::string& name) {
+            auto it = component_removers.find(name);
+            if (it != component_removers.end()) {
+                it->second(static_cast<entt::entity>(entity));
+            }
         }
 
-        void Controller::setEntityComponent(Entity::Type entity, Component::Type type, std::shared_ptr<void> comp) {
-            component_service->setEntityComponent(entity, type, comp);
+        void* Controller::getComponentPtrByName(Entity::Type entity, const std::string& name) {
+            auto it = component_getters.find(name);
+            if (it == component_getters.end()) {
+                return nullptr;
+            }
+
+            return it->second(static_cast<entt::entity>(entity));
         }
 
-        bool Controller::checkComponentType(std::string const& type) const {
-            return component_service->checkComponentType(type);
-        }
-
-        size_t Controller::getComponentEntitiesCount(Component::Type comp_type) const {
-            return component_service->getComponentEntitiesCount(comp_type).value_or(0);
-        }
-
-        const std::set<Entity::Type> Controller::getAllComponentEntities(Component::Type comp_type) const {
-            return component_service->getAllComponentEntities(comp_type);
-        }
-
-        const std::unordered_map<std::string, std::shared_ptr<void>>
-            Controller::getAllEntityComponents(Entity::Type entity) const {
-            return component_service->getAllEntityComponents(entity);
-        }
-
-        const std::unordered_map<std::string, std::shared_ptr<void>>
-            Controller::getAllCopiedEntityComponents(Entity::Type entity) const {
-            return component_service->getAllCopiedEntityComponents(entity);
-        }
-
-        const std::unordered_map<std::string, Component::Type>
-            Controller::getAllComponentTypes() const {
-            return component_service->getAllComponentTypes();
-        }
-
-        size_t Controller::getComponentsCount() const {
-            return component_service->getComponentsCount();
-        }
 
 	}
 }

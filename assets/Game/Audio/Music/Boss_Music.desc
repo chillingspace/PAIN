@@ -4,14 +4,14 @@
     "type": "Audio"
   },
   "build_data": {
-    "raw_last_modified": 13404145557792
+    "raw_last_modified": 13405103572931
   },
-  "created_timestamp": 1759675749662,
+  "created_timestamp": 1760637981518,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "b0746fbb-e4a0-e14f-8ec3-df8125726dbd",
+  "guid": "33b79cc4-6aa6-ed42-9945-c1df66924421",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Audio\\Music\\Boss_Music.wav"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Audio\\Music\\Boss_Music.wav"
   }
 }

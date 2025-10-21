@@ -25,6 +25,9 @@ add_library(gli_headers INTERFACE)
 target_include_directories(gli_headers INTERFACE "${VENDOR_DIR}/gli")
 target_link_libraries(gli_headers INTERFACE glm) 
 
+add_library(entt_header_only INTERFACE)
+target_include_directories(entt_header_only INTERFACE "${VENDOR_DIR}/entt/src")
+
 # ======================= GLEW Vendor  =========================
 
 if (WIN32 AND NOT ANDROID)
@@ -234,6 +237,11 @@ if (WIN32 AND NOT ANDROID)
             
         # DON'T create alias - assimp already creates assimp::assimp for us!
         # The alias is automatically created by assimp's CMakeLists.txt
+
+        # Create a stable alias if the subproject didn't (some assimp versions dont define assimp::assimp, ensures target always exists for downstream target_link_lib calls)
+        if(NOT TARGET assimp::assimp)
+          add_library(assimp::assimp ALIAS assimp)
+        endif()
         
         message(STATUS "Assimp built from source - assimp::assimp target available")
         
@@ -253,4 +261,24 @@ if (WIN32 AND NOT ANDROID)
     else()
         message(STATUS "Assimp not found - 3D model import will be disabled")
     endif()
+endif()
+
+
+# ======================= Lua Vendor (Shared) =========================
+if (EXISTS "${VENDOR_DIR}/lua/CMakeLists.txt")
+  # Build Lua from source as a shared library (.dll / .so)
+  add_subdirectory("${VENDOR_DIR}/lua" "${CMAKE_BINARY_DIR}/vendor_lua" EXCLUDE_FROM_ALL)
+
+  # NOTE: vendor/lua/CMakeLists sets include dirs + platform defs and creates:
+  #   target: lua (SHARED) and alias: lua::lua
+  message(STATUS "Lua: building from ${VENDOR_DIR}/lua (shared)")
+else()
+  message(FATAL_ERROR "Lua not found at ${VENDOR_DIR}/lua. Please drop Lua 5.4 sources there.")
+endif()
+
+# sol2 (header-only)
+if (EXISTS "${VENDOR_DIR}/sol2")
+  add_library(sol2 INTERFACE)
+  target_include_directories(sol2 INTERFACE "${VENDOR_DIR}/sol2/include")
+  message(STATUS "sol2 headers available")
 endif()

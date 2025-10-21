@@ -58,17 +58,26 @@ if(TARGET spdlog_header_only)
     target_link_libraries(PAINAssetPipeline PRIVATE spdlog_header_only)
 endif()
 
+
 # ======================= Platform-Specific Dependencies =========================
 
-# Asset processing dependencies - Only for host platforms (not Android runtime)
-if(TARGET assimp::assimp AND NOT ANDROID)
-    target_link_libraries(PAINAssetPipeline PRIVATE assimp::assimp)
-    target_compile_definitions(PAINAssetPipeline PRIVATE 
-        HAS_ASSIMP=1
-        PAIN_ENABLE_3D_MODELS=1
+# Assimp (transitive) — only on host (not Android), and only if the target exists
+if(NOT ANDROID)
+  if(TARGET assimp::assimp)
+    target_link_libraries(PAINAssetPipeline
+      PUBLIC
+        assimp::assimp
+    )
+    target_compile_definitions(PAINAssetPipeline PRIVATE
+      HAS_ASSIMP=1
+      PAIN_ENABLE_3D_MODELS=1
     )
     message(STATUS "AssetPipeline: Assimp enabled - 3D model import available")
+  else()
+    message(WARNING "AssetPipeline: assimp::assimp target not found; 3D model import disabled")
+  endif()
 endif()
+
 
 # Asset processing dependencies - Only for host platforms (not Android runtime)
 if(TARGET stb AND NOT ANDROID)

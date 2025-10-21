@@ -4,14 +4,14 @@
     "type": "Shader"
   },
   "build_data": {
-    "raw_last_modified": 13404145557583
+    "raw_last_modified": 13405103572769
   },
-  "created_timestamp": 1759675749655,
+  "created_timestamp": 1760637981515,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "1af12281-4d37-3342-9f55-6f196f337026",
+  "guid": "1ed61bef-de91-3643-a127-3cd3c55c76f7",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Engine\\Shaders\\texture.frag"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Engine\\Shaders\\texture.frag"
   }
 }

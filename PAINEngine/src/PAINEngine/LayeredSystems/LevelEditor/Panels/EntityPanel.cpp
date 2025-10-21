@@ -49,9 +49,8 @@ namespace PAIN {
                             //Create new entity 
                             auto ecs = services->get<ECS::Controller>();
 
-                            int total_entities = ecs->getAllEntities().size();
                             // For simplicity, just add a new entity with a generic name
-                            glm::vec3 pos = glm::vec3(1.f, 1.f, 1.f * total_entities);
+                            glm::vec3 pos = glm::vec3(1.f, 1.f, 1.f);
                             glm::quat rot = { 0.f,0.f,0.f, 0.f };
                             glm::vec3 scale = { 1.f, 1.f, 1.f };
 
@@ -64,7 +63,11 @@ namespace PAIN {
 
                         //Undo Action
                         create.undo_action = [&, shared_id]() {
-
+                            // Find entity by name and destroy it
+                            auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
+                            if (entity.has_value()) {
+                                PN_ECS_SERVICE->destroyEntity(entity.value());
+                            }
                             };
 
                         //Execute create entity action
@@ -117,45 +120,23 @@ namespace PAIN {
                         std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(selected_name);
 
                         //Get all entity comps for pass by value storage
-                        auto comps = PN_ECS_SERVICE->getAllCopiedEntityComponents(selected_entity);
-                        auto comp_types = PN_ECS_SERVICE->getAllComponentTypes();
+                        ECS::Entity::Type entity_to_remove = selected_entity;
                         //int layer_id = PN_METADATA_SERVICE->getEntityLayerID(selected_entity);
 
                         //Setup undo action for remove
-                        remove.undo_action = [&, shared_id, comps, comp_types]() {
+                        remove.undo_action = [&, shared_id, entity_to_remove]() {
 
-                            //Creat new entity 
-                            ECS::Entity::Type new_id = PN_ECS_SERVICE->createEntity();
-                            //PN_METADATA_SERVICE->setEntityLayerID(new_id, layer_id);
-
-                            //Add all the comps back
-                            for (auto&& comp : comps) {
-                                PN_ECS_SERVICE->addDefEntityComponent(new_id, comp_types.at(comp.first));
-                                PN_ECS_SERVICE->setEntityComponent(new_id, comp_types.at(comp.first), comp.second);
-                            }
-
-                            //Update metadata name ref
-                            PN_METADATA_SERVICE->setEntityName(new_id, *shared_id);
-
-                            //Set selected entity back to old entity
-                            selected_entity = new_id;
-                            };
+                                // TODO: Need use clone
+                        };
 
                         //Setup action for removing entity
                         remove.do_action = [&, shared_id]() {
 
-                            //Check if entity is still alive
-                            auto entity = PN_ECS_SERVICE->checkEntity(selected_entity);
-
-                            if (entity) {
-                                //Destroy new entity
-                                PN_ECS_SERVICE->destroyEntity(selected_entity);
-
+                            if (PN_ECS_SERVICE->checkEntity(entity_to_remove)) {
+                                PN_ECS_SERVICE->destroyEntity(entity_to_remove);
                             }
-
-                            //Set selected entity to an invalid entity
-                            selected_entity = UINT16_MAX;
-                            };
+                            selected_entity = ECS::Entity::INVALID;
+                        };
 
                         //Execute remove action
                         command_manager->executeAction(std::move(remove));
@@ -277,207 +258,127 @@ namespace PAIN {
             }
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
-
-                // Detect if a scene was just loaded
+                auto ecs = PN_ECS_SERVICE;
                 auto ser = services->get<Serialization::Service>();
+
+                // Detect scene changes
                 bool sceneChanged = ser && ser->consumeSceneChanged();
                 if (sceneChanged) {
-                    // Clear selection and force a rebuild next frame
-                    selected_entity = ECS::Entity::INVALID;  // or call unselectEntity()
+                    selected_entity = ECS::Entity::INVALID;
                     selectedEntityIndex = -1;
                     editor_entities.clear();
-                    total_entities = 0;                     
-                    // forces rebuild
+                    total_entities = 0;
                     b_entity_changed = true;
                     PN_CORE_INFO("[EntityPanel] Scene changed detected, list reset");
                 }
 
-                // Update entity list
-                auto ecs = services->get<ECS::Controller>();
-                auto scene = services->get<Scene>();
-                if (total_entities != ecs->getAllEntities().size()) {
-                    auto ecs_entities = ecs->getAllEntities();
-                    total_entities = ecs_entities.size();
+                // Get current entity count from ECS
+                size_t current_count = static_cast<size_t>(ecs->getEntitiesCount());
+
+                // Rebuild entity list if count changed
+                if (total_entities != current_count) {
+                    total_entities = current_count;
                     editor_entities.clear();
 
-                    for (auto& e : ecs_entities) {
-                        // Get entity name from MetaData::EntityName component
-                        auto name_opt = ecs->getEntityComponent<MetaData::EntityName>(e);
-                        if (name_opt.has_value()) {
-                            std::string entity_name = name_opt->get().name;
+                    // Rebuild list by iterating entities with EntityName component
+                    auto& registry = ecs->getRegistry();
+                    auto view = registry.view<MetaData::EntityName>();
 
-                            // Optionally get tags from MetaData::Tag component
-                            auto tag_opt = ecs->getEntityComponent<MetaData::Tag>(e);
-
-                            // Store entity with its name
-                            editor_entities.push_back(std::pair<ECS::Entity::Type, std::string>{e, entity_name});
-
-                            // Optional: You can also filter by tags here if needed
-                            // if (tag_opt.has_value()) {
-                            //     auto& tags = tag_opt->get().tags;
-                            //     // Do something with tags
-                            // }
-                        }
+                    for (auto entity : view) {
+                        auto& name_comp = view.get<MetaData::EntityName>(entity);
+                        editor_entities.push_back({
+                            static_cast<ECS::Entity::Type>(entity),
+                            name_comp.name
+                        });
                     }
 
+                    // Verify our list matches the count (sanity check)
+                    if (editor_entities.size() != total_entities) {
+                        PN_CORE_WARN("[EntityPanel] Entity count mismatch: displayed={}, total={}",
+                            editor_entities.size(), total_entities);
+                    }
                 }
-                
+
+                // Begin ImGui window
                 ImGui::Begin(name.c_str());
-
-                //Set window dock id
                 dock_id = ImGui::GetWindowDockID();
-
                 ImGui::Spacing();
 
-                //Entities (no layering)
-
-                ImGui::Text("Number of entities in level: %d", PN_ECS_SERVICE->getEntitiesCount());
-
-
+                // Display entity count
+                ImGui::Text("Number of entities in level: %d", total_entities);
                 ImGui::Spacing();
 
-
-                // Iterate through all entities directly (no layering)
+                // Render entity list
                 for (size_t i = 0; i < editor_entities.size(); ++i) {
                     ECS::Entity::Type entity_id = editor_entities[i].first;
                     bool isSelected = (selected_entity == entity_id);
                     std::string label = editor_entities[i].second + "##" + std::to_string(entity_id);
 
-                    // Direct selection without action
                     if (ImGui::Selectable(label.c_str(), isSelected)) {
                         if (isSelected) {
-                            // Deselect if clicking the same entity
+                            // Deselect if already selected
                             selected_entity = ECS::Entity::INVALID;
                             selectedEntityIndex = -1;
                         }
                         else {
-                            // Select new entity
+                            // Select entity
                             selected_entity = entity_id;
-                            selectedEntityIndex = i;
+                            selectedEntityIndex = static_cast<int>(i);
                         }
                         b_entity_changed = true;
                     }
 
-                    // Show tooltip on hover
+                    // Tooltip on hover
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
                         ImGui::Text("Entity ID: %u", static_cast<uint32_t>(entity_id));
-                        auto metadata = services->get<MetaData::Service>();
-                        if (metadata) {
-                            if (metadata->isLocked(entity_id)) {
-                                ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "LOCKED");
-                            }
+
+                        // Show locked status if applicable
+                        auto metadata = PN_METADATA_SERVICE;
+                        if (metadata && metadata->isLocked(entity_id)) {
+                            ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "LOCKED");
                         }
+
                         ImGui::EndTooltip();
                     }
                 }
 
                 ImGui::Spacing();
+                ImGui::Separator();
 
-                if (ImGui::Button("Add Entity")) {
+                // Add Entity button
+                if (ImGui::Button("Add Entity", ImVec2(-1, 0))) {
                     openPopUp("Create Entity");
                 }
 
-                //for (auto entity : PN_ECS_SERVICE->getAllEntities()) {
-                //    auto entity_name = PN_METADATA_SERVICE->getEntityName(entity);
-                //    auto entity_tags = PN_METADATA_SERVICE->getEntityTags(entity);
-                //    if (entity_name == "" || (!tag_filter.empty() && entity_tags.find(tag_filter) == entity_tags.end())) continue;
-
-                //    bool selected = PN_ECS_SERVICE->checkEntity(selected_entity) && entity == selected_entity;
-
-                //    // Show selectable
-                //    if (ImGui::Selectable((entity_name + "##Entity").c_str(), selected)) {
-                //        // Check if currently editing grid
-                //        //if (tilemap_panel.lock()->checkGridEditing()) {
-                //        //    error_msg->assign("Editing grid now, unable to select entity.");
-                //        //    openPopUp("Error");
-                //        //    unselectEntity();
-                //        //    break;
-                //        //}
-
-                //        // Prepare for redo/undo if the entity selection changes
-                //        if (selected_entity != entity) {
-                //            Action select_entity_action;
-
-                //            auto prev_entity = selected_entity;
-                //            auto new_entity = entity;
-
-                //            select_entity_action.do_action = [&, prev_entity, new_entity]() {
-                //                selected_entity = new_entity;
-                //                b_entity_changed = true;
-                //                };
-
-                //            select_entity_action.undo_action = [&, prev_entity, new_entity]() {
-                //                selected_entity = prev_entity;
-                //                b_entity_changed = true;
-                //                };
-
-                //            command_manager->executeAction(std::move(select_entity_action));
-                //        }
-                //        // Unselect the entity
-                //        else {
-                //            Action unselect_entity_action;
-
-                //            auto prev_entity = selected_entity;
-
-                //            unselect_entity_action.do_action = [&, prev_entity]() {
-                //                unselectEntity();
-                //                b_entity_changed = true;
-                //                };
-
-                //            unselect_entity_action.undo_action = [&, prev_entity]() {
-                //                selected_entity = prev_entity;
-                //                b_entity_changed = true;
-                //                };
-
-                //            command_manager->executeAction(std::move(unselect_entity_action));
-                //        }
-                //    }
-
-                //    //Start drag-and-drop entity
-                //    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-                //        ImGui::SetDragDropPayload(std::string("Selected Entity").c_str(), &entity, sizeof(ECS::Entity::Type));
-                //        ImGui::Text("%s", std::string("Entity: " + PN_METADATA_SERVICE->getEntityName(entity)).c_str());
-                //        ImGui::EndDragDropSource();
-                //    }
-                //    else {
-                //        if (ImGui::IsItemHovered()) {
-                //            ImGui::BeginTooltip();
-                //            ImGui::Text("Drag entity to reorder or add tags.");
-                //            ImGui::EndTooltip();
-                //        }
-                //    }
-
-                //    //Drop Entity tag payload
-                //    if (ImGui::BeginDragDropTarget()) {
-                //        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string("Entity Tag").c_str())) {
-                //            std::string tag(static_cast<const char*>(payload->Data));
-                //            PN_METADATA_SERVICE->addEntityTag(entity, tag);
-                //        }
-                //        ImGui::EndDragDropTarget();
-                //    }
-                //}
-
-                // Show Remove and Clone buttons only when an entity is selected and valid
-                if (PN_ECS_SERVICE->checkEntity(selected_entity)) {
+                // Show Remove/Clone buttons when entity is selected
+                if (ecs->checkEntity(selected_entity)) {
                     ImGui::Spacing();
                     ImGui::Separator();
+                    ImGui::Spacing();
 
-                    if (ImGui::Button("Remove Entity") || ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+                    ImGui::BeginGroup();
+
+                    // Remove button (also works with Delete key)
+                    if (ImGui::Button("Remove Entity", ImVec2(-1, 0)) ||
+                        (ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_Delete))) {
                         openPopUp("Remove Entity");
                     }
 
-                    ImGui::SameLine();
-
-                    if (ImGui::Button("Clone Entity")) {
+                    // Clone button
+                    if (ImGui::Button("Clone Entity", ImVec2(-1, 0))) {
                         openPopUp("Clone Entity");
                     }
+
+                    ImGui::EndGroup();
                 }
 
-
+                // Render any open popups
                 renderPopUps();
+
                 ImGui::End();
             }
+
 
         } // namespace Panel
     } // namespace Editor

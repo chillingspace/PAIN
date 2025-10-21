@@ -58,11 +58,6 @@ namespace PAIN {
 
 				bool should_open_remove_popup = false;
 
-
-
-				//Components Map
-				std::unordered_map<std::string, ECS::Component::Type> comps;
-
 				//Components to UI Function map
 				std::unordered_map<std::string, std::function<void(ComponentsPanel&, void*)>> comps_ui;
 

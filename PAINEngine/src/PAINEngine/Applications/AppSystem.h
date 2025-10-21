@@ -39,8 +39,10 @@ namespace PAIN {
 		//Optional virtual functions
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onFixedUpdate(AppTiming timing) = 0;
-		virtual void onUpdate(AppTiming timing) = 0;
+
+		// Ngl if AppTiming has fixed_dt, i dont think onFixedUpdate is needed anymore 
+		virtual void onFixedUpdate(AppTiming timing) {};
+		virtual void onUpdate(AppTiming timing) {};
 		virtual void onAppPause() {}
 		virtual void onAppResume() {}
 

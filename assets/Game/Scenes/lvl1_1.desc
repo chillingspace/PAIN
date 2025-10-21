@@ -4,14 +4,14 @@
     "type": "Scenes"
   },
   "build_data": {
-    "raw_last_modified": 13404145557885
+    "raw_last_modified": 13405103572983
   },
-  "created_timestamp": 1759675749752,
+  "created_timestamp": 1760637981548,
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "cf793552-babf-f546-8eb1-ff26a509a747",
+  "guid": "8889dc6b-5050-854b-ac6e-4730e7522a82",
   "import_settings": null,
   "meta_data": {
-    "source_file": "C:\\Users\\Lenovo\\Desktop\\sit\\y3\\PAIN\\assets\\Game\\Scenes\\lvl1_1.scn"
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Scenes\\lvl1_1.scn"
   }
 }

@@ -16,6 +16,9 @@ add_library(PAINEngine STATIC ${ENGINE_SRC})
 target_include_directories(PAINEngine
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/vendor/reflcpp
+    ${CMAKE_SOURCE_DIR}/vendor/FileWatch
+    ${CMAKE_SOURCE_DIR}/vendor/nlohmann
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine
 )
@@ -32,9 +35,12 @@ target_precompile_headers(PAINEngine
 target_link_libraries(PAINEngine
     PRIVATE  
         glm
+	nlohmann_json
         imgui::imgui
         Jolt
         FMOD::core
+	lua::lua
+	sol2
 )
 
 target_link_libraries(PAINEngine
@@ -44,6 +50,7 @@ target_link_libraries(PAINEngine
         nlohmann_json
 	    reflcpp
         gli_headers
+        entt_header_only
 )
 
 # ImGui backends compiled into the engine
@@ -69,6 +76,14 @@ if (WIN32 AND NOT ANDROID)
 else()
     target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID IMGUI_IMPL_OPENGL_ES3=1)
+endif()
+
+# Ensures Lua shared library is next to the app on Windows
+if (WIN32 AND NOT ANDROID)
+    add_custom_command(TARGET PAINEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:lua::lua>
+                $<TARGET_FILE_DIR:PAINEngine>)
 endif()
 
 #Asset Pipeline

@@ -27,7 +27,7 @@ namespace PAIN {
 			PN_CORE_TRACE("AI System setup complete");
 		}
 
-		System::System() : c_max_ai_entities(1024), c_ai_update_interval(0.1f), accumulated_time(0.0f)
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_ai_entities(1024), c_ai_update_interval(0.1f), accumulated_time(0.0f)
 		{
 			aiSetup();
 		}
@@ -41,7 +41,7 @@ namespace PAIN {
 			PN_CORE_TRACE("AI System destroyed");
 		}
 
-		void System::onUpdate(AppTiming timing)
+		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			// Skip AI updates if disabled
 			if (!b_ai_enabled) return;
@@ -68,36 +68,6 @@ namespace PAIN {
 				accumulated_time -= c_ai_update_interval;
 			}
 		}
-
-		void System::onFixedUpdate(AppTiming timing)
-		{
-			// Skip AI updates if disabled
-			if (!b_ai_enabled) return;
-
-			// Fixed timestep AI updates
-			// Useful for deterministic AI behaviors
-
-			// TODO: Add fixed-timestep AI logic here
-			// Example: navigation mesh updates, pathfinding recalculation
-		}
-
-		void System::onAttach()
-		{
-			// Initialize AI world state
-			// Setup navigation meshes, decision graphs, etc.
-			// Register AI components with ECS
-
-			PN_CORE_INFO("AI SYSTEM INITIALIZED!");
-		}
-
-		void System::onDetach()
-		{
-			// Cleanup on system detachment
-			b_ai_enabled = false;
-
-			PN_CORE_TRACE("AI System detached");
-		}
-
 		void System::onEvent(Event::Event& e)
 		{
 			// Handle AI-related events
