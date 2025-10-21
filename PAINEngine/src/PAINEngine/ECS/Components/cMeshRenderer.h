@@ -1,6 +1,7 @@
 #pragma once
 
-#include <CoreSystems/Renderer/Mesh.h>
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+
 
 namespace PAIN {
 
@@ -14,7 +15,21 @@ namespace PAIN {
 		uint32_t mesh_id;
 	};
 
+#ifdef _DEBUG
+	// UI Registration function
+	inline void RegisterMeshRendererUI(Editor::Panel::ComponentsPanel& panel) {
+		panel.registerCompUIFunc<MeshRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, MeshRenderer& mesh) {
+			ImGui::Text("Mesh Renderer");
+			ImGui::Separator();
+			
+			unsigned int step = 1;
+			ImGui::InputScalar("Mesh ID", ImGuiDataType_U32, &mesh.mesh_id, &step);
 
+		});
+
+	}
+
+#endif
 
 }
 

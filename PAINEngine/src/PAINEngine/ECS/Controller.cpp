@@ -59,7 +59,7 @@ namespace PAIN {
         {
             // Core components
             registerComponent<Transform>("Transform");
-            registerComponent<MeshRenderer>("Mesh Renderer");
+            registerComponent<MeshRenderer>("MeshRenderer");
             //registerComponent<Camera>("Camera");
             //registerComponent<RigidBody>("RigidBody");
 
