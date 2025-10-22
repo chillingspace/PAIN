@@ -7,6 +7,7 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Audio/AudioManager.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Scene/sCameraController.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -151,6 +152,9 @@ namespace PAIN {
 #endif
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
+
+		// Camera System
+		addCoreSystem(std::make_shared<sCameraController>());
 
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());

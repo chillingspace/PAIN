@@ -83,32 +83,32 @@ namespace PAIN {
 					if (!isSimulationPaused && wantsInput()) {
 						ImGuiIO& io = ImGui::GetIO();
 
-						auto renderer = services->get<sRenderer>();
-						if (renderer) {
+						auto camera = services->get<sCameraController>();
+						if (camera) {
 							// Keyboard
-							renderer->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-							renderer->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-							renderer->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-							renderer->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							renderer->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-							renderer->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+							camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+							camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+							camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+							camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
 							// Mouse (LMB drag rotates in your code)
-							renderer->mouseButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+							camera->mouseButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
 
 							// Provide per-frame mouse movement
-							if (renderer->mouseButtonDown) {
-								renderer->xOffset = io.MouseDelta.x;
-								renderer->yOffset = io.MouseDelta.y;
+							if (camera->mouseButtonDown) {
+								camera->xOffset = io.MouseDelta.x;
+								camera->yOffset = io.MouseDelta.y;
 							}
 						}
 					}
 					else {
 						// When viewport loses focus/hover OR is paused, ensure keys don't "stick"
-						if (auto renderer = services->get<sRenderer>()) {
-							renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
-							renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
-							renderer->mouseButtonDown = false;
+						if (auto camera = services->get<sCameraController>()) {
+							camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
+							camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
+							camera->mouseButtonDown = false;
 						}
 					}
 

@@ -5,7 +5,8 @@
 #define VIEWPORT_PANEL_HPP
 
 #include "Panels.h"
-#include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Scene/sCameraController.h"
+
 
 namespace PAIN {
 	namespace Editor {

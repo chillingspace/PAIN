@@ -52,6 +52,7 @@ namespace PAIN {
 		return buffer.str();
 	}
 
+	// TO BE MOVED 
 	std::unique_ptr<Shader> WindowsRenderer::LoadShaders(const std::string& vert_file, const std::string& frag_file)
 	{
 		PN_CORE_INFO("Compiling shaders {0}, {1}", vert_file, frag_file);
@@ -78,7 +79,6 @@ namespace PAIN {
 		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
 
 		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
-
 		std::string vert_code = ReadFile(vert_full);
 		PN_CORE_INFO("Successfully read vertex shader");
 		std::string frag_code = ReadFile(frag_full);
@@ -225,9 +225,6 @@ namespace PAIN {
 
 	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
 	{
-
-
-
 		glViewport(0, 0, winWidth, winHeight);
 
 		// Setup framebuffers, clear buffers
@@ -237,8 +234,6 @@ namespace PAIN {
 
 	void WindowsRenderer::EndRendering(std::shared_ptr<Scene> scene)
 	{
-		
-
 		// draw floor
 		{
 			if (!floor_shader) {
