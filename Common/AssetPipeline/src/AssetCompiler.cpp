@@ -31,19 +31,36 @@ static void open_libs_from_settings(sol::state& lua, const nlohmann::json& impor
 static nlohmann::json to_json_sol_obj(const sol::object& o, bool error_on_unsupported);
 
 static nlohmann::json to_json_sol_table(const sol::table& t, bool error_on_unsupported) {
-    bool array_like = true;
-    for (int i = 1; i <= (int)t.size(); ++i) {
-        if (!t.get<sol::object>(i).valid()) { array_like = false; break; }
+    const int n = static_cast<int>(t.size());
+
+    // Treat as array ONLY if there is at least one element and all keys are 1..n
+    bool array_like = (n > 0);
+    for (int i = 1; array_like && i <= n; ++i) {
+        if (!t.get<sol::object>(i).valid()) array_like = false;
     }
+
+    // debug: which path was chosen
+    // std::cerr << "[LuaBake] table size=" << n << " -> "
+    //     << (array_like ? "ARRAY" : "OBJECT") << "\n";
+
     if (array_like) {
         nlohmann::json a = nlohmann::json::array();
-        for (int i = 1; i <= (int)t.size(); ++i)
+        for (int i = 1; i <= n; ++i) {
             a.push_back(to_json_sol_obj(t.get<sol::object>(i), error_on_unsupported));
+        }
         return a;
     }
     // object-like
     nlohmann::json j = nlohmann::json::object();
     for (auto& kv : t) {
+        if (kv.first.get_type() != sol::type::string) {
+            if (error_on_unsupported)
+                throw std::runtime_error("[LuaBake] non-string key in object table");
+            // permissive fallback
+            std::string k = kv.first.as<std::string>();
+            j[k] = to_json_sol_obj(kv.second, error_on_unsupported);
+            continue;
+        }
         std::string k = kv.first.as<std::string>();
         j[k] = to_json_sol_obj(kv.second, error_on_unsupported);
     }
@@ -55,24 +72,20 @@ static nlohmann::json to_json_sol_obj(const sol::object& o, bool error_on_unsupp
     case sol::type::nil:     return nullptr;
     case sol::type::boolean: return o.as<bool>();
     case sol::type::number: {
-        double d = o.as<double>();
-        if (std::isfinite(d) && std::floor(d) == d &&
-            d >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
-            d <= static_cast<double>(std::numeric_limits<int64_t>::max())) {
-            return static_cast<int64_t>(d);             // preserve integers
-        }
-        return d;
-    }
+                                double d = o.as<double>();
+                                if (std::isfinite(d) && std::floor(d) == d &&
+                                    d >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
+                                    d <= static_cast<double>(std::numeric_limits<int64_t>::max())) {
+                                        return static_cast<int64_t>(d); // keep integers
+                                    }
+                                return d; 
+                            }
     case sol::type::string:  return o.as<std::string>();
     case sol::type::table:   return to_json_sol_table(o.as<sol::table>(), error_on_unsupported);
     default:
-        if (error_on_unsupported) {
-            throw std::runtime_error("[LuaBake] unsupported Lua type (function/userdata/thread)");
-        }
-        else {
-            std::cerr << "[LuaBake] WARNING: unsupported Lua type converted to null\n";
-            return nullptr;
-        }
+        if (error_on_unsupported)
+            throw std::runtime_error("[LuaBake] unsupported Lua type");
+        return nullptr;
     }
 }
 
@@ -576,7 +589,7 @@ namespace PAIN {
                     return false;
                 }
 
-                sol::object ret = res;               // chunk return value
+                sol::object ret = res.get<sol::object>();               
                 if (ret.get_type() != sol::type::table) {
                     std::cerr << "[LuaBake] ERROR: " << lua_in << " must `return { ... }`\n";
                     return false;
