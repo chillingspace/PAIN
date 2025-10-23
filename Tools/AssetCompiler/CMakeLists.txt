@@ -45,6 +45,23 @@ if(NOT ANDROID)
         )
     endif()
 
+    # ================================================
+    # Post-build: Copy Lua DLL so the tool runs properly
+    # ================================================
+    add_custom_command(TARGET AssetCompilerTool POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_BINARY_DIR}/vendor_lua/$<CONFIG>/lua54$<$<CONFIG:Debug>:d>.dll"
+      "$<TARGET_FILE_DIR:AssetCompilerTool>/"
+  )
+
+  # (optional) also drop a copy into bin/<config> for manual runs
+  add_custom_command(TARGET AssetCompilerTool POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_BINARY_DIR}/vendor_lua/$<CONFIG>/lua54$<$<CONFIG:Debug>:d>.dll"
+      "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/"
+  )
+
 else()
     # Android builds: Asset compilation happens on the host during build time
     message(STATUS "Skipping AssetCompilerTool for Android build")

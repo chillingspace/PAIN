@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
+if(ANDROID)
+  message(STATUS "AssetPipeline: Skipping build on Android (host-only tool)")
+  # Provide a lightweight interface target so other CMakeLists can link safely if they try.
+  add_library(PAINAssetPipeline INTERFACE)
+  target_compile_definitions(PAINAssetPipeline INTERFACE PAIN_ASSET_PIPELINE_ENABLED=0)
+  return()
+endif()
+
 message(STATUS "=== Building PAINAssetPipeline ===")
 
 # ======================= Platform Detection & Definitions =========================
@@ -58,6 +66,26 @@ if(TARGET spdlog_header_only)
     target_link_libraries(PAINAssetPipeline PRIVATE spdlog_header_only)
 endif()
 
+# ======================= Lua + Sol2 for Script Baking =========================
+
+if (NOT ANDROID)
+  target_include_directories(PAINAssetPipeline PRIVATE
+      "${CMAKE_SOURCE_DIR}/vendor/lua"
+      "${CMAKE_SOURCE_DIR}/vendor/sol2/include"
+      "${CMAKE_SOURCE_DIR}/vendor/stb"
+      "${CMAKE_SOURCE_DIR}/Common/AssetTypes/src"                
+  )
+  if (TARGET lua::lua)
+    target_link_libraries(PAINAssetPipeline PRIVATE lua::lua)
+  elseif (TARGET lua)
+    target_link_libraries(PAINAssetPipeline PRIVATE lua)
+  else()
+    message(FATAL_ERROR "Lua target not found (expected lua::lua or lua).")
+  endif()
+
+  # sol2 is header-only
+  target_compile_definitions(PAINAssetPipeline PRIVATE SOL_ALL_SAFETIES_ON=1)
+endif()
 
 # ======================= Platform-Specific Dependencies =========================
 
@@ -142,4 +170,15 @@ target_include_directories(PAINAssetPipeline
 target_compile_features(PAINAssetPipeline PUBLIC cxx_std_17)
 
 message(STATUS "PAINAssetPipeline configured successfully")
+
+
+# ======================= Tiny bake tool =========================
+add_executable(PAINBake src/main.cpp)
+target_link_libraries(PAINBake PRIVATE PAINAssetPipeline PAINAssetTypes)
+
+# Make sure it sees the public headers
+target_include_directories(PAINBake PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# On Windows, run from build dir; optionally copy a default Assets folder next to exe.
+
 

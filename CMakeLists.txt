@@ -59,7 +59,9 @@ endif()
 # ======================= Output Directories  =========================
 
 add_subdirectory(Common/AssetTypes)
+if(NOT ANDROID)
 add_subdirectory(Common/AssetPipeline)
+endif()
 
 if (NOT ANDROID)
 add_subdirectory(Tools)

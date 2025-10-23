@@ -1,0 +1,28 @@
+{
+  "asset_info": {
+    "name": "test_enemy",
+    "type": "Script"
+  },
+  "build_data": {
+    "raw_last_modified": 13405625529024
+  },
+  "created_timestamp": 1761211961964,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "eaf5d5dd-8168-424f-8156-016d7a450221",
+  "import_settings": {
+    "error_on_unsupported": true,
+    "lua_libs": [
+      "base",
+      "math",
+      "string",
+      "table",
+      "utf8"
+    ],
+    "output": "json",
+    "schema_version": 1
+  },
+  "meta_data": {
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Scripts\\test_enemy.lua"
+  }
+}

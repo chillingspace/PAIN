@@ -90,8 +90,14 @@ namespace PAIN {
 
         //Boolean to check if the asset is compilable
         static bool isAssetCompilable(Type type) {
-            if (type == Type::Texture /*|| type == Type::Model || type == Type::Audio*/) return true;
-            return false;
+            // if (type == Type::Texture /*|| type == Type::Model || type == Type::Audio*/) return true;
+            // return false;
+
+            switch(type) {
+                case Type::Texture: return true;
+                case Type::Script:  return true;
+                default:    return false;
+            }
         }
 
         //Descriptor file extension
