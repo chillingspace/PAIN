@@ -100,7 +100,7 @@ namespace PAIN {
 
 		auto ecs = services->get<ECS::Controller>();
 		auto audioManager = services->get<Audio::Audio>();
-		if (!audioManager || audioSourceEntity == ECS::Entity::INVALID) return;
+		if (!audioManager || audioSourceEntity == entt::null) return;
 
 		// Handle audio pause/resume based on simulation state
 		//static bool wasPaused = false;
@@ -160,10 +160,10 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	ECS::Entity::Type Scene::AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	entt::entity Scene::AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
-		ECS::Entity::Type entity = ecs->createEntity();
+		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, MeshRenderer{ mesh });

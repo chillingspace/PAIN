@@ -55,7 +55,7 @@ namespace PAIN {
                             glm::quat rot = { 0.f,0.f,0.f, 0.f };
                             glm::vec3 scale = { 1.f, 1.f, 1.f };
 
-                            ECS::Entity::Type entity = ecs->createEntity();
+                            entt::entity entity = ecs->createEntity();
                             ecs->addEntityComponent(entity, MetaData::EntityName{ entity_name });
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("")});
@@ -121,7 +121,7 @@ namespace PAIN {
                         std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(selected_name);
 
                         //Get all entity comps for pass by value storage
-                        ECS::Entity::Type entity_to_remove = selected_entity;
+                        entt::entity entity_to_remove = selected_entity;
                         //int layer_id = PN_METADATA_SERVICE->getEntityLayerID(selected_entity);
 
                         //Setup undo action for remove
@@ -136,7 +136,7 @@ namespace PAIN {
                             if (PN_ECS_SERVICE->checkEntity(entity_to_remove)) {
                                 PN_ECS_SERVICE->destroyEntity(entity_to_remove);
                             }
-                            selected_entity = ECS::Entity::INVALID;
+                            selected_entity = entt::null;
                         };
 
                         //Execute remove action
@@ -179,13 +179,13 @@ namespace PAIN {
                         std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(entity_name);
 
                         //Clone entity for capturing by value
-                        ECS::Entity::Type clone_entity = selected_entity;
+                        entt::entity clone_entity = selected_entity;
 
                         //Do Action
                         clone.do_action = [&, shared_id, clone_entity]() {
                             if (PN_ECS_SERVICE->checkEntity(clone_entity)) {
                                 //Clone entity 
-                                ECS::Entity::Type new_id = PN_ECS_SERVICE->cloneEntity(clone_entity);
+                                entt::entity new_id = PN_ECS_SERVICE->cloneEntity(clone_entity);
                                 //PN_METADATA_SERVICE->setEntityLayerID(new_id, PN_METADATA_SERVICE->getEntityLayerID(clone_entity));
 
                                 //If entity name is valid
@@ -239,14 +239,14 @@ namespace PAIN {
                 // No special behavior here
             }
             
-            ECS::Entity::Type EntityPanel::getSelectedEntity() const
+            entt::entity EntityPanel::getSelectedEntity() const
             {
                 return selected_entity;
             }
 
             void EntityPanel::unselectEntity()
             {
-                selected_entity = UINT16_MAX;
+                selected_entity = entt::null;
             }
 
             bool EntityPanel::isEntityChanged() const
@@ -265,7 +265,7 @@ namespace PAIN {
                 // Detect scene changes
                 bool sceneChanged = ser && ser->consumeSceneChanged();
                 if (sceneChanged) {
-                    selected_entity = ECS::Entity::INVALID;
+                    selected_entity = entt::null;
                     selectedEntityIndex = -1;
                     editor_entities.clear();
                     total_entities = 0;
@@ -288,7 +288,7 @@ namespace PAIN {
                     for (auto entity : view) {
                         auto& name_comp = view.get<MetaData::EntityName>(entity);
                         editor_entities.push_back({
-                            static_cast<ECS::Entity::Type>(entity),
+                            entity,
                             name_comp.name
                         });
                     }
@@ -311,14 +311,14 @@ namespace PAIN {
 
                 // Render entity list
                 for (size_t i = 0; i < editor_entities.size(); ++i) {
-                    ECS::Entity::Type entity_id = editor_entities[i].first;
-                    bool isSelected = (selected_entity == entity_id);
-                    std::string label = editor_entities[i].second + "##" + std::to_string(entity_id);
+                    entt::entity entity_id = editor_entities[i].first;
+                    bool is_selected = (selected_entity == entity_id);
+                    std::string label = editor_entities[i].second /*+ "##" + std::to_string(entity_id)*/;
 
-                    if (ImGui::Selectable(label.c_str(), isSelected)) {
-                        if (isSelected) {
+                    if (ImGui::Selectable(label.c_str(), is_selected)) {
+                        if (is_selected) {
                             // Deselect if already selected
-                            selected_entity = ECS::Entity::INVALID;
+                            selected_entity = entt::null;
                             selectedEntityIndex = -1;
                         }
                         else {

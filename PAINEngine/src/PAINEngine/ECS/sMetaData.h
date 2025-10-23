@@ -21,7 +21,7 @@ namespace PAIN {
             std::string name;
             std::optional<std::string> parent_group;
             std::set<std::string> child_groups;
-            std::set<ECS::Entity::Type> entities;
+            std::set<entt::entity> entities;
             bool expanded;
 
             GroupData() : expanded(true) {}
@@ -41,7 +41,7 @@ namespace PAIN {
             std::unordered_map<std::string, GroupData> groups;
 
             // Name uniqueness tracking
-            std::unordered_map<std::string, ECS::Entity::Type> name_lookup;
+            std::unordered_map<std::string, entt::entity> name_lookup;
 
             std::string generateUniqueName(std::string const& base_name) const;
 
@@ -58,9 +58,9 @@ namespace PAIN {
             void onEvent(Event::Event& e) override;
 
             // === Name Management ===
-            void setEntityName(ECS::Entity::Type entity, std::string const& name);
-            std::string getEntityName(ECS::Entity::Type entity) const;
-            std::optional<ECS::Entity::Type> getEntityByName(std::string const& name) const;
+            void setEntityName(entt::entity entity, std::string const& name);
+            std::string getEntityName(entt::entity entity) const;
+            std::optional<entt::entity> getEntityByName(std::string const& name) const;
             bool isNameValid(std::string const& name) const;
 
             // === Tag System ===
@@ -69,40 +69,40 @@ namespace PAIN {
             bool isTagValid(std::string const& tag) const;
             std::set<std::string> const& getRegisteredTags() const;
 
-            void addTag(ECS::Entity::Type entity, std::string const& tag);
-            void removeTag(ECS::Entity::Type entity, std::string const& tag);
-            std::vector<ECS::Entity::Type> getEntitiesByTag(std::string const& tag) const;
-            bool hasTag(ECS::Entity::Type entity, std::string const& tag) const;
+            void addTag(entt::entity entity, std::string const& tag);
+            void removeTag(entt::entity entity, std::string const& tag);
+            std::vector<entt::entity> getEntitiesByTag(std::string const& tag) const;
+            bool hasTag(entt::entity entity, std::string const& tag) const;
 
             // === Hierarchy System ===
-            void setParent(ECS::Entity::Type child, ECS::Entity::Type parent);
-            void addChild(ECS::Entity::Type parent, ECS::Entity::Type child);
-            void removeChild(ECS::Entity::Type parent, ECS::Entity::Type child);
-            bool hasChildren(ECS::Entity::Type entity) const;
-            bool hasParent(ECS::Entity::Type entity) const;
-            void detachFromParent(ECS::Entity::Type entity);
-            std::optional<ECS::Entity::Type> getParent(ECS::Entity::Type entity) const;
-            std::vector<ECS::Entity::Type> getChildren(ECS::Entity::Type entity) const;
+            void setParent(entt::entity child, entt::entity parent);
+            void addChild(entt::entity parent, entt::entity child);
+            void removeChild(entt::entity parent, entt::entity child);
+            bool hasChildren(entt::entity entity) const;
+            bool hasParent(entt::entity entity) const;
+            void detachFromParent(entt::entity entity);
+            std::optional<entt::entity> getParent(entt::entity entity) const;
+            std::vector<entt::entity> getChildren(entt::entity entity) const;
 
             // === Editor Visibility ===
-            void setVisible(ECS::Entity::Type entity, bool visible);
-            bool isVisible(ECS::Entity::Type entity) const;
-            void setLocked(ECS::Entity::Type entity, bool locked);
-            bool isLocked(ECS::Entity::Type entity) const;
+            void setVisible(entt::entity entity, bool visible);
+            bool isVisible(entt::entity entity) const;
+            void setLocked(entt::entity entity, bool locked);
+            bool isLocked(entt::entity entity) const;
 
             // === Group System ===
             bool createGroup(std::string const& group_name,
                 std::optional<std::string> parent_group = std::nullopt);
             bool deleteGroup(std::string const& group_name, bool remove_entities = false);
-            void assignToGroup(ECS::Entity::Type entity, std::string const& group_name);
-            void unassignFromGroup(ECS::Entity::Type entity);
-            std::optional<std::string> getEntityGroup(ECS::Entity::Type entity) const;
+            void assignToGroup(entt::entity entity, std::string const& group_name);
+            void unassignFromGroup(entt::entity entity);
+            std::optional<std::string> getEntityGroup(entt::entity entity) const;
 
             std::set<std::string> getAllGroups() const;
             std::set<std::string> getRootGroups() const;
 
             // === Serialization ===
-            nlohmann::json serializeEntity(ECS::Entity::Type entity) const;
+            nlohmann::json serializeEntity(entt::entity entity) const;
             nlohmann::json serialize() const;
             void deserialize(nlohmann::json const& data);
             void reset();

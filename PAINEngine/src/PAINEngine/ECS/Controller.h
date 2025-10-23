@@ -63,16 +63,16 @@ namespace PAIN {
 			*********************************************************************/
 
 			//Create Entity
-			Entity::Type createEntity();
+			entt::entity createEntity();
 
 			//Clone entity ( ID of clone returned )
-			Entity::Type cloneEntity(Entity::Type copy);
+			entt::entity cloneEntity(entt::entity copy);
 
 			//Destroy Entity
-			void destroyEntity(Entity::Type entity);
+			void destroyEntity(entt::entity entity);
 
 			//Check entity
-			bool checkEntity(Entity::Type entity) const;
+			bool checkEntity(entt::entity entity) const;
 
 			//Destroy Entity
 			void destroyAllEntities();
@@ -117,16 +117,16 @@ namespace PAIN {
 			}
 
 			// Create component by string name (for editor/serialization)
-			void addComponentByName(Entity::Type entity, const std::string& name) {
+			void addComponentByName(entt::entity entity, const std::string& name) {
 				auto it = component_factories.find(name);
 				if (it != component_factories.end()) {
-					it->second(static_cast<entt::entity>(entity));
+					it->second(entity);
 				}
 			}
 
 			// Add component to entity (move semantics for efficiency)
 			template<typename T>
-			void addEntityComponent(Entity::Type entity, T&& component) {
+			void addEntityComponent(entt::entity entity, T&& component) {
 
 				// Safety checks to check for valid entity before adding comp to the entity
 				if (!checkEntity(entity)) {
@@ -135,41 +135,41 @@ namespace PAIN {
 					return;
 				}
 
-				entt_registry.emplace<T>(static_cast<entt::entity>(entity), std::forward<T>(component));
+				entt_registry.emplace<T>(entity, std::forward<T>(component));
 			}
 
 
 			template<typename T>
-			void removeEntityComponent(Entity::Type entity) {
-				entt_registry.remove<T>(static_cast<entt::entity>(entity));
+			void removeEntityComponent(entt::entity entity) {
+				entt_registry.remove<T>(entity);
 			}
 
 			template<typename T>
-			std::optional<std::reference_wrapper<T>> getEntityComponent(Entity::Type entity) {
-				if (auto* comp = entt_registry.try_get<T>(static_cast<entt::entity>(entity))) {
+			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity) {
+				if (auto* comp = entt_registry.try_get<T>(entity)) {
 					return *comp;
 				}
 				return std::nullopt;
 			}	
 
 			template<typename T>
-			bool checkEntityComponent(Entity::Type entity) {
-				return entt_registry.all_of<T>(static_cast<entt::entity>(entity));
+			bool checkEntityComponent(entt::entity entity) {
+				return entt_registry.all_of<T>(entity);
 			}		
 
 			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
 
 			// Get all component names registered for an entity
-			std::vector<std::string> getEntityComponentNames(Entity::Type entity) const;
+			std::vector<std::string> getEntityComponentNames(entt::entity entity) const;
 
 			// Check if entity has a component by name (uses registered factories)
-			bool hasComponentByName(Entity::Type entity, const std::string& name) const;
+			bool hasComponentByName(entt::entity entity, const std::string& name) const;
 
 			// Remove component by name (for editor use)
-			void removeComponentByName(Entity::Type entity, const std::string& name);
+			void removeComponentByName(entt::entity entity, const std::string& name);
 
 			// Get component pointer by name (type-erased for editor)
-			void* getComponentPtrByName(Entity::Type entity, const std::string& name);
+			void* getComponentPtrByName(entt::entity entity, const std::string& name);
 
 			/*****************************************************************//**
 			* System Methods

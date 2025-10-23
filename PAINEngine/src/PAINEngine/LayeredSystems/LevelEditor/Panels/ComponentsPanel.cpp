@@ -51,7 +51,7 @@ namespace PAIN {
                         return;
                     }
 
-                    ECS::Entity::Type selected_entity = entity_panel->getSelectedEntity();
+                    entt::entity selected_entity = entity_panel->getSelectedEntity();
 
                     if (!ecs->checkEntity(selected_entity)) {
                         ImGui::Text("No valid entity selected");
@@ -132,8 +132,8 @@ namespace PAIN {
                         return;
                     }
 
-                    ECS::Entity::Type entity = entity_panel->getSelectedEntity();
-                    if (entity == ECS::Entity::INVALID || !ecs->checkEntity(entity)) {
+                    entt::entity entity = entity_panel->getSelectedEntity();
+                    if (entity == entt::null || !ecs->checkEntity(entity)) {
                         ImGui::Text("No valid entity selected");
                         ImGui::Spacing();
                         if (ImGui::Button("Close", ImVec2(-1, 0))) {
@@ -202,7 +202,7 @@ namespace PAIN {
                 };
             }
 
-            void ComponentsPanel::renderEntityComponents(ECS::Entity::Type entity) {
+            void ComponentsPanel::renderEntityComponents(entt::entity entity) {
                 auto ecs = services->get<ECS::Controller>();
 
                 if (!ecs || !ecs->checkEntity(entity)) {
@@ -335,10 +335,10 @@ namespace PAIN {
                 }
 
                 // Get selected entity
-                ECS::Entity::Type selected = entity_panel->getSelectedEntity();
+                entt::entity selected = entity_panel->getSelectedEntity();
 
                 // No entity selected - show placeholder
-                if (selected == ECS::Entity::INVALID || !ecs->checkEntity(selected)) {
+                if (selected == entt::null || !ecs->checkEntity(selected)) {
                     ImGui::Spacing();
                     ImGui::Spacing();
 

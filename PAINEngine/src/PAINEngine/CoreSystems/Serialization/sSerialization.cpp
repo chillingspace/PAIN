@@ -285,10 +285,7 @@ namespace PAIN {
                 // Use EnTT view to iterate all entities with EntityName component
                 auto& registry = controller->getRegistry();
                 auto view = registry.view<MetaData::EntityName>();
-                for (auto entity : view) {
-
-                    // Cast to own entity type 
-                    ECS::Entity::Type e = static_cast<ECS::Entity::Type>(entity);
+                for (auto e : view) {
 
                     nlohmann::json E = nlohmann::json::object();
 

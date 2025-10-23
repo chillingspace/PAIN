@@ -25,7 +25,7 @@ namespace PAIN {
                 void nextWindowSettings() override;
 
                 //Get selected entity
-                ECS::Entity::Type getSelectedEntity() const;
+                entt::entity getSelectedEntity() const;
 
                 //Unselect entity
                 void unselectEntity();
@@ -34,10 +34,10 @@ namespace PAIN {
                 bool isEntityChanged() const;
 
             private:
-                std::vector<std::pair<ECS::Entity::Type, std::string>> editor_entities;
+                std::vector<std::pair<entt::entity, std::string>> editor_entities;
 
                 //Selected entity
-                ECS::Entity::Type selected_entity;
+                entt::entity selected_entity;
 
                 //Error msg
                 std::shared_ptr<std::string> error_msg;

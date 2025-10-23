@@ -10,7 +10,7 @@
 
  #pragma once
 
- #include "ECS/ECSTypes.h"
+ 
  
  namespace PAIN {
  
@@ -39,8 +39,8 @@
 		 };
  
 		 struct Relation {
-			 std::vector<ECS::Entity::Type> children;
-			 ECS::Entity::Type parent;
+			 std::vector<entt::entity> children;
+			 entt::entity parent;
 		 };
  
 		 // Group assignment component

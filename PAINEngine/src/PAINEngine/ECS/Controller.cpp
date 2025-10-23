@@ -79,47 +79,45 @@ namespace PAIN {
         * Entity Methods
         *********************************************************************/
 
-        Entity::Type Controller::createEntity() {
-            auto entity = static_cast<Entity::Type>(entt_registry.create());
+        entt::entity Controller::createEntity() {
+            auto entity = entt_registry.create();
             ++entity_count;
             // TODO: When create entity, default add the metadata comps
             return entity;
 
         }
 
-        Entity::Type Controller::cloneEntity(Entity::Type copy) {
+        entt::entity Controller::cloneEntity(entt::entity copy) {
             if (!checkEntity(copy)) {
-                PN_CORE_INFO("Cannot clone invalid entity: {}", copy);
-                return Entity::INVALID;
+                PN_CORE_INFO("Cannot clone invalid entity: {}", entt::to_integral(copy));
+                return entt::null;
             }
 
-            Entity::Type clone = createEntity();
+            entt::entity clone = createEntity();
 
             // Copy all components from source to clone, EnTT doesn't have built-in cloning, so we iterate through storage pools
-            entt::entity src_entity = static_cast<entt::entity>(copy);
-            entt::entity clone_entity = static_cast<entt::entity>(clone);
 
             // Iterate all registered component types and copy if present
             for (const auto [type_index, storage] : entt_registry.storage()) {
-                if (storage.contains(src_entity)) {
+                if (storage.contains(copy)) {
                     // Component exists on source, copy to clone
                     // Note: This requires components to be copy-constructible
-                    storage.push(clone_entity, storage.value(src_entity));
+                    storage.push(clone, storage.value(copy));
                 }
             }
 
             return clone;
         }
 
-        void Controller::destroyEntity(Entity::Type entity) {
-            if (entt_registry.valid(static_cast<entt::entity>(entity))) {
-                entt_registry.destroy(static_cast<entt::entity>(entity));
+        void Controller::destroyEntity(entt::entity entity) {
+            if (entt_registry.valid(entity)) {
+                entt_registry.destroy(entity);
                 --entity_count;
             }
         }
 
-        bool Controller::checkEntity(Entity::Type entity) const {
-            return entt_registry.valid(static_cast<entt::entity>(entity));
+        bool Controller::checkEntity(entt::entity entity) const {
+            return entt_registry.valid(entity);
         }
 
         void Controller::destroyAllEntities() {
@@ -135,18 +133,16 @@ namespace PAIN {
             return component_factories;
         }
 
-        std::vector<std::string> Controller::getEntityComponentNames(Entity::Type entity) const {
+        std::vector<std::string> Controller::getEntityComponentNames(entt::entity entity) const {
             std::vector<std::string> component_names;
 
             if (!checkEntity(entity)) {
                 return component_names;
             }
 
-            auto e = static_cast<entt::entity>(entity);
-
             // Iterate all registered component checkers
             for (const auto& [name, checker] : component_checkers) {
-                if (checker(e)) {
+                if (checker(entity)) {
                     component_names.push_back(name);
                 }
             }
@@ -154,29 +150,29 @@ namespace PAIN {
             return component_names;
         }
 
-        bool Controller::hasComponentByName(Entity::Type entity, const std::string& name) const {
+        bool Controller::hasComponentByName(entt::entity entity, const std::string& name) const {
             auto it = component_checkers.find(name);
             if (it == component_checkers.end()) {
                 return false;
             }
 
-            return it->second(static_cast<entt::entity>(entity));
+            return it->second(entity);
         }
 
-        void Controller::removeComponentByName(Entity::Type entity, const std::string& name) {
+        void Controller::removeComponentByName(entt::entity entity, const std::string& name) {
             auto it = component_removers.find(name);
             if (it != component_removers.end()) {
-                it->second(static_cast<entt::entity>(entity));
+                it->second(entity);
             }
         }
 
-        void* Controller::getComponentPtrByName(Entity::Type entity, const std::string& name) {
+        void* Controller::getComponentPtrByName(entt::entity entity, const std::string& name) {
             auto it = component_getters.find(name);
             if (it == component_getters.end()) {
                 return nullptr;
             }
 
-            return it->second(static_cast<entt::entity>(entity));
+            return it->second(entity);
         }
 
 

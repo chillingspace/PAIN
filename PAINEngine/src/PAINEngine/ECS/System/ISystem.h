@@ -3,7 +3,6 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
-#include "../ECSTypes.h"
 #include "CoreSystems/Events/Event.h"
 #include <Applications/AppSystem.h>
 

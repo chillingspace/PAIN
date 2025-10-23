@@ -4,7 +4,6 @@
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
 
 #include "Panels.h"
-#include "ECS/ECSTypes.h"
 #include "Utility/ECSUtility.h"
 
 namespace PAIN {
@@ -39,7 +38,7 @@ namespace PAIN {
 					comps_ui.emplace(ECS::Utility::convertTypeString(typeid(T).name()), [comp_func](ComponentsPanel& comp_panel, void* comp) { comp_func(comp_panel, *static_cast<T*>(comp)); });
 				}
 
-				void renderEntityComponents(ECS::Entity::Type entity);
+				void renderEntityComponents(entt::entity entity);
 
 
 			private:

@@ -88,12 +88,9 @@ namespace PAIN {
 
 					for (auto e : view) {
 
-						// Cast to own entity type 
-						ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
+						auto transform = ecs->getEntityComponent<Transform>(e);
 
-						auto transform = ecs->getEntityComponent<Transform>(entity);
-
-						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+						auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
 
 						glm::mat4 model;
 						if (transform.has_value())
@@ -123,11 +120,8 @@ namespace PAIN {
 
 			for (auto e : view) {
 
-				// Cast to own entity type 
-				ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
-
-				auto transform = ecs->getEntityComponent<Transform>(entity);
-				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
+				auto transform = ecs->getEntityComponent<Transform>(e);
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
 				glm::mat4 model;
 				if (transform.has_value())
 				{
