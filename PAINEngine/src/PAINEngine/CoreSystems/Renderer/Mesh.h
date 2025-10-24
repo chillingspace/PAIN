@@ -19,8 +19,6 @@ namespace PAIN {
 		~Mesh();
 		void Draw(unsigned int vao, unsigned int vbo, unsigned int ebo) const;
 
-		static std::shared_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
-
 		unsigned int texture_id = 0;
 		Material material{};
 

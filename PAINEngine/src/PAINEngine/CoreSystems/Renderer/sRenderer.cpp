@@ -33,8 +33,90 @@ namespace PAIN {
 		
 	}
 
-	void sRenderer::onUpdate(AppTiming timing) {
+	void sRenderer::shadowPass()
+	{
+		// populate shadow map first
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
 
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+
+		// Im sure there is a better way to render shadows
+		for (const Light& l : LightSources::get().getAll()) {
+
+			if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED) continue;
+
+			w_renderer->BeginShadowPass(l);
+
+			for (auto e : view) {
+
+				auto transform = ecs->getEntityComponent<Transform>(e);
+
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+
+				glm::mat4 model;
+				if (transform.has_value())
+				{
+					model = transform.value().get().getMatrix();
+				}
+
+				if (mesh.has_value())
+				{
+					auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+					w_renderer->DrawShadows(mesh_ptr.get(), model, l); // uses shadow_shader
+
+				}
+
+
+			}
+			w_renderer->EndShadowPass();
+		}
+	}
+
+	void sRenderer::geometryPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		w_renderer->BeginGeometryPass(scene);
+		for (auto e : view) {
+
+			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			glm::mat4 model;
+			if (transform.has_value())
+			{
+				model = transform.value().get().getMatrix();
+			}
+			if (mesh.has_value())
+			{
+				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+				w_renderer->DrawGeometry(m_Scene, mesh_ptr.get(), model);
+			}
+
+		}
+		w_renderer->EndGeometryPass();
+	}
+
+	void sRenderer::lightingPass()
+	{
+		auto scene = services->get<Scene>();
+		w_renderer->LightingPass(scene, LightSources::get());
+	}
+	void sRenderer::postProcessPass()
+	{
+		w_renderer->PostProcessPass();
+	}
+
+	void sRenderer::onUpdate(AppTiming timing) {
 
 		{
 #ifdef DEBUG
@@ -68,76 +150,11 @@ namespace PAIN {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Render all
-			// populate shadow map first
-			auto ecs = services->get<ECS::Controller>();
-			auto scene = services->get<Scene>();
-
-			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
-
-			// Im sure there is a better way to render shadows
-			for (const Light& l : LightSources::get().getAll()) {
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-					//glClearDepth(1.0f);  // Explicitly set clear value
-					glClear(GL_DEPTH_BUFFER_BIT);
-
-					// Use EnTT view to iterate all entities with EntityName component
-					auto& registry = ecs->getRegistry();
-					auto view = registry.view<MetaData::EntityName>();
-
-					for (auto e : view) {
-
-						auto transform = ecs->getEntityComponent<Transform>(e);
-
-						auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
-
-						glm::mat4 model;
-						if (transform.has_value())
-						{
-							model = transform.value().get().getMatrix();
-						}
-
-						if (mesh.has_value())
-						{
-							auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
-							w_renderer->RenderGeometryShadows(mesh_ptr.get(), model, l); // uses shadow_shader
-						
-						}
-						
-
-					}
-					
-				}
-			}
-
-			// render scene
-			w_renderer->BeginRendering(m_Scene);
-
-			// Use EnTT view to iterate all entities with EntityName component
-			auto& registry = ecs->getRegistry();
-			auto view = registry.view<MetaData::EntityName>();
-
-			for (auto e : view) {
-
-				auto transform = ecs->getEntityComponent<Transform>(e);
-				auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
-				glm::mat4 model;
-				if (transform.has_value())
-				{
-					model = transform.value().get().getMatrix();
-				}
-				if (mesh.has_value())
-				{
-					auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
-						// uses geometry_shader
-					w_renderer->RenderGeometry(m_Scene, mesh_ptr.get(), model);
-					
-				}
-
-			}
-			
-			w_renderer->EndRendering(m_Scene);
+			// Render all passes
+			shadowPass();
+			geometryPass();
+			lightingPass();
+			postProcessPass();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
@@ -151,6 +168,7 @@ namespace PAIN {
 		lcam.forward = m_Scene->GetActiveCamera()->forward;
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
 	}
+
 
 	void sRenderer::onEvent(Event::Event& e) {}
 }

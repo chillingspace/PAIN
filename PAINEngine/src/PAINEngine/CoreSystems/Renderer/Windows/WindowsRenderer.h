@@ -42,11 +42,17 @@ namespace PAIN {
 
 		void Init(std::shared_ptr<Services> app_services);
 
-		void BeginRendering(std::shared_ptr<Scene> scene);
-		void EndRendering(std::shared_ptr<Scene> scene);
+		// PASSES
+		void BeginShadowPass(const Light& l);
+		void DrawShadows(Mesh* mesh, const glm::mat4& M, const Light& l);
+		void EndShadowPass();
 
-		void RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
-		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
+		void BeginGeometryPass(std::shared_ptr<Scene> scene);
+		void DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M);
+		void EndGeometryPass();
+
+		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
+		void PostProcessPass();
 
 		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
 
@@ -115,15 +121,6 @@ namespace PAIN {
 			&material_properties_texture,
 			//&shadow_texture
 		};
-
-		/*
-		std::unique_ptr<Shader> pbr_shader = nullptr;
-		std::unique_ptr<Shader> geometry_shader = nullptr;
-		std::unique_ptr<Shader> floor_shader = nullptr;
-		std::unique_ptr<Shader> passthrough_shader = nullptr;
-		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Shader> texture_shader = nullptr;
-		*/
 
 		std::shared_ptr<Services> services;
 

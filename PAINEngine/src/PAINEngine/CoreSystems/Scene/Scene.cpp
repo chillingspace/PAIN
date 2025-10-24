@@ -109,12 +109,12 @@ namespace PAIN {
 			};
 
 			// Load and play the looping music
-			std::string loopingSoundPath = pathService->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
-			audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f);
-			auto channelOpt = audioManager->play(loopingSoundPath, pathCorners[0], 0.0f);
-			if (channelOpt.has_value()) {
-				audioSourceChannel = channelOpt.value();
-			}
+			//std::string loopingSoundPath = pathService->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+			//audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f);
+			//auto channelOpt = audioManager->play(loopingSoundPath, pathCorners[0], 0.0f);
+			//if (channelOpt.has_value()) {
+			//	audioSourceChannel = channelOpt.value();
+			//}
 
 			// Load the footstep playlist
 			Audio::PlaylistDesc footstepPlaylist;

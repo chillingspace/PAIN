@@ -348,17 +348,38 @@ namespace PAIN {
 		glBindVertexArray(0);
 	}
 
-	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::BeginShadowPass(const Light& l)
 	{
-		glViewport(0, 0, winWidth, winHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+		//glClearDepth(1.0f);  // Explicitly set clear value
+		glClear(GL_DEPTH_BUFFER_BIT);
 
-		// Setup framebuffers, clear buffers
-		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void WindowsRenderer::EndRendering(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::DrawShadows(Mesh* mesh, const glm::mat4& M, const Light& l)
 	{
+		if (!mesh || !shadow_shader) return;
+
+		shadow_shader->Bind();
+
+		shadow_shader->SetUniform("u_M", M);
+		shadow_shader->SetUniform("u_V", l.view());
+		shadow_shader->SetUniform("u_P", l.projection());
+
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+	}
+
+	void WindowsRenderer::EndShadowPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
+	{
+		glViewport(0, 0, winWidth, winHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// draw floor
 		{
 			if (!floor_shader) {
@@ -374,6 +395,54 @@ namespace PAIN {
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 		}
+
+		geometry_shader->Bind();
+		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+	}
+
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M)
+	{
+		if (!mesh || !geometry_shader) return;
+
+		geometry_shader->SetUniform("u_M", M);
+
+		geometry_shader->SetUniform("material.rough", mesh->material.rough);
+		geometry_shader->SetUniform("material.metal", mesh->material.metal);
+		geometry_shader->SetUniform("material.color", mesh->material.color);
+		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
+
+		if (mesh->material.useTex) {
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+			geometry_shader->SetUniform("material.tex", 6);
+		}
+
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+	}
+
+	void WindowsRenderer::EndGeometryPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
+	{
+		//{
+		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
+
+		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//	passthrough_shader->Bind();
+
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_2D, col_texture);
+
+		//	glBindVertexArray(passthrough_vao);
+		//	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//	return;
+		//}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
@@ -489,23 +558,10 @@ namespace PAIN {
 			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
 		}
 
+	}
 
-		//{
-		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
-
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//	passthrough_shader->Bind();
-
-		//	glActiveTexture(GL_TEXTURE0);
-		//	glBindTexture(GL_TEXTURE_2D, col_texture);
-
-		//	glBindVertexArray(passthrough_vao);
-		//	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		//	return;
-		//}
-
-
+	void WindowsRenderer::PostProcessPass()
+	{
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
@@ -515,141 +571,6 @@ namespace PAIN {
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}
-/*
-	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
-		services = app_services;
-#ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
-#else
-		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
-#endif
-
-		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
-#else
-		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
-#endif
-
-		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-#ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("passthrough.vert", "passthrough.frag");
-#else
-		passthrough_shader = LoadShaders("android_passthrough.vert", "android_passthrough.frag");
-#endif
-
-#ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
-#else
-		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
-#endif
-
-#ifdef PN_PLATFORM_WINDOWS
-		texture_shader = LoadShaders("texture.vert", "texture.frag");
-#else
-		texture_shader = LoadShaders("android_texture.vert", "android_texture.frag");
-#endif
-
-		glGenVertexArrays(1, &empty_vao);
-		if (empty_vao == 0) {
-			PN_CORE_ERROR("Failed to create empty VAO");
-			return;
-		}
-
-		_initDeferredShadingBuffers();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		
-		// init light source(s)
-
-		LightSources::get().create("cam");
-		auto olcam = LightSources::get().get("cam");
-		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.01f);
-		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
-
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(4.f, 4.f, -8.f);
-		la.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("b");
-		auto olb = LightSources::get().get("b");
-		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		lb.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("c");
-		auto olc = LightSources::get().get("c");
-		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 30.f, 0.f);
-		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-		lc.L_intensity = glm::vec3(0.5f);
-		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.type = Light::TYPES::DIRECTIONAL;
-		//lc.far_plane = 200.f;
-		//lc.forward = -lc.position;
-	}
-*/
-
-	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
-	{
-		if (!mesh || !geometry_shader) return;
-
-		geometry_shader->Bind();
-
-		geometry_shader->SetUniform("u_M", model);
-		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
-
-		geometry_shader->SetUniform("material.rough", mesh->material.rough);
-		geometry_shader->SetUniform("material.metal", mesh->material.metal);
-		geometry_shader->SetUniform("material.color", mesh->material.color);
-		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
-
-		if (mesh->material.useTex) {
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
-			geometry_shader->SetUniform("material.tex", 6);
-		}
-
-		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
-	}
-
-	void WindowsRenderer::RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light) {
-		if (!mesh || !shadow_shader) return;
-
-		shadow_shader->Bind();
-
-		shadow_shader->SetUniform("u_M", model);
-		shadow_shader->SetUniform("u_V", light.view());
-		shadow_shader->SetUniform("u_P", light.projection());
-
-		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
 	}
 
 	void WindowsRenderer::Cleanup() {
