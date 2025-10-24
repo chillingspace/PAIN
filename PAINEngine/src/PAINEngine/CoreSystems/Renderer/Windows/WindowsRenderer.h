@@ -47,6 +47,9 @@ namespace PAIN {
 
 		void RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
 		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
+
+		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
+
 		void Cleanup();
 
 		unsigned int getFinalFbo() const {
@@ -86,8 +89,6 @@ namespace PAIN {
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
-		unsigned int texture2d_vao = 0;
-		unsigned int texture2d_vbo = 0;
 
 		unsigned int final_texture = 0;		// for imgui/post-processing/display
 

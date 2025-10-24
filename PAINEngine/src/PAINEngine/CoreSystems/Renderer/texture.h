@@ -28,5 +28,9 @@ namespace PAIN {
 		}
 
 		unsigned int load(const char* file_path, const std::string& ref);
+
+		const  std::unordered_map<std::string, unsigned int>& getTextureMap() const {
+			return texture_map;
+		}
 	};
 }

@@ -44,6 +44,11 @@ namespace PAIN {
 		glUniform3f(glGetUniformLocation(m_RendererID, name.c_str()), val.x, val.y, val.z);
 	}
 
+	void Shader::SetUniform(const std::string& name, const glm::vec2& val) const
+	{
+		glUniform2f(glGetUniformLocation(m_RendererID, name.c_str()), val.x, val.y);
+	}
+
 	void Shader::SetUniform(const std::string& name, float x, float y, float z) const
 	{
 		glUniform3f(glGetUniformLocation(m_RendererID, name.c_str()), x, y, z);

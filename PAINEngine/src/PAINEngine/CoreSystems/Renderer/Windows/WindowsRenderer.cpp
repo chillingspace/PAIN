@@ -10,6 +10,7 @@
  */
 
 #include "WindowsRenderer.h"
+#include "CoreSystems/Renderer/texture.h"
 
 
 namespace PAIN {
@@ -300,15 +301,6 @@ namespace PAIN {
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
-
-		// vao/vbo for texture2d shader
-		{
-			static constexpr float quadVertices[] = {
-				// positions    // texCoords
-				-0.5f,  0.5f,   0.0f, 1.0f,
-				-0.5f, -0.5f,   0.0f, 0.0f,
-				 0.5f, -0.5f,   1.0f, 0.0f,
-				-0.5f,  0.5f,   0.0f,
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
@@ -329,6 +321,31 @@ namespace PAIN {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+	}
+
+	void WindowsRenderer::Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale) {
+		const auto texmap = TextureManager::get().getTextureMap();
+		if (texmap.find(ref) == texmap.end()) {
+			PN_CORE_ERROR("Texture with ref '{}' not found!", ref);
+			return;
+		}
+
+		if (!texture2d_shader) {
+			PN_CORE_ERROR("Unable to find texture2d_shader");
+			return;
+		}
+
+		texture2d_shader->Bind();
+		texture2d_shader->SetUniform("pos", pos);
+		texture2d_shader->SetUniform("ndc_scale", scale);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, texmap.at(ref));
+		texture2d_shader->SetUniform("tex", 6);
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindVertexArray(0);
 	}
 
 	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
@@ -463,6 +480,13 @@ namespace PAIN {
 
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+		// render 2D textures onto screen
+
+		{
+			// !TODO: add queue and iterate through all 2D textures to be rendered last
+			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
 		}
 
 
