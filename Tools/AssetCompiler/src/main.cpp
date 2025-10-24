@@ -11,7 +11,7 @@
 #include <limits.h>
 #endif
 
-std::filesystem::path getExecutablePath() {
+static std::filesystem::path getExecutablePath() {
 #ifdef _WIN32
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
@@ -36,7 +36,7 @@ std::filesystem::path getExecutablePath() {
 #endif
 }
 
-std::filesystem::path findProjectRoot() {
+static std::filesystem::path findProjectRoot() {
     // Get the actual executable directory
     std::filesystem::path execDir = getExecutablePath();
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path assetsRoot = projectRoot / "assets";
 
 	//create assset compiler
-    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(assetsRoot);
+    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(assetsRoot, getExecutablePath());
 
     //Enforce a standard structure for assets
     compiler->enforceStandardStructure();

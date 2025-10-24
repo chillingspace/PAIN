@@ -24,6 +24,7 @@ namespace PAIN {
 
 			//Paths
 			std::filesystem::path assets_root;
+			std::filesystem::path exec_path;
 
 			//Extensions
 			std::string desc_ext;
@@ -67,7 +68,7 @@ namespace PAIN {
 		public:
 
 			//Default compiler
-			Compiler(std::filesystem::path const& assets_root) : assets_root{ assets_root }, desc_ext{ Assets::descriptor_ext } {
+			Compiler(std::filesystem::path const& assets_root, std::filesystem::path const& exec_path) : assets_root{ assets_root }, exec_path{ exec_path }, desc_ext { Assets::descriptor_ext } {
 #ifdef PN_PLATFORM_WINDOWS
 				output_dir = std::string(PAIN_ASSETS_OUTPUT_DIR);
 

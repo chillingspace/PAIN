@@ -389,8 +389,9 @@ namespace PAIN {
         }
 
         std::string Compiler::GetCuttlefishExecutable() const {
+
             // Try to find cuttlefish executable
-            std::filesystem::path cuttle_fish_path = assets_root.parent_path() / "vendor/cuttlefish/cuttlefish.exe";
+            std::filesystem::path cuttle_fish_path = exec_path / "cuttlefish.exe";
             std::cout << cuttle_fish_path << std::endl;
 
             //Check if exists
@@ -399,7 +400,7 @@ namespace PAIN {
             }
         
             std::cout << "WARNING: Cuttlefish executable not found!" << std::endl;
-            return "cuttlefish"; // Fallback
+            return "cuttlefish.exe"; // Fallback
         }
 
         bool Compiler::CompressTextureDDS(unsigned char* pixels, int width, int height, int channels,

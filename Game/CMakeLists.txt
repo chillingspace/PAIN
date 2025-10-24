@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.22)
+message(STATUS "Game configuration begin.")
+
 # Collect all game source files
 file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
@@ -16,6 +19,7 @@ else()
   # Debug -> fmodL.(dll), others -> fmod.(dll)
   add_custom_command(TARGET Game POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:lua>"
             "$<TARGET_FILE:FMOD::core>"
             "$<TARGET_FILE_DIR:Game>"
     COMMENT "Copying FMOD runtime DLL...")
@@ -31,3 +35,5 @@ else()
   set_target_properties(Game PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Game>")
 endif()
+
+message(STATUS "Game configuration successful.")
