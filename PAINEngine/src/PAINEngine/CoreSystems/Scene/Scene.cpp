@@ -5,6 +5,7 @@
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
 
 #ifdef _DEBUG
@@ -67,17 +68,32 @@ namespace PAIN {
 		cacheMesh("");
 		cacheMesh(obj_path);
 
+		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://Models/quad.obj");
+		cacheMesh(quad_path);
 
 		auto cube_mesh = getMeshId("");
 		auto ogre_mesh = getMeshId("ogre.obj");
+		auto quad_mesh_id = getMeshId("quad.obj");
+
+		auto quad_mesh = getMesh(quad_mesh_id);
+		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://Textures/sunshine.png");
+		quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
 		
 		// Create the audio source object and store its entity ID
 		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
+
+		Material texturedMat;
+		texturedMat.useTex = true;
+		texturedMat.tex = quad_mesh->texture_id;
+		texturedMat.color = { 1.f, 0.f, 1.f };
+
+		quad_mesh->material = texturedMat;
 
 		// Create the other static objects
 		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		if (audioManager)
 		{
@@ -191,7 +207,7 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	entt::entity Scene::AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	entt::entity Scene::AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		entt::entity entity = ecs->createEntity();
@@ -310,6 +326,7 @@ namespace PAIN {
 
 		std::vector<glm::vec3> positions;
 		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> texCoords;
 
 #ifdef PN_PLATFORM_WINDOWS
 		std::ifstream objStream(mesh_full);
@@ -334,12 +351,12 @@ namespace PAIN {
 				ls >> p.x >> p.y >> p.z;
 				positions.push_back(p);
 			}
-			//else if (token == "vt") {
-			//	// Process texture coordinate
-			//	float s, t;
-			//	ls >> s >> t;
-			//	texCoords.push_back(glm::vec2(s, t));
-			//}
+			else if (token == "vt") {
+				// Process texture coordinate
+				float s, t;
+				ls >> s >> t;
+				texCoords.push_back(glm::vec2(s, t));
+			}
 			else if (token == "vn") {
 				glm::vec3 n;
 				ls >> n.x >> n.y >> n.z;
@@ -357,6 +374,9 @@ namespace PAIN {
 						Vertex v{};
 						if (tv[j].pIdx > 0) v.pos = positions[tv[j].pIdx - 1];
 						if (tv[j].nIdx > 0) v.normal = normals[tv[j].nIdx - 1];
+						if (!texCoords.empty() && tv[j].pIdx > 0 && tv[j].pIdx - 1 < texCoords.size()) {
+							v.uv = texCoords[tv[j].pIdx - 1];
+						}
 
 						vertices.push_back(v);
 						indices.push_back((unsigned int)vertices.size() - 1);

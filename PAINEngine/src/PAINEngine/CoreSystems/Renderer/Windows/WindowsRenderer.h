@@ -57,8 +57,20 @@ namespace PAIN {
 			return final_texture;
 		}
 
+		static constexpr int MAX_VERTICES = 1000000;
+		static constexpr int MAX_INDICES = 1000000;
+
 	private:
-		// === Framebuffer objects ===
+
+		unsigned int geometry_vao = 0;
+		unsigned int geometry_vbo = 0;
+		unsigned int geometry_ebo = 0;
+/*
+		unsigned int empty_vao = 0;
+
+		unsigned int passthrough_vao = 0;
+		unsigned int passthrough_vbo = 0;
+*/
 		unsigned int ds_fbo = 0;			// deferred shading framebuffer
 		unsigned int ds_rbo = 0;				// depth buffer
 		//unsigned int shadow_fbo = 0;
@@ -104,6 +116,14 @@ namespace PAIN {
 			//&shadow_texture
 		};
 
+		/*
+		std::unique_ptr<Shader> pbr_shader = nullptr;
+		std::unique_ptr<Shader> geometry_shader = nullptr;
+		std::unique_ptr<Shader> floor_shader = nullptr;
+		std::unique_ptr<Shader> passthrough_shader = nullptr;
+		std::unique_ptr<Shader> shadow_shader = nullptr;
+		std::unique_ptr<Shader> texture_shader = nullptr;
+		*/
 
 		std::shared_ptr<Services> services;
 

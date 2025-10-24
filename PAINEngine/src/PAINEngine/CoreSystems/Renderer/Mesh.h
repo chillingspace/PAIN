@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Material.h"
+
 namespace PAIN {
 
 	struct Vertex {
@@ -13,17 +15,17 @@ namespace PAIN {
 	class Mesh {
 
 	public:
-		Mesh(const std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 		~Mesh();
-		void Draw() const;
+		void Draw(unsigned int vao, unsigned int vbo, unsigned int ebo) const;
 
 		static std::shared_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
 
-	private:
+		unsigned int texture_id = 0;
+		Material material{};
 
-		unsigned int vao = 0;
-		unsigned int vbo = 0;
-		unsigned int ebo = 0;
-		size_t index_count;
+	private:
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
 	};
 }
