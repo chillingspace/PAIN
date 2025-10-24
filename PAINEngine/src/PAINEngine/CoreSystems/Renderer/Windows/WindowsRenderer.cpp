@@ -214,6 +214,39 @@ namespace PAIN {
 
 			glBindVertexArray(0);
 		}
+
+		// vao/vbo for geometry shader
+
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &geometry_vao);
+			glBindVertexArray(geometry_vao);
+
+			// Generate and bind VBO
+			glGenBuffers(1, &geometry_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+			// Generate and bind EBO (index buffer)
+			glGenBuffers(1, &geometry_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			// Normal attribute, layout(location = 1)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+			glEnableVertexAttribArray(1);
+
+			// texcoords attribute, layout(location = 2)
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+			glEnableVertexAttribArray(2);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
 	}
 
 	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
@@ -498,7 +531,7 @@ namespace PAIN {
 			geometry_shader->SetUniform("material.tex", 6);
 		}
 
-		mesh->Draw();
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
 	}
 
 	void WindowsRenderer::RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light) {
@@ -510,13 +543,13 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_V", light.view());
 		shadow_shader->SetUniform("u_P", light.projection());
 
-		mesh->Draw();
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
 	}
 
 	void WindowsRenderer::Cleanup() {
-		if (vao != 0) {
-			glDeleteVertexArrays(1, &vao);
-			vao = 0;
+		if (geometry_vao != 0) {
+			glDeleteVertexArrays(1, &geometry_vao);
+			geometry_vao = 0;
 		}
 
 		if (empty_vao != 0) {
@@ -524,14 +557,14 @@ namespace PAIN {
 			empty_vao = 0;
 		}
 
-		if (vbo != 0) {
-			glDeleteBuffers(1, &vbo);
-			vbo = 0;
+		if (geometry_vbo != 0) {
+			glDeleteBuffers(1, &geometry_vbo);
+			geometry_vbo = 0;
 		}
 
-		if (ebo != 0) {
-			glDeleteBuffers(1, &ebo);
-			ebo = 0;
+		if (geometry_ebo != 0) {
+			glDeleteBuffers(1, &geometry_ebo);
+			geometry_ebo = 0;
 		}
 
 		if (pbr_shader) {

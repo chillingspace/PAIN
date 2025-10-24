@@ -2,53 +2,32 @@
 #include "Mesh.h"
 
 namespace PAIN {
-	Mesh::Mesh(const std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+		: vertices(vertices), indices(indices)
 	{
-		index_count = static_cast<size_t>(indices.size());
-
-		// Generate and bind VAO
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		// Generate and bind VBO
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-
-		// Generate and bind EBO (index buffer)
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-
-		// Position attribute, layout(location = 0)
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		// color attribute, layout(location = 1)
-		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-		//glEnableVertexAttribArray(1);
-
-		// Normal attribute, layout(location = 1)
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-		glEnableVertexAttribArray(1);
-
-		// Unbind VAO
-		glBindVertexArray(0);
-
 	}
 	Mesh::~Mesh()
 	{
-		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(1, &vbo);
-		glDeleteBuffers(1, &ebo);
 	}
-	void Mesh::Draw() const
+	void Mesh::Draw(unsigned int vao, unsigned int vbo, unsigned int ebo) const
 	{
 		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(unsigned int), indices.data());
+
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error in Mesh::Draw: {0}", err);
+		}
 	}
+
 	std::shared_ptr<Mesh> Mesh::LoadObj(const std::string& mesh_file)
 	{
 		std::vector<Vertex> vertices;

@@ -65,10 +65,13 @@ namespace PAIN {
 			return final_texture;
 		}
 
+		static constexpr int MAX_VERTICES = 1000000;
+		static constexpr int MAX_INDICES = 1000000;
+
 	private:
-		unsigned int vao = 0;
-		unsigned int vbo = 0;
-		unsigned int ebo = 0;
+		unsigned int geometry_vao = 0;
+		unsigned int geometry_vbo = 0;
+		unsigned int geometry_ebo = 0;
 
 		unsigned int empty_vao = 0;
 
