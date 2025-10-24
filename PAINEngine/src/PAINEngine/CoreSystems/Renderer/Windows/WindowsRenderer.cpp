@@ -9,12 +9,7 @@
  *
  */
 
-
- //#ifdef PN_PLATFORM_WINDOWS
-
 #include "WindowsRenderer.h"
-
-#include "CoreSystems/Path/Path.h"
 
 
 namespace PAIN {
@@ -39,6 +34,7 @@ namespace PAIN {
 		Cleanup();
 	}
 
+	// TO BE MOVED
 	std::string WindowsRenderer::ReadFile(const std::filesystem::path& path)
 	{
 		std::ifstream file(path);
@@ -97,6 +93,56 @@ namespace PAIN {
 		return std::make_unique<Shader>(vert_code, frag_code);
 	}
 
+	void WindowsRenderer::initShaders()
+	{
+#ifdef PN_PLATFORM_WINDOWS
+		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
+#else
+		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
+#endif
+
+		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+		else {
+			PN_CORE_INFO("Successfully linked shader");
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
+#else
+		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
+#endif
+
+		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+#ifdef PN_PLATFORM_WINDOWS
+		floor_shader = LoadShaders("floor.vert", "floor.frag");
+#else
+		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
+#endif
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+#ifdef PN_PLATFORM_WINDOWS
+		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
+#else
+		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
+#endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
+#else
+		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
+#endif
+	}
+
+	// TO BE MOVED
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment) {
 		glGenTextures(1, &tex);
 		if (!tex) {
@@ -128,6 +174,7 @@ namespace PAIN {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, gl_color_attachment, GL_TEXTURE_2D, tex, 0);
 	}
 
+	// TO BE MOVED
 	void WindowsRenderer::_initDeferredShadingBuffers() {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}", winWidth, winHeight);
 
@@ -221,6 +268,26 @@ namespace PAIN {
 
 			glBindVertexArray(0);
 		}
+	}
+
+	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
+		services = app_services;
+		
+		initShaders();
+
+		// fallback or placeholder VAO to avoid OpenGL errors 
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
+		_initDeferredShadingBuffers();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
 	}
 
 	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
@@ -384,99 +451,6 @@ namespace PAIN {
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-
-	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
-		services = app_services;
-#ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
-#else
-		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
-#endif
-
-		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
-#else
-		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
-#endif
-
-		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-#ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
-#else
-		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
-#endif
-
-#ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
-#else
-		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
-#endif
-
-		glGenVertexArrays(1, &empty_vao);
-		if (empty_vao == 0) {
-			PN_CORE_ERROR("Failed to create empty VAO");
-			return;
-		}
-
-		_initDeferredShadingBuffers();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		
-		// init light source(s)
-
-		LightSources::get().create("cam");
-		auto olcam = LightSources::get().get("cam");
-		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.01f);
-		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
-
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(4.f, 4.f, -8.f);
-		la.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("b");
-		auto olb = LightSources::get().get("b");
-		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		lb.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("c");
-		auto olc = LightSources::get().get("c");
-		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 30.f, 0.f);
-		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-		lc.L_intensity = glm::vec3(0.5f);
-		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.type = Light::TYPES::DIRECTIONAL;
-		//lc.far_plane = 200.f;
-		//lc.forward = -lc.position;
-	}
-
 
 	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
 	{
