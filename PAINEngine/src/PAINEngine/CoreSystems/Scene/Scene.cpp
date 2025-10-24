@@ -5,6 +5,7 @@
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "CoreSystems/Renderer/texture.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -36,9 +37,16 @@ namespace PAIN {
 		cacheMesh("");
 		cacheMesh(obj_path);
 
+		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://Models/quad.obj");
+		cacheMesh(quad_path);
 
 		auto cube_mesh = getMeshId("");
 		auto ogre_mesh = getMeshId("ogre.obj");
+		auto quad_mesh_id = getMeshId("quad.obj");
+
+		auto quad_mesh = getMesh(quad_mesh_id);
+		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://Textures/sunshine.png");
+		quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
 		
 		// Create the audio source object and store its entity ID
 		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
@@ -47,6 +55,7 @@ namespace PAIN {
 		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(quad_mesh_id, "texture", { 0.f, 3.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		if (audioManager)
 		{

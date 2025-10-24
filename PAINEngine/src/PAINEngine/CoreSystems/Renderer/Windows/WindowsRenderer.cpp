@@ -422,15 +422,21 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
+		passthrough_shader = LoadShaders("passthrough.vert", "passthrough.frag");
 #else
-		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
+		passthrough_shader = LoadShaders("android_passthrough.vert", "android_passthrough.frag");
 #endif
 
 #ifdef PN_PLATFORM_WINDOWS
 		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
 #else
 		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
+#endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		texture_shader = LoadShaders("texture.vert", "texture.frag");
+#else
+		texture_shader = LoadShaders("android_texture.vert", "android_texture.frag");
 #endif
 
 		glGenVertexArrays(1, &empty_vao);
