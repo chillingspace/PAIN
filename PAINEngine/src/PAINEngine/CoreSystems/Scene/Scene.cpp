@@ -295,6 +295,7 @@ namespace PAIN {
 
 		std::vector<glm::vec3> positions;
 		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> texCoords;
 
 #ifdef PN_PLATFORM_WINDOWS
 		std::ifstream objStream(mesh_full);
@@ -319,12 +320,12 @@ namespace PAIN {
 				ls >> p.x >> p.y >> p.z;
 				positions.push_back(p);
 			}
-			//else if (token == "vt") {
-			//	// Process texture coordinate
-			//	float s, t;
-			//	ls >> s >> t;
-			//	texCoords.push_back(glm::vec2(s, t));
-			//}
+			else if (token == "vt") {
+				// Process texture coordinate
+				float s, t;
+				ls >> s >> t;
+				texCoords.push_back(glm::vec2(s, t));
+			}
 			else if (token == "vn") {
 				glm::vec3 n;
 				ls >> n.x >> n.y >> n.z;
@@ -342,6 +343,9 @@ namespace PAIN {
 						Vertex v{};
 						if (tv[j].pIdx > 0) v.pos = positions[tv[j].pIdx - 1];
 						if (tv[j].nIdx > 0) v.normal = normals[tv[j].nIdx - 1];
+						if (!texCoords.empty() && tv[j].pIdx > 0 && tv[j].pIdx - 1 < texCoords.size()) {
+							v.uv = texCoords[tv[j].pIdx - 1];
+						}
 
 						vertices.push_back(v);
 						indices.push_back((unsigned int)vertices.size() - 1);
