@@ -65,6 +65,27 @@ static std::filesystem::path findProjectRoot() {
 
 int main(int argc, char* argv[]) {
 
+    std::filesystem::path input_path;
+    std::filesystem::path output_path;
+    std::string build_target;
+
+    //Retrieve input and output directories
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--input" && i + 1 < argc) {
+            input_path = std::string(argv[i + 1]);
+        }
+
+        if (std::string(argv[i]) == "--output" && i + 1 < argc) {
+            output_path = std::string(argv[i + 1]);
+        }
+
+        if (std::string(argv[i]) == "--target" && i + 1 < argc) {
+            build_target = std::string(argv[i + 1]);
+        }
+    }
+
+    std::cout << "Asset Compiler Running On: " << build_target << std::endl;
+
     //Auto-discover project root from executable location
     std::filesystem::path projectRoot = findProjectRoot();
     std::filesystem::path assetsRoot = projectRoot / "assets";

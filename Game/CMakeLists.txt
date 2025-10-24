@@ -8,7 +8,7 @@ file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS src/*.cpp src/*.h)
 if (ANDROID)
   add_library(GameCore STATIC ${GAME_SRC})
   target_link_libraries(GameCore PUBLIC PAINEngine)
-  add_dependencies(GameCore CompileAllAssetsAndroid)
+  add_dependencies(GameCore CompileAllAssets)
 
 else()
   add_executable(Game ${GAME_SRC})
