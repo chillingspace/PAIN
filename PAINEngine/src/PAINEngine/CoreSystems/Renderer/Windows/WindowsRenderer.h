@@ -61,11 +61,11 @@ namespace PAIN {
 		static constexpr int MAX_INDICES = 1000000;
 
 	private:
-	/*
+
 		unsigned int geometry_vao = 0;
 		unsigned int geometry_vbo = 0;
 		unsigned int geometry_ebo = 0;
-
+/*
 		unsigned int empty_vao = 0;
 
 		unsigned int passthrough_vao = 0;
