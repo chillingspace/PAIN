@@ -6,6 +6,7 @@
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
+#include "CoreSystems/Renderer/Light.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -27,6 +28,36 @@ namespace PAIN {
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
 		camera = std::make_unique<Camera>(pos, forward, up, fov, near_plane, far_plane, width_ratio, height_ratio);
+
+		// Init light sources
+		LightSources::get().create("cam");
+		auto olcam = LightSources::get().get("cam");
+		Light& lcam = olcam.value();
+		lcam.L_intensity = glm::vec3(0.01f);
+		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
+
+		LightSources::get().create("world");
+		auto olc = LightSources::get().get("world");
+		Light& lc = olc.value();
+		lc.position = glm::vec3(0.f, 30.f, 0.f);
+		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
+		lc.L_intensity = glm::vec3(0.5f);
+		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+		lc.type = Light::TYPES::DIRECTIONAL;
+		//lc.far_plane = 200.f;
+		//lc.forward = -lc.position;
+
+		LightSources::get().create("a");
+		auto ola = LightSources::get().get("a");
+		Light& la = ola.value();
+		la.position = glm::vec3(4.f, 4.f, -8.f);
+		la.L_intensity = glm::vec3(0.2f);
+
+		LightSources::get().create("b");
+		auto olb = LightSources::get().get("b");
+		Light& lb = olb.value();
+		lb.position = glm::vec3(-4.f, 4.f, -8.f);
+		lb.L_intensity = glm::vec3(0.2f);
 
 		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();

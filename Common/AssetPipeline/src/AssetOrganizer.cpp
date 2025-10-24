@@ -184,7 +184,7 @@ namespace PAIN {
             }
         }
 
-        AssetOrganizer::AssetOrganizer(std::filesystem::path const& assets_root) : assets_root{ assets_root } {
+        AssetOrganizer::AssetOrganizer(std::filesystem::path const& assets_root, std::filesystem::path const& exec_path) : assets_root{ assets_root }, exec_path{ exec_path } {
 
             //Set desc extensions
             desc_ext = Assets::descriptor_ext;
@@ -203,7 +203,7 @@ namespace PAIN {
             engine_dir = Assets::getAllEngineFolders();
 
             //Create compiler
-            compiler = std::make_unique<Compiler>(assets_root);
+            compiler = std::make_unique<Compiler>(assets_root, exec_path);
         }
 
         void AssetOrganizer::initGameFolders(Type type, std::string const& folder) {

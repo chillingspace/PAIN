@@ -53,7 +53,7 @@
  * Asset Parser includes
  *********************************************************************/
 #ifdef PN_PLATFORM_WINDOWS
-#include "gli/gli.hpp"
+//#include "gli/gli.hpp"
 #endif
 
 // Math Lib

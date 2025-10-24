@@ -8,6 +8,12 @@ if(ANDROID)
             native_app_glue/android_native_app_glue.c   # vendored glue
     )
 
+    # Ensures libpain.so
+    set_target_properties(pain PROPERTIES
+            OUTPUT_NAME "pain"
+            DEBUG_POSTFIX ""
+    )
+
     # Include path for the glue header
     target_include_directories(pain PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/native_app_glue
@@ -39,6 +45,7 @@ if(ANDROID)
             log
             EGL
             GLESv3
+            astc_encoder::lib
     )
 
     target_link_options(GameCore PRIVATE
@@ -54,6 +61,7 @@ if(ANDROID)
     target_link_options(pain PRIVATE
             -Wl,-z,common-page-size=4096
             -Wl,-z,max-page-size=16384
+
     )
 
     target_compile_definitions(pain PRIVATE IMGUI_IMPL_OPENGL_ES3=1)

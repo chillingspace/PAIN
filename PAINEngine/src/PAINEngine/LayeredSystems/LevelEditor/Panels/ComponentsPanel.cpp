@@ -20,6 +20,7 @@ namespace PAIN {
                 // Register component-specific UI
                 RegisterTransformUI(*this);
                 RegisterMeshRendererUI(*this);
+                RegisterLightUI(*this);
 
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();

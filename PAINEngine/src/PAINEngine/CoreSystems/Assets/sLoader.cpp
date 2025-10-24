@@ -82,117 +82,117 @@ namespace PAIN {
 
         bool RenderLoader::loadDDSTexture(const std::string& filepath, GLuint& out_texID, int& out_width, int& out_height, int& out_depth)
         {
-            gli::texture Texture = gli::load(filepath);
-            if (Texture.empty()) {
-                PN_CORE_WARN("Failed to load DDS texture: {}", filepath);
-                return false;
-            }
+            //gli::texture Texture = gli::load(filepath);
+            //if (Texture.empty()) {
+            //    PN_CORE_WARN("Failed to load DDS texture: {}", filepath);
+            //    return false;
+            //}
 
-            gli::gl GL(gli::gl::PROFILE_GL33);
-            gli::gl::format const Format = GL.translate(Texture.format(), Texture.swizzles());
-            GLenum target = GL.translate(Texture.target());
+            //gli::gl GL(gli::gl::PROFILE_GL33);
+            //gli::gl::format const Format = GL.translate(Texture.format(), Texture.swizzles());
+            //GLenum target = GL.translate(Texture.target());
 
-            glGenTextures(1, &out_texID);
-            glBindTexture(target, out_texID);
+            //glGenTextures(1, &out_texID);
+            //glBindTexture(target, out_texID);
 
-            glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
-            glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(Texture.levels() - 1));
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER,
-                Texture.levels() > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            //glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+            //glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(Texture.levels() - 1));
+            //glTexParameteri(target, GL_TEXTURE_MIN_FILTER,
+            //    Texture.levels() > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+            //glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            //glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            //glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-            if (target == GL_TEXTURE_3D) {
-                glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_REPEAT);
-            }
+            //if (target == GL_TEXTURE_3D) {
+            //    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+            //}
 
-            glm::tvec3<GLsizei> const Extent(Texture.extent());
-            out_width = static_cast<int>(Extent.x);
-            out_height = static_cast<int>(Extent.y);
-            out_depth = static_cast<int>(Extent.z);
+            //glm::tvec3<GLsizei> const Extent(Texture.extent());
+            //out_width = static_cast<int>(Extent.x);
+            //out_height = static_cast<int>(Extent.y);
+            //out_depth = static_cast<int>(Extent.z);
 
-            // Upload texture data for each mipmap level
-            for (std::size_t Level = 0; Level < Texture.levels(); ++Level)
-            {
-                glm::tvec3<GLsizei> LevelExtent(Texture.extent(Level));
+            //// Upload texture data for each mipmap level
+            //for (std::size_t Level = 0; Level < Texture.levels(); ++Level)
+            //{
+            //    glm::tvec3<GLsizei> LevelExtent(Texture.extent(Level));
 
-                if (target == GL_TEXTURE_2D)
-                {
-                    if (gli::is_compressed(Texture.format()))
-                    {
-                        glCompressedTexImage2D(
-                            target,
-                            static_cast<GLint>(Level),
-                            Format.Internal,
-                            LevelExtent.x,
-                            LevelExtent.y,
-                            0,
-                            static_cast<GLsizei>(Texture.size(Level)),
-                            Texture.data(0, 0, Level)
-                        );
-                    }
-                    else
-                    {
-                        glTexImage2D(
-                            target,
-                            static_cast<GLint>(Level),
-                            Format.Internal,
-                            LevelExtent.x,
-                            LevelExtent.y,
-                            0,
-                            Format.External,
-                            Format.Type,
-                            Texture.data(0, 0, Level)
-                        );
-                    }
-                }
-                else if (target == GL_TEXTURE_3D)
-                {
-                    if (gli::is_compressed(Texture.format()))
-                    {
-                        glCompressedTexImage3D(
-                            target,
-                            static_cast<GLint>(Level),
-                            Format.Internal,
-                            LevelExtent.x,
-                            LevelExtent.y,
-                            LevelExtent.z,
-                            0,
-                            static_cast<GLsizei>(Texture.size(Level)),
-                            Texture.data(0, 0, Level)
-                        );
-                    }
-                    else
-                    {
-                        glTexImage3D(
-                            target,
-                            static_cast<GLint>(Level),
-                            Format.Internal,
-                            LevelExtent.x,
-                            LevelExtent.y,
-                            LevelExtent.z,
-                            0,
-                            Format.External,
-                            Format.Type,
-                            Texture.data(0, 0, Level)
-                        );
-                    }
-                }
-                else if (target == GL_TEXTURE_CUBE_MAP)
-                {
-                    PN_CORE_WARN("Cube map textures not yet supported: {}", filepath);
-                    glDeleteTextures(1, &out_texID);
-                    return false;
-                }
-            }
+            //    if (target == GL_TEXTURE_2D)
+            //    {
+            //        if (gli::is_compressed(Texture.format()))
+            //        {
+            //            glCompressedTexImage2D(
+            //                target,
+            //                static_cast<GLint>(Level),
+            //                Format.Internal,
+            //                LevelExtent.x,
+            //                LevelExtent.y,
+            //                0,
+            //                static_cast<GLsizei>(Texture.size(Level)),
+            //                Texture.data(0, 0, Level)
+            //            );
+            //        }
+            //        else
+            //        {
+            //            glTexImage2D(
+            //                target,
+            //                static_cast<GLint>(Level),
+            //                Format.Internal,
+            //                LevelExtent.x,
+            //                LevelExtent.y,
+            //                0,
+            //                Format.External,
+            //                Format.Type,
+            //                Texture.data(0, 0, Level)
+            //            );
+            //        }
+            //    }
+            //    else if (target == GL_TEXTURE_3D)
+            //    {
+            //        if (gli::is_compressed(Texture.format()))
+            //        {
+            //            glCompressedTexImage3D(
+            //                target,
+            //                static_cast<GLint>(Level),
+            //                Format.Internal,
+            //                LevelExtent.x,
+            //                LevelExtent.y,
+            //                LevelExtent.z,
+            //                0,
+            //                static_cast<GLsizei>(Texture.size(Level)),
+            //                Texture.data(0, 0, Level)
+            //            );
+            //        }
+            //        else
+            //        {
+            //            glTexImage3D(
+            //                target,
+            //                static_cast<GLint>(Level),
+            //                Format.Internal,
+            //                LevelExtent.x,
+            //                LevelExtent.y,
+            //                LevelExtent.z,
+            //                0,
+            //                Format.External,
+            //                Format.Type,
+            //                Texture.data(0, 0, Level)
+            //            );
+            //        }
+            //    }
+            //    else if (target == GL_TEXTURE_CUBE_MAP)
+            //    {
+            //        PN_CORE_WARN("Cube map textures not yet supported: {}", filepath);
+            //        glDeleteTextures(1, &out_texID);
+            //        return false;
+            //    }
+            //}
 
-            GLenum error = glGetError();
-            if (error != GL_NO_ERROR) {
-                PN_CORE_ERROR("OpenGL error while loading DDS texture: {} (error: {})", filepath, error);
-                glDeleteTextures(1, &out_texID);
-                return false;
-            }
+            //GLenum error = glGetError();
+            //if (error != GL_NO_ERROR) {
+            //    PN_CORE_ERROR("OpenGL error while loading DDS texture: {} (error: {})", filepath, error);
+            //    glDeleteTextures(1, &out_texID);
+            //    return false;
+            //}
 
             return true;
         }
