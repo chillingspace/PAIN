@@ -123,9 +123,9 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
+		passthrough_shader = LoadShaders("passthrough.vert", "passthrough.frag");
 #else
-		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
+		passthrough_shader = LoadShaders("android_passthrough.vert", "android_passthrough.frag");
 #endif
 
 #ifdef PN_PLATFORM_WINDOWS
