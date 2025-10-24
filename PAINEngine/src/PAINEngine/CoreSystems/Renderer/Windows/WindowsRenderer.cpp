@@ -490,6 +490,13 @@ namespace PAIN {
 		geometry_shader->SetUniform("material.rough", mesh->material.rough);
 		geometry_shader->SetUniform("material.metal", mesh->material.metal);
 		geometry_shader->SetUniform("material.color", mesh->material.color);
+		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
+
+		if (mesh->material.useTex) {
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+			geometry_shader->SetUniform("material.tex", 6);
+		}
 
 		mesh->Draw();
 	}
