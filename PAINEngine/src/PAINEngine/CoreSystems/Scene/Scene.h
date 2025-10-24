@@ -21,7 +21,7 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		// Modified to return the created entity's ID
-		entt::entity AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
+		entt::entity AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
 
 		// TO BE MOVEDDDDDDDDDD INTO ASSETS LOADER
 		std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache

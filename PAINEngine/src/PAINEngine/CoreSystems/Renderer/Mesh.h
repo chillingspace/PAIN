@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Material.h"
+
 namespace PAIN {
 
 	struct Vertex {
@@ -20,6 +22,7 @@ namespace PAIN {
 		static std::shared_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
 
 		unsigned int texture_id = 0;
+		Material material{};
 
 	private:
 

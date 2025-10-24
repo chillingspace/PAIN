@@ -18,13 +18,6 @@
 
 
 namespace PAIN {
-
-	Material material = {
-		0.1f,		// 0.1 -> smooth, 1 -> rough
-		0.3f,
-		{1.f,0.f,0.f}
-	};
-
 	//Light light = {
 	//	{2.f, 3.f, 2.f},	// position
 	//	{0.2f, 0.2f, 0.2f},					// intensity
@@ -494,9 +487,9 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
 
-		geometry_shader->SetUniform("material.rough", material.rough);
-		geometry_shader->SetUniform("material.metal", material.metal);
-		geometry_shader->SetUniform("material.color", material.color);
+		geometry_shader->SetUniform("material.rough", mesh->material.rough);
+		geometry_shader->SetUniform("material.metal", mesh->material.metal);
+		geometry_shader->SetUniform("material.color", mesh->material.color);
 
 		mesh->Draw();
 	}

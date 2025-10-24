@@ -51,11 +51,18 @@ namespace PAIN {
 		// Create the audio source object and store its entity ID
 		audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
 
+		Material texturedMat;
+		texturedMat.useTex = true;
+		texturedMat.tex = quad_mesh->texture_id;
+		texturedMat.color = { 1.f, 0.f, 1.f };
+
+		quad_mesh->material = texturedMat;
+
 		// Create the other static objects
 		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(quad_mesh_id, "texture", { 0.f, 3.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(quad_mesh_id, "screen", { 0.f, 3.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		if (audioManager)
 		{
@@ -169,7 +176,7 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	entt::entity Scene::AddObject(uint32_t mesh, std::string name, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	entt::entity Scene::AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		entt::entity entity = ecs->createEntity();

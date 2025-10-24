@@ -17,7 +17,9 @@ layout(location = 3) out vec2 gMaterial;    // rough, metal
 struct Material {
     float rough;
     float metal;
-    vec3 color;
+    float useTex;
+    sampler2D tex;
+    vec3 color;         // fallback if there is no texture
 };
 
 
@@ -26,7 +28,13 @@ uniform Material material;
 
 void main() {
     gPos = vFragPos;
-    gCol = material.color;
     gNorm = normalize(vNormal);
     gMaterial = vec2(material.rough, material.metal);
+
+    if (material.useTex == 0.0) {
+        gCol = material.color;
+        return;
+    }
+
+    // use texture instead of fallback color
 }
