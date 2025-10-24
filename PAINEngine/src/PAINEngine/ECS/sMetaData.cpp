@@ -82,6 +82,8 @@ namespace PAIN {
             std::string unique = generateUniqueName(name);
             name_comp_opt->get().name = unique;
             name_lookup[unique] = entity;
+
+            b_entity_changed = true;
         }
 
         std::string Service::getEntityName(entt::entity entity) const {
@@ -95,6 +97,14 @@ namespace PAIN {
                 return it->second;
             }
             return std::nullopt;
+        }
+
+        bool Service::entityNameChanged() {
+            // atomically read+clear
+            if (b_entity_changed) {
+                b_entity_changed = false;
+                return true;
+            }
         }
 
         /****************************************************************
@@ -171,6 +181,25 @@ namespace PAIN {
 
             return result;
         }
+
+        void Service::setEntityTag(entt::entity entity, const std::string& new_tag) {
+            // Remove all existing tags from this entity
+            auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
+            if (tag_comp_opt.has_value()) {
+                tag_comp_opt->get().tags.clear();
+            }
+            else {
+                MetaData::Tag new_tag_comp;
+                PN_ECS_SERVICE->addEntityComponent(entity, std::move(new_tag_comp));
+                tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity); // refresh
+            }
+            // Add the new tag
+            if (!new_tag.empty()) {
+                tag_comp_opt->get().tags.insert(new_tag);
+                registered_tags.insert(new_tag);
+            }
+        }
+
 
         /****************************************************************
         * Hierarchy System

@@ -260,6 +260,7 @@ namespace PAIN {
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
                 auto ecs = PN_ECS_SERVICE;
+                auto metadata = PN_METADATA_SERVICE;
                 auto ser = services->get<Serialization::Service>();
 
                 // Detect scene changes
@@ -271,6 +272,14 @@ namespace PAIN {
                     total_entities = 0;
                     b_entity_changed = true;
                     PN_CORE_INFO("[EntityPanel] Scene changed detected, list reset");
+                }
+
+                // Detect name changes
+                if (metadata->entityNameChanged()) {
+                    editor_entities.clear();
+                    total_entities = 0;
+                    b_entity_changed = true;
+                    PN_CORE_INFO("[EntityPanel] Entity Name changed detected, list reset");
                 }
 
                 // Get current entity count from ECS
@@ -335,7 +344,6 @@ namespace PAIN {
                         ImGui::Text("Entity ID: %u", static_cast<uint32_t>(entity_id));
 
                         // Show locked status if applicable
-                        auto metadata = PN_METADATA_SERVICE;
                         if (metadata && metadata->isLocked(entity_id)) {
                             ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "LOCKED");
                         }
