@@ -133,6 +133,12 @@ namespace PAIN {
 #else
 		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
 #endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		texture2d_shader = LoadShaders("texture2d.vert", "texture2d.frag");
+#else
+		texture2d_shader = LoadShaders("android_texture2d.vert", "android_texture2d.frag");
+#endif
 	}
 
 	// TO BE MOVED
@@ -294,6 +300,15 @@ namespace PAIN {
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
+
+		// vao/vbo for texture2d shader
+		{
+			static constexpr float quadVertices[] = {
+				// positions    // texCoords
+				-0.5f,  0.5f,   0.0f, 1.0f,
+				-0.5f, -0.5f,   0.0f, 0.0f,
+				 0.5f, -0.5f,   1.0f, 0.0f,
+				-0.5f,  0.5f,   0.0f,
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
