@@ -13,7 +13,7 @@
 namespace PAIN {
 	class TextureManager {
 	private:
-		TextureManager() = default;
+		TextureManager();
 		~TextureManager();
 
 	private:

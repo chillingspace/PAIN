@@ -15,6 +15,10 @@
 
 
 namespace PAIN {
+	TextureManager::TextureManager() {
+		stbi_set_flip_vertically_on_load(true);
+	}
+
 	TextureManager::~TextureManager() {
 		for (const auto& [ref, tex_id] : texture_map) {
 			glDeleteTextures(1, &tex_id);
