@@ -8,6 +8,7 @@
 
 layout(location = 0) in vec3 vNormal;
 layout(location = 1) in vec3 vFragPos;
+layout(location = 2) in vec2 vTexCoords;
 
 layout(location = 0) out vec3 gPos;
 layout(location = 1) out vec3 gCol;
@@ -37,5 +38,5 @@ void main() {
     }
 
     // use texture instead of fallback color
-    
+    gCol = texture(material.tex, vTexCoords).rgb;
 }
