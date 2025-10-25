@@ -53,6 +53,7 @@ x64/
 Win32/
 /build/
 out*/
+android/app/src/main/assets-*/
 
 # ========================
 # Compiled object files / libraries / executables

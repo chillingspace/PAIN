@@ -23,7 +23,7 @@ if(WIN32)
         DEPENDS "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets/.assets_compiled_stamp"
     )
 elseif(ANDROID)
-    set(ASSET_COMPILER_EXE "${CMAKE_BINARY_DIR}/Tools/AssetCompilerTool.exe")
+    set(ASSET_COMPILER_EXE "${CMAKE_SOURCE_DIR}/build/Tools/AssetCompilerTool.exe")
     set(ASSETS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets") # Android assets for APK
 
     add_custom_command(
