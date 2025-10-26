@@ -84,16 +84,4 @@ namespace PAIN {
 
 		return texture_id;
 	}
-
-	unsigned int TextureManager::isTextureLoaded(const char* file_path, const std::string& ref) {
-		// Check if texture already loaded
-		auto it = texture_map.find(ref);
-		if (it != texture_map.end()) {
-			return it->second; // return existing texture ID
-		}
-
-		// Otherwise, load and store
-		return load(file_path, ref);
-	}
-
 }

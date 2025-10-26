@@ -105,6 +105,7 @@ namespace PAIN {
                 b_entity_changed = false;
                 return true;
             }
+            return false;
         }
 
         /****************************************************************

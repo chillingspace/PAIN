@@ -130,25 +130,44 @@ namespace PAIN {
 					std::string icon_ref = PN_ASSETS_SERVICE->getIDFromPath(path.string(), false);
 
 					auto tex_path = path.string();
-					unsigned int tex_id = TextureManager::get().isTextureLoaded(tex_path.c_str(), icon_ref);
-					return tex_id;
+					return isTextureLoaded(tex_path.c_str(), icon_ref);
 				}
 				else {
-					std::string icon_ref = path.extension().string().substr(1) + "_icon.png";
+					std::string ext = path.extension().string();
 
-					auto icon_path = services->get<Path::Path>()->resolvePath("engine_assets://Icons/" + icon_ref);
+					std::string icon_ref;
+					if (!ext.empty() && ext.size() > 1) {
+						icon_ref = ext.substr(1) + "_icon.png";  // remove leading dot
+					}
+					else {
+						icon_ref = "def_icon.png";  // fallback icon
+					}
+
+					auto icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/" + icon_ref);
 
 					if (std::filesystem::exists(icon_path)) {
-						return TextureManager::get().isTextureLoaded(icon_path.c_str(), icon_ref);
+						return isTextureLoaded(icon_path.string().c_str(), icon_ref);
 					}
 					else {
 						//Load default file icon
-						auto def_icon_path = services->get<Path::Path>()->resolvePath("engine_assets://Icons/def_icon.png");
-						return TextureManager::get().isTextureLoaded(def_icon_path.c_str(), "def_icon.png");
+						auto def_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/def_icon.png");
+						return isTextureLoaded(def_icon_path.string().c_str(), "def_icon.png");
 					}
 				}
 
 				return 0;
+			}
+
+			unsigned int ResourcePanel::isTextureLoaded(const char* file_path, const std::string& ref) {
+				// Check if texture already loaded
+				auto& texture_map = TextureManager::get().getTextureMap();
+				auto it = texture_map.find(ref);
+				if (it != texture_map.end()) {
+					return it->second;
+				}
+
+				// Otherwise, load and store
+				return TextureManager::get().load(file_path, ref);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -183,9 +202,10 @@ namespace PAIN {
 
 					//Folder icon
 					//ImTextureID icon = static_cast<ImTextureID>(PN_ASSETS_SERVICE->getAsset<Assets::Texture>("folder_icon.png")->gl_data);
-					auto folder_icon_path = services->get<Path::Path>()->resolvePath("engine_assets://Icons/folder_icon.png");
-					ImTextureID icon = TextureManager::get().isTextureLoaded(folder_icon_path.c_str(), "folder_icon");
+					auto folder_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/folder_icon.png");
+					unsigned int tex_id = isTextureLoaded(folder_icon_path.string().c_str(), "folder_icon");
 
+					ImTextureID icon = (ImTextureID)(static_cast<uintptr_t>(tex_id));
 
 					//Display directory icon
 					ImVec2 uv0(0.0f, 1.0f);
@@ -293,7 +313,7 @@ namespace PAIN {
 					ImGui::BeginGroup();
 
 					//Extension cases
-					ImTextureID icon = static_cast<ImTextureID>(fileIcon(file));
+					ImTextureID icon = fileIcon(file);
 
 					//Display file icon
 					ImVec2 uv0(0.0f, 1.0f);

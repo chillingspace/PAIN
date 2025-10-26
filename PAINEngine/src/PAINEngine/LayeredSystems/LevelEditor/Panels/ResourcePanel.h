@@ -93,6 +93,7 @@ namespace PAIN {
                 // Internal Helpers
                 // ----------------------------
                 unsigned int fileIcon(std::filesystem::path const& path); //Internal asset icon picking
+                unsigned int isTextureLoaded(const char* file_path, const std::string& ref);
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
                 void renderFileEditor(); //Internal rendering of a file editor
 
