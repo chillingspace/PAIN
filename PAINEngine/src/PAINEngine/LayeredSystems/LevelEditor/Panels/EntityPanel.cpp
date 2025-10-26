@@ -1,4 +1,14 @@
-﻿#include "pch.h"
+﻿/*****************************************************************//**
+ * \file   sysAnimation.cpp
+ * \brief  Definition of animation system states
+ *
+ * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
+ * \co-author
+ * \date   October 2025
+ * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
+
+#include "pch.h"
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
@@ -468,6 +478,17 @@ namespace PAIN {
                         cloneEntityChildren(entity_id, new_id);
 
                         force_refresh = true;
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    if (ImGui::MenuItem("Create Prefab")) {
+                        PN_CORE_INFO("[EntityPanel] Creating prefab from entity {}", static_cast<uint32_t>(entity_id));
+
+                        // TODO: Implement prefab creation
+                        // This would serialize the entity and its children to a prefab file
+                        //                       
+                        PN_CORE_WARN("[EntityPanel] Create Prefab not yet implemented");
+
                         ImGui::CloseCurrentPopup();
                     }
 

@@ -1,11 +1,11 @@
 ﻿/*****************************************************************//**
- * \file   cHierarchy.h
- * \brief  Hierarchy component for parent-child entity relationships
+ * \file   sysAnimation.cpp
+ * \brief  Definition of animation system states
  *
- * \author [Your Name], [Your ID], [Your Email] (100%)
+ * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
  * \co-author
- * \date   October 2025
- * All content © 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+ * \date   24 October 2025
+ * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
 #ifndef C_HIERARCHY_H
