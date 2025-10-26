@@ -1,5 +1,5 @@
 ﻿/*****************************************************************//**
- * \file   sysAnimation.cpp
+ * \file   cHierarchy.h
  * \brief  Definition of animation system states
  *
  * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)

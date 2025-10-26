@@ -1,5 +1,5 @@
 ﻿/*****************************************************************//**
- * \file   sysAnimation.cpp
+ * \file   EntityPanel.cpp
  * \brief  Definition of animation system states
  *
  * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
