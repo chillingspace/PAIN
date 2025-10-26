@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Controller.h"
+#include "ECS/Components/cHierarchy.h" 
 
 namespace PAIN {
 	namespace ECS {
@@ -61,6 +62,7 @@ namespace PAIN {
             registerComponent<Transform>("Transform");
             registerComponent<MeshRenderer>("MeshRenderer");
             registerComponent<Lighting>("Lighting");
+            registerComponent<Hierarchy>("Hierarchy");
             //registerComponent<Camera>("Camera");
             //registerComponent<RigidBody>("RigidBody");
 
