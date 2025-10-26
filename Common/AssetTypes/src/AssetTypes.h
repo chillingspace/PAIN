@@ -16,6 +16,12 @@ using json = nlohmann::json;
 namespace PAIN {
     namespace Assets {
 
+        //Asset platform
+        enum class Platform {
+            Windows = 0,
+            Android
+        };
+
         struct GUID {
             uint8_t bytes[16] = {};
 

@@ -390,13 +390,16 @@ namespace PAIN {
 
         std::string Compiler::GetCuttlefishExecutable() const {
 
-            // Try to find cuttlefish executable
-            std::filesystem::path cuttle_fish_path = exec_path / "cuttlefish.exe";
-            std::cout << cuttle_fish_path << std::endl;
+            //Locate all possible cuttlfish executables
+            std::vector<std::filesystem::path> possible_paths = {
+                exec_path / "cuttlefish.exe"
+            };
 
-            //Check if exists
-            if (std::filesystem::exists(cuttle_fish_path)) {
-                return cuttle_fish_path.string();
+            for (const auto& path : possible_paths) {
+                if (std::filesystem::exists(path)) {
+                    std::cout << "Found cuttlefish: " << path << std::endl;
+                    return path.string();
+                }
             }
         
             std::cout << "WARNING: Cuttlefish executable not found!" << std::endl;
@@ -461,11 +464,12 @@ namespace PAIN {
 
         std::string Compiler::GetASTCEncoderExecutable() const {
 
-            // Try optimized versions in order of performance
+            //Locate all possible astcenc executables
             std::vector<std::filesystem::path> possible_paths = {
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-avx2.exe",
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse4.1.exe",
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse2.exe"
+                exec_path / "astcenc-avx2.exe",
+                exec_path / "astcenc-neon.exe",
+                exec_path / "astcenc-native.exe",
+                exec_path / "astcenc-sse2.exe"
             };
 
             for (const auto& path : possible_paths) {
@@ -475,7 +479,7 @@ namespace PAIN {
                 }
             }
 
-            std::cout << "WARNING: ASTC encoder (astcenc) not found!" << std::endl;
+            std::cout << "WARNING: astcenc executable not found!" << std::endl;
             return "astcenc-avx2.exe"; // Fallback
         }
 
@@ -551,7 +555,6 @@ namespace PAIN {
             }
         }
 
-
 		void Compiler::processAsset(Info& asset_info) {
 
             //Check for desc files and output
@@ -582,7 +585,7 @@ namespace PAIN {
                 //If asset is not compilable ship asset straight into 
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / asset_info.name;
 
-                // Only ship if source is SIGNIFICANTLY newer than destination
+                //Only ship if source is SIGNIFICANTLY newer than destination
                 if (asset_info.raw_last_modified > (getFileLastModified(asset_info.shipped_path) + TOLERANCE_MS)) {
 
                     //Copy all assets

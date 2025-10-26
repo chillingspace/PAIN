@@ -24,13 +24,6 @@ static std::filesystem::path getExecutablePath() {
         return std::filesystem::path(buffer).parent_path();
     }
     return std::filesystem::current_path();
-#elif __APPLE__
-    char buffer[PATH_MAX];
-    uint32_t size = sizeof(buffer);
-    if (_NSGetExecutablePath(buffer, &size) == 0) {
-        return std::filesystem::path(buffer).parent_path();
-    }
-    return std::filesystem::current_path();
 #else
     return std::filesystem::current_path();
 #endif
@@ -67,10 +60,11 @@ int main(int argc, char* argv[]) {
 
     std::filesystem::path input_path;
     std::filesystem::path output_path;
-    std::string build_target;
+    PAIN::Assets::Platform build_platform;
 
     //Retrieve input and output directories
     for (int i = 1; i < argc; ++i) {
+
         if (std::string(argv[i]) == "--input" && i + 1 < argc) {
             input_path = std::string(argv[i + 1]);
         }
@@ -80,18 +74,24 @@ int main(int argc, char* argv[]) {
         }
 
         if (std::string(argv[i]) == "--target" && i + 1 < argc) {
-            build_target = std::string(argv[i + 1]);
+            auto platform_str = std::string(argv[i + 1]);
+
+            if (platform_str == "windows") {
+                build_platform = PAIN::Assets::Platform::Windows;
+            }
+            else if(platform_str == "android") {
+                build_platform = PAIN::Assets::Platform::Android;
+            }
+            else {
+                build_platform = PAIN::Assets::Platform::Windows;
+            }
+
+            std::cout << "Asset Compiler Running On: " << platform_str << std::endl;
         }
     }
 
-    std::cout << "Asset Compiler Running On: " << build_target << std::endl;
-
-    //Auto-discover project root from executable location
-    std::filesystem::path projectRoot = findProjectRoot();
-    std::filesystem::path assetsRoot = projectRoot / "assets";
-
 	//create assset compiler
-    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(assetsRoot, getExecutablePath());
+    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(input_path, output_path, build_platform,getExecutablePath());
 
     //Enforce a standard structure for assets
     compiler->enforceStandardStructure();

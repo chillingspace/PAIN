@@ -67,7 +67,7 @@ namespace PAIN {
             void recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func);
 
         public:
-            AssetOrganizer(std::filesystem::path const& assets_root, std::filesystem::path const& exec_path);
+            AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
             ~AssetOrganizer() = default;
 
             //Game folders
