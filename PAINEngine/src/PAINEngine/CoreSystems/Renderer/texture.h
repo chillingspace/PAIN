@@ -28,5 +28,6 @@ namespace PAIN {
 		}
 
 		unsigned int load(const char* file_path, const std::string& ref);
+		unsigned int isTextureLoaded(const char* file_path, const std::string& ref);
 	};
 }
