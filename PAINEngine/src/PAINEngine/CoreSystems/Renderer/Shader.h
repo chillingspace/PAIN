@@ -21,6 +21,8 @@ namespace PAIN {
 		// Set a uniform var of type glm::vec3
 		void SetUniform(const std::string& name, const glm::vec3& val) const;
 
+		void SetUniform(const std::string& name, const glm::vec2& val) const;
+
 		// Set a uniform var of type glm::vec3 (float x , y , z)
 		void SetUniform(const std::string& name, float x, float y, float z) const;
 

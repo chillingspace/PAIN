@@ -18,10 +18,20 @@ namespace PAIN {
 
 		std::shared_ptr<Scene> m_Scene;
 
+
+
 		void onDetach() override;
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
+
+		void shadowPass();
+		void geometryPass();
+		void lightingPass();
+		void postProcessPass();
+		void uiPass();
+
         void onUpdate(AppTiming timing) override;
+
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 

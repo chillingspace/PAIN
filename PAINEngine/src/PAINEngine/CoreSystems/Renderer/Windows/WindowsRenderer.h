@@ -42,11 +42,20 @@ namespace PAIN {
 
 		void Init(std::shared_ptr<Services> app_services);
 
-		void BeginRendering(std::shared_ptr<Scene> scene);
-		void EndRendering(std::shared_ptr<Scene> scene);
+		// PASSES
+		void BeginShadowPass(const Light& l);
+		void DrawShadows(Mesh* mesh, const glm::mat4& M, const Light& l);
+		void EndShadowPass();
 
-		void RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model);
-		void RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light);
+		void BeginGeometryPass(std::shared_ptr<Scene> scene);
+		void DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M);
+		void EndGeometryPass();
+
+		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
+		void PostProcessPass();
+
+		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
+
 		void Cleanup();
 
 		unsigned int getFinalFbo() const {
@@ -61,16 +70,12 @@ namespace PAIN {
 		static constexpr int MAX_INDICES = 1000000;
 
 	private:
+		/*
+				unsigned int empty_vao = 0;
 
-		unsigned int geometry_vao = 0;
-		unsigned int geometry_vbo = 0;
-		unsigned int geometry_ebo = 0;
-/*
-		unsigned int empty_vao = 0;
-
-		unsigned int passthrough_vao = 0;
-		unsigned int passthrough_vbo = 0;
-*/
+				unsigned int passthrough_vao = 0;
+				unsigned int passthrough_vbo = 0;
+		*/
 		unsigned int ds_fbo = 0;			// deferred shading framebuffer
 		unsigned int ds_rbo = 0;				// depth buffer
 		//unsigned int shadow_fbo = 0;
@@ -84,14 +89,14 @@ namespace PAIN {
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
 
 		// === Geometry Buffers ===
-		unsigned int vao = 0;
-		unsigned int vbo = 0;
-		unsigned int ebo = 0;
+		unsigned int geometry_vao = 0;
+		unsigned int geometry_vbo = 0;
+		unsigned int geometry_ebo = 0;
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
 
-		unsigned int final_texture = 0;		// for imgui
+		unsigned int final_texture = 0;		// for imgui/post-processing/display
 
 		// === Shaders ===
 		std::unique_ptr<Shader> pbr_shader = nullptr;
@@ -99,13 +104,14 @@ namespace PAIN {
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
 		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Camera> active_cam = nullptr;
- 
+		std::unique_ptr<Camera> active_cam = nullptr;		// what is this for? -js
+		std::unique_ptr<Shader> texture2d_shader = nullptr;
+
 		// for easy access to clear memory
-		std::array<unsigned int*, 2> fbos{ 
-			&ds_fbo, 
+		std::array<unsigned int*, 2> fbos{
+			&ds_fbo,
 			//&shadow_fbo, 
-			&final_fbo 
+			&final_fbo
 		};
 		std::array<unsigned int*, 1> rbos{ &ds_rbo };
 		std::array<unsigned int*, 4> texs{
@@ -115,15 +121,6 @@ namespace PAIN {
 			&material_properties_texture,
 			//&shadow_texture
 		};
-
-		/*
-		std::unique_ptr<Shader> pbr_shader = nullptr;
-		std::unique_ptr<Shader> geometry_shader = nullptr;
-		std::unique_ptr<Shader> floor_shader = nullptr;
-		std::unique_ptr<Shader> passthrough_shader = nullptr;
-		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Shader> texture_shader = nullptr;
-		*/
 
 		std::shared_ptr<Services> services;
 
