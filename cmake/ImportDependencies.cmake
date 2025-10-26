@@ -3,6 +3,20 @@ include(FetchContent)
 macro(importDependencies)
     message(STATUS "Importing project dependencies with FetchContent...")
 
+        # Check if Git is available
+    find_package(Git QUIET)
+    if(NOT Git_FOUND)
+        message(FATAL_ERROR 
+            "Git is required to fetch dependencies but was not found.\n"
+            "Please install Git:\n"
+            "  - Windows: Download from https://git-scm.com/download/win\n"
+            "  - macOS: Install via 'brew install git' or Xcode Command Line Tools\n"
+            "  - Linux: Install via your package manager (e.g., 'apt install git', 'yum install git')\n"
+            "After installation, ensure Git is in your system PATH and restart your terminal/IDE.")
+    endif()
+    
+    message(STATUS "Git found: ${GIT_EXECUTABLE}")
+
     # ImGui
     FetchContent_Declare(
       imgui
