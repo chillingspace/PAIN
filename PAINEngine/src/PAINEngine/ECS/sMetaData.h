@@ -103,6 +103,7 @@ namespace PAIN {
 
             // === Serialization ===
             nlohmann::json serializeEntity(entt::entity entity) const;
+            void deserializeEntity(entt::entity entity, nlohmann::json const& data);
             nlohmann::json serialize() const;
             void deserialize(nlohmann::json const& data);
             void reset();

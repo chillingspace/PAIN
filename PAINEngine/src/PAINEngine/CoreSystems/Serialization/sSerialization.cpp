@@ -1,4 +1,4 @@
-/*****************************************************************//**
+﻿/*****************************************************************//**
  * \file   sSerialization.cpp
  * \brief  Definition of serialization service
  *
@@ -10,6 +10,8 @@
 
 #include "pch.h"
 #include "sSerialization.h"
+#include "ECS/sMetaData.h"
+#include "CoreSystems/Path/Path.h"
 
 
  // Fail at compile time if reflection didn't bind
@@ -64,6 +66,7 @@ namespace PAIN {
                 std::ofstream out(file_path, std::ios::binary | std::ios::trunc);
                 if (!out) return false;
                 out << data.dump(4);
+                PN_CORE_INFO("Save to scene file: {}", file_path);
                 return true;
             }
             catch (...) {
@@ -81,6 +84,7 @@ namespace PAIN {
             catch (...) {
                 // leave empty
             }
+            PN_CORE_INFO("Load from scene file: {}", file_path);
             return j;
         }
 
@@ -165,7 +169,90 @@ namespace PAIN {
         std::string Service::MakeScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/Raw/Game/Scenes/") + b;
+
+            auto path_service = services->get<Path::Path>();
+
+            return path_service->resolvePath("main_game_assets://Scenes/" + b);
+        }
+
+        /*************************
+        * Prefab Seri
+        *************************/
+
+        void Service::savePrefabToFile(const std::string& filepath, const std::vector<entt::entity>& entities)
+        {
+            auto controller = services->get<PAIN::ECS::Controller>();
+            auto metadata_service = services->get<PAIN::MetaData::Service>();
+
+            nlohmann::json prefab_json;
+            nlohmann::json ents = nlohmann::json::array();
+
+            for (auto entity : entities) {
+                nlohmann::json E = nlohmann::json::object();
+                
+                // Seriliaze metadata comps
+                E["MetaData"] = metadata_service->serializeEntity(entity); 
+
+                // To seri comps
+                nlohmann::json C = nlohmann::json::object();
+
+                auto transform_opt = controller->getEntityComponent<PAIN::Transform>(entity);
+
+                if (transform_opt.has_value()) {
+                    const auto& transform_comp = transform_opt.value().get();
+                    C["Transform"] = {
+                        {"rotation", {transform_comp.rotation.x, transform_comp.rotation.y, transform_comp.rotation.z, transform_comp.rotation.w}},
+                        {"position", {transform_comp.position.x, transform_comp.position.y, transform_comp.position.z}},
+                        {"scale", {transform_comp.scale.x, transform_comp.scale.y, transform_comp.scale.z}}
+                    };
+                }
+                // TODO: Add other component types (Audio, Renderer, etc.)  
+                E["Components"] = std::move(C);
+
+                ents.push_back(E);
+            }
+
+            prefab_json["Entities"] = std::move(ents);
+        
+            saveJsonFile(filepath, prefab_json);
+        }
+
+        std::vector<entt::entity> PAIN::Serialization::Service::loadPrefabFromFile(const std::string& filepath)
+        {
+            auto controller = services->get<PAIN::ECS::Controller>();
+            auto metadata_service = services->get<PAIN::MetaData::Service>();
+
+            std::vector<entt::entity> entities;
+
+            nlohmann::json prefab_json = loadJsonFile(filepath);
+            if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
+
+            for (const auto& E : prefab_json["Entities"]) {
+                // Create new entity
+                entt::entity e = controller->createEntity();
+                entities.push_back(e);
+
+                // Deserialize Metadata
+                if (E.contains("MetaData"))
+                    metadata_service->deserializeEntity(e, E["MetaData"]);
+
+                // Deserialize Components
+                if (E.contains("Components")) {
+                    const auto& C = E["Components"];
+                    // Example: Transform
+                    if (C.contains("Transform")) {
+                        const auto& T = C["Transform"];
+                        PAIN::Transform tr;
+                        tr.rotation = glm::f32quat(T["rotation"][3].get<float>(), T["rotation"][0].get<float>(), T["rotation"][1].get<float>(), T["rotation"][2].get<float>());
+                        tr.position = glm::vec3(T["position"][0].get<float>(), T["position"][1].get<float>(), T["position"][2].get<float>());
+                        tr.scale = glm::vec3(T["scale"][0].get<float>(), T["scale"][1].get<float>(), T["scale"][2].get<float>());
+                        controller->addEntityComponent<PAIN::Transform>(e, std::move(tr));
+                    }
+                    // TODO: add deserialization for other components (Audio, Renderer, etc.)
+                }
+            }
+
+            return entities;
         }
 
         bool Service::createNewScene(std::string_view baseName)
@@ -297,9 +384,6 @@ namespace PAIN {
                     else {
                         E["Name"] = "Entity " + std::to_string((int)e);
                     }
-
-                    // ID
-                    E["ID"] = int(e);
 
                     // Components
                     nlohmann::json C = nlohmann::json::object();

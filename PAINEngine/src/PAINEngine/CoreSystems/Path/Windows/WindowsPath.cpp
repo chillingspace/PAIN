@@ -67,17 +67,23 @@ namespace PAIN {
             roamingdata_path = getKnownFolderPath(FOLDERID_RoamingAppData);
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
+            // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
+            std::filesystem::path project_root = std::filesystem::current_path().parent_path().parent_path();
+            std::string project_root_str = normalizePath(project_root.string());
+
             //Register default virtual paths
             registerVirtualPath("out", out_path);
 
             //Temp paths to be changed
             registerVirtualPath("game_assets", out_path + "/assets/" + relative_game_folder, true);
             registerVirtualPath("engine_assets", out_path + "/assets/" + relative_engine_folder, true);
-            registerVirtualPath("config", out_path + "/config", true);  
             registerVirtualPath("local", localdata_path + "/" + app_name, true);
             registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
             registerVirtualPath("documents", documents_path + "/" + app_name, true);
             registerVirtualPath("temp", localdata_path + "/" + app_name + "/temp", true);
+            registerVirtualPath("main_game_assets", project_root_str + "/assets/" + relative_game_folder, false);
+            registerVirtualPath("config", project_root_str + "/Config", false);
+            registerVirtualPath("main_engine_assets", project_root_str + "/assets/" + relative_engine_folder, false);
         }
 
         void WindowsPath::destroy() {

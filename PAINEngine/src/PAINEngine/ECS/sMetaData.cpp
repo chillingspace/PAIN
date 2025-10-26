@@ -450,6 +450,58 @@ namespace PAIN {
             return data;
         }
 
+        void Service::deserializeEntity(entt::entity entity, nlohmann::json const& data)
+        {
+            // Get access to ECS controller
+            auto& registry = PN_ECS_SERVICE->getRegistry();
+
+            // --- Entity Name ---
+            if (data.contains("name")) {
+                setEntityName(entity, data["name"].get<std::string>());
+            }
+
+            // --- Tags ---
+            if (data.contains("tags")) {
+                auto tags = data["tags"].get<std::set<std::string>>();
+                for (const auto& tag : tags) {
+                    addTag(entity, tag);
+                }
+            }
+
+            // --- Editor Visibility & Locking ---
+            if (data.contains("visible") || data.contains("locked")) {
+                bool visible = data.value("visible", true);
+                bool locked = data.value("locked", false);
+                setVisible(entity, visible);
+                setLocked(entity, locked);
+            }
+
+            // --- Relation (Parent/Children) ---
+            if (data.contains("parent") || data.contains("children")) {
+                entt::entity parent = entt::entity(data.value("parent", static_cast<uint32_t>(entt::null)));
+                // Set parent if specified
+                if (parent != entt::null)
+                    setParent(entity, parent);
+                // Set children
+                if (data.contains("children")) {
+                    auto children_ids = data["children"].get<std::vector<uint32_t>>();
+                    for (auto child_id : children_ids) {
+                        entt::entity child = entt::entity(child_id);
+                        addChild(entity, child);
+                    }
+                }
+            }
+
+            // --- Group ---
+            if (data.contains("group")) {
+                std::string group_name = data["group"].get<std::string>();
+                if (!group_name.empty()) {
+                    assignToGroup(entity, group_name);
+                }
+            }
+        }
+
+
         nlohmann::json Service::serialize() const {
             nlohmann::json data;
             data["registered_tags"] = registered_tags;
