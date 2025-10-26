@@ -77,6 +77,15 @@ namespace PAIN {
 
                     // Iterate registered component factories
                     for (const auto& [comp_name, factory_func] : ecs->getComponentFactories()) {
+                        
+                        if (comp_name == "Name" ||
+                            comp_name == "Tag" ||
+                            comp_name == "Editor Visiblity" ||
+                            comp_name == "Relation" ||
+                            comp_name == "Group") {
+                            continue;
+                        }
+
                         // Skip if entity already has this component
                         if (ecs->hasComponentByName(selected_entity, comp_name)) {
                             continue;
@@ -188,6 +197,17 @@ namespace PAIN {
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
                     if (remove_clicked) {
+
+                        if (comp_string_ref == "Name" ||
+                            comp_string_ref == "Tag" ||
+                            comp_string_ref == "Editor Visiblity" ||
+                            comp_string_ref == "Relation" ||
+                            comp_string_ref == "Group") {
+                            closePopUp(popup_id);
+                            comp_string_ref.clear();
+                            return;
+                        }
+
                         // Use new removeComponentByName method
                         if (ecs->hasComponentByName(entity, comp_string_ref)) {
                             ecs->removeComponentByName(entity, comp_string_ref);
@@ -222,11 +242,14 @@ namespace PAIN {
                 }
 
                 for (const auto& comp_name : component_names) {
-                    // Skip Name/Tag Component
-                    if (comp_name == "Tag" || comp_name == "MetaData::Tag")
+                    // Skip Metadata Component
+                    if (comp_name == "Name" ||
+                        comp_name == "Tag" ||
+                        comp_name == "Editor Visiblity" ||
+                        comp_name == "Relation" ||
+                        comp_name == "Group") {
                         continue;
-                    if (comp_name == "Name" || comp_name == "MetaData::Name")
-                        continue;
+                    }
 
                     ImGui::PushID(comp_name.c_str());
 
