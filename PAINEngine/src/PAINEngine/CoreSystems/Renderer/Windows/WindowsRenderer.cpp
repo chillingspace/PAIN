@@ -140,6 +140,12 @@ namespace PAIN {
 #else
 		texture2d_shader = LoadShaders("android_texture2d.vert", "android_texture2d.frag");
 #endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		debug_shader = LoadShaders("debug_geometry.vert", "debug_geometry.frag");
+#else
+		debug_shader = LoadShaders("android_debug_geometry.vert", "android_debug_geometry.frag");
+#endif
 	}
 
 	// TO BE MOVED
@@ -183,9 +189,8 @@ namespace PAIN {
 			return;
 		}
 
-		// fbo/texture for deferred shading
+		// === Final FBO/Texture For Deffered Shading ===
 		// !TODO: resize when window resizes
-
 		{
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -218,8 +223,7 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// final fbo/texture(final output, for rendering)
-
+		// === Final VAO/Texture (final output, for rendering) ===
 		{
 			glGenFramebuffers(1, &final_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -240,8 +244,7 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// vao/vbo for final passthrough texture
-
+		// === VAO/VBO For Final Passthrough Texture ===
 		{
 			static constexpr float quadVertices[] = {
 				// positions    // texCoords
@@ -269,8 +272,7 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		// vao/vbo for geometry shader
-
+		// === VAO/VBO For Geometry Shaders ===
 		{
 			// Generate and bind VAO
 			glGenVertexArrays(1, &geometry_vao);
@@ -301,11 +303,35 @@ namespace PAIN {
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
+
+
+		// === VAO/VBO For Debug Shaders ===
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &debug_VAO);
+			glBindVertexArray(debug_VAO);
+
+
+			// Generate and bind VBO
+			glGenBuffers(1, &debug_VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+
+			// Color attribute, layout(location = 1)
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+			glBindVertexArray(0);
+		}
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
-		
+	
+
 		initShaders();
 
 		// fallback or placeholder VAO to avoid OpenGL errors 
@@ -373,7 +399,7 @@ namespace PAIN {
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-
+	
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
 	{
 		glViewport(0, 0, winWidth, winHeight);
@@ -560,6 +586,29 @@ namespace PAIN {
 
 	}
 
+
+	void WindowsRenderer::DebugPass(const glm::vec3& minP, const glm::vec3& maxP, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest)
+	{
+		if (!debug_VAO || !debug_shader) return;
+
+		std::vector<float> verts; verts.reserve(24 * 7);
+		PushAABBLines(minP, maxP, color, verts);
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		debug_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+		glDrawArrays(GL_LINES, 0, 24);
+
+		glDepthMask(GL_TRUE);
+		glBindVertexArray(0);
+	}
+
+
 	void WindowsRenderer::PostProcessPass()
 	{
 		// render to actual screen
@@ -592,6 +641,16 @@ namespace PAIN {
 		if (geometry_ebo != 0) {
 			glDeleteBuffers(1, &geometry_ebo);
 			geometry_ebo = 0;
+		}
+
+		if (debug_VAO) {
+			glDeleteVertexArrays(1, &debug_VAO);
+			debug_VAO = 0;
+		}
+
+		if (debug_VBO) {
+			glDeleteBuffers(1, &debug_VBO); 
+			debug_VBO = 0;
 		}
 
 		if (pbr_shader) {

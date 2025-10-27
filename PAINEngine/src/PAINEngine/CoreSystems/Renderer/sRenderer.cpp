@@ -89,7 +89,7 @@ namespace PAIN {
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
-			auto transform = ecs->getEntityComponent<Transform>(e);
+  			auto transform = ecs->getEntityComponent<Transform>(e);
 			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
 			glm::mat4 model;
 			if (transform.has_value())
@@ -111,6 +111,42 @@ namespace PAIN {
 		auto scene = services->get<Scene>();
 		w_renderer->LightingPass(scene, LightSources::get());
 	}
+
+	void sRenderer::debugPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+		auto& reg = ecs->getRegistry();
+		auto view = reg.view<MetaData::EntityName>();
+
+		for (auto e : view) {
+			auto trans = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			if (!trans.has_value() || !mesh.has_value()) continue;
+
+			glm::mat4 M = trans->get().getMatrix();
+			auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+
+			glm::vec3 minL = mesh_ptr->getAABBMin(), maxL = mesh_ptr->getAABBMax();
+
+			// Transform 8 corners and accumulate world min/max
+			glm::vec3 corners[8] = {
+			  {minL.x,minL.y,minL.z},{maxL.x,minL.y,minL.z},
+			  {maxL.x,maxL.y,minL.z},{minL.x,maxL.y,minL.z},
+			  {minL.x,minL.y,maxL.z},{maxL.x,minL.y,maxL.z},
+			  {maxL.x,maxL.y,maxL.z},{minL.x,maxL.y,maxL.z}
+			};
+			glm::vec3 wmin(FLT_MAX), wmax(-FLT_MAX);
+			for (auto& c : corners) {
+				glm::vec4 w = M * glm::vec4(c, 1.0f);
+				wmin.x = min(wmin.x, w.x); wmin.y = min(wmin.y, w.y); wmin.z = min(wmin.z, w.z);
+				wmax.x = max(wmax.x, w.x); wmax.y = max(wmax.y, w.y); wmax.z = max(wmax.z, w.z);
+			}
+			w_renderer->DebugPass(wmin, wmax, { 1,1,0,1 }, scene, false);
+		}
+	}
+
+
 	void sRenderer::postProcessPass()
 	{
 		w_renderer->PostProcessPass();
@@ -154,6 +190,8 @@ namespace PAIN {
 			shadowPass();
 			geometryPass();
 			lightingPass();
+		
+			debugPass();
 			postProcessPass();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
