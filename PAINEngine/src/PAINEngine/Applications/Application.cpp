@@ -65,10 +65,36 @@ namespace PAIN {
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
 
-		core_system->services = services;
-		core_system->onAttach();
-		services->set<T>(core_system);
-		core_stack.push_back(services->get<T>());
+		// Check if the system derives from AppSystem
+		if constexpr (std::is_base_of_v<AppSystem, T>) {
+			// Cast to AppSystem base
+			auto app_system_base = std::static_pointer_cast<AppSystem>(core_system);
+
+			// Assign services pointer
+			app_system_base->services = services;
+			// Call onAttach
+			app_system_base->onAttach();
+			// Add to the main services map
+			services->set<T>(core_system);
+			// Add a weak pointer to the AppSystem stack
+			core_stack.push_back(std::weak_ptr<AppSystem>(app_system_base));
+
+		// Check if the system derives from ECS::System::ISystem
+		} else if constexpr (std::is_base_of_v<ECS::System::ISystem, T>) {
+			// ECS::System::ISystem constructor handles service assignment internally.
+			// We do NOT manually assign services here.
+			// ISystem does not have an onAttach method.
+			// Add to the main services map ONLY.
+			services->set<T>(core_system);
+			// DO NOT add ECS systems to the 'core_stack' which expects AppSystem derivatives.
+			// The ECS::Controller will update them.
+			PN_CORE_INFO("Registered ECS System (added to services map only): {}", core_system->getSysName());
+
+		} else {
+			// Log an error if the type doesn't fit expected bases
+			PN_CORE_ERROR("Type added via addCoreSystem must derive from AppSystem or ECS::System::ISystem");
+			assert(false && "Invalid type passed to addCoreSystem");
+		}
 	}
 
 	template<typename T>

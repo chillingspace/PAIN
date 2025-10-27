@@ -5,7 +5,7 @@
 
 // Include necessary headers for implementation details
 #include "ECS/Controller.h"
-#include "ECS/Components/cTransform.h"
+#include "ECS/Components/cTransform.h"      // Include full definition
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cMetadata.h"
@@ -15,14 +15,16 @@
 // Ensure code is within the namespace
 namespace PAIN {
 
+    // Constructor implementation
     sBVHSystem::sBVHSystem(std::shared_ptr<Services> svc)
-        : ECS::System::ISystem(svc), m_bvh(128) // Initialize base class and BVH
+        : ECS::System::ISystem(svc), m_bvh(128) // Initialize base class and member BVH
     {
         PN_CORE_INFO("BVH System Initialized.");
     }
 
+    // Implementation for calculating local AABB from mesh vertices
     AABB sBVHSystem::calculateLocalAABB(const std::shared_ptr<Mesh>& mesh) {
-        AABB localAABB;
+        AABB localAABB; // Default initialized AABB (max/lowest bounds)
         if (!mesh) {
             PN_CORE_WARN("Attempted to calculate AABB for a null mesh. Using default small box.");
             localAABB.min = glm::vec3(-0.01f);
@@ -30,7 +32,7 @@ namespace PAIN {
             return localAABB;
         }
 
-        // Assumes Mesh has getVertices() method
+        // Access vertices using the getter method added to Mesh.h
         const std::vector<Vertex>& vertices = mesh->getVertices();
         if (vertices.empty()) {
              PN_CORE_WARN("Mesh has no vertices. Using default small box.");
@@ -46,7 +48,7 @@ namespace PAIN {
 
         // Add epsilon for degenerate cases
          glm::vec3 extents = localAABB.getExtents();
-         const float minExtent = 0.01f;
+         const float minExtent = 0.01f; // Minimum size threshold
          if (extents.x < minExtent) { localAABB.min.x -= minExtent; localAABB.max.x += minExtent; }
          if (extents.y < minExtent) { localAABB.min.y -= minExtent; localAABB.max.y += minExtent; }
          if (extents.z < minExtent) { localAABB.min.z -= minExtent; localAABB.max.z += minExtent; }
@@ -54,92 +56,107 @@ namespace PAIN {
         return localAABB;
     }
 
-
+    // Implementation of the system's main update logic
     void sBVHSystem::onUpdate(AppTiming timing, entt::registry& registry)
     {
+         // Get required services
          auto sceneService = getServices()->get<Scene>();
           if (!sceneService) {
-             PN_CORE_WARN("Scene service not found in BVH System.");
+             PN_CORE_WARN("Scene service not found in BVH System. Cannot process meshes.");
              return;
          }
 
         // --- Phase 1: Update World AABBs and Collect Items ---
         std::vector<std::pair<entt::entity, AABB>> bvhItems;
-        bvhItems.reserve(registry.size<cTransform>() / 2);
+        
+        // --- THIS LINE IS CORRECTED ---
+        // Estimate reservation based on the number of entities with a Transform component
+        bvhItems.reserve(registry.storage<Transform>().size());
+        // --- END CORRECTION ---
 
-        // View entities with cTransform
-        auto view = registry.view<cTransform>(/*entt::exclude<MetaData::EditorVisible>*/);
+        // Create a view for entities having a Transform component
+        // This requires the full definition of Transform included above
+        auto view = registry.view<Transform>(/*entt::exclude<MetaData::EditorVisible>*/);
 
         for (auto entity : view) {
-             auto& transform = view.get<cTransform>(entity);
-             cBoundingVolume* bvComponent = registry.try_get<cBoundingVolume>(entity);
+             auto& transform = view.get<Transform>(entity); // Get transform component
+             cBoundingVolume* bvComponent = registry.try_get<cBoundingVolume>(entity); // Try to get existing BV component
 
-             // Ensure component exists or create from MeshRenderer
+             // If no BV component, try to create one from MeshRenderer
              if (!bvComponent) {
                  auto* meshRenderer = registry.try_get<MeshRenderer>(entity);
-                 if (meshRenderer) {
-                     auto mesh = sceneService->getMesh(meshRenderer->mesh_id);
-                     if (mesh) {
+                 if (meshRenderer) { // Check if MeshRenderer exists
+                     auto mesh = sceneService->getMesh(meshRenderer->mesh_id); // Get mesh from scene cache
+                     if (mesh) { // Check if mesh was found
+                        // Add cBoundingVolume component to the entity
                         bvComponent = &registry.emplace<cBoundingVolume>(entity);
+                        // Calculate local AABB from the mesh
                         bvComponent->localAABB = calculateLocalAABB(mesh);
-                        bvComponent->needsUpdate = true;
+                        bvComponent->needsUpdate = true; // Mark for world AABB update
                      } else {
-                         continue; // Skip if mesh not found
+                         // Mesh ID exists but mesh not loaded/cached, skip entity
+                         continue;
                      }
                  } else {
-                     continue; // Skip if no BV and no mesh
+                     // Entity has transform but no BV or MeshRenderer, skip it
+                     continue;
                  }
              }
 
-            // TODO: Add proper transform changed check
+            // Simple update trigger: assume transform changed every frame
             bool transformChanged = true;
             if (transformChanged) {
                  bvComponent->needsUpdate = true;
             }
 
-            // Update World AABB if needed
+            // Recalculate world AABB if marked for update
             if (bvComponent->needsUpdate) {
                 glm::mat4 worldMatrix = transform.getMatrix();
+                // Transform the local AABB to world space
                 bvComponent->worldAABB = bvComponent->localAABB.transform(worldMatrix);
-                bvComponent->needsUpdate = false;
+                bvComponent->needsUpdate = false; // Reset flag
             }
 
+             // Add entity and its world AABB to the list for the BVH build input
              bvhItems.push_back({entity, bvComponent->worldAABB});
         }
 
 
-        // --- Phase 2: Rebuild BVH ---
+        // --- Phase 2: Rebuild the BVH Tree ---
          m_bvh.build(bvhItems);
 
-         // --- Phase 3: Update node indices in components ---
+         // --- Phase 3: Update BVH Node Indices in Components ---
          const auto& nodes = m_bvh.getNodes();
-         for(int i = 0; i < nodes.size(); ++i) {
+         for(int i = 0; i < nodes.size(); ++i) { // Iterate all nodes in the pool
              const auto& node = nodes[i];
+             // Check if it's an active leaf node associated with a valid entity
              if (node.isLeaf() && node.height != -1 && registry.valid(node.entity)) {
+                 // Update the bvhNodeIndex in the entity's component
                  if (auto* bvComp = registry.try_get<cBoundingVolume>(node.entity)) {
-                     bvComp->bvhNodeIndex = i;
+                     bvComp->bvhNodeIndex = i; // Store the index of this leaf node
                  }
              }
          }
-         // Clear stale indices
+         // Clear indices for components whose entities were not included in the last build
          auto bvView = registry.view<cBoundingVolume>();
          for (auto entity : bvView) {
              bool foundInBvhItems = false;
-             for(const auto& item : bvhItems) {
+             for(const auto& item : bvhItems) { // Check if the entity was part of the build input
                  if (item.first == entity) {
                      foundInBvhItems = true;
                      break;
                  }
              }
-             if (!foundInBvhItems) {
+             if (!foundInBvhItems) { // Reset index if entity wasn't processed
                  bvView.get<cBoundingVolume>(entity).bvhNodeIndex = -1;
              }
          }
-    }
+    } // End of onUpdate
 
+    // Implementation for event handling (currently empty)
     void sBVHSystem::onEvent(Event::Event& e)
     {
-        // Placeholder
+        // Placeholder for event responses
     }
 
 } // namespace PAIN

@@ -13,13 +13,13 @@
 #include <memory>
 #include <string>
 
-// Forward declarations for types used as pointers/references
+// Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
     class Scene;
     struct Mesh;
-    struct cTransform;
+    struct Transform; // <<< CORRECTED FORWARD DECLARATION
     struct MeshRenderer;
-    struct cBoundingVolume; // Declaration is sufficient here
+    struct cBoundingVolume;
     namespace MetaData { struct EditorVisible; }
 } // namespace PAIN
 
