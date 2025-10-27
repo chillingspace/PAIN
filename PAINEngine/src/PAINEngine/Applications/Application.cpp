@@ -31,6 +31,7 @@
 #include "Systems/Animation/sysAnimation.h" 
 #include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h" 
+#include "Systems/Collision/sBVHSystem.h" // Currently only for bounding volume and BVH
 
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h" 
 
@@ -124,7 +125,7 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
-
+		addCoreSystem(std::make_shared<sBVHSystem>(services)); // BVH system
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 

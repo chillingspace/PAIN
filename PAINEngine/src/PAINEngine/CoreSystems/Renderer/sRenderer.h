@@ -7,7 +7,7 @@
 
 #include "Windows/WindowsRenderer.h"
 
-
+#include <functional> // For std::function
 
 namespace PAIN {
 	

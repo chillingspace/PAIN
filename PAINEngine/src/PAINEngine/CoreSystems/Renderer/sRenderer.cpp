@@ -15,6 +15,8 @@
 
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
+#include "Systems/Collision/sBVHSystem.h"
+
 
 namespace PAIN {
 	void sRenderer::onDetach()
@@ -155,6 +157,66 @@ namespace PAIN {
 			geometryPass();
 			lightingPass();
 			postProcessPass();
+
+			// --- BVH Debug Drawing ---
+			auto bvhSystem = services->get<sBVHSystem>(); // Get the BVH system
+
+			// Check if BVH system, renderer, scene are valid, and if BVH is not empty
+			if (bvhSystem && w_renderer && m_Scene && !bvhSystem->getBVH().isEmpty()) {
+				const BVH& bvh = bvhSystem->getBVH();
+				const std::vector<BVHNode>& nodes = bvh.getNodes();
+				int rootIndex = bvh.getRootIndex();
+
+				// Calculate the combined View-Projection matrix from the active camera
+				glm::mat4 vpMatrix = m_Scene->GetActiveCamera()->projection() * m_Scene->GetActiveCamera()->view();
+
+				// Define a recursive lambda function to traverse and draw BVH nodes
+				std::function<void(int nodeIndex, int depth)> drawNodeRecursive =
+					[&](int nodeIndex, int depth) {
+					// Stop recursion if index is invalid or node is marked as free
+					if (nodeIndex == -1 || nodeIndex >= nodes.size() || nodes[nodeIndex].height == -1) {
+						return;
+					}
+					const BVHNode& node = nodes[nodeIndex];
+
+					// Select color: green for leaves, varying colors for internal nodes based on depth
+					glm::vec3 color;
+					if (node.isLeaf()) {
+						color = glm::vec3(0.0f, 1.0f, 0.0f); // Green
+					} else {
+						// Simple color cycling based on depth modulo 6
+						int colorIndex = depth % 6;
+						switch (colorIndex) {
+							case 0: color = glm::vec3(1.0f, 0.0f, 0.0f); break; // Red
+							case 1: color = glm::vec3(1.0f, 0.5f, 0.0f); break; // Orange
+							case 2: color = glm::vec3(1.0f, 1.0f, 0.0f); break; // Yellow
+							case 3: color = glm::vec3(0.0f, 1.0f, 1.0f); break; // Cyan
+							case 4: color = glm::vec3(0.0f, 0.0f, 1.0f); break; // Blue
+							default: color = glm::vec3(1.0f, 0.0f, 1.0f); break; // Magenta
+						}
+						color *= 0.8f; // Slightly dim internal nodes
+					}
+
+					// Call the renderer's function to draw the wireframe AABB
+					w_renderer->DrawAABBWireframe(node.aabb, vpMatrix, color);
+
+					// If it's an internal node, recurse for its children
+					if (!node.isLeaf()) {
+						drawNodeRecursive(node.child1Index, depth + 1);
+						drawNodeRecursive(node.child2Index, depth + 1);
+					}
+				};
+
+				// Prepare OpenGL state for drawing lines on top of the scene
+				glDisable(GL_DEPTH_TEST); // Draw lines regardless of scene depth
+
+				// Start the recursive drawing process from the root node
+				drawNodeRecursive(rootIndex, 0);
+
+				// Restore OpenGL state
+				glEnable(GL_DEPTH_TEST); // Re-enable depth testing
+			}
+			// --- End BVH Debug Drawing ---
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

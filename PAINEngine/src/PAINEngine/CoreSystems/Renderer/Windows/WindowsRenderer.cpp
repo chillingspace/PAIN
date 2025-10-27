@@ -317,6 +317,47 @@ namespace PAIN {
 
 		_initDeferredShadingBuffers();
 
+		// --- Debug Line Renderer Setup ---
+		PN_CORE_INFO("Initializing Debug Line Renderer...");
+		#ifdef PN_PLATFORM_WINDOWS
+			// Load the debug shaders
+			m_debugLineShader = LoadShaders("debug_line.vert", "debug_line.frag");
+		#else
+			// Attempt to load Windows versions as fallback if LoadShaders handles it
+			m_debugLineShader = LoadShaders("debug_line.vert", "debug_line.frag");
+			// If LoadShaders needs platform-specific paths, adjust here:
+			// PN_CORE_WARN("Debug line shaders might need Android-specific paths.");
+		#endif
+
+		if (!m_debugLineShader) {
+			PN_CORE_ERROR("Failed to load debug line shader program!");
+			// Consider cleanup or throwing an exception
+		} else {
+			PN_CORE_INFO("Debug line shader loaded successfully.");
+		}
+
+		// Create Vertex Array Object (VAO) and Vertex Buffer Object (VBO) for lines
+		glGenVertexArrays(1, &m_debugLineVAO);
+		glGenBuffers(1, &m_debugLineVBO);
+
+		glBindVertexArray(m_debugLineVAO); // Bind the VAO to configure it
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLineVBO); // Bind the VBO
+		// Allocate buffer memory. We need 24 vec3 vertices (12 lines * 2 endpoints).
+		// Use GL_DYNAMIC_DRAW because we'll update vertex data frequently (per AABB).
+		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+
+		// Specify the layout of the vertex data (position only)
+		// Corresponds to 'layout (location = 0)' in the vertex shader.
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+
+		// Unbind VBO and VAO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		PN_CORE_INFO("Debug Line VAO/VBO created.");
+		// --- End Debug Line Renderer Setup ---
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -560,6 +601,69 @@ namespace PAIN {
 
 	}
 
+	// Renders the 12 edges of an AABB as lines.
+	void WindowsRenderer::DrawAABBWireframe(const AABB& aabb, const glm::mat4& vpMatrix, const glm::vec3& color) {
+		// Check if debug resources are valid
+		if (!m_debugLineShader || m_debugLineVAO == 0 || m_debugLineVBO == 0) {
+			// PN_CORE_WARN("Cannot draw AABB wireframe: Debug resources not initialized."); // Avoid excessive logging
+			return;
+		}
+
+		glm::vec3 min = aabb.min;
+		glm::vec3 max = aabb.max;
+
+		// Define the 8 corner vertices of the AABB
+		glm::vec3 corners[8] = {
+			glm::vec3(min.x, min.y, min.z), // 0: Lower-back-left
+			glm::vec3(max.x, min.y, min.z), // 1: Lower-back-right
+			glm::vec3(max.x, max.y, min.z), // 2: Upper-back-right
+			glm::vec3(min.x, max.y, min.z), // 3: Upper-back-left
+			glm::vec3(min.x, min.y, max.z), // 4: Lower-front-left
+			glm::vec3(max.x, min.y, max.z), // 5: Lower-front-right
+			glm::vec3(max.x, max.y, max.z), // 6: Upper-front-right
+			glm::vec3(min.x, max.y, max.z)  // 7: Upper-front-left
+		};
+
+		// Define the 24 vertices needed for the 12 lines (2 vertices per line)
+		glm::vec3 vertices[24] = {
+			corners[0], corners[1], // Bottom face edges
+			corners[1], corners[5],
+			corners[5], corners[4],
+			corners[4], corners[0],
+			corners[3], corners[2], // Top face edges
+			corners[2], corners[6],
+			corners[6], corners[7],
+			corners[7], corners[3],
+			corners[0], corners[3], // Connecting vertical edges
+			corners[1], corners[2],
+			corners[5], corners[6],
+			corners[4], corners[7]
+		};
+
+		// Activate the debug line shader program
+		m_debugLineShader->Bind();
+		// Set the combined view-projection matrix uniform
+		m_debugLineShader->SetUniform("u_VP", vpMatrix);
+		// Set the line color uniform
+		m_debugLineShader->SetUniform("u_Color", color);
+
+		// Bind the VAO and VBO for line drawing
+		glBindVertexArray(m_debugLineVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_debugLineVBO);
+		// Upload the new vertex data for this specific AABB to the VBO
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 24 * sizeof(glm::vec3), vertices);
+
+		// Draw the 12 lines (24 vertices)
+		glDrawArrays(GL_LINES, 0, 24);
+
+		// Unbind the VBO and VAO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
+		// Unbind the shader program
+		m_debugLineShader->UnBind();
+	}
+
 	void WindowsRenderer::PostProcessPass()
 	{
 		// render to actual screen
@@ -617,6 +721,22 @@ namespace PAIN {
 				glDeleteRenderbuffers(1, rbo);
 				*rbo = 0;
 			}
+		}
+
+		// Clean up debug drawing resources
+		if (m_debugLineShader) {
+			m_debugLineShader.reset(); // Calls shader destructor
+			PN_CORE_INFO("Debug line shader destroyed.");
+		}
+		if (m_debugLineVAO != 0) {
+			glDeleteVertexArrays(1, &m_debugLineVAO);
+			m_debugLineVAO = 0;
+			PN_CORE_INFO("Debug line VAO destroyed.");
+		}
+		if (m_debugLineVBO != 0) {
+			glDeleteBuffers(1, &m_debugLineVBO);
+			m_debugLineVBO = 0;
+			PN_CORE_INFO("Debug line VBO destroyed.");
 		}
 	}
 }

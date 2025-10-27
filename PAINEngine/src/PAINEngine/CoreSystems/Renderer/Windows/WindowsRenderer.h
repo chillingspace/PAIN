@@ -25,6 +25,7 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/Camera.h"
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Collision/BoundingVolume.h" // For AABB struct definition
 
 namespace PAIN {
 	extern Material material;
@@ -55,6 +56,9 @@ namespace PAIN {
 		void PostProcessPass();
 
 		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
+
+		// Renders the wireframe of an AABB.
+    	void DrawAABBWireframe(const AABB& aabb, const glm::mat4& vpMatrix, const glm::vec3& color);
 
 		void Cleanup();
 
@@ -106,6 +110,11 @@ namespace PAIN {
 		std::unique_ptr<Shader> shadow_shader = nullptr;
 		std::unique_ptr<Camera> active_cam = nullptr;		// what is this for? -js
 		std::unique_ptr<Shader> texture2d_shader = nullptr;
+
+		// For bounding volume and BVH wireframe
+		std::unique_ptr<Shader> m_debugLineShader = nullptr; // Shader for drawing lines
+		unsigned int m_debugLineVAO = 0; // VAO for line vertices
+		unsigned int m_debugLineVBO = 0; // VBO for line vertices
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{

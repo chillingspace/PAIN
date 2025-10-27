@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Controller.h"
+#include "ECS/Components/cBoundingVolume.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -64,6 +65,8 @@ namespace PAIN {
             //registerComponent<Camera>("Camera");
             //registerComponent<RigidBody>("RigidBody");
 
+            registerComponent<cBoundingVolume>("BoundingVolume"); // For bounding volume
+            
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");
             registerComponent<MetaData::Tag>("Tag");

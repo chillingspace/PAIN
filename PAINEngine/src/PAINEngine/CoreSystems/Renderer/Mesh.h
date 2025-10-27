@@ -22,6 +22,9 @@ namespace PAIN {
 		unsigned int texture_id = 0;
 		Material material{};
 
+		// Provides read-only access to the mesh's vertex data.
+    	const std::vector<Vertex>& getVertices() const { return vertices; }
+
 	private:
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
