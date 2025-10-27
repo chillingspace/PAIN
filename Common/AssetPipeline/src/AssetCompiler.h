@@ -3,6 +3,7 @@
 #ifndef ASSET_COMPILER_HPP
 #define ASSET_COMPILER_HPP
 
+#include "AssetData.h"
 #include "AssetTypes.h"
 
 namespace PAIN {
@@ -60,6 +61,7 @@ namespace PAIN {
 			std::string ConvertToASTCBlockSize(const std::string& format) const;
 			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetFFMPEGExecutable() const;
+			void ExportModel(const Model& asset, const std::filesystem::path& out_path) const;
 
 			//Recompilation check
 			bool needsRecompilation(Info& asset_info, Descriptor const& desc_file) const;

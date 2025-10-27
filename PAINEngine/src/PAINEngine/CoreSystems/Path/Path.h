@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AssetTypes.h"
+#include "AssetData.h"
 
 #ifndef PATH_HPP
 #define PATH_HPP

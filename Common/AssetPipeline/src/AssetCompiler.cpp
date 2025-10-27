@@ -4,6 +4,10 @@
 #include "stb_image_resize2.h"
 #include "stb_image_write.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 namespace PAIN {
 	namespace Assets {
@@ -104,9 +108,31 @@ namespace PAIN {
                 break;
             }
             case Type::Model: {
-                //settings["generate_lods"] = true;
-                //settings["optimize_vertices"] = true;
-                //settings["weld_threshold"] = 0.001;
+                settings["extension"] = ".mesh";
+                settings["optimize_vertices"] = true;
+                settings["weld_threshold"] = 0.001f;
+                settings["generate_normals"] = false;  // Only if missing
+                settings["generate_tangents"] = true;  // For normal mapping
+                settings["triangulate"] = true;
+                settings["join_identical_vertices"] = true;
+                settings["remove_redundant_materials"] = true;
+                settings["optimize_meshes"] = true;
+                settings["improve_cache_locality"] = true;
+
+                // Compression/quantization
+                settings["quantize_positions"] = false;  // Enable for mobile
+                settings["quantize_normals"] = false;
+                settings["quantize_uvs"] = false;
+
+                // LOD generation (advanced)
+                settings["generate_lods"] = false;
+                settings["lod_levels"] = 3;
+                settings["lod_reduction"] = 0.5f;  // 50% reduction per level
+
+                // Animation/skeleton
+                settings["import_animations"] = true;
+                settings["import_skeleton"] = true;
+                settings["max_bone_weights"] = 4;
                 break;
             }
             default:
@@ -139,9 +165,25 @@ namespace PAIN {
                     break;
 
                 case Type::Model:
-                    //checker =   (settings.contains("generate_lods") &&
-                    //            settings.contains("optimize_vertices") &&
-                    //            settings.contains("weld_threshold"));
+                    checker = (settings.contains("extension") &&
+                        settings.contains("optimize_vertices") &&
+                        settings.contains("weld_threshold") &&
+                        settings.contains("generate_normals") &&
+                        settings.contains("generate_tangents") &&
+                        settings.contains("triangulate") &&
+                        settings.contains("join_identical_vertices") &&
+                        settings.contains("remove_redundant_materials") &&
+                        settings.contains("optimize_meshes") &&
+                        settings.contains("improve_cache_locality") &&
+                        settings.contains("quantize_positions") &&
+                        settings.contains("quantize_normals") &&
+                        settings.contains("quantize_uvs") &&
+                        settings.contains("generate_lods") &&
+                        settings.contains("lod_levels") &&
+                        settings.contains("lod_reduction") &&
+                        settings.contains("import_animations") &&
+                        settings.contains("import_skeleton") &&
+                        settings.contains("max_bone_weights"));
                     break;
                 default:
                     break;
@@ -459,7 +501,166 @@ namespace PAIN {
         }
 
         void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
-            //To be implemented
+
+            // Set output extension
+            std::string out_ext = desc_file.import_settings.value("extension", ".mesh");
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);
+
+            // Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+
+            // Get import settings
+            bool optimize_vertices = desc_file.import_settings.value("optimize_vertices", true);
+            float weld_threshold = desc_file.import_settings.value("weld_threshold", 0.001f);
+            bool generate_tangents = desc_file.import_settings.value("generate_tangents", true);
+            bool triangulate = desc_file.import_settings.value("triangulate", true);
+            bool import_animations = desc_file.import_settings.value("import_animations", true);
+            bool import_skeleton = desc_file.import_settings.value("import_skeleton", true);
+            int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+
+            // Configure Assimp post-processing flags
+            unsigned int ppFlags = 0;
+            if (triangulate) ppFlags |= aiProcess_Triangulate;
+            if (optimize_vertices) ppFlags |= aiProcess_JoinIdenticalVertices;
+            if (desc_file.import_settings.value("optimize_meshes", true)) ppFlags |= aiProcess_OptimizeMeshes;
+            if (desc_file.import_settings.value("improve_cache_locality", true)) ppFlags |= aiProcess_ImproveCacheLocality;
+            if (desc_file.import_settings.value("remove_redundant_materials", true)) ppFlags |= aiProcess_RemoveRedundantMaterials;
+            if (generate_tangents) ppFlags |= aiProcess_CalcTangentSpace;
+            if (desc_file.import_settings.value("generate_normals", false)) ppFlags |= aiProcess_GenNormals;
+
+            // Load with Assimp
+            Assimp::Importer importer;
+            const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);
+
+            if (!scene || !scene->HasMeshes()) {
+                std::cerr << "Failed to load model: " << importer.GetErrorString() << std::endl;
+                return;
+            }
+
+            // Extract data based on settings
+            Model asset;
+
+            // Extract meshes, vertices, indices
+            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                aiMesh* mesh = scene->mMeshes[m];
+                size_t vertexBase = asset.vertices.size();
+                for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+                    Vertex vert;
+                    vert.pos = glm::vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z);
+                    vert.normal = mesh->HasNormals() ? glm::vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z) : glm::vec3(0, 0, 1);
+                    vert.uv = mesh->HasTextureCoords(0) ? glm::vec2(mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y) : glm::vec2(0);
+                    asset.vertices.push_back(vert);
+                }
+                for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+                    for (unsigned int i = 0; i < mesh->mFaces[f].mNumIndices; ++i) {
+                        asset.indices.push_back(static_cast<unsigned int>(vertexBase + mesh->mFaces[f].mIndices[i]));
+                    }
+                }
+            }
+
+            // Map bone names to bone indices for fast lookup
+            std::unordered_map<std::string, int> boneNameToIndex;
+            for (size_t i = 0; i < asset.skeleton.size(); ++i)
+                boneNameToIndex[asset.skeleton[i].name] = static_cast<int>(i);
+
+            asset.weights.resize(asset.vertices.size());
+
+            size_t globalVertexBase = 0;
+            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                aiMesh* mesh = scene->mMeshes[m];
+                for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                    aiBone* bone = mesh->mBones[b];
+                    int boneIdx = boneNameToIndex[bone->mName.C_Str()];
+                    for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+                        unsigned int vertId = globalVertexBase + mesh->mBones[b]->mWeights[w].mVertexId;
+                        asset.weights[vertId].push_back(BoneWeight{ uint32_t(boneIdx), mesh->mBones[b]->mWeights[w].mWeight });
+                    }
+                }
+                globalVertexBase += mesh->mNumVertices;
+            }
+
+            // Extract skeleton if enabled
+            if (import_skeleton && scene->HasMeshes()) {
+                std::unordered_map<std::string, int> boneMap;
+                for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                    aiMesh* mesh = scene->mMeshes[m];
+                    for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                        aiBone* bone = mesh->mBones[b];
+                        std::string boneName = bone->mName.C_Str();
+                        if (boneMap.find(boneName) == boneMap.end()) {
+                            Bone joint;
+                            joint.name = boneName;
+                            joint.parent = -1; // Assign parent below by name-match if needed
+                            aiMatrix4x4 m = bone->mOffsetMatrix;
+                            // Convert aiMatrix4x4 to glm::mat4
+                            joint.bindPose = glm::mat4(
+                                m.a1, m.b1, m.c1, m.d1,
+                                m.a2, m.b2, m.c2, m.d2,
+                                m.a3, m.b3, m.c3, m.d3,
+                                m.a4, m.b4, m.c4, m.d4
+                            );
+                            boneMap[boneName] = static_cast<int>(asset.skeleton.size());
+                            asset.skeleton.push_back(joint);
+                        }
+                    }
+                }
+            }
+
+            // Extract animations if enabled
+            if (import_animations && scene->HasAnimations()) {
+                for (unsigned int a = 0; a < scene->mNumAnimations; ++a) {
+                    aiAnimation* anim = scene->mAnimations[a];
+                    AnimationClip clip;
+                    clip.name = anim->mName.C_Str();
+                    clip.duration = static_cast<float>(anim->mDuration) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+                    for (unsigned int c = 0; c < anim->mNumChannels; ++c) {
+                        aiNodeAnim* chan = anim->mChannels[c];
+                        AnimationTrack track;
+                        track.boneName = chan->mNodeName.C_Str();
+                        for (unsigned int k = 0; k < chan->mNumPositionKeys; ++k) {
+                            AnimationKey key;
+                            key.time = static_cast<float>(chan->mPositionKeys[k].mTime) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+                            key.translation = glm::vec3(chan->mPositionKeys[k].mValue.x, chan->mPositionKeys[k].mValue.y, chan->mPositionKeys[k].mValue.z);
+                            if (k < chan->mNumRotationKeys) {
+                                key.rotation = glm::quat(chan->mRotationKeys[k].mValue.w,
+                                    chan->mRotationKeys[k].mValue.x,
+                                    chan->mRotationKeys[k].mValue.y,
+                                    chan->mRotationKeys[k].mValue.z
+                                );
+                            }
+                            if (k < chan->mNumScalingKeys) {
+                                key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
+                            }
+                            track.keys.push_back(key);
+                        }
+                        clip.tracks.push_back(track);
+                    }
+                    asset.animations.push_back(clip);
+                }
+            }
+
+            // Materials (basic example; expand for PBR)
+            for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
+                aiMaterial* material = scene->mMaterials[m];
+                Material mat;
+                mat.name = material->GetName().C_Str();
+                aiString texPath;
+                if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
+                    mat.diffuseMap = texPath.C_Str();
+                // Repeat for normal/specular/metal/etc as needed
+                asset.materials.push_back(mat);
+            }
+
+            //Create output directory
+            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
+
+            //Export model
+            ExportModel(asset, asset_info.shipped_path);
+
+            std::cout << "[Model] Compiled " << asset_info.raw_path.string() << " -> " << asset_info.shipped_path.string() << std::endl;
+
+            //Update desc file with hashing
+            desc_file.hash = fileHashing(asset_info.raw_path);
         }
 
         std::string Compiler::GetCuttlefishExecutable() const {
@@ -642,6 +843,71 @@ namespace PAIN {
 
             std::cout << "WARNING: ffmpegffmpeg executable not found!" << std::endl;
             return "ffmpeg.exe"; // Fallback
+        }
+
+        void Compiler::ExportModel(const Model& asset, const std::filesystem::path& out_path) const {
+            std::ofstream out(out_path, std::ios::binary);
+
+            // Vertices/indices
+            uint32_t vtxCount = uint32_t(asset.vertices.size());
+            uint32_t idxCount = uint32_t(asset.indices.size());
+            out.write((char*)&vtxCount, sizeof(vtxCount));
+            out.write((char*)&idxCount, sizeof(idxCount));
+            out.write((char*)asset.vertices.data(), vtxCount * sizeof(Vertex));
+            out.write((char*)asset.indices.data(), idxCount * sizeof(uint32_t));
+
+            // Skeleton (bones)
+            uint32_t boneCount = uint32_t(asset.skeleton.size());
+            out.write((char*)&boneCount, sizeof(boneCount));
+            for (const Bone& b : asset.skeleton) {
+                uint32_t nameLen = uint32_t(b.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(b.name.data(), nameLen);
+                out.write((char*)&b.parent, sizeof(b.parent));
+                out.write((char*)&b.bindPose, sizeof(glm::mat4));
+            }
+
+            // Skinning Weights
+            for (const auto& vweights : asset.weights) {
+                uint32_t count = uint32_t(vweights.size());
+                out.write((char*)&count, sizeof(count));
+                out.write((char*)vweights.data(), count * sizeof(BoneWeight));
+            }
+
+            // Animations
+            uint32_t animCount = uint32_t(asset.animations.size());
+            out.write((char*)&animCount, sizeof(animCount));
+            for (const AnimationClip& anim : asset.animations) {
+                uint32_t nameLen = uint32_t(anim.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(anim.name.data(), nameLen);
+                out.write((char*)&anim.duration, sizeof(anim.duration));
+                uint32_t trackCount = uint32_t(anim.tracks.size());
+                out.write((char*)&trackCount, sizeof(trackCount));
+                for (const AnimationTrack& track : anim.tracks) {
+                    uint32_t boneLen = uint32_t(track.boneName.size());
+                    out.write((char*)&boneLen, sizeof(boneLen));
+                    out.write(track.boneName.data(), boneLen);
+                    uint32_t keyCount = uint32_t(track.keys.size());
+                    out.write((char*)&keyCount, sizeof(keyCount));
+                    out.write((char*)track.keys.data(), keyCount * sizeof(AnimationKey));
+                }
+            }
+
+            // Materials
+            uint32_t matCount = uint32_t(asset.materials.size());
+            out.write((char*)&matCount, sizeof(matCount));
+            for (const Material& mat : asset.materials) {
+                uint32_t nameLen = uint32_t(mat.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(mat.name.data(), nameLen);
+                uint32_t diffLen = uint32_t(mat.diffuseMap.size());
+                out.write((char*)&diffLen, sizeof(diffLen));
+                out.write(mat.diffuseMap.data(), diffLen);
+                // Add normal/specular if present
+            }
+
+            out.close();
         }
 
         bool Compiler::needsRecompilation(Info& asset_info, Descriptor const& desc_file) const {

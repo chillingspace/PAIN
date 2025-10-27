@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 
+#include "pch.h"
+// Somehow, if i dont include this, refl macro cannot be foundl, even tho is in pch...
+#include "refl.hpp"
 #include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
-
 
 namespace PAIN {
 
@@ -32,4 +34,9 @@ namespace PAIN {
 #endif
 
 }
+
+
+REFL_TYPE(PAIN::MeshRenderer)
+REFL_FIELD(mesh_id)
+REFL_END
 

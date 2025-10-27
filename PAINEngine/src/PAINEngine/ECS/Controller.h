@@ -30,6 +30,10 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
+			template<typename ...Components>
+			void deserializeComponentsImpl(entt::entity entity, const nlohmann::json& comps, std::tuple<Components...>);
+
+
 		public:
 			explicit Controller(std::shared_ptr<Services> svc) {
 				services = svc;
@@ -117,6 +121,14 @@ namespace PAIN {
 			// Get all component names registered for an entity
 			std::vector<std::string> getEntityComponentNames(entt::entity entity) const;
 
+			// Get all components as JSON (for serialization)
+			nlohmann::json getAllComponentsAsJson(entt::entity entity) const;
+
+
+			// Deserialize all components from JSON
+			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps);
+
+
 			// Check if entity has a component by name (uses registered factories)
 			bool hasComponentByName(entt::entity entity, const std::string& name) const;
 
@@ -145,6 +157,12 @@ namespace PAIN {
 					return std::nullopt;
 				}
 				return std::ref(entt_registry.get<T>(entity));
+			}
+
+			// Get All Entity's Component 
+			template<typename T>
+			std::optional<std::reference_wrapper<T>> getEntityAllComponent(entt::entity entity) {
+
 			}
 
 			// Get component (const version)
@@ -208,10 +226,9 @@ namespace PAIN {
 			const std::vector<std::shared_ptr<System::ISystem>>& getAllSystems() const {
 				return systems;
 			}
+};
 
-		};
-
-	}
+		}
 }
 
 #endif
