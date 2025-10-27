@@ -102,6 +102,17 @@ int main(int argc, char* argv[]) {
     //Tidy up any additional directories
     compiler->tidyUpDirectories();
 
+    //Output stamp file
+    std::filesystem::path debug_file = output_path / "assetcompiler_stamp.txt";
+    std::ofstream test_out(debug_file);
+    if (test_out.is_open()) {
+        test_out << "AssetCompiler ran successfully at: " << std::time(nullptr) << std::endl;
+        test_out.close();
+    }
+    else {
+        std::cerr << "Failed to write debug test file: " << debug_file << std::endl;
+    }
+
     //Clean up resource
 	delete compiler;
 }

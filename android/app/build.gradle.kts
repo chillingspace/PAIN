@@ -1,3 +1,29 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+tasks.register<Exec>("runAssetCompiler") {
+    val assetCompilerExe = File(rootDir.parentFile, "build/Tools/AssetCompilerTool.exe").absolutePath
+    val assetInputDir = File(rootDir.parentFile, "assets").absolutePath
+    val assetOutputDir = File(rootDir, "app/src/main/assets").absolutePath
+
+    onlyIf {
+        Os.isFamily(Os.FAMILY_WINDOWS) && File(assetCompilerExe).exists()
+    }
+    commandLine(assetCompilerExe,
+        "--input", assetInputDir,
+        "--output", assetOutputDir,
+        "--target", "android")
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("runAssetCompiler")
+}
+
+tasks.register<Exec>("buildAssetCompilerTool") {
+    val buildassetcompilerBat = File(rootDir.parentFile, "build-assetcompiler.bat").absolutePath
+    commandLine("cmd", "/c", buildassetcompilerBat)
+}
+tasks.named("runAssetCompiler").configure { dependsOn("buildAssetCompilerTool") }
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -45,10 +71,6 @@ android {
     sourceSets.getByName("main") {
         jniLibs.srcDirs(
             "$rootDir/../vendor/FMOD/android/api/core/lib"
-        )
-
-        assets.srcDirs(
-            "$rootDir/../assets"
         )
     }
 }

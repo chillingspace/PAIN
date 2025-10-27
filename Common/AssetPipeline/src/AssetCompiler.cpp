@@ -356,13 +356,13 @@ namespace PAIN {
             bool compression_success = false;
 
             if (platform == Platform::Windows) {
-                // Use Cuttlefish for DDS/BC7 compression
+                //Use Cuttlefish for DDS/BC7 compression
                 compression_success = CompressTextureDDS(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
             }
             else if (platform == Platform::Android) {
-                // Use Cuttlefish for ASTC compression
+                //Use astc encoder for ASTC compression
                 compression_success = CompressTextureASTC(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
@@ -524,12 +524,6 @@ namespace PAIN {
                 cmd << " \"" + output_path + "\"";   // Output file
                 cmd << " " << ConvertToASTCBlockSize(format);  // Block size (e.g., "4x4")
                 cmd << " -" << settings.value("quality", "medium");  // Quality: -fastest, -fast, -medium, -thorough, -exhaustive
-
-                // Additional ASTC options
-                if (settings.value("srgb", false)) {
-                    cmd << " -srgb";  // sRGB color space
-                }
-
                 cmd << "\"";  // End outer quotes for Windows
 
                 std::string final_command = cmd.str();
