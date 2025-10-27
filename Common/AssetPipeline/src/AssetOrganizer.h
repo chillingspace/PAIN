@@ -13,7 +13,7 @@
 #include <memory>
 
 //Include asset compiler
-#include "AssetTypes.h"
+#include "AssetData.h"
 #include "AssetCompiler.h"
 
 namespace PAIN {

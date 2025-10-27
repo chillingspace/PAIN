@@ -46,7 +46,7 @@ add_library(PAINAssetPipeline STATIC ${PIPELINE_SRC})
 # Core dependencies - PAINAssetTypes MUST be linked first
 target_link_libraries(PAINAssetPipeline
     PUBLIC 
-        PAINAssetTypes        # Basic asset types
+        PAINAssetTypes assimp::assimp        # Basic asset types
 )
 
 # Add vendor dependencies

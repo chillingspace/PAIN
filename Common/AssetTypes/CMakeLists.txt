@@ -35,7 +35,7 @@ target_compile_features(PAINAssetTypes INTERFACE cxx_std_17)
 
 # Link basic vendor dependencies that AssetTypes needs
 if(TARGET nlohmann_json)
-    target_link_libraries(PAINAssetTypes INTERFACE nlohmann_json)
+    target_link_libraries(PAINAssetTypes INTERFACE nlohmann_json glm)
 endif()
 
 # Optional: Add compile definitions
