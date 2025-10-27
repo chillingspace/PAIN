@@ -11,6 +11,7 @@
 
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
+#include "CoreSystems/Renderer/text.h"
 
 
 namespace PAIN {
@@ -592,13 +593,6 @@ namespace PAIN {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
-		// render 2D textures onto screen
-
-		{
-			// !TODO: add queue and iterate through all 2D textures to be rendered last
-			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
-		}
-
 	}
 
 	void WindowsRenderer::PostProcessPass()
@@ -634,6 +628,22 @@ namespace PAIN {
 			passthrough_shader->SetUniform("tex", 0);
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+		// set back to use final_fbo and final_texture for further rendering
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+
+		// render 2D textures onto screen
+		{
+			// !TODO: add queue and iterate through all 2D textures to be rendered last
+			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
+		}
+
+		// render text onto screen
+		{
+			TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
+			TextRenderer::get().debugRenderQuad();
 		}
 
 		err = glGetError();
