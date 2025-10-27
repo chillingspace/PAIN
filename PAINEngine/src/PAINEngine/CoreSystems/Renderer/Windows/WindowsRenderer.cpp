@@ -140,6 +140,12 @@ namespace PAIN {
 #else
 		texture2d_shader = LoadShaders("android_texture2d.vert", "android_texture2d.frag");
 #endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		gamma_shader = LoadShaders("gamma.vert", "gamma.frag");
+#else
+		gamma_shader = LoadShaders("android_gamma.vert", "android_gamma.frag");
+#endif
 	}
 
 	// TO BE MOVED
@@ -238,6 +244,21 @@ namespace PAIN {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// final_texture_2 for ping-pong if needed in post-processing
+			glGenTextures(1, &final_texture_2);
+			if (final_texture_2 == 0) {
+				PN_CORE_ERROR("Failed to create final texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+
 		}
 
 		// vao/vbo for final passthrough texture
@@ -562,13 +583,49 @@ namespace PAIN {
 
 	void WindowsRenderer::PostProcessPass()
 	{
+		int postprocess_passes = 0;
+
+		// gamma correction
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+		gamma_shader->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, final_texture);
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		++postprocess_passes;
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err during PostProcessPass: {}", err);
+		}
+
+		// make sure final_texture now holds the gamma corrected texture
+		// disable this if doing an even number of post-process passes
+		if (postprocess_passes % 2) {
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D, final_texture_2, 0);
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D, final_texture, 0);
+
+			glBlitFramebuffer(0, 0, winWidth, winHeight,  // src rect
+				0, 0, winWidth, winHeight,  // dst rect
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
+		}
+
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
-
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, final_texture);
-
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}

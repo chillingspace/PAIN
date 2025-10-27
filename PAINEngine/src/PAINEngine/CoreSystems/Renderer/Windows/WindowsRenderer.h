@@ -97,6 +97,7 @@ namespace PAIN {
 		unsigned int passthrough_vbo = 0;
 
 		unsigned int final_texture = 0;		// for imgui/post-processing/display
+		unsigned int final_texture_2 = 0;	// for ping-pong for post-processing
 
 		// === Shaders ===
 		std::unique_ptr<Shader> pbr_shader = nullptr;
@@ -106,6 +107,7 @@ namespace PAIN {
 		std::unique_ptr<Shader> shadow_shader = nullptr;
 		std::unique_ptr<Camera> active_cam = nullptr;		// what is this for? -js
 		std::unique_ptr<Shader> texture2d_shader = nullptr;
+		std::unique_ptr<Shader> gamma_shader = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{
@@ -114,12 +116,14 @@ namespace PAIN {
 			&final_fbo
 		};
 		std::array<unsigned int*, 1> rbos{ &ds_rbo };
-		std::array<unsigned int*, 4> texs{
+		std::array<unsigned int*, 6> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
-			//&shadow_texture
+			//&shadow_texture,
+			&final_texture,
+			& final_texture_2
 		};
 
 		std::shared_ptr<Services> services;
