@@ -9,6 +9,7 @@
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Renderer/text.h"
+#include "CoreSystems/Renderer/skybox.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -24,12 +25,11 @@ namespace PAIN {
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
 		glm::vec3 forward{ -glm::normalize(pos) };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
-		float fov{ 90.f };
 		float near_plane{ 0.1f };
 		float far_plane{ 100.f };
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
-		camera = std::make_unique<Camera>(pos, forward, up, fov, near_plane, far_plane, width_ratio, height_ratio);
+		camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
 
 		// Init light sources
 		LightSources::get().create("cam");
@@ -135,6 +135,11 @@ namespace PAIN {
 
 		// font
 		TextRenderer::get();
+
+		// skybox
+		Skybox::get().init(
+			services, services->get<Path::Path>()->resolvePath("engine_assets://Textures/skybox.hdr")
+		);
 	}
 
 	void Scene::onUpdate(AppTiming timing)

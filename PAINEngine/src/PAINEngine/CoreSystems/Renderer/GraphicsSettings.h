@@ -46,5 +46,6 @@ namespace PAIN {
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 		bool daytime = true;
+		float fov = 90.f;
 	};
 }

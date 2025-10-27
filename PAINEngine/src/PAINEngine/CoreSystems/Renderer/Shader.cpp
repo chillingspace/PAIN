@@ -167,10 +167,6 @@ namespace PAIN {
 			PN_CORE_INFO("Program link succeeded");
 		}
 
-		// Test getting uniform location RIGHT NOW
-		GLint testLoc = glGetUniformLocation(program, "projection");
-		PN_CORE_INFO("Projection location immediately after link: {}", testLoc);
-
 		// (Optional but recommended)
 		glDetachShader(program, vert_shader);
 		glDetachShader(program, frag_shader);

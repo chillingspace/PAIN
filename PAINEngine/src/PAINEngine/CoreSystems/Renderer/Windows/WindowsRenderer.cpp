@@ -12,6 +12,7 @@
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/text.h"
+#include "CoreSystems/Renderer/skybox.h"
 
 
 namespace PAIN {
@@ -405,6 +406,15 @@ namespace PAIN {
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before drawing floor: {}", err);
+		}
+
+		// draw skybox
+		{
+			Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+		}
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after drawing skybox: {}", err);
 		}
 
 		// draw floor

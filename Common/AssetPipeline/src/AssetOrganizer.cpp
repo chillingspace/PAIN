@@ -187,7 +187,7 @@ namespace PAIN {
             }
         }
 
-        void AssetOrganizer::recursiveScanAllDirectories(std::filesystem::path const& path, 
+        void AssetOrganizer::recursiveScanAllDirectories(std::filesystem::path const& path,
             std::function<void(std::filesystem::path const& file)> file_func,
             std::function<void(std::filesystem::path const& file)> dir_func) {
 
