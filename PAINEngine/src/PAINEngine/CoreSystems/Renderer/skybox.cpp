@@ -161,8 +161,13 @@ namespace PAIN {
 
 			renderCube(); // Render a unit cube
 		}
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("Capture Framebuffer not complete!");
+		}
+
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
 		glDeleteTextures(1, &skybox_tex); // delete the original HDR
@@ -210,6 +215,7 @@ namespace PAIN {
 	}
 
 	void Skybox::render(const glm::mat4& view, const glm::mat4& proj) {
+		glDisable(GL_CULL_FACE);	// we are inside cube, so disable culling
 		glDepthFunc(GL_LEQUAL);  // so skybox renders at max depth
 
 		shader.Bind();
@@ -227,5 +233,6 @@ namespace PAIN {
 		renderCube();
 
 		glDepthFunc(GL_LESS);  // reset depth function to default
+		glEnable(GL_CULL_FACE);
 	}
 }

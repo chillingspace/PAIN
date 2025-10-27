@@ -405,7 +405,7 @@ namespace PAIN {
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before drawing floor: {}", err);
+			PN_CORE_ERROR("OpenGL error before drawing skybox: {}", err);
 		}
 
 		// draw skybox
