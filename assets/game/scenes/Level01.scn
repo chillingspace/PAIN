@@ -1,0 +1,172 @@
+{
+    "active_cam_id": "",
+    "dirty": false,
+    "ecs": {
+        "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 2216829733
+                        },
+                        "Transform": {
+                            "position": [
+                                8.0,
+                                1.0,
+                                -0.25716590881347656
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "audio_src"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 3057003121
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 3057003121
+                        },
+                        "Transform": {
+                            "position": [
+                                2.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 3057003121
+                        },
+                        "Transform": {
+                            "position": [
+                                -2.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 2647512933
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                2.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "screen"
+                }
+            }
+        ]
+    },
+    "grid_id": 0,
+    "layers": [],
+    "mask_matrix": [],
+    "meta_tags": []
+}

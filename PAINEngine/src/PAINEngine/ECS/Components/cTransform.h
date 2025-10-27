@@ -11,7 +11,9 @@
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
+#include "GLMSerialization.h"
 #include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+
 
 namespace PAIN {
 
@@ -56,7 +58,28 @@ namespace PAIN {
 	}
 	
 #endif
+}
 
+// No refl macro here, have to use custom GLM serializers, 
+//  refl-cpp doesn't automatically know how to reflect GLM types
+
+// This is needed as json still does not now how to handle seri for the custom comps,
+// These types not supported by refl, so we need add struct-level seri 
+namespace nlohmann {
+	template<>
+	struct adl_serializer<PAIN::Transform> {
+		static void to_json(json& j, const PAIN::Transform& t) {
+			j["position"] = t.position;
+			j["rotation"] = t.rotation;
+			j["scale"] = t.scale;
+		}
+
+		static void from_json(const json& j, PAIN::Transform& t) {
+			t.position = j["position"].get<glm::vec3>();
+			t.rotation = j["rotation"].get<glm::quat>();
+			t.scale = j["scale"].get<glm::vec3>();
+		}
+	};
 }
 
 #endif

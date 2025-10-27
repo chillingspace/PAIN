@@ -66,7 +66,7 @@ namespace PAIN {
                 std::ofstream out(file_path, std::ios::binary | std::ios::trunc);
                 if (!out) return false;
                 out << data.dump(4);
-                PN_CORE_INFO("Save to scene file: {}", file_path);
+                PN_CORE_INFO("Save file: {}", file_path);
                 return true;
             }
             catch (...) {
@@ -84,7 +84,7 @@ namespace PAIN {
             catch (...) {
                 // leave empty
             }
-            PN_CORE_INFO("Load from scene file: {}", file_path);
+            PN_CORE_INFO("Load file: {}", file_path);
             return j;
         }
 
@@ -131,28 +131,11 @@ namespace PAIN {
                             else
                                 controller->addEntityComponent(e, MetaData::EntityName{ "Entity " + std::to_string((int)e) });
 
-                            // Components
+                            // Deserialize all components using their adl_serializer or refl-cpp
                             if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-                                const auto& comps = *compsIt;
-
-                                // Transform::Transform
-                                if (auto jt = comps.find("Transform::Transform"); jt != comps.end() && jt->is_object()) {
-                                    const auto& obj = *jt;
-                                    auto rot = obj.value("rotation", nlohmann::json::array());
-                                    auto pos = obj.value("position", nlohmann::json::array());
-                                    auto scl = obj.value("scale", nlohmann::json::array());
-
-                                    if (rot.size() == 4 && pos.size() == 3 && scl.size() == 3) {
-                                        Transform t;
-                                        t.rotation = glm::f32quat{ rot[3].get<float>(), rot[0].get<float>(), rot[1].get<float>(), rot[2].get<float>() };
-                                        t.position = { pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>() };
-                                        t.scale = { scl[0].get<float>(), scl[1].get<float>(), scl[2].get<float>() };
-                                        controller->addEntityComponent<PAIN::Transform>(e, std::move(t));
-                                    }
-                                }
-
-                                // TODO: add other components here (Audio, Renderers,.)
+                                controller->loadAllComponentsFromJson(e, *compsIt);
                             }
+                            
                         }
                     }
                 }
@@ -188,33 +171,17 @@ namespace PAIN {
             nlohmann::json ents = nlohmann::json::array();
 
             for (auto entity : entities) {
-                nlohmann::json E = nlohmann::json::object();
-                
-                // Seriliaze metadata comps
-                E["MetaData"] = metadata_service->serializeEntity(entity); 
-
-                // To seri comps
-                nlohmann::json C = nlohmann::json::object();
-
-                auto transform_opt = controller->getEntityComponent<PAIN::Transform>(entity);
-
-                if (transform_opt.has_value()) {
-                    const auto& transform_comp = transform_opt.value().get();
-                    C["Transform"] = {
-                        {"rotation", {transform_comp.rotation.x, transform_comp.rotation.y, transform_comp.rotation.z, transform_comp.rotation.w}},
-                        {"position", {transform_comp.position.x, transform_comp.position.y, transform_comp.position.z}},
-                        {"scale", {transform_comp.scale.x, transform_comp.scale.y, transform_comp.scale.z}}
-                    };
-                }
-                // TODO: Add other component types (Audio, Renderer, etc.)  
-                E["Components"] = std::move(C);
-
+                nlohmann::json E;
+                E["MetaData"] = metadata_service->serializeEntity(entity);
+                E["Components"] = controller->getAllComponentsAsJson(entity);  
                 ents.push_back(E);
             }
 
             prefab_json["Entities"] = std::move(ents);
+
+            std::string prefab_filepath = resolvePrefabPath(filepath);
         
-            saveJsonFile(filepath, prefab_json);
+            saveJsonFile(prefab_filepath, prefab_json);
         }
 
         std::vector<entt::entity> PAIN::Serialization::Service::loadPrefabFromFile(const std::string& filepath)
@@ -224,7 +191,9 @@ namespace PAIN {
 
             std::vector<entt::entity> entities;
 
-            nlohmann::json prefab_json = loadJsonFile(filepath);
+            std::string prefab_filepath = resolvePrefabPath(filepath);
+
+            nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
             if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
 
             for (const auto& E : prefab_json["Entities"]) {
@@ -233,26 +202,30 @@ namespace PAIN {
                 entities.push_back(e);
 
                 // Deserialize Metadata
-                if (E.contains("MetaData"))
+                if (E.contains("MetaData")) {
                     metadata_service->deserializeEntity(e, E["MetaData"]);
+                }
 
-                // Deserialize Components
+                // Deserialize Components using adl_serializer or refl cpp
                 if (E.contains("Components")) {
-                    const auto& C = E["Components"];
-                    // Example: Transform
-                    if (C.contains("Transform")) {
-                        const auto& T = C["Transform"];
-                        PAIN::Transform tr;
-                        tr.rotation = glm::f32quat(T["rotation"][3].get<float>(), T["rotation"][0].get<float>(), T["rotation"][1].get<float>(), T["rotation"][2].get<float>());
-                        tr.position = glm::vec3(T["position"][0].get<float>(), T["position"][1].get<float>(), T["position"][2].get<float>());
-                        tr.scale = glm::vec3(T["scale"][0].get<float>(), T["scale"][1].get<float>(), T["scale"][2].get<float>());
-                        controller->addEntityComponent<PAIN::Transform>(e, std::move(tr));
-                    }
-                    // TODO: add deserialization for other components (Audio, Renderer, etc.)
+                    controller->loadAllComponentsFromJson(e, E["Components"]);
                 }
             }
 
+            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_filepath);
             return entities;
+        }
+
+        std::string Service::resolvePrefabPath(std::string const& prefab)
+        {
+            auto path_service = services->get<Path::Path>();
+
+            std::string prefab_with_ext = prefab;
+
+            // If do not have the .prefab extension, add it in
+            if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
+
+            return path_service->resolvePath("main_game_assets://prefabs/" + prefab_with_ext);
         }
 
         bool Service::createNewScene(std::string_view baseName)
@@ -386,21 +359,7 @@ namespace PAIN {
                     }
 
                     // Components
-                    nlohmann::json C = nlohmann::json::object();
-
-                    // Transform (quat + vec3)
-                    if (auto t = controller->getEntityComponent<Transform>(e)) {
-                        const auto& tr = t->get();
-                        C["Transform::Transform"] = {
-                            {"rotation", {tr.rotation.x, tr.rotation.y, tr.rotation.z, tr.rotation.w}},
-                            {"position", {tr.position.x, tr.position.y, tr.position.z}},
-                            {"scale",    {tr.scale.x,    tr.scale.y,    tr.scale.z}}
-                        };
-                    }
-
-                    // TODO: add other components
-
-                    E["Components"] = std::move(C);
+                    E["Components"] = controller->getAllComponentsAsJson(e);
 
                     ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
                 }

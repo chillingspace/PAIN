@@ -95,6 +95,8 @@ namespace PAIN {
 
             const SceneDoc& doc() const { return doc_; }
 
+            std::string resolvePrefabPath(std::string const& prefab);
+
             // Mutators
             void setGrid(int g);    
             void setActiveCam(std::string id);

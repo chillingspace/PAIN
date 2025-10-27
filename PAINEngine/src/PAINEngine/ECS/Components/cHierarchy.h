@@ -11,11 +11,7 @@
 #ifndef C_HIERARCHY_H
 #define C_HIERARCHY_H
 
-#include <entt/entt.hpp>
-#include <vector>
-#include "Jolt/Jolt.h"
-#include <Jolt/Core/Factory.h>          
-#include <Jolt/RegisterTypes.h>   
+#include "pch.h"
 
 namespace PAIN {
 
@@ -41,5 +37,10 @@ namespace PAIN {
 	};
 
 } // namespace PAIN
+
+REFL_TYPE(PAIN::Hierarchy)
+REFL_FIELD(parent)
+REFL_FIELD(children)
+REFL_END
 
 #endif // C_HIERARCHY_H
