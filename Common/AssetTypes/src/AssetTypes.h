@@ -62,6 +62,7 @@ namespace PAIN {
             Data,       // .json
             Shader,     // .vert, .frag
             Scenes,
+            Font,
             Other
         };
 
@@ -75,6 +76,7 @@ namespace PAIN {
             temp[Type::Data] = "Data";
             temp[Type::Shader] = "Shader";
             temp[Type::Scenes] = "Scenes";
+            temp[Type::Font] = "Font";
             temp[Type::Other] = "Other";
 
             return temp;
@@ -96,7 +98,7 @@ namespace PAIN {
 
         //Boolean to check if the asset is compilable
         static bool isAssetCompilable(Type type) {
-            if (type == Type::Texture /*|| type == Type::Model || type == Type::Audio*/) return true;
+            if (type == Type::Texture || type == Type::Audio /*|| type == Type::Model*/) return true;
             return false;
         }
 
@@ -116,6 +118,7 @@ namespace PAIN {
             temp[Type::Data] = { ".json" };
             temp[Type::Shader] = { ".vert", ".frag" };
             temp[Type::Scenes] = { ".scn" };
+            temp[Type::Font] = { ".ttf" };
 
             return temp;
         }
@@ -148,19 +151,16 @@ namespace PAIN {
             temp[Type::Script] = engine_assets_folder / "scripts";
             temp[Type::Data] = engine_assets_folder / "data";
             temp[Type::Shader] = engine_assets_folder / "shaders";
+            temp[Type::Font] = engine_assets_folder / "fonts";
             temp[Type::Other] = engine_assets_folder / "others";
 
             return temp;
         }
 
         static std::string toLowerCase(std::string const& string) {
-            std::string new_string;
-            for (auto c : string) {
-                //new_string += __ascii_tolower(c);
-                new_string += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-
-            }
-            return new_string;
+            std::string t = string;
+            std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+            return t;
         }
 
         static Type getAssetType(std::filesystem::path const& file) {
@@ -195,6 +195,18 @@ namespace PAIN {
             }
         }
 
+        static std::size_t fileHashing(const std::filesystem::path& path) {
+            std::ifstream file(path, std::ios::binary);
+            std::size_t hash = 0;
+            char buffer[4096];
+            while (file.read(buffer, sizeof(buffer)))
+                for (auto b : buffer)
+                    hash ^= std::hash<char>{}(b)+0x9e3779b9 + (hash << 6) + (hash >> 2);
+            for (auto b : std::string(buffer, file.gcount()))
+                hash ^= std::hash<char>{}(b)+0x9e3779b9 + (hash << 6) + (hash >> 2);
+            return hash;
+        }
+
         //Asset info
         struct Info {
 
@@ -214,7 +226,6 @@ namespace PAIN {
             uint64_t raw_last_modified = 0;
         };
 
-
         struct Descriptor {
 
             //Identity
@@ -231,6 +242,7 @@ namespace PAIN {
 
             //Build data
             uint64_t raw_last_modified;
+            std::size_t hash;
 
             //Dependencies
             std::vector<GUID> dependencies;
@@ -238,6 +250,25 @@ namespace PAIN {
             //Meta data
             nlohmann::json meta_data;
         };
+
+        inline bool operator==(const Descriptor& lhs, const Descriptor& rhs)
+        {
+            return lhs.guid == rhs.guid
+                && lhs.descriptor_version == rhs.descriptor_version
+                && lhs.created_timestamp == rhs.created_timestamp
+                && lhs.type == rhs.type
+                && lhs.name == rhs.name
+                && lhs.import_settings == rhs.import_settings
+                && lhs.raw_last_modified == rhs.raw_last_modified
+                && lhs.hash == rhs.hash
+                && lhs.dependencies == rhs.dependencies
+                && lhs.meta_data == rhs.meta_data;
+        }
+
+        inline bool operator!=(const Descriptor& lhs, const Descriptor& rhs)
+        {
+            return !(lhs == rhs);
+        }
     }
 }
 

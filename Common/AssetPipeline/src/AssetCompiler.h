@@ -36,7 +36,7 @@ namespace PAIN {
 			bool copyFile(std::filesystem::path const& copy, std::filesystem::path const& dest) const;
 
 			//Generate default asset settings
-			nlohmann::json generateDefaultCompileSettings(Type const& type) const;
+			nlohmann::json generateDefaultCompileSettings(Type const& type, Info const& asset) const;
 
 			//Create default desc file
 			Descriptor createDefaultDesc(Info const& asset, std::filesystem::path const& path) const;
@@ -48,17 +48,21 @@ namespace PAIN {
 			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
 
 			//Compile and ship
-			void compileAndShip(Descriptor const& desc_file, Info& asset_info) const;
+			void compileAndShip(Descriptor& desc_file, Info& asset_info) const;
 
 			//Internal asset compilers
-			void compileTexture(Descriptor const& desc_file, Info& asset_info) const;
-			void compileAudio(Descriptor const& desc_file, Info& asset_info) const;
-			void compileModel(Descriptor const& desc_file, Info& asset_info) const;
+			void compileTexture(Descriptor& desc_file, Info& asset_info) const;
+			void compileAudio(Descriptor& desc_file, Info& asset_info) const;
+			void compileModel(Descriptor& desc_file, Info& asset_info) const;
 			std::string GetCuttlefishExecutable() const;
 			bool CompressTextureDDS(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetASTCEncoderExecutable() const;
 			std::string ConvertToASTCBlockSize(const std::string& format) const;
 			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+			std::string GetFFMPEGExecutable() const;
+
+			//Recompilation check
+			bool needsRecompilation(Info& asset_info, Descriptor const& desc_file) const;
 		public:
 
 			//Default compiler

@@ -83,6 +83,10 @@ if(TARGET astcenc)
     add_dependencies(AssetCompilerTool astcenc-native copy_astcenc_bin)
 endif()
 
+if(NOT ANDROID)
+	add_dependencies(AssetCompilerTool copy_ffmpeg_bin)
+endif()
+
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
 #add_subdirectory(Tests/LuaBridgeSmoke)

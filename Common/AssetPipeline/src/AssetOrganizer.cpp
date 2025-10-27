@@ -91,6 +91,12 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
+                        //Remove lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        if (std::filesystem::exists(lagging_desc)) {
+                            deleteFile(lagging_desc);
+                        }
+
                         //Update asset details
                         asset.raw_path = target;
                         asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
@@ -109,6 +115,12 @@ namespace PAIN {
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
+
+                        //Remove lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        if (std::filesystem::exists(lagging_desc)) {
+                            deleteFile(lagging_desc);
+                        }
 
                         //Update asset details
                         asset.raw_path = target;
@@ -135,6 +147,12 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
+                        //Remove lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        if (std::filesystem::exists(lagging_desc)) {
+                            deleteFile(lagging_desc);
+                        }
+
                         //Update asset details
                         asset.raw_path = target;
                         asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
@@ -154,6 +172,12 @@ namespace PAIN {
 
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
+
+                        //Remove lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        if (std::filesystem::exists(lagging_desc)) {
+                            deleteFile(lagging_desc);
+                        }
 
                         //Update asset details
                         asset.raw_path = target;
@@ -219,12 +243,6 @@ namespace PAIN {
             engine_dir.emplace(type, engine_folder / folder);
         }
 
-        std::string AssetOrganizer::to_lower(const std::string& s) const {
-            std::string t = s;
-            std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-            return t;
-        }
-
         void AssetOrganizer::enforceStandardStructure() {
 
             //Ensure creation of base folders
@@ -242,7 +260,7 @@ namespace PAIN {
                 recursiveScanAllDirectories(fullPath, [](std::filesystem::path) {}, [&](std::filesystem::path const& dir) {
                     auto parent = dir.parent_path();
                     auto dir_name = dir.filename().string();
-                    auto lower_name = to_lower(dir_name);
+                    auto lower_name = Assets::toLowerCase(dir_name);
                     if (lower_name != dir_name) {
                         auto new_path = parent / lower_name;
                         instantiateFolder(new_path);
@@ -261,7 +279,7 @@ namespace PAIN {
                 recursiveScanAllDirectories(fullPath, [](std::filesystem::path) {}, [&](std::filesystem::path const& dir) {
                     auto parent = dir.parent_path();
                     auto dir_name = dir.filename().string();
-                    auto lower_name = to_lower(dir_name);
+                    auto lower_name = Assets::toLowerCase(dir_name);
                     if (lower_name != dir_name) {
                         auto new_path = parent / lower_name;
                         instantiateFolder(new_path);
@@ -301,7 +319,10 @@ namespace PAIN {
 
                         //Try to read source
                         if (desc.meta_data.contains("source_file")) {
-                            if (!std::filesystem::exists(desc.meta_data["source_file"])) {
+                            auto path_str = desc.meta_data["source_file"];
+                            std::filesystem::path path = path_str;
+                            auto desc_path = assets_root / std::filesystem::relative(path, assets_root).parent_path() / (path.stem().string() + desc_ext);
+                            if (!std::filesystem::exists(path) || desc_path != file) {
                                 deleteFile(file);
                             }
                         }
