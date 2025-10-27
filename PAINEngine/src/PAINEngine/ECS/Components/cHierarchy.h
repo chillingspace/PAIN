@@ -2,7 +2,7 @@
  * \file   cHierarchy.h
  * \brief  Definition of animation system states
  *
- * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
+ * \author Nicole Esther Lee, 2301544, [lee.n@digipen.edu] (100%)
  * \co-author
  * \date   24 October 2025
  * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
@@ -38,30 +38,6 @@ namespace PAIN {
 		 * Contains all direct children of this entity in the hierarchy
 		 */
 		std::vector<entt::entity> children;
-
-		/**
-		 * \brief Check if this entity is a root entity (no parent)
-		 * \return true if parent is null, false otherwise
-		 */
-		bool isRoot() const {
-			return parent == entt::null;
-		}
-
-		/**
-		 * \brief Check if this entity has any children
-		 * \return true if children vector is not empty
-		 */
-		bool hasChildren() const {
-			return !children.empty();
-		}
-
-		/**
-		 * \brief Get the number of direct children
-		 * \return Number of children
-		 */
-		size_t getChildCount() const {
-			return children.size();
-		}
 	};
 
 } // namespace PAIN
