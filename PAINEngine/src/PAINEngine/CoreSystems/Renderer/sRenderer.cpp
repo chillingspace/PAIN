@@ -86,6 +86,11 @@ namespace PAIN {
 		auto& registry = ecs->getRegistry();
 		auto view = registry.view<MetaData::EntityName>();
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before geometry pass: {}", err);
+		}
+
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
@@ -104,6 +109,11 @@ namespace PAIN {
 
 		}
 		w_renderer->EndGeometryPass();
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+		}
 	}
 
 	void sRenderer::lightingPass()
@@ -125,6 +135,11 @@ namespace PAIN {
 #else
 			bool editor_visible = false;
 #endif
+
+			GLenum err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
+			}
 
 			if (editor_visible) {
 				glBindFramebuffer(GL_FRAMEBUFFER, w_renderer->getFinalFbo());
@@ -150,11 +165,32 @@ namespace PAIN {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err before render passes: {}", err);
+			}
+
 			// Render all passes
 			shadowPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
+			}
 			geometryPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+			}
 			lightingPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
+			}
 			postProcessPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

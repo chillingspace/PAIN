@@ -401,6 +401,11 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error before drawing floor: {}", err);
+		}
+
 		// draw floor
 		{
 			if (!floor_shader) {
@@ -417,6 +422,11 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
+		}
+
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
@@ -425,6 +435,11 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M)
 	{
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
+		}
+
 		if (!mesh || !geometry_shader) return;
 
 		geometry_shader->SetUniform("u_M", M);
@@ -441,6 +456,11 @@ namespace PAIN {
 		}
 
 		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after DrawGeometry: {}", err);
+		}
 	}
 
 	void WindowsRenderer::EndGeometryPass()
@@ -586,14 +606,17 @@ namespace PAIN {
 		int postprocess_passes = 0;
 
 		// gamma correction
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
-		gamma_shader->Bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, final_texture);
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		++postprocess_passes;
+		if (GraphicsSettings::get().gamma_correction) {
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+			gamma_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			gamma_shader->SetUniform("tex", 0);
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			++postprocess_passes;
+		}
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -601,19 +624,16 @@ namespace PAIN {
 		}
 
 		// make sure final_texture now holds the gamma corrected texture
-		// disable this if doing an even number of post-process passes
+		// use passthrough to render final_texture_2 to final_texture if odd number of passes
 		if (postprocess_passes % 2) {
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, final_fbo);
-			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, final_texture_2, 0);
-
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
-			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, final_texture, 0);
-
-			glBlitFramebuffer(0, 0, winWidth, winHeight,  // src rect
-				0, 0, winWidth, winHeight,  // dst rect
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+			passthrough_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			passthrough_shader->SetUniform("tex", 0);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
 		err = glGetError();

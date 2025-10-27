@@ -2,8 +2,8 @@
 #include "Mesh.h"
 
 namespace PAIN {
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
-		: vertices(vertices), indices(indices)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::string& ref)
+		: vertices(vertices), indices(indices), ref(ref)
 	{
 	}
 	Mesh::~Mesh()
@@ -24,7 +24,7 @@ namespace PAIN {
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error in Mesh::Draw: {0}", err);
+			PN_CORE_ERROR("OpenGL error in Mesh::Draw: {} on mesh {}", err, ref);;
 		}
 	}
 

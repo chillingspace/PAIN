@@ -37,11 +37,14 @@ namespace PAIN {
 			{SHADOW_TYPES::HARD, 1024}
 		};
 
-		// actual settings
-		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
-
 		int getShadowMapWidth() const {
 			return SHADOW_MAP_WIDTHS.at(shadow_type);
 		}
+
+		// actual settings
+		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
+		bool gamma_correction = true;
+		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
+		bool daytime = false;
 	};
 }

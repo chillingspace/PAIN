@@ -246,6 +246,9 @@ namespace PAIN {
 		timing.steps_this_frame = steps;
 		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
+		// clear errors before next rendering loop
+		while (glGetError());
+
 		//Update all core systems
 		for (auto& core : core_stack) core.lock()->onUpdate(timing);
 

@@ -7,6 +7,7 @@
 #include "ECS/Components/cMeshRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -36,14 +37,16 @@ namespace PAIN {
 		lcam.L_intensity = glm::vec3(0.01f);
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
-		LightSources::get().create("world");
-		auto olc = LightSources::get().get("world");
-		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 30.f, 0.f);
-		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-		lc.L_intensity = glm::vec3(0.5f);
-		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.type = Light::TYPES::DIRECTIONAL;
+		if (GraphicsSettings::get().daytime) {
+			LightSources::get().create("world");
+			auto olc = LightSources::get().get("world");
+			Light& lc = olc.value();
+			lc.position = glm::vec3(0.f, 30.f, 0.f);
+			lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
+			lc.L_intensity = glm::vec3(0.5f);
+			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
+			lc.type = Light::TYPES::DIRECTIONAL;
+		}
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 
@@ -307,7 +310,7 @@ namespace PAIN {
 				20,21,22, 20,22,23
 			};
 
-			return std::make_shared<Mesh>(vertices, indices);;
+			return std::make_shared<Mesh>(vertices, indices, path_to_mesh);
 		}
 
 		struct TempVertex {
@@ -391,7 +394,7 @@ namespace PAIN {
 		// can add generalization
 		// must add texcoords
 
-		return std::make_shared<Mesh>(vertices, indices);;
+		return std::make_shared<Mesh>(vertices, indices, path_to_mesh);
 	}
 
 	uint32_t Scene::cacheMesh(const std::string& path)

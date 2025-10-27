@@ -1,12 +1,12 @@
 #version 330 core
 
-out vec4 FragColor;
 in vec2 TexCoords;
+out vec4 FragColor;
 
-uniform sampler2D screenTexture;
+uniform sampler2D tex;
 
 void main() {
-    vec3 color = texture(screenTexture, TexCoords).rgb;
+    vec3 color = texture(tex, TexCoords).rgb;
     
     color = pow(color, vec3(1.0/2.2));
     
