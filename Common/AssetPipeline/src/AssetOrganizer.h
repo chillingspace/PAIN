@@ -64,8 +64,12 @@ namespace PAIN {
             void enforceEngineAssetLocation(Info& asset) const;
 
             //Recursively scan the directory
-            void recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func);
+            void recursiveScanAllDirectories(std::filesystem::path const& path,
+                std::function<void(std::filesystem::path const& file)> file_func,
+                std::function<void(std::filesystem::path const& file)> dir_func);
 
+            //Enforce lower caps for all folders
+            std::string to_lower(const std::string& s) const;
         public:
             AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
             ~AssetOrganizer() = default;

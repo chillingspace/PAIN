@@ -112,13 +112,13 @@ namespace PAIN {
 
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS
-        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
         app_audio->play(asset_path);
 #else
-        app_audio->loadSound("file:///android_asset/Game/Audio/Music/Boss_Music.wav", true, false, false);
-        app_audio->play("file:///android_asset/Game/Audio/Music/Boss_Music.wav");
+        app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
+        app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack

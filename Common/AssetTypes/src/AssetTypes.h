@@ -121,34 +121,34 @@ namespace PAIN {
         }
 
         //All folder types
-        static std::filesystem::path game_assets_folder = "Game";
-        static std::filesystem::path engine_assets_folder = "Engine";
+        static std::filesystem::path game_assets_folder = "game";
+        static std::filesystem::path engine_assets_folder = "engine";
 
         //All folder types based on types
 
         static std::unordered_map<Type, std::filesystem::path> getAllGameFolders() {
             std::unordered_map<Type, std::filesystem::path> temp;
 
-            temp[Type::Texture] = game_assets_folder / "Textures";
-            temp[Type::Model] = game_assets_folder / "Models";
-            temp[Type::Audio] = game_assets_folder / "Audio";
-            temp[Type::Script] = game_assets_folder / "Scripts";
-            temp[Type::Data] = game_assets_folder / "Data";
-            temp[Type::Scenes] = game_assets_folder / "Scenes";
-            temp[Type::Other] = game_assets_folder / "Others";
+            temp[Type::Texture] = game_assets_folder / "textures";
+            temp[Type::Model] = game_assets_folder / "models";
+            temp[Type::Audio] = game_assets_folder / "audio";
+            temp[Type::Script] = game_assets_folder / "scripts";
+            temp[Type::Data] = game_assets_folder / "data";
+            temp[Type::Scenes] = game_assets_folder / "scenes";
+            temp[Type::Other] = game_assets_folder / "others";
 
             return temp;
         }
         static std::unordered_map<Type, std::filesystem::path> getAllEngineFolders() {
             std::unordered_map<Type, std::filesystem::path> temp;
 
-            temp[Type::Texture] = engine_assets_folder / "Textures";
-            temp[Type::Model] = engine_assets_folder / "Models";
-            temp[Type::Audio] = engine_assets_folder / "Audio";
-            temp[Type::Script] = engine_assets_folder / "Scripts";
-            temp[Type::Data] = engine_assets_folder / "Data";
-            temp[Type::Shader] = engine_assets_folder / "Shaders";
-            temp[Type::Other] = engine_assets_folder / "Others";
+            temp[Type::Texture] = engine_assets_folder / "textures";
+            temp[Type::Model] = engine_assets_folder / "models";
+            temp[Type::Audio] = engine_assets_folder / "audio";
+            temp[Type::Script] = engine_assets_folder / "scripts";
+            temp[Type::Data] = engine_assets_folder / "data";
+            temp[Type::Shader] = engine_assets_folder / "shaders";
+            temp[Type::Other] = engine_assets_folder / "others";
 
             return temp;
         }

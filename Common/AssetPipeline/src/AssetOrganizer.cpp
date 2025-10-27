@@ -163,7 +163,9 @@ namespace PAIN {
             }
         }
 
-        void AssetOrganizer::recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func) {
+        void AssetOrganizer::recursiveScanAllDirectories(std::filesystem::path const& path, 
+            std::function<void(std::filesystem::path const& file)> file_func,
+            std::function<void(std::filesystem::path const& file)> dir_func) {
 
             //Look for Engine and Game directories
             for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -172,14 +174,17 @@ namespace PAIN {
                 if (entry.is_directory()) {
 
                     //Scan all directories
-                    recursiveScanAllDirectories(entry.path(), func);
+                    recursiveScanAllDirectories(entry.path(), file_func, dir_func);
+
+                    //Operate dir func
+                    dir_func(entry.path());
                 }
 
                 //File actions
                 if (entry.is_regular_file()) {
 
                     //Execute action if its a file
-                    func(entry.path());
+                    file_func(entry.path());
                 }
             }
         }
@@ -214,6 +219,12 @@ namespace PAIN {
             engine_dir.emplace(type, engine_folder / folder);
         }
 
+        std::string AssetOrganizer::to_lower(const std::string& s) const {
+            std::string t = s;
+            std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+            return t;
+        }
+
         void AssetOrganizer::enforceStandardStructure() {
 
             //Ensure creation of base folders
@@ -226,6 +237,17 @@ namespace PAIN {
                 //Ensure raw directory exists
                 std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
+
+                //Recursive folders
+                recursiveScanAllDirectories(fullPath, [](std::filesystem::path) {}, [&](std::filesystem::path const& dir) {
+                    auto parent = dir.parent_path();
+                    auto dir_name = dir.filename().string();
+                    auto lower_name = to_lower(dir_name);
+                    if (lower_name != dir_name) {
+                        auto new_path = parent / lower_name;
+                        instantiateFolder(new_path);
+                    }
+                    });
             }
 
             //Ensure standard structure for engine directory
@@ -234,6 +256,17 @@ namespace PAIN {
                 //Ensure raw directory exists
                 std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
+
+                //Recursive folders
+                recursiveScanAllDirectories(fullPath, [](std::filesystem::path) {}, [&](std::filesystem::path const& dir) {
+                    auto parent = dir.parent_path();
+                    auto dir_name = dir.filename().string();
+                    auto lower_name = to_lower(dir_name);
+                    if (lower_name != dir_name) {
+                        auto new_path = parent / lower_name;
+                        instantiateFolder(new_path);
+                    }
+                    });
             }
         }
 
@@ -243,11 +276,6 @@ namespace PAIN {
 
             //Clear all outstanding assets
             assets.clear();
-
-            //Tidy up root directory
-            for (const auto& entry : std::filesystem::directory_iterator(assets_root)) {
-                //Directory actions
-            }
 
             //Scan raw asset directory
             recursiveScanAllDirectories(assets_root, [&](std::filesystem::path const& file) {
@@ -320,7 +348,7 @@ namespace PAIN {
 
                 //Inser asset into assets
                 assets.push_back(asset);
-                });
+                }, [](std::filesystem::path) {});
         }
 
         void AssetOrganizer::tidyUpDirectories() {
