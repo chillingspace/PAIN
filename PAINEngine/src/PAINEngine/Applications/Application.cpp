@@ -32,7 +32,9 @@
 #include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h" 
 
-#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h" 
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+
+#include "CoreSystems/Renderer/text.h"
 
 namespace PAIN {
 
@@ -109,6 +111,9 @@ namespace PAIN {
 		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
+
+		// dependency injection
+		TextRenderer::init(services);
 
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS

@@ -184,3 +184,13 @@ if(NOT TARGET Jolt)
 endif()
 
 message(STATUS "All vendor targets configured for FetchContent system")
+
+# ======================= FreeType =========================
+if(NOT TARGET freetype)
+    # FreeType builds itself via its own CMakeLists.txt
+    # This assumes freetype is fetched via FetchContent in ImportDependencies.cmake
+    # If not, you need to add it there first
+    message(STATUS "FreeType configured from: ${freetype_SOURCE_DIR}")
+endif()
+
+message(STATUS "All vendor targets configured for FetchContent system")

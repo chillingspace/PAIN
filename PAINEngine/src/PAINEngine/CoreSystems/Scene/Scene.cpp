@@ -8,6 +8,7 @@
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Renderer/text.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -131,6 +132,9 @@ namespace PAIN {
 			}
 			audioManager->loadPlaylist(footstepPlaylist);
 		}
+
+		// font
+		TextRenderer::get();
 	}
 
 	void Scene::onUpdate(AppTiming timing)

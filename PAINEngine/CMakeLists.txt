@@ -44,6 +44,7 @@ target_link_libraries(PAINEngine
 	    lua
 	    sol2
         assimp::assimp
+        freetype
 )
 
 target_link_libraries(PAINEngine
