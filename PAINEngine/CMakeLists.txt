@@ -39,6 +39,7 @@ target_link_libraries(PAINEngine
         glm
 	    nlohmann_json
         imgui::imgui
+		
         FMOD::core
         Jolt
 	    lua
@@ -53,6 +54,7 @@ target_link_libraries(PAINEngine
 	    reflcpp
         gli_headers
         entt_header_only
+imguizmo
 )
 
 # ImGui backends compiled into the engine

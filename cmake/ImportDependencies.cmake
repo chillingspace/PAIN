@@ -10,6 +10,15 @@ macro(importDependencies)
       GIT_TAG v1.91.9-docking
     )
     FetchContent_MakeAvailable(imgui)
+    
+    # ImGuizmo
+    FetchContent_Declare(
+      imguizmo
+      GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
+      GIT_TAG master
+    )
+    FetchContent_MakeAvailable(imguizmo)
+
 
     # GLM
     FetchContent_Declare(

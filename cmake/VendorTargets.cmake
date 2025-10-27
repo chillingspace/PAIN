@@ -68,6 +68,23 @@ endif()
 
 set(IMGUI_DIR ${imgui_SOURCE_DIR} CACHE PATH "Path to ImGui sources")
 
+# ======================= ImGuizmo =========================
+if(NOT TARGET imguizmo)
+    add_library(imguizmo STATIC
+        "${imguizmo_SOURCE_DIR}/ImGuizmo.cpp"
+        "${imguizmo_SOURCE_DIR}/ImGuizmo.h"
+    )
+    # Include both public interface dir and private compilation includes
+    target_include_directories(imguizmo 
+        PUBLIC 
+            ${imguizmo_SOURCE_DIR}
+        PRIVATE
+            ${imgui_SOURCE_DIR}
+    )
+    target_link_libraries(imguizmo PUBLIC imgui::imgui)
+    target_compile_definitions(imguizmo PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+endif()
+
 # ======================= stb =========================
 if (WIN32 AND NOT ANDROID)
     add_library(stb_implementation STATIC "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp")
