@@ -66,29 +66,49 @@ namespace PAIN {
             }
 		}
 
-        nlohmann::json Compiler::generateDefaultCompileSettings(Type const& type) const {
+        nlohmann::json Compiler::generateDefaultCompileSettings(Type const& type, Info const& asset) const {
             nlohmann::json settings;
 
             switch (type) {
-            case Type::Texture:
+            case Type::Texture: {
                 settings["window_compression"] = "BC7";
                 settings["android_compression"] = "ASTC_4x4";
                 settings["generate_mipmaps"] = true;
                 settings["max_size"] = 1024;
                 settings["srgb"] = true;
                 break;
+            }
+            case Type::Audio: {
 
-            case Type::Audio:
-                //settings["compression"] = "OGG";
-                //settings["quality"] = 0.8;
-                //settings["loop"] = false;
+                settings["compression"] = "OGG";
+                settings["extension"] = ".ogg";
+                settings["quality"] = 0.8;
+
+                bool isMusic = false;
+
+                //For determining if its music
+                if (std::filesystem::exists(asset.raw_path)) {
+                    uintmax_t fileSize = std::filesystem::file_size(asset.raw_path);
+                    constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024; // 1MB
+                    isMusic = fileSize > MUSIC_FILESIZE_THRESHOLD;
+                }
+               isMusic = (isMusic || asset.shipped_path.string().find("music") != std::string::npos ||
+                    asset.shipped_path.string().find("bgm") != std::string::npos);
+
+                if (isMusic) {
+                    settings["loop"] = true;
+                }
+                else {
+                    settings["loop"] = false;
+                }
                 break;
-
-            case Type::Model:
+            }
+            case Type::Model: {
                 //settings["generate_lods"] = true;
                 //settings["optimize_vertices"] = true;
                 //settings["weld_threshold"] = 0.001;
                 break;
+            }
             default:
                 break;
             }
@@ -112,9 +132,10 @@ namespace PAIN {
                     break;
 
                 case Type::Audio:
-                    //checker =   (settings.contains("compression") &&
-                    //            settings.contains("quality") &&
-                    //            settings.contains("loop"));
+                    checker =   (settings.contains("compression") &&
+                                settings.contains("extension") &&
+                                settings.contains("quality") &&
+                                settings.contains("loop"));
                     break;
 
                 case Type::Model:
@@ -140,31 +161,32 @@ namespace PAIN {
             //Extract asset name from path
             std::string asset_name = asset.raw_path.stem().string();
 
-            // Create default descriptor
+            //Create default descriptor
             Descriptor desc;
 
-            // Identity
+            //Identity
             desc.guid = GUID::Generate();
             desc.descriptor_version = 1;
             desc.created_timestamp = getCurrentTimeStamp();
 
-            // Asset classification
+            //Asset classification
             desc.type = asset.type;
             desc.name = asset_name;
 
-            // Import/processing settings
-            desc.import_settings = generateDefaultCompileSettings(desc.type);
+            //Import/processing settings
+            desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
 
-            // Build data
+            //Build data
             desc.raw_last_modified = asset.raw_last_modified;
+            desc.hash = fileHashing(path);
 
-            // Dependencies
+            //Dependencies
             desc.dependencies.clear();
 
-            // Metadata (start empty, expandable)
+            //Metadata (start empty, expandable)
             desc.meta_data = nlohmann::json::object();
 
-            // Add some basic metadata based on asset type
+            //Add some basic metadata based on asset type
             desc.meta_data["source_file"] = asset.raw_path;
 
             //Save desc file
@@ -193,6 +215,7 @@ namespace PAIN {
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
                 desc.raw_last_modified = build_data.value("raw_last_modified", 0ULL);
+                desc.hash = build_data.value("hash", fileHashing(path));
 
                 //Dependencies
                 auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
@@ -228,15 +251,16 @@ namespace PAIN {
                 desc_json["guid"] = desc_file.guid.ToString();
                 desc_json["created_timestamp"] = desc_file.created_timestamp;
 
-                // Asset info
+                //Asset info
                 desc_json["asset_info"]["type"] = assetTypeToString(desc_file.type);
                 desc_json["asset_info"]["name"] = desc_file.name;
 
-                // Settings and build data
+                //Settings and build data
                 desc_json["import_settings"] = desc_file.import_settings;
                 desc_json["build_data"]["raw_last_modified"] = desc_file.raw_last_modified;
+                desc_json["build_data"]["hash"] = desc_file.hash;
 
-                // Dependencies and metadata
+                //Dependencies and metadata
                 nlohmann::json deps_array = nlohmann::json::array();
                 for (const auto& dep : desc_file.dependencies) {
                     deps_array.push_back(dep.ToString());
@@ -260,7 +284,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileAndShip(Descriptor const& desc_file, Info& asset_info) const {
+        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) const {
 
             //Find asset type and platform
             switch (desc_file.type) {
@@ -280,7 +304,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileTexture(Descriptor const& desc_file, Info& asset_info) const {
+        void Compiler::compileTexture(Descriptor& desc_file, Info& asset_info) const {
 
             //Determine output format and shipped path
             std::string output_extension;
@@ -301,6 +325,9 @@ namespace PAIN {
                 std::cout << "ERROR: Unsupported platform for texture compilation" << std::endl;
                 return;
             }
+
+            //Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
 
             //Load texture data using STB
             int width, height, channels;
@@ -374,17 +401,64 @@ namespace PAIN {
             //Verify output
             if (compression_success && std::filesystem::exists(asset_info.shipped_path)) {
                 std::cout << "Texture compiled successfully: " << asset_info.shipped_path.filename() << std::endl;
+
+                //Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
             }
             else {
                 std::cout << "ERROR: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
+                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
+                copyFile(asset_info.raw_path, asset_info.shipped_path);
             }
         }
 
-        void Compiler::compileAudio(Descriptor const& desc_file, Info& asset_info) const {
-            //To be implemented
+        void Compiler::compileAudio(Descriptor& desc_file, Info& asset_info) const {
+
+            //Set output directory
+            std::string out_ext = desc_file.import_settings.value("extension", ".ogg"); // fallback to 0.8 if not specified
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);
+
+            //Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+
+            // Paths
+            std::string ffmpegExe = GetFFMPEGExecutable();
+            std::string inputPath = asset_info.raw_path.string(); // Your input PCM/WAV/AIFF/etc.
+            std::string outputPath = asset_info.shipped_path.string(); // Destination .ogg file
+
+            // Import settings
+            float quality = desc_file.import_settings.value("quality", 0.8f); // fallback to 0.8 if not specified
+            bool shouldLoop = desc_file.import_settings.value("loop", false);
+
+            std::filesystem::create_directories(std::filesystem::path(outputPath).parent_path());
+
+            // Build ffmpeg command for OGG conversion
+            std::stringstream cmd;
+            cmd << "cmd /C \""
+                << "\"" << ffmpegExe << "\""
+                << " -y"
+                << " -i \"" << inputPath << "\""
+                << " -c:a libvorbis"
+                << " -qscale:a " << quality * 10
+                << " \"" << outputPath << "\""
+                << "\""; // Close the CMD string
+
+            // Launch ffmpeg as a process
+            int result = std::system(cmd.str().c_str());
+            if (result != 0) {
+                std::cerr << "[ERROR] FFmpeg conversion failed: " << cmd.str() << std::endl;
+                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
+                copyFile(asset_info.raw_path, asset_info.shipped_path);
+            }
+            else {
+                std::cout << "[Audio] Compiled " << inputPath << " to OGG at " << outputPath << std::endl;
+
+                //Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
+            }
         }
 
-        void Compiler::compileModel(Descriptor const& desc_file, Info& asset_info) const {
+        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
             //To be implemented
         }
 
@@ -392,7 +466,7 @@ namespace PAIN {
 
             //Locate all possible cuttlfish executables
             std::vector<std::filesystem::path> possible_paths = {
-                exec_path / "cuttlefish.exe"
+                exec_path / "cuttlefish/cuttlefish.exe"
             };
 
             for (const auto& path : possible_paths) {
@@ -418,6 +492,8 @@ namespace PAIN {
                     std::cout << "Failed to write temporary PNG" << std::endl;
                     return false;
                 }
+
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
 
                 // WINDOWS SYSTEM() REQUIRES SPECIAL QUOTING [web:1061]
                 std::stringstream cmd;
@@ -466,10 +542,10 @@ namespace PAIN {
 
             //Locate all possible astcenc executables
             std::vector<std::filesystem::path> possible_paths = {
-                exec_path / "astcenc-avx2.exe",
-                exec_path / "astcenc-neon.exe",
-                exec_path / "astcenc-native.exe",
-                exec_path / "astcenc-sse2.exe"
+                exec_path / "astc/astcenc-avx2.exe",
+                exec_path / "astc/astcenc-neon.exe",
+                exec_path / "astc/astcenc-native.exe",
+                exec_path / "astc/astcenc-sse2.exe"
             };
 
             for (const auto& path : possible_paths) {
@@ -511,6 +587,8 @@ namespace PAIN {
                     return false;
                 }
 
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
+
                 // Build astcenc command with proper syntax
                 std::stringstream cmd;
 
@@ -549,6 +627,31 @@ namespace PAIN {
             }
         }
 
+        std::string Compiler::GetFFMPEGExecutable() const {
+            //Locate all possible ffmpeg executables
+            std::vector<std::filesystem::path> possible_paths = {
+                exec_path / "ffmpeg/ffmpeg.exe"
+            };
+
+            for (const auto& path : possible_paths) {
+                if (std::filesystem::exists(path)) {
+                    std::cout << "Found ffmpeg: " << path << std::endl;
+                    return path.string();
+                }
+            }
+
+            std::cout << "WARNING: ffmpegffmpeg executable not found!" << std::endl;
+            return "ffmpeg.exe"; // Fallback
+        }
+
+        bool Compiler::needsRecompilation(Info& asset_info, Descriptor const& desc_file) const {
+            //Check if asset needs to be recompiled
+            auto shipped = asset_info.shipped_path;
+            if (std::filesystem::exists(shipped) && getFileLastModified(asset_info.raw_path) < getFileLastModified(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
+
+            return true;
+        }
+
 		void Compiler::processAsset(Info& asset_info) {
 
             //Check for desc files and output
@@ -585,6 +688,11 @@ namespace PAIN {
                     //Copy all assets
                     copyFile(asset_info.raw_path, asset_info.shipped_path);
                 }
+            }
+
+            //Double check if there are desc changes
+            if (desc_obj != readDescFile(asset_info, asset_desc_path)) {
+                saveDescFile(desc_obj, asset_desc_path);
             }
 		}
 	}

@@ -168,7 +168,7 @@ macro(importDependencies)
             add_custom_target(copy_cuttlefish_bin ALL
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
                 $<TARGET_FILE_DIR:cuttlefish>
-                ${ASSETS_TOOLS_OUTPUT_DIR}
+                ${ASSETS_TOOLS_OUTPUT_DIR}/cuttlefish
                 DEPENDS cuttlefish
                 COMMENT "Copying cuttlefish.exe, .pdb, .dll and all other files to asset tools output directory")
         endif()
@@ -191,11 +191,17 @@ macro(importDependencies)
             add_custom_target(copy_astcenc_bin ALL
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
                 $<TARGET_FILE_DIR:astcenc-avx2>
-                ${ASSETS_TOOLS_OUTPUT_DIR}
+                ${ASSETS_TOOLS_OUTPUT_DIR}/astc
                 DEPENDS astcenc-avx2
                 COMMENT "Copying astcenc-avx.exe, .pdb, .dll and all other files to asset tools output directory")
         endif()
 
+        # Copy FFMPEG
+        add_custom_target(copy_ffmpeg_bin ALL
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/vendor/ffmpeg/ffmpeg.exe
+                ${ASSETS_TOOLS_OUTPUT_DIR}/ffmpeg/ffmpeg.exe
+            COMMENT "Copying ffmpeg.exe to asset tools output directory")
     endif()
 
     # Android only

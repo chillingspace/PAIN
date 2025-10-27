@@ -58,9 +58,9 @@ static std::filesystem::path findProjectRoot() {
 
 int main(int argc, char* argv[]) {
 
-    std::filesystem::path input_path;
-    std::filesystem::path output_path;
-    PAIN::Assets::Platform build_platform;
+    std::filesystem::path input_path = findProjectRoot() / "assets";
+    std::filesystem::path output_path = findProjectRoot() / "bin/Debug/assets";
+    PAIN::Assets::Platform build_platform = PAIN::Assets::Platform::Windows;
 
     //Retrieve input and output directories
     for (int i = 1; i < argc; ++i) {
