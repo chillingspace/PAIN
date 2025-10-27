@@ -124,25 +124,29 @@ namespace PAIN {
 			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
 			if (!trans.has_value() || !mesh.has_value()) continue;
 
-			glm::mat4 M = trans->get().getMatrix();
+			glm::mat4 mat = trans->get().getMatrix();
 			auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
 
-			glm::vec3 minL = mesh_ptr->getAABBMin(), maxL = mesh_ptr->getAABBMax();
+			glm::vec3 min_aabb = mesh_ptr->getAABBMin(), max_aabb = mesh_ptr->getAABBMax();
 
-			// Transform 8 corners and accumulate world min/max
+			// Transform 8 corners to world space
 			glm::vec3 corners[8] = {
-			  {minL.x,minL.y,minL.z},{maxL.x,minL.y,minL.z},
-			  {maxL.x,maxL.y,minL.z},{minL.x,maxL.y,minL.z},
-			  {minL.x,minL.y,maxL.z},{maxL.x,minL.y,maxL.z},
-			  {maxL.x,maxL.y,maxL.z},{minL.x,maxL.y,maxL.z}
+			  {min_aabb.x,min_aabb.y,min_aabb.z},{max_aabb.x,min_aabb.y,min_aabb.z},
+			  {max_aabb.x,max_aabb.y,min_aabb.z},{min_aabb.x,max_aabb.y,min_aabb.z},
+			  {min_aabb.x,min_aabb.y,max_aabb.z},{max_aabb.x,min_aabb.y,max_aabb.z},
+			  {max_aabb.x,max_aabb.y,max_aabb.z},{min_aabb.x,max_aabb.y,max_aabb.z}
 			};
-			glm::vec3 wmin(FLT_MAX), wmax(-FLT_MAX);
+
+			glm::vec3 w_min(FLT_MAX), w_max(-FLT_MAX);
+
+			// Get min max aabb in world space
 			for (auto& c : corners) {
-				glm::vec4 w = M * glm::vec4(c, 1.0f);
-				wmin.x = min(wmin.x, w.x); wmin.y = min(wmin.y, w.y); wmin.z = min(wmin.z, w.z);
-				wmax.x = max(wmax.x, w.x); wmax.y = max(wmax.y, w.y); wmax.z = max(wmax.z, w.z);
+				glm::vec4 w = mat * glm::vec4(c, 1.0f);
+				w_min.x = min(w_min.x, w.x); w_min.y = min(w_min.y, w.y); w_min.z = min(w_min.z, w.z);
+				w_max.x = max(w_max.x, w.x); w_max.y = max(w_max.y, w.y); w_max.z = max(w_max.z, w.z);
 			}
-			w_renderer->DebugPass(wmin, wmax, { 1,1,0,1 }, scene, false);
+
+			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene, false);
 		}
 	}
 

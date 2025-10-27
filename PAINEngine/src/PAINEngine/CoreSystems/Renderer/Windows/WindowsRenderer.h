@@ -52,25 +52,10 @@ namespace PAIN {
 		void EndGeometryPass();
 
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
-		void DebugPass(const glm::vec3& minP, const glm::vec3& maxP, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest);
 		void PostProcessPass();
 
 		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
-
-		static void PushAABBLines(const glm::vec3& minP, const glm::vec3& maxP, const glm::vec4& color, std::vector<float>& out) {
-			glm::vec3 v[8] = {
-			  {minP.x,minP.y,minP.z},{maxP.x,minP.y,minP.z},
-			  {maxP.x,maxP.y,minP.z},{minP.x,maxP.y,minP.z},
-			  {minP.x,minP.y,maxP.z},{maxP.x,minP.y,maxP.z},
-			  {maxP.x,maxP.y,maxP.z},{minP.x,maxP.y,maxP.z}
-			};
-			int e[24] = { 0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
-			auto push = [&](const glm::vec3& p, const glm::vec4& c) {
-				out.insert(out.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
-				};
-			for (int i = 0; i < 24; i += 2) { push(v[e[i]], color); push(v[e[i + 1]], color); }
-		}
-
 
 		void Cleanup();
 

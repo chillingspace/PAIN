@@ -587,12 +587,33 @@ namespace PAIN {
 	}
 
 
-	void WindowsRenderer::DebugPass(const glm::vec3& minP, const glm::vec3& maxP, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest)
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest)
 	{
 		if (!debug_VAO || !debug_shader) return;
 
 		std::vector<float> verts; verts.reserve(24 * 7);
-		PushAABBLines(minP, maxP, color, verts);
+
+		// converts min/max into 8 corners,
+		glm::vec3 v[8] = {
+		  {min_p.x,min_p.y,min_p.z},{max_p.x,min_p.y,min_p.z},
+		  {max_p.x,max_p.y,min_p.z},{min_p.x,max_p.y,min_p.z},
+		  {min_p.x,min_p.y,max_p.z},{max_p.x,min_p.y,max_p.z},
+		  {max_p.x,max_p.y,max_p.z},{min_p.x,max_p.y,max_p.z}
+		};
+
+		// edge index list (tells which pairs of the 8 AABB corners should be connected to form the 12 box edges)
+		int e[24] = { 0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
+
+		// xyz and rgba
+		auto push = [&](const glm::vec3& p, const glm::vec4& c) {
+			verts.insert(verts.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
+		};
+
+		// The loop iterates over all 12 edges by stepping i += 2, takes the two endpoint corners for each edge via v[e[i]] and v[e[i+1]], and pushes both endpoints
+		for (int i = 0; i < 24; i += 2) { 
+			push(v[e[i]], color);
+			push(v[e[i + 1]], color); 
+		}
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
