@@ -47,7 +47,6 @@ namespace PAIN {
 			lc.L_intensity = glm::vec3(1.5f);
 			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 			lc.type = Light::TYPES::DIRECTIONAL;
-			lc.far_plane = 100.f;
 		}
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
@@ -132,6 +131,7 @@ namespace PAIN {
 		AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		auto uqmid = getMeshId("quad.obj");
@@ -140,7 +140,7 @@ namespace PAIN {
 		unlitMat.useTex = true;
 		unlitMat.tex = unlit_quad_mesh->texture_id;
 		unlitMat.color = { 1.f, 1.f, 1.f };
-		unlitMat.alwaysLit = false;
+		//unlitMat.alwaysLit = false;
 		unlit_quad_mesh->material = unlitMat;
 		AddObject(uqmid, "unlit_screen", { -2.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
@@ -156,7 +156,7 @@ namespace PAIN {
 		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
 		sdcc_mesh->material.useTex = true;
 		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
-		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -30.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
+		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -100.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
 		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/city.obj");
 		//cacheMesh(obj_path);
@@ -230,6 +230,12 @@ namespace PAIN {
 		// Apply time scale to deltaTime for simulation
 		float scaledDt = timing.dt * timeScale;
 
+		{
+			auto olc = LightSources::get().get("world");
+			Light& lc = olc.value();
+			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
+		}
+
 		auto ecs = services->get<ECS::Controller>();
 		auto audioManager = services->get<Audio::Audio>();
 		if (!audioManager || audioSourceEntity == entt::null) return;
@@ -288,10 +294,6 @@ namespace PAIN {
 			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
 			footstepTimer = footstepInterval;
 		}
-
-		//auto olc = LightSources::get().get("world");
-		//Light& lc = olc.value();
-		//lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * 50.f;
 	}
 
 	void Scene::onEvent(Event::Event& e) {}

@@ -81,10 +81,6 @@ namespace PAIN {
 		glm::vec3 L_intensity = glm::vec3(0.1f);
 		TYPES type = TYPES::POINT;
 
-		// not required for point lights
-		glm::vec3 forward{0 , -1, 0};	// looking down by default
-		float fov{ 120.f };				// dont set larger values
-
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
 #ifdef PN_PLATFORM_WINDOWS
@@ -92,7 +88,12 @@ namespace PAIN {
 #else
 		float near_plane{ 1.f };
 #endif
-		float far_plane{ 50.f };		// furthest distance light can see
+		float far_plane{ 100.f };		// furthest distance light can see
+
+		// not required for point lights
+		glm::vec3 forward{0 , -1, 0};	// looking down by default
+		float fov{ 120.f };				// dont set larger values
+		float shadow_source_follow_distance{ far_plane / 2.f };	// how far away should shadow map frustum origin be placed from camera
 
 		glm::mat4 view() const {
 			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
