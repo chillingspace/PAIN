@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_passthrough",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4512127871272002480
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "92c015c7-1597-3c4f-914e-68a59aa62bc6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_passthrough.vert"
+  }
+}

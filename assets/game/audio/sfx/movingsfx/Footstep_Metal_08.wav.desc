@@ -1,0 +1,21 @@
+{
+  "asset_info": {
+    "name": "Footstep_Metal_08",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 3526182818262951674
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "9a731e69-bccb-bf40-a913-93788f54c8f1",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_08.wav"
+  }
+}

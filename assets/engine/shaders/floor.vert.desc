@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "floor",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17111094565936801482
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "26fc83c1-cb07-a54c-a255-50a70041ec57",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\floor.vert"
+  }
+}

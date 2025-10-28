@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "geometry",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 12078198968239877924
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "f37719c0-67ce-2744-ac00-61ae1861695f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\geometry.frag"
+  }
+}

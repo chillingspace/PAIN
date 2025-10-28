@@ -10,7 +10,13 @@
 #include <vector>
 #include <memory>
 
+#ifdef PN_PLATFORM_ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#include <EGL/egl.h>
+#else
 #include "GL/glew.h"
+#endif
 
 namespace PAIN {
     namespace Assets {
@@ -27,8 +33,14 @@ namespace PAIN {
         class Texture : public IAsset {
         public:
             int width = 0, height = 0, mips = 1;
+#ifdef PN_PLATFORM_ANDROID
+            TextureFormat format = TextureFormat::ASTC_4x4;
+            unsigned int glTexFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+#else
             TextureFormat format = TextureFormat::BC7;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+#endif
+
             std::vector<uint8_t> data;
             GLuint gl_texture = 0;
 

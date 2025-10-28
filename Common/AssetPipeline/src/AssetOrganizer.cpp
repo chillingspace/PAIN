@@ -23,35 +23,6 @@ namespace PAIN {
             return currentPath == absRoot;
         }
 
-        bool AssetOrganizer::repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const {
-            try {
-                std::filesystem::rename(file_path, target_path);
-                std::cout << "File Moved From: " << file_path << " To: " << target_path << std::endl;
-                return true;
-            }
-            catch (const std::filesystem::filesystem_error& e) {
-                std::cout << file_path << "Reposition Failed." << std::endl;
-                return false;
-            }
-        }
-
-        bool AssetOrganizer::deleteFile(std::filesystem::path const& file_path) const {
-            try {
-                if (std::filesystem::remove(file_path)) {
-                    std::cout << file_path << " - Deleted." << std::endl;
-                    return true;
-                }
-                else {
-                    std::cout << file_path << " - Deletion Failed." << std::endl;
-                    return false;
-                }
-            }
-            catch (const std::filesystem::filesystem_error& e) {
-                std::cout << file_path << " - Deletion Failed. " << e.what() << std::endl;
-                return false;
-            }
-        }
-
         void AssetOrganizer::instantiateFolder(std::filesystem::path const& path) const {
 
             if (!std::filesystem::exists(path)) {
@@ -91,10 +62,11 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
-                        //Remove lagging desc files if there are any
-                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        //Update lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
                         if (std::filesystem::exists(lagging_desc)) {
-                            deleteFile(lagging_desc);
+                            auto target_desc = assets_root / std::filesystem::relative(target, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                            repositionFile(lagging_desc, target_desc);
                         }
 
                         //Update asset details
@@ -116,10 +88,11 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
-                        //Remove lagging desc files if there are any
-                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        //Update lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
                         if (std::filesystem::exists(lagging_desc)) {
-                            deleteFile(lagging_desc);
+                            auto target_desc = assets_root / std::filesystem::relative(target, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                            repositionFile(lagging_desc, target_desc);
                         }
 
                         //Update asset details
@@ -147,10 +120,11 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
-                        //Remove lagging desc files if there are any
-                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        //Update lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
                         if (std::filesystem::exists(lagging_desc)) {
-                            deleteFile(lagging_desc);
+                            auto target_desc = assets_root / std::filesystem::relative(target, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                            repositionFile(lagging_desc, target_desc);
                         }
 
                         //Update asset details
@@ -173,10 +147,11 @@ namespace PAIN {
                     //Reposition asset into the right directory
                     if (repositionFile(asset.raw_path, target)) {
 
-                        //Remove lagging desc files if there are any
-                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.stem().string() + desc_ext);
+                        //Update lagging desc files if there are any
+                        auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
                         if (std::filesystem::exists(lagging_desc)) {
-                            deleteFile(lagging_desc);
+                            auto target_desc = assets_root / std::filesystem::relative(target, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                            repositionFile(lagging_desc, target_desc);
                         }
 
                         //Update asset details
@@ -304,43 +279,8 @@ namespace PAIN {
                 //Check if asset is a desc file, locate raw asset in same directory
                 if (file.extension() == desc_ext) {
 
-                    try {
-                        std::ifstream stream(file);
-                        nlohmann::json desc_json;
-                        stream >> desc_json;
-
-                        Descriptor desc;
-                        desc.type = stringToAssetType(desc_json["asset_info"]["type"].get<std::string>());
-                        desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
-                        desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
-
-                        //Close file stream
-                        stream.close();
-
-                        //Try to read source
-                        if (desc.meta_data.contains("source_file")) {
-                            auto path_str = desc.meta_data["source_file"];
-                            std::filesystem::path path = path_str;
-                            auto desc_path = assets_root / std::filesystem::relative(path, assets_root).parent_path() / (path.stem().string() + desc_ext);
-                            if (!std::filesystem::exists(path) || desc_path != file) {
-                                deleteFile(file);
-                            }
-                        }
-                        else {
-                            deleteFile(file);
-                        }
-
-                        //Verify import settings
-                        if (!compiler->verifyCompileSettings(desc.type, desc.import_settings)) {
-                            deleteFile(file);
-                        }
-                    }
-                    catch (const std::exception& e) {
-                        std::cout << "Invalid desc file." << std::endl;
-                        deleteFile(file);
-                    }
-
-                    //Return on desc extension
+                    //Flag desc for deletion
+                    if(!std::filesystem::exists(file.parent_path()/file.stem())) deleteFile(file);
                     return;
                 }
 
@@ -369,7 +309,8 @@ namespace PAIN {
 
                 //Inser asset into assets
                 assets.push_back(asset);
-                }, [](std::filesystem::path) {});
+            },
+            [](std::filesystem::path) {});
         }
 
         void AssetOrganizer::tidyUpDirectories() {

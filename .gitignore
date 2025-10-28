@@ -71,11 +71,6 @@ android/app/src/main/assets*/
 *.iopt
 
 # ========================
-# Keep assets, ignore desc files
-# ========================
-Assets/**/*.desc
-
-# ========================
 # Logs / Cache / Temp
 # ========================
 *.log

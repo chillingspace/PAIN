@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "shadow",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 289414460255447663
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "4b8480cd-a6ab-2c4c-82e0-43f81d4b21a4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\shadow.vert"
+  }
+}

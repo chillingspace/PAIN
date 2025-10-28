@@ -207,6 +207,36 @@ namespace PAIN {
             return hash;
         }
 
+        static bool deleteFile(std::filesystem::path const& file_path) {
+            try {
+                if (std::filesystem::remove(file_path)) {
+                    std::cout << file_path << " - Deleted." << std::endl;
+                    return true;
+                }
+                else {
+                    std::cout << file_path << " - Deletion Failed." << std::endl;
+                    return false;
+                }
+            }
+            catch (const std::filesystem::filesystem_error& e) {
+                std::cout << file_path << " - Deletion Failed. " << e.what() << std::endl;
+                return false;
+            }
+        }
+
+        static bool repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) {
+            try {
+                std::filesystem::rename(file_path, target_path);
+                std::cout << "File Moved From: " << file_path << " To: " << target_path << std::endl;
+                return true;
+            }
+            catch (const std::filesystem::filesystem_error& e) {
+                std::cout << file_path << "Reposition Failed." << std::endl;
+                return false;
+            }
+        }
+
+
         //Asset info
         struct Info {
 
@@ -231,7 +261,6 @@ namespace PAIN {
             //Identity
             GUID guid;
             uint32_t descriptor_version = 1;
-            uint64_t created_timestamp = 0;
 
             //Asset class
             Type type;
@@ -241,7 +270,6 @@ namespace PAIN {
             nlohmann::json import_settings;
 
             //Build data
-            uint64_t raw_last_modified;
             std::size_t hash;
 
             //Dependencies
@@ -255,11 +283,9 @@ namespace PAIN {
         {
             return lhs.guid == rhs.guid
                 && lhs.descriptor_version == rhs.descriptor_version
-                && lhs.created_timestamp == rhs.created_timestamp
                 && lhs.type == rhs.type
                 && lhs.name == rhs.name
                 && lhs.import_settings == rhs.import_settings
-                && lhs.raw_last_modified == rhs.raw_last_modified
                 && lhs.hash == rhs.hash
                 && lhs.dependencies == rhs.dependencies
                 && lhs.meta_data == rhs.meta_data;

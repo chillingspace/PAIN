@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "Heart",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1014535514271613847
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "f6c63389-8e42-f344-a175-7bee0724747c",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Heart.png"
+  }
+}

@@ -15,7 +15,6 @@ namespace PAIN {
 			void extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex);
 			void extractASTC(std::filesystem::path const& path, std::shared_ptr<Texture> tex);
 
-
 		public:
 
 			Loader() = default;

@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
 //Include asset compiler
 #include "AssetData.h"
@@ -49,12 +50,6 @@ namespace PAIN {
 
             //Check if path is derived
             bool isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const;
-
-            //Reposition file
-            bool repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const;
-
-            //Delete file
-            bool deleteFile(std::filesystem::path const& file_path) const;
 
             //Create or rename folder
             void instantiateFolder(std::filesystem::path const& path) const;

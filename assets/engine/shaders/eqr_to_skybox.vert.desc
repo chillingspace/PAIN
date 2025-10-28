@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "eqr_to_skybox",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 3643380999760619682
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "003a9856-c2d5-214d-ade6-6b5d5efa5821",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\eqr_to_skybox.vert"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_geometry",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17526959088170690474
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "b8736289-0ace-c54f-b2ba-e3501551c4ab",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_geometry.frag"
+  }
+}

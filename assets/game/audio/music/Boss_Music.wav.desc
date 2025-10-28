@@ -1,0 +1,21 @@
+{
+  "asset_info": {
+    "name": "Boss_Music",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 4264461739387590033
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "f3b34dcb-ec89-2946-96db-ab1943406e92",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": true,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\music\\Boss_Music.wav"
+  }
+}

@@ -40,10 +40,10 @@ namespace PAIN {
 			nlohmann::json generateDefaultCompileSettings(Type const& type, Info const& asset) const;
 
 			//Create default desc file
-			Descriptor createDefaultDesc(Info const& asset, std::filesystem::path const& path) const;
+			Descriptor createDefaultDesc(Info& asset, std::filesystem::path const& path) const;
 
 			//Read desc file
-			Descriptor readDescFile(Info const& asset, std::filesystem::path const& path) const;
+			Descriptor readDescFile(Info& asset, std::filesystem::path const& path) const;
 
 			//Save desc file
 			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
@@ -64,7 +64,10 @@ namespace PAIN {
 			void ExportModel(const Model& asset, const std::filesystem::path& out_path) const;
 
 			//Recompilation check
-			bool needsRecompilation(Info& asset_info, Descriptor const& desc_file) const;
+			bool needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const;
+
+			//Verify import settings
+			bool verifyCompileSettings(Type const& type, nlohmann::json const& settings) const;
 		public:
 
 			//Default compiler
@@ -74,9 +77,6 @@ namespace PAIN {
 
 			//Public process asset
 			void processAsset(Info& asset_info);
-
-			//Verify import settings
-			bool verifyCompileSettings(Type const& type, nlohmann::json const& settings) const;
 		};
 	}
 }

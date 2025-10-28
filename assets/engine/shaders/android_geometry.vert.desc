@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_geometry",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 18105046456143999293
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "de3e4d20-a1f4-8c44-9f55-2de8dd14fcdf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_geometry.vert"
+  }
+}

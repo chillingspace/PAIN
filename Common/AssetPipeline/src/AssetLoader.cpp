@@ -5,6 +5,7 @@ namespace PAIN {
 	namespace Assets {
 
         void Loader::extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex) {
+#ifdef PN_PLATFORM_WINDOWS
             std::ifstream file(path, std::ios::binary);
             char magic[4];
             file.read(magic, 4);
@@ -20,9 +21,11 @@ namespace PAIN {
             tex->data.assign(std::istreambuf_iterator<char>(file), {});
             tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
             file.close();
+#endif
         }
 
         void Loader::extractASTC(std::filesystem::path const& path, std::shared_ptr<Texture> tex) {
+#ifdef PN_PLATFORM_ANDROID
             // --- Minimal ASTC header parse (supports .astc 4x4 only here) ---
             std::ifstream file(path, std::ios::binary);
             uint8_t header[16];
@@ -37,6 +40,7 @@ namespace PAIN {
             tex->data.assign(std::istreambuf_iterator<char>(file), {});
             tex->glTexFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
             file.close();
+#endif
         }
 
         std::shared_ptr<Texture> Loader::ImportTexture(std::filesystem::path const& path) {
@@ -51,12 +55,16 @@ namespace PAIN {
 
             //Filter extensions
             if (path.extension() == ".dds") {
+#ifdef PN_PLATFORM_WINDOWS
                 //Extract DDS Texture
                 extractDDS(path, tex);
+#endif
             }
             if (path.extension() == ".astc") {
+#ifdef PN_PLATFORM_ANDROID
                 //Extract DDS Texture
                 extractASTC(path, tex);
+#endif
             }
             else {
                 throw std::runtime_error("Unknown texture format!");
@@ -71,16 +79,20 @@ namespace PAIN {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             if (tex->format == TextureFormat::BC7) {
+#ifdef PN_PLATFORM_WINDOWS
                 //BC7 block size (16 bytes/block, 4x4 texel block)
                 int blockWidth = (tex->width + 3) / 4, blockHeight = (tex->height + 3) / 4;
                 GLsizei imageSize = blockWidth * blockHeight * 16;
                 glCompressedTexImage2D(GL_TEXTURE_2D, 0, tex->glTexFormat, tex->width, tex->height, 0, imageSize, tex->data.data());
+#endif
             }
             else if (tex->format == TextureFormat::ASTC_4x4) {
+#ifdef PN_PLATFORM_ANDROID
                 //ASTC 4x4 block size = 16 bytes/block
                 int blockWidth = (tex->width + 3) / 4, blockHeight = (tex->height + 3) / 4;
                 GLsizei imageSize = blockWidth * blockHeight * 16;
                 glCompressedTexImage2D(GL_TEXTURE_2D, 0, tex->glTexFormat, tex->width, tex->height, 0, imageSize, tex->data.data());
+#endif
             }
             glBindTexture(GL_TEXTURE_2D, 0);
             return tex;

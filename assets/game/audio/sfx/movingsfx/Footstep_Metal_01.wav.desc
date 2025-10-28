@@ -1,0 +1,21 @@
+{
+  "asset_info": {
+    "name": "Footstep_Metal_01",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 3989720226107713490
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "e0edd423-45ea-934b-830a-d249176f81ef",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_01.wav"
+  }
+}

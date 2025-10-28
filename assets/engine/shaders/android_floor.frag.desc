@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_floor",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 13321041059594060628
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "a3a9acab-e72a-a846-ac4e-5c354cd9db0c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_floor.frag"
+  }
+}

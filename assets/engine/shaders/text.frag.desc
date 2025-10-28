@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "text",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 649315806298283225
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "f1335d8c-5974-f84a-a579-3d8bf152612a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\text.frag"
+  }
+}

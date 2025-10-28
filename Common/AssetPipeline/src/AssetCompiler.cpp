@@ -60,12 +60,12 @@ namespace PAIN {
                     return true;
                 }
                 else {
-                    std::cout << copy << " Reposition Failed." << std::endl;
+                    std::cout << copy << " Copy Failed." << std::endl;
                     return false;
                 }
             }
             catch (const std::filesystem::filesystem_error& e) {
-                std::cout << copy << " Reposition Failed." << e.what() << std::endl;
+                std::cout << copy << " Copy Failed." << e.what() << std::endl;
                 return false;
             }
 		}
@@ -198,7 +198,7 @@ namespace PAIN {
 
         }
 
-        Descriptor Compiler::createDefaultDesc(Info const& asset, std::filesystem::path const& path) const {
+        Descriptor Compiler::createDefaultDesc(Info& asset, std::filesystem::path const& path) const {
 
             //Extract asset name from path
             std::string asset_name = asset.raw_path.stem().string();
@@ -207,9 +207,14 @@ namespace PAIN {
             Descriptor desc;
 
             //Identity
-            desc.guid = GUID::Generate();
+            if (asset.guid.IsValid()) {
+                desc.guid = asset.guid;
+            }
+            else {
+                desc.guid = GUID::Generate();
+                asset.guid = desc.guid;
+            }
             desc.descriptor_version = 1;
-            desc.created_timestamp = getCurrentTimeStamp();
 
             //Asset classification
             desc.type = asset.type;
@@ -219,8 +224,7 @@ namespace PAIN {
             desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
 
             //Build data
-            desc.raw_last_modified = asset.raw_last_modified;
-            desc.hash = fileHashing(path);
+            desc.hash = fileHashing(asset.raw_path);
 
             //Dependencies
             desc.dependencies.clear();
@@ -229,7 +233,7 @@ namespace PAIN {
             desc.meta_data = nlohmann::json::object();
 
             //Add some basic metadata based on asset type
-            desc.meta_data["source_file"] = asset.raw_path;
+            desc.meta_data["source_file"] = asset.relative_folder / asset.name;
 
             //Save desc file
             saveDescFile(desc, path);
@@ -237,7 +241,8 @@ namespace PAIN {
             return desc;
         }
 
-        Descriptor Compiler::readDescFile(Info const& asset, std::filesystem::path const& path) const {
+        Descriptor Compiler::readDescFile(Info& asset, std::filesystem::path const& path) const {
+
             try {
                 std::ifstream file(path);
                 nlohmann::json desc_json;
@@ -246,18 +251,22 @@ namespace PAIN {
                 Descriptor desc;
                 desc.descriptor_version = desc_json.value("descriptor_version", 1);
                 desc.guid = GUID(desc_json["guid"].get<std::string>());
-                desc.created_timestamp = desc_json.value("created_timestamp", 0ULL);
+                asset.guid = desc.guid;
 
                 //Asset info
                 auto asset_info = desc_json["asset_info"];
                 desc.type = stringToAssetType(asset_info["type"].get<std::string>());
-                desc.name = asset_info.value("name", "");
+                desc.name = asset_info.value("name", asset.name);
 
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.raw_last_modified = build_data.value("raw_last_modified", 0ULL);
                 desc.hash = build_data.value("hash", fileHashing(path));
+
+                //Verify import settings
+                if (!verifyCompileSettings(asset.type, desc.import_settings)) {
+                    desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
+                }
 
                 //Dependencies
                 auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
@@ -265,7 +274,15 @@ namespace PAIN {
                     desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
                 }
 
-                desc.meta_data = desc_json.value("metadata", nlohmann::json{});
+                desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
+
+                // Verify desc file source
+                std::filesystem::path expected_source = asset.relative_folder / asset.name;
+                std::filesystem::path current_source = desc.meta_data.value("source_file", "");
+
+                if (current_source != expected_source) {
+                    desc.meta_data["source_file"] = expected_source.string();
+                }
 
                 file.close();
 
@@ -291,7 +308,6 @@ namespace PAIN {
                 //Core identity
                 desc_json["descriptor_version"] = desc_file.descriptor_version;
                 desc_json["guid"] = desc_file.guid.ToString();
-                desc_json["created_timestamp"] = desc_file.created_timestamp;
 
                 //Asset info
                 desc_json["asset_info"]["type"] = assetTypeToString(desc_file.type);
@@ -299,7 +315,6 @@ namespace PAIN {
 
                 //Settings and build data
                 desc_json["import_settings"] = desc_file.import_settings;
-                desc_json["build_data"]["raw_last_modified"] = desc_file.raw_last_modified;
                 desc_json["build_data"]["hash"] = desc_file.hash;
 
                 //Dependencies and metadata
@@ -910,7 +925,7 @@ namespace PAIN {
             out.close();
         }
 
-        bool Compiler::needsRecompilation(Info& asset_info, Descriptor const& desc_file) const {
+        bool Compiler::needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const {
             //Check if asset needs to be recompiled
             auto shipped = asset_info.shipped_path;
             if (std::filesystem::exists(shipped) && getFileLastModified(asset_info.raw_path) < getFileLastModified(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
@@ -921,7 +936,7 @@ namespace PAIN {
 		void Compiler::processAsset(Info& asset_info) {
 
             //Check for desc files and output
-            auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.stem().string() + desc_ext);
+            auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.filename().string() + desc_ext);
 
             //Get desc obj
             Descriptor desc_obj;
@@ -934,9 +949,6 @@ namespace PAIN {
                 desc_obj = readDescFile(asset_info, asset_desc_path);
             }
 
-            //Update asset GUID
-            asset_info.guid = desc_obj.guid;
-
             //Check if asset is compilable
             if (Assets::isAssetCompilable(asset_info.type)) {
 
@@ -948,11 +960,14 @@ namespace PAIN {
                 //If asset is not compilable ship asset straight into 
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / asset_info.name;
 
-                //Only ship if source is SIGNIFICANTLY newer than destination
-                if (asset_info.raw_last_modified > (getFileLastModified(asset_info.shipped_path) + TOLERANCE_MS)) {
+                //Only ship if source if updates are needed
+                if (needsRecompilation(asset_info, desc_obj)) {
 
                     //Copy all assets
                     copyFile(asset_info.raw_path, asset_info.shipped_path);
+
+                    //Update hashing
+                    desc_obj.hash = fileHashing(asset_info.raw_path);
                 }
             }
 

@@ -58,6 +58,10 @@ if(TARGET spdlog_header_only)
     target_link_libraries(PAINAssetPipeline PRIVATE spdlog_header_only)
 endif()
 
+if(TARGET glm)
+    target_link_libraries(PAINAssetPipeline PRIVATE glm)
+endif()
+
 
 # ======================= Platform-Specific Dependencies =========================
 
