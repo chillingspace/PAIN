@@ -31,16 +31,28 @@ namespace PAIN {
 		template <typename T>
 		std::shared_ptr<T> Manager::getAsset(GUID const& id) {
 
+			//Check if asset register has id
+			if (asset_registry.find(id) == asset_registry.end()) {
+
+				//Asset doesnt exist in registry
+				throw std::runtime_error("Asset doesn't exist in registry.");
+			}
+
 			//Asset template
 			std::shared_ptr<IAsset> asset;
 
 			//Search asset cache
-			if (asset_cache.find(id) == asset_cache.end()) {
+			auto it = asset_cache.find(id);
+			if (it == asset_cache.end()) {
 
 				//Cache asset
 				asset = cacheAsset(id);
 			}
+			else {
+				asset = it->second;
+			}
 
+			//Return asset pointer
 			return std::static_pointer_cast<T>(asset);
 		}
 
