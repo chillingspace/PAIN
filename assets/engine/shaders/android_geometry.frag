@@ -17,14 +17,14 @@ struct Material {
     float rough;
     float metal;
     float useTex;
+    sampler2D tex;
     vec3 color;         // fallback if there is no texture
     float alwaysLit;    // bool
     float use_ao;
+    sampler2D ao_map;
 };
 
 uniform Material material;
-uniform sampler2D material_tex;
-uniform sampler2D material_ao_map;
 
 
 void main() {
@@ -38,7 +38,7 @@ void main() {
     }
 
     // use texture instead of fallback color
-    vec3 color = texture(material_tex, vTexCoords).rgb;
+    vec3 color = texture(material.tex, vTexCoords).rgb;
 
     if (material.use_ao == 0.0) {
         gCol = color;
@@ -46,6 +46,6 @@ void main() {
     }
 
     // use ambient occlusion texture
-    float ao = texture(material_ao_map, vTexCoords).r;       // grayscale, just use red channel
+    float ao = texture(material.ao_map, vTexCoords).r;       // grayscale, just use red channel
     gCol = color * ao;
 }

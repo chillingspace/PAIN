@@ -472,6 +472,9 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.ao_map", 7);
 				geometry_shader->SetUniform("material.use_ao", 1.f);
 			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.f);
+			}
 		}
 
 		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);

@@ -68,6 +68,7 @@ namespace PAIN {
 			return data;
 		}
 		PN_CORE_ERROR("Failed to decode texture: {} - Reason: {}", file_path, stbi_failure_reason());
+		return nullptr;
 #endif
 	}
 
@@ -93,15 +94,29 @@ namespace PAIN {
 		switch (num_channels) {
 		case 1:
 			// for single channel textures like roughness, metallic, ao etc.
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_LUMINANCE;
+			data_format = GL_LUMINANCE;
+#else
 			internal_format = GL_R8;
 			data_format = GL_RED;
+#endif
 			break;
 		case 3:
+			// Use RGB instead of RGB8 for better Android compatibility
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_RGB;
+#else
 			internal_format = GL_RGB8;
+#endif
 			data_format = GL_RGB;
 			break;
 		case 4:
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_RGBA;
+#else
 			internal_format = GL_RGBA8;
+#endif
 			data_format = GL_RGBA;
 			break;
 		default:
@@ -110,10 +125,20 @@ namespace PAIN {
 			return 0;
 		}
 
+		// Set pixel unpack alignment based on channel count
+		if (num_channels == 3 || num_channels == 1) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		}
+		else {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+
 		// store texture in vram
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
-
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Reset to default alignment
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 		stbi_image_free(data);
 		glBindTexture(GL_TEXTURE_2D, 0);
