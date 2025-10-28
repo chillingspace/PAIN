@@ -1,16 +1,16 @@
 {
   "asset_info": {
-    "name": "Level01",
+    "name": "test",
     "type": "Scenes"
   },
   "build_data": {
-    "hash": 340052646903685354
+    "hash": 4082821230318523242
   },
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "cb21bbcf-afb7-6449-af36-b3d220e23bb4",
+  "guid": "ff1207d4-0baf-2548-897c-e7c37a58be20",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\scenes\\Level01.scn"
+    "source_file": "game\\scenes\\test.scn"
   }
 }

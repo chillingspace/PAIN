@@ -28,7 +28,7 @@ namespace PAIN {
             std::unique_ptr<Compiler> compiler;
 
             //Assets info for sorting
-            std::vector<Info> assets;
+            std::vector<IAsset> assets;
 
             //Assets root path
             std::filesystem::path assets_root;

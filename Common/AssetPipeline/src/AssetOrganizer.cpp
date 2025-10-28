@@ -335,8 +335,15 @@ namespace PAIN {
                 //Compile asset
                 compiler->processAsset(asset);
 
+                //Craft asset interface
+                IAsset asset_interface;
+                asset_interface.guid = asset.guid;
+                asset_interface.name = asset.name;
+                asset_interface.type = asset.type;
+                asset_interface.relative_path = asset.relative_path;
+
                 //Inser asset into assets
-                assets.push_back(asset);
+                assets.push_back(asset_interface);
             },
             [](std::filesystem::path) {});
 

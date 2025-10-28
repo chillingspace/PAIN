@@ -18,11 +18,24 @@
 #include "GL/glew.h"
 #endif
 
+#include "AssetData.h"
+
 namespace PAIN {
     namespace Assets {
 
         //Asset interface
-        class IAsset { public: virtual ~IAsset() = default; };
+        struct IAsset {
+        public: 
+            virtual ~IAsset() = default;
+
+            //Details
+            GUID guid;
+            Type type;
+            std::string name;
+
+            //Asset relative folder
+            std::filesystem::path relative_path;
+        };
 
         //Texture format
         enum class TextureFormat {
@@ -30,7 +43,7 @@ namespace PAIN {
         };
 
         //Texture class
-        class Texture : public IAsset {
+        struct Texture : public IAsset {
         public:
             int width = 0, height = 0, mips = 1;
 #ifdef PN_PLATFORM_ANDROID
@@ -65,7 +78,6 @@ namespace PAIN {
             std::vector<AnimationClip> animations;
             std::vector<Material> materials;
         };
-
     }
 }
 
