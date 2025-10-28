@@ -1,4 +1,4 @@
-#include "Scene.h"
+﻿#include "Scene.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Controller.h"
@@ -142,6 +142,24 @@ namespace PAIN {
 		unlitMat.alwaysLit = false;
 		unlit_quad_mesh->material = unlitMat;
 		AddObject(uqmid, "unlit_screen", { -2.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+
+
+
+
+		obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/sdcc.obj");
+		cacheMesh(obj_path);
+		auto sdcc_mesh_id = getMeshId("sdcc.obj");
+		auto sdcc_mesh = getMesh(sdcc_mesh_id);
+
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/sdcc_baked_building.png");
+		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
+		sdcc_mesh->material.useTex = true;
+		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
+		AddObject(sdcc_mesh_id, "sdcc", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {10.f, 10.f, 10.f});
+
+
+
+
 
 		if (audioManager)
 		{
@@ -367,15 +385,22 @@ namespace PAIN {
 		}
 
 		struct TempVertex {
-			int pIdx = -1, nIdx = -1;
+			int pIdx = -1, nIdx = -1, tIdx = -1;  //
 			TempVertex() = default;
 			TempVertex(const std::string& token) {
-				// Parse formats: v//n or v/n
+				// Parse formats: v/vt/vn or v//vn or v/vt or v
 				if (token.find("//") != std::string::npos) {
+					// Format: v//vn (no texture coords)
 					sscanf(token.c_str(), "%d//%d", &pIdx, &nIdx);
 				}
 				else {
-					sscanf(token.c_str(), "%d/%d", &pIdx, &nIdx);
+					// Format: v/vt/vn or v/vt or v
+					int parsed = sscanf(token.c_str(), "%d/%d/%d", &pIdx, &tIdx, &nIdx);
+					if (parsed == 2) {
+						// Only got v/vt, move tIdx value to nIdx (some files use v/n format)
+						nIdx = tIdx;
+						tIdx = -1;
+					}
 				}
 			}
 		};
@@ -430,8 +455,8 @@ namespace PAIN {
 						Vertex v{};
 						if (tv[j].pIdx > 0) v.pos = positions[tv[j].pIdx - 1];
 						if (tv[j].nIdx > 0) v.normal = normals[tv[j].nIdx - 1];
-						if (!texCoords.empty() && tv[j].pIdx > 0 && tv[j].pIdx - 1 < texCoords.size()) {
-							v.uv = texCoords[tv[j].pIdx - 1];
+						if (tv[j].tIdx > 0 && tv[j].tIdx - 1 < texCoords.size()) {
+							v.uv = texCoords[tv[j].tIdx - 1];
 						}
 
 						vertices.push_back(v);
