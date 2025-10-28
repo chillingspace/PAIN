@@ -20,7 +20,7 @@ inline std::string ReadFileAndroid(const std::string& path) {
 
     AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER);
     if (!asset) {
-        PN_CORE_ERROR("Failed to open: {0}", path.c_str());
+        PN_CORE_ERROR("Failed to open: {0} using AndroidFs.h", path.c_str());
         return "";
     }
 

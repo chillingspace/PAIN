@@ -37,6 +37,11 @@ namespace PAIN {
 
 		unsigned int vao, vbo;
 		Shader shader;
+
+#ifdef PN_PLATFORM_ANDROID
+		// on android, need to keep the font data in memory
+		std::string fontDataBuffer;
+#endif
 	public:
 		// dependency injection
 		static void init(std::shared_ptr<Services> s) {

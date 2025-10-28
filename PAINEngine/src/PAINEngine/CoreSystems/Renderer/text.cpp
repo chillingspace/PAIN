@@ -10,6 +10,10 @@
 #include "pch.h"
 #include "text.h"
 
+#ifdef PN_PLATFORM_ANDROID
+#include "Utility/AndroidFs.h"
+#endif
+
 bool PAIN::TextRenderer::initialized = false;
 std::shared_ptr<PAIN::Services> PAIN::TextRenderer::services = nullptr;
 
@@ -33,10 +37,32 @@ namespace PAIN {
 				PN_CORE_ERROR("Could not initialize FreeType library");
 			}
 
-			// Load font file
+#ifdef PN_PLATFORM_ANDROID
+			// On Android, read the font data from assets into memory
+			std::string fontData = ReadFileAndroid(path);
+			if (fontData.empty()) {
+				PN_CORE_ERROR("Could not read font file from Android assets");
+				return;
+			}
+
+			// Load font from memory buffer
+			if (FT_New_Memory_Face(library,
+				reinterpret_cast<const FT_Byte*>(fontData.data()),
+				fontData.size(),
+				0,
+				&face)) {
+				PN_CORE_ERROR("Could not load font from memory");
+				return;
+			}
+
+			// store in member var so that it stays in memory
+			fontDataBuffer = std::move(fontData);
+
+#else
 			if (FT_New_Face(library, path.c_str(), 0, &face)) {
 				PN_CORE_ERROR("Could not load font");
 			}
+#endif
 
 			// Set font size (width=0 means auto-calculate)
 			FT_Set_Pixel_Sizes(face, 0, 48);
