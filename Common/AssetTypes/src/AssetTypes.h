@@ -14,6 +14,12 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
+
+// // Define ASTC extension constant if not available
+// #ifndef GL_COMPRESSED_RGBA_ASTC_4x4_KHR
+// #define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
+// #endif
+
 #else
 #include "GL/glew.h"
 #endif
