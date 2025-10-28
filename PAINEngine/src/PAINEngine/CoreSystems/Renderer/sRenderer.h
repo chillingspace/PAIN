@@ -26,6 +26,7 @@ namespace PAIN {
 
 		void shadowPass();
 		void geometryPass();
+		void reflectionPass();
 		void lightingPass();
 		void postProcessPass();
 		void uiPass();

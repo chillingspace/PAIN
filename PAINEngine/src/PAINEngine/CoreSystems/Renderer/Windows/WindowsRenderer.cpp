@@ -487,6 +487,15 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void WindowsRenderer::ReflectionPass(const std::shared_ptr<Mesh>& m)
+	{
+		if (m->material.reflection_type == m->material.REFLECTION_TYPES::NONE) {
+			return;
+		}
+
+
+	}
+
 	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
 	{
 		//{

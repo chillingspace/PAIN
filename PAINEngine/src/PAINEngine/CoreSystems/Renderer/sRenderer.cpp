@@ -118,6 +118,33 @@ namespace PAIN {
 		}
 	}
 
+	void sRenderer::reflectionPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		for (auto e : view) {
+
+			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			glm::mat4 model;
+			if (transform.has_value())
+			{
+				model = transform.value().get().getMatrix();
+			}
+			if (mesh.has_value())
+			{
+				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+				w_renderer->ReflectionPass(mesh_ptr);
+			}
+
+		}
+	}
+
 	void sRenderer::lightingPass()
 	{
 		auto scene = services->get<Scene>();
@@ -184,6 +211,11 @@ namespace PAIN {
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+			}
+			reflectionPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
 			}
 			lightingPass();
 			err = glGetError();

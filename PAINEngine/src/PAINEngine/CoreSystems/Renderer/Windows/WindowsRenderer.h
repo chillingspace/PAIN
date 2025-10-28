@@ -51,6 +51,7 @@ namespace PAIN {
 		void DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M);
 		void EndGeometryPass();
 
+		void ReflectionPass(const std::shared_ptr<Mesh>& m);
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
 		void PostProcessPass();
 
