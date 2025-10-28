@@ -88,12 +88,12 @@ namespace PAIN {
 #else
 		float near_plane{ 1.f };
 #endif
-		float far_plane{ 100.f };		// furthest distance light can see
+		float far_plane{ 150.f };		// furthest distance light can see(for shadows)
 
 		// not required for point lights
 		glm::vec3 forward{0 , -1, 0};	// looking down by default
 		float fov{ 120.f };				// dont set larger values
-		float shadow_source_follow_distance{ far_plane / 2.f };	// how far away should shadow map frustum origin be placed from camera
+		float shadow_source_follow_distance{ far_plane * 0.75f };	// how far away should shadow map frustum origin be placed from camera
 
 		glm::mat4 view() const {
 			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
@@ -112,7 +112,7 @@ namespace PAIN {
 
 		glm::mat4 projection() const {
 			if (type == TYPES::DIRECTIONAL) {
-				float ortho_size = 20.f;  // based on scene size. lower values = sharper shadows
+				float ortho_size = shadow_source_follow_distance;  // based on scene size. lower values = sharper shadows
 				return glm::ortho(
 					-ortho_size, ortho_size,   // left, right
 					-ortho_size, ortho_size,   // bottom, top

@@ -131,7 +131,7 @@ namespace PAIN {
 		AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		//AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		auto uqmid = getMeshId("quad.obj");
@@ -156,7 +156,7 @@ namespace PAIN {
 		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
 		sdcc_mesh->material.useTex = true;
 		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
-		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -100.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
+		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
 		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/city.obj");
 		//cacheMesh(obj_path);
