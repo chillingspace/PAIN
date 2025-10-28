@@ -352,6 +352,10 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
+		if (texture_id == 0) {
+			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
+			return;
+		}
 
 		if (!texture2d_shader) {
 			PN_CORE_ERROR("Unable to find texture2d_shader");
@@ -697,6 +701,8 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
 			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("0604eff8-67f9-4946-b955-c0280eb59c14"));
 			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
+#else
+			Render2DTexture(TextureManager::get().getTextureMap().at("sunshine"), { 0.85f, -0.85f }, 0.1f);
 #endif
 		}
 
