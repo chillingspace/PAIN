@@ -72,6 +72,9 @@ namespace PAIN {
 		cacheMesh("");
 		cacheMesh(obj_path);
 
+		obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre_smile.obj");
+		cacheMesh(obj_path);
+
 		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://Models/quad.obj");
 		cacheMesh(quad_path);
 
@@ -79,6 +82,7 @@ namespace PAIN {
 		auto cube_mesh = getMeshId("");
 		auto ogre_mesh_id = getMeshId("ogre.obj");
 		auto quad_mesh_id = getMeshId("quad.obj");
+		auto smile_ogre_mesh_id = getMeshId("ogre_smile.obj");
 
 		auto quad_mesh = getMesh(quad_mesh_id);
 		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://Textures/sunshine.png");
@@ -95,6 +99,16 @@ namespace PAIN {
 
 		quad_mesh->material = texturedMat;
 
+		auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_diffuse.png");
+		unsigned int ogre_diffuse_tex = TextureManager::get().load(texture_path.c_str(), "ogre_diffuse");
+		smile_ogre_mesh->texture_id = ogre_diffuse_tex;
+		smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
+		smile_ogre_mesh->material.useTex = true;
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_ao_smile.png");
+		smile_ogre_mesh->material.aoTex = TextureManager::get().load(texture_path.c_str(), "smile_ogre_ao");
+		smile_ogre_mesh->material.useAo = true;
+
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
 		ogreMat.alwaysLit = true;
@@ -102,12 +116,11 @@ namespace PAIN {
 
 		// diffuse color texture
 		ogreMat.useTex = true;
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/diffuse.png");
-		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_texture");
+		ogre_mesh->texture_id = ogre_diffuse_tex;
 		ogreMat.tex = ogre_mesh->texture_id;
 
 		// ao map
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ao_rest.png");
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_ao_rest.png");
 		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_ao");
 		ogreMat.aoTex = ogre_mesh->texture_id;
 		ogreMat.useAo = true;
@@ -115,7 +128,7 @@ namespace PAIN {
 		ogre_mesh->material = ogreMat;
 
 		// Create the other static objects
-		AddObject(ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
