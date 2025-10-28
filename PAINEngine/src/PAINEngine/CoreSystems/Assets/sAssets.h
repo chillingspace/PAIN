@@ -39,7 +39,35 @@ namespace PAIN {
 
 			//Get asset
 			template <typename T>
-			std::shared_ptr<T> getAsset(GUID const& id);
+			std::shared_ptr<T> getAsset(GUID const& id) {
+
+				//Check if asset register has id
+				if (asset_registry.find(id) == asset_registry.end()) {
+
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Asset doesn't exist in registry.");
+				}
+
+				//Asset template
+				std::shared_ptr<IAsset> asset;
+
+				//Search asset cache
+				auto it = asset_cache.find(id);
+				if (it == asset_cache.end()) {
+
+					//Cache asset
+					asset = cacheAsset(id);
+				}
+				else {
+					asset = it->second;
+				}
+
+				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
+				if (!typed_asset) {
+					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
+				}
+				return typed_asset;
+			}
 
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void uncacheAsset(GUID const& id);

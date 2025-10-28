@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2025
  *
  */
-
+#include "CoreSystems/Assets/sAssets.h"
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/text.h"
@@ -351,12 +351,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale) {
-		const auto texmap = TextureManager::get().getTextureMap();
-		if (texmap.find(ref) == texmap.end()) {
-			PN_CORE_ERROR("Texture with ref '{}' not found!", ref);
-			return;
-		}
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
 
 		if (!texture2d_shader) {
 			PN_CORE_ERROR("Unable to find texture2d_shader");
@@ -368,7 +363,7 @@ namespace PAIN {
 		texture2d_shader->SetUniform("ndc_scale", scale);
 
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, texmap.at(ref));
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 		texture2d_shader->SetUniform("tex", 6);
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -687,7 +682,8 @@ namespace PAIN {
 		// render 2D textures onto screen
 		{
 			// !TODO: add queue and iterate through all 2D textures to be rendered last
-			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
+			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("0604eff8-67f9-4946-b955-c0280eb59c14"));
+			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
 		}
 
 		// render text onto screen

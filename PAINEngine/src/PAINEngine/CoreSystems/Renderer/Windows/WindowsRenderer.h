@@ -54,7 +54,7 @@ namespace PAIN {
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
 		void PostProcessPass();
 
-		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
+		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale);
 
 		void Cleanup();
 

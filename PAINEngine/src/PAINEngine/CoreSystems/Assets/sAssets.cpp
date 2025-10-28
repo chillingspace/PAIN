@@ -27,45 +27,53 @@ namespace PAIN {
 			//Dump asset registry
 			logAssetRegistry();
 		}
-
-		template <typename T>
-		std::shared_ptr<T> Manager::getAsset(GUID const& id) {
-
-			//Check if asset register has id
-			if (asset_registry.find(id) == asset_registry.end()) {
-
-				//Asset doesnt exist in registry
-				throw std::runtime_error("Asset doesn't exist in registry.");
-			}
-
-			//Asset template
-			std::shared_ptr<IAsset> asset;
-
-			//Search asset cache
-			auto it = asset_cache.find(id);
-			if (it == asset_cache.end()) {
-
-				//Cache asset
-				asset = cacheAsset(id);
-			}
-			else {
-				asset = it->second;
-			}
-
-			//Return asset pointer
-			return std::static_pointer_cast<T>(asset);
-		}
-
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
-			return std::shared_ptr<IAsset>();
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				return cache_it->second;
+			}
+
+			//Resolve asset path
+			auto asset_path = services->get<Path::Path>()->resolvePath("assets", registry_it->second.relative_path.string());
+			PN_CORE_INFO(asset_path);
+
+			//Ensure asset exists
+			if (!std::filesystem::exists(asset_path)) {
+				PN_CORE_WARN("Unable to cache asset. Invalid asset path: {}", asset_path);
+				throw std::runtime_error("Invalid asset path!");
+			}
+
+			//Load assset through registered loaded
+			auto asset = asset_loader->GetLoader(registry_it->second.type)(asset_path);
+
+			//Insert loaded asset into asset cache
+			asset_cache.emplace(id, asset);
+
+			return asset;
 		}
 
 		void Manager::uncacheAsset(GUID const& id) {
-
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				cache_it = asset_cache.erase(cache_it);
+			}
 		}
 
 		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
-			return std::shared_ptr<IAsset>();
+			//Uncache asset
+			uncacheAsset(id);
+
+			//Cache asset
+			return cacheAsset(id);
 		}
 
 		// ----------------------------
