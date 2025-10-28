@@ -8,9 +8,29 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "GL/glew.h"
 
 namespace PAIN {
     namespace Assets {
+
+        //Texture format
+        enum class TextureFormat {
+            UNKNOWN, BC7, ASTC_4x4, // add more as needed
+        };
+
+        //Texture class
+        class Texture {
+        public:
+            int width = 0, height = 0, mips = 1;
+            TextureFormat format = TextureFormat::BC7;
+            unsigned int glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+            std::vector<uint8_t> data;
+            GLuint gl_texture = 0;
+
+            ~Texture() { if (gl_texture) glDeleteTextures(1, &gl_texture); }
+        };
 
         //Model data
         struct Vertex { glm::vec3 pos, normal; glm::vec2 uv; };
