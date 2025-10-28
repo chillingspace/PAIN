@@ -205,6 +205,8 @@ namespace PAIN {
 
             std::string prefab_filepath = resolvePrefabPath(filepath);
 
+            assert(std::filesystem::exists(prefab_filepath) && "Prefab file does not exist or path is invalid!");
+
             nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
             if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
 

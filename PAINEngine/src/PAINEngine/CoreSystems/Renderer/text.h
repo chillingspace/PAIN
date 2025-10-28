@@ -46,7 +46,7 @@ namespace PAIN {
 
 		static TextRenderer& get() {
 			if (!initialized) {
-				throw std::exception("TextRenderer not initialized!");
+                throw std::runtime_error("TextRenderer not initialized!");
 			}
 			static TextRenderer instance;
 			return instance;

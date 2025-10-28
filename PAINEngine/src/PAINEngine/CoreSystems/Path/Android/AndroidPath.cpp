@@ -201,6 +201,7 @@ namespace PAIN {
 		}
 
 		std::string AndroidPath::resolvePath(const std::string& alias, std::string const& relative) const {
+            auto virtualPath = alias + getVirtualSymbol() + relative;
 
 			auto it = virtual_paths.find(alias);
 			if (it == virtual_paths.end()) {

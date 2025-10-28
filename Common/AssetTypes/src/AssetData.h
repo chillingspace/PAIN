@@ -63,6 +63,7 @@ namespace PAIN {
             Shader,     // .vert, .frag
             Scenes,
             Font,
+            Prefabs, // .prefab
             Other
         };
 
@@ -77,6 +78,7 @@ namespace PAIN {
             temp[Type::Shader] = "Shader";
             temp[Type::Scenes] = "Scenes";
             temp[Type::Font] = "Font";
+            temp[Type::Prefabs] = "Prefabs";
             temp[Type::Other] = "Other";
 
             return temp;
@@ -121,6 +123,7 @@ namespace PAIN {
             temp[Type::Data] = { ".json" };
             temp[Type::Shader] = { ".vert", ".frag" };
             temp[Type::Scenes] = { ".scn" };
+            temp[Type::Prefabs] = { ".prefab" };
             temp[Type::Font] = { ".ttf" };
 
             return temp;
@@ -141,6 +144,7 @@ namespace PAIN {
             temp[Type::Script] = game_assets_folder / "scripts";
             temp[Type::Data] = game_assets_folder / "data";
             temp[Type::Scenes] = game_assets_folder / "scenes";
+            temp[Type::Prefabs] = game_assets_folder / "prefabs";
             temp[Type::Other] = game_assets_folder / "others";
 
             return temp;

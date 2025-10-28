@@ -8,6 +8,7 @@
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
 
@@ -201,6 +202,15 @@ namespace PAIN {
 		Skybox::get().init(
 			services, services->get<Path::Path>()->resolvePath("engine_assets://Textures/skybox.hdr")
 		);
+
+		// Test load prefab
+		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("sdcc.prefab");
+		//for (auto e : loaded_entities) {
+		//	// Info: Print entity names, transforms, etc.
+		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<MetaData::EntityName>(e);
+		//	std::string name = nameOpt ? nameOpt->get().name : "<no name>";
+		//}
+
 	}
 
 	void Scene::onUpdate(AppTiming timing)

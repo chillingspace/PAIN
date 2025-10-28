@@ -15,10 +15,21 @@
 #include <GLES3/gl3ext.h>
 #include <EGL/egl.h>
 
-// // Define ASTC extension constant if not available
-// #ifndef GL_COMPRESSED_RGBA_ASTC_4x4_KHR
-// #define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
-// #endif
+#ifndef GL_COMPRESSED_RGBA_ASTC_4x4_KHR
+#define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR 0x93D0
+#endif
+
+#ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#endif
+
+#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#endif
 
 #else
 #include "GL/glew.h"

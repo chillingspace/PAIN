@@ -82,6 +82,10 @@ namespace PAIN {
                 bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
                 void removeEntityWithChildren(entt::entity entity);
                 void cloneEntityChildren(entt::entity source, entt::entity cloned_parent);
+
+                // Prefab helper functions
+                std::string generateUniquePrefabName(const std::string& base_name);
+                void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
                 void ungroupEntity(entt::entity entity);
                 void unparentEntity(entt::entity entity);
 

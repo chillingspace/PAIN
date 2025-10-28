@@ -1,6 +1,4 @@
 
-#ifdef PN_PLATFORM_WINDOWS
-
 #include "pch.h"
 #include "Applications/Application.h"
 #include "sAssets.h"
@@ -80,6 +78,7 @@ namespace PAIN {
 		// Asset Service 
 		// ----------------------------
 
+#ifdef PN_PLATFORM_WINDOWS
 		void Service::onAttach() {
 			/*font_loader = std::make_unique<Assets::FontLoader>();
 			render_loader = std::make_unique<Assets::RenderLoader>();
@@ -839,7 +838,7 @@ namespace PAIN {
 				break;
 			}
 		}
-	}
-}
 
 #endif
+	}
+}
