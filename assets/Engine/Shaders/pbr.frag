@@ -13,6 +13,7 @@ struct Material {
     float rough;
     float metal;
     vec3 color;
+    float alwaysLit;    // bool
 };
 
 struct Light {
@@ -151,15 +152,22 @@ void main() {
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
     vec3 normal = texture(gNorm, TexCoords).rgb;
-    vec2 m = texture(gMaterial, TexCoords).rg;
+    vec3 m = texture(gMaterial, TexCoords).rgb;
 
     material.rough = m.r;
     material.metal = m.g;
+    material.alwaysLit = m.b;
 
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
     vec3 viewNormal = mat3(u_V) * normalize(normal);
 
-    vec3 color = material.color * u_AmbientLight;
+    vec3 color = vec3(0);
+    if (material.alwaysLit != 0.0) {
+        color = material.color;
+    }
+    else {
+        color = material.color * u_AmbientLight;
+    }
     for (int i=0; i < int(u_NumLights); i++) {
         vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
 

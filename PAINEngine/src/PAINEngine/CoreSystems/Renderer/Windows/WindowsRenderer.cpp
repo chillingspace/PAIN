@@ -459,6 +459,7 @@ namespace PAIN {
 		geometry_shader->SetUniform("material.metal", mesh->material.metal);
 		geometry_shader->SetUniform("material.color", mesh->material.color);
 		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
+		geometry_shader->SetUniform("material.alwaysLit", mesh->material.alwaysLit ? 1.f : 0.f);
 
 		if (mesh->material.useTex) {
 			glActiveTexture(GL_TEXTURE6);

@@ -16,6 +16,8 @@
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
 
+#include "CoreSystems/Renderer/skybox.h"
+
 namespace PAIN {
 	void sRenderer::onDetach()
 	{
@@ -120,6 +122,8 @@ namespace PAIN {
 	{
 		auto scene = services->get<Scene>();
 		w_renderer->LightingPass(scene, LightSources::get());
+
+		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
 	}
 	void sRenderer::postProcessPass()
 	{

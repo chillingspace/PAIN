@@ -10,6 +10,7 @@ namespace PAIN {
         bool useTex{ false };        // pass in as float
 		unsigned int tex{ 0 };      // just for redundanncy
         // sampler2D tex;
+		bool alwaysLit{ false };
     };
 
 
