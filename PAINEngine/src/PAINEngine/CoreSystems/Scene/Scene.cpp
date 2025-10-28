@@ -90,6 +90,7 @@ namespace PAIN {
 		texturedMat.useTex = true;
 		texturedMat.tex = quad_mesh->texture_id;
 		texturedMat.color = { 1.f, 0.f, 1.f };
+		texturedMat.alwaysLit = true;
 
 		quad_mesh->material = texturedMat;
 
