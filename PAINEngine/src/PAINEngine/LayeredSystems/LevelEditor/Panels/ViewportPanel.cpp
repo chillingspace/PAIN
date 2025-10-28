@@ -1,5 +1,6 @@
-#include "pch.h"
+#ifdef _DEBUG
 
+#include "pch.h"
 #ifdef max
 #undef max
 #endif
@@ -12,7 +13,7 @@
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
-#ifdef _DEBUG
+
 #include "../Editor.h" 
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
