@@ -86,6 +86,7 @@ endif()
 #Asset Pipeline
 target_link_libraries(PAINEngine
     PUBLIC
+        PAINAssetPipeline
         PAINAssetTypes        # Basic asset types for runtime
     PRIVATE
         # Hot-reload support only on desktop platforms

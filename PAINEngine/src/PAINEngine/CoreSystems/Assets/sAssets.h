@@ -7,8 +7,53 @@
 #include "Applications/AppSystem.h"
 #include "CoreSystems/Path/Path.h"
 
+#include "AssetTypes.h"
+#include "AssetLoader.h"
+
 namespace PAIN {
     namespace Assets {
+
+		class Manager : public AppSystem {
+		private:
+
+			//Asset registry
+			std::unordered_map<GUID, IAsset> asset_registry;
+
+			//Asset cache
+			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_cache;
+
+			//Asset compiler
+			std::unique_ptr<Loader> asset_loader;
+
+			//Log asset registry
+			void logAssetRegistry() const;
+		public:
+
+			Manager() {
+
+				//Create unique asset loader
+				asset_loader = std::make_unique<Loader>();
+			}
+
+			virtual ~Manager() = default;
+
+			//Get asset
+			template <typename T>
+			std::shared_ptr<T> getAsset(GUID const& id);
+
+			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
+			void uncacheAsset(GUID const& id);
+			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+
+			// AppSystem overrides
+			void onAttach() override;
+			void onUpdate(AppTiming timing) override {}
+			void onDetach() override {}
+			void onFixedUpdate(AppTiming timing) override {}
+			void onAppPause() override {}
+			void onAppResume() override {}
+			void onEvent(Event::Event& e) override {}
+		};
 
 		//Temporary Disable DLL Export Warning
 		#pragma warning(disable: 4251)

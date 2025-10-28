@@ -340,7 +340,7 @@ namespace PAIN {
                 asset_interface.guid = asset.guid;
                 asset_interface.name = asset.name;
                 asset_interface.type = asset.type;
-                asset_interface.relative_path = asset.relative_path;
+                asset_interface.relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
 
                 //Inser asset into assets
                 assets.push_back(asset_interface);

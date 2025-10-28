@@ -9,8 +9,13 @@
 namespace PAIN {
 	namespace Assets {
 
+		using LoaderFunc = std::function<std::shared_ptr<void>(std::filesystem::path const&)>;
+
 		class Loader {
 		private:
+
+			std::unordered_map<Type, LoaderFunc> asset_loader; //Asset loader
+
 			//Texture data extractor
 			void extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex);
 			void extractASTC(std::filesystem::path const& path, std::shared_ptr<Texture> tex);

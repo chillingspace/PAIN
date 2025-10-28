@@ -12,6 +12,50 @@
 namespace PAIN {
 	namespace Assets {
 
+		void Manager::logAssetRegistry() const {
+
+			for (auto const& asset : asset_registry) {
+				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second.relative_path.string());
+			}
+		}
+
+		void Manager::onAttach() {
+
+			//Import asset registry
+			asset_registry = asset_loader->ImportAssetRegistry(services->get<Path::Path>()->resolvePath("assets://" + asset_registry_filename));
+
+			//Dump asset registry
+			logAssetRegistry();
+		}
+
+		template <typename T>
+		std::shared_ptr<T> Manager::getAsset(GUID const& id) {
+
+			//Asset template
+			std::shared_ptr<IAsset> asset;
+
+			//Search asset cache
+			if (asset_cache.find(id) == asset_cache.end()) {
+
+				//Cache asset
+				asset = cacheAsset(id);
+			}
+
+			return std::static_pointer_cast<T>(asset);
+		}
+
+		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
+			return std::shared_ptr<IAsset>();
+		}
+
+		void Manager::uncacheAsset(GUID const& id) {
+
+		}
+
+		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
+			return std::shared_ptr<IAsset>();
+		}
+
 		// ----------------------------
 		// Asset Service 
 		// ----------------------------
