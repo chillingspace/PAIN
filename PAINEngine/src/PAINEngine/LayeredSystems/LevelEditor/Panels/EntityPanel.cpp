@@ -203,6 +203,28 @@ namespace PAIN {
                 force_refresh = true;
             }
 
+            void EntityPanel::setSelectedEntity(entt::entity entity) {
+                // Only update if the entity is different
+                if (selected_entity != entity) {
+                    selected_entity = entity;
+                    b_entity_changed = true;
+
+                    // Update the selected entity index
+                    if (entity != entt::null) {
+                        // Find the index of the selected entity in the editor_entities list
+                        for (int i = 0; i < editor_entities.size(); ++i) {
+                            if (editor_entities[i].first == entity) {
+                                selectedEntityIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        selectedEntityIndex = -1;
+                    }
+                }
+            }
+
             void EntityPanel::nextWindowSettings() {
             }
 

@@ -18,7 +18,7 @@ namespace PAIN {
 
             void ComponentsPanel::onAttach() {
                 // Register component-specific UI
-                //RegisterTransformUI(*this);
+                RegisterTransformUI(*this);
                 RegisterMeshRendererUI(*this);
                 RegisterLightUI(*this);
 

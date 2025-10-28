@@ -8,48 +8,68 @@
 #include "CoreSystems/Scene/sCameraController.h"
 #include "ImGuizmo.h"
 
+// Forward declaration
+namespace PAIN {
+    namespace Editor {
+        namespace Panel {
+            class EntityPanel;
+        }
+    }
+}
 
 namespace PAIN {
-	namespace Editor {
-		namespace Panel {
+    namespace Editor {
+        namespace Panel {
 
-			class ViewportPanel : public IPanel {
-			public:
-				ViewportPanel();
+            class ViewportPanel : public IPanel {
+            public:
+                ViewportPanel();
 
-				void nextWindowSettings() override;
+                void onAttach() override;
+                void onUpdate(PAIN::AppTiming timing) override;
+                void nextWindowSettings() override;
 
-				void onAttach() override;
+                float getTimeScale() const;
+                void setRenderTexture(ImTextureID texID, int width, int height);
 
-				void onUpdate(AppTiming timing) override;
+                bool wantsInput() const { return contentHovered && isFocused; }
 
-				// Provide texture from renderer
-				void setRenderTexture(ImTextureID texID, int width, int height);
+                void setSimulationState(bool isPaused) {
+                    isSimulationPaused = isPaused;
+                }
 
-				// Get time scale for simulation (0.0 when paused, 1.0 when playing)
-				float getTimeScale() const;
+                void setEntityPanel(std::shared_ptr<EntityPanel> panel) { m_EntityPanel = panel; }
 
-				// Set simulation state programmatically (true = paused, false = playing)
-				void setSimulationState(bool paused) { isSimulationPaused = paused; }
+            private:
+                ImTextureID renderTexture;
+                int texWidth, texHeight;
 
-				bool isFocused = false;        // window focus (incl. children)
-				bool contentHovered = false;   // mouse over the image area
-				bool wantsInput() const { return isFocused || contentHovered; }
+                bool isInputPaused;
+                bool isSimulationPaused;
 
-			private:
-				ImTextureID renderTexture;
-				int texWidth;
-				int texHeight;
-				bool isInputPaused;           // Controls input forwarding
-				bool isSimulationPaused; // Controls scene simulation
+                bool contentHovered = false;
+                bool isFocused = false;
 
-				// Gizmo state
-				ImGuizmo::OPERATION m_GizmoOperation;
-				ImGuizmo::MODE m_GizmoMode;
-			};
+                ImGuizmo::OPERATION m_GizmoOperation;
+                ImGuizmo::MODE m_GizmoMode;
 
-		} // namespace Panel
-	} // namespace Editor
+                // ADD THIS - Shared pointer to EntityPanel
+                std::shared_ptr<EntityPanel> m_EntityPanel;
+
+                // Ray casting methods
+                glm::vec3 screenToWorldRay(ImVec2 mousePos, ImVec2 viewportSize,
+                    const glm::mat4& view, const glm::mat4& projection);
+                glm::vec3 getCameraPosition(const glm::mat4& viewMatrix);
+                void performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize);
+                bool rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+                    const glm::vec3& sphereCenter, float sphereRadius,
+                    float& distance);
+                bool rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+                    const Transform& transform, float& distance);
+            };
+
+        } // namespace Panel
+    } // namespace Editor
 } // namespace PAIN
 
 #endif

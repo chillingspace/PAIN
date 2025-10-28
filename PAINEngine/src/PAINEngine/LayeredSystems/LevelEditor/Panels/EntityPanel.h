@@ -27,6 +27,8 @@ namespace PAIN {
                 //Get selected entity
                 entt::entity getSelectedEntity() const;
 
+                void setSelectedEntity(entt::entity entity);
+
                 //Unselect entity
                 void unselectEntity();
 

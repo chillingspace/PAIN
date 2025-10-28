@@ -101,19 +101,23 @@ namespace PAIN {
 
             auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
 
-            //Register panels
-            registerPanel(std::make_shared<Panel::EntityPanel>());
+            // Create EntityPanel first and keep a reference
+            auto entity_panel = std::make_shared<Panel::EntityPanel>();
+            registerPanel(entity_panel);
+
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
 
-            // Create ViewportPanel and register it in BOTH panels and services
+            // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
+            viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
+
 
 
             #ifdef PN_PLATFORM_WINDOWS
