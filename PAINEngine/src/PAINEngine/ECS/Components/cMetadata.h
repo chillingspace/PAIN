@@ -51,3 +51,25 @@
 	 }
  
  }
+
+ REFL_TYPE(PAIN::MetaData::EntityName)
+	 REFL_FIELD(name)
+	 REFL_END
+
+	 REFL_TYPE(PAIN::MetaData::Tag)
+	 REFL_FIELD(tags)
+	 REFL_END
+
+	 REFL_TYPE(PAIN::MetaData::EditorVisible)
+	 REFL_FIELD(visible)
+	 REFL_FIELD(locked)
+	 REFL_END
+
+	 REFL_TYPE(PAIN::MetaData::Relation)
+	 REFL_FIELD(children)
+	 REFL_FIELD(parent)
+	 REFL_END
+
+	 REFL_TYPE(PAIN::MetaData::Group)
+	 REFL_FIELD(group_name)
+	 REFL_END

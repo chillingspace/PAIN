@@ -12,6 +12,7 @@
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cHierarchy.h"
@@ -24,6 +25,8 @@ namespace PAIN {
 
 #define PN_ECS_SERVICE services->get<ECS::Controller>()
 #define PN_METADATA_SERVICE services->get<MetaData::Service>()
+#define PN_SERI_SERVICE services->get<Serialization::Service>()
+
 
             EntityPanel::EntityPanel() {
                 name = "Entity Panel";
@@ -486,8 +489,12 @@ namespace PAIN {
 
                         // TODO: Implement prefab creation
                         // This would serialize the entity and its children to a prefab file
-                        //                       
-                        PN_CORE_WARN("[EntityPanel] Create Prefab not yet implemented");
+                        std::string prefab_name = PN_METADATA_SERVICE->getEntityName(entity_id);
+                        // If duplicated, add in (1) and such
+
+                        //PN_SERI_SERVICE->savePrefabToFile(entity_name,entity_id);
+                                              
+                        //PN_CORE_WARN("[EntityPanel] Create Prefab not yet implemented");
 
                         ImGui::CloseCurrentPopup();
                     }

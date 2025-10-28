@@ -94,6 +94,12 @@ namespace PAIN {
 
         bool Service::saveSceneToFile(const std::string& file_path) {
             nlohmann::json scene = to_json_from_doc_(); 
+
+            // For metadata seri
+            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
+                scene["metadata_service"] = metadata_service->serializeServiceState();
+            }
+
             std::string path = file_path;
             if (path.size() < 4 || path.rfind(".scn") != path.size() - 4) path += ".scn";
             const bool ok = saveJsonFile(path, scene);
@@ -110,6 +116,13 @@ namespace PAIN {
             // Reflect into doc_
             // set doc_ + clear dirty
             doc_from_json_(j);  
+
+            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
+                if (j.contains("metadata_service")) {
+                    metadata_service->deserializeServiceState(j["metadata_service"]);
+                }
+            }
+
 
             // Rebuild ECS from the new bolt on section if present
             if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
@@ -172,7 +185,6 @@ namespace PAIN {
 
             for (auto entity : entities) {
                 nlohmann::json E;
-                E["MetaData"] = metadata_service->serializeEntity(entity);
                 E["Components"] = controller->getAllComponentsAsJson(entity);  
                 ents.push_back(E);
             }
@@ -200,11 +212,6 @@ namespace PAIN {
                 // Create new entity
                 entt::entity e = controller->createEntity();
                 entities.push_back(e);
-
-                // Deserialize Metadata
-                if (E.contains("MetaData")) {
-                    metadata_service->deserializeEntity(e, E["MetaData"]);
-                }
 
                 // Deserialize Components using adl_serializer or refl cpp
                 if (E.contains("Components")) {
@@ -365,7 +372,7 @@ namespace PAIN {
                 }
             }
 
-            ecs["Entities"] = std::move(ents);
+            ecs["Entities"] = std::move(ents);  
             root["ecs"] = std::move(ecs);            // bolt on section
 
             return root;

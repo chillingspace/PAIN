@@ -27,8 +27,16 @@ namespace PAIN {
     * 3. Register your component in controller.cpp
     */
     using AllGameplayComponents = std::tuple <
-        Transform,
+        // Metadata components
+        MetaData::EntityName,
+        MetaData::Tag,
+        MetaData::EditorVisible,
+        MetaData::Relation,
+        MetaData::Group,
         Hierarchy,
+
+        // Gameplay
+        Transform,
         MeshRenderer,
         Lighting,
         Physics::RigidBody3D,
@@ -38,8 +46,16 @@ namespace PAIN {
 
     template<typename T>
     constexpr const char* getComponentName() {
-        if constexpr (std::is_same_v<T, Transform>) return "Transform";
+        // Metadata components
+        if constexpr (std::is_same_v<T, MetaData::EntityName>) return "EntityName";
+        else if constexpr (std::is_same_v<T, MetaData::Tag>) return "Tag";
+        else if constexpr (std::is_same_v<T, MetaData::EditorVisible>) return "EditorVisible";
+        else if constexpr (std::is_same_v<T, MetaData::Relation>) return "Relation";
+        else if constexpr (std::is_same_v<T, MetaData::Group>) return "Group";
         else if constexpr (std::is_same_v<T, Hierarchy>) return "Hierarchy";
+
+        // Gameplay components
+        else if constexpr (std::is_same_v<T, Transform>) return "Transform";
         else if constexpr (std::is_same_v<T, MeshRenderer>) return "MeshRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
