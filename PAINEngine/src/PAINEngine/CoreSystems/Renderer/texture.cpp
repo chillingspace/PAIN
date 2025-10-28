@@ -1,7 +1,7 @@
 /*****************************************************************//**
  * \file   texture.cpp
- * \brief  
- * 
+ * \brief
+ *
  * \author Lenovo
  * \date   October 2025
  *********************************************************************/
@@ -14,6 +14,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #endif
 #include "stb_image.h"
+
+#ifdef PN_PLATFORM_ANDROID
+#include "Utility/AndroidFs.h"
+#endif
 
 
 
@@ -32,13 +36,39 @@ namespace PAIN {
 
 
 	unsigned char* TextureManager::_getTextureData(const char* file_path, int& width, int& height, int& num_channels) {
+#ifdef PN_PLATFORM_WINDOWS
 		unsigned char* data = stbi_load(file_path, &width, &height, &num_channels, 0);
 		if (data) {
 			PN_CORE_INFO("Loaded texture: {} ({}x, {}y, {} channels)\n", file_path, width, height, num_channels);
-		} else {
+		}
+		else {
 			PN_CORE_ERROR("Failed to load texture: {}\n", file_path);
 		}
 		return data;
+#else
+		std::string fileData = ReadFileAndroid(file_path);
+
+		if (fileData.empty()) {
+			PN_CORE_ERROR("Failed to read file: {}", file_path);
+			return nullptr;
+		}
+
+		// Load from memory buffer
+		unsigned char* data = stbi_load_from_memory(
+			reinterpret_cast<const unsigned char*>(fileData.data()),
+			fileData.size(),
+			&width,
+			&height,
+			&num_channels,
+			0
+		);
+
+		if (data) {
+			PN_CORE_INFO("Loaded texture: {} ({}x{}, {} channels)", file_path, width, height, num_channels);
+			return data;
+		}
+		PN_CORE_ERROR("Failed to decode texture: {} - Reason: {}", file_path, stbi_failure_reason());
+#endif
 	}
 
 	unsigned int TextureManager::load(const char* file_path, const std::string& ref) {
@@ -57,7 +87,7 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
+
 
 		unsigned int internal_format, data_format;
 		switch (num_channels) {
