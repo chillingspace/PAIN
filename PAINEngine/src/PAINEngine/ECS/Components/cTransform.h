@@ -8,12 +8,15 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
+#pragma once
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
+//#include "pch.h"
+#include <refl.hpp>
 #include "GLMSerialization.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
-
 
 namespace PAIN {
 
@@ -37,6 +40,15 @@ namespace PAIN {
 
 #ifdef _DEBUG
 	// UI Registration function
+	//inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
+	//	panel.registerCompUIFunc<PAIN::Transform>([](Editor::Panel::ComponentsPanel&, PAIN::Transform& t) {
+	//		ImGui::Text("Transform");
+	//		ImGui::Separator();
+	//		DrawWithReflection(t);
+	//		});
+	//}
+
+	/*
 	inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
 		panel.registerCompUIFunc<Transform>([](Editor::Panel::ComponentsPanel& comp_panel, Transform& transform) {
 			ImGui::Text("Transform");
@@ -56,6 +68,7 @@ namespace PAIN {
 			ImGui::DragFloat3("Scale", glm::value_ptr(transform.scale), 0.1f);
 		});
 	}
+	*/
 	
 #endif
 }
@@ -81,5 +94,14 @@ namespace nlohmann {
 		}
 	};
 }
+
+// Register type & fields for refl-cpp
+REFL_TYPE(PAIN::Transform)
+REFL_FIELD(position)
+REFL_FIELD(rotation)
+REFL_FIELD(scale)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
 
 #endif
