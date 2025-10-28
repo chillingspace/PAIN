@@ -157,6 +157,16 @@ namespace PAIN {
 		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
 		AddObject(sdcc_mesh_id, "sdcc", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {10.f, 10.f, 10.f});
 
+		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/city.obj");
+		//cacheMesh(obj_path);
+		//auto city_mesh_id = getMeshId("city.obj");
+		//auto city_mesh = getMesh(city_mesh_id);
+
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/city.png");
+		//city_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "city");
+		//city_mesh->material.useTex = true;
+		//city_mesh->material.tex = city_mesh->texture_id;
+		//AddObject(city_mesh_id, "city", { -20.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 100.f, 100.f, 100.f });
 
 
 
@@ -453,8 +463,17 @@ namespace PAIN {
 					TempVertex tv[3] = { faceVerts[0], faceVerts[i], faceVerts[i + 1] };
 					for (int j = 0; j < 3; j++) {
 						Vertex v{};
-						if (tv[j].pIdx > 0) v.pos = positions[tv[j].pIdx - 1];
-						if (tv[j].nIdx > 0) v.normal = normals[tv[j].nIdx - 1];
+						// Check bounds for positions
+						if (tv[j].pIdx > 0 && tv[j].pIdx - 1 < positions.size()) {
+							v.pos = positions[tv[j].pIdx - 1];
+						}
+
+						// Check bounds for normals
+						if (tv[j].nIdx > 0 && tv[j].nIdx - 1 < normals.size()) {
+							v.normal = normals[tv[j].nIdx - 1];
+						}
+
+						// Check bounds for texture coordinates
 						if (tv[j].tIdx > 0 && tv[j].tIdx - 1 < texCoords.size()) {
 							v.uv = texCoords[tv[j].tIdx - 1];
 						}
