@@ -194,12 +194,9 @@ namespace PAIN {
 
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-					// Get services once at the start
 					auto editor = services->get<PAIN::Editor::Editor>();
 					auto scene = services->get<Scene>();
 					auto ecs = services->get<ECS::Controller>();
-
-					PN_CORE_INFO("onUpdate - m_EntityPanel pointer: {0}", (void*)m_EntityPanel.get());
 
 					// Toolbar
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
@@ -252,33 +249,11 @@ namespace PAIN {
 						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
-					// Mouse picking debug
-					if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-						PN_CORE_INFO("=== LEFT MOUSE CLICKED ===");
-						PN_CORE_INFO("contentHovered: {0}", contentHovered);
-						PN_CORE_INFO("ImGuizmo::IsUsing(): {0}", ImGuizmo::IsUsing());
-						PN_CORE_INFO("ImGuizmo::IsOver(): {0}", ImGuizmo::IsOver());
-					}
-
-					if (contentHovered
-						&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)
-						&& !ImGuizmo::IsUsing()
-						&& !ImGuizmo::IsOver()) {
-
-						PN_CORE_INFO(">>> CLICK PASSED ALL CHECKS - CALLING performMousePicking <<<");
-
-						ImVec2 mousePos = ImGui::GetMousePos();
-						ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
-
-						performMousePicking(localMousePos, size);
-					}
-
-					// ImGuizmo - use m_EntityPanel instead of entityPanel
+					// ========================================
+					// === ImGuizmo - RENDER FIRST ===
+					// ========================================
 					if (m_EntityPanel) {
 						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
-
-						PN_CORE_INFO("Currently selected entity: {0}",
-							selectedEntity != entt::null ? static_cast<uint32_t>(selectedEntity) : 0);
 
 						if (selectedEntity != entt::null) {
 							auto transformOpt = ecs->getEntityComponent<Transform>(selectedEntity);
@@ -296,6 +271,7 @@ namespace PAIN {
 									ImGuizmo::SetDrawlist();
 									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
 
+									// Hotkeys
 									if (ImGui::IsKeyPressed(ImGuiKey_T))
 										m_GizmoOperation = ImGuizmo::TRANSLATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_R))
@@ -303,6 +279,7 @@ namespace PAIN {
 									if (ImGui::IsKeyPressed(ImGuiKey_Y))
 										m_GizmoOperation = ImGuizmo::SCALE;
 
+									// Draw the gizmo
 									ImGuizmo::Manipulate(
 										glm::value_ptr(viewMatrix),
 										glm::value_ptr(projectionMatrix),
@@ -311,6 +288,7 @@ namespace PAIN {
 										glm::value_ptr(modelMatrix)
 									);
 
+									// Update transform if manipulated
 									if (ImGuizmo::IsUsing()) {
 										float translation[3], rotation[3], scale[3];
 										ImGuizmo::DecomposeMatrixToComponents(
@@ -329,7 +307,23 @@ namespace PAIN {
 						}
 					}
 
-					// Camera controls
+					// ========================================
+					// === Mouse Picking - AFTER GIZMO ===
+					// ========================================
+					if (contentHovered
+						&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+						&& !ImGuizmo::IsUsing()
+						&& !ImGuizmo::IsOver()) {
+
+						ImVec2 mousePos = ImGui::GetMousePos();
+						ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+						performMousePicking(localMousePos, size);
+					}
+
+					// ========================================
+					// === Camera Controls ===
+					// ========================================
 					if (!isSimulationPaused && wantsInput() && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver()) {
 						ImGuiIO& io = ImGui::GetIO();
 						auto camera = services->get<sCameraController>();
@@ -337,7 +331,6 @@ namespace PAIN {
 						if (camera) {
 							bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right) && contentHovered;
 
-							// Keyboard movement (WASD + Space/Ctrl)
 							if (rightMouseHeld) {
 								camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
 								camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
@@ -351,7 +344,6 @@ namespace PAIN {
 								camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
 							}
 
-							// Mouse rotation (right mouse button)
 							camera->mouseButtonDown = rightMouseHeld;
 
 							if (camera->mouseButtonDown) {
@@ -363,33 +355,27 @@ namespace PAIN {
 								camera->yOffset = 0.0f;
 							}
 
-							// Mouse wheel zoom (when viewport is hovered)
+							// Mouse wheel zoom
 							if (contentHovered && io.MouseWheel != 0.0f) {
 								float mouseWheel = io.MouseWheel;
-								float zoomSpeed = 0.1f;  // Changed from 5.0f to 0.1f for slower zoom
-
-								// Get the active camera from the scene
+								float zoomSpeed = 0.1f;
 								auto activeCamera = scene->GetActiveCamera();
 
 								if (activeCamera) {
 									glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 
 									if (mouseWheel > 0.0f) {
-										// Zoom in (move forward)
 										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
 											* activeCamera->speed * zoomSpeed * mouseWheel;
 										activeCamera->pos += offset;
 									}
 									else if (mouseWheel < 0.0f) {
-										// Zoom out (move backward)
 										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
 											* activeCamera->speed * zoomSpeed * abs(mouseWheel);
 										activeCamera->pos -= offset;
 									}
 								}
 							}
-
-
 						}
 					}
 					else {
@@ -402,11 +388,10 @@ namespace PAIN {
 							camera->yOffset = 0.0f;
 						}
 					}
-
-
 				}
 				ImGui::End();
 			}
+
 
 
 		} // namespace Panel
