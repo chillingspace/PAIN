@@ -134,18 +134,6 @@ namespace PAIN {
 		//AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
-		auto uqmid = getMeshId("quad.obj");
-		auto unlit_quad_mesh = getMesh(uqmid);
-		Material unlitMat;
-		unlitMat.useTex = true;
-		unlitMat.tex = unlit_quad_mesh->texture_id;
-		unlitMat.color = { 1.f, 1.f, 1.f };
-		//unlitMat.alwaysLit = false;
-		unlit_quad_mesh->material = unlitMat;
-		AddObject(uqmid, "unlit_screen", { -2.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
-
-
-
 
 		obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/sdcc.obj");
 		cacheMesh(obj_path);
