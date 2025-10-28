@@ -80,6 +80,7 @@ namespace PAIN {
 		unsigned int ds_rbo = 0;				// depth buffer
 		//unsigned int shadow_fbo = 0;
 		unsigned int final_fbo = 0;
+		unsigned int final_rbo = 0;
 
 		// === Textures ===
 		unsigned int pos_texture = 0;
@@ -115,7 +116,7 @@ namespace PAIN {
 			//&shadow_fbo, 
 			&final_fbo
 		};
-		std::array<unsigned int*, 1> rbos{ &ds_rbo };
+		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
 		std::array<unsigned int*, 6> texs{
 			&pos_texture,
 			&col_texture,

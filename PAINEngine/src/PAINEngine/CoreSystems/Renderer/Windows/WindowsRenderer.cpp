@@ -245,6 +245,11 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
+			glGenRenderbuffers(1, &final_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, final_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, final_rbo);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// final_texture_2 for ping-pong if needed in post-processing
@@ -403,19 +408,19 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before drawing skybox: {}", err);
-		}
+		//GLenum err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error before drawing skybox: {}", err);
+		//}
 
-		// draw skybox
-		{
-			Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
-		}
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after drawing skybox: {}", err);
-		}
+		//// draw skybox
+		//{
+		//	Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+		//}
+		//err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error after drawing skybox: {}", err);
+		//}
 
 		// draw floor
 		{
@@ -433,7 +438,7 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		err = glGetError();
+		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
 		}
@@ -512,6 +517,10 @@ namespace PAIN {
 
 		{
 			// pbr pass
+
+			// lighting shouldnt write to depth buffer
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
 
 			pbr_shader->Bind();
 
@@ -602,6 +611,26 @@ namespace PAIN {
 
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			glEnable(GL_DEPTH_TEST);
+
+			// After lighting pass, final_fbo has the lit scene but NO depth buffer yet
+			// So we copy it:
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, ds_fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
+			glBlitFramebuffer(0, 0, winWidth, winHeight,
+				0, 0, winWidth, winHeight,
+				GL_DEPTH_BUFFER_BIT, GL_NEAREST);  // Copy depth only
+
+			// Now final_fbo has depth info. Render skybox:
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glDepthFunc(GL_LEQUAL);  // Pass if depth <= existing depth
+			glDepthMask(GL_FALSE);   // Don't write to depth buffer
+
+			Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+
+			glDepthMask(GL_TRUE);
+			glDepthFunc(GL_LESS);
 		}
 
 	}
