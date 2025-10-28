@@ -77,7 +77,7 @@ namespace PAIN {
 
 		// !TODO: gotta fix mesh ref system. must be able to have both lit and unlit versions of same mesh, same goes for colors/textures
 		auto cube_mesh = getMeshId("");
-		auto ogre_mesh = getMeshId("ogre.obj");
+		auto ogre_mesh_id = getMeshId("ogre.obj");
 		auto quad_mesh_id = getMeshId("quad.obj");
 
 		auto quad_mesh = getMesh(quad_mesh_id);
@@ -95,10 +95,20 @@ namespace PAIN {
 
 		quad_mesh->material = texturedMat;
 
+		auto ogre_mesh = getMesh(ogre_mesh_id);
+		Material ogreMat;
+		ogreMat.useTex = true;
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/diffuse.png");
+		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_texture");
+		ogreMat.tex = ogre_mesh->texture_id;
+		ogreMat.alwaysLit = true;
+		ogreMat.color = { 1.f, 1.f, 1.f };
+		ogre_mesh->material = ogreMat;
+
 		// Create the other static objects
-		AddObject(ogre_mesh, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		auto uqmid = getMeshId("quad.obj");

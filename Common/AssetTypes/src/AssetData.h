@@ -55,7 +55,7 @@ namespace PAIN {
 
         //Asset types
         enum class Type {
-            Texture,    // .png, .jpg, .jpeg, .hdr
+            Texture,    // .png, .jpg, .jpeg, .hdr, .tex
             Model,      // .obj
             Audio,      // .wav, .mp3, .ogg
             Script,     // .lua
@@ -111,7 +111,7 @@ namespace PAIN {
             std::unordered_map<Type, std::set<std::string>> temp;
 
             //Set up extensions for asset types
-            temp[Type::Texture] = { ".png", ".jpg", ".jpeg", ".hdr" };
+            temp[Type::Texture] = { ".png", ".jpg", ".jpeg", ".hdr", ".tex" };
             temp[Type::Model] = { ".obj" };
             temp[Type::Audio] = { ".wav", ".mp3", ".ogg" };
             temp[Type::Script] = { ".lua" };
