@@ -68,15 +68,15 @@ namespace PAIN {
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
 
-		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre.obj");
+		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre.obj");
 
 		cacheMesh("");
 		cacheMesh(obj_path);
 
-		obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/ogre_smile.obj");
+		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
 		cacheMesh(obj_path);
 
-		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://Models/quad.obj");
+		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://models/quad.obj");
 		cacheMesh(quad_path);
 
 		// !TODO: gotta fix mesh ref system. must be able to have both lit and unlit versions of same mesh, same goes for colors/textures
@@ -86,7 +86,7 @@ namespace PAIN {
 		auto smile_ogre_mesh_id = getMeshId("ogre_smile.obj");
 
 		auto quad_mesh = getMesh(quad_mesh_id);
-		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://Textures/sunshine.png");
+		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://textures/sunshine.png");
 		quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
 		
 		// Create the audio source object and store its entity ID
@@ -101,12 +101,12 @@ namespace PAIN {
 		quad_mesh->material = texturedMat;
 
 		auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_diffuse.png");
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_diffuse.png");
 		unsigned int ogre_diffuse_tex = TextureManager::get().load(texture_path.c_str(), "ogre_diffuse");
 		smile_ogre_mesh->texture_id = ogre_diffuse_tex;
 		smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
 		smile_ogre_mesh->material.useTex = true;
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_ao_smile.png");
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_smile.png");
 		smile_ogre_mesh->material.aoTex = TextureManager::get().load(texture_path.c_str(), "smile_ogre_ao");
 		smile_ogre_mesh->material.useAo = true;
 
@@ -121,7 +121,7 @@ namespace PAIN {
 		ogreMat.tex = ogre_mesh->texture_id;
 
 		// ao map
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ogre_ao_rest.png");
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_rest.png");
 		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_ao");
 		ogreMat.aoTex = ogre_mesh->texture_id;
 		ogreMat.useAo = true;
@@ -136,23 +136,23 @@ namespace PAIN {
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 
-		obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/sdcc.obj");
+		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/sdcc.obj");
 		cacheMesh(obj_path);
 		auto sdcc_mesh_id = getMeshId("sdcc.obj");
 		auto sdcc_mesh = getMesh(sdcc_mesh_id);
 
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/sdcc_baked_building.png");
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/sdcc_baked_building.png");
 		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
 		sdcc_mesh->material.useTex = true;
 		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
 		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
-		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/city.obj");
+		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/city.obj");
 		//cacheMesh(obj_path);
 		//auto city_mesh_id = getMeshId("city.obj");
 		//auto city_mesh = getMesh(city_mesh_id);
 
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/city.png");
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/city.png");
 		//city_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "city");
 		//city_mesh->material.useTex = true;
 		//city_mesh->material.tex = city_mesh->texture_id;
@@ -200,7 +200,7 @@ namespace PAIN {
 
 		// skybox
 		Skybox::get().init(
-			services, services->get<Path::Path>()->resolvePath("engine_assets://Textures/skybox.hdr")
+			services, services->get<Path::Path>()->resolvePath("engine_assets://textures/skybox.hdr")
 		);
 
 		// Test load prefab

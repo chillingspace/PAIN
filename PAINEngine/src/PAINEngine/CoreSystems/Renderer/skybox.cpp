@@ -179,11 +179,11 @@ namespace PAIN {
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_WINDOWS
-			const std::string path_vert = "engine_assets://Shaders/eqr_to_skybox.vert";
-			const std::string path_frag = "engine_assets://Shaders/eqr_to_skybox.frag";
+			const std::string path_vert = "engine_assets://shaders/eqr_to_skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/eqr_to_skybox.frag";
 #else
-			const std::string path_vert = "engine_assets://Shaders/android_eqr_to_skybox.vert";
-			const std::string path_frag = "engine_assets://Shaders/android_eqr_to_skybox.frag";
+			const std::string path_vert = "engine_assets://shaders/android_eqr_to_skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/android_eqr_to_skybox.frag";
 #endif
 
 			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
@@ -207,11 +207,11 @@ namespace PAIN {
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_WINDOWS
-			const std::string path_vert = "engine_assets://Shaders/skybox.vert";
-			const std::string path_frag = "engine_assets://Shaders/skybox.frag";
+			const std::string path_vert = "engine_assets://shaders/skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/skybox.frag";
 #else
-			const std::string path_vert = "engine_assets://Shaders/android_skybox.vert";
-			const std::string path_frag = "engine_assets://Shaders/android_skybox.frag";
+			const std::string path_vert = "engine_assets://shaders/android_skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/android_skybox.frag";
 #endif
 
 			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));

@@ -67,8 +67,8 @@ namespace PAIN {
 		//Get path service
 		auto path_service = services->get<Path::Path>();
 
-		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://shaders/" + vert_file);
+		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://shaders/" + frag_file);
 
 		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
 		std::string vert_code = ReadFile(vert_full);
@@ -80,8 +80,8 @@ namespace PAIN {
 
         //Get path service
         auto path_service = services->get<Path::Path>();
-        auto vert_path = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-        auto frag_path = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+        auto vert_path = path_service->resolvePath("engine_assets://shaders/" + vert_file);
+        auto frag_path = path_service->resolvePath("engine_assets://shaders/" + frag_file);
 		std::string vert_code = ReadFileAndroid(vert_path);
 		std::string frag_code = ReadFileAndroid(frag_path);
 #endif
