@@ -136,3 +136,11 @@ template<>
     };
 }
 
+// Reflection
+REFL_TYPE(PAIN::Lighting)
+REFL_FIELD(position)
+REFL_FIELD(light_intensity)
+REFL_FIELD(light_type)
+REFL_FIELD(forward)
+REFL_FIELD(shadow_type)
+REFL_END
