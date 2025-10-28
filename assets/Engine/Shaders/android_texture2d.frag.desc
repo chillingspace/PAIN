@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_texture2d",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17426284156821842594
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "c421012a-7d10-044d-92c9-8baf1dcca787",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_texture2d.frag"
+  }
+}

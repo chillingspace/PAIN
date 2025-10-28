@@ -6,7 +6,7 @@ in vec3 fFragPos;
 layout(location = 0) out vec3 gPos;
 layout(location = 1) out vec3 gCol;
 layout(location = 2) out vec3 gNorm;
-layout(location = 3) out vec2 gMaterial;
+layout(location = 3) out vec3 gMaterial;
 
 
 void main() {
@@ -25,5 +25,5 @@ void main() {
     gPos = fFragPos;
     gCol = mix(light, dark, dark_tile_intensity);
     gNorm = vec3(0.0, 1.0, 0.0);
-    gMaterial = vec2(roughness, metallic);
+    gMaterial = vec3(roughness, metallic, 0.0);
 }

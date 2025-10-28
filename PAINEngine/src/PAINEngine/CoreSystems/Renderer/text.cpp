@@ -90,14 +90,22 @@ namespace PAIN {
 
 		// compile and link shader
 		{
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/text.vert"));
+#ifdef PN_PLATFORM_ANDROID
+			std::string path_vert = "engine_assets://Shaders/android_text.vert";
+			std::string path_frag = "engine_assets://Shaders/android_text.frag";
+#else
+			std::string path_vert = "engine_assets://Shaders/text.vert";
+			std::string path_frag = "engine_assets://Shaders/text.frag";
+#endif
+
+			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
 			buffer << ifs.rdbuf();
 			const std::string vert = buffer.str();
 
 			ifs.close();
 
-			ifs.open(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/text.frag"));
+			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();

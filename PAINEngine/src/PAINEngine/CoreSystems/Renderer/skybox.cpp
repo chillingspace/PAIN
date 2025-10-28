@@ -178,14 +178,22 @@ namespace PAIN {
 
 		// compile and link shader
 		{
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/eqr_to_skybox.vert"));
+#ifdef PN_PLATFORM_WINDOWS
+			const std::string path_vert = "engine_assets://Shaders/eqr_to_skybox.vert";
+			const std::string path_frag = "engine_assets://Shaders/eqr_to_skybox.frag";
+#else
+			const std::string path_vert = "engine_assets://Shaders/android_eqr_to_skybox.vert";
+			const std::string path_frag = "engine_assets://Shaders/android_eqr_to_skybox.frag";
+#endif
+
+			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
 			buffer << ifs.rdbuf();
 			const std::string vert = buffer.str();
 
 			ifs.close();
 
-			ifs.open(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/eqr_to_skybox.frag"));
+			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();
@@ -198,14 +206,22 @@ namespace PAIN {
 
 		// compile and link shader
 		{
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/skybox.vert"));
+#ifdef PN_PLATFORM_WINDOWS
+			const std::string path_vert = "engine_assets://Shaders/skybox.vert";
+			const std::string path_frag = "engine_assets://Shaders/skybox.frag";
+#else
+			const std::string path_vert = "engine_assets://Shaders/android_skybox.vert";
+			const std::string path_frag = "engine_assets://Shaders/android_skybox.frag";
+#endif
+
+			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
 			buffer << ifs.rdbuf();
 			const std::string vert = buffer.str();
 
 			ifs.close();
 
-			ifs.open(services->get<Path::Path>()->resolvePath("engine_assets://Shaders/skybox.frag"));
+			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();

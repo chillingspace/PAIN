@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_eqr_to_skybox",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15150976985220708139
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "6352b18a-8cbb-b849-b579-32081048ecc4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_eqr_to_skybox.frag"
+  }
+}
