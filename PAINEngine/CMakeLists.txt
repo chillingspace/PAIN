@@ -55,6 +55,7 @@ target_link_libraries(PAINEngine
 	    reflcpp
         gli_headers
         entt_header_only
+imguizmo
 )
 
 # ImGui backends compiled into the engine

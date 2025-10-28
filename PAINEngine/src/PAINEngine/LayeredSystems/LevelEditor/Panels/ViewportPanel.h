@@ -6,6 +6,7 @@
 
 #include "Panels.h"
 #include "CoreSystems/Scene/sCameraController.h"
+#include "ImGuizmo.h"
 
 
 namespace PAIN {
@@ -41,6 +42,10 @@ namespace PAIN {
 				int texHeight;
 				bool isInputPaused;           // Controls input forwarding
 				bool isSimulationPaused; // Controls scene simulation
+
+				// Gizmo state
+				ImGuizmo::OPERATION m_GizmoOperation;
+				ImGuizmo::MODE m_GizmoMode;
 			};
 
 		} // namespace Panel
