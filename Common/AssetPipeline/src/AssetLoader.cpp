@@ -4,7 +4,25 @@
 namespace PAIN {
 	namespace Assets {
 
-        std::unordered_map<GUID, IAsset> Loader::ImportAssetRegistry(std::filesystem::path const& path) {
+        LoaderFunc Loader::GetLoader(Type const& type) const {
+            
+            //Check if loader exists
+            if (!CheckLoader(type)) {
+                throw std::runtime_error("Loader does not exist! Unable to get loader function!");
+            }
+
+            return asset_loader.at(type);
+        }
+
+        bool Loader::CheckLoader(Type const& type) const {
+            if (asset_loader.find(type) != asset_loader.end()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        std::unordered_map<GUID, IAsset> Loader::ImportAssetRegistry(std::filesystem::path const& path) const {
             std::unordered_map<GUID, IAsset> assets;
 
             //Check if file exists
@@ -41,27 +59,104 @@ namespace PAIN {
             return assets;
         }
 
-        void Loader::extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex) {
+        void Loader::extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex) const {
 #ifdef PN_PLATFORM_WINDOWS
             std::ifstream file(path, std::ios::binary);
+            if (!file.is_open()) {
+                throw std::runtime_error("Failed to open DDS file: " + path.string());
+            }
+
+            // Read magic number
             char magic[4];
             file.read(magic, 4);
-            if (std::memcmp(magic, "DDS ", 4) != 0) throw std::runtime_error("Not a DDS file!");
-            file.ignore(8); // size, flags
-            uint32_t height, width; file.read((char*)&height, 4); file.read((char*)&width, 4);
-            file.ignore(108); // skip rest of header (could extract mips, format here)
-            tex->width = width;
-            tex->height = height;
-            tex->mips = 1; // For simplicity here; parse real mip count in production!
-            tex->format = TextureFormat::BC7;
-            // Copy whole file (after header) to tex->data
-            tex->data.assign(std::istreambuf_iterator<char>(file), {});
-            tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+            if (std::memcmp(magic, "DDS ", 4) != 0) {
+                throw std::runtime_error("Not a DDS file!");
+            }
+
+            // Read DDS header (124 bytes)
+            uint32_t header[31];
+            file.read((char*)header, sizeof(header));
+
+            tex->height = header[2];
+            tex->width = header[3];
+            uint32_t mipMapCount = header[7] ? header[7] : 1;
+            tex->mips = mipMapCount;
+
+            // Check for DX10 extended header
+            uint32_t pixelFormatFlags = header[19];
+            bool isDX10 = (header[20] == 0x30315844); // "DX10" in little-endian
+
+            if (isDX10) {
+                // Read complete DX10 header (20 bytes = 5 uint32_t values)
+                uint32_t dx10Header[5];
+                file.read((char*)dx10Header, 20);
+
+                uint32_t dxgiFormat = dx10Header[0];
+
+                // DXGI_FORMAT_BC7_TYPELESS = 97
+                // DXGI_FORMAT_BC7_UNORM = 98
+                // DXGI_FORMAT_BC7_UNORM_SRGB = 99
+                if (dxgiFormat == 98) {
+                    tex->format = TextureFormat::BC7;
+                    tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+                }
+                else if (dxgiFormat == 99) {
+                    tex->format = TextureFormat::BC7;
+                    tex->glTexFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB; // sRGB variant
+                }
+                else if (dxgiFormat == 97) {
+                    // Typeless - default to linear
+                    tex->format = TextureFormat::BC7;
+                    tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+                }
+                else {
+                    throw std::runtime_error("Unsupported DXGI format: " + std::to_string(dxgiFormat) + " (expected BC7: 97/98/99)");
+                }
+                // File cursor is already at the correct position after reading DX10 header
+            }
+            else {
+                // Legacy DDS format - check FourCC for BC7
+                throw std::runtime_error("Legacy DDS format detected. BC7 requires DX10 header!");
+            }
+
+            // Prepare data storage
+            tex->data.clear();
+            tex->mipOffsets.clear();
+
+            // Read all mipmap levels WITHOUT flipping
+            int mipW = tex->width;
+            int mipH = tex->height;
+
+            for (uint32_t mip = 0; mip < mipMapCount; ++mip) {
+                // Calculate block dimensions and size
+                int blocks_w = (mipW + 3) / 4;
+                int blocks_h = (mipH + 3) / 4;
+                size_t mipSize = blocks_w * blocks_h * 16; // BC7 always uses 16 bytes per block
+
+                // Store offset for this mip level
+                tex->mipOffsets.push_back(tex->data.size());
+
+                // Resize and read directly into final buffer
+                size_t currentOffset = tex->data.size();
+                tex->data.resize(tex->data.size() + mipSize);
+
+                file.read(reinterpret_cast<char*>(tex->data.data() + currentOffset), mipSize);
+
+                if (!file) {
+                    throw std::runtime_error("Failed to read mipmap level " + std::to_string(mip) +
+                        " (expected " + std::to_string(mipSize) + " bytes)");
+                }
+
+                // Calculate next mip dimensions
+                mipW = std::max(1, mipW / 2);
+                mipH = std::max(1, mipH / 2);
+            }
+
             file.close();
 #endif
         }
 
-        void Loader::extractASTC(std::filesystem::path const& path, std::shared_ptr<Texture> tex) {
+        void Loader::extractASTC(std::filesystem::path const& path, std::shared_ptr<Texture> tex) const {
 #ifdef PN_PLATFORM_ANDROID
             // --- Minimal ASTC header parse (supports .astc 4x4 only here) ---
             std::ifstream file(path, std::ios::binary);
@@ -80,7 +175,7 @@ namespace PAIN {
 #endif
         }
 
-        std::shared_ptr<Texture> Loader::ImportTexture(std::filesystem::path const& path) {
+        std::shared_ptr<Texture> Loader::ImportTexture(std::filesystem::path const& path) const {
 
             //Check if path exists
             if (!std::filesystem::exists(path)) {
@@ -97,7 +192,7 @@ namespace PAIN {
                 extractDDS(path, tex);
 #endif
             }
-            if (path.extension() == ".astc") {
+            else if (path.extension() == ".astc") {
 #ifdef PN_PLATFORM_ANDROID
                 //Extract DDS Texture
                 extractASTC(path, tex);
@@ -110,17 +205,50 @@ namespace PAIN {
             //Immediate upload
             glGenTextures(1, &tex->gl_texture);
             glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+            // Anisotropic filtering (essential for quality)
+            GLfloat maxAniso = 0.0f;
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+
             if (tex->format == TextureFormat::BC7) {
 #ifdef PN_PLATFORM_WINDOWS
-                //BC7 block size (16 bytes/block, 4x4 texel block)
-                int blockWidth = (tex->width + 3) / 4, blockHeight = (tex->height + 3) / 4;
-                GLsizei imageSize = blockWidth * blockHeight * 16;
-                glCompressedTexImage2D(GL_TEXTURE_2D, 0, tex->glTexFormat, tex->width, tex->height, 0, imageSize, tex->data.data());
+                int mipW = tex->width;
+                int mipH = tex->height;
+
+                for (uint32_t mip = 0; mip < tex->mips; ++mip) {
+                    int blocks_w = (mipW + 3) / 4;
+                    int blocks_h = (mipH + 3) / 4;
+                    size_t mipSize = blocks_w * blocks_h * 16;
+                    size_t offset = tex->mipOffsets[mip];
+
+                    glCompressedTexImage2D(
+                        GL_TEXTURE_2D,
+                        mip,
+                        tex->glTexFormat,
+                        mipW,
+                        mipH,
+                        0,
+                        mipSize,
+                        tex->data.data() + offset
+                    );
+
+                    GLenum err = glGetError();
+                    if (err != GL_NO_ERROR) {
+                        throw std::runtime_error("OpenGL error uploading mip " +
+                            std::to_string(mip) + ": 0x" +
+                            std::to_string(err));
+                    }
+
+                    mipW = std::max(1, mipW / 2);
+                    mipH = std::max(1, mipH / 2);
+                }
 #endif
             }
             else if (tex->format == TextureFormat::ASTC_4x4) {
@@ -129,13 +257,18 @@ namespace PAIN {
                 int blockWidth = (tex->width + 3) / 4, blockHeight = (tex->height + 3) / 4;
                 GLsizei imageSize = blockWidth * blockHeight * 16;
                 glCompressedTexImage2D(GL_TEXTURE_2D, 0, tex->glTexFormat, tex->width, tex->height, 0, imageSize, tex->data.data());
+
+                GLenum err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    throw std::runtime_error("OpenGL error occurred uploading texture.");
+                }
 #endif
             }
             glBindTexture(GL_TEXTURE_2D, 0);
             return tex;
         }
 
-		std::shared_ptr<Model> Loader::ImportModel(std::filesystem::path const& path) {
+		std::shared_ptr<Model> Loader::ImportModel(std::filesystem::path const& path) const {
             Model asset;
 
             //Double check if file is valid

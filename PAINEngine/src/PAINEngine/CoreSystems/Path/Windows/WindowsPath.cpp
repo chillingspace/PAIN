@@ -152,6 +152,21 @@ namespace PAIN {
             return normalizePath(fullPath.string());
         }
 
+        std::string WindowsPath::resolvePath(const std::string& alias, std::string const& relative) const {
+
+            auto it = virtual_paths.find(alias);
+            if (it == virtual_paths.end()) {
+                throw std::runtime_error("Unknown virtual path alias: " + alias);
+            }
+
+            if (relative.empty()) {
+                return it->second;
+            }
+
+            std::filesystem::path fullPath = std::filesystem::path(it->second) / relative;
+            return normalizePath(fullPath.string());
+        }
+
         std::vector<std::string> WindowsPath::listFiles(const std::string& virtualPath, const std::string& filter, const std::string& extension) const {
             //Get actual path
             auto actual_path = resolvePath(virtualPath);

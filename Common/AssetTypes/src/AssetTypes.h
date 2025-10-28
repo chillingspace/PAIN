@@ -46,6 +46,7 @@ namespace PAIN {
         struct Texture : public IAsset {
         public:
             int width = 0, height = 0, mips = 1;
+            std::vector<size_t> mipOffsets;
 #ifdef PN_PLATFORM_ANDROID
             TextureFormat format = TextureFormat::ASTC_4x4;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;

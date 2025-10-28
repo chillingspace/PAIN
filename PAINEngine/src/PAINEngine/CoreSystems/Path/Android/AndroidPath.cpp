@@ -200,6 +200,27 @@ namespace PAIN {
 			}
 		}
 
+		std::string AndroidPath::resolvePath(const std::string& alias, std::string const& relative) const {
+
+			auto it = virtual_paths.find(alias);
+			if (it == virtual_paths.end()) {
+				throw std::runtime_error("Unknown virtual path alias: " + alias);
+			}
+
+			if (relative.empty()) {
+				return it->second;
+			}
+
+			std::string fullPath = it->second + "/" + relative;
+
+			if (isAssetPath(virtualPath)) {
+				return fullPath;
+			}
+			else {
+				return normalizePath(fullPath);
+			}
+		}
+
 		std::vector<std::string> AndroidPath::listFiles(const std::string& virtualPath, const std::string& filter, const std::string& extension) const {
 			// Assets can't be listed through filesystem
 			if (isAssetPath(virtualPath)) {

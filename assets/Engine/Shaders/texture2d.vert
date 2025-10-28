@@ -12,7 +12,9 @@ void main() {
         vec2( 1.0,  1.0)
     );
     vec2 vertex = vertices[gl_VertexID];
-    TexCoords = vertex * 0.5 + 0.5;
+    // Vertically flip texture coordinates
+    TexCoords = vec2(vertex.x * 0.5 + 0.5, 1.0 - (vertex.y * 0.5 + 0.5));
+    //TexCoords = vertex * 0.5 + 0.5;
     vec2 fragPos = vertex * ndc_scale + pos;
     gl_Position = vec4(fragPos, 0.0, 1.0);
 }
