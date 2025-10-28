@@ -20,7 +20,7 @@ namespace PAIN {
 			PLANAR,
 			SCREEN_SPACE,
 			NUM_REFLECTION_TYPES,
-			;
+		};
 		REFLECTION_TYPES reflection_type{ REFLECTION_TYPES::NONE };
     };
 
