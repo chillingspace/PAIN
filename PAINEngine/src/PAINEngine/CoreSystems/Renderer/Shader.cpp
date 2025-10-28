@@ -88,8 +88,8 @@ namespace PAIN {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 #ifdef PN_PLATFORM_ANDROID
-			PN_CORE_ERROR("Shader compile error {0}: {1}",
-				type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+			PN_CORE_ERROR("Shader compile error {0}: {1}\nSource: {2}",
+				type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog, source);
 #else
 			PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
 #endif

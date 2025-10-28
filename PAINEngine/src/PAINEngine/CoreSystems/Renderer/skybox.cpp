@@ -12,6 +12,10 @@
 #include "GraphicsSettings.h"
 #include "CoreSystems/Scene/Camera.h"
 
+#ifdef PN_PLATFORM_ANDROID
+#include "Utility/AndroidFs.h"
+#endif
+
 
 namespace PAIN {
 	Skybox::Skybox() {
@@ -178,13 +182,17 @@ namespace PAIN {
 
 		// compile and link shader
 		{
-#ifdef PN_PLATFORM_WINDOWS
-			const std::string path_vert = "engine_assets://shaders/eqr_to_skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/eqr_to_skybox.frag";
-#else
+#ifdef PN_PLATFORM_ANDROID
 			const std::string path_vert = "engine_assets://shaders/android_eqr_to_skybox.vert";
 			const std::string path_frag = "engine_assets://shaders/android_eqr_to_skybox.frag";
-#endif
+
+
+			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
+			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
+#else
+			const std::string path_vert = "engine_assets://shaders/eqr_to_skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/eqr_to_skybox.frag";
+
 
 			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
@@ -197,8 +205,11 @@ namespace PAIN {
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();
+#endif
 
+			PN_CORE_INFO("Compiling equirectangular to cubemap shader from {} and {}", path_vert, path_frag);
 			conversionShader = Shader(vert.c_str(), frag.c_str());
+			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader.GetRendererID());
 		}
 
 		loadHdr(skybox_path);
@@ -206,13 +217,16 @@ namespace PAIN {
 
 		// compile and link shader
 		{
-#ifdef PN_PLATFORM_WINDOWS
-			const std::string path_vert = "engine_assets://shaders/skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/skybox.frag";
-#else
+#ifdef PN_PLATFORM_ANDROID
 			const std::string path_vert = "engine_assets://shaders/android_skybox.vert";
 			const std::string path_frag = "engine_assets://shaders/android_skybox.frag";
-#endif
+
+			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
+			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
+#else
+			const std::string path_vert = "engine_assets://shaders/skybox.vert";
+			const std::string path_frag = "engine_assets://shaders/skybox.frag";
+
 
 			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
@@ -225,8 +239,11 @@ namespace PAIN {
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();
+#endif
 
+			PN_CORE_INFO("Compiling skybox shader from {} and {}", path_vert, path_frag);
 			shader = Shader(vert.c_str(), frag.c_str());
+			PN_CORE_INFO("Skybox shader compiled, ID: {}", shader.GetRendererID());
 		}
 	}
 

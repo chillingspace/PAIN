@@ -119,10 +119,13 @@ namespace PAIN {
 #ifdef PN_PLATFORM_ANDROID
 			std::string path_vert = "engine_assets://shaders/android_text.vert";
 			std::string path_frag = "engine_assets://shaders/android_text.frag";
+
+			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
+			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
 #else
 			std::string path_vert = "engine_assets://shaders/text.vert";
 			std::string path_frag = "engine_assets://shaders/text.frag";
-#endif
+
 
 			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
 			std::stringstream buffer;
@@ -135,8 +138,13 @@ namespace PAIN {
 			buffer.str(std::string());
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();
+#endif
 
+
+			PN_CORE_INFO("Compiling text shader from {} and {}", path_vert, path_frag);
+			PN_CORE_TRACE("Vertex shader source:\n{0}", vert);
 			shader = Shader(vert.c_str(), frag.c_str());
+			PN_CORE_INFO("Text shader compiled, ID: {}", shader.GetRendererID());
 		}
 		error = glGetError();
 		if (error != GL_NO_ERROR) {
