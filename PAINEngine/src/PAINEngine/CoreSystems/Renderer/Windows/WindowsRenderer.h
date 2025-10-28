@@ -52,7 +52,7 @@ namespace PAIN {
 		void EndGeometryPass();
 
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
-		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene);
 		void PostProcessPass();
 
 		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);

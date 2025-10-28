@@ -204,6 +204,12 @@ namespace PAIN {
                     }
                 }
             }
+            if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
+                toggleDebugMode();
+
+                PN_CORE_INFO("Editor debug mode: {}", editor_debug ? "ON" : "OFF");
+
+            }
 #endif
 
 #ifdef PN_PLATFORM_ANDROID

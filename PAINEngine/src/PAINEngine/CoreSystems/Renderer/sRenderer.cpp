@@ -112,8 +112,10 @@ namespace PAIN {
 		w_renderer->LightingPass(scene, LightSources::get());
 	}
 
-	void sRenderer::debugPass()
+	void sRenderer::debugPass(bool show_debug)
 	{
+		if (!show_debug) { return; }
+
 		auto ecs = services->get<ECS::Controller>();
 		auto scene = services->get<Scene>();
 		auto& reg = ecs->getRegistry();
@@ -146,7 +148,7 @@ namespace PAIN {
 				w_max.x = max(w_max.x, w.x); w_max.y = max(w_max.y, w.y); w_max.z = max(w_max.z, w.z);
 			}
 
-			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene, false);
+			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene);
 		}
 	}
 
@@ -159,11 +161,14 @@ namespace PAIN {
 	void sRenderer::onUpdate(AppTiming timing) {
 
 		{
-#ifdef DEBUG
+#ifdef _DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
+			bool editor_debug = editor && editor->isDebugMode();
+
 #else
 			bool editor_visible = false;
+			bool editor_debug = false;
 #endif
 
 			if (editor_visible) {
@@ -195,7 +200,7 @@ namespace PAIN {
 			geometryPass();
 			lightingPass();
 		
-			debugPass();
+			debugPass(editor_debug);
 			postProcessPass();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset

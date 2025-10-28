@@ -587,7 +587,7 @@ namespace PAIN {
 	}
 
 
-	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene, bool depthTest)
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
 	{
 		if (!debug_VAO || !debug_shader) return;
 
