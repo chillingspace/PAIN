@@ -407,102 +407,8 @@ namespace PAIN {
         * Serialization
         **************************************************************/
 
-        nlohmann::json Service::serializeEntity(entt::entity entity) const {
-            nlohmann::json data;
 
-            auto name_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
-            if (name_opt.has_value()) {
-                data["name"] = name_opt->get().name;
-            }
-
-            auto tag_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
-            if (tag_opt.has_value()) {
-                data["tags"] = tag_opt->get().tags;
-            }
-
-            auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
-            if (vis_opt.has_value()) {
-                data["visible"] = vis_opt->get().visible;
-                data["locked"] = vis_opt->get().locked;
-            }
-
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            if (relation_opt.has_value()) {
-                auto& relation = relation_opt->get();
-
-                // Convert entt::entity parent to integer
-                data["parent"] = static_cast<uint32_t>(relation.parent);
-
-                // Convert entt::entity children to integers
-                std::vector<uint32_t> children_ids;
-                children_ids.reserve(relation.children.size());
-                for (auto child : relation.children) {
-                    children_ids.push_back(static_cast<uint32_t>(child));
-                }
-                data["children"] = children_ids;
-            }
-
-            auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
-            if (group_opt.has_value()) {
-                data["group"] = group_opt->get().group_name;
-            }
-
-            return data;
-        }
-
-        void Service::deserializeEntity(entt::entity entity, nlohmann::json const& data)
-        {
-            // Get access to ECS controller
-            auto& registry = PN_ECS_SERVICE->getRegistry();
-
-            // --- Entity Name ---
-            if (data.contains("name")) {
-                setEntityName(entity, data["name"].get<std::string>());
-            }
-
-            // --- Tags ---
-            if (data.contains("tags")) {
-                auto tags = data["tags"].get<std::set<std::string>>();
-                for (const auto& tag : tags) {
-                    addTag(entity, tag);
-                }
-            }
-
-            // --- Editor Visibility & Locking ---
-            if (data.contains("visible") || data.contains("locked")) {
-                bool visible = data.value("visible", true);
-                bool locked = data.value("locked", false);
-                setVisible(entity, visible);
-                setLocked(entity, locked);
-            }
-
-            // --- Relation (Parent/Children) ---
-            if (data.contains("parent") || data.contains("children")) {
-                entt::entity parent = entt::entity(data.value("parent", static_cast<uint32_t>(entt::null)));
-                // Set parent if specified
-                if (parent != entt::null)
-                    setParent(entity, parent);
-                // Set children
-                if (data.contains("children")) {
-                    auto children_ids = data["children"].get<std::vector<uint32_t>>();
-                    for (auto child_id : children_ids) {
-                        entt::entity child = entt::entity(child_id);
-                        addChild(entity, child);
-                    }
-                }
-            }
-
-            // --- Group ---
-            if (data.contains("group")) {
-                std::string group_name = data["group"].get<std::string>();
-                if (!group_name.empty()) {
-                    assignToGroup(entity, group_name);
-                }
-            }
-        }
-
-
-        nlohmann::json Service::serialize() const {
+        nlohmann::json Service::serializeServiceState() const {
             nlohmann::json data;
             data["registered_tags"] = registered_tags;
 
@@ -531,7 +437,7 @@ namespace PAIN {
         }
 
 
-        void Service::deserialize(nlohmann::json const& data) {
+        void Service::deserializeServiceState(nlohmann::json const& data) {
             if (data.contains("registered_tags")) {
                 registered_tags = data["registered_tags"].get<std::set<std::string>>();
             }
