@@ -83,3 +83,7 @@ android/app/src/main/assets*/
 *.tmp
 *.bak
 *.swp
+
+
+# do not ignore assets
+!assets/**
