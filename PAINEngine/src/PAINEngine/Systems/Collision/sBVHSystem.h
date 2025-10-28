@@ -16,8 +16,8 @@
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
     class Scene;
-    struct Mesh;
-    struct Transform; // <<< CORRECTED FORWARD DECLARATION
+    class Mesh;
+    struct Transform;
     struct MeshRenderer;
     struct cBoundingVolume;
     namespace MetaData { struct EditorVisible; }
