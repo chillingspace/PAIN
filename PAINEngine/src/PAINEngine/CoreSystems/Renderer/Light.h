@@ -38,7 +38,11 @@ namespace PAIN {
 			glGenTextures(1, &shadow_texture);
 			glBindTexture(GL_TEXTURE_2D, shadow_texture);
 
+#ifdef PN_PLATFORM_ANDROID
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+#else
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+#endif
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
