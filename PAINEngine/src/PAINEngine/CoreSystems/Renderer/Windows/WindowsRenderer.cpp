@@ -674,6 +674,9 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
 		// render 2D textures onto screen
 		{
 			// !TODO: add queue and iterate through all 2D textures to be rendered last
@@ -685,6 +688,8 @@ namespace PAIN {
 			TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
 			TextRenderer::get().debugRenderQuad();
 		}
+
+		glEnable(GL_DEPTH_TEST);
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
