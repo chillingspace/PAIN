@@ -24,7 +24,7 @@ namespace PAIN {
 
     // Implementation for calculating local AABB from mesh vertices
     AABB sBVHSystem::calculateLocalAABB(const std::shared_ptr<Mesh>& mesh) {
-        AABB localAABB; // Default initialized AABB (max/lowest bounds)
+        AABB localAABB; // Initializes with max/lowest bounds
         if (!mesh) {
             PN_CORE_WARN("Attempted to calculate AABB for a null mesh. Using default small box.");
             localAABB.min = glm::vec3(-0.01f);
@@ -32,6 +32,7 @@ namespace PAIN {
             return localAABB;
         }
 
+        // --- THIS BLOCK IS NOW CORRECT ---
         // Access vertices using the getter method added to Mesh.h
         const std::vector<Vertex>& vertices = mesh->getVertices();
         if (vertices.empty()) {
@@ -41,17 +42,18 @@ namespace PAIN {
              return localAABB;
         }
 
-        // Calculate bounds from vertices
+        // Iterate through all vertices and expand the AABB to include them
         for (const auto& vertex : vertices) {
             localAABB.expand(vertex.pos);
         }
 
-        // Add epsilon for degenerate cases
+        // Add a small epsilon to avoid degenerate AABBs (lines or points)
          glm::vec3 extents = localAABB.getExtents();
          const float minExtent = 0.01f; // Minimum size threshold
          if (extents.x < minExtent) { localAABB.min.x -= minExtent; localAABB.max.x += minExtent; }
          if (extents.y < minExtent) { localAABB.min.y -= minExtent; localAABB.max.y += minExtent; }
          if (extents.z < minExtent) { localAABB.min.z -= minExtent; localAABB.max.z += minExtent; }
+        // --- END OF CORRECTION ---
 
         return localAABB;
     }
@@ -69,13 +71,10 @@ namespace PAIN {
         // --- Phase 1: Update World AABBs and Collect Items ---
         std::vector<std::pair<entt::entity, AABB>> bvhItems;
         
-        // --- THIS LINE IS CORRECTED ---
         // Estimate reservation based on the number of entities with a Transform component
         bvhItems.reserve(registry.storage<Transform>().size());
-        // --- END CORRECTION ---
 
         // Create a view for entities having a Transform component
-        // This requires the full definition of Transform included above
         auto view = registry.view<Transform>(/*entt::exclude<MetaData::EditorVisible>*/);
 
         for (auto entity : view) {

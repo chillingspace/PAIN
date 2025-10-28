@@ -210,9 +210,13 @@ namespace PAIN {
 				// Prepare OpenGL state for drawing lines on top of the scene
 				glDisable(GL_DEPTH_TEST); // Draw lines regardless of scene depth
 
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Tell OpenGL to draw triangles as wireframes
+
 				// Start the recursive drawing process from the root node
 				drawNodeRecursive(rootIndex, 0);
 
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Restore to default drawing mode
+				
 				// Restore OpenGL state
 				glEnable(GL_DEPTH_TEST); // Re-enable depth testing
 			}
