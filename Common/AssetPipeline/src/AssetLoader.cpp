@@ -4,6 +4,43 @@
 namespace PAIN {
 	namespace Assets {
 
+        std::unordered_map<GUID, IAsset> Loader::ImportAssetRegistry(std::filesystem::path const& path) {
+            std::unordered_map<GUID, IAsset> assets;
+
+            //Check if file exists
+            if (!std::filesystem::exists(path)) {
+                throw std::runtime_error("Asset registry does not exist or invalid path!");
+            }
+
+            std::ifstream file(path);
+            if (!file.is_open()) {
+                throw std::runtime_error("Unable to open path!");
+            }
+
+            nlohmann::json registry_json;
+            file >> registry_json;
+
+            for (auto it = registry_json.begin(); it != registry_json.end(); ++it) {
+                // Parse GUID from key
+                GUID guid = GUID(it.key());
+                const auto& obj = it.value();
+
+                IAsset asset;
+                asset.guid = guid;
+
+                //Parse asset type
+                asset.type = stringToAssetType(obj["type"]);
+                asset.name = obj.value("name", "");
+
+                //Parse paths
+                asset.relative_path = obj.value("relative_path", "");
+
+                //Store in map
+                assets[guid] = asset;
+            }
+            return assets;
+        }
+
         void Loader::extractDDS(std::filesystem::path const& path, std::shared_ptr<Texture> tex) {
 #ifdef PN_PLATFORM_WINDOWS
             std::ifstream file(path, std::ios::binary);

@@ -20,6 +20,9 @@ namespace PAIN {
 			Loader() = default;
 			~Loader() = default;
 
+			//Import asset registry file
+			std::unordered_map<GUID, IAsset> ImportAssetRegistry(std::filesystem::path const& path);
+
 			//Importing texture
 			std::shared_ptr<Texture> ImportTexture(std::filesystem::path const& path);
 

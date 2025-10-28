@@ -243,6 +243,8 @@ namespace PAIN {
 
         Descriptor Compiler::readDescFile(Info& asset, std::filesystem::path const& path) const {
 
+            bool needs_updating = false;
+
             try {
                 std::ifstream file(path);
                 nlohmann::json desc_json;
@@ -261,11 +263,12 @@ namespace PAIN {
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.hash = build_data.value("hash", fileHashing(path));
+                desc.hash = build_data.value("hash", std::size_t(0));
 
                 //Verify import settings
                 if (!verifyCompileSettings(asset.type, desc.import_settings)) {
                     desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
+                    needs_updating = true;
                 }
 
                 //Dependencies
@@ -282,9 +285,15 @@ namespace PAIN {
 
                 if (current_source != expected_source) {
                     desc.meta_data["source_file"] = expected_source.string();
+                    needs_updating = true;
                 }
 
                 file.close();
+
+                //if file needs to be updated.
+                if (needs_updating) {
+                    saveDescFile(desc, path);
+                }
 
                 return desc;
             }
@@ -928,7 +937,7 @@ namespace PAIN {
         bool Compiler::needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const {
             //Check if asset needs to be recompiled
             auto shipped = asset_info.shipped_path;
-            if (std::filesystem::exists(shipped) && getFileLastModified(asset_info.raw_path) < getFileLastModified(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
+            if (std::filesystem::exists(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
 
             return true;
         }
