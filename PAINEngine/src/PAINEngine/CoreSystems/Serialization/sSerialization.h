@@ -91,7 +91,7 @@ namespace PAIN {
 
             void savePrefabToFile(const std::string& filepath, const std::vector<entt::entity>& entities);
 
-            std::vector<entt::entity> loadPrefabFromFile(const std::string& filepath);
+            std::vector<entt::entity> loadPrefabFromFile(const std::string& prefab_filename);
 
             const SceneDoc& doc() const { return doc_; }
 

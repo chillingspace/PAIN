@@ -189,15 +189,16 @@ namespace PAIN {
                     return;
                 }
 
-                auto& hierarchy = ecs->getEntityComponent<Hierarchy>(entity).value().get();
-                entt::entity parent = hierarchy.parent;
+                auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity);
+                entt::entity parent = entt::null;
+                if (hierarchy.has_value()) { entt::entity parent = hierarchy.value().get().parent; }
 
                 // Get all children
                 std::vector<entt::entity> children = getEntityChildren(entity);
 
                 // Move each child to this entity's parent (or root)
                 for (auto child : children) {
-                    setEntityParent(child, parent);
+                    if(parent != entt::null) { setEntityParent(child, parent); }
                 }
 
                 force_refresh = true;
@@ -318,10 +319,13 @@ namespace PAIN {
                 std::vector<entt::entity> root_entities;
                 for (const auto& [entity_id, name] : editor_entities) {
                     if (ecs->hasEntityComponent<Hierarchy>(entity_id)) {
-                        auto& hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id).value().get();
-                        if (hierarchy.parent == entt::null) {
-                            root_entities.push_back(entity_id);
+                        auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id);
+                        if (hierarchy.has_value()) {
+                            if (hierarchy.value().get().parent == entt::null) {
+                                root_entities.push_back(entity_id);
+                            }
                         }
+
                     }
                     else {
                         root_entities.push_back(entity_id);
@@ -509,14 +513,18 @@ namespace PAIN {
                     if (ImGui::MenuItem("Create Prefab")) {
                         PN_CORE_INFO("[EntityPanel] Creating prefab from entity {}", static_cast<uint32_t>(entity_id));
 
-                        // TODO: Implement prefab creation
-                        // This would serialize the entity and its children to a prefab file
-                        std::string prefab_name = PN_METADATA_SERVICE->getEntityName(entity_id);
-                        // If duplicated, add in (1) and such
+                        // Generate unique prefab name
+                        std::string prefab_name = generateUniquePrefabName(entity_name);
 
-                        //PN_SERI_SERVICE->savePrefabToFile(entity_name,entity_id);
-                                              
-                        //PN_CORE_WARN("[EntityPanel] Create Prefab not yet implemented");
+                        // Collect entity and children
+                        std::vector<entt::entity> entities_to_save;
+                        collectEntityHierarchy(entity_id, entities_to_save);
+
+                        // Save prefab (serialization service handles the rest!)
+                        PN_SERI_SERVICE->savePrefabToFile(prefab_name, entities_to_save);
+
+                        PN_CORE_INFO("[EntityPanel] Created prefab '{}' with {} entities",
+                            prefab_name, entities_to_save.size());
 
                         ImGui::CloseCurrentPopup();
                     }
@@ -532,15 +540,18 @@ namespace PAIN {
                     }
 
                     if (ecs->hasEntityComponent<Hierarchy>(entity_id)) {
-                        auto& hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id).value().get();
-                        if (hierarchy.parent != entt::null) {
-                            if (ImGui::MenuItem("Move to Root")) {
-                                PN_CORE_INFO("[EntityPanel] Moving entity {} to root", static_cast<uint32_t>(entity_id));
-                                setEntityParent(entity_id, entt::null);
-                                force_refresh = true;
-                                ImGui::CloseCurrentPopup();
+                        auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id);
+                        if (hierarchy.has_value()) {
+                            if (hierarchy.value().get().parent != entt::null) {
+                                if (ImGui::MenuItem("Move to Root")) {
+                                    PN_CORE_INFO("[EntityPanel] Moving entity {} to root", static_cast<uint32_t>(entity_id));
+                                    setEntityParent(entity_id, entt::null);
+                                    force_refresh = true;
+                                    ImGui::CloseCurrentPopup();
+                                }
                             }
                         }
+
                     }
 
                     ImGui::Separator();
@@ -590,58 +601,91 @@ namespace PAIN {
                     ecs->addEntityComponent(child, Hierarchy{});
                 }
 
-                auto& child_hierarchy = ecs->getEntityComponent<Hierarchy>(child).value().get();
+                auto child_hierarchy = ecs->getEntityComponent<Hierarchy>(child);
 
-                // Remove from old parent
-                if (child_hierarchy.parent != entt::null) {
-                    if (ecs->hasEntityComponent<Hierarchy>(child_hierarchy.parent)) {
-                        auto& old_parent_hierarchy = ecs->getEntityComponent<Hierarchy>(child_hierarchy.parent).value().get();
-                        old_parent_hierarchy.children.erase(
-                            std::remove(old_parent_hierarchy.children.begin(),
-                                old_parent_hierarchy.children.end(), child),
-                            old_parent_hierarchy.children.end()
-                        );
+                if (child_hierarchy.has_value()) {
+                    // Remove from old parent
+                    if (child_hierarchy.value().get().parent != entt::null) {
+                        if (ecs->hasEntityComponent<Hierarchy>(child_hierarchy.value().get().parent)) {
+                            auto old_parent_hierarchy = ecs->getEntityComponent<Hierarchy>(child_hierarchy.value().get().parent);
+                            if (old_parent_hierarchy.has_value()) {
+                                old_parent_hierarchy.value().get().children.erase(
+                                    std::remove(old_parent_hierarchy.value().get().children.begin(),
+                                        old_parent_hierarchy.value().get().children.end(), child),
+                                    old_parent_hierarchy.value().get().children.end()
+                                );
+                            }
+
+                        }
                     }
                 }
 
+
+
                 // Set new parent
-                child_hierarchy.parent = parent;
+                if (child_hierarchy.has_value()) {
+                    child_hierarchy.value().get().parent = parent;
+                }
 
                 // Add to new parent's children
                 if (parent != entt::null) {
                     if (!ecs->hasEntityComponent<Hierarchy>(parent)) {
                         ecs->addEntityComponent(parent, Hierarchy{});
                     }
-                    auto& parent_hierarchy = ecs->getEntityComponent<Hierarchy>(parent).value().get();
-                    parent_hierarchy.children.push_back(child);
+                    auto parent_hierarchy = ecs->getEntityComponent<Hierarchy>(parent);
+                    if(parent_hierarchy.has_value()) { parent_hierarchy.value().get().children.push_back(child); }
+
                 }
             }
 
             bool EntityPanel::isAncestor(entt::entity potential_ancestor, entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
 
-                if (!ecs->hasEntityComponent<Hierarchy>(entity)) {
-                    return false;
+                // Check if initial entity has hierarchy component
+                auto hierarchy_opt = ecs->getEntityComponent<Hierarchy>(entity);
+                if (!hierarchy_opt) {
+                    return false;  // No hierarchy component
                 }
 
-                auto& hierarchy = ecs->getEntityComponent<Hierarchy>(entity).value().get();
-                entt::entity current_parent = hierarchy.parent;
+                // Track visited entities to prevent cycles
+                std::unordered_set<entt::entity> visited;
+                visited.insert(entity);
 
-                while (current_parent != entt::null) {
+                // Get parent from the optional safely
+                entt::entity current_parent = hierarchy_opt->get().parent;
+
+                // Traverse up the hierarchy
+                constexpr size_t MAX_DEPTH = 100;
+                size_t depth = 0;
+
+                while (current_parent != entt::null && depth++ < MAX_DEPTH) {
+                    // Check for cycles
+                    if (visited.count(current_parent) > 0) {
+                        PN_CORE_ERROR("Cycle detected in hierarchy for entity {}",
+                            static_cast<uint32_t>(entity));
+                        return false;
+                    }
+                    visited.insert(current_parent);
+
+                    // Found the ancestor
                     if (current_parent == potential_ancestor) {
                         return true;
                     }
 
-                    if (!ecs->hasEntityComponent<Hierarchy>(current_parent)) {
-                        break;
+                    // Get parent's hierarchy component
+                    auto parent_hierarchy_opt = ecs->getEntityComponent<Hierarchy>(current_parent);
+                    if (!parent_hierarchy_opt) {
+                        // Parent has no hierarchy component - end of chain
+                        break;  
                     }
 
-                    auto& parent_hierarchy = ecs->getEntityComponent<Hierarchy>(current_parent).value().get();
-                    current_parent = parent_hierarchy.parent;
+                    // Move to next parent
+                    current_parent = parent_hierarchy_opt->get().parent;
                 }
 
                 return false;
             }
+
 
             void EntityPanel::removeEntityWithChildren(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
@@ -693,6 +737,39 @@ namespace PAIN {
                     cloneEntityChildren(child, cloned_child);
                 }
             }
+
+            /**********************************
+            * Prefab Helper functions
+            ******************************/
+
+            // Generate unique prefab filename (without path, just name)
+            std::string EntityPanel::generateUniquePrefabName(const std::string& base_name) {
+                auto seri_service = services->get<PAIN::Serialization::Service>();
+
+                std::string prefab_name = base_name;
+                int counter = 1;
+
+                std::string test_path = seri_service->resolvePrefabPath(prefab_name);
+
+                while (std::filesystem::exists(test_path)) {
+                    prefab_name = base_name + " (" + std::to_string(counter++) + ")";
+                    test_path = seri_service->resolvePrefabPath(prefab_name);
+                }
+
+                return prefab_name; 
+            }
+
+            // Recursively collect entity and all children
+            void EntityPanel::collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities) {
+                out_entities.push_back(entity);
+
+                // Get children safely
+                auto children = getEntityChildren(entity);
+                for (auto child : children) {
+                    collectEntityHierarchy(child, out_entities);
+                }
+            }
+
 
         } // namespace Panel
     } // namespace Editor
