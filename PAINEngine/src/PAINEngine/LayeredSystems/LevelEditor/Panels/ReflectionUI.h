@@ -8,6 +8,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/constants.hpp>
 #include "ComponentsPanel.h"
+#include "ECS/Components/cLight.h"
 
 
 // ---------- Primitive + std types ----------
@@ -35,6 +36,69 @@ inline bool DrawField(const char* label, glm::quat& q) {
     }
     return false;
 }
+
+// ----------- Unsigned ints -----------
+inline bool DrawField(const char* label, uint8_t& v) { unsigned int uv = v; bool ch = ImGui::InputScalar(label, ImGuiDataType_U8, &uv); if (ch) v = (uint8_t)uv; return ch; }
+inline bool DrawField(const char* label, uint16_t& v) { unsigned int uv = v; bool ch = ImGui::InputScalar(label, ImGuiDataType_U16, &uv); if (ch) v = (uint16_t)uv; return ch; }
+
+// Exact type with matching step & format (decimal)
+inline bool DrawField(const char* label, uint32_t& v) {
+    uint32_t step = 1;
+    return ImGui::InputScalar(label, ImGuiDataType_U32, &v, &step, nullptr, "%u",
+        ImGuiInputTextFlags_CharsDecimal);
+}
+
+inline bool DrawField(const char* label, uint64_t& v) {
+    uint64_t step = 1;
+    return ImGui::InputScalar(label, ImGuiDataType_U64, &v, &step, nullptr, "%llu",
+        ImGuiInputTextFlags_CharsDecimal);
+}
+
+// ----- Lighting Enums -----
+inline bool DrawField(const char* label, PAIN::TYPES& v) {
+    const char* names[] = { "Point", "Directional", "Spotlight" };
+    int idx = static_cast<int>(v);
+    const int count = 3; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::TYPES>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
+    const char* names[] = { "None", "Mapped", "Screen Space" };
+    int idx = static_cast<int>(v);
+    const int count = 3; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::SHADOW_TYPES>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
 
 // ---------- Fallback for unknown types ----------
 template <typename T>
@@ -67,8 +131,8 @@ namespace PAIN {
             template <typename T>
             inline void RegisterReflected(ComponentsPanel& panel, const char* title) {
                 panel.registerCompUIFunc<T>([title](ComponentsPanel&, T& comp) {
-                    ImGui::TextUnformatted(title ? title : "Component");
-                    ImGui::Separator();
+                    //ImGui::TextUnformatted(title ? title : "Component");
+                    //ImGui::Separator();
                     DrawWithReflection(comp);
                     });
             }

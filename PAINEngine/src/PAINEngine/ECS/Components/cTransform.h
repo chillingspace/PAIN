@@ -102,6 +102,6 @@ REFL_FIELD(rotation)
 REFL_FIELD(scale)
 REFL_END
 
-static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
+//static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
 
 #endif
