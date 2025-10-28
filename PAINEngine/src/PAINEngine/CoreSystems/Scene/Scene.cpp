@@ -42,11 +42,12 @@ namespace PAIN {
 			LightSources::get().create("world");
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
-			lc.position = glm::vec3(0.f, 30.f, 0.f);
-			lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
+			lc.forward = glm::normalize(glm::vec3{ -0.5, -1, -0.5 });
+			lc.position = -lc.forward * 10.f;
 			lc.L_intensity = glm::vec3(1.5f);
 			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 			lc.type = Light::TYPES::DIRECTIONAL;
+			lc.far_plane = 100.f;
 		}
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
@@ -111,7 +112,7 @@ namespace PAIN {
 
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
-		ogreMat.alwaysLit = true;
+		//ogreMat.alwaysLit = true;
 		ogreMat.color = { 1.f, 1.f, 1.f };
 
 		// diffuse color texture
@@ -155,7 +156,7 @@ namespace PAIN {
 		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
 		sdcc_mesh->material.useTex = true;
 		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
-		AddObject(sdcc_mesh_id, "sdcc", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {10.f, 10.f, 10.f});
+		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -30.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
 		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://Models/city.obj");
 		//cacheMesh(obj_path);
@@ -287,6 +288,10 @@ namespace PAIN {
 			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
 			footstepTimer = footstepInterval;
 		}
+
+		//auto olc = LightSources::get().get("world");
+		//Light& lc = olc.value();
+		//lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * 50.f;
 	}
 
 	void Scene::onEvent(Event::Event& e) {}
