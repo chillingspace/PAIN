@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#ifdef PN_PLATFORM_WINDOWS
-
 #include "pch.h"
 #include "sLoader.h"
 #include "Applications/AppSystem.h"
@@ -82,6 +80,8 @@ namespace PAIN {
 			void onAppResume() override {}
 			void onEvent(Event::Event& e) override {}
 		};
+
+#ifdef PN_PLATFORM_WINDOWS
 
 		//Temporary Disable DLL Export Warning
 		#pragma warning(disable: 4251)
@@ -273,10 +273,10 @@ namespace PAIN {
 
 		};
 
+#endif
+
 		//Re-enable DLL Export warning
 		#pragma warning(default: 4251)
 
     } // namespace Assets
 } // namespace PAIN
-
-#endif

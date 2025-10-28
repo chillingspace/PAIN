@@ -1,5 +1,6 @@
 #include "AssetCompiler.h"
 
+#ifdef PN_PLATFORM_WINDOWS
 #include "stb_image.h"
 #include "stb_image_resize2.h"
 #include "stb_image_write.h"
@@ -987,3 +988,5 @@ namespace PAIN {
 		}
 	}
 }
+
+#endif

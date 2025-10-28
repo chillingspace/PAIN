@@ -109,7 +109,9 @@ namespace PAIN {
 		services->get<Path::Path>()->logVirtualPaths();
 
 		//Create asset service
+#ifdef PN_PLATFORM_WINDOWS
 		addCoreSystem(std::make_shared<Assets::Manager>());
+#endif
 
 		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));

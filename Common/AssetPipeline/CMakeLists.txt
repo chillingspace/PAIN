@@ -93,24 +93,6 @@ if(TARGET stb AND NOT ANDROID)
     message(STATUS "AssetPipeline: STB enabled - Image loading available")
 endif()
 
-if(TARGET Cuttlefish::Cuttlefish AND WIN32)
-    target_link_libraries(PAINAssetPipeline PRIVATE Cuttlefish::Cuttlefish)
-    target_compile_definitions(PAINAssetPipeline PRIVATE 
-        HAS_CUTTLEFISH=1
-        PAIN_ENABLE_BC_COMPRESSION=1
-    )
-    message(STATUS "AssetPipeline: Cuttlefish enabled - BC compression available")
-endif()
-
-if(TARGET ASTC::Encoder AND NOT ANDROID)
-    target_link_libraries(PAINAssetPipeline PRIVATE ASTC::Encoder)
-    target_compile_definitions(PAINAssetPipeline PRIVATE 
-        HAS_ASTC_ENCODER=1
-        PAIN_ENABLE_ASTC_COMPRESSION=1
-    )
-    message(STATUS "AssetPipeline: ASTC Encoder enabled - ASTC compression available")
-endif()
-
 # ======================= Compile Definitions =========================
 
 # Platform-specific definitions (your requested PN_PLATFORM_* macros)
