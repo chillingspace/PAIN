@@ -58,6 +58,11 @@ namespace PAIN {
 
 		unsigned int internal_format, data_format;
 		switch (num_channels) {
+		case 1:
+			// for single channel textures like roughness, metallic, ao etc.
+			internal_format = GL_R8;
+			data_format = GL_RED;
+			break;
 		case 3:
 			internal_format = GL_RGB8;
 			data_format = GL_RGB;

@@ -468,8 +468,15 @@ namespace PAIN {
 
 		if (mesh->material.useTex) {
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+			glBindTexture(GL_TEXTURE_2D, mesh->material.tex);
 			geometry_shader->SetUniform("material.tex", 6);
+
+			if (GraphicsSettings::get().ao && mesh->material.useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, mesh->material.aoTex);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.f);
+			}
 		}
 
 		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);

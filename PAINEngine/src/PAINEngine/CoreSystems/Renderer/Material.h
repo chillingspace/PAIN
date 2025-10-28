@@ -11,6 +11,8 @@ namespace PAIN {
 		unsigned int tex{ 0 };      // just for redundanncy
         // sampler2D tex;
 		bool alwaysLit{ false };
+		bool useAo{ false };
+		unsigned int aoTex{ 0 };
     };
 
 

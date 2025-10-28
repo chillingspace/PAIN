@@ -97,12 +97,21 @@ namespace PAIN {
 
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
+		ogreMat.alwaysLit = true;
+		ogreMat.color = { 1.f, 1.f, 1.f };
+
+		// diffuse color texture
 		ogreMat.useTex = true;
 		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/diffuse.png");
 		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_texture");
 		ogreMat.tex = ogre_mesh->texture_id;
-		ogreMat.alwaysLit = true;
-		ogreMat.color = { 1.f, 1.f, 1.f };
+
+		// ao map
+		texture_path = services->get<Path::Path>()->resolvePath("game_assets://Textures/ao_rest.png");
+		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_ao");
+		ogreMat.aoTex = ogre_mesh->texture_id;
+		ogreMat.useAo = true;
+
 		ogre_mesh->material = ogreMat;
 
 		// Create the other static objects
