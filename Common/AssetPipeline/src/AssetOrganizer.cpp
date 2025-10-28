@@ -188,7 +188,33 @@ namespace PAIN {
             }
         }
 
-        AssetOrganizer::AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path) : assets_root{ input_path }, exec_path{ exec_path } {
+        void AssetOrganizer::ExportAssetRegistry() {
+            try {
+                nlohmann::json registry;
+                for (const auto& info : assets) {
+                    registry[info.guid.ToString()] = {
+                        {"type", assetTypeToString(info.type)},
+                        {"name", info.name},
+                        {"relative_path", info.relative_path.string()}
+                    };
+                }
+
+                //Get asset registry path
+                std::filesystem::path out_path = output_dir / asset_registry_filename;
+
+                //Dump json
+                std::ofstream file(out_path);
+                file << registry.dump(2);
+
+                //Success output
+                std::cout << "Asset registry successfully saved to: " << out_path << std::endl;
+            }
+            catch (const std::exception& e) {
+                throw std::runtime_error("Error saving asset registry.");
+            }
+        }
+
+        AssetOrganizer::AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path) : assets_root{ input_path }, output_dir{ output_path }, exec_path { exec_path } {
 
             //Set desc extensions
             desc_ext = Assets::descriptor_ext;
@@ -290,7 +316,6 @@ namespace PAIN {
                 asset.name = asset.raw_path.filename().string();
                 asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
                 asset.type = getAssetType(asset.raw_path);
-                asset.raw_last_modified = getFileLastModified(asset.raw_path);
 
                 //Check if asset is in engine or game
                 if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
@@ -304,6 +329,9 @@ namespace PAIN {
                     enforceEngineAssetLocation(asset);
                 }
 
+                //Update asset relative path
+                asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
+
                 //Compile asset
                 compiler->processAsset(asset);
 
@@ -311,6 +339,9 @@ namespace PAIN {
                 assets.push_back(asset);
             },
             [](std::filesystem::path) {});
+
+            //Craft asset registry
+            ExportAssetRegistry();
         }
 
         void AssetOrganizer::tidyUpDirectories() {

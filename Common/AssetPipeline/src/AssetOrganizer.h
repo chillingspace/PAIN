@@ -33,6 +33,7 @@ namespace PAIN {
             //Assets root path
             std::filesystem::path assets_root;
             std::filesystem::path exec_path;
+            std::filesystem::path output_dir;
 
             //Paths
             std::unordered_map<Type, std::filesystem::path> game_dir;
@@ -62,6 +63,9 @@ namespace PAIN {
             void recursiveScanAllDirectories(std::filesystem::path const& path,
                 std::function<void(std::filesystem::path const& file)> file_func,
                 std::function<void(std::filesystem::path const& file)> dir_func);
+
+            //Export asset registry
+            void ExportAssetRegistry();
         public:
             AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
             ~AssetOrganizer() = default;

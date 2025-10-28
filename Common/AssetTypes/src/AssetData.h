@@ -105,6 +105,9 @@ namespace PAIN {
         //Descriptor file extension
         static std::string descriptor_ext = ".desc";
 
+        //Asset registry path
+        static std::string asset_registry_filename = "asset_registry.json";
+
         //All extensions
         static std::unordered_map<Type, std::set<std::string>> getAllExtensions() {
 
@@ -236,7 +239,6 @@ namespace PAIN {
             }
         }
 
-
         //Asset info
         struct Info {
 
@@ -251,9 +253,7 @@ namespace PAIN {
 
             //Asset relative folder
             std::filesystem::path relative_folder;
-
-            //Build-critical timestamps
-            uint64_t raw_last_modified = 0;
+            std::filesystem::path relative_path;
         };
 
         struct Descriptor {
