@@ -15,13 +15,16 @@
 namespace PAIN {
     namespace Assets {
 
+        //Asset interface
+        class IAsset { public: virtual ~IAsset() = default; };
+
         //Texture format
         enum class TextureFormat {
             UNKNOWN, BC7, ASTC_4x4, // add more as needed
         };
 
         //Texture class
-        class Texture {
+        class Texture : public IAsset {
         public:
             int width = 0, height = 0, mips = 1;
             TextureFormat format = TextureFormat::BC7;
@@ -42,7 +45,7 @@ namespace PAIN {
         struct Material { std::string name; std::string diffuseMap; std::string normalMap; /* etc. */ };
 
         //Model class
-        struct Model {
+        struct Model : public IAsset {
             std::vector<Vertex> vertices;
             std::vector<unsigned int> indices;
             std::vector<Bone> skeleton;
