@@ -201,7 +201,7 @@ namespace PAIN {
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 
 			unsigned int attachments[4] = {
 				GL_COLOR_ATTACHMENT0,

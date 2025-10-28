@@ -162,26 +162,29 @@ void main() {
     vec3 viewNormal = mat3(u_V) * normalize(normal);
 
     vec3 color = vec3(0);
-    if (material.alwaysLit != 0.0) {
-        color = material.color;
+
+    if (material.alwaysLit == 0.0) {
+        color = material.color * u_AmbientLight;
+        for (int i=0; i < int(u_NumLights); i++) {
+            vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
+
+            if (u_Lights[i].shadowMapIdx > -0.5) {
+                // light has shadow map
+                float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);   // in range [0,1]
+                float light_intensity = 1.0 - shadow_intensity;                 // in range [0,1]
+                light_contrib *= light_intensity;
+            }
+
+            color += light_contrib;
+        }
     }
     else {
-        color = material.color * u_AmbientLight;
-    }
-    for (int i=0; i < int(u_NumLights); i++) {
-        vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
-
-        if (u_Lights[i].shadowMapIdx > -0.5) {
-            // light has shadow map
-            float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);   // in range [0,1]
-            float light_intensity = 1.0 - shadow_intensity;                 // in range [0,1]
-            light_contrib *= light_intensity;
-        }
-
-        color += light_contrib;
+        color = material.color;
     }
     FragColor = vec4(color, 1.0);
 
     // FragColor = vec4(u_NumShadowMaps, u_NumShadowMaps, u_NumShadowMaps, 1.0);
     // FragColor = vec4(1, 0, 0, 1);
+
+    // FragColor = vec4(material.alwaysLit, material.alwaysLit, material.alwaysLit, 1.0);
 }

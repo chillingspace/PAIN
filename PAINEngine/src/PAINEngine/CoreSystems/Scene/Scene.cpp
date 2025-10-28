@@ -44,7 +44,7 @@ namespace PAIN {
 			Light& lc = olc.value();
 			lc.position = glm::vec3(0.f, 30.f, 0.f);
 			lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-			lc.L_intensity = glm::vec3(0.5f);
+			lc.L_intensity = glm::vec3(1.5f);
 			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 			lc.type = Light::TYPES::DIRECTIONAL;
 		}
@@ -75,6 +75,7 @@ namespace PAIN {
 		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://Models/quad.obj");
 		cacheMesh(quad_path);
 
+		// !TODO: gotta fix mesh ref system. must be able to have both lit and unlit versions of same mesh, same goes for colors/textures
 		auto cube_mesh = getMeshId("");
 		auto ogre_mesh = getMeshId("ogre.obj");
 		auto quad_mesh_id = getMeshId("quad.obj");
@@ -99,6 +100,16 @@ namespace PAIN {
 		AddObject(ogre_mesh, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+
+		auto uqmid = getMeshId("quad.obj");
+		auto unlit_quad_mesh = getMesh(uqmid);
+		Material unlitMat;
+		unlitMat.useTex = true;
+		unlitMat.tex = unlit_quad_mesh->texture_id;
+		unlitMat.color = { 1.f, 1.f, 1.f };
+		unlitMat.alwaysLit = false;
+		unlit_quad_mesh->material = unlitMat;
+		AddObject(uqmid, "unlit_screen", { -2.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		if (audioManager)
 		{
