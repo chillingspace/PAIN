@@ -110,7 +110,7 @@ namespace PAIN {
 
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before compiling text shader: {}", error);
+			PN_CORE_ERROR("OpenGL error before compiling text shader 1: {}", error);
 		}
 
 
@@ -139,6 +139,11 @@ namespace PAIN {
 			buffer << ifs.rdbuf();
 			const std::string frag = buffer.str();
 #endif
+
+			error = glGetError();
+			if (error != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL error before compiling text shader 2: {}", error);
+			}
 
 
 			PN_CORE_INFO("Compiling text shader from {} and {}", path_vert, path_frag);

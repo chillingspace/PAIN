@@ -27,7 +27,21 @@ namespace PAIN {
 	void Skybox::loadHdr(const std::string& path) {
 		stbi_set_flip_vertically_on_load(true);
 		int width, height, nrComponents;
+#ifdef PN_PLATFORM_ANDROID
+		std::string fileData = ReadFileAndroid(path);
+		if (fileData.empty()) {
+			PN_CORE_ERROR("Failed to load HDR asset: {}", path);
+			return;
+		}
+
+		float* data = stbi_loadf_from_memory(
+			reinterpret_cast<const unsigned char*>(fileData.data()),
+			fileData.size(),
+			&width, &height, &nrComponents, 0
+		);
+#else
 		float* data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
+#endif
 		if (data) {
 			PN_CORE_INFO("Loaded HDR image with size: {}x{} and {} components", width, height, nrComponents);
 
