@@ -4,6 +4,7 @@
 #ifdef PN_PLATFORM_WINDOWS
 
 #include "EditorGLFW.h"
+#include "ImGuizmo.h" 
 
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -123,6 +124,7 @@ namespace PAIN {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+            ImGuizmo::BeginFrame();
 		}
 
         void EditorGLFW::updateShortCuts(std::shared_ptr<CommandManager> command) {

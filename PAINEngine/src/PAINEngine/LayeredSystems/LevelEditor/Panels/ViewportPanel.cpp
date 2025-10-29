@@ -280,17 +280,136 @@ namespace PAIN {
 									if (ImGui::IsKeyPressed(ImGuiKey_Y))
 										m_GizmoOperation = ImGuizmo::SCALE;
 
+									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
+
+									// Setup snapping
+									bool useSnap = ImGui::GetIO().KeyCtrl; // Hold Ctrl to enable snapping
+									float snapValue = 0.5f;
+
+									// Different snap values for different operations
+									if (m_GizmoOperation == ImGuizmo::ROTATE) {
+										snapValue = 45.0f; // Snap to 45 degrees for rotation
+									}
+									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+										snapValue = 0.5f; // Snap to 0.5 units for translation
+									}
+									else if (m_GizmoOperation == ImGuizmo::SCALE) {
+										snapValue = 0.1f; // Snap to 0.1 for scale
+									}
+
+									float snapValues[3] = { snapValue, snapValue, snapValue };
+
 									// Draw the gizmo
 									ImGuizmo::Manipulate(
 										glm::value_ptr(viewMatrix),
 										glm::value_ptr(projectionMatrix),
 										m_GizmoOperation,
 										m_GizmoMode,
-										glm::value_ptr(modelMatrix)
+										glm::value_ptr(modelMatrix),
+										nullptr,
+										useSnap ? snapValues : nullptr // Pass snap values if Ctrl is held
 									);
 
-									// Update transform if manipulated
-									if (ImGuizmo::IsUsing()) {
+									// FIXED: Cache values and only update the component being manipulated
+									static bool wasUsing = false;
+									static glm::vec3 cachedPosition = glm::vec3(0.0f);
+									static glm::vec3 cachedRotation = glm::vec3(0.0f);
+									static glm::vec3 cachedScale = glm::vec3(1.0f);
+									static glm::vec3 lastFrameRotation = glm::vec3(0.0f); // Track last frame's rotation
+									static entt::entity lastSelectedEntity = entt::null;
+									static glm::mat4 originalMatrix = glm::mat4(1.0f);
+
+									bool isCurrentlyUsing = ImGuizmo::IsUsing();
+
+									// Reset cache if entity changed
+									if (selectedEntity != lastSelectedEntity) {
+										wasUsing = false;
+										lastSelectedEntity = selectedEntity;
+									}
+
+									// Just started using - cache the original values AND matrix
+									if (isCurrentlyUsing && !wasUsing) {
+										cachedPosition.x = transform.position.x;
+										cachedPosition.y = transform.position.y;
+										cachedPosition.z = transform.position.z;
+
+										cachedRotation.x = transform.rotation.x;
+										cachedRotation.y = transform.rotation.y;
+										cachedRotation.z = transform.rotation.z;
+
+										cachedScale.x = transform.scale.x;
+										cachedScale.y = transform.scale.y;
+										cachedScale.z = transform.scale.z;
+
+										lastFrameRotation = cachedRotation; // Initialize last frame rotation
+
+										originalMatrix = modelMatrix;
+									}
+
+									// Currently manipulating
+									if (isCurrentlyUsing) {
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
+											transform.rotation = cachedRotation;
+											transform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											glm::vec3 newRotation = glm::vec3(rotation[0], rotation[1], rotation[2]);
+
+											// Compare against LAST FRAME's rotation, not original cached
+											glm::vec3 deltaRotation = newRotation - lastFrameRotation;
+
+											// Check for reasonable change (less than 90 degrees per frame)
+											float maxDeltaPerFrame = 90.0f;
+											bool isReasonable = (abs(deltaRotation.x) < maxDeltaPerFrame &&
+												abs(deltaRotation.y) < maxDeltaPerFrame &&
+												abs(deltaRotation.z) < maxDeltaPerFrame);
+
+											if (isReasonable) {
+												transform.rotation = newRotation;
+												lastFrameRotation = newRotation; // Update for next frame comparison
+											}
+											else {
+												// Reject the change - keep last frame's rotation
+												transform.rotation = lastFrameRotation;
+											}
+
+											transform.position = cachedPosition;
+											transform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											transform.position = cachedPosition;
+											transform.rotation = cachedRotation;
+											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+										}
+									}
+
+									// Just released - final update
+									if (!isCurrentlyUsing && wasUsing) {
 										float translation[3], rotation[3], scale[3];
 										ImGuizmo::DecomposeMatrixToComponents(
 											glm::value_ptr(modelMatrix),
@@ -299,10 +418,29 @@ namespace PAIN {
 											scale
 										);
 
-										transform.position = glm::vec3(translation[0], translation[1], translation[2]);
-										transform.rotation = glm::vec3(rotation[0], rotation[1], rotation[2]);
-										transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											glm::vec3 finalRotation = glm::vec3(rotation[0], rotation[1], rotation[2]);
+
+											// Normalize angles to -180 to 180 range
+											finalRotation.x = fmod(finalRotation.x + 180.0f, 360.0f) - 180.0f;
+											finalRotation.y = fmod(finalRotation.y + 180.0f, 360.0f) - 180.0f;
+											finalRotation.z = fmod(finalRotation.z + 180.0f, 360.0f) - 180.0f;
+
+											transform.rotation = finalRotation;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+										}
 									}
+
+									wasUsing = isCurrentlyUsing;
+
+
+
+
 								}
 							}
 						}
