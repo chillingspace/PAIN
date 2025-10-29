@@ -29,4 +29,4 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Build Android app
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: .\gradlew.bat assembleDebug
