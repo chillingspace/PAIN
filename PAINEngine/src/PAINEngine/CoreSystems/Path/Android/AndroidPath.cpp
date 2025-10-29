@@ -32,6 +32,22 @@ namespace PAIN {
 				normalized.pop_back();
 			}
 
+			// Remove leading slashes
+			while (normalized.length() > 1 && normalized.front() == '/') {
+				normalized.erase(normalized.begin());
+			}
+
+			return normalized;
+		}
+
+		std::string AndroidPath::normalizeFileIOPath(const std::string& path) const {
+			std::string normalized = path;
+			std::replace(normalized.begin(), normalized.end(), '\\', '/');
+			size_t pos = 0;
+			while ((pos = normalized.find("//", pos)) != std::string::npos) {
+				normalized.replace(pos, 2, "/");
+			}
+			// Do not strip leading or trailing slashes for file I/O
 			return normalized;
 		}
 
@@ -74,11 +90,11 @@ namespace PAIN {
 
 			// Use the direct path members - NO JNI REQUIRED!
 			if (activity->internalDataPath) {
-				internal_path = normalizePath(activity->internalDataPath);
+				internal_path = normalizeFileIOPath(activity->internalDataPath);
 			}
 
 			if (activity->externalDataPath) {
-				external_path = normalizePath(activity->externalDataPath);
+				external_path = normalizeFileIOPath(activity->externalDataPath);
 			}
 
 			// Generate package name from internal path
@@ -93,13 +109,11 @@ namespace PAIN {
 
 			// Convert to paths
 			cache_path = internal_path + "/cache";
-			assets_path = "file:///android_asset";
 
 			// Log all paths
 			PN_CORE_INFO("Internal Path: {}", internal_path);
 			PN_CORE_INFO("External Path: {}", external_path);
 			PN_CORE_INFO("Cache Path: {}", cache_path);
-			PN_CORE_INFO("Assets Path: {}", assets_path);
 
 			// Initialize virtual paths
 			init();
@@ -116,11 +130,9 @@ namespace PAIN {
 			}
 
 			//Special case: manually register asset path
-			//virtual_paths["assets"] = assets_path;
-			//virtual_paths["game_assets"] = assets_path + "/" + relative_game_folder;
-			//virtual_paths["engine_assets"] = assets_path + "/" + relative_engine_folder;
 			virtual_paths["game_assets"] = relative_game_folder;
 			virtual_paths["engine_assets"] = relative_engine_folder;
+			virtual_paths["assets"] = "";
 
 			// Register default virtual paths
 			registerVirtualPath("internal", internal_path, true);
@@ -154,7 +166,7 @@ namespace PAIN {
 			}
 
 			// Register path...
-			virtual_paths[alias] = normalizePath(path);
+			virtual_paths[alias] = normalizeFileIOPath(path);
 			PN_CORE_INFO("Registered Virtual Path: {} -> {}", alias, path);
 		}
 
@@ -173,7 +185,7 @@ namespace PAIN {
 			}
 
 			// Update path
-			it->second = normalizePath(path);
+			it->second = normalizeFileIOPath(path);
 			PN_CORE_INFO("Updated: {} -> {}", alias, path);
 		}
 
@@ -190,13 +202,49 @@ namespace PAIN {
 				return it->second;
 			}
 
-			std::string fullPath = it->second + "/" + relativePath;
+            std::string fullPath;
 
-			if (isAssetPath(virtualPath)) {
-				return fullPath;
+			if (it->second != "") {
+				fullPath = it->second + "/" + relativePath;
 			}
 			else {
+				fullPath = relativePath;
+			}
+
+			if (isAssetPath(virtualPath)) {
 				return normalizePath(fullPath);
+			}
+			else {
+				return normalizeFileIOPath(fullPath);
+			}
+		}
+
+		std::string AndroidPath::resolvePath(const std::string& alias, std::string const& relative) const {
+            auto virtualPath = aliasCombineRelative(alias, relative);
+
+			auto it = virtual_paths.find(alias);
+			if (it == virtual_paths.end()) {
+				throw std::runtime_error("Unknown virtual path alias: " + alias);
+			}
+
+			if (relative.empty()) {
+				return it->second;
+			}
+
+            std::string fullPath;
+
+			if (it->second != "") {
+				fullPath = it->second + "/" + relative;
+			}
+			else {
+				fullPath = relative;
+			}
+
+			if (isAssetPath(virtualPath)) {
+				return normalizePath(fullPath);
+			}
+			else {
+				return normalizeFileIOPath(fullPath);
 			}
 		}
 
@@ -320,7 +368,28 @@ namespace PAIN {
 		}
 
 		bool AndroidPath::isAssetPath(const std::string& virtualPath) const {
-			return parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
+			return parseVirtualPath(virtualPath).first == "assets" || parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
+		}
+
+		std::unique_ptr<IFileStream> AndroidPath::createFileStream(const std::string& virtualPath, FileMode mode) {
+
+			//Resolve path and create stream
+			auto path = resolvePath(virtualPath);
+
+			//Check if virtual path is asset
+			if (isAssetPath(virtualPath) && mode == FileMode::Read) {
+				AAssetManager* asset_mgr = m_app->activity->assetManager;
+				return std::make_unique<AndroidAssetStream>(asset_mgr, path, FileMode::Read);
+			}
+			else {
+
+				//Ensure path exists
+				if (!std::filesystem::exists(path)) {
+					throw std::runtime_error("File does not exist! Unable to create file stream");
+				}
+
+				return std::make_unique<AndroidAssetStream>(nullptr, path, mode);
+			}
 		}
 	}
 }

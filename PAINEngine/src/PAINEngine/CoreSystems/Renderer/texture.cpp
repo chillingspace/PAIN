@@ -1,7 +1,7 @@
 /*****************************************************************//**
  * \file   texture.cpp
- * \brief  
- * 
+ * \brief
+ *
  * \author Lenovo
  * \date   October 2025
  *********************************************************************/
@@ -10,8 +10,15 @@
 #include "pch.h"
 #include "texture.h"
 
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include "stb_image.h"
+
+#ifdef PN_PLATFORM_ANDROID
+#include "Utility/AndroidFs.h"
+#endif
+
 
 
 namespace PAIN {
@@ -29,13 +36,40 @@ namespace PAIN {
 
 
 	unsigned char* TextureManager::_getTextureData(const char* file_path, int& width, int& height, int& num_channels) {
+#ifdef PN_PLATFORM_WINDOWS
 		unsigned char* data = stbi_load(file_path, &width, &height, &num_channels, 0);
 		if (data) {
 			PN_CORE_INFO("Loaded texture: {} ({}x, {}y, {} channels)\n", file_path, width, height, num_channels);
-		} else {
+		}
+		else {
 			PN_CORE_ERROR("Failed to load texture: {}\n", file_path);
 		}
 		return data;
+#else
+		std::string fileData = ReadFileAndroid(file_path);
+
+		if (fileData.empty()) {
+			PN_CORE_ERROR("Failed to read file: {}", file_path);
+			return nullptr;
+		}
+
+		// Load from memory buffer
+		unsigned char* data = stbi_load_from_memory(
+			reinterpret_cast<const unsigned char*>(fileData.data()),
+			fileData.size(),
+			&width,
+			&height,
+			&num_channels,
+			0
+		);
+
+		if (data) {
+			PN_CORE_INFO("Loaded texture: {} ({}x{}, {} channels)", file_path, width, height, num_channels);
+			return data;
+		}
+		PN_CORE_ERROR("Failed to decode texture: {} - Reason: {}", file_path, stbi_failure_reason());
+		return nullptr;
+#endif
 	}
 
 	unsigned int TextureManager::load(const char* file_path, const std::string& ref) {
@@ -54,16 +88,35 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		
+
 
 		unsigned int internal_format, data_format;
 		switch (num_channels) {
+		case 1:
+			// for single channel textures like roughness, metallic, ao etc.
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_LUMINANCE;
+			data_format = GL_LUMINANCE;
+#else
+			internal_format = GL_R8;
+			data_format = GL_RED;
+#endif
+			break;
 		case 3:
+			// Use RGB instead of RGB8 for better Android compatibility
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_RGB;
+#else
 			internal_format = GL_RGB8;
+#endif
 			data_format = GL_RGB;
 			break;
 		case 4:
+#ifdef PN_PLATFORM_ANDROID
+			internal_format = GL_RGBA;
+#else
 			internal_format = GL_RGBA8;
+#endif
 			data_format = GL_RGBA;
 			break;
 		default:
@@ -72,10 +125,20 @@ namespace PAIN {
 			return 0;
 		}
 
+		// Set pixel unpack alignment based on channel count
+		if (num_channels == 3 || num_channels == 1) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		}
+		else {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+
 		// store texture in vram
 		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
-
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Reset to default alignment
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 		stbi_image_free(data);
 		glBindTexture(GL_TEXTURE_2D, 0);

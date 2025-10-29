@@ -4,8 +4,24 @@ namespace PAIN {
 	class Shader {
 
 	public:
+		Shader();
 		Shader(const std::string& vertex_src, const std::string& fragment_src);
 		~Shader();
+		Shader(const Shader&) = delete;
+		Shader& operator=(const Shader&) = delete;
+
+		Shader(Shader&& other) noexcept : m_RendererID(other.m_RendererID) {
+			other.m_RendererID = 0;
+		}
+
+		Shader& operator=(Shader&& other) noexcept {
+			if (this != &other) {
+				glDeleteProgram(m_RendererID);
+				m_RendererID = other.m_RendererID;
+				other.m_RendererID = 0;
+			}
+			return *this;
+		}
 
 		void Bind() const;
 		void UnBind() const;

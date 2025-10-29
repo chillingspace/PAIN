@@ -43,6 +43,8 @@ target_link_libraries(PAINEngine
         Jolt
 	    lua
 	    sol2
+        assimp::assimp
+        freetype
 )
 
 target_link_libraries(PAINEngine
@@ -53,6 +55,7 @@ target_link_libraries(PAINEngine
 	    reflcpp
         gli_headers
         entt_header_only
+imguizmo
 )
 
 # ImGui backends compiled into the engine
@@ -83,6 +86,7 @@ endif()
 #Asset Pipeline
 target_link_libraries(PAINEngine
     PUBLIC
+        PAINAssetPipeline
         PAINAssetTypes        # Basic asset types for runtime
     PRIVATE
         # Hot-reload support only on desktop platforms

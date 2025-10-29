@@ -11,6 +11,7 @@
 *.ncb
 *.sdf
 *.opendb
+.vscode/
 
 # ========================
 # Android Studio / IntelliJ
@@ -53,13 +54,13 @@ x64/
 Win32/
 /build/
 out*/
+android/app/src/main/assets*/
 
 # ========================
 # Compiled object files / libraries / executables
 # ========================
 *.obj
 *.o
-*.exe
 *.exp
 *.pdb
 *.idb
@@ -69,11 +70,6 @@ out*/
 *.iobj
 *.ipdb
 *.iopt
-
-# ========================
-# Keep assets, ignore desc files
-# ========================
-Assets/**/*.desc
 
 # ========================
 # Logs / Cache / Temp
@@ -88,3 +84,7 @@ Assets/**/*.desc
 *.tmp
 *.bak
 *.swp
+
+
+# do not ignore assets
+!assets/**

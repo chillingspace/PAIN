@@ -4,6 +4,7 @@
 
 	extern PAIN::Application* PAIN::CreateApplication();
 
+
 	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 		//// Enable run-time memory check for debug builds.

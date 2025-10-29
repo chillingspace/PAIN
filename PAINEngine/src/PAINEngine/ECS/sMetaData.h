@@ -102,9 +102,8 @@ namespace PAIN {
             std::set<std::string> getRootGroups() const;
 
             // === Serialization ===
-            nlohmann::json serializeEntity(entt::entity entity) const;
-            nlohmann::json serialize() const;
-            void deserialize(nlohmann::json const& data);
+            nlohmann::json serializeServiceState() const;
+            void deserializeServiceState(nlohmann::json const& data);
             void reset();
         };
 

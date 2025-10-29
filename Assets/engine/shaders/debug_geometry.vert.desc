@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "debug_geometry.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 16125654835400086242
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "9b225db9-ed0b-8943-98c3-5a1e3379e70a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\debug_geometry.vert"
+  }
+}

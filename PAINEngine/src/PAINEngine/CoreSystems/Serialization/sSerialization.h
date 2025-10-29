@@ -46,6 +46,11 @@ namespace PAIN {
             bool dirty = false;
         };
 
+        struct EntityPrefab {
+            std::string name;
+            std::vector<nlohmann::json> entities;
+        };  
+            
         // ----------------------------
         // Service (inherits AppSystem)
         // ----------------------------
@@ -78,12 +83,22 @@ namespace PAIN {
             bool loadSceneFromFile(const std::string& file_path);
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
-            static std::string MakeScenePathFromBase(std::string_view base); 
+            std::string MakeScenePathFromBase(std::string_view base); 
+                
+            /***********************************
+            * Prefab Serializations
+            ************************************/
+
+            void savePrefabToFile(const std::string& filepath, const std::vector<entt::entity>& entities);
+
+            std::vector<entt::entity> loadPrefabFromFile(const std::string& prefab_filename);
 
             const SceneDoc& doc() const { return doc_; }
 
+            std::string resolvePrefabPath(std::string const& prefab);
+
             // Mutators
-            void setGrid(int g);
+            void setGrid(int g);    
             void setActiveCam(std::string id);
             void setTags(std::vector<std::string> t);
 

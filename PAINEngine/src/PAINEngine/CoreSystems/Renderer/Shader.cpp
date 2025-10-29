@@ -2,6 +2,9 @@
 #include "Shader.h"
 
 namespace PAIN {
+	Shader::Shader() : m_RendererID(0)
+	{
+	}
 
 	Shader::Shader(const std::string& vertex_src, const std::string& fragment_src)
 	{
@@ -17,6 +20,7 @@ namespace PAIN {
 
 	Shader::~Shader()
 	{
+		PN_CORE_INFO("Shader destructor called for program ID: {}", m_RendererID);
 		glDeleteProgram(m_RendererID);
 	}
 	void Shader::Bind() const
@@ -84,8 +88,8 @@ namespace PAIN {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 #ifdef PN_PLATFORM_ANDROID
-			PN_CORE_ERROR("Shader compile error {0}: {1}",
-				type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+			PN_CORE_ERROR("Shader compile error {0}: {1}\nSource: {2}",
+				type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog, source);
 #else
 			PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
 #endif
@@ -138,6 +142,19 @@ namespace PAIN {
 		glAttachShader(program, frag_shader);
 		glLinkProgram(program);
 
+		GLint numUniforms = 0;
+		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
+		PN_CORE_INFO("Linked program {} has {} active uniforms", program, numUniforms);
+
+		for (int i = 0; i < numUniforms; i++) {
+			char name[256] = { 0 };
+			GLsizei length = 0;
+			GLint size = 0;
+			GLenum type = 0;
+			glGetActiveUniform(program, i, 256, &length, &size, &type, name);
+			PN_CORE_INFO("  Uniform {}: '{}'", i, name);
+		}
+
 		if (!CheckProgram(program)) {
 #ifdef PN_PLATFORM_ANDROID
 			PN_CORE_ERROR("Program link FAILED");
@@ -145,6 +162,9 @@ namespace PAIN {
 			PN_CORE_ERROR("Program link FAILED");
 #endif
 			assert("Program link failed");
+		}
+		else {
+			PN_CORE_INFO("Program link succeeded");
 		}
 
 		// (Optional but recommended)

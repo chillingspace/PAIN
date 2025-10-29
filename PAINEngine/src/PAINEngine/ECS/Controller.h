@@ -30,6 +30,11 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
+			//boom
+			template<typename ...Components>
+			void deserializeComponentsImpl(entt::entity entity, const nlohmann::json& comps, std::tuple<Components...>);
+
+
 		public:
 			explicit Controller(std::shared_ptr<Services> svc) {
 				services = svc;
@@ -54,8 +59,6 @@ namespace PAIN {
 
 			// Direct registry access for advanced use cases
 			entt::registry& getRegistry() { return entt_registry; }
-
-
 			const entt::registry& getRegistry() const { return entt_registry; }
 
 			/*****************************************************************//**
@@ -101,14 +104,6 @@ namespace PAIN {
 				component_getters[name] = [this](entt::entity e) -> void* {
 					return static_cast<void*>(entt_registry.try_get<T>(e));
 					};
-
-				//// Copier for cloning
-				//component_copiers[name] = [this](entt::entity src, entt::entity dst) {
-				//	if (entt_registry.all_of<T>(src)) {
-				//		const T& src_comp = entt_registry.get<T>(src);
-				//		entt_registry.emplace<T>(dst, src_comp);
-				//	}
-				//	};
 			}
 
 			// Check if component type is registered
@@ -124,43 +119,16 @@ namespace PAIN {
 				}
 			}
 
-			// Add component to entity (move semantics for efficiency)
-			template<typename T>
-			void addEntityComponent(entt::entity entity, T&& component) {
-
-				// Safety checks to check for valid entity before adding comp to the entity
-				if (!checkEntity(entity)) {
-					PN_CORE_ERROR("Cannot add component to invalid entity: {}",
-						static_cast<uint32_t>(entity));
-					return;
-				}
-
-				entt_registry.emplace<T>(entity, std::forward<T>(component));
-			}
-
-
-			template<typename T>
-			void removeEntityComponent(entt::entity entity) {
-				entt_registry.remove<T>(entity);
-			}
-
-			template<typename T>
-			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity) {
-				if (auto* comp = entt_registry.try_get<T>(entity)) {
-					return *comp;
-				}
-				return std::nullopt;
-			}	
-
-			template<typename T>
-			bool checkEntityComponent(entt::entity entity) {
-				return entt_registry.all_of<T>(entity);
-			}		
-
-			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
-
 			// Get all component names registered for an entity
 			std::vector<std::string> getEntityComponentNames(entt::entity entity) const;
+
+			// Get all components as JSON (for serialization)
+			nlohmann::json getAllComponentsAsJson(entt::entity entity) const;
+
+
+			// Deserialize all components from JSON
+			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps);
+
 
 			// Check if entity has a component by name (uses registered factories)
 			bool hasComponentByName(entt::entity entity, const std::string& name) const;
@@ -170,6 +138,70 @@ namespace PAIN {
 
 			// Get component pointer by name (type-erased for editor)
 			void* getComponentPtrByName(entt::entity entity, const std::string& name);
+
+			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
+
+			/*****************************************************************//**
+			* Template Component Methods (Type-Safe)
+			*********************************************************************/
+
+			// Check if entity has a specific component type
+			template<typename T>
+			bool hasEntityComponent(entt::entity entity) const {
+				return entt_registry.all_of<T>(entity);
+			}
+
+			// Get component (non-const version)
+			template<typename T>
+			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity) {
+				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+					return std::nullopt;
+				}
+				return std::ref(entt_registry.get<T>(entity));
+			}
+
+			// Get All Entity's Component 
+			template<typename T>
+			std::optional<std::reference_wrapper<T>> getEntityAllComponent(entt::entity entity) {
+
+			}
+
+			// Get component (const version)
+			template<typename T>
+			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity) const {
+				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+					return std::nullopt;
+				}
+				return std::ref(entt_registry.get<T>(entity));
+			}
+
+			// Add component to entity (move semantics for efficiency)
+			template<typename T>
+			void addEntityComponent(entt::entity entity, T&& component) {
+				// Safety checks to check for valid entity before adding comp to the entity
+				if (!checkEntity(entity)) {
+					PN_CORE_ERROR("Cannot add component to invalid entity: {}",
+						static_cast<uint32_t>(entity));
+					return;
+				}
+
+				entt_registry.emplace_or_replace<T>(entity, std::forward<T>(component));
+			}
+
+			// Remove component from entity
+			template<typename T>
+			void removeEntityComponent(entt::entity entity) {
+				if (entt_registry.all_of<T>(entity)) {
+					entt_registry.remove<T>(entity);
+				}
+			}
+
+			// Alternative name for consistency (checks component exists)
+			template<typename T>
+			bool checkEntityComponent(entt::entity entity) const {
+				return entt_registry.all_of<T>(entity);
+			}
+
 
 			/*****************************************************************//**
 			* System Methods
@@ -187,7 +219,7 @@ namespace PAIN {
 					if (auto casted = std::dynamic_pointer_cast<T>(sys)) {
 						return casted;
 					}
-				}	
+				}
 				return nullptr;
 			}
 
@@ -195,10 +227,9 @@ namespace PAIN {
 			const std::vector<std::shared_ptr<System::ISystem>>& getAllSystems() const {
 				return systems;
 			}
+};
 
-		};
-
-	}
+		}
 }
 
 #endif

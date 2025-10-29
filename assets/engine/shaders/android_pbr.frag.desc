@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_pbr.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15598591607772346808
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "64501ccf-367f-304f-85fb-c1daa43b448f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_pbr.frag"
+  }
+}

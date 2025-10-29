@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "city.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 333222235216210890
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "29fe999b-d257-bf41-879d-6d7578d43734",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\city.png"
+  }
+}

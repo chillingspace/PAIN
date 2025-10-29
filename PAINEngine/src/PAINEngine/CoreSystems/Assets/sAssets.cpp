@@ -1,6 +1,4 @@
 
-#ifdef PN_PLATFORM_WINDOWS
-
 #include "pch.h"
 #include "Applications/Application.h"
 #include "sAssets.h"
@@ -12,10 +10,88 @@
 namespace PAIN {
 	namespace Assets {
 
+		void Manager::logAssetRegistry() const {
+
+			for (auto const& asset : asset_registry) {
+				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second.relative_path.string());
+			}
+		}
+
+		void Manager::onAttach() {
+
+			//Create unique asset loader
+			asset_loader = std::make_unique<Loader>(services);
+
+			//Register texture loader
+			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
+
+				return asset_loader->ImportTexture(virtual_path);
+				});
+
+			//Register Model loader
+			asset_loader->RegisterLoader(Type::Model, [this](std::string const& virtual_path) {
+
+				return asset_loader->ImportModel(virtual_path);
+				});
+
+			//Import asset registry
+			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
+
+			//Dump asset registry
+			logAssetRegistry();
+		}
+
+		void Manager::onDetach() {
+			asset_loader = nullptr;
+		}
+
+		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				return cache_it->second;
+			}
+
+			//Resolve asset path
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second.relative_path.string());
+
+			//Load assset through registered loaded
+			auto asset = asset_loader->GetLoader(registry_it->second.type)(virtual_path);
+
+			//Insert loaded asset into asset cache
+			asset_cache.emplace(id, asset);
+
+			return asset;
+		}
+
+		void Manager::uncacheAsset(GUID const& id) {
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				cache_it = asset_cache.erase(cache_it);
+			}
+		}
+
+		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
+			//Uncache asset
+			uncacheAsset(id);
+
+			//Cache asset
+			return cacheAsset(id);
+		}
+
 		// ----------------------------
 		// Asset Service 
 		// ----------------------------
 
+#ifdef PN_PLATFORM_WINDOWS
 		void Service::onAttach() {
 			/*font_loader = std::make_unique<Assets::FontLoader>();
 			render_loader = std::make_unique<Assets::RenderLoader>();
@@ -775,7 +851,7 @@ namespace PAIN {
 				break;
 			}
 		}
-	}
-}
 
 #endif
+	}
+}

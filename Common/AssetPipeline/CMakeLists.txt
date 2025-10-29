@@ -46,7 +46,7 @@ add_library(PAINAssetPipeline STATIC ${PIPELINE_SRC})
 # Core dependencies - PAINAssetTypes MUST be linked first
 target_link_libraries(PAINAssetPipeline
     PUBLIC 
-        PAINAssetTypes        # Basic asset types
+        PAINAssetTypes assimp::assimp        # Basic asset types
 )
 
 # Add vendor dependencies
@@ -56,6 +56,10 @@ endif()
 
 if(TARGET spdlog_header_only)
     target_link_libraries(PAINAssetPipeline PRIVATE spdlog_header_only)
+endif()
+
+if(TARGET glm)
+    target_link_libraries(PAINAssetPipeline PRIVATE glm)
 endif()
 
 
@@ -87,24 +91,6 @@ if(TARGET stb AND NOT ANDROID)
         PAIN_ENABLE_IMAGE_LOADING=1
     )
     message(STATUS "AssetPipeline: STB enabled - Image loading available")
-endif()
-
-if(TARGET Cuttlefish::Cuttlefish AND WIN32)
-    target_link_libraries(PAINAssetPipeline PRIVATE Cuttlefish::Cuttlefish)
-    target_compile_definitions(PAINAssetPipeline PRIVATE 
-        HAS_CUTTLEFISH=1
-        PAIN_ENABLE_BC_COMPRESSION=1
-    )
-    message(STATUS "AssetPipeline: Cuttlefish enabled - BC compression available")
-endif()
-
-if(TARGET ASTC::Encoder AND NOT ANDROID)
-    target_link_libraries(PAINAssetPipeline PRIVATE ASTC::Encoder)
-    target_compile_definitions(PAINAssetPipeline PRIVATE 
-        HAS_ASTC_ENCODER=1
-        PAIN_ENABLE_ASTC_COMPRESSION=1
-    )
-    message(STATUS "AssetPipeline: ASTC Encoder enabled - ASTC compression available")
 endif()
 
 # ======================= Compile Definitions =========================

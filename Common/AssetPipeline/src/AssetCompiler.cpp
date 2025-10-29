@@ -1,8 +1,13 @@
 #include "AssetCompiler.h"
 
+#ifdef PN_PLATFORM_WINDOWS
 #include "stb_image.h"
 #include "stb_image_resize2.h"
 #include "stb_image_write.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 namespace PAIN {
@@ -56,39 +61,81 @@ namespace PAIN {
                     return true;
                 }
                 else {
-                    std::cout << copy << " Reposition Failed." << std::endl;
+                    std::cout << copy << " Copy Failed." << std::endl;
                     return false;
                 }
             }
             catch (const std::filesystem::filesystem_error& e) {
-                std::cout << copy << " Reposition Failed." << e.what() << std::endl;
+                std::cout << copy << " Copy Failed." << e.what() << std::endl;
                 return false;
             }
 		}
 
-        nlohmann::json Compiler::generateDefaultCompileSettings(Type const& type) const {
+        nlohmann::json Compiler::generateDefaultCompileSettings(Type const& type, Info const& asset) const {
             nlohmann::json settings;
 
             switch (type) {
-            case Type::Texture:
+            case Type::Texture: {
                 settings["window_compression"] = "BC7";
                 settings["android_compression"] = "ASTC_4x4";
                 settings["generate_mipmaps"] = true;
                 settings["max_size"] = 1024;
                 settings["srgb"] = true;
                 break;
+            }
+            case Type::Audio: {
 
-            case Type::Audio:
-                //settings["compression"] = "OGG";
-                //settings["quality"] = 0.8;
-                //settings["loop"] = false;
-                break;
+                settings["compression"] = "OGG";
+                settings["extension"] = ".ogg";
+                settings["quality"] = 0.8;
 
-            case Type::Model:
-                //settings["generate_lods"] = true;
-                //settings["optimize_vertices"] = true;
-                //settings["weld_threshold"] = 0.001;
+                bool isMusic = false;
+
+                //For determining if its music
+                if (std::filesystem::exists(asset.raw_path)) {
+                    uintmax_t fileSize = std::filesystem::file_size(asset.raw_path);
+                    constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024; // 1MB
+                    isMusic = fileSize > MUSIC_FILESIZE_THRESHOLD;
+                }
+               isMusic = (isMusic || asset.shipped_path.string().find("music") != std::string::npos ||
+                    asset.shipped_path.string().find("bgm") != std::string::npos);
+
+                if (isMusic) {
+                    settings["loop"] = true;
+                }
+                else {
+                    settings["loop"] = false;
+                }
                 break;
+            }
+            case Type::Model: {
+                settings["extension"] = ".mesh";
+                settings["optimize_vertices"] = true;
+                settings["weld_threshold"] = 0.001f;
+                settings["generate_normals"] = false;  // Only if missing
+                settings["generate_tangents"] = true;  // For normal mapping
+                settings["triangulate"] = true;
+                settings["join_identical_vertices"] = true;
+                settings["remove_redundant_materials"] = true;
+                settings["optimize_meshes"] = true;
+                settings["improve_cache_locality"] = true;
+
+                // Compression/quantization
+                settings["quantize_positions"] = false;  // Enable for mobile
+                settings["quantize_normals"] = false;
+                settings["quantize_uvs"] = false;
+
+                // LOD generation (advanced)
+                settings["generate_lods"] = false;
+                settings["lod_levels"] = 3;
+                settings["lod_reduction"] = 0.5f;  // 50% reduction per level
+
+                // Animation/skeleton
+                settings["import_animations"] = true;
+                settings["import_skeleton"] = true;
+                settings["max_bone_weights"] = 4;
+                break;
+            }
             default:
                 break;
             }
@@ -112,15 +159,32 @@ namespace PAIN {
                     break;
 
                 case Type::Audio:
-                    //checker =   (settings.contains("compression") &&
-                    //            settings.contains("quality") &&
-                    //            settings.contains("loop"));
+                    checker =   (settings.contains("compression") &&
+                                settings.contains("extension") &&
+                                settings.contains("quality") &&
+                                settings.contains("loop"));
                     break;
 
                 case Type::Model:
-                    //checker =   (settings.contains("generate_lods") &&
-                    //            settings.contains("optimize_vertices") &&
-                    //            settings.contains("weld_threshold"));
+                    checker = (settings.contains("extension") &&
+                        settings.contains("optimize_vertices") &&
+                        settings.contains("weld_threshold") &&
+                        settings.contains("generate_normals") &&
+                        settings.contains("generate_tangents") &&
+                        settings.contains("triangulate") &&
+                        settings.contains("join_identical_vertices") &&
+                        settings.contains("remove_redundant_materials") &&
+                        settings.contains("optimize_meshes") &&
+                        settings.contains("improve_cache_locality") &&
+                        settings.contains("quantize_positions") &&
+                        settings.contains("quantize_normals") &&
+                        settings.contains("quantize_uvs") &&
+                        settings.contains("generate_lods") &&
+                        settings.contains("lod_levels") &&
+                        settings.contains("lod_reduction") &&
+                        settings.contains("import_animations") &&
+                        settings.contains("import_skeleton") &&
+                        settings.contains("max_bone_weights"));
                     break;
                 default:
                     break;
@@ -135,37 +199,42 @@ namespace PAIN {
 
         }
 
-        Descriptor Compiler::createDefaultDesc(Info const& asset, std::filesystem::path const& path) const {
+        Descriptor Compiler::createDefaultDesc(Info& asset, std::filesystem::path const& path) const {
 
             //Extract asset name from path
-            std::string asset_name = asset.raw_path.stem().string();
+            std::string asset_name = asset.raw_path.filename().string();
 
-            // Create default descriptor
+            //Create default descriptor
             Descriptor desc;
 
-            // Identity
-            desc.guid = GUID::Generate();
+            //Identity
+            if (asset.guid.IsValid()) {
+                desc.guid = asset.guid;
+            }
+            else {
+                desc.guid = GUID::Generate();
+                asset.guid = desc.guid;
+            }
             desc.descriptor_version = 1;
-            desc.created_timestamp = getCurrentTimeStamp();
 
-            // Asset classification
+            //Asset classification
             desc.type = asset.type;
             desc.name = asset_name;
 
-            // Import/processing settings
-            desc.import_settings = generateDefaultCompileSettings(desc.type);
+            //Import/processing settings
+            desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
 
-            // Build data
-            desc.raw_last_modified = asset.raw_last_modified;
+            //Build data
+            desc.hash = fileHashing(asset.raw_path);
 
-            // Dependencies
+            //Dependencies
             desc.dependencies.clear();
 
-            // Metadata (start empty, expandable)
+            //Metadata (start empty, expandable)
             desc.meta_data = nlohmann::json::object();
 
-            // Add some basic metadata based on asset type
-            desc.meta_data["source_file"] = asset.raw_path;
+            //Add some basic metadata based on asset type
+            desc.meta_data["source_file"] = asset.relative_folder / asset.name;
 
             //Save desc file
             saveDescFile(desc, path);
@@ -173,7 +242,10 @@ namespace PAIN {
             return desc;
         }
 
-        Descriptor Compiler::readDescFile(Info const& asset, std::filesystem::path const& path) const {
+        Descriptor Compiler::readDescFile(Info& asset, std::filesystem::path const& path) const {
+
+            bool needs_updating = false;
+
             try {
                 std::ifstream file(path);
                 nlohmann::json desc_json;
@@ -182,17 +254,23 @@ namespace PAIN {
                 Descriptor desc;
                 desc.descriptor_version = desc_json.value("descriptor_version", 1);
                 desc.guid = GUID(desc_json["guid"].get<std::string>());
-                desc.created_timestamp = desc_json.value("created_timestamp", 0ULL);
+                asset.guid = desc.guid;
 
                 //Asset info
                 auto asset_info = desc_json["asset_info"];
                 desc.type = stringToAssetType(asset_info["type"].get<std::string>());
-                desc.name = asset_info.value("name", "");
+                desc.name = asset_info.value("name", asset.name);
 
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.raw_last_modified = build_data.value("raw_last_modified", 0ULL);
+                desc.hash = build_data.value("hash", std::size_t(0));
+
+                //Verify import settings
+                if (!verifyCompileSettings(asset.type, desc.import_settings)) {
+                    desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
+                    needs_updating = true;
+                }
 
                 //Dependencies
                 auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
@@ -200,9 +278,23 @@ namespace PAIN {
                     desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
                 }
 
-                desc.meta_data = desc_json.value("metadata", nlohmann::json{});
+                desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
+
+                // Verify desc file source
+                std::filesystem::path expected_source = asset.relative_folder / asset.name;
+                std::filesystem::path current_source = desc.meta_data.value("source_file", "");
+
+                if (current_source != expected_source) {
+                    desc.meta_data["source_file"] = expected_source.string();
+                    needs_updating = true;
+                }
 
                 file.close();
+
+                //if file needs to be updated.
+                if (needs_updating) {
+                    saveDescFile(desc, path);
+                }
 
                 return desc;
             }
@@ -226,17 +318,16 @@ namespace PAIN {
                 //Core identity
                 desc_json["descriptor_version"] = desc_file.descriptor_version;
                 desc_json["guid"] = desc_file.guid.ToString();
-                desc_json["created_timestamp"] = desc_file.created_timestamp;
 
-                // Asset info
+                //Asset info
                 desc_json["asset_info"]["type"] = assetTypeToString(desc_file.type);
                 desc_json["asset_info"]["name"] = desc_file.name;
 
-                // Settings and build data
+                //Settings and build data
                 desc_json["import_settings"] = desc_file.import_settings;
-                desc_json["build_data"]["raw_last_modified"] = desc_file.raw_last_modified;
+                desc_json["build_data"]["hash"] = desc_file.hash;
 
-                // Dependencies and metadata
+                //Dependencies and metadata
                 nlohmann::json deps_array = nlohmann::json::array();
                 for (const auto& dep : desc_file.dependencies) {
                     deps_array.push_back(dep.ToString());
@@ -260,7 +351,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileAndShip(Descriptor const& desc_file, Info& asset_info) const {
+        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) const {
 
             //Find asset type and platform
             switch (desc_file.type) {
@@ -280,7 +371,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileTexture(Descriptor const& desc_file, Info& asset_info) const {
+        void Compiler::compileTexture(Descriptor& desc_file, Info& asset_info) const {
 
             //Determine output format and shipped path
             std::string output_extension;
@@ -301,6 +392,9 @@ namespace PAIN {
                 std::cout << "ERROR: Unsupported platform for texture compilation" << std::endl;
                 return;
             }
+
+            //Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
 
             //Load texture data using STB
             int width, height, channels;
@@ -356,13 +450,13 @@ namespace PAIN {
             bool compression_success = false;
 
             if (platform == Platform::Windows) {
-                // Use Cuttlefish for DDS/BC7 compression
+                //Use Cuttlefish for DDS/BC7 compression
                 compression_success = CompressTextureDDS(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
             }
             else if (platform == Platform::Android) {
-                // Use Cuttlefish for ASTC compression
+                //Use astc encoder for ASTC compression
                 compression_success = CompressTextureASTC(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
@@ -374,29 +468,238 @@ namespace PAIN {
             //Verify output
             if (compression_success && std::filesystem::exists(asset_info.shipped_path)) {
                 std::cout << "Texture compiled successfully: " << asset_info.shipped_path.filename() << std::endl;
+
+                //Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
             }
             else {
                 std::cout << "ERROR: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
+                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
+                copyFile(asset_info.raw_path, asset_info.shipped_path);
             }
         }
 
-        void Compiler::compileAudio(Descriptor const& desc_file, Info& asset_info) const {
-            //To be implemented
+        void Compiler::compileAudio(Descriptor& desc_file, Info& asset_info) const {
+
+            //Set output directory
+            std::string out_ext = desc_file.import_settings.value("extension", ".ogg"); // fallback to 0.8 if not specified
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);
+
+            //Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+
+            // Paths
+            std::string ffmpegExe = GetFFMPEGExecutable();
+            std::string inputPath = asset_info.raw_path.string(); // Your input PCM/WAV/AIFF/etc.
+            std::string outputPath = asset_info.shipped_path.string(); // Destination .ogg file
+
+            // Import settings
+            float quality = desc_file.import_settings.value("quality", 0.8f); // fallback to 0.8 if not specified
+            bool shouldLoop = desc_file.import_settings.value("loop", false);
+
+            std::filesystem::create_directories(std::filesystem::path(outputPath).parent_path());
+
+            // Build ffmpeg command for OGG conversion
+            std::stringstream cmd;
+            cmd << "cmd /C \""
+                << "\"" << ffmpegExe << "\""
+                << " -y"
+                << " -i \"" << inputPath << "\""
+                << " -c:a libvorbis"
+                << " -qscale:a " << quality * 10
+                << " \"" << outputPath << "\""
+                << "\""; // Close the CMD string
+
+            // Launch ffmpeg as a process
+            int result = std::system(cmd.str().c_str());
+            if (result != 0) {
+                std::cerr << "[ERROR] FFmpeg conversion failed: " << cmd.str() << std::endl;
+                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
+                copyFile(asset_info.raw_path, asset_info.shipped_path);
+            }
+            else {
+                std::cout << "[Audio] Compiled " << inputPath << " to OGG at " << outputPath << std::endl;
+
+                //Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
+            }
         }
 
-        void Compiler::compileModel(Descriptor const& desc_file, Info& asset_info) const {
-            //To be implemented
+        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
+
+            // Set output extension
+            std::string out_ext = desc_file.import_settings.value("extension", ".mesh");
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);
+
+            // Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+
+            // Get import settings
+            bool optimize_vertices = desc_file.import_settings.value("optimize_vertices", true);
+            float weld_threshold = desc_file.import_settings.value("weld_threshold", 0.001f);
+            bool generate_tangents = desc_file.import_settings.value("generate_tangents", true);
+            bool triangulate = desc_file.import_settings.value("triangulate", true);
+            bool import_animations = desc_file.import_settings.value("import_animations", true);
+            bool import_skeleton = desc_file.import_settings.value("import_skeleton", true);
+            int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+
+            // Configure Assimp post-processing flags
+            unsigned int ppFlags = 0;
+            if (triangulate) ppFlags |= aiProcess_Triangulate;
+            if (optimize_vertices) ppFlags |= aiProcess_JoinIdenticalVertices;
+            if (desc_file.import_settings.value("optimize_meshes", true)) ppFlags |= aiProcess_OptimizeMeshes;
+            if (desc_file.import_settings.value("improve_cache_locality", true)) ppFlags |= aiProcess_ImproveCacheLocality;
+            if (desc_file.import_settings.value("remove_redundant_materials", true)) ppFlags |= aiProcess_RemoveRedundantMaterials;
+            if (generate_tangents) ppFlags |= aiProcess_CalcTangentSpace;
+            if (desc_file.import_settings.value("generate_normals", false)) ppFlags |= aiProcess_GenNormals;
+
+            // Load with Assimp
+            Assimp::Importer importer;
+            const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);
+
+            if (!scene || !scene->HasMeshes()) {
+                std::cerr << "Failed to load model: " << importer.GetErrorString() << std::endl;
+                return;
+            }
+
+            // Extract data based on settings
+            Model asset;
+
+            // Extract meshes, vertices, indices
+            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                aiMesh* mesh = scene->mMeshes[m];
+                size_t vertexBase = asset.vertices.size();
+                for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+                    Vertex vert;
+                    vert.pos = glm::vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z);
+                    vert.normal = mesh->HasNormals() ? glm::vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z) : glm::vec3(0, 0, 1);
+                    vert.uv = mesh->HasTextureCoords(0) ? glm::vec2(mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y) : glm::vec2(0);
+                    asset.vertices.push_back(vert);
+                }
+                for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+                    for (unsigned int i = 0; i < mesh->mFaces[f].mNumIndices; ++i) {
+                        asset.indices.push_back(static_cast<unsigned int>(vertexBase + mesh->mFaces[f].mIndices[i]));
+                    }
+                }
+            }
+
+            // Map bone names to bone indices for fast lookup
+            std::unordered_map<std::string, int> boneNameToIndex;
+            for (size_t i = 0; i < asset.skeleton.size(); ++i)
+                boneNameToIndex[asset.skeleton[i].name] = static_cast<int>(i);
+
+            asset.weights.resize(asset.vertices.size());
+
+            size_t globalVertexBase = 0;
+            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                aiMesh* mesh = scene->mMeshes[m];
+                for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                    aiBone* bone = mesh->mBones[b];
+                    int boneIdx = boneNameToIndex[bone->mName.C_Str()];
+                    for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+                        unsigned int vertId = globalVertexBase + mesh->mBones[b]->mWeights[w].mVertexId;
+                        asset.weights[vertId].push_back(BoneWeight{ uint32_t(boneIdx), mesh->mBones[b]->mWeights[w].mWeight });
+                    }
+                }
+                globalVertexBase += mesh->mNumVertices;
+            }
+
+            // Extract skeleton if enabled
+            if (import_skeleton && scene->HasMeshes()) {
+                std::unordered_map<std::string, int> boneMap;
+                for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                    aiMesh* mesh = scene->mMeshes[m];
+                    for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                        aiBone* bone = mesh->mBones[b];
+                        std::string boneName = bone->mName.C_Str();
+                        if (boneMap.find(boneName) == boneMap.end()) {
+                            Bone joint;
+                            joint.name = boneName;
+                            joint.parent = -1; // Assign parent below by name-match if needed
+                            aiMatrix4x4 m = bone->mOffsetMatrix;
+                            // Convert aiMatrix4x4 to glm::mat4
+                            joint.bindPose = glm::mat4(
+                                m.a1, m.b1, m.c1, m.d1,
+                                m.a2, m.b2, m.c2, m.d2,
+                                m.a3, m.b3, m.c3, m.d3,
+                                m.a4, m.b4, m.c4, m.d4
+                            );
+                            boneMap[boneName] = static_cast<int>(asset.skeleton.size());
+                            asset.skeleton.push_back(joint);
+                        }
+                    }
+                }
+            }
+
+            // Extract animations if enabled
+            if (import_animations && scene->HasAnimations()) {
+                for (unsigned int a = 0; a < scene->mNumAnimations; ++a) {
+                    aiAnimation* anim = scene->mAnimations[a];
+                    AnimationClip clip;
+                    clip.name = anim->mName.C_Str();
+                    clip.duration = static_cast<float>(anim->mDuration) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+                    for (unsigned int c = 0; c < anim->mNumChannels; ++c) {
+                        aiNodeAnim* chan = anim->mChannels[c];
+                        AnimationTrack track;
+                        track.boneName = chan->mNodeName.C_Str();
+                        for (unsigned int k = 0; k < chan->mNumPositionKeys; ++k) {
+                            AnimationKey key;
+                            key.time = static_cast<float>(chan->mPositionKeys[k].mTime) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+                            key.translation = glm::vec3(chan->mPositionKeys[k].mValue.x, chan->mPositionKeys[k].mValue.y, chan->mPositionKeys[k].mValue.z);
+                            if (k < chan->mNumRotationKeys) {
+                                key.rotation = glm::quat(chan->mRotationKeys[k].mValue.w,
+                                    chan->mRotationKeys[k].mValue.x,
+                                    chan->mRotationKeys[k].mValue.y,
+                                    chan->mRotationKeys[k].mValue.z
+                                );
+                            }
+                            if (k < chan->mNumScalingKeys) {
+                                key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
+                            }
+                            track.keys.push_back(key);
+                        }
+                        clip.tracks.push_back(track);
+                    }
+                    asset.animations.push_back(clip);
+                }
+            }
+
+            // Materials (basic example; expand for PBR)
+            for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
+                aiMaterial* material = scene->mMaterials[m];
+                Material mat;
+                mat.name = material->GetName().C_Str();
+                aiString texPath;
+                if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
+                    mat.diffuseMap = texPath.C_Str();
+                // Repeat for normal/specular/metal/etc as needed
+                asset.materials.push_back(mat);
+            }
+
+            //Create output directory
+            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
+
+            //Export model
+            ExportModel(asset, asset_info.shipped_path);
+
+            std::cout << "[Model] Compiled " << asset_info.raw_path.string() << " -> " << asset_info.shipped_path.string() << std::endl;
+
+            //Update desc file with hashing
+            desc_file.hash = fileHashing(asset_info.raw_path);
         }
 
         std::string Compiler::GetCuttlefishExecutable() const {
 
-            // Try to find cuttlefish executable
-            std::filesystem::path cuttle_fish_path = exec_path / "cuttlefish.exe";
-            std::cout << cuttle_fish_path << std::endl;
+            //Locate all possible cuttlfish executables
+            std::vector<std::filesystem::path> possible_paths = {
+                exec_path / "cuttlefish/cuttlefish.exe"
+            };
 
-            //Check if exists
-            if (std::filesystem::exists(cuttle_fish_path)) {
-                return cuttle_fish_path.string();
+            for (const auto& path : possible_paths) {
+                if (std::filesystem::exists(path)) {
+                    std::cout << "Found cuttlefish: " << path << std::endl;
+                    return path.string();
+                }
             }
         
             std::cout << "WARNING: Cuttlefish executable not found!" << std::endl;
@@ -415,6 +718,8 @@ namespace PAIN {
                     std::cout << "Failed to write temporary PNG" << std::endl;
                     return false;
                 }
+
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
 
                 // WINDOWS SYSTEM() REQUIRES SPECIAL QUOTING [web:1061]
                 std::stringstream cmd;
@@ -461,11 +766,12 @@ namespace PAIN {
 
         std::string Compiler::GetASTCEncoderExecutable() const {
 
-            // Try optimized versions in order of performance
+            //Locate all possible astcenc executables
             std::vector<std::filesystem::path> possible_paths = {
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-avx2.exe",
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse4.1.exe",
-                assets_root.parent_path() / "vendor/astc-encoder/astcenc-sse2.exe"
+                exec_path / "astc/astcenc-avx2.exe",
+                exec_path / "astc/astcenc-neon.exe",
+                exec_path / "astc/astcenc-native.exe",
+                exec_path / "astc/astcenc-sse2.exe"
             };
 
             for (const auto& path : possible_paths) {
@@ -475,7 +781,7 @@ namespace PAIN {
                 }
             }
 
-            std::cout << "WARNING: ASTC encoder (astcenc) not found!" << std::endl;
+            std::cout << "WARNING: astcenc executable not found!" << std::endl;
             return "astcenc-avx2.exe"; // Fallback
         }
 
@@ -507,6 +813,8 @@ namespace PAIN {
                     return false;
                 }
 
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
+
                 // Build astcenc command with proper syntax
                 std::stringstream cmd;
 
@@ -520,12 +828,6 @@ namespace PAIN {
                 cmd << " \"" + output_path + "\"";   // Output file
                 cmd << " " << ConvertToASTCBlockSize(format);  // Block size (e.g., "4x4")
                 cmd << " -" << settings.value("quality", "medium");  // Quality: -fastest, -fast, -medium, -thorough, -exhaustive
-
-                // Additional ASTC options
-                if (settings.value("srgb", false)) {
-                    cmd << " -srgb";  // sRGB color space
-                }
-
                 cmd << "\"";  // End outer quotes for Windows
 
                 std::string final_command = cmd.str();
@@ -551,11 +853,100 @@ namespace PAIN {
             }
         }
 
+        std::string Compiler::GetFFMPEGExecutable() const {
+            //Locate all possible ffmpeg executables
+            std::vector<std::filesystem::path> possible_paths = {
+                exec_path / "ffmpeg/ffmpeg.exe"
+            };
+
+            for (const auto& path : possible_paths) {
+                if (std::filesystem::exists(path)) {
+                    std::cout << "Found ffmpeg: " << path << std::endl;
+                    return path.string();
+                }
+            }
+
+            std::cout << "WARNING: ffmpegffmpeg executable not found!" << std::endl;
+            return "ffmpeg.exe"; // Fallback
+        }
+
+        void Compiler::ExportModel(const Model& asset, const std::filesystem::path& out_path) const {
+            std::ofstream out(out_path, std::ios::binary);
+
+            // Vertices/indices
+            uint32_t vtxCount = uint32_t(asset.vertices.size());
+            uint32_t idxCount = uint32_t(asset.indices.size());
+            out.write((char*)&vtxCount, sizeof(vtxCount));
+            out.write((char*)&idxCount, sizeof(idxCount));
+            out.write((char*)asset.vertices.data(), vtxCount * sizeof(Vertex));
+            out.write((char*)asset.indices.data(), idxCount * sizeof(uint32_t));
+
+            // Skeleton (bones)
+            uint32_t boneCount = uint32_t(asset.skeleton.size());
+            out.write((char*)&boneCount, sizeof(boneCount));
+            for (const Bone& b : asset.skeleton) {
+                uint32_t nameLen = uint32_t(b.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(b.name.data(), nameLen);
+                out.write((char*)&b.parent, sizeof(b.parent));
+                out.write((char*)&b.bindPose, sizeof(glm::mat4));
+            }
+
+            // Skinning Weights
+            for (const auto& vweights : asset.weights) {
+                uint32_t count = uint32_t(vweights.size());
+                out.write((char*)&count, sizeof(count));
+                out.write((char*)vweights.data(), count * sizeof(BoneWeight));
+            }
+
+            // Animations
+            uint32_t animCount = uint32_t(asset.animations.size());
+            out.write((char*)&animCount, sizeof(animCount));
+            for (const AnimationClip& anim : asset.animations) {
+                uint32_t nameLen = uint32_t(anim.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(anim.name.data(), nameLen);
+                out.write((char*)&anim.duration, sizeof(anim.duration));
+                uint32_t trackCount = uint32_t(anim.tracks.size());
+                out.write((char*)&trackCount, sizeof(trackCount));
+                for (const AnimationTrack& track : anim.tracks) {
+                    uint32_t boneLen = uint32_t(track.boneName.size());
+                    out.write((char*)&boneLen, sizeof(boneLen));
+                    out.write(track.boneName.data(), boneLen);
+                    uint32_t keyCount = uint32_t(track.keys.size());
+                    out.write((char*)&keyCount, sizeof(keyCount));
+                    out.write((char*)track.keys.data(), keyCount * sizeof(AnimationKey));
+                }
+            }
+
+            // Materials
+            uint32_t matCount = uint32_t(asset.materials.size());
+            out.write((char*)&matCount, sizeof(matCount));
+            for (const Material& mat : asset.materials) {
+                uint32_t nameLen = uint32_t(mat.name.size());
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(mat.name.data(), nameLen);
+                uint32_t diffLen = uint32_t(mat.diffuseMap.size());
+                out.write((char*)&diffLen, sizeof(diffLen));
+                out.write(mat.diffuseMap.data(), diffLen);
+                // Add normal/specular if present
+            }
+
+            out.close();
+        }
+
+        bool Compiler::needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const {
+            //Check if asset needs to be recompiled
+            auto shipped = asset_info.shipped_path;
+            if (std::filesystem::exists(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
+
+            return true;
+        }
 
 		void Compiler::processAsset(Info& asset_info) {
 
             //Check for desc files and output
-            auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.stem().string() + desc_ext);
+            auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.filename().string() + desc_ext);
 
             //Get desc obj
             Descriptor desc_obj;
@@ -568,9 +959,6 @@ namespace PAIN {
                 desc_obj = readDescFile(asset_info, asset_desc_path);
             }
 
-            //Update asset GUID
-            asset_info.guid = desc_obj.guid;
-
             //Check if asset is compilable
             if (Assets::isAssetCompilable(asset_info.type)) {
 
@@ -582,13 +970,23 @@ namespace PAIN {
                 //If asset is not compilable ship asset straight into 
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / asset_info.name;
 
-                // Only ship if source is SIGNIFICANTLY newer than destination
-                if (asset_info.raw_last_modified > (getFileLastModified(asset_info.shipped_path) + TOLERANCE_MS)) {
+                //Only ship if source if updates are needed
+                if (needsRecompilation(asset_info, desc_obj)) {
 
                     //Copy all assets
                     copyFile(asset_info.raw_path, asset_info.shipped_path);
+
+                    //Update hashing
+                    desc_obj.hash = fileHashing(asset_info.raw_path);
                 }
+            }
+
+            //Double check if there are desc changes
+            if (desc_obj != readDescFile(asset_info, asset_desc_path)) {
+                saveDescFile(desc_obj, asset_desc_path);
             }
 		}
 	}
 }
+
+#endif

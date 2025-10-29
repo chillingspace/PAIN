@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "ogre_ao_angry.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7843526217880381277
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "0e281a68-2ccc-5741-9582-f3b716139dc6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ogre_ao_angry.png"
+  }
+}

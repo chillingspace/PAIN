@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_pbr.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4512127871272002480
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "06da4c22-7a34-094b-ae7c-37fbfa61a0a2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_pbr.vert"
+  }
+}

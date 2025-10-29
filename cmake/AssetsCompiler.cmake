@@ -1,46 +1,37 @@
-# Define input sources as before
 set(ASSETS_INPUT_DIR "${CMAKE_SOURCE_DIR}/assets")
-file(GLOB_RECURSE ALL_ASSET_INPUTS "${ASSETS_INPUT_DIR}/*")
 
 if(WIN32)
     set(ASSET_COMPILER_EXE "${CMAKE_BINARY_DIR}/Tools/AssetCompilerTool.exe")
+    set(GAME_ASSET_OUT "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets")
 
-    add_custom_command(
-        OUTPUT "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets/.assets_compiled_stamp"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets"
+    add_custom_target(CompileAllAssets ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${GAME_ASSET_OUT}"
         COMMAND "${ASSET_COMPILER_EXE}"
             --input "${ASSETS_INPUT_DIR}"
-            --output "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets"
+            --output "${GAME_ASSET_OUT}"
             --target "windows"
-        COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets/.assets_compiled_stamp"
-        DEPENDS ${ASSET_COMPILER_EXE} ${ALL_ASSET_INPUTS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        COMMENT "Building assets for ${CMAKE_SYSTEM_NAME}"
+        COMMENT "Running asset compiler before running the game"
         VERBATIM
+        USES_TERMINAL
     )
 
-    add_custom_target(CompileAllAssets
-        DEPENDS "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets/.assets_compiled_stamp"
-    )
+    add_dependencies(CompileAllAssets AssetCompilerTool)
+
 elseif(ANDROID)
-    set(ASSET_COMPILER_EXE "${CMAKE_BINARY_DIR}/Tools/AssetCompilerTool.exe")
-    set(ASSETS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets") # Android assets for APK
+    set(ASSET_COMPILER_EXE "${CMAKE_SOURCE_DIR}/build/Tools/AssetCompilerTool.exe")
+    set(ASSETS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets")
 
-    add_custom_command(
-        OUTPUT "${ASSETS_OUTPUT_DIR}/.assets_compiled_stamp"
+    add_custom_target(CompileAllAssets ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory "${ASSETS_OUTPUT_DIR}"
         COMMAND "${ASSET_COMPILER_EXE}"
             --input "${ASSETS_INPUT_DIR}"
             --output "${ASSETS_OUTPUT_DIR}"
             --target "android"
-        COMMAND ${CMAKE_COMMAND} -E touch "${ASSETS_OUTPUT_DIR}/.assets_compiled_stamp"
-        DEPENDS ${ASSET_COMPILER_EXE} ${ALL_ASSET_INPUTS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        COMMENT "Building assets for ${CMAKE_SYSTEM_NAME}"
+        COMMENT "Running asset compiler before packaging APK"
         VERBATIM
+        USES_TERMINAL
     )
 
-    add_custom_target(CompileAllAssets
-        DEPENDS "${ASSETS_OUTPUT_DIR}/.assets_compiled_stamp"
-    )
 endif()

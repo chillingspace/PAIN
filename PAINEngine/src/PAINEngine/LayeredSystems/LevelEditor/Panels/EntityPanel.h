@@ -27,6 +27,8 @@ namespace PAIN {
                 //Get selected entity
                 entt::entity getSelectedEntity() const;
 
+                void setSelectedEntity(entt::entity entity);
+
                 //Unselect entity
                 void unselectEntity();
 
@@ -62,11 +64,43 @@ namespace PAIN {
                 //Create entity popup
                 std::function<void()> createEntityPopUp(std::string const& popup_id);
 
-                //Remove Entity popup
                 std::function<void()> removeEntityPopUp(std::string const& popup_id);
 
                 //Clone entity popup
                 std::function<void()> cloneEntityPopUp(std::string const& popup_id);
+
+                char search_buffer[256] = "";
+                bool sort_alphabetically = false;
+                bool force_refresh = false;
+
+                // Helper methods for hierarchy
+                void drawEntityNode(entt::entity entity);
+                std::vector<entt::entity> getRootEntities();
+                std::vector<entt::entity> getEntityChildren(entt::entity parent);
+                std::string getEntityName(entt::entity entity);
+                void setEntityParent(entt::entity child, entt::entity parent);
+                bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
+                void removeEntityWithChildren(entt::entity entity);
+                void cloneEntityChildren(entt::entity source, entt::entity cloned_parent);
+
+                // Prefab helper functions
+                std::string generateUniquePrefabName(const std::string& base_name);
+                void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
+                void ungroupEntity(entt::entity entity);
+                void unparentEntity(entt::entity entity);
+
+                std::function<void()> createEmptyEntityPopUp(std::string const& popup_id);
+                std::function<void()> createChildEntityPopUp(std::string const& popup_id);
+
+                entt::entity entity_pending_delete = entt::null;
+
+                // Member variables
+                std::vector<entt::entity> multi_selected_entities;
+
+                // Member functions
+                std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
+
+                void drawEntityHierarchy(entt::entity entity_id, int depth);
             };
 
         } // namespace Panel
