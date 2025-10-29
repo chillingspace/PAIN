@@ -6,6 +6,9 @@
 #include "AssetTypes.h"
 #include "AssetData.h"
 
+#include "Applications/AppSystem.h"
+#include "CoreSystems/Path/Path.h"
+
 #ifdef PN_PLATFORM_ANDROID
 #include <android/asset_manager.h>
 #endif
@@ -18,6 +21,11 @@ namespace PAIN {
 		class Loader {
 		private:
 
+			//Services
+			std::shared_ptr<Services> services;
+			std::shared_ptr<Path::Path> path_service;
+
+			//Map of loaders
 			std::unordered_map<Type, LoaderFunc> asset_loader;
 
 #ifdef PN_PLATFORM_ANDROID
@@ -29,15 +37,17 @@ namespace PAIN {
 		private:
 
 			//Extract ASTC
-			void extractASTC(std::vector<uint8_t> const& data, std::shared_ptr<Texture> tex) const;
+			void extractASTC(std::string const& virtual_path, std::shared_ptr<Texture> tex) const;
 #else
 			//Texture data extractor
-			void extractDDS(std::vector<uint8_t> const& data, std::shared_ptr<Texture> tex) const;
+			void extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const;
 #endif
 
 		public:
 
-			Loader() = default;
+			Loader(std::shared_ptr<Services> services) : services{ services } {
+				path_service = services->get<Path::Path>();
+			}
 			~Loader() = default;
 
 			//Register loader
@@ -50,13 +60,13 @@ namespace PAIN {
 			bool CheckLoader(Type const& type) const;
 
 			//Import asset registry file
-			std::unordered_map<GUID, IAsset> ImportAssetRegistry(nlohmann::json const& json_package) const;
+			std::unordered_map<GUID, IAsset> ImportAssetRegistry(std::string const& virtual_path) const;
 
 			//Importing texture
-			std::shared_ptr<Texture> ImportTexture(std::vector<uint8_t> const& data) const;
+			std::shared_ptr<Texture> ImportTexture(std::string const& virtual_path) const;
 
 			//Importing model
-			std::shared_ptr<Model> ImportModel(std::vector<uint8_t> const& data) const;
+			std::shared_ptr<Model> ImportModel(std::string const& virtual_path) const;
 		};
 	}
 }

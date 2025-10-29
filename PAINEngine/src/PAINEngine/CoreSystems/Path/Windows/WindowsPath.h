@@ -9,6 +9,44 @@
 namespace PAIN {
 	namespace Path {
 
+		// Windows Implementation
+		class WinFileStream : public IFileStream {
+			std::fstream file;
+			size_t fileSize = 0;
+		public:
+			WinFileStream(const std::string& path, FileMode mode) {
+				std::ios_base::openmode fmode = std::ios::binary;
+				if (mode == FileMode::Read) fmode |= std::ios::in;
+				else if (mode == FileMode::Write) fmode |= std::ios::out | std::ios::trunc;
+				else if (mode == FileMode::ReadWrite) fmode |= std::ios::in | std::ios::out;
+				file.open(path, fmode);
+				if (file) {
+					file.seekg(0, std::ios::end);
+					fileSize = static_cast<size_t>(file.tellg());
+					file.seekg(0, std::ios::beg);
+				}
+			}
+			~WinFileStream() override {
+				if (file.is_open()) {
+					file.close();
+				}
+			}
+			size_t read(void* buffer, size_t size) override {
+				file.read(static_cast<char*>(buffer), size);
+				return static_cast<size_t>(file.gcount());
+			}
+			size_t write(const void* buffer, size_t size) override {
+				file.write(static_cast<const char*>(buffer), size);
+				return file ? size : 0;
+			}
+			void flush() override { file.flush(); }
+			void seek(size_t pos) override { file.seekg(pos, std::ios::beg); file.seekp(pos, std::ios::beg); }
+			size_t tell() override { return static_cast<size_t>(file.tellg()); }
+			bool eof() const override { return file.eof(); }
+			size_t size() const override { return fileSize; }
+			bool good() const override { return file.good(); }
+		};
+
 		class WindowsPath : public Path {
 		private:
 
@@ -42,13 +80,7 @@ namespace PAIN {
 			bool pathExists(const std::string& virtualPath) const override;
 			bool createDirectory(const std::string& virtualPath) const override;
 
-			//Read & write files
-			std::vector<uint8_t> readFile(const std::string& virtualPath) const override;
-			bool writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const override;
-
-			//Overloads provided for json
-			nlohmann::json readJsonFile(const std::string& virtualPath) const override;
-			bool writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const override;
+			std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) override;
 		};
 
 	}

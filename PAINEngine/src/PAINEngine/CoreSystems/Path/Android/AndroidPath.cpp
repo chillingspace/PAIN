@@ -371,93 +371,25 @@ namespace PAIN {
 			return parseVirtualPath(virtualPath).first == "assets" || parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
 		}
 
-		std::vector<uint8_t> AndroidPath::readAssetData(const std::string& asset_path) const {
+		std::unique_ptr<IFileStream> AndroidPath::createFileStream(const std::string& virtualPath, FileMode mode) {
 
-			AAssetManager* mgr = m_app->activity->assetManager;
+			//Resolve path and create stream
+			auto path = resolvePath(virtualPath);
 
-			//Check for valid asset manager
-			if (!mgr) {
-				PN_CORE_WARN("Android asset manager error!");
-				return {};
-			}
-
-            PN_CORE_INFO(asset_path);
-
-			// Asset paths should be relative to the assets directory
-			AAsset* asset = AAssetManager_open(mgr, asset_path.c_str(), AASSET_MODE_STREAMING);
-			if (!asset) {
-				PN_CORE_WARN("Unable to open asset!");
-				return {};
-			}
-
-			const off_t length = AAsset_getLength(asset);
-			std::vector<uint8_t> buffer(length);
-
-			int64_t readResult = AAsset_read(asset, buffer.data(), length);
-			AAsset_close(asset);
-
-			if (readResult < length) {
-				// Logging partial read
-				buffer.resize(static_cast<size_t>(readResult));
-			}
-
-			return buffer;
-		}
-
-		std::vector<uint8_t> AndroidPath::readFile(const std::string& virtualPath) const {
-			//Check if path leads to asset directory
-			if (isAssetPath(virtualPath)) {
-
-				//Read and return asset
-				return readAssetData(resolvePath(virtualPath));
+			//Check if virtual path is asset
+			if (isAssetPath(virtualPath) && mode == FileMode::Read) {
+				AAssetManager* asset_mgr = m_app->activity->assetManager;
+				return std::make_unique<AndroidAssetStream>(asset_mgr, path, FileMode::Read);
 			}
 			else {
 
-				//Read file
-				std::string resolved = resolvePath(virtualPath);
-				std::ifstream file(resolved, std::ios::binary);
-				if (!file.is_open()) {
-					PN_CORE_WARN("Unable to open file path for reading: {}", resolved);
-					return {};
+				//Ensure path exists
+				if (!std::filesystem::exists(path)) {
+					throw std::runtime_error("File does not exist! Unable to create file stream");
 				}
-				return std::vector<uint8_t>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-			}
-		}
 
-		bool AndroidPath::writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const {
-			//Check if path leads to asset directory
-			if (isAssetPath(virtualPath)) {
-				PN_CORE_WARN("Attempting to write to asset path: {}", virtualPath);
-				return false;
+				return std::make_unique<AndroidAssetStream>(nullptr, path, mode);
 			}
-
-			//Write to file
-			std::string resolved = resolvePath(virtualPath);
-			std::ofstream file(resolved, std::ios::binary);
-			if (!file.is_open()) {
-				PN_CORE_WARN("Unable to open file path for writing: {}", resolved);
-				return false;
-			}
-			file.write(reinterpret_cast<const char*>(data.data()), data.size());
-			return file.good();
-		}
-
-		nlohmann::json AndroidPath::readJsonFile(const std::string& virtualPath) const {
-			auto data = readFile(virtualPath);
-			if (data.empty())
-				return {};
-			//Parse data into json
-			return nlohmann::json::parse(data.begin(), data.end(), nullptr, false);
-		}
-
-		bool AndroidPath::writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const {
-			if (isAssetPath(virtualPath)) {
-				PN_CORE_WARN("Attempting to write json to asset path: {}", virtualPath);
-				return false;
-			}
-			std::string jsonText = data.dump();
-			std::vector<uint8_t> buffer(jsonText.begin(), jsonText.end());
-			return writeFile(virtualPath, buffer);
 		}
 	}
 }
