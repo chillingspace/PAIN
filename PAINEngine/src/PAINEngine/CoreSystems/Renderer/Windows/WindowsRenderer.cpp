@@ -712,7 +712,7 @@ namespace PAIN {
 		{
 			// !TODO: add queue and iterate through all 2D textures to be rendered last
 #ifdef PN_PLATFORM_WINDOWS
-			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("0604eff8-67f9-4946-b955-c0280eb59c14"));
+			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
 			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
 #else
 			Render2DTexture(TextureManager::get().getTextureMap().at("sunshine"), { 0.85f, -0.85f }, 0.1f);

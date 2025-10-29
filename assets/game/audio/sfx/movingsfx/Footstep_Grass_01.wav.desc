@@ -1,0 +1,21 @@
+{
+  "asset_info": {
+    "name": "Footstep_Grass_01.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 15863038713820178176
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "ee4d5a08-f7c6-f742-93ab-2fa6949ebe2c",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_01.wav"
+  }
+}

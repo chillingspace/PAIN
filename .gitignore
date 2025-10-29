@@ -88,5 +88,3 @@ android/app/src/main/assets*/
 
 # do not ignore assets
 !assets/**
-# but ignore .desc
-assets/**/*.desc

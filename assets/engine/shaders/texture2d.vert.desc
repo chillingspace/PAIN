@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "texture2d.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 14724146149616889623
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "41741f51-6589-fa47-84e4-ab0ae2c1ceba",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\texture2d.vert"
+  }
+}

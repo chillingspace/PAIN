@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "geometry.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 16085051246838178118
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "848a13b7-895c-4f47-bc41-78bbea2e1284",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\geometry.vert"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_gamma.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 7579311884048157261
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "240193c1-8d67-9d49-90be-9258c88659d1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_gamma.vert"
+  }
+}

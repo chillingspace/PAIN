@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_texture2d.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 3211211897322181258
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "63d34c4b-6847-324c-8470-30196b67331d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_texture2d.vert"
+  }
+}
