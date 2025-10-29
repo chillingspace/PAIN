@@ -19,7 +19,9 @@ layout(location = 2) uniform mat4 u_P;
 void main() {
     vNormal = mat3(transpose(inverse(u_M))) * aNormal;
     vFragPos = vec3(u_M * vec4(aPos, 1.0));
-    vTexCoords = aTexCoords;
+
+    // invert tex coords vertically for compressed textures(astc)
+    vTexCoords = vec2(aTexCoords.x, 1.0 - aTexCoords.y);
 
     mat4 MVP = u_P * u_V * u_M;
     gl_Position = MVP * vec4(aPos, 1.0);
