@@ -49,6 +49,7 @@ namespace PAIN {
                 }
                 catch (...) {
                     // Catch-all for non-standard exceptions (rare but possible)
+                    // blah blah
                     PN_CORE_ERROR("System '{}' threw unknown exception!",
                         sys->getSysName());
 
