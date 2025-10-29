@@ -52,4 +52,5 @@ void main() {
     // use ambient occlusion texture
     float ao = texture(material.ao_map, vTexCoords).r;       // grayscale, just use red channel
     gCol = color * ao;
+    // gCol = vec3(1,0,0);
 }
