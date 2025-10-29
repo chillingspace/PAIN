@@ -209,10 +209,10 @@ namespace PAIN {
                 }
             }
             if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
-                toggleDebugMode();
-
-                PN_CORE_INFO("Editor debug mode: {}", editor_debug ? "ON" : "OFF");
-
+                editor_debug_mode = (editor_debug_mode + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+                if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
+                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
+                else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
             }
 #endif
 

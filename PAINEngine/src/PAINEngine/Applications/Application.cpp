@@ -31,6 +31,7 @@
 #include "Systems/Animation/sysAnimation.h" 
 #include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h" 
+#include "Systems/Collision/sBVHSystem.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 
@@ -145,6 +146,7 @@ namespace PAIN {
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
 		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
+		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 #endif
 
 		// Register components here

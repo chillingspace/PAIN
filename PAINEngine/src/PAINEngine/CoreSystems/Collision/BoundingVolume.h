@@ -5,6 +5,7 @@
 
 #include "pch.h" // Include pch first
 #include <limits> // Required for numeric_limits
+#include <nlohmann/json.hpp>
 
 // Undefine min/max macros JUST FOR THIS FILE
 #ifdef min
@@ -104,5 +105,19 @@ namespace PAIN {
     };
 
 } // namespace PAIN
+
+namespace nlohmann {
+    template <>
+    struct adl_serializer<PAIN::AABB> {
+        static void to_json(json& j, const PAIN::AABB& aabb) {
+            j = json{ {"min", aabb.min}, {"max", aabb.max} };
+        }
+
+        static void from_json(const json& j, PAIN::AABB& aabb) {
+            j.at("min").get_to(aabb.min);
+            j.at("max").get_to(aabb.max);
+        }
+    };
+}
 
 #endif // BOUNDING_VOLUME_H

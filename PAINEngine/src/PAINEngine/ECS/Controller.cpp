@@ -12,6 +12,7 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/GLMSerialization.h"
 #include "ECS/Components/AllComponents.h" 
+#include "ECS/Components/cBoundingVolume.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -78,6 +79,7 @@ namespace PAIN {
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collidor");
             registerComponent<Joint>("Joint");
+            registerComponent<cBoundingVolume>("BoundingVolume");
 
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");

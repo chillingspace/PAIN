@@ -17,6 +17,7 @@
 #include "cLight.h"
 #include "cPhysics.h"
 #include "cMetadata.h"
+#include "cBoundingVolume.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
@@ -41,7 +42,8 @@ namespace PAIN {
         Lighting,
         Physics::RigidBody3D,
         Collision::Collider,
-        Joint
+        Joint,
+        cBoundingVolume
     >;
 
     template<typename T>
@@ -61,6 +63,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
         else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collidor";
         else if constexpr (std::is_same_v<T, Joint>) return "Joint";
+        else if constexpr (std::is_same_v<T, cBoundingVolume>) return "BoundingVolume";
         else return "Unknown";
     }
 }
