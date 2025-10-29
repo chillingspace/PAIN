@@ -1,12 +1,3 @@
-/*****************************************************************//**
- * \file   Controller.h
- * \brief  ECS Controller
- *
- * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
- * \date   October 2024
- * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
- *********************************************************************/
-
 #pragma once
 
 #ifndef CONTROLLER_HPP
