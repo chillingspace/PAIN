@@ -25,8 +25,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
       - name: Build Android app
         working-directory: android
         run: ./gradlew assembleDebug
