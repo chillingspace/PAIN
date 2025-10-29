@@ -202,7 +202,7 @@ namespace PAIN {
         Descriptor Compiler::createDefaultDesc(Info& asset, std::filesystem::path const& path) const {
 
             //Extract asset name from path
-            std::string asset_name = asset.raw_path.stem().string();
+            std::string asset_name = asset.raw_path.filename().string();
 
             //Create default descriptor
             Descriptor desc;

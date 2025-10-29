@@ -338,7 +338,7 @@ namespace PAIN {
                 //Craft asset interface
                 IAsset asset_interface;
                 asset_interface.guid = asset.guid;
-                asset_interface.name = asset.name;
+                asset_interface.name = asset.shipped_path.filename().string();
                 asset_interface.type = asset.type;
                 asset_interface.relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
 

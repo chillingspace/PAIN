@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "skybox.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 2112716213609070794
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "37cc2290-763b-5b41-802b-adce3c1cbdca",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\skybox.vert"
+  }
+}
