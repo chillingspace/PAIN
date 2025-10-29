@@ -147,6 +147,11 @@ namespace PAIN {
 		gamma_shader = LoadShaders("gamma.vert", "gamma.frag");
 #else
 		gamma_shader = LoadShaders("android_gamma.vert", "android_gamma.frag");
+
+#ifdef PN_PLATFORM_WINDOWS
+		debug_shader = LoadShaders("debug_geometry.vert", "debug_geometry.frag");
+#else
+		debug_shader = LoadShaders("android_debug_geometry.vert", "android_debug_geometry.frag");
 #endif
 	}
 
@@ -191,9 +196,8 @@ namespace PAIN {
 			return;
 		}
 
-		// fbo/texture for deferred shading
+		// === Final FBO/Texture For Deffered Shading ===
 		// !TODO: resize when window resizes
-
 		{
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -226,8 +230,7 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// final fbo/texture(final output, for rendering)
-
+		// === Final VAO/Texture (final output, for rendering) ===
 		{
 			glGenFramebuffers(1, &final_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -268,8 +271,7 @@ namespace PAIN {
 
 		}
 
-		// vao/vbo for final passthrough texture
-
+		// === VAO/VBO For Final Passthrough Texture ===
 		{
 			static constexpr float quadVertices[] = {
 				// positions    // texCoords
@@ -297,8 +299,7 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		// vao/vbo for geometry shader
-
+		// === VAO/VBO For Geometry Shaders ===
 		{
 			// Generate and bind VAO
 			glGenVertexArrays(1, &geometry_vao);
@@ -329,11 +330,35 @@ namespace PAIN {
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
+
+
+		// === VAO/VBO For Debug Shaders ===
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &debug_VAO);
+			glBindVertexArray(debug_VAO);
+
+
+			// Generate and bind VBO
+			glGenBuffers(1, &debug_VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+
+			// Color attribute, layout(location = 1)
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+			glBindVertexArray(0);
+		}
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
-		
+	
+
 		initShaders();
 
 		// fallback or placeholder VAO to avoid OpenGL errors 
@@ -413,7 +438,7 @@ namespace PAIN {
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
 	}
-
+	
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
 	{
 		glViewport(0, 0, winWidth, winHeight);
@@ -666,6 +691,50 @@ namespace PAIN {
 
 	}
 
+
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	{
+		if (!debug_VAO || !debug_shader) return;
+
+		std::vector<float> verts; verts.reserve(24 * 7);
+
+		// converts min/max into 8 corners,
+		glm::vec3 v[8] = {
+		  {min_p.x,min_p.y,min_p.z},{max_p.x,min_p.y,min_p.z},
+		  {max_p.x,max_p.y,min_p.z},{min_p.x,max_p.y,min_p.z},
+		  {min_p.x,min_p.y,max_p.z},{max_p.x,min_p.y,max_p.z},
+		  {max_p.x,max_p.y,max_p.z},{min_p.x,max_p.y,max_p.z}
+		};
+
+		// edge index list (tells which pairs of the 8 AABB corners should be connected to form the 12 box edges)
+		int e[24] = { 0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
+
+		// xyz and rgba
+		auto push = [&](const glm::vec3& p, const glm::vec4& c) {
+			verts.insert(verts.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
+		};
+
+		// The loop iterates over all 12 edges by stepping i += 2, takes the two endpoint corners for each edge via v[e[i]] and v[e[i+1]], and pushes both endpoints
+		for (int i = 0; i < 24; i += 2) { 
+			push(v[e[i]], color);
+			push(v[e[i + 1]], color); 
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		debug_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+		glDrawArrays(GL_LINES, 0, 24);
+
+		glDepthMask(GL_TRUE);
+		glBindVertexArray(0);
+	}
+
+
 	void WindowsRenderer::PostProcessPass()
 	{
 		int postprocess_passes = 0;
@@ -756,6 +825,16 @@ namespace PAIN {
 		if (geometry_ebo != 0) {
 			glDeleteBuffers(1, &geometry_ebo);
 			geometry_ebo = 0;
+		}
+
+		if (debug_VAO) {
+			glDeleteVertexArrays(1, &debug_VAO);
+			debug_VAO = 0;
+		}
+
+		if (debug_VBO) {
+			glDeleteBuffers(1, &debug_VBO); 
+			debug_VBO = 0;
 		}
 
 		if (pbr_shader) {

@@ -42,6 +42,9 @@ namespace PAIN {
 			glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+			// Request a debug context
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+
 			glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 			glfwWindowHint(GLFW_DEPTH_BITS, 24);
 			glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);

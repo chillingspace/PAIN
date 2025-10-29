@@ -53,6 +53,7 @@ namespace PAIN {
 
 		void ReflectionPass(const std::shared_ptr<Mesh>& m);
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene);
 		void PostProcessPass();
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale);
@@ -101,15 +102,21 @@ namespace PAIN {
 		unsigned int final_texture = 0;		// for imgui/post-processing/display
 		unsigned int final_texture_2 = 0;	// for ping-pong for post-processing
 
+		// === Debug Buffers ===
+		unsigned int debug_VAO = 0;
+		unsigned int debug_VBO = 0;
+
 		// === Shaders ===
 		std::unique_ptr<Shader> pbr_shader = nullptr;
 		std::unique_ptr<Shader> geometry_shader = nullptr;
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
 		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Camera> active_cam = nullptr;		// what is this for? -js
 		std::unique_ptr<Shader> texture2d_shader = nullptr;
+		std::unique_ptr<Shader> debug_shader = nullptr;
 		std::unique_ptr<Shader> gamma_shader = nullptr;
+
+
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{
