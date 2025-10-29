@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "ogre_gi.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 402563200210805217
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "33175c33-50ea-da41-a2b2-56c611b0e030",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ogre_gi.png"
+  }
+}
