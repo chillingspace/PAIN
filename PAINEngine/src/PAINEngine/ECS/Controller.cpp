@@ -1,4 +1,13 @@
-﻿#include "pch.h"
+﻿/*****************************************************************//**
+ * \file   Controller.h
+ * \brief  ECS Controller
+ *
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \date   October 2024
+ * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
+
+#include "pch.h"
 #include "Controller.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/GLMSerialization.h"
