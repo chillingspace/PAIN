@@ -379,6 +379,13 @@ namespace PAIN {
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
 		//glClearDepth(1.0f);  // Explicitly set clear value
+
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// disable color writes
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
+
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 	}
@@ -399,6 +406,12 @@ namespace PAIN {
 	void WindowsRenderer::EndShadowPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// reenable color writes
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
 	}
 
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)

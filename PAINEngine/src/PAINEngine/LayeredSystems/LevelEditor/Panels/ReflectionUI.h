@@ -125,6 +125,7 @@ bool DrawWithReflection(T& obj) {
     return changed;
 }
 
+#ifdef _DEBUG
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -139,3 +140,4 @@ namespace PAIN {
         }
     }
 }
+#endif
