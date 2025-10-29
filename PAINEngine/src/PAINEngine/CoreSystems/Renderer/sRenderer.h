@@ -7,7 +7,7 @@
 
 #include "Windows/WindowsRenderer.h"
 
-#include <functional> // For std::function
+
 
 namespace PAIN {
 	
@@ -26,7 +26,9 @@ namespace PAIN {
 
 		void shadowPass();
 		void geometryPass();
+		void reflectionPass();
 		void lightingPass();
+		void debugPass(bool show_debug);
 		void postProcessPass();
 		void uiPass();
 

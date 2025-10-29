@@ -1,6 +1,17 @@
+﻿/*****************************************************************//**
+ * \file   Controller.h
+ * \brief  ECS Controller
+ *
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \date   October 2024
+ * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
+
 #include "pch.h"
 #include "Controller.h"
-#include "ECS/Components/cBoundingVolume.h"
+#include "CoreSystems/Serialization/sSerialization.h"
+#include "ECS/Components/GLMSerialization.h"
+#include "ECS/Components/AllComponents.h" 
 
 namespace PAIN {
 	namespace ECS {
@@ -62,11 +73,12 @@ namespace PAIN {
             registerComponent<Transform>("Transform");
             registerComponent<MeshRenderer>("MeshRenderer");
             registerComponent<Lighting>("Lighting");
+            registerComponent<Hierarchy>("Hierarchy");
             //registerComponent<Camera>("Camera");
-            //registerComponent<RigidBody>("RigidBody");
+            registerComponent<Physics::RigidBody3D>("RigidBody3D");
+            registerComponent<Collision::Collider>("Collidor");
+            registerComponent<Joint>("Joint");
 
-            registerComponent<cBoundingVolume>("BoundingVolume"); // For bounding volume
-            
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");
             registerComponent<MetaData::Tag>("Tag");
@@ -152,6 +164,95 @@ namespace PAIN {
             }
 
             return component_names;
+        }
+
+        template<typename... Components>
+        nlohmann::json serializeAllComponentsImpl(
+            entt::entity entity,
+            const entt::registry& registry,
+            std::tuple<Components...>) {
+
+            nlohmann::json components;
+
+            // Use fold expression to check and serialize each component
+            ([&] {
+                if (registry.all_of<Components>(entity)) {
+                    const auto& comp = registry.get<Components>(entity);
+                    std::string comp_name = getComponentName<Components>();
+
+                    // Check if the type is reflectable
+                    if constexpr (refl::trait::is_reflectable_v<Components>) {
+                        // Use reflection-based serialization
+                        components[comp_name] = PAIN::Serialization::to_json_reflected(comp);
+                    }
+                    else {
+                        // Use custom JSON serialization (for glm types)
+                        // nlohmann::json will use custom to_json
+                        components[comp_name] = nlohmann::json(comp);
+                    }
+                }
+                }(), ...);
+
+            return components;
+        }
+
+        template<typename... Components>
+        void Controller::deserializeComponentsImpl(
+            entt::entity entity,
+            const nlohmann::json& comps,
+            std::tuple<Components...>
+        ) {
+            ([&] {
+                std::string comp_name = getComponentName<Components>();
+
+                if (comps.contains(comp_name)) {
+                    try {
+                        Components comp;
+
+                        // Check if type is reflectable
+                        if constexpr (refl::trait::is_reflectable_v<Components>) {
+                            // Use refl-cpp deserialization
+                            PAIN::Serialization::from_json_reflected(comp, comps[comp_name]);
+                        }
+                        else {
+                            // Use adl_serializer (for Transform, Lighting, Physics components)
+                            comp = comps[comp_name].get<Components>();
+                        }
+
+                        // Add or replace component
+                        if (getRegistry().all_of<Components>(entity)) {
+                            getRegistry().replace<Components>(entity, std::move(comp));
+                        }
+                        else {
+                            getRegistry().emplace<Components>(entity, std::move(comp));
+                        }
+                    }
+                    catch (const nlohmann::json::exception& e) {
+                        PN_CORE_ERROR("Failed to deserialize {} (JSON error): {}", comp_name, e.what());
+                    }
+                    catch (const std::exception& e) {
+                        PN_CORE_ERROR("Failed to deserialize {}: {}", comp_name, e.what());
+                    }
+                }
+                }(), ...);
+        }
+
+
+        void Controller::loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps) {
+            if (!comps.is_object()) {
+                PN_CORE_WARN("loadAllComponentsFromJson: Expected object, got {}", comps.type_name());
+                return;
+            }
+
+            deserializeComponentsImpl(entity, comps, AllGameplayComponents{});
+        }
+
+        nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity) const {
+            if (!checkEntity(entity)) {
+                return nlohmann::json::object();
+            }
+
+            return serializeAllComponentsImpl(entity, getRegistry(), AllGameplayComponents{});
         }
 
         bool Controller::hasComponentByName(entt::entity entity, const std::string& name) const {

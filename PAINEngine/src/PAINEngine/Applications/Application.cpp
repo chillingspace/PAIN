@@ -31,9 +31,10 @@
 #include "Systems/Animation/sysAnimation.h" 
 #include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h" 
-#include "Systems/Collision/sBVHSystem.h" // Currently only for bounding volume and BVH
 
-#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h" 
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+
+#include "CoreSystems/Renderer/text.h"
 
 namespace PAIN {
 
@@ -65,36 +66,10 @@ namespace PAIN {
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
 
-		// Check if the system derives from AppSystem
-		if constexpr (std::is_base_of_v<AppSystem, T>) {
-			// Cast to AppSystem base
-			auto app_system_base = std::static_pointer_cast<AppSystem>(core_system);
-
-			// Assign services pointer
-			app_system_base->services = services;
-			// Call onAttach
-			app_system_base->onAttach();
-			// Add to the main services map
-			services->set<T>(core_system);
-			// Add a weak pointer to the AppSystem stack
-			core_stack.push_back(std::weak_ptr<AppSystem>(app_system_base));
-
-		// Check if the system derives from ECS::System::ISystem
-		} else if constexpr (std::is_base_of_v<ECS::System::ISystem, T>) {
-			// ECS::System::ISystem constructor handles service assignment internally.
-			// We do NOT manually assign services here.
-			// ISystem does not have an onAttach method.
-			// Add to the main services map ONLY.
-			services->set<T>(core_system);
-			// DO NOT add ECS systems to the 'core_stack' which expects AppSystem derivatives.
-			// The ECS::Controller will update them.
-			PN_CORE_INFO("Registered ECS System (added to services map only): {}", core_system->getSysName());
-
-		} else {
-			// Log an error if the type doesn't fit expected bases
-			PN_CORE_ERROR("Type added via addCoreSystem must derive from AppSystem or ECS::System::ISystem");
-			assert(false && "Invalid type passed to addCoreSystem");
-		}
+		core_system->services = services;
+		core_system->onAttach();
+		services->set<T>(core_system);
+		core_stack.push_back(services->get<T>());
 	}
 
 	template<typename T>
@@ -128,30 +103,35 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 #endif
 
-
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
 		services->get<Path::Path>()->logVirtualPaths();
+
+		//Create asset service
+		addCoreSystem(std::make_shared<Assets::Manager>());
 
 		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
+		// dependency injection
+		TextRenderer::init(services);
+
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS
-        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
-        app_audio->play(asset_path);
+        //app_audio->play(asset_path);
 #else
-        app_audio->loadSound("file:///android_asset/Game/Audio/Music/Boss_Music.wav", true, false, false);
-        app_audio->play("file:///android_asset/Game/Audio/Music/Boss_Music.wav");
+        app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
+        app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
-		addCoreSystem(std::make_shared<sBVHSystem>(services)); // BVH system
+
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
@@ -272,6 +252,9 @@ namespace PAIN {
 		//Update timing variables
 		timing.steps_this_frame = steps;
 		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
+		// clear errors before next rendering loop
+		while (glGetError());
 
 		//Update all core systems
 		for (auto& core : core_stack) core.lock()->onUpdate(timing);

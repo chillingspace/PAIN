@@ -25,7 +25,6 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/Camera.h"
 #include "CoreSystems/Path/Path.h"
-#include "CoreSystems/Collision/BoundingVolume.h" // For AABB struct definition
 
 namespace PAIN {
 	extern Material material;
@@ -52,13 +51,12 @@ namespace PAIN {
 		void DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M);
 		void EndGeometryPass();
 
+		void ReflectionPass(const std::shared_ptr<Mesh>& m);
 		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene);
 		void PostProcessPass();
 
-		void Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale);
-
-		// Renders the wireframe of an AABB.
-    	void DrawAABBWireframe(const AABB& aabb, const glm::mat4& vpMatrix, const glm::vec3& color);
+		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale);
 
 		void Cleanup();
 
@@ -84,6 +82,7 @@ namespace PAIN {
 		unsigned int ds_rbo = 0;				// depth buffer
 		//unsigned int shadow_fbo = 0;
 		unsigned int final_fbo = 0;
+		unsigned int final_rbo = 0;
 
 		// === Textures ===
 		unsigned int pos_texture = 0;
@@ -101,6 +100,11 @@ namespace PAIN {
 		unsigned int passthrough_vbo = 0;
 
 		unsigned int final_texture = 0;		// for imgui/post-processing/display
+		unsigned int final_texture_2 = 0;	// for ping-pong for post-processing
+
+		// === Debug Buffers ===
+		unsigned int debug_VAO = 0;
+		unsigned int debug_VBO = 0;
 
 		// === Shaders ===
 		std::unique_ptr<Shader> pbr_shader = nullptr;
@@ -108,13 +112,11 @@ namespace PAIN {
 		std::unique_ptr<Shader> floor_shader = nullptr;
 		std::unique_ptr<Shader> passthrough_shader = nullptr;
 		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Camera> active_cam = nullptr;		// what is this for? -js
 		std::unique_ptr<Shader> texture2d_shader = nullptr;
+		std::unique_ptr<Shader> debug_shader = nullptr;
+		std::unique_ptr<Shader> gamma_shader = nullptr;
 
-		// For bounding volume and BVH wireframe
-		std::unique_ptr<Shader> m_debugLineShader = nullptr; // Shader for drawing lines
-		unsigned int m_debugLineVAO = 0; // VAO for line vertices
-		unsigned int m_debugLineVBO = 0; // VBO for line vertices
+
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{
@@ -122,13 +124,15 @@ namespace PAIN {
 			//&shadow_fbo, 
 			&final_fbo
 		};
-		std::array<unsigned int*, 1> rbos{ &ds_rbo };
-		std::array<unsigned int*, 4> texs{
+		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
+		std::array<unsigned int*, 6> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
-			//&shadow_texture
+			//&shadow_texture,
+			&final_texture,
+			& final_texture_2
 		};
 
 		std::shared_ptr<Services> services;

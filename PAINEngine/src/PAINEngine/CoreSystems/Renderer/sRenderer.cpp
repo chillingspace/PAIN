@@ -15,8 +15,8 @@
 
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
-#include "Systems/Collision/sBVHSystem.h"
 
+#include "CoreSystems/Renderer/skybox.h"
 
 namespace PAIN {
 	void sRenderer::onDetach()
@@ -88,10 +88,15 @@ namespace PAIN {
 		auto& registry = ecs->getRegistry();
 		auto view = registry.view<MetaData::EntityName>();
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before geometry pass: {}", err);
+		}
+
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
-			auto transform = ecs->getEntityComponent<Transform>(e);
+  			auto transform = ecs->getEntityComponent<Transform>(e);
 			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
 			glm::mat4 model;
 			if (transform.has_value())
@@ -106,13 +111,96 @@ namespace PAIN {
 
 		}
 		w_renderer->EndGeometryPass();
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+		}
+	}
+
+	void sRenderer::reflectionPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		for (auto e : view) {
+
+			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			glm::mat4 model;
+			if (transform.has_value())
+			{
+				model = transform.value().get().getMatrix();
+			}
+			if (mesh.has_value())
+			{
+				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+				w_renderer->ReflectionPass(mesh_ptr);
+			}
+
+		}
 	}
 
 	void sRenderer::lightingPass()
 	{
 		auto scene = services->get<Scene>();
 		w_renderer->LightingPass(scene, LightSources::get());
+
+		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
 	}
+
+	void sRenderer::debugPass(bool show_debug)
+	{
+		if (!show_debug) { return; }
+
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+		auto& reg = ecs->getRegistry();
+		auto view = reg.view<MetaData::EntityName>();
+
+		for (auto e : view) {
+			auto trans = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			if (!trans.has_value() || !mesh.has_value()) continue;
+
+			glm::mat4 mat = trans->get().getMatrix();
+			auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+
+			glm::vec3 min_aabb = mesh_ptr->getAABBMin(), max_aabb = mesh_ptr->getAABBMax();
+
+			// Transform 8 corners to world space
+			glm::vec3 corners[8] = {
+			  {min_aabb.x,min_aabb.y,min_aabb.z},{max_aabb.x,min_aabb.y,min_aabb.z},
+			  {max_aabb.x,max_aabb.y,min_aabb.z},{min_aabb.x,max_aabb.y,min_aabb.z},
+			  {min_aabb.x,min_aabb.y,max_aabb.z},{max_aabb.x,min_aabb.y,max_aabb.z},
+			  {max_aabb.x,max_aabb.y,max_aabb.z},{min_aabb.x,max_aabb.y,max_aabb.z}
+			};
+
+			glm::vec3 w_min(FLT_MAX), w_max(-FLT_MAX);
+
+#ifdef PN_PLATFORM_WINDOWS
+            for (auto& c : corners) {
+				glm::vec4 w = mat * glm::vec4(c, 1.0f);
+				w_min.x = min(w_min.x, w.x); w_min.y = min(w_min.y, w.y); w_min.z = min(w_min.z, w.z);
+				w_max.x = max(w_max.x, w.x); w_max.y = max(w_max.y, w.y); w_max.z = max(w_max.z, w.z);
+			}
+#else
+            for (auto& c : corners) {
+                glm::vec4 w = mat * glm::vec4(c, 1.0f);
+                w_min.x = fmin(w_min.x, w.x); w_min.y = fmin(w_min.y, w.y); w_min.z = fmin(w_min.z, w.z);
+                w_max.x = fmax(w_max.x, w.x); w_max.y = fmax(w_max.y, w.y); w_max.z = fmax(w_max.z, w.z);
+            }
+#endif
+
+			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene);
+		}
+	}
+
+
 	void sRenderer::postProcessPass()
 	{
 		w_renderer->PostProcessPass();
@@ -121,12 +209,20 @@ namespace PAIN {
 	void sRenderer::onUpdate(AppTiming timing) {
 
 		{
-#ifdef DEBUG
+#ifdef _DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
+			bool editor_debug = editor && editor->isDebugMode();
+
 #else
 			bool editor_visible = false;
+			bool editor_debug = false;
 #endif
+
+			GLenum err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
+			}
 
 			if (editor_visible) {
 				glBindFramebuffer(GL_FRAMEBUFFER, w_renderer->getFinalFbo());
@@ -152,75 +248,39 @@ namespace PAIN {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err before render passes: {}", err);
+			}
+
 			// Render all passes
 			shadowPass();
-			geometryPass();
-			lightingPass();
-			postProcessPass();
-
-			// --- BVH Debug Drawing ---
-			auto bvhSystem = services->get<sBVHSystem>(); // Get the BVH system
-
-			// Check if BVH system, renderer, scene are valid, and if BVH is not empty
-			if (bvhSystem && w_renderer && m_Scene && !bvhSystem->getBVH().isEmpty()) {
-				const BVH& bvh = bvhSystem->getBVH();
-				const std::vector<BVHNode>& nodes = bvh.getNodes();
-				int rootIndex = bvh.getRootIndex();
-
-				// Calculate the combined View-Projection matrix from the active camera
-				glm::mat4 vpMatrix = m_Scene->GetActiveCamera()->projection() * m_Scene->GetActiveCamera()->view();
-
-				// Define a recursive lambda function to traverse and draw BVH nodes
-				std::function<void(int nodeIndex, int depth)> drawNodeRecursive =
-					[&](int nodeIndex, int depth) {
-					// Stop recursion if index is invalid or node is marked as free
-					if (nodeIndex == -1 || nodeIndex >= nodes.size() || nodes[nodeIndex].height == -1) {
-						return;
-					}
-					const BVHNode& node = nodes[nodeIndex];
-
-					// Select color: green for leaves, varying colors for internal nodes based on depth
-					glm::vec3 color;
-					if (node.isLeaf()) {
-						color = glm::vec3(0.0f, 1.0f, 0.0f); // Green
-					} else {
-						// Simple color cycling based on depth modulo 6
-						int colorIndex = depth % 6;
-						switch (colorIndex) {
-							case 0: color = glm::vec3(1.0f, 0.0f, 0.0f); break; // Red
-							case 1: color = glm::vec3(1.0f, 0.5f, 0.0f); break; // Orange
-							case 2: color = glm::vec3(1.0f, 1.0f, 0.0f); break; // Yellow
-							case 3: color = glm::vec3(0.0f, 1.0f, 1.0f); break; // Cyan
-							case 4: color = glm::vec3(0.0f, 0.0f, 1.0f); break; // Blue
-							default: color = glm::vec3(1.0f, 0.0f, 1.0f); break; // Magenta
-						}
-						color *= 0.8f; // Slightly dim internal nodes
-					}
-
-					// Call the renderer's function to draw the wireframe AABB
-					w_renderer->DrawAABBWireframe(node.aabb, vpMatrix, color);
-
-					// If it's an internal node, recurse for its children
-					if (!node.isLeaf()) {
-						drawNodeRecursive(node.child1Index, depth + 1);
-						drawNodeRecursive(node.child2Index, depth + 1);
-					}
-				};
-
-				// Prepare OpenGL state for drawing lines on top of the scene
-				glDisable(GL_DEPTH_TEST); // Draw lines regardless of scene depth
-
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Tell OpenGL to draw triangles as wireframes
-
-				// Start the recursive drawing process from the root node
-				drawNodeRecursive(rootIndex, 0);
-
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Restore to default drawing mode
-				
-				// Restore OpenGL state
-				glEnable(GL_DEPTH_TEST); // Re-enable depth testing
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 			}
-			// --- End BVH Debug Drawing ---
+			geometryPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+			}
+			reflectionPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
+			}
+			lightingPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
+			}
+		
+			debugPass(editor_debug);
+			postProcessPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}

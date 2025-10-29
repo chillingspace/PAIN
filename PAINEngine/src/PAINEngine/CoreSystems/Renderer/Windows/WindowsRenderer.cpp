@@ -8,9 +8,11 @@
  * @copyright Copyright (c) 2025
  *
  */
-
+#include "CoreSystems/Assets/sAssets.h"
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/texture.h"
+#include "CoreSystems/Renderer/text.h"
+#include "CoreSystems/Renderer/skybox.h"
 
 
 namespace PAIN {
@@ -65,8 +67,8 @@ namespace PAIN {
 		//Get path service
 		auto path_service = services->get<Path::Path>();
 
-		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://shaders/" + vert_file);
+		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://shaders/" + frag_file);
 
 		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
 		std::string vert_code = ReadFile(vert_full);
@@ -78,8 +80,8 @@ namespace PAIN {
 
         //Get path service
         auto path_service = services->get<Path::Path>();
-        auto vert_path = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-        auto frag_path = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
+        auto vert_path = path_service->resolvePath("engine_assets://shaders/" + vert_file);
+        auto frag_path = path_service->resolvePath("engine_assets://shaders/" + frag_file);
 		std::string vert_code = ReadFileAndroid(vert_path);
 		std::string frag_code = ReadFileAndroid(frag_path);
 #endif
@@ -140,6 +142,18 @@ namespace PAIN {
 #else
 		texture2d_shader = LoadShaders("android_texture2d.vert", "android_texture2d.frag");
 #endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		gamma_shader = LoadShaders("gamma.vert", "gamma.frag");
+#else
+		gamma_shader = LoadShaders("android_gamma.vert", "android_gamma.frag");
+#endif
+
+#ifdef PN_PLATFORM_WINDOWS
+		debug_shader = LoadShaders("debug_geometry.vert", "debug_geometry.frag");
+#else
+		debug_shader = LoadShaders("android_debug_geometry.vert", "android_debug_geometry.frag");
+#endif
 	}
 
 	// TO BE MOVED
@@ -183,9 +197,8 @@ namespace PAIN {
 			return;
 		}
 
-		// fbo/texture for deferred shading
+		// === Final FBO/Texture For Deffered Shading ===
 		// !TODO: resize when window resizes
-
 		{
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -193,7 +206,7 @@ namespace PAIN {
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 
 			unsigned int attachments[4] = {
 				GL_COLOR_ATTACHMENT0,
@@ -218,8 +231,7 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// final fbo/texture(final output, for rendering)
-
+		// === Final VAO/Texture (final output, for rendering) ===
 		{
 			glGenFramebuffers(1, &final_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -237,11 +249,30 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
+			glGenRenderbuffers(1, &final_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, final_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, final_rbo);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// final_texture_2 for ping-pong if needed in post-processing
+			glGenTextures(1, &final_texture_2);
+			if (final_texture_2 == 0) {
+				PN_CORE_ERROR("Failed to create final texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+
 		}
 
-		// vao/vbo for final passthrough texture
-
+		// === VAO/VBO For Final Passthrough Texture ===
 		{
 			static constexpr float quadVertices[] = {
 				// positions    // texCoords
@@ -269,8 +300,7 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		// vao/vbo for geometry shader
-
+		// === VAO/VBO For Geometry Shaders ===
 		{
 			// Generate and bind VAO
 			glGenVertexArrays(1, &geometry_vao);
@@ -301,11 +331,35 @@ namespace PAIN {
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
+
+
+		// === VAO/VBO For Debug Shaders ===
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &debug_VAO);
+			glBindVertexArray(debug_VAO);
+
+
+			// Generate and bind VBO
+			glGenBuffers(1, &debug_VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+
+			// Color attribute, layout(location = 1)
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+			glBindVertexArray(0);
+		}
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
-		
+	
+
 		initShaders();
 
 		// fallback or placeholder VAO to avoid OpenGL errors 
@@ -317,57 +371,15 @@ namespace PAIN {
 
 		_initDeferredShadingBuffers();
 
-		// --- Debug Line Renderer Setup ---
-		PN_CORE_INFO("Initializing Debug Line Renderer...");
-		#ifdef PN_PLATFORM_WINDOWS
-			// Load the debug shaders
-			m_debugLineShader = LoadShaders("debug_line.vert", "debug_line.frag");
-		#else
-			// Attempt to load Windows versions as fallback if LoadShaders handles it
-			m_debugLineShader = LoadShaders("debug_line.vert", "debug_line.frag");
-			// If LoadShaders needs platform-specific paths, adjust here:
-			// PN_CORE_WARN("Debug line shaders might need Android-specific paths.");
-		#endif
-
-		if (!m_debugLineShader) {
-			PN_CORE_ERROR("Failed to load debug line shader program!");
-			// Consider cleanup or throwing an exception
-		} else {
-			PN_CORE_INFO("Debug line shader loaded successfully.");
-		}
-
-		// Create Vertex Array Object (VAO) and Vertex Buffer Object (VBO) for lines
-		glGenVertexArrays(1, &m_debugLineVAO);
-		glGenBuffers(1, &m_debugLineVBO);
-
-		glBindVertexArray(m_debugLineVAO); // Bind the VAO to configure it
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_debugLineVBO); // Bind the VBO
-		// Allocate buffer memory. We need 24 vec3 vertices (12 lines * 2 endpoints).
-		// Use GL_DYNAMIC_DRAW because we'll update vertex data frequently (per AABB).
-		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
-
-		// Specify the layout of the vertex data (position only)
-		// Corresponds to 'layout (location = 0)' in the vertex shader.
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-
-		// Unbind VBO and VAO
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-		PN_CORE_INFO("Debug Line VAO/VBO created.");
-		// --- End Debug Line Renderer Setup ---
-
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
 	}
 
-	void WindowsRenderer::Render2DTexture(const std::string& ref, const glm::vec2& pos, float scale) {
-		const auto texmap = TextureManager::get().getTextureMap();
-		if (texmap.find(ref) == texmap.end()) {
-			PN_CORE_ERROR("Texture with ref '{}' not found!", ref);
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
+		if (texture_id == 0) {
+			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
 			return;
 		}
 
@@ -381,7 +393,7 @@ namespace PAIN {
 		texture2d_shader->SetUniform("ndc_scale", scale);
 
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, texmap.at(ref));
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 		texture2d_shader->SetUniform("tex", 6);
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -393,6 +405,13 @@ namespace PAIN {
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
 		//glClearDepth(1.0f);  // Explicitly set clear value
+
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// disable color writes
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
+
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 	}
@@ -413,13 +432,33 @@ namespace PAIN {
 	void WindowsRenderer::EndShadowPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
 
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// reenable color writes
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
+	}
+	
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
 	{
 		glViewport(0, 0, winWidth, winHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//GLenum err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error before drawing skybox: {}", err);
+		//}
+
+		//// draw skybox
+		//{
+		//	Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+		//}
+		//err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error after drawing skybox: {}", err);
+		//}
 
 		// draw floor
 		{
@@ -437,6 +476,11 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
+		}
+
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
@@ -445,6 +489,11 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M)
 	{
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
+		}
+
 		if (!mesh || !geometry_shader) return;
 
 		geometry_shader->SetUniform("u_M", M);
@@ -453,19 +502,44 @@ namespace PAIN {
 		geometry_shader->SetUniform("material.metal", mesh->material.metal);
 		geometry_shader->SetUniform("material.color", mesh->material.color);
 		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
+		geometry_shader->SetUniform("material.alwaysLit", mesh->material.alwaysLit ? 1.f : 0.f);
 
 		if (mesh->material.useTex) {
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+			glBindTexture(GL_TEXTURE_2D, mesh->material.tex);
 			geometry_shader->SetUniform("material.tex", 6);
+
+			if (GraphicsSettings::get().ao && mesh->material.useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, mesh->material.aoTex);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.f);
+			}
 		}
 
 		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after DrawGeometry: {}", err);
+		}
 	}
 
 	void WindowsRenderer::EndGeometryPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void WindowsRenderer::ReflectionPass(const std::shared_ptr<Mesh>& m)
+	{
+		if (m->material.reflection_type == m->material.REFLECTION_TYPES::NONE) {
+			return;
+		}
+
+
 	}
 
 	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
@@ -500,6 +574,10 @@ namespace PAIN {
 
 		{
 			// pbr pass
+
+			// lighting shouldnt write to depth buffer
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
 
 			pbr_shader->Bind();
 
@@ -590,89 +668,141 @@ namespace PAIN {
 
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
 
-		// render 2D textures onto screen
+			glEnable(GL_DEPTH_TEST);
 
-		{
-			// !TODO: add queue and iterate through all 2D textures to be rendered last
-			Render2DTexture("sunshine", { 0.85f, -0.85f }, 0.1f);
+			// After lighting pass, final_fbo has the lit scene but NO depth buffer yet
+			// So we copy it:
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, ds_fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
+			glBlitFramebuffer(0, 0, winWidth, winHeight,
+				0, 0, winWidth, winHeight,
+				GL_DEPTH_BUFFER_BIT, GL_NEAREST);  // Copy depth only
+
+			// Now final_fbo has depth info. Render skybox:
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glDepthFunc(GL_LEQUAL);  // Pass if depth <= existing depth
+			glDepthMask(GL_FALSE);   // Don't write to depth buffer
+
+			Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+
+			glDepthMask(GL_TRUE);
+			glDepthFunc(GL_LESS);
 		}
 
 	}
 
-	// Renders the 12 edges of an AABB as lines.
-	void WindowsRenderer::DrawAABBWireframe(const AABB& aabb, const glm::mat4& vpMatrix, const glm::vec3& color) {
-		// Check if debug resources are valid
-		if (!m_debugLineShader || m_debugLineVAO == 0 || m_debugLineVBO == 0) {
-			// PN_CORE_WARN("Cannot draw AABB wireframe: Debug resources not initialized."); // Avoid excessive logging
-			return;
+
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	{
+		if (!debug_VAO || !debug_shader) return;
+
+		std::vector<float> verts; verts.reserve(24 * 7);
+
+		// converts min/max into 8 corners,
+		glm::vec3 v[8] = {
+		  {min_p.x,min_p.y,min_p.z},{max_p.x,min_p.y,min_p.z},
+		  {max_p.x,max_p.y,min_p.z},{min_p.x,max_p.y,min_p.z},
+		  {min_p.x,min_p.y,max_p.z},{max_p.x,min_p.y,max_p.z},
+		  {max_p.x,max_p.y,max_p.z},{min_p.x,max_p.y,max_p.z}
+		};
+
+		// edge index list (tells which pairs of the 8 AABB corners should be connected to form the 12 box edges)
+		int e[24] = { 0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
+
+		// xyz and rgba
+		auto push = [&](const glm::vec3& p, const glm::vec4& c) {
+			verts.insert(verts.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
+		};
+
+		// The loop iterates over all 12 edges by stepping i += 2, takes the two endpoint corners for each edge via v[e[i]] and v[e[i+1]], and pushes both endpoints
+		for (int i = 0; i < 24; i += 2) { 
+			push(v[e[i]], color);
+			push(v[e[i + 1]], color); 
 		}
 
-		glm::vec3 min = aabb.min;
-		glm::vec3 max = aabb.max;
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
 
-		// Define the 8 corner vertices of the AABB
-		glm::vec3 corners[8] = {
-			glm::vec3(min.x, min.y, min.z), // 0: Lower-back-left
-			glm::vec3(max.x, min.y, min.z), // 1: Lower-back-right
-			glm::vec3(max.x, max.y, min.z), // 2: Upper-back-right
-			glm::vec3(min.x, max.y, min.z), // 3: Upper-back-left
-			glm::vec3(min.x, min.y, max.z), // 4: Lower-front-left
-			glm::vec3(max.x, min.y, max.z), // 5: Lower-front-right
-			glm::vec3(max.x, max.y, max.z), // 6: Upper-front-right
-			glm::vec3(min.x, max.y, max.z)  // 7: Upper-front-left
-		};
+		debug_shader->Bind();
+		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		debug_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
 
-		// Define the 24 vertices needed for the 12 lines (2 vertices per line)
-		glm::vec3 vertices[24] = {
-			corners[0], corners[1], // Bottom face edges
-			corners[1], corners[5],
-			corners[5], corners[4],
-			corners[4], corners[0],
-			corners[3], corners[2], // Top face edges
-			corners[2], corners[6],
-			corners[6], corners[7],
-			corners[7], corners[3],
-			corners[0], corners[3], // Connecting vertical edges
-			corners[1], corners[2],
-			corners[5], corners[6],
-			corners[4], corners[7]
-		};
-
-		// Activate the debug line shader program
-		m_debugLineShader->Bind();
-		// Set the combined view-projection matrix uniform
-		m_debugLineShader->SetUniform("u_VP", vpMatrix);
-		// Set the line color uniform
-		m_debugLineShader->SetUniform("u_Color", color);
-
-		// Bind the VAO and VBO for line drawing
-		glBindVertexArray(m_debugLineVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, m_debugLineVBO);
-		// Upload the new vertex data for this specific AABB to the VBO
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 24 * sizeof(glm::vec3), vertices);
-
-		// Draw the 12 lines (24 vertices)
 		glDrawArrays(GL_LINES, 0, 24);
 
-		// Unbind the VBO and VAO
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDepthMask(GL_TRUE);
 		glBindVertexArray(0);
-
-		// Unbind the shader program
-		m_debugLineShader->UnBind();
 	}
+
 
 	void WindowsRenderer::PostProcessPass()
 	{
+		int postprocess_passes = 0;
+
+		// gamma correction
+		if (GraphicsSettings::get().gamma_correction) {
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+			gamma_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			gamma_shader->SetUniform("tex", 0);
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			++postprocess_passes;
+		}
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err during PostProcessPass: {}", err);
+		}
+
+		// make sure final_texture now holds the gamma corrected texture
+		// use passthrough to render final_texture_2 to final_texture if odd number of passes
+		if (postprocess_passes % 2) {
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+			passthrough_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			passthrough_shader->SetUniform("tex", 0);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+		// set back to use final_fbo and final_texture for further rendering
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		// render 2D textures onto screen
+		{
+			// !TODO: add queue and iterate through all 2D textures to be rendered last
+			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
+			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
+		}
+
+		// render text onto screen
+		{
+			TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
+			TextRenderer::get().debugRenderQuad();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
+		}
+
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
-
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, final_texture);
-
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
@@ -698,6 +828,16 @@ namespace PAIN {
 			geometry_ebo = 0;
 		}
 
+		if (debug_VAO) {
+			glDeleteVertexArrays(1, &debug_VAO);
+			debug_VAO = 0;
+		}
+
+		if (debug_VBO) {
+			glDeleteBuffers(1, &debug_VBO); 
+			debug_VBO = 0;
+		}
+
 		if (pbr_shader) {
 			pbr_shader.reset();
 		}
@@ -721,22 +861,6 @@ namespace PAIN {
 				glDeleteRenderbuffers(1, rbo);
 				*rbo = 0;
 			}
-		}
-
-		// Clean up debug drawing resources
-		if (m_debugLineShader) {
-			m_debugLineShader.reset(); // Calls shader destructor
-			PN_CORE_INFO("Debug line shader destroyed.");
-		}
-		if (m_debugLineVAO != 0) {
-			glDeleteVertexArrays(1, &m_debugLineVAO);
-			m_debugLineVAO = 0;
-			PN_CORE_INFO("Debug line VAO destroyed.");
-		}
-		if (m_debugLineVBO != 0) {
-			glDeleteBuffers(1, &m_debugLineVBO);
-			m_debugLineVBO = 0;
-			PN_CORE_INFO("Debug line VBO destroyed.");
 		}
 	}
 }
