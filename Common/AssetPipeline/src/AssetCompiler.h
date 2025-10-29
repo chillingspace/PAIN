@@ -14,11 +14,6 @@ namespace PAIN {
 			Android
 		};
 
-		struct CompilationException : std::runtime_error {
-			using std::runtime_error::runtime_error;
-		};
-
-
 		//Asset compiler
 		class Compiler {
 		private:
@@ -64,13 +59,11 @@ namespace PAIN {
 			void compileTexture(Descriptor const& desc_file, Info& asset_info) const;
 			void compileAudio(Descriptor const& desc_file, Info& asset_info) const;
 			void compileModel(Descriptor const& desc_file, Info& asset_info) const;
-			void compileScript(Descriptor const& desc_file, Info& asset_info) const;
 			std::string GetCuttlefishExecutable() const;
 			bool CompressTextureDDS(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetASTCEncoderExecutable() const;
 			std::string ConvertToASTCBlockSize(const std::string& format) const;
 			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
-			bool BakeLuaFileToJson(const std::filesystem::path& lua_in, const std::filesystem::path& json_out, const nlohmann::json& import_settings) const;
 
 		public:
 

@@ -1,134 +1,11 @@
 #include "AssetCompiler.h"
 
-#include <cmath>
-#include <chrono>
-#include <limits>
-
 #include "stb_image.h"
 #include "stb_image_resize2.h"
 #include "stb_image_write.h"
 
-#include <sol/sol.hpp>
-
-static void open_libs_from_settings(sol::state& lua, const nlohmann::json& import_settings) {
-    std::vector<std::string> libs = { "base","math","string","table","utf8" };
-    if (import_settings.contains("lua_libs") && import_settings["lua_libs"].is_array()) {
-        libs.clear();
-        for (auto& s : import_settings["lua_libs"]) libs.push_back(s.get<std::string>());
-    }
-    for (auto& name : libs) {
-        if (name == "base")   lua.open_libraries(sol::lib::base);
-        else if (name == "math")   lua.open_libraries(sol::lib::math);
-        else if (name == "string") lua.open_libraries(sol::lib::string);
-        else if (name == "table")  lua.open_libraries(sol::lib::table);
-        else if (name == "utf8")   lua.open_libraries(sol::lib::utf8);
-        else if (name == "os")     lua.open_libraries(sol::lib::os);
-        else if (name == "io")     lua.open_libraries(sol::lib::io);
-    }
-}
-
-// forward with policy flag
-static nlohmann::json to_json_sol_obj(const sol::object& o, bool error_on_unsupported);
-
-static nlohmann::json to_json_sol_table(const sol::table& t, bool error_on_unsupported) {
-    const int n = static_cast<int>(t.size());
-
-    // Treat as array ONLY if there is at least one element and all keys are 1..n
-    bool array_like = (n > 0);
-    for (int i = 1; array_like && i <= n; ++i) {
-        if (!t.get<sol::object>(i).valid()) array_like = false;
-    }
-
-    // debug: which path was chosen
-    // std::cerr << "[LuaBake] table size=" << n << " -> "
-    //     << (array_like ? "ARRAY" : "OBJECT") << "\n";
-
-    if (array_like) {
-        nlohmann::json a = nlohmann::json::array();
-        for (int i = 1; i <= n; ++i) {
-            a.push_back(to_json_sol_obj(t.get<sol::object>(i), error_on_unsupported));
-        }
-        return a;
-    }
-    // object-like
-    nlohmann::json j = nlohmann::json::object();
-    for (auto& kv : t) {
-        if (kv.first.get_type() != sol::type::string) {
-            if (error_on_unsupported)
-                throw std::runtime_error("[LuaBake] non-string key in object table");
-            // permissive fallback
-            std::string k = kv.first.as<std::string>();
-            j[k] = to_json_sol_obj(kv.second, error_on_unsupported);
-            continue;
-        }
-        std::string k = kv.first.as<std::string>();
-        j[k] = to_json_sol_obj(kv.second, error_on_unsupported);
-    }
-    return j;
-}
-
-static nlohmann::json to_json_sol_obj(const sol::object& o, bool error_on_unsupported) {
-    switch (o.get_type()) {
-    case sol::type::nil:     return nullptr;
-    case sol::type::boolean: return o.as<bool>();
-    case sol::type::number: {
-                                double d = o.as<double>();
-                                if (std::isfinite(d) && std::floor(d) == d &&
-                                    d >= static_cast<double>(std::numeric_limits<int64_t>::min()) &&
-                                    d <= static_cast<double>(std::numeric_limits<int64_t>::max())) {
-                                        return static_cast<int64_t>(d); // keep integers
-                                    }
-                                return d; 
-                            }
-    case sol::type::string:  return o.as<std::string>();
-    case sol::type::table:   return to_json_sol_table(o.as<sol::table>(), error_on_unsupported);
-    default:
-        if (error_on_unsupported)
-            throw std::runtime_error("[LuaBake] unsupported Lua type");
-        return nullptr;
-    }
-}
-
-void enforce_platform_rules(const nlohmann::json& baked,
-    const nlohmann::json& settings,
-    PAIN::Assets::Platform platform,
-    std::string_view source)
-{
-    // bail if no overrides section
-    if (!settings.contains("platform_overrides") || !settings["platform_overrides"].is_object())
-        return;
-
-    const auto& overrides = settings["platform_overrides"];
-    const char* key = (platform == PAIN::Assets::Platform::Android) ? "Android" : "Windows";
-
-    const nlohmann::json* po = nullptr;
-    if (auto it = overrides.find(key); it != overrides.end())
-        po = &it.value();
-
-    if (!po) return;
-
-    if (po->contains("max_waypoints")) {
-        int mw = (*po)["max_waypoints"].get<int>();
-        if (baked.contains("waypoints") && baked["waypoints"].is_array()
-            && static_cast<int>(baked["waypoints"].size()) > mw) {
-            throw PAIN::Assets::CompilationException(std::string(source) + ": too many waypoints for platform");
-        }
-    }
-
-    if (po->contains("forbid_fields")) {
-        for (const auto& f : (*po)["forbid_fields"]) {
-            const std::string fld = f.get<std::string>();
-            if (baked.contains(fld)) {
-                throw PAIN::Assets::CompilationException(std::string(source) + ": field forbidden on platform: " + fld);
-            }
-        }
-    }
-}
-
 namespace PAIN {
 	namespace Assets {
-
-         
 
         uint64_t Compiler::getCurrentTimeStamp() const {
             //Get current timestamp in milliseconds since epoch
@@ -212,13 +89,6 @@ namespace PAIN {
                 //settings["weld_threshold"] = 0.001;
                 break;
 
-            case Type::Script:
-                settings["schema_version"] = 1;
-                settings["output"] = "json"; 
-                settings["error_on_unsupported"] = true; // fail build on functions/userdata
-                settings["lua_libs"] = {"base","math","string","table","utf8"};
-                break;
-                
             default:
                 break;
             }
@@ -251,10 +121,6 @@ namespace PAIN {
                     //checker =   (settings.contains("generate_lods") &&
                     //            settings.contains("optimize_vertices") &&
                     //            settings.contains("weld_threshold"));
-                    break;
-                
-                case Type::Script:
-                    checker = (settings.contains("schema_version") && settings.contains("output"));
                     break;
 
                 default:
@@ -335,7 +201,7 @@ namespace PAIN {
                     desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
                 }
 
-                desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
+                desc.meta_data = desc_json.value("metadata", nlohmann::json{});
 
                 file.close();
 
@@ -409,10 +275,6 @@ namespace PAIN {
 
             case Type::Model:
                 compileModel(desc_file, asset_info);
-                break;
-
-            case Type::Script:
-                compileScript(desc_file, asset_info);
                 break;
                 
             default:
@@ -527,90 +389,6 @@ namespace PAIN {
         void Compiler::compileModel(Descriptor const& desc_file, Info& asset_info) const {
             //To be implemented
         }
-
-        void Compiler::compileScript(Descriptor const& desc_file, Info& asset_info) const {
-            asset_info.shipped_path =
-                output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + ".json");
-
-            if (asset_info.raw_last_modified <= (getFileLastModified(asset_info.shipped_path) + TOLERANCE_MS)) {
-                std::cout << "Script up to date: " << asset_info.raw_path.filename() << "\n";
-                return;
-            }
-
-            if (!verifyDirectory(asset_info.shipped_path)) {
-                throw CompilationException("Cannot create directory for: " + asset_info.shipped_path.string());
-            }
-
-            auto t0 = std::chrono::high_resolution_clock::now();
-            bool ok = BakeLuaFileToJson(asset_info.raw_path, asset_info.shipped_path, desc_file.import_settings);
-
-            if (ok && desc_file.import_settings.contains("required_fields")) { // schema check
-                try {
-                    std::ifstream in(asset_info.shipped_path);
-                    nlohmann::json baked; in >> baked;
-                    enforce_platform_rules(baked, desc_file.import_settings, platform, asset_info.raw_path.string());
-                    for (auto& fld : desc_file.import_settings["required_fields"]) {
-                        const std::string k = fld.get<std::string>();
-                        if (!baked.contains(k)) {
-                            std::cerr << "[LuaBake] ERROR: missing required field '" << k
-                                      << "' in " << asset_info.raw_path << "\n";
-                            ok = false;
-                        }
-                    }
-                } 
-                catch (...) {
-                    ok = false;
-                }
-            }
-
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
-
-            if (ok) {
-                std::cout << "Script OK (" << ms << "ms): " << asset_info.raw_path.filename() << "\n";
-            } 
-            else {
-                throw CompilationException("Script FAILED (" + std::to_string(ms) + "ms): " + asset_info.raw_path.string());
-            }
-        }
-
-        bool Compiler::BakeLuaFileToJson(const std::filesystem::path& lua_in,
-                                 const std::filesystem::path& json_out,
-                                 const nlohmann::json& import_settings) const
-        {
-            try {
-                sol::state lua;
-                open_libs_from_settings(lua, import_settings);
-
-                auto res = lua.safe_script_file(lua_in.string(), &sol::script_pass_on_error);
-                if (!res.valid()) {
-                    sol::error err = res;
-                    std::cerr << "[LuaBake] ERROR in " << std::filesystem::absolute(lua_in).string() << "\n"
-                                << "  " << err.what() << "\n";
-                    return false;
-                }
-
-                sol::object ret = res.get<sol::object>();               
-                if (ret.get_type() != sol::type::table) {
-                    std::cerr << "[LuaBake] ERROR: " << lua_in << " must `return { ... }`\n";
-                    return false;
-                }
-
-                const bool strict = import_settings.value("error_on_unsupported", true);
-                nlohmann::json j = to_json_sol_table(ret.as<sol::table>(), strict);
-
-                if (!verifyDirectory(json_out)) 
-                    return false;
-
-                std::ofstream out(json_out, std::ios::binary);
-                out << j.dump(2);
-                return true;
-            } 
-            catch (const std::exception& e) {
-                std::cerr << "[LuaBake] exception in " << lua_in << ": " << e.what() << "\n";
-                return false;
-            }
-        }
-
 
         std::string Compiler::GetCuttlefishExecutable() const {
             // Try to find cuttlefish executable

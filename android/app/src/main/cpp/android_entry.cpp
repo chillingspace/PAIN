@@ -14,9 +14,11 @@
 extern PAIN::Application* PAIN::CreateApplication();
 
 AAssetManager* assetManager = nullptr;
+AAssetManager* g_AssetMgr = nullptr;
 
 extern "C" void android_main(android_app* app) {
     assetManager = app->activity->assetManager;
+    g_AssetMgr   = app->activity->assetManager;
 
     //Game entry
     PAIN::Application* game = PAIN::CreateApplication();
