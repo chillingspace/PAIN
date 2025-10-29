@@ -8,6 +8,27 @@
 namespace PAIN {
 	namespace Path {
 
+		//Different file modes
+		enum class FileMode {
+			Read,
+			Write,
+			ReadWrite
+		};
+
+		//Custom file streaming
+		class IFileStream {
+		public:
+			virtual ~IFileStream() = default;
+			virtual size_t read(void* buffer, size_t size) = 0;
+			virtual size_t write(const void* buffer, size_t size) = 0;
+			virtual void flush() = 0;
+			virtual void seek(size_t pos) = 0;
+			virtual size_t tell() = 0;
+			virtual bool eof() const = 0;
+			virtual size_t size() const = 0;
+			virtual bool good() const = 0;
+		};
+
 		//Path class
 		class Path {
 		protected:
@@ -60,13 +81,8 @@ namespace PAIN {
 			virtual bool pathExists(const std::string& virtualPath) const = 0;
 			virtual bool createDirectory(const std::string& virtualPath) const = 0;
 
-			//Read & write files
-			virtual std::vector<uint8_t> readFile(const std::string& virtualPath) const = 0;
-			virtual bool writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const = 0;
-
-			//Overloads provided for json
-			virtual nlohmann::json readJsonFile(const std::string& virtualPath) const = 0;
-			virtual bool writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const = 0;
+			//Create custom file stream
+			virtual std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) = 0;
 
 			std::string getAlias(const std::string& virtualPath) const {
 				auto [alias, relativePath] = parseVirtualPath(virtualPath);

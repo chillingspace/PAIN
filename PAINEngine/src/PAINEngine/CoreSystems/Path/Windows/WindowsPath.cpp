@@ -234,76 +234,18 @@ namespace PAIN {
             }
         }
 
-        std::vector<uint8_t> WindowsPath::readFile(const std::string& virtualPath) const {
-            std::string resolved = resolvePath(virtualPath);
+        std::unique_ptr<IFileStream> WindowsPath::createFileStream(const std::string& virtualPath, FileMode mode) {
 
-            //Check if path exists
-            if (!std::filesystem::exists(resolved)) {
-                PN_CORE_WARN("Resolved path does not exist: {}", resolved);
-                return {};
+            //Resolve path and create stream
+            auto path = resolvePath(virtualPath);
+
+            //Ensure path exists
+            if (!std::filesystem::exists(path)) {
+                PN_CORE_WARN("File does not exist! Unable to create file stream");
+                return std::unique_ptr<IFileStream>();
             }
 
-            std::ifstream file(resolved, std::ios::binary);
-            if (!file.is_open()) {
-                PN_CORE_WARN("Unable to open file path for reading: {}", resolved);
-                return {};
-            }
-            return std::vector<uint8_t>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-        }
-
-        bool WindowsPath::writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const {
-            std::string resolved = resolvePath(virtualPath);
-
-            //Check if path exists
-            if (!std::filesystem::exists(resolved)) {
-                PN_CORE_WARN("Resolved path does not exist: {}", resolved);
-                return false;
-            }
-
-            std::ofstream file(resolved, std::ios::binary);
-            if (!file.is_open()) {
-                PN_CORE_WARN("Unable to open file path for writing: {}", resolved);
-                return false;
-            }
-            file.write(reinterpret_cast<const char*>(data.data()), data.size());
-            return file.good();
-        }
-
-        nlohmann::json WindowsPath::readJsonFile(const std::string& virtualPath) const {
-            std::string resolved = resolvePath(virtualPath);
-
-            //Check if path exists
-            if (!std::filesystem::exists(resolved)) {
-                PN_CORE_WARN("Resolved path does not exist: {}", resolved);
-                return nlohmann::json{};
-            }
-
-            std::ifstream file(resolved, std::ios::binary);
-            if (!file.is_open()) {
-                PN_CORE_WARN("Unable to open file path for reading json: {}", resolved);
-                return nlohmann::json{};
-            }
-            nlohmann::json j;
-            file >> j;
-            return j;
-        }
-
-        bool WindowsPath::writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const {
-            std::string resolved = resolvePath(virtualPath);
-
-            //Check if path exists
-            if (!std::filesystem::exists(resolved)) {
-                PN_CORE_WARN("Resolved path does not exist: {}", resolved);
-                return false;
-            }
-
-            std::ofstream file(resolved, std::ios::binary);
-            if (!file.is_open()) {
-                PN_CORE_WARN("Unable to open file path for writing json: {}", resolved);
-                return false;
-            }
-            file << data.dump(2); // Pretty-print with indentation
-            return file.good();
+            return std::make_unique<WinFileStream>(path, mode);
         }
 	}
 }

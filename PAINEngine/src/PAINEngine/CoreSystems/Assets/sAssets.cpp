@@ -20,31 +20,29 @@ namespace PAIN {
 		void Manager::onAttach() {
 
 			//Create unique asset loader
-			asset_loader = std::make_unique<Loader>();
+			asset_loader = std::make_unique<Loader>(services);
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
 
-				//Read asset data
-				auto data = services->get<Path::Path>()->readFile(virtual_path);
-
-				return asset_loader->ImportTexture(data);
+				return asset_loader->ImportTexture(virtual_path);
 				});
 
 			//Register Model loader
 			asset_loader->RegisterLoader(Type::Model, [this](std::string const& virtual_path) {
 
-				//Read asset data
-				auto data = services->get<Path::Path>()->readFile(virtual_path);
-
-				return asset_loader->ImportModel(data);
+				return asset_loader->ImportModel(virtual_path);
 				});
 
 			//Import asset registry
-			asset_registry = asset_loader->ImportAssetRegistry(services->get<Path::Path>()->readJsonFile("assets://" + asset_registry_filename));
+			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
 			//Dump asset registry
 			logAssetRegistry();
+		}
+
+		void Manager::onDetach() {
+			asset_loader = nullptr;
 		}
 
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
