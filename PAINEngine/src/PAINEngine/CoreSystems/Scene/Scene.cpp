@@ -102,15 +102,18 @@ namespace PAIN {
 
 		quad_mesh->material = texturedMat;
 
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_diffuse.png");
+		auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_smile.png");
+		auto ogre_smile_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
+
 		auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_diffuse.png");
-		unsigned int ogre_diffuse_tex = TextureManager::get().load(texture_path.c_str(), "ogre_diffuse");
-		smile_ogre_mesh->texture_id = ogre_diffuse_tex;
+		smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
 		smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
 		smile_ogre_mesh->material.useTex = true;
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_smile.png");
-		smile_ogre_mesh->material.aoTex = TextureManager::get().load(texture_path.c_str(), "smile_ogre_ao");
+		smile_ogre_mesh->material.aoTex = ogre_smile_tex->gl_texture;
 		smile_ogre_mesh->material.useAo = true;
+
 
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
@@ -119,13 +122,14 @@ namespace PAIN {
 
 		// diffuse color texture
 		ogreMat.useTex = true;
-		ogre_mesh->texture_id = ogre_diffuse_tex;
+		ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
 		ogreMat.tex = ogre_mesh->texture_id;
 
 		// ao map
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_rest.png");
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_rest.png");
+		auto ogre_rest_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("43dea636-43ff-864f-b059-bf1f4999b063"));
 		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_ao");
-		ogreMat.aoTex = ogre_mesh->texture_id;
+		ogreMat.aoTex = ogre_rest_tex->gl_texture;
 		ogreMat.useAo = true;
 
 		ogre_mesh->material = ogreMat;
@@ -143,10 +147,11 @@ namespace PAIN {
 		auto sdcc_mesh_id = getMeshId("sdcc.obj");
 		auto sdcc_mesh = getMesh(sdcc_mesh_id);
 
-		texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/sdcc_baked_building.png");
-		sdcc_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sdcc_baked_building");
+		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/sdcc_baked_building.png");
+		auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
+		sdcc_mesh->texture_id = sdcc_tex->gl_texture;
 		sdcc_mesh->material.useTex = true;
-		sdcc_mesh->material.tex = sdcc_mesh->texture_id;
+		sdcc_mesh->material.tex = sdcc_tex->gl_texture;
 		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
 		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/city.obj");
