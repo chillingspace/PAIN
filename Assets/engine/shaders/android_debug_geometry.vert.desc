@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_debug_geometry.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 13747350968247004232
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "ad27e286-c4a0-dc47-a282-3106f4b522a4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_debug_geometry.vert"
+  }
+}

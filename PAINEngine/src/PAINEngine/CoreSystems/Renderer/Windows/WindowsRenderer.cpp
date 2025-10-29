@@ -147,6 +147,7 @@ namespace PAIN {
 		gamma_shader = LoadShaders("gamma.vert", "gamma.frag");
 #else
 		gamma_shader = LoadShaders("android_gamma.vert", "android_gamma.frag");
+#endif
 
 #ifdef PN_PLATFORM_WINDOWS
 		debug_shader = LoadShaders("debug_geometry.vert", "debug_geometry.frag");

@@ -182,12 +182,19 @@ namespace PAIN {
 
 			glm::vec3 w_min(FLT_MAX), w_max(-FLT_MAX);
 
-			// Get min max aabb in world space
-			for (auto& c : corners) {
+#ifdef PN_PLATFORM_WINDOWS
+            for (auto& c : corners) {
 				glm::vec4 w = mat * glm::vec4(c, 1.0f);
 				w_min.x = min(w_min.x, w.x); w_min.y = min(w_min.y, w.y); w_min.z = min(w_min.z, w.z);
 				w_max.x = max(w_max.x, w.x); w_max.y = max(w_max.y, w.y); w_max.z = max(w_max.z, w.z);
 			}
+#else
+            for (auto& c : corners) {
+                glm::vec4 w = mat * glm::vec4(c, 1.0f);
+                w_min.x = fmin(w_min.x, w.x); w_min.y = fmin(w_min.y, w.y); w_min.z = fmin(w_min.z, w.z);
+                w_max.x = fmax(w_max.x, w.x); w_max.y = fmax(w_max.y, w.y); w_max.z = fmax(w_max.z, w.z);
+            }
+#endif
 
 			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene);
 		}
