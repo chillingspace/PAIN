@@ -72,7 +72,7 @@ namespace PAIN {
 			// AppSystem overrides
 			void onAttach() override;
 			void onUpdate(AppTiming timing) override {}
-			void onDetach() override {}
+			void onDetach() override;
 			void onFixedUpdate(AppTiming timing) override {}
 			void onAppPause() override {}
 			void onAppResume() override {}
