@@ -711,12 +711,8 @@ namespace PAIN {
 		// render 2D textures onto screen
 		{
 			// !TODO: add queue and iterate through all 2D textures to be rendered last
-#ifdef PN_PLATFORM_WINDOWS
 			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
 			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
-#else
-			Render2DTexture(TextureManager::get().getTextureMap().at("sunshine"), { 0.85f, -0.85f }, 0.1f);
-#endif
 		}
 
 		// render text onto screen

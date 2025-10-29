@@ -19,12 +19,34 @@ namespace PAIN {
 
 		void Manager::onAttach() {
 
+			//Create unique asset loader
+			asset_loader = std::make_unique<Loader>();
+
+			//Register texture loader
+			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
+
+				//Read asset data
+				auto data = services->get<Path::Path>()->readFile(virtual_path);
+
+				return asset_loader->ImportTexture(data);
+				});
+
+			//Register Model loader
+			asset_loader->RegisterLoader(Type::Model, [this](std::string const& virtual_path) {
+
+				//Read asset data
+				auto data = services->get<Path::Path>()->readFile(virtual_path);
+
+				return asset_loader->ImportModel(data);
+				});
+
 			//Import asset registry
-			asset_registry = asset_loader->ImportAssetRegistry(services->get<Path::Path>()->resolvePath("assets://" + asset_registry_filename));
+			asset_registry = asset_loader->ImportAssetRegistry(services->get<Path::Path>()->readJsonFile("assets://" + asset_registry_filename));
 
 			//Dump asset registry
 			logAssetRegistry();
 		}
+
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 
 			//Get asset registry data
@@ -40,17 +62,10 @@ namespace PAIN {
 			}
 
 			//Resolve asset path
-			auto asset_path = services->get<Path::Path>()->resolvePath("assets", registry_it->second.relative_path.string());
-			PN_CORE_INFO(asset_path);
-
-			//Ensure asset exists
-			if (!std::filesystem::exists(asset_path)) {
-				PN_CORE_WARN("Unable to cache asset. Invalid asset path: {}", asset_path);
-				throw std::runtime_error("Invalid asset path!");
-			}
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second.relative_path.string());
 
 			//Load assset through registered loaded
-			auto asset = asset_loader->GetLoader(registry_it->second.type)(asset_path);
+			auto asset = asset_loader->GetLoader(registry_it->second.type)(virtual_path);
 
 			//Insert loaded asset into asset cache
 			asset_cache.emplace(id, asset);

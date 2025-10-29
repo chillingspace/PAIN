@@ -8,6 +8,8 @@
 #include "AssetTypes.h"
 #include "AssetLoader.h"
 
+
+
 namespace PAIN {
     namespace Assets {
 
@@ -27,11 +29,7 @@ namespace PAIN {
 			void logAssetRegistry() const;
 		public:
 
-			Manager() {
-
-				//Create unique asset loader
-				asset_loader = std::make_unique<Loader>();
-			}
+			Manager() = default;
 
 			virtual ~Manager() = default;
 

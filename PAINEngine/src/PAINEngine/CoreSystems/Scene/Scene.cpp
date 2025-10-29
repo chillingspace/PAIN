@@ -87,7 +87,9 @@ namespace PAIN {
 
 		auto quad_mesh = getMesh(quad_mesh_id);
 		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://textures/sunshine.png");
-		quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
+		auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
+		quad_mesh->texture_id = texture->gl_texture;
+		//quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
 		
 		// Create the audio source object and store its entity ID
 		//audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });

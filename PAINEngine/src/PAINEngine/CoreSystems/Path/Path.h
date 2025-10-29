@@ -60,6 +60,14 @@ namespace PAIN {
 			virtual bool pathExists(const std::string& virtualPath) const = 0;
 			virtual bool createDirectory(const std::string& virtualPath) const = 0;
 
+			//Read & write files
+			virtual std::vector<uint8_t> readFile(const std::string& virtualPath) const = 0;
+			virtual bool writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const = 0;
+
+			//Overloads provided for json
+			virtual nlohmann::json readJsonFile(const std::string& virtualPath) const = 0;
+			virtual bool writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const = 0;
+
 			std::string getAlias(const std::string& virtualPath) const {
 				auto [alias, relativePath] = parseVirtualPath(virtualPath);
 				return alias;

@@ -16,11 +16,20 @@
 #include <EGL/egl.h>
 
 #ifndef GL_COMPRESSED_RGBA_ASTC_4x4_KHR
-#define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
-#endif
-
-#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR 0x93D0
+#define GL_COMPRESSED_RGBA_ASTC_4x4_KHR       0x93B0
+#define GL_COMPRESSED_RGBA_ASTC_5x4_KHR       0x93B1
+#define GL_COMPRESSED_RGBA_ASTC_5x5_KHR       0x93B2
+#define GL_COMPRESSED_RGBA_ASTC_6x5_KHR       0x93B3
+#define GL_COMPRESSED_RGBA_ASTC_6x6_KHR       0x93B4
+#define GL_COMPRESSED_RGBA_ASTC_8x5_KHR       0x93B5
+#define GL_COMPRESSED_RGBA_ASTC_8x6_KHR       0x93B6
+#define GL_COMPRESSED_RGBA_ASTC_8x8_KHR       0x93B7
+#define GL_COMPRESSED_RGBA_ASTC_10x5_KHR      0x93B8
+#define GL_COMPRESSED_RGBA_ASTC_10x6_KHR      0x93B9
+#define GL_COMPRESSED_RGBA_ASTC_10x8_KHR      0x93BA
+#define GL_COMPRESSED_RGBA_ASTC_10x10_KHR     0x93BB
+#define GL_COMPRESSED_RGBA_ASTC_12x10_KHR     0x93BC
+#define GL_COMPRESSED_RGBA_ASTC_12x12_KHR     0x93BD
 #endif
 
 #ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
@@ -56,7 +65,7 @@ namespace PAIN {
 
         //Texture format
         enum class TextureFormat {
-            UNKNOWN, BC7, ASTC_4x4, // add more as needed
+            UNKNOWN, BC7, ASTC, // add more as needed
         };
 
         //Texture class
@@ -65,7 +74,7 @@ namespace PAIN {
             int width = 0, height = 0, mips = 1;
             std::vector<size_t> mipOffsets;
 #ifdef PN_PLATFORM_ANDROID
-            TextureFormat format = TextureFormat::ASTC_4x4;
+            TextureFormat format = TextureFormat::ASTC;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
 #else
             TextureFormat format = TextureFormat::BC7;

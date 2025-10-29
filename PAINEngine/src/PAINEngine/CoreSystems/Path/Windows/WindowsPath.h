@@ -41,6 +41,14 @@ namespace PAIN {
 			std::vector<std::string> listDirectories(const std::string& virtualPath, const std::string& filter = "") const override;
 			bool pathExists(const std::string& virtualPath) const override;
 			bool createDirectory(const std::string& virtualPath) const override;
+
+			//Read & write files
+			std::vector<uint8_t> readFile(const std::string& virtualPath) const override;
+			bool writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const override;
+
+			//Overloads provided for json
+			nlohmann::json readJsonFile(const std::string& virtualPath) const override;
+			bool writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const override;
 		};
 
 	}

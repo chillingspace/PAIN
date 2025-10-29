@@ -32,6 +32,22 @@ namespace PAIN {
 				normalized.pop_back();
 			}
 
+			// Remove leading slashes
+			while (normalized.length() > 1 && normalized.front() == '/') {
+				normalized.erase(normalized.begin());
+			}
+
+			return normalized;
+		}
+
+		std::string AndroidPath::normalizeFileIOPath(const std::string& path) const {
+			std::string normalized = path;
+			std::replace(normalized.begin(), normalized.end(), '\\', '/');
+			size_t pos = 0;
+			while ((pos = normalized.find("//", pos)) != std::string::npos) {
+				normalized.replace(pos, 2, "/");
+			}
+			// Do not strip leading or trailing slashes for file I/O
 			return normalized;
 		}
 
@@ -74,11 +90,11 @@ namespace PAIN {
 
 			// Use the direct path members - NO JNI REQUIRED!
 			if (activity->internalDataPath) {
-				internal_path = normalizePath(activity->internalDataPath);
+				internal_path = normalizeFileIOPath(activity->internalDataPath);
 			}
 
 			if (activity->externalDataPath) {
-				external_path = normalizePath(activity->externalDataPath);
+				external_path = normalizeFileIOPath(activity->externalDataPath);
 			}
 
 			// Generate package name from internal path
@@ -93,13 +109,11 @@ namespace PAIN {
 
 			// Convert to paths
 			cache_path = internal_path + "/cache";
-			assets_path = "file:///android_asset";
 
 			// Log all paths
 			PN_CORE_INFO("Internal Path: {}", internal_path);
 			PN_CORE_INFO("External Path: {}", external_path);
 			PN_CORE_INFO("Cache Path: {}", cache_path);
-			PN_CORE_INFO("Assets Path: {}", assets_path);
 
 			// Initialize virtual paths
 			init();
@@ -116,11 +130,9 @@ namespace PAIN {
 			}
 
 			//Special case: manually register asset path
-			//virtual_paths["assets"] = assets_path;
-			//virtual_paths["game_assets"] = assets_path + "/" + relative_game_folder;
-			//virtual_paths["engine_assets"] = assets_path + "/" + relative_engine_folder;
 			virtual_paths["game_assets"] = relative_game_folder;
 			virtual_paths["engine_assets"] = relative_engine_folder;
+			virtual_paths["assets"] = "";
 
 			// Register default virtual paths
 			registerVirtualPath("internal", internal_path, true);
@@ -154,7 +166,7 @@ namespace PAIN {
 			}
 
 			// Register path...
-			virtual_paths[alias] = normalizePath(path);
+			virtual_paths[alias] = normalizeFileIOPath(path);
 			PN_CORE_INFO("Registered Virtual Path: {} -> {}", alias, path);
 		}
 
@@ -173,7 +185,7 @@ namespace PAIN {
 			}
 
 			// Update path
-			it->second = normalizePath(path);
+			it->second = normalizeFileIOPath(path);
 			PN_CORE_INFO("Updated: {} -> {}", alias, path);
 		}
 
@@ -190,18 +202,25 @@ namespace PAIN {
 				return it->second;
 			}
 
-			std::string fullPath = it->second + "/" + relativePath;
+            std::string fullPath;
 
-			if (isAssetPath(virtualPath)) {
-				return fullPath;
+			if (it->second != "") {
+				fullPath = it->second + "/" + relativePath;
 			}
 			else {
+				fullPath = relativePath;
+			}
+
+			if (isAssetPath(virtualPath)) {
 				return normalizePath(fullPath);
+			}
+			else {
+				return normalizeFileIOPath(fullPath);
 			}
 		}
 
 		std::string AndroidPath::resolvePath(const std::string& alias, std::string const& relative) const {
-            auto virtualPath = alias + getVirtualSymbol() + relative;
+            auto virtualPath = aliasCombineRelative(alias, relative);
 
 			auto it = virtual_paths.find(alias);
 			if (it == virtual_paths.end()) {
@@ -212,13 +231,20 @@ namespace PAIN {
 				return it->second;
 			}
 
-			std::string fullPath = it->second + "/" + relative;
+            std::string fullPath;
 
-			if (isAssetPath(virtualPath)) {
-				return fullPath;
+			if (it->second != "") {
+				fullPath = it->second + "/" + relative;
 			}
 			else {
+				fullPath = relative;
+			}
+
+			if (isAssetPath(virtualPath)) {
 				return normalizePath(fullPath);
+			}
+			else {
+				return normalizeFileIOPath(fullPath);
 			}
 		}
 
@@ -342,7 +368,96 @@ namespace PAIN {
 		}
 
 		bool AndroidPath::isAssetPath(const std::string& virtualPath) const {
-			return parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
+			return parseVirtualPath(virtualPath).first == "assets" || parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
+		}
+
+		std::vector<uint8_t> AndroidPath::readAssetData(const std::string& asset_path) const {
+
+			AAssetManager* mgr = m_app->activity->assetManager;
+
+			//Check for valid asset manager
+			if (!mgr) {
+				PN_CORE_WARN("Android asset manager error!");
+				return {};
+			}
+
+            PN_CORE_INFO(asset_path);
+
+			// Asset paths should be relative to the assets directory
+			AAsset* asset = AAssetManager_open(mgr, asset_path.c_str(), AASSET_MODE_STREAMING);
+			if (!asset) {
+				PN_CORE_WARN("Unable to open asset!");
+				return {};
+			}
+
+			const off_t length = AAsset_getLength(asset);
+			std::vector<uint8_t> buffer(length);
+
+			int64_t readResult = AAsset_read(asset, buffer.data(), length);
+			AAsset_close(asset);
+
+			if (readResult < length) {
+				// Logging partial read
+				buffer.resize(static_cast<size_t>(readResult));
+			}
+
+			return buffer;
+		}
+
+		std::vector<uint8_t> AndroidPath::readFile(const std::string& virtualPath) const {
+			//Check if path leads to asset directory
+			if (isAssetPath(virtualPath)) {
+
+				//Read and return asset
+				return readAssetData(resolvePath(virtualPath));
+			}
+			else {
+
+				//Read file
+				std::string resolved = resolvePath(virtualPath);
+				std::ifstream file(resolved, std::ios::binary);
+				if (!file.is_open()) {
+					PN_CORE_WARN("Unable to open file path for reading: {}", resolved);
+					return {};
+				}
+				return std::vector<uint8_t>(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+			}
+		}
+
+		bool AndroidPath::writeFile(const std::string& virtualPath, const std::vector<uint8_t>& data) const {
+			//Check if path leads to asset directory
+			if (isAssetPath(virtualPath)) {
+				PN_CORE_WARN("Attempting to write to asset path: {}", virtualPath);
+				return false;
+			}
+
+			//Write to file
+			std::string resolved = resolvePath(virtualPath);
+			std::ofstream file(resolved, std::ios::binary);
+			if (!file.is_open()) {
+				PN_CORE_WARN("Unable to open file path for writing: {}", resolved);
+				return false;
+			}
+			file.write(reinterpret_cast<const char*>(data.data()), data.size());
+			return file.good();
+		}
+
+		nlohmann::json AndroidPath::readJsonFile(const std::string& virtualPath) const {
+			auto data = readFile(virtualPath);
+			if (data.empty())
+				return {};
+			//Parse data into json
+			return nlohmann::json::parse(data.begin(), data.end(), nullptr, false);
+		}
+
+		bool AndroidPath::writeJsonFile(const std::string& virtualPath, const nlohmann::json& data) const {
+			if (isAssetPath(virtualPath)) {
+				PN_CORE_WARN("Attempting to write json to asset path: {}", virtualPath);
+				return false;
+			}
+			std::string jsonText = data.dump();
+			std::vector<uint8_t> buffer(jsonText.begin(), jsonText.end());
+			return writeFile(virtualPath, buffer);
 		}
 	}
 }
