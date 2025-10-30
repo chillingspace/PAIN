@@ -14,6 +14,7 @@
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
 
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
 	//Light light = {
@@ -359,6 +360,10 @@ namespace PAIN {
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
 	
+		//Set win width and height
+		auto window_service = services->get<Window::Window>();
+		winWidth = window_service->getFrameBuffer().x;
+		winHeight = window_service->getFrameBuffer().y;
 
 		initShaders();
 

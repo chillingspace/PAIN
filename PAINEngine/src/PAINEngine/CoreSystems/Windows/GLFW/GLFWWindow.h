@@ -58,6 +58,8 @@ namespace PAIN {
 			void pollEvents() override;
 
 			void swapBuffers() override;
+
+			glm::uvec2 getFrameBuffer() const override;
 		};
 	}
 }

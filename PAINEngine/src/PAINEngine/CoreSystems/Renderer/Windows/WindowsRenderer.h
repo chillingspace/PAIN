@@ -37,6 +37,9 @@ namespace PAIN {
 	public:
 		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
 
+		int winWidth = 0;
+		int winHeight = 0;
+
 		WindowsRenderer();
 		~WindowsRenderer();
 

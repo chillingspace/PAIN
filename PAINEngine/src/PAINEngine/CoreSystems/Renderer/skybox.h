@@ -30,6 +30,9 @@ namespace PAIN {
 		Shader shader;
 
 		std::shared_ptr<Services> services;
+
+		int winWidth = 0;
+		int winHeight = 0;
 	public:
 		static Skybox& get() {
 			static Skybox instance;

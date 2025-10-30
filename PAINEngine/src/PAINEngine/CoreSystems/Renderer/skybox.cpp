@@ -16,6 +16,7 @@
 #include "Utility/AndroidFs.h"
 #endif
 
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
 	Skybox::Skybox() {
@@ -193,6 +194,11 @@ namespace PAIN {
 
 	void Skybox::init(const std::shared_ptr<Services>& s, const std::string& skybox_path) {
 		services = s;
+
+		//Set win width and height
+		auto window_service = services->get<Window::Window>();
+		winWidth = window_service->getFrameBuffer().x;
+		winHeight = window_service->getFrameBuffer().y;
 
 		// compile and link shader
 		{

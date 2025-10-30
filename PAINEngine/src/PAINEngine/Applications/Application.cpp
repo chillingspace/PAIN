@@ -95,15 +95,6 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// Match viewport to window size
 		auto window = services->get<Window::Window>();
-#ifdef PN_PLATFORM_WINDOWS
-		glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
-		glViewport(0, 0, winWidth, winHeight);
-#else
-		ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
-		winWidth = ANativeWindow_getWidth(nativeWindow);
-		winHeight = ANativeWindow_getHeight(nativeWindow);
-		glViewport(0, 0, winWidth, winHeight);
-#endif
 
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
@@ -201,7 +192,7 @@ namespace PAIN {
 		timing.dt = std::chrono::duration<float>(now - last_time).count();
 		last_time = now;
 
-		fps = static_cast<int>(1.f / timing.dt);
+		auto fps = static_cast<int>(1.f / timing.dt);
 #ifdef PN_PLATFORM_WINDOWS
 		static float avgFps = 0.f;
 		static float timeSinceLastUpdate = 0.0f;

@@ -58,6 +58,9 @@ namespace PAIN {
 			//Get window active state
 			bool getActive() const { return b_active; }
 
+			//Get window height and width
+			virtual glm::uvec2 getFrameBuffer() const = 0;
+
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
 		};

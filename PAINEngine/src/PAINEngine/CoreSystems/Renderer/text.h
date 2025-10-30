@@ -15,6 +15,7 @@
 #include FT_FREETYPE_H
 #include "CoreSystems/Renderer/Shader.h"
 
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
 	class TextRenderer {
@@ -38,6 +39,9 @@ namespace PAIN {
 		unsigned int vao, vbo;
 		Shader shader;
 
+		static int winWidth;
+		static int winHeight;
+
 #ifdef PN_PLATFORM_ANDROID
 		// on android, need to keep the font data in memory
 		std::string fontDataBuffer;
@@ -47,6 +51,11 @@ namespace PAIN {
 		static void init(std::shared_ptr<Services> s) {
 			services = s;
 			initialized = true;
+
+			//Set win width and height
+			auto window_service = services->get<Window::Window>();
+			winWidth = window_service->getFrameBuffer().x;
+			winHeight = window_service->getFrameBuffer().y;
 		}
 
 		static TextRenderer& get() {

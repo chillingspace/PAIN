@@ -15,6 +15,8 @@
 #endif
 
 bool PAIN::TextRenderer::initialized = false;
+int PAIN::TextRenderer::winWidth = 0;
+int PAIN::TextRenderer::winHeight = 0;
 std::shared_ptr<PAIN::Services> PAIN::TextRenderer::services = nullptr;
 
 namespace PAIN {

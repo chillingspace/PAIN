@@ -7,7 +7,7 @@
 
 #include "Windows/WindowsRenderer.h"
 
-
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
 	
@@ -41,8 +41,8 @@ namespace PAIN {
 		ImTextureID getFramebufferTexture() const {
 			return w_renderer->getFinalTexture();
 		}
-		int getFramebufferWidth() const { return winWidth; }
-		int getFramebufferHeight() const { return winHeight; }
+		int getFramebufferWidth() const { return services->get<Window::Window>()->getFrameBuffer().x; }
+		int getFramebufferHeight() const { return services->get<Window::Window>()->getFrameBuffer().y; }
 
 		std::unique_ptr<WindowsRenderer> w_renderer;
 
