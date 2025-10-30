@@ -17,6 +17,32 @@ namespace PAIN {
 			}
 		}
 
+		GUID Manager::findGUID(std::string const& name) const {
+			GUID guid;
+
+			//Find asset guid
+			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
+				if (it->second.name == name) {
+					guid = it->second.guid;
+				}
+			}
+
+			return guid;
+		}
+
+		GUID Manager::findGUID(std::filesystem::path const& relative_path) const {
+			GUID guid;
+
+			//Find asset guid
+			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
+				if (it->second.relative_path == relative_path) {
+					guid = it->second.guid;
+				}
+			}
+
+			return guid;
+		}
+
 		void Manager::onAttach() {
 
 			//Create unique asset loader
