@@ -87,23 +87,93 @@ namespace PAIN {
             ~Texture() { if (gl_texture) glDeleteTextures(1, &gl_texture); }
         };
 
-        //Model data
-        struct Vertex { glm::vec3 pos, normal; glm::vec2 uv; };
-        struct BoneWeight { uint32_t boneIndex; float weight; };
-        struct Bone { std::string name; int parent; glm::mat4 bindPose; };
-        struct AnimationKey { float time; glm::vec3 translation; glm::quat rotation; glm::vec3 scale; };
-        struct AnimationTrack { std::string boneName; std::vector<AnimationKey> keys; };
-        struct AnimationClip { std::string name; float duration; std::vector<AnimationTrack> tracks; };
-        struct Material { std::string name; std::string diffuseMap; std::string normalMap; /* etc. */ };
+        // Vertex structure suitable for PBR, skinning, and morph targets
+        struct Vertex {
+            glm::vec3 pos;
+            glm::vec3 normal;
+            glm::vec2 uv;
+            glm::vec3 tangent;    // For normal mapping/PBR
+            glm::vec3 bitangent;  // For normal mapping/PBR
+            uint8_t boneIndices[4]; // Supports 4 bone influences per vertex
+            float boneWeights[4];   // Matches bone indices, sum to 1
+            glm::vec3 color;        // (optional) for vertex color
+        };
 
-        //Model class
+        // Morph Target Data (for blend shapes)
+        struct MorphTarget {
+            std::string name;
+            std::vector<glm::vec3> positionDeltas;
+            std::vector<glm::vec3> normalDeltas;
+            // Optionally: tangent, bitangent deltas
+        };
+
+        // Bone/Animation Structures
+        struct Bone {
+            std::string name;
+            int parent;
+            glm::mat4 bindPose;
+        };
+
+        struct AnimationKey {
+            float time;
+            glm::vec3 translation;
+            glm::quat rotation;
+            glm::vec3 scale;
+            std::vector<float> morphTargetWeights; // Support for blend shapes
+        };
+
+        struct AnimationTrack {
+            std::string boneName;
+            std::vector<AnimationKey> keys;
+        };
+
+        struct AnimationClip {
+            std::string name;
+            float duration;
+            std::vector<AnimationTrack> tracks;
+            bool isAdditive; // For blending, layering
+        };
+
+        // Material (PBR support)
+        struct Material {
+            std::string name;
+            std::string diffuseMap;
+            std::string normalMap;
+            std::string metallicMap;
+            std::string roughnessMap;
+            std::string aoMap;
+            std::string emissionMap;
+            glm::vec3 baseColor;
+            float metallic;
+            float roughness;
+            float ao;
+            float emission;
+            // Additional: transparency, alpha mode, etc.
+        };
+
+        // Submesh: supports multi-material, LODs
+        struct Submesh {
+            std::string name;
+            uint32_t materialIndex; // Refers to materials in Model
+            uint32_t firstIndex;
+            uint32_t indexCount;
+            uint32_t vertexOffset;
+            // Optionally: bounding box, LOD info
+        };
+
+        // Model class - full AAA-ready object
         struct Model : public IAsset {
             std::vector<Vertex> vertices;
             std::vector<unsigned int> indices;
+            std::vector<Submesh> submeshes;
             std::vector<Bone> skeleton;
-            std::vector<std::vector<BoneWeight>> weights;
+            std::vector<MorphTarget> morphTargets;
             std::vector<AnimationClip> animations;
             std::vector<Material> materials;
+
+            // Extra: bounding box, LODs, instancing support, metadata, engine tags, etc.
+            glm::vec3 aabbMin, aabbMax;
+            std::vector<uint32_t> lods;
         };
     }
 }

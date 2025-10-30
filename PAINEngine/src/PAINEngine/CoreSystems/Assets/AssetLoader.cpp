@@ -308,12 +308,10 @@ namespace PAIN {
         }
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
-            // Open custom stream, supports both APK assets and regular files
             auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
             if (!stream || !stream->good())
                 throw std::runtime_error("Failed to open model file: " + virtual_path);
 
-            // Preallocate file size, read full file into buffer in one go for parsing
             std::vector<uint8_t> data(stream->size());
             size_t read = stream->read(data.data(), data.size());
             if (read != data.size())
@@ -321,16 +319,22 @@ namespace PAIN {
 
             Model asset;
             size_t offset = 0;
-
             auto require = [&](size_t n) {
-                if (offset + n > data.size())
-                    throw std::runtime_error("Unexpected end of model file data!");
+                if (offset + n > data.size()) throw std::runtime_error("Unexpected end of model file");
                 };
             auto readMem = [&](void* dst, size_t n) {
-                require(n);
-                std::memcpy(dst, data.data() + offset, n);
-                offset += n;
+                require(n); std::memcpy(dst, data.data() + offset, n); offset += n;
                 };
+
+            // Read bounding box
+            readMem(&asset.aabbMin, sizeof(asset.aabbMin));
+            readMem(&asset.aabbMax, sizeof(asset.aabbMax));
+
+            // Read LODs
+            uint32_t lodCount = 0;
+            readMem(&lodCount, sizeof(lodCount));
+            asset.lods.resize(lodCount);
+            readMem(asset.lods.data(), lodCount * sizeof(uint32_t));
 
             // Vertices/Indices
             uint32_t vtxCount = 0, idxCount = 0;
@@ -341,7 +345,39 @@ namespace PAIN {
             readMem(asset.vertices.data(), vtxCount * sizeof(Vertex));
             readMem(asset.indices.data(), idxCount * sizeof(uint32_t));
 
-            // Skeleton (bones)
+            // Submeshes
+            uint32_t submeshCount = 0;
+            readMem(&submeshCount, sizeof(submeshCount));
+            asset.submeshes.resize(submeshCount);
+            for (Submesh& sm : asset.submeshes) {
+                uint32_t nameLen = 0;
+                readMem(&nameLen, sizeof(nameLen));
+                sm.name.resize(nameLen);
+                readMem(sm.name.data(), nameLen);
+                readMem(&sm.materialIndex, sizeof(sm.materialIndex));
+                readMem(&sm.firstIndex, sizeof(sm.firstIndex));
+                readMem(&sm.indexCount, sizeof(sm.indexCount));
+                readMem(&sm.vertexOffset, sizeof(sm.vertexOffset));
+            }
+
+            // MorphTargets
+            uint32_t morphCount = 0;
+            readMem(&morphCount, sizeof(morphCount));
+            asset.morphTargets.resize(morphCount);
+            for (MorphTarget& mt : asset.morphTargets) {
+                uint32_t nameLen = 0, deltaCount = 0;
+                readMem(&nameLen, sizeof(nameLen));
+                mt.name.resize(nameLen);
+                readMem(mt.name.data(), nameLen);
+
+                readMem(&deltaCount, sizeof(deltaCount));
+                mt.positionDeltas.resize(deltaCount);
+                mt.normalDeltas.resize(deltaCount);
+                readMem(mt.positionDeltas.data(), deltaCount * sizeof(glm::vec3));
+                readMem(mt.normalDeltas.data(), deltaCount * sizeof(glm::vec3));
+            }
+
+            // Skeleton Bones
             uint32_t boneCount = 0;
             readMem(&boneCount, sizeof(boneCount));
             asset.skeleton.resize(boneCount);
@@ -349,18 +385,9 @@ namespace PAIN {
                 uint32_t nameLen = 0;
                 readMem(&nameLen, sizeof(nameLen));
                 b.name.resize(nameLen);
-                readMem(&b.name[0], nameLen);
+                readMem(b.name.data(), nameLen);
                 readMem(&b.parent, sizeof(b.parent));
                 readMem(&b.bindPose, sizeof(glm::mat4));
-            }
-
-            // Skinning Weights
-            asset.weights.resize(vtxCount);
-            for (auto& vweights : asset.weights) {
-                uint32_t count = 0;
-                readMem(&count, sizeof(count));
-                vweights.resize(count);
-                readMem(vweights.data(), count * sizeof(BoneWeight));
             }
 
             // Animations
@@ -371,20 +398,32 @@ namespace PAIN {
                 uint32_t nameLen = 0;
                 readMem(&nameLen, sizeof(nameLen));
                 anim.name.resize(nameLen);
-                readMem(&anim.name[0], nameLen);
+                readMem(anim.name.data(), nameLen);
                 readMem(&anim.duration, sizeof(anim.duration));
+                readMem(&anim.isAdditive, sizeof(anim.isAdditive));
+
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
                 anim.tracks.resize(trackCount);
                 for (AnimationTrack& track : anim.tracks) {
-                    uint32_t boneLen = 0;
+                    uint32_t boneLen = 0, keyCount = 0;
                     readMem(&boneLen, sizeof(boneLen));
                     track.boneName.resize(boneLen);
-                    readMem(&track.boneName[0], boneLen);
-                    uint32_t keyCount = 0;
+                    readMem(track.boneName.data(), boneLen);
+
                     readMem(&keyCount, sizeof(keyCount));
                     track.keys.resize(keyCount);
-                    readMem(track.keys.data(), keyCount * sizeof(AnimationKey));
+                    for (AnimationKey& key : track.keys) {
+                        readMem(&key.time, sizeof(key.time));
+                        readMem(&key.translation, sizeof(key.translation));
+                        readMem(&key.rotation, sizeof(key.rotation));
+                        readMem(&key.scale, sizeof(key.scale));
+                        // Morph weights
+                        uint32_t morphWeightsCount = 0;
+                        readMem(&morphWeightsCount, sizeof(morphWeightsCount));
+                        key.morphTargetWeights.resize(morphWeightsCount);
+                        readMem(key.morphTargetWeights.data(), morphWeightsCount * sizeof(float));
+                    }
                 }
             }
 
@@ -396,12 +435,27 @@ namespace PAIN {
                 uint32_t nameLen = 0;
                 readMem(&nameLen, sizeof(nameLen));
                 mat.name.resize(nameLen);
-                readMem(&mat.name[0], nameLen);
-                uint32_t diffLen = 0;
-                readMem(&diffLen, sizeof(diffLen));
-                mat.diffuseMap.resize(diffLen);
-                readMem(&mat.diffuseMap[0], diffLen);
-                // Read normal/specular etc. here if you add them to export.
+                readMem(mat.name.data(), nameLen);
+
+                auto readStr = [&](std::string& str) {
+                    uint32_t len = 0;
+                    readMem(&len, sizeof(len));
+                    str.resize(len);
+                    readMem(str.data(), len);
+                    };
+
+                readStr(mat.diffuseMap);
+                readStr(mat.normalMap);
+                readStr(mat.metallicMap);
+                readStr(mat.roughnessMap);
+                readStr(mat.aoMap);
+                readStr(mat.emissionMap);
+
+                readMem(&mat.baseColor, sizeof(mat.baseColor));
+                readMem(&mat.metallic, sizeof(mat.metallic));
+                readMem(&mat.roughness, sizeof(mat.roughness));
+                readMem(&mat.ao, sizeof(mat.ao));
+                readMem(&mat.emission, sizeof(mat.emission));
             }
 
             return std::make_shared<Model>(std::move(asset));

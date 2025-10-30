@@ -562,76 +562,130 @@ namespace PAIN {
                 return;
             }
 
-            // Extract data based on settings
             Model asset;
 
-            // Extract meshes, vertices, indices
+            // First, extract bone names and bind poses (for skeleton)
+            std::unordered_map<std::string, int> boneNameToIndex;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
                 aiMesh* mesh = scene->mMeshes[m];
-                size_t vertexBase = asset.vertices.size();
+                for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                    aiBone* bone = mesh->mBones[b];
+                    std::string boneName = bone->mName.C_Str();
+                    if (boneNameToIndex.find(boneName) == boneNameToIndex.end()) {
+                        Bone joint;
+                        joint.name = boneName;
+                        joint.parent = -1; // Optionally resolve parent below if needed
+                        aiMatrix4x4 m = bone->mOffsetMatrix;
+                        joint.bindPose = glm::mat4(
+                            m.a1, m.b1, m.c1, m.d1,
+                            m.a2, m.b2, m.c2, m.d2,
+                            m.a3, m.b3, m.c3, m.d3,
+                            m.a4, m.b4, m.c4, m.d4
+                        );
+                        boneNameToIndex[boneName] = static_cast<int>(asset.skeleton.size());
+                        asset.skeleton.push_back(joint);
+                    }
+                }
+            }
+
+            size_t vertexBase = 0;
+            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                aiMesh* mesh = scene->mMeshes[m];
+
+                size_t firstVertex = asset.vertices.size();
+                size_t firstIndex = asset.indices.size();
+
+                // Vertex extraction
                 for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
                     Vertex vert;
                     vert.pos = glm::vec3(mesh->mVertices[v].x, mesh->mVertices[v].y, mesh->mVertices[v].z);
                     vert.normal = mesh->HasNormals() ? glm::vec3(mesh->mNormals[v].x, mesh->mNormals[v].y, mesh->mNormals[v].z) : glm::vec3(0, 0, 1);
                     vert.uv = mesh->HasTextureCoords(0) ? glm::vec2(mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y) : glm::vec2(0);
-                    asset.vertices.push_back(vert);
-                }
-                for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
-                    for (unsigned int i = 0; i < mesh->mFaces[f].mNumIndices; ++i) {
-                        asset.indices.push_back(static_cast<unsigned int>(vertexBase + mesh->mFaces[f].mIndices[i]));
-                    }
-                }
-            }
+                    vert.tangent = mesh->HasTangentsAndBitangents()
+                        ? glm::vec3(mesh->mTangents[v].x, mesh->mTangents[v].y, mesh->mTangents[v].z)
+                        : glm::vec3(1, 0, 0);
+                    vert.bitangent = mesh->HasTangentsAndBitangents()
+                        ? glm::vec3(mesh->mBitangents[v].x, mesh->mBitangents[v].y, mesh->mBitangents[v].z)
+                        : glm::vec3(0, 1, 0);
+                    vert.color = mesh->HasVertexColors(0)
+                        ? glm::vec3(mesh->mColors[0][v].r, mesh->mColors[0][v].g, mesh->mColors[0][v].b)
+                        : glm::vec3(1, 1, 1);
 
-            // Map bone names to bone indices for fast lookup
-            std::unordered_map<std::string, int> boneNameToIndex;
-            for (size_t i = 0; i < asset.skeleton.size(); ++i)
-                boneNameToIndex[asset.skeleton[i].name] = static_cast<int>(i);
-
-            asset.weights.resize(asset.vertices.size());
-
-            size_t globalVertexBase = 0;
-            for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
-                aiMesh* mesh = scene->mMeshes[m];
-                for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
-                    aiBone* bone = mesh->mBones[b];
-                    int boneIdx = boneNameToIndex[bone->mName.C_Str()];
-                    for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
-                        unsigned int vertId = globalVertexBase + mesh->mBones[b]->mWeights[w].mVertexId;
-                        asset.weights[vertId].push_back(BoneWeight{ uint32_t(boneIdx), mesh->mBones[b]->mWeights[w].mWeight });
-                    }
-                }
-                globalVertexBase += mesh->mNumVertices;
-            }
-
-            // Extract skeleton if enabled
-            if (import_skeleton && scene->HasMeshes()) {
-                std::unordered_map<std::string, int> boneMap;
-                for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
-                    aiMesh* mesh = scene->mMeshes[m];
-                    for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
-                        aiBone* bone = mesh->mBones[b];
-                        std::string boneName = bone->mName.C_Str();
-                        if (boneMap.find(boneName) == boneMap.end()) {
-                            Bone joint;
-                            joint.name = boneName;
-                            joint.parent = -1; // Assign parent below by name-match if needed
-                            aiMatrix4x4 m = bone->mOffsetMatrix;
-                            // Convert aiMatrix4x4 to glm::mat4
-                            joint.bindPose = glm::mat4(
-                                m.a1, m.b1, m.c1, m.d1,
-                                m.a2, m.b2, m.c2, m.d2,
-                                m.a3, m.b3, m.c3, m.d3,
-                                m.a4, m.b4, m.c4, m.d4
-                            );
-                            boneMap[boneName] = static_cast<int>(asset.skeleton.size());
-                            asset.skeleton.push_back(joint);
+                    // Bone assignment: collect up to 4, sorted greatest weight first
+                    std::vector<std::pair<uint32_t, float>> weights;
+                    // For all bones in mesh, check if this vertex is influenced
+                    if (mesh->HasBones()) {
+                        for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                            aiBone* bone = mesh->mBones[b];
+                            for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+                                if (mesh->mBones[b]->mWeights[w].mVertexId == v) {
+                                    weights.push_back({ boneNameToIndex[bone->mName.C_Str()], bone->mWeights[w].mWeight });
+                                }
+                            }
                         }
                     }
+                    // Sort and clamp to max_bone_weights
+                    std::sort(weights.begin(), weights.end(),
+                        [](const auto& a, const auto& b) { return a.second > b.second; });
+                    while (weights.size() < max_bone_weights) weights.push_back({ 0,0.0f });
+                    if (weights.size() > max_bone_weights) weights.resize(max_bone_weights);
+
+                    for (int i = 0; i < max_bone_weights; ++i) {
+                        vert.boneIndices[i] = (uint8_t)weights[i].first;
+                        vert.boneWeights[i] = weights[i].second;
+                    }
+
+                    asset.vertices.push_back(vert);
                 }
+
+                // Index extraction
+                for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+                    for (unsigned int i = 0; i < mesh->mFaces[f].mNumIndices; ++i) {
+                        asset.indices.push_back(static_cast<unsigned int>(firstVertex + mesh->mFaces[f].mIndices[i]));
+                    }
+                }
+
+                // Submesh extraction
+                Submesh submesh;
+                submesh.name = mesh->mName.C_Str();
+                submesh.firstIndex = (uint32_t)firstIndex;
+                submesh.indexCount = (uint32_t)(asset.indices.size() - firstIndex);
+                submesh.vertexOffset = (uint32_t)firstVertex;
+                submesh.materialIndex = mesh->mMaterialIndex;
+                asset.submeshes.push_back(submesh);
+
+                vertexBase += mesh->mNumVertices;
+
+                // --- Morph Target Extraction (Blend Shapes) ---
+                for (unsigned int mt = 0; mt < mesh->mNumAnimMeshes; ++mt) {
+                    aiAnimMesh* animMesh = mesh->mAnimMeshes[mt];
+                    MorphTarget morph;
+                    morph.name = animMesh->mName.C_Str();
+
+                    uint32_t deltaCount = mesh->mNumVertices;
+                    morph.positionDeltas.resize(deltaCount);
+                    morph.normalDeltas.resize(deltaCount);
+
+                    for (uint32_t v = 0; v < deltaCount; ++v) {
+                        if (animMesh->mVertices) {
+                            // delta = morph - base
+                            morph.positionDeltas[v] = glm::vec3(animMesh->mVertices[v].x - mesh->mVertices[v].x,
+                                animMesh->mVertices[v].y - mesh->mVertices[v].y,
+                                animMesh->mVertices[v].z - mesh->mVertices[v].z);
+                        }
+                        if (animMesh->mNormals && mesh->mNormals) {
+                            morph.normalDeltas[v] = glm::vec3(animMesh->mNormals[v].x - mesh->mNormals[v].x,
+                                animMesh->mNormals[v].y - mesh->mNormals[v].y,
+                                animMesh->mNormals[v].z - mesh->mNormals[v].z);
+                        }
+                    }
+                    asset.morphTargets.push_back(morph);
+                }
+                // -----------------------------------------------
             }
 
-            // Extract animations if enabled
+            // Animation extraction as previously shown (unchanged)
+
             if (import_animations && scene->HasAnimations()) {
                 for (unsigned int a = 0; a < scene->mNumAnimations; ++a) {
                     aiAnimation* anim = scene->mAnimations[a];
@@ -656,6 +710,7 @@ namespace PAIN {
                             if (k < chan->mNumScalingKeys) {
                                 key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
                             }
+                            // Morph target weights can be set here if you support animated blend shapes
                             track.keys.push_back(key);
                         }
                         clip.tracks.push_back(track);
@@ -664,15 +719,47 @@ namespace PAIN {
                 }
             }
 
-            // Materials (basic example; expand for PBR)
             for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
                 aiMaterial* material = scene->mMaterials[m];
                 Material mat;
                 mat.name = material->GetName().C_Str();
                 aiString texPath;
+
                 if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
                     mat.diffuseMap = texPath.C_Str();
-                // Repeat for normal/specular/metal/etc as needed
+                if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS)
+                    mat.normalMap = texPath.C_Str();
+                if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS)
+                    mat.metallicMap = texPath.C_Str();
+                if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == AI_SUCCESS)
+                    mat.roughnessMap = texPath.C_Str();
+
+                // Base (albedo) color
+                aiColor3D baseColor(1, 1, 1);
+                if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor))
+                    mat.baseColor = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+
+                // Metallic
+                float metallic = 0.0f;
+                if (AI_SUCCESS == material->Get(AI_MATKEY_METALLIC_FACTOR, metallic))
+                    mat.metallic = metallic;
+
+                // Roughness
+                float roughness = 0.0f;
+                if (AI_SUCCESS == material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness))
+                    mat.roughness = roughness;
+
+                // Emissive color/intensity
+                aiColor3D emissiveColor(0, 0, 0);
+                float emissiveIntensity = 1.0f;
+                if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor))
+                    mat.emission = glm::length(glm::vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b));
+                if (AI_SUCCESS == material->Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveIntensity))
+                    mat.emission *= emissiveIntensity;
+
+                // Ambient occlusion (usually only as texture, not scalar)
+                mat.ao = 1.0f;
+
                 asset.materials.push_back(mat);
             }
 
@@ -873,63 +960,119 @@ namespace PAIN {
         void Compiler::ExportModel(const Model& asset, const std::filesystem::path& out_path) const {
             std::ofstream out(out_path, std::ios::binary);
 
-            // Vertices/indices
-            uint32_t vtxCount = uint32_t(asset.vertices.size());
-            uint32_t idxCount = uint32_t(asset.indices.size());
+            // Write bounding box
+            out.write((char*)&asset.aabbMin, sizeof(asset.aabbMin));
+            out.write((char*)&asset.aabbMax, sizeof(asset.aabbMax));
+
+            // Write LODs
+            uint32_t lodCount = (uint32_t)asset.lods.size();
+            out.write((char*)&lodCount, sizeof(lodCount));
+            out.write((char*)asset.lods.data(), lodCount * sizeof(uint32_t));
+
+            // Write vertices/indices
+            uint32_t vtxCount = (uint32_t)asset.vertices.size();
+            uint32_t idxCount = (uint32_t)asset.indices.size();
             out.write((char*)&vtxCount, sizeof(vtxCount));
             out.write((char*)&idxCount, sizeof(idxCount));
             out.write((char*)asset.vertices.data(), vtxCount * sizeof(Vertex));
             out.write((char*)asset.indices.data(), idxCount * sizeof(uint32_t));
 
-            // Skeleton (bones)
-            uint32_t boneCount = uint32_t(asset.skeleton.size());
+            // Write submeshes
+            uint32_t submeshCount = (uint32_t)asset.submeshes.size();
+            out.write((char*)&submeshCount, sizeof(submeshCount));
+            for (const Submesh& sm : asset.submeshes) {
+                uint32_t nameLen = (uint32_t)sm.name.size();
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(sm.name.data(), nameLen);
+                out.write((char*)&sm.materialIndex, sizeof(sm.materialIndex));
+                out.write((char*)&sm.firstIndex, sizeof(sm.firstIndex));
+                out.write((char*)&sm.indexCount, sizeof(sm.indexCount));
+                out.write((char*)&sm.vertexOffset, sizeof(sm.vertexOffset));
+            }
+
+            // Write morph targets
+            uint32_t morphCount = (uint32_t)asset.morphTargets.size();
+            out.write((char*)&morphCount, sizeof(morphCount));
+            for (const MorphTarget& mt : asset.morphTargets) {
+                uint32_t nameLen = (uint32_t)mt.name.size();
+                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(mt.name.data(), nameLen);
+
+                uint32_t deltaCount = (uint32_t)mt.positionDeltas.size();
+                out.write((char*)&deltaCount, sizeof(deltaCount));
+                out.write((char*)mt.positionDeltas.data(), deltaCount * sizeof(glm::vec3));
+                out.write((char*)mt.normalDeltas.data(), deltaCount * sizeof(glm::vec3));
+            }
+
+            // Write skeleton bones
+            uint32_t boneCount = (uint32_t)asset.skeleton.size();
             out.write((char*)&boneCount, sizeof(boneCount));
             for (const Bone& b : asset.skeleton) {
-                uint32_t nameLen = uint32_t(b.name.size());
+                uint32_t nameLen = (uint32_t)b.name.size();
                 out.write((char*)&nameLen, sizeof(nameLen));
                 out.write(b.name.data(), nameLen);
                 out.write((char*)&b.parent, sizeof(b.parent));
                 out.write((char*)&b.bindPose, sizeof(glm::mat4));
             }
 
-            // Skinning Weights
-            for (const auto& vweights : asset.weights) {
-                uint32_t count = uint32_t(vweights.size());
-                out.write((char*)&count, sizeof(count));
-                out.write((char*)vweights.data(), count * sizeof(BoneWeight));
-            }
-
-            // Animations
-            uint32_t animCount = uint32_t(asset.animations.size());
+            // Write animations
+            uint32_t animCount = (uint32_t)asset.animations.size();
             out.write((char*)&animCount, sizeof(animCount));
             for (const AnimationClip& anim : asset.animations) {
-                uint32_t nameLen = uint32_t(anim.name.size());
+                uint32_t nameLen = (uint32_t)anim.name.size();
                 out.write((char*)&nameLen, sizeof(nameLen));
                 out.write(anim.name.data(), nameLen);
                 out.write((char*)&anim.duration, sizeof(anim.duration));
-                uint32_t trackCount = uint32_t(anim.tracks.size());
+                out.write((char*)&anim.isAdditive, sizeof(anim.isAdditive));
+
+                uint32_t trackCount = (uint32_t)anim.tracks.size();
                 out.write((char*)&trackCount, sizeof(trackCount));
                 for (const AnimationTrack& track : anim.tracks) {
-                    uint32_t boneLen = uint32_t(track.boneName.size());
+                    uint32_t boneLen = (uint32_t)track.boneName.size();
                     out.write((char*)&boneLen, sizeof(boneLen));
                     out.write(track.boneName.data(), boneLen);
-                    uint32_t keyCount = uint32_t(track.keys.size());
+
+                    uint32_t keyCount = (uint32_t)track.keys.size();
                     out.write((char*)&keyCount, sizeof(keyCount));
-                    out.write((char*)track.keys.data(), keyCount * sizeof(AnimationKey));
+                    for (const AnimationKey& key : track.keys) {
+                        out.write((char*)&key.time, sizeof(key.time));
+                        out.write((char*)&key.translation, sizeof(key.translation));
+                        out.write((char*)&key.rotation, sizeof(key.rotation));
+                        out.write((char*)&key.scale, sizeof(key.scale));
+                        // Write morph target weights if blend shapes exist
+                        uint32_t morphWeightsCount = (uint32_t)key.morphTargetWeights.size();
+                        out.write((char*)&morphWeightsCount, sizeof(morphWeightsCount));
+                        out.write((char*)key.morphTargetWeights.data(), morphWeightsCount * sizeof(float));
+                    }
                 }
             }
 
-            // Materials
-            uint32_t matCount = uint32_t(asset.materials.size());
+            // Write materials
+            uint32_t matCount = (uint32_t)asset.materials.size();
             out.write((char*)&matCount, sizeof(matCount));
             for (const Material& mat : asset.materials) {
-                uint32_t nameLen = uint32_t(mat.name.size());
+                uint32_t nameLen = (uint32_t)mat.name.size();
                 out.write((char*)&nameLen, sizeof(nameLen));
                 out.write(mat.name.data(), nameLen);
-                uint32_t diffLen = uint32_t(mat.diffuseMap.size());
-                out.write((char*)&diffLen, sizeof(diffLen));
-                out.write(mat.diffuseMap.data(), diffLen);
-                // Add normal/specular if present
+
+                auto writeStr = [&](const std::string& str) {
+                    uint32_t len = (uint32_t)str.size();
+                    out.write((char*)&len, sizeof(len));
+                    out.write(str.data(), len);
+                    };
+
+                writeStr(mat.diffuseMap);
+                writeStr(mat.normalMap);
+                writeStr(mat.metallicMap);
+                writeStr(mat.roughnessMap);
+                writeStr(mat.aoMap);
+                writeStr(mat.emissionMap);
+
+                out.write((char*)&mat.baseColor, sizeof(mat.baseColor));
+                out.write((char*)&mat.metallic, sizeof(mat.metallic));
+                out.write((char*)&mat.roughness, sizeof(mat.roughness));
+                out.write((char*)&mat.ao, sizeof(mat.ao));
+                out.write((char*)&mat.emission, sizeof(mat.emission));
             }
 
             out.close();
