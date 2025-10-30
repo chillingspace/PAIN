@@ -37,17 +37,16 @@ namespace PAIN {
 		std::unique_ptr<Camera> camera;
 
 		// Audio Demo State Variables
-		entt::entity audioSourceEntity = entt::null;
-		Audio::AudioChannelId audioSourceChannel;
+		entt::entity m_audioSourceEntity = entt::null;
 
 		// Path animation variables
-		float demoTime = 0.0f;
-		int currentPathSegment = 0;
-		float segmentDuration = 4.0f;
-		std::vector<glm::vec3> pathCorners;
+		float m_demoTime = 0.0f;
+		int m_currentPathSegment = 0;
+		float m_segmentDuration = 4.0f;
+		std::vector<glm::vec3> m_pathCorners;
 
 		// Footstep variables
-		float footstepTimer = 0.0f;
-		const float footstepInterval = 0.4f;
+		float m_footstepTimer = 0.0f;
+		const float m_footstepInterval = 0.4f;
 	};
 }

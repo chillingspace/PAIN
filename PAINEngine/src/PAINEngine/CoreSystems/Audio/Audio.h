@@ -57,6 +57,7 @@ namespace PAIN {
             virtual AudioResult resumeChannel(AudioChannelId ch) = 0;
             virtual void pauseAll() = 0;
             virtual void resumeAll() = 0;
+            virtual AudioResult setMuteAll(bool mute) = 0;
             virtual AudioResult setVolumeDb(AudioChannelId ch, float volumeDb) = 0;
             virtual AudioResult setVolumeLinear(AudioChannelId ch, float volume01) = 0;
             virtual AudioResult setPosition(AudioChannelId ch, const glm::vec3& pos) = 0;

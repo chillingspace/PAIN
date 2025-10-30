@@ -3,20 +3,20 @@
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Scene/Scene.h"
-
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/Material.h"
+#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Renderer/skybox.h"
 
 #include "ECS/Controller.h"
+#include "ECS/Components/cBoundingVolume.h"
 
 //For imgui viewport
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 
-#include "CoreSystems/Path/Path.h"
-#include "CoreSystems/Audio/Audio.h"
-
-#include "CoreSystems/Renderer/skybox.h"
+#include "Systems/Collision/sBVHSystem.h"
 
 namespace PAIN {
 	void sRenderer::onDetach()
@@ -153,51 +153,97 @@ namespace PAIN {
 		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
 	}
 
-	void sRenderer::debugPass(bool show_debug)
+	void sRenderer::debugPass(int debug_mode)
 	{
-		if (!show_debug) { return; }
+		// Mode 0 is OFF
+		if (debug_mode == 0) { return; }
 
 		auto ecs = services->get<ECS::Controller>();
 		auto scene = services->get<Scene>();
-		auto& reg = ecs->getRegistry();
-		auto view = reg.view<MetaData::EntityName>();
+		
+		if (!ecs || !scene || !w_renderer) {
+			PN_CORE_WARN("DebugPass skipped: Missing required services.");
+			return;
+		}
 
-		for (auto e : view) {
-			auto trans = ecs->getEntityComponent<Transform>(e);
-			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
-			if (!trans.has_value() || !mesh.has_value()) continue;
+		auto bvhSystem = ecs->getSystem<sBVHSystem>(); // Get BVH system from ECS
 
-			glm::mat4 mat = trans->get().getMatrix();
-			auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+		if (!bvhSystem) { // This check is what's firing in your log
+			PN_CORE_WARN("DebugPass skipped: Missing BVH System.");
+			return;
+		}
 
-			glm::vec3 min_aabb = mesh_ptr->getAABBMin(), max_aabb = mesh_ptr->getAABBMax();
+		Camera* camera = scene->GetActiveCamera();
+		if (!camera) {
+			PN_CORE_WARN("DebugPass skipped: No active camera.");
+			return;
+		}
 
-			// Transform 8 corners to world space
-			glm::vec3 corners[8] = {
-			  {min_aabb.x,min_aabb.y,min_aabb.z},{max_aabb.x,min_aabb.y,min_aabb.z},
-			  {max_aabb.x,max_aabb.y,min_aabb.z},{min_aabb.x,max_aabb.y,min_aabb.z},
-			  {min_aabb.x,min_aabb.y,max_aabb.z},{max_aabb.x,min_aabb.y,max_aabb.z},
-			  {max_aabb.x,max_aabb.y,max_aabb.z},{min_aabb.x,max_aabb.y,max_aabb.z}
+		// --- Option A (Mode 1): Draw World AABBs from cBoundingVolume ---
+		if (debug_mode == 1)
+		{
+			auto bvView = ecs->getRegistry().view<cBoundingVolume>();
+			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
+
+			for (auto entity : bvView) {
+				const auto& bvComp = bvView.get<cBoundingVolume>(entity);
+				// Check if the AABB is valid
+				if (bvComp.worldAABB.min.x <= bvComp.worldAABB.max.x)
+				{
+					// Call the existing WindowsRenderer::DebugPass function
+					w_renderer->DebugPass(bvComp.worldAABB.min, bvComp.worldAABB.max, color, scene);
+				}
+			}
+		}
+		// --- End Option A ---
+
+
+		// --- Option B (Mode 2): Draw BVH Tree Nodes ---
+		if (debug_mode == 2)
+		{
+			const BVH& bvh = bvhSystem->getBVH();
+			const auto& nodes = bvh.getNodes();
+			int rootIndex = bvh.getRootIndex();
+
+			std::function<void(int nodeIndex, int depth)> drawNodeRecursive =
+				[&](int nodeIndex, int depth) {
+				if (nodeIndex == -1 || nodeIndex >= nodes.size() || nodes[nodeIndex].height == -1) return;
+
+				const BVHNode& node = nodes[nodeIndex];
+				glm::vec4 nodeColor; 
+
+				if (node.isLeaf()) {
+					nodeColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); // Green for leaves
+				} else {
+					int colorIndex = depth % 6;
+					switch (colorIndex) { // Cycle colors for internal nodes
+						case 0: nodeColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); break; // Red
+						case 1: nodeColor = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f); break; // Orange
+						case 2: nodeColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); break; // Yellow
+						case 3: nodeColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); break; // Cyan
+						case 4: nodeColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); break; // Blue
+						default: nodeColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f); break; // Magenta
+					}
+				}
+				w_renderer->DebugPass(node.aabb.min, node.aabb.max, nodeColor, scene);
+
+				if (!node.isLeaf()) {
+					drawNodeRecursive(node.child1Index, depth + 1);
+					drawNodeRecursive(node.child2Index, depth + 1);
+				}
 			};
 
-			glm::vec3 w_min(FLT_MAX), w_max(-FLT_MAX);
-
-#ifdef PN_PLATFORM_WINDOWS
-            for (auto& c : corners) {
-				glm::vec4 w = mat * glm::vec4(c, 1.0f);
-				w_min.x = min(w_min.x, w.x); w_min.y = min(w_min.y, w.y); w_min.z = min(w_min.z, w.z);
-				w_max.x = max(w_max.x, w.x); w_max.y = max(w_max.y, w.y); w_max.z = max(w_max.z, w.z);
+			// Disable depth testing to see all boxes
+			glDisable(GL_DEPTH_TEST);
+			
+			if (rootIndex != -1) {
+				drawNodeRecursive(rootIndex, 0);
 			}
-#else
-            for (auto& c : corners) {
-                glm::vec4 w = mat * glm::vec4(c, 1.0f);
-                w_min.x = fmin(w_min.x, w.x); w_min.y = fmin(w_min.y, w.y); w_min.z = fmin(w_min.z, w.z);
-                w_max.x = fmax(w_max.x, w.x); w_max.y = fmax(w_max.y, w.y); w_max.z = fmax(w_max.z, w.z);
-            }
-#endif
 
-			w_renderer->DebugPass(w_min, w_max, { 1,1,0,1 }, scene);
+			// Restore depth testing
+			glEnable(GL_DEPTH_TEST);
 		}
+		// --- End Option B ---
 	}
 
 
@@ -212,11 +258,11 @@ namespace PAIN {
 #ifdef _DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
-			bool editor_debug = editor && editor->isDebugMode();
+			int editor_debug_mode = editor ? editor->getDebugMode() : 0;
 
 #else
 			bool editor_visible = false;
-			bool editor_debug = false;
+			int editor_debug_mode = 0;
 #endif
 
 			GLenum err = glGetError();
@@ -275,7 +321,7 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 			}
 		
-			debugPass(editor_debug);
+			debugPass(editor_debug_mode);
 			postProcessPass();
 			err = glGetError();
 			if (err != GL_NO_ERROR) {

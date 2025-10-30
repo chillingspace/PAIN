@@ -9,6 +9,7 @@
 #include <glm/gtc/constants.hpp>
 #include "ComponentsPanel.h"
 #include "ECS/Components/cLight.h"
+#include "ECS/Components/cAudioSource.h"
 
 
 // ---------- Primitive + std types ----------
@@ -99,6 +100,21 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
     return changed;
 }
 
+// ----- AudioState Enum -----
+inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
+    const char* names[] = { "Stopped", "Playing", "Paused" };
+    int idx = static_cast<int>(v);
+    if (idx < 0 || idx > 2) idx = 0; // Safety clamp
+    const char* preview = names[idx];
+    bool changed = false;
+
+    // Make the state read-only in the editor
+    ImGui::Text("%s:", label);
+    ImGui::SameLine();
+    ImGui::TextDisabled("%s", preview);
+
+    return changed; // 'changed' will always be false
+}
 
 // ---------- Fallback for unknown types ----------
 template <typename T>
