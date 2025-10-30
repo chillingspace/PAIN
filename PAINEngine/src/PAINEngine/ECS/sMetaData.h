@@ -45,6 +45,8 @@ namespace PAIN {
 
             std::string generateUniqueName(std::string const& base_name) const;
 
+            bool b_entity_changed = false;
+
         public:
             Service() = default;
 
@@ -62,6 +64,7 @@ namespace PAIN {
             std::string getEntityName(entt::entity entity) const;
             std::optional<entt::entity> getEntityByName(std::string const& name) const;
             bool isNameValid(std::string const& name) const;
+            bool entityNameChanged();
 
             // === Tag System ===
             void registerTag(std::string const& tag);
@@ -73,6 +76,7 @@ namespace PAIN {
             void removeTag(entt::entity entity, std::string const& tag);
             std::vector<entt::entity> getEntitiesByTag(std::string const& tag) const;
             bool hasTag(entt::entity entity, std::string const& tag) const;
+            void setEntityTag(entt::entity entity, const std::string& new_tag);
 
             // === Hierarchy System ===
             void setParent(entt::entity child, entt::entity parent);

@@ -9,10 +9,13 @@
 #include "CoreSystems/Assets/sPath.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sLoader.h"
+#include "CoreSystems/Renderer/texture.h"
+#include "CoreSystems/Events/GLFW/AssetEvents.h"
 
 #define PN_PATH_SERVICE  services->get<Path::Service>()
 #define PN_LOADER_SERVICE  services->get<Loader::Service>()
 #define PN_ASSETS_SERVICE  services->get<Assets::Service>()
+
 
 namespace PAIN {
     namespace Editor {
@@ -70,12 +73,15 @@ namespace PAIN {
 				}
 			}
 
-			// TO Do: File Drop Event
-			/*void ResourcePanel::onEvent(std::shared_ptr<Assets::FileDropEvent> event) {
+			// File Drop Event
+			void ResourcePanel::onEvent(PAIN::Event::Event& event) {
 
-				if (NIKE_LVLEDITOR_SERVICE->getEditorState() && !checkPopUpShowing()) {
-					int file_count = event->count;
-					const char** file_paths = event->paths;
+				if (event.getType() == PAIN::Event::Type::FileDrop) {
+
+					auto& fileEvent = static_cast<PAIN::Event::FileDropped&>(event);
+					// Now, use fileEvent's data
+					int file_count = fileEvent.getFilesCount();
+					const char** file_paths = fileEvent.getPaths();
 
 					//Initialize message
 					std::string message = "Files Added: " + std::to_string(file_count) + " \n";
@@ -99,11 +105,11 @@ namespace PAIN {
 							std::filesystem::copy(src_file_path, PN_PATH_SERVICE->resolvePath(current_path), std::filesystem::copy_options::overwrite_existing);
 
 							//Log success
-							NIKEE_CORE_INFO("File " + src_file_path.string() + " successfully copied into" + PN_PATH_SERVICE->resolvePath(current_path).string());
+							PN_CORE_INFO("File " + src_file_path.string() + " successfully copied into" + PN_PATH_SERVICE->resolvePath(current_path).string());
 							message += std::string(file_paths[i]) + "\n";
 						}
 						else {
-							NIKEE_CORE_ERROR("Error Unsupported File Type: {}", file_paths[i]);
+							PN_CORE_ERROR("Error Unsupported File Type: {}", file_paths[i]);
 							message = "Error Unsupported File Type: " + src_file_path.filename().extension().string();
 						}
 					}
@@ -117,29 +123,55 @@ namespace PAIN {
 					b_file_dropped = true;
 				}
 
-				event->setEventProcessed(true);
-			}*/
+				//event->setEventProcessed(true);
+			}
 
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& path) {
 				//Get assets icons
-				//if (PN_ASSETS_SERVICE->getAssetType(path) == Assets::Types::Texture && PN_ASSETS_SERVICE->isAssetCached(path)) {
+				if (PN_ASSETS_SERVICE->getAssetType(path) == Assets::Types::Texture && PN_ASSETS_SERVICE->isAssetCached(path)) {
 
-				//	//Check if asset has been loaded
-				//	std::string icon_ref = PN_ASSETS_SERVICE->getIDFromPath(path.string(), false);
-				//	return PN_ASSETS_SERVICE->getAsset<Assets::Texture>(icon_ref)->gl_data;
-				//}
-				//else {
-				//	std::string icon_ref = path.extension().string().substr(1) + "_icon.png";
-				//	if (auto texture = PN_ASSETS_SERVICE->getAsset<Assets::Texture>(icon_ref)) {
-				//		return texture->gl_data;
-				//	}
-				//	else {
-				//		//Load default file icon
-				//		return PN_ASSETS_SERVICE->getAsset<Assets::Texture>("def_icon.png")->gl_data;
-				//	}
-				//}
+					//Check if asset has been loaded
+					std::string icon_ref = PN_ASSETS_SERVICE->getIDFromPath(path.string(), false);
+
+					auto tex_path = path.string();
+					return isTextureLoaded(tex_path.c_str(), icon_ref);
+				}
+				else {
+					std::string ext = path.extension().string();
+
+					std::string icon_ref;
+					if (!ext.empty() && ext.size() > 1) {
+						icon_ref = ext.substr(1) + "_icon.png";  // remove leading dot
+					}
+					else {
+						icon_ref = "def_icon.png";  // fallback icon
+					}
+
+					auto icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/" + icon_ref);
+
+					if (std::filesystem::exists(icon_path)) {
+						return isTextureLoaded(icon_path.string().c_str(), icon_ref);
+					}
+					else {
+						//Load default file icon
+						auto def_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/def_icon.png");
+						return isTextureLoaded(def_icon_path.string().c_str(), "def_icon.png");
+					}
+				}
 
 				return 0;
+			}
+
+			unsigned int ResourcePanel::isTextureLoaded(const char* file_path, const std::string& ref) {
+				// Check if texture already loaded
+				auto& texture_map = TextureManager::get().getTextureMap();
+				auto it = texture_map.find(ref);
+				if (it != texture_map.end()) {
+					return it->second;
+				}
+
+				// Otherwise, load and store
+				return TextureManager::get().load(file_path, ref);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -173,7 +205,11 @@ namespace PAIN {
 					ImGui::BeginGroup();
 
 					//Folder icon
-					/*ImTextureID icon = static_cast<ImTextureID>(PN_ASSETS_SERVICE->getAsset<Assets::Texture>("folder_icon.png")->gl_data);
+					//ImTextureID icon = static_cast<ImTextureID>(PN_ASSETS_SERVICE->getAsset<Assets::Texture>("folder_icon.png")->gl_data);
+					auto folder_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/folder_icon.png");
+					unsigned int tex_id = isTextureLoaded(folder_icon_path.string().c_str(), "folder_icon");
+
+					ImTextureID icon = (ImTextureID)(static_cast<uintptr_t>(tex_id));
 
 					//Display directory icon
 					ImVec2 uv0(0.0f, 1.0f);
@@ -194,65 +230,7 @@ namespace PAIN {
 						break;
 					}
 					ImGui::PopStyleColor();
-					moveFileAcceptPayload(virtual_path + '/' + dir.filename().string());*/
-
-
-					// ----------- Placeholder as Icon PNG not in yet ---------------------
-					// Determine type for label (assuming 'dir' is a std::filesystem::path object)
-					std::string label;
-					auto type = PN_ASSETS_SERVICE->getAssetType(dir);
-
-					switch (type) {
-					case Assets::Types::Model:   label = "Model"; break;
-					case Assets::Types::Music:   label = "Music"; break;
-					case Assets::Types::Scene:   label = "Scene"; break;
-					case Assets::Types::Prefab:  label = "Prefab"; break;
-					case Assets::Types::Grid:    label = "Grid"; break;
-					case Assets::Types::Script:  label = "Script"; break;
-					case Assets::Types::Font:    label = "Font"; break;
-					case Assets::Types::Video:   label = "Video"; break;
-					case Assets::Types::Texture: label = "Texture"; break;
-					default:
-						if (std::filesystem::is_directory(dir))
-							label = "Folder"; // Use "Folder" for directories
-						else
-							label = "File";
-						break;
-					}
-
-					// Display directory icon - using a styled button with *only* the label
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
-					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-
-					// The button text is now ONLY the label, but we must still add a unique ID (##...)
-					std::string button_id = label + "##" + dir.filename().string();
-
-					// Use a regular ImGui::Button with the label as the visible text
-					if (ImGui::Button(button_id.c_str(), ImVec2(icon_size.x, icon_size.y))) {
-						// Change current path to folder path clicked
-						current_path = virtual_path + '/' + dir.filename().string();
-
-						// Update directories & files
-						directories = PN_PATH_SERVICE->listDirectories(current_path);
-						files = PN_PATH_SERVICE->listFiles(current_path);
-
-						// Pop styles and break
-						ImGui::PopStyleVar(2);
-						ImGui::PopStyleColor();
-						ImGui::EndGroup();
-						break;
-					}
-
-					// Pop styles if the button wasn't clicked
-					ImGui::PopStyleVar(2);
-					ImGui::PopStyleColor();
-
-					// Retain the move file functionality outside the button's 'if' block
 					moveFileAcceptPayload(virtual_path + '/' + dir.filename().string());
-
-					// ----------- Placeholder as Icon PNG not in yet ---------------------
-
 
 					//Display directory name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
@@ -281,7 +259,7 @@ namespace PAIN {
 					ImGui::BeginGroup();
 
 					//Extension cases
-					ImTextureID icon = static_cast<ImTextureID>(fileIcon(file));
+					ImTextureID icon = fileIcon(file);
 
 					//Display file icon
 					ImVec2 uv0(0.0f, 1.0f);
@@ -563,8 +541,8 @@ namespace PAIN {
 			void ResourcePanel::onAttach() {
 
 				//Setup events listening
-				/*std::shared_ptr<LevelEditor::ResourcePanel> resourcepanel_wrapped(this, [](LevelEditor::ResourcePanel*) {});
-				NIKE_EVENTS_SERVICE->addEventListeners<Assets::FileDropEvent>(resourcepanel_wrapped);
+				std::shared_ptr<ResourcePanel> resourcepanel_wrapped(this, [](ResourcePanel*) {});
+				/*NIKE_EVENTS_SERVICE->addEventListeners<Assets::FileDropEvent>(resourcepanel_wrapped);
 
 				entities_panel = std::dynamic_pointer_cast<EntitiesPanel>(NIKE_LVLEDITOR_SERVICE->getPanel(EntitiesPanel::getStaticName()));*/
 
@@ -591,17 +569,17 @@ namespace PAIN {
 				icon_size = { 128.0f, 128.0f };
 
 				//Register all engine icons
-				//PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Icons");
+				PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Icons");
 
 				//Init all directories & files
 				directories = PN_PATH_SERVICE->listDirectories(current_path);
 				files = PN_PATH_SERVICE->listFiles(current_path);
 
 				// Create a weak_ptr for safe capturing in filewatch callbacks
-				//std::weak_ptr<LevelEditor::ResourcePanel> weak_this = resourcepanel_wrapped;
+				std::weak_ptr<ResourcePanel> weak_this = resourcepanel_wrapped;
 
 				//Setup directory watching 
-				/*PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/", [weak_this](std::filesystem::path const& file, filewatch::Event event) {
+				PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/", [weak_this, this](std::filesystem::path const& file, filewatch::Event event) {
 					if (auto shared_this = weak_this.lock()) { // Check if the object is still alive
 
 						//Engine engine assets path
@@ -618,7 +596,7 @@ namespace PAIN {
 						switch (event) {
 						case filewatch::Event::added: {
 
-							cout << "ADD EVENT FOR PATH: " << file.string() << " " << file.extension().string() << endl;
+							PN_CORE_INFO("Add Event for Path: " + file.string() + " " + file.extension().string());
 
 							//Push to file event queue
 							shared_this->pushFileEvent([&, file]() {
@@ -634,7 +612,7 @@ namespace PAIN {
 						}
 						case filewatch::Event::removed: {
 
-							cout << "REMOVE EVENT FOR PATH: " << file.string() << " " << file.extension().string() << endl;
+							PN_CORE_INFO("Remove Event for Path: " + file.string() + " " + file.extension().string());
 
 							//Push to file event queue
 							shared_this->pushFileEvent([&, file]() {
@@ -647,7 +625,7 @@ namespace PAIN {
 						}
 						case filewatch::Event::modified: {
 
-							cout << "MODIFIED EVENT FOR PATH: " << file.string() << " " << file.extension().string() << endl;
+							PN_CORE_INFO("Modified Event for Path: " + file.string() + " " + file.extension().string());
 
 							//Push to file event queue
 							shared_this->pushFileEvent([&, file]() {
@@ -668,7 +646,7 @@ namespace PAIN {
 						}
 						}
 					}
-				});*/
+				});
 			}
 
 
@@ -1013,10 +991,10 @@ namespace PAIN {
 				renderFileEditor();
 
 				//File dropped popup
-				/*if (b_file_dropped && !checkPopUpShowing()) {
+				if (b_file_dropped && !checkPopUpShowing()) {
 					openPopUp("Success");
 					b_file_dropped = false;
-				}*/
+				}
 
 				//Render popups
 				renderPopUps();

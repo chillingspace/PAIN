@@ -246,6 +246,7 @@ namespace PAIN {
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
                 auto ecs = PN_ECS_SERVICE;
+                auto metadata = PN_METADATA_SERVICE;
                 auto ser = services->get<Serialization::Service>();
 
                 // AUTO-ADD HIERARCHY COMPONENT
@@ -268,7 +269,15 @@ namespace PAIN {
                     force_refresh = true;
                 }
 
-                // Get current entity count
+                // Detect name changes
+                if (metadata->entityNameChanged()) {
+                    editor_entities.clear();
+                    total_entities = 0;
+                    b_entity_changed = true;
+                    PN_CORE_INFO("[EntityPanel] Entity Name changed detected, list reset");
+                }
+
+                // Get current entity count from ECS
                 size_t current_count = static_cast<size_t>(ecs->getEntitiesCount());
 
                 // Rebuild entity list if needed
@@ -676,7 +685,7 @@ namespace PAIN {
                     auto parent_hierarchy_opt = ecs->getEntityComponent<Hierarchy>(current_parent);
                     if (!parent_hierarchy_opt) {
                         // Parent has no hierarchy component - end of chain
-                        break;  
+                        break;
                     }
 
                     // Move to next parent
@@ -756,7 +765,7 @@ namespace PAIN {
                     test_path = seri_service->resolvePrefabPath(prefab_name);
                 }
 
-                return prefab_name; 
+                return prefab_name;
             }
 
             // Recursively collect entity and all children
