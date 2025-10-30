@@ -147,14 +147,14 @@ namespace PAIN {
 						icon_ref = "def_icon.png";  // fallback icon
 					}
 
-					auto icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://icons/" + icon_ref);
+					auto icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/" + icon_ref);
 
 					if (std::filesystem::exists(icon_path)) {
 						return isTextureLoaded(icon_path.string().c_str(), icon_ref);
 					}
 					else {
 						//Load default file icon
-						auto def_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://icons/def_icon.png");
+						auto def_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/def_icon.png");
 						return isTextureLoaded(def_icon_path.string().c_str(), "def_icon.png");
 					}
 				}
@@ -206,7 +206,7 @@ namespace PAIN {
 
 					//Folder icon
 					//ImTextureID icon = static_cast<ImTextureID>(PN_ASSETS_SERVICE->getAsset<Assets::Texture>("folder_icon.png")->gl_data);
-					auto folder_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Icons/folder_icon.png");
+					auto folder_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/folder_icon.png");
 					unsigned int tex_id = isTextureLoaded(folder_icon_path.string().c_str(), "folder_icon");
 
 					ImTextureID icon = (ImTextureID)(static_cast<uintptr_t>(tex_id));
@@ -569,7 +569,7 @@ namespace PAIN {
 				icon_size = { 128.0f, 128.0f };
 
 				//Register all engine icons
-				PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/icons");
+				PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Textures");
 
 				//Init all directories & files
 				directories = PN_PATH_SERVICE->listDirectories(current_path);
