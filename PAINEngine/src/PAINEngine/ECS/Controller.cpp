@@ -12,6 +12,7 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/GLMSerialization.h"
 #include "ECS/Components/AllComponents.h" 
+#include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cBoundingVolume.h"
 
 namespace PAIN {
@@ -80,6 +81,7 @@ namespace PAIN {
             registerComponent<Collision::Collider>("Collidor");
             registerComponent<Joint>("Joint");
             registerComponent<cBoundingVolume>("BoundingVolume");
+            registerComponent<Audio::AudioSource>("AudioSource");
 
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");

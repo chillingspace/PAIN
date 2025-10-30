@@ -5,6 +5,7 @@
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "ECS/Components/cAudioSource.h"
 #include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
@@ -21,6 +22,9 @@ namespace PAIN {
 
 	void Scene::onAttach()
 	{
+
+		// For audio comp testing
+		auto ecs = services->get<ECS::Controller>();
 
 		// Camera and Scene Setup
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
@@ -139,7 +143,19 @@ namespace PAIN {
 		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		//AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+		
+		// New audio demo test
+		// Add the looping sound to the "screen" entity as a component
+		auto loopingSoundPath = pathService->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+		audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f); // Still need to load it
+
+		m_audioSourceEntity = AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+		ecs->addEntityComponent(m_audioSourceEntity, Audio::AudioSource {
+			.soundPath = loopingSoundPath,
+			.is3D = true,
+			.looping = true,
+			.playTrigger = true // Tell the AudioSystem to play this on its first update
+		});
 
 
 		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/sdcc.obj");
@@ -166,15 +182,13 @@ namespace PAIN {
 		//AddObject(city_mesh_id, "city", { -20.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 100.f, 100.f, 100.f });
 
 
-
-
 		if (audioManager)
 		{
 			// Define the rectangular path
 			float pathWidth = 16.0f;
 			float pathDepth = 8.0f;
 			glm::vec3 pathCenter = { 0.0f, 1.0f, 0.0f };
-			pathCorners = {
+			m_pathCorners = {
 				pathCenter + glm::vec3(-pathWidth / 2, 0.0f, -pathDepth / 2),
 				pathCenter + glm::vec3(pathWidth / 2, 0.0f, -pathDepth / 2),
 				pathCenter + glm::vec3(pathWidth / 2, 0.0f,  pathDepth / 2),
@@ -225,12 +239,12 @@ namespace PAIN {
 		// Get time scale from ViewportPanel (0.0 when paused, 1.0 when playing)
 		float timeScale = 1.0f;
 		bool isPaused = false;
-#ifdef _DEBUG
+	#ifdef _DEBUG
 		if (auto viewport = services->get<Editor::Panel::ViewportPanel>()) {
 			timeScale = viewport->getTimeScale();
 			isPaused = (timeScale == 0.0f);
 		}
-#endif
+	#endif
 
 		// Apply time scale to deltaTime for simulation
 		float scaledDt = timing.dt * timeScale;
@@ -243,61 +257,34 @@ namespace PAIN {
 
 		auto ecs = services->get<ECS::Controller>();
 		auto audioManager = services->get<Audio::Audio>();
-		if (!audioManager || audioSourceEntity == entt::null) return;
+		if (!audioManager || m_audioSourceEntity == entt::null) return;
 
-		// Handle audio pause/resume based on simulation state
-		//static bool wasPaused = false;
-		//if (isPaused != wasPaused) {
-		//	if (isPaused) {
-		//		// Pause the looping music channel
-		//		if (isValid(audioSourceChannel)) {
-		//			audioManager->pauseChannel(audioSourceChannel);
-		//		}
-		//	}
-		//	else {
-		//		// Resume the looping music channel
-		//		if (isValid(audioSourceChannel)) {
-		//			audioManager->resumeChannel(audioSourceChannel);
-		//		}
-		//	}
-		//	wasPaused = isPaused;
-		//}
-
-		// Update listener position to match the camera's current state (always runs)
-		audioManager->setListener(camera->pos, { 0,0,0 }, camera->forward, camera->up);
+		// The AudioSystem now handles pause/resume automatically via the AppSystem interface
 
 		// Animate the audio source object along a predefined path (respects pause)
-		demoTime += scaledDt; // Changed from timing.dt
-		float progress = fmod(demoTime, segmentDuration) / segmentDuration;
-		int segment = static_cast<int>(demoTime / segmentDuration) % 4;
-		if (segment != currentPathSegment) {
-			currentPathSegment = segment;
+		m_demoTime += scaledDt; // Changed from timing.dt
+		float progress = fmod(m_demoTime, m_segmentDuration) / m_segmentDuration;
+		int segment = static_cast<int>(m_demoTime / m_segmentDuration) % 4;
+		if (segment != m_currentPathSegment) {
+			m_currentPathSegment = segment;
 		}
-		glm::vec3 startPos = pathCorners[currentPathSegment];
-		glm::vec3 endPos = pathCorners[(currentPathSegment + 1) % 4];
+		glm::vec3 startPos = m_pathCorners[m_currentPathSegment];
+		glm::vec3 endPos = m_pathCorners[(m_currentPathSegment + 1) % 4];
 		glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
 
 		// Update the Transform component in the ECS for the renderer
-		if (auto transform = ecs->getEntityComponent<Transform>(audioSourceEntity)) {
+		if (auto transform = ecs->getEntityComponent<Transform>(m_audioSourceEntity)) {
 			transform->get().position = currentPosition;
-		}
-		else {
-			// Component doesn't exist - log warning
-			PN_CORE_WARN("Audio source entity {} has no Transform component",
-				static_cast<uint32_t>(audioSourceEntity));
-		}
-
-		// Update the 3D position of the looping music channel (only when not paused)
-		if (!isPaused && isValid(audioSourceChannel)) {
-			audioManager->setPosition(audioSourceChannel, currentPosition);
 		}
 
 		// Handle footstep playback at intervals (respects pause)
-		footstepTimer -= scaledDt; // Changed from timing.dt
-		if (footstepTimer <= 0.0f)
+		m_footstepTimer -= scaledDt; // Changed from timing.dt
+		if (m_footstepTimer <= 0.0f)
 		{
+			// This is a "one-shot" sound, not tied to a component.
+			// It's fine to keep calling the service directly for this.
 			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
-			footstepTimer = footstepInterval;
+			m_footstepTimer = m_footstepInterval;
 		}
 	}
 

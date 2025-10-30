@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
+#include "ECS/Components/cAudioSource.h"
 
 #ifdef _DEBUG
 
@@ -26,6 +27,8 @@ namespace PAIN {
 
                 PAIN::Editor::Panel::RegisterReflected<PAIN::Lighting>(*this, "Lighting");
                 //RegisterLightUI(*this);
+
+                PAIN::Editor::Panel::RegisterReflected<PAIN::Audio::AudioSource>(*this, "Audio Source");
 
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();
