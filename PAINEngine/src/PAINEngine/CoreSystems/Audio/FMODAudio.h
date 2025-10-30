@@ -44,6 +44,7 @@ namespace PAIN {
             void        resumeAll() override;
             AudioResult setVolumeDb(AudioChannelId, float) override;
             AudioResult setVolumeLinear(AudioChannelId, float) override;
+            AudioResult setMuteAll(bool mute) override;
             AudioResult setPosition(AudioChannelId, const glm::vec3&) override;
 
             void setListener(const glm::vec3&, const glm::vec3&,

@@ -161,6 +161,21 @@ namespace PAIN {
 			case PAIN_KEY_O:
 				camera->move_mode = static_cast<Camera::MOVE_MODES>((camera->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
 				break;
+			case PAIN_KEY_M:
+			{
+				m_isMuted = !m_isMuted; // Toggle the state
+				auto audio = services->get<Audio::Audio>();
+				if (audio) {
+					audio->setMuteAll(m_isMuted); // Use the new mute function
+					if (m_isMuted) {
+						PN_CORE_INFO("Audio Muted");
+					}
+					else {
+						PN_CORE_INFO("Audio Unmuted");
+					}
+				}
+				break;
+			}
 			default:
 				break;
 			}

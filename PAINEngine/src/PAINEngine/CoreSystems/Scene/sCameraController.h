@@ -42,5 +42,6 @@ namespace PAIN {
 	private:
 		Camera* camera;
 		std::shared_ptr<Scene> m_Scene;
+		bool m_isMuted = false; // For toggling all audio (testing)
 	};
 }
