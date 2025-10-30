@@ -133,7 +133,7 @@ namespace PAIN {
             // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
 
 #ifdef PN_PLATFORM_WINDOWS
-            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
 #else
             // For now i do a copy in assets folder andriod
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
@@ -159,6 +159,9 @@ namespace PAIN {
             ImGuiIO& io = ImGui::GetIO();
             io.IniFilename = m_imgui_ini_path.c_str();
 
+            // Load saved layout (docking state, window positions, etc.)
+            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+            //PN_CORE_INFO("Taken From: {}", io.IniFilename);
 
             //toggleVisible();
         }
