@@ -12,6 +12,7 @@
 #include "sSerialization.h"
 #include "ECS/sMetaData.h"
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Path/Android/AndroidPath.h"
 
 
  // Fail at compile time if reflection didn't bind
@@ -59,32 +60,56 @@ namespace PAIN {
         // ----------------------------
         bool Service::saveJsonFile(const std::string& file_path, const nlohmann::json& data) {
             try {
-                fs::path p{ file_path };
-                if (p.has_parent_path()) {
-                    fs::create_directories(p.parent_path());
+                auto path_service = services->get<Path::Path>();
+                
+                auto stream = path_service->createFileStream(file_path, Path::FileMode::Write);
+
+                if (!stream || !stream->good()) {
+                    PN_CORE_ERROR("Could not open file for writing JSON: {}", file_path);
+                    return false;
                 }
-                std::ofstream out(file_path, std::ios::binary | std::ios::trunc);
-                if (!out) return false;
-                out << data.dump(4);
+
+                // Output as a std::string with pretty formatting
+                std::string contents = data.dump(4);
+                stream->write(contents.data(), contents.size());
+                // Good practice for custom streams
+                stream->flush(); 
+
                 PN_CORE_INFO("Save file: {}", file_path);
                 return true;
             }
             catch (...) {
+                PN_CORE_ERROR("Exception when saving JSON: {}", file_path);
                 return false;
             }
         }
 
+
         nlohmann::json Service::loadJsonFile(const std::string& file_path) {
             nlohmann::json j;
+
+            auto path_service = services->get<Path::Path>();
+
+            // Crash is happening in create file stream
+            auto stream = path_service->createFileStream(file_path, Path::FileMode::Read);
+
+            if (!stream || !stream->good() || stream->size() == 0) {
+                PN_CORE_ERROR("Could not open scene file for JSON: {}", file_path);
+                return j;
+            }
+
+            std::string contents;
+            contents.resize(stream->size());
+            stream->read(contents.data(), contents.size());
+
             try {
-                std::ifstream in(file_path, std::ios::binary);
-                if (!in) return j; // empty on failure
-                in >> j;
+                j = nlohmann::json::parse(contents);
             }
             catch (...) {
-                // leave empty
+                PN_CORE_ERROR("Failed to parse JSON: {}", file_path);
+                // Leave empty
             }
-            PN_CORE_INFO("Load file: {}", file_path);
+            PN_CORE_INFO("Load file {}", file_path);
             return j;
         }
 
@@ -107,6 +132,7 @@ namespace PAIN {
             return ok;
         }
         bool Service::loadSceneFromFile(const std::string& file_path) {
+
             const auto j = loadJsonFile(file_path);
             if (!j.is_object()) {
                 PN_CORE_WARN("[Scene] expected object root (reflection)");
@@ -162,13 +188,18 @@ namespace PAIN {
             return true;
         }
 
-        std::string Service::MakeScenePathFromBase(std::string_view base)
+        std::string Service::makeVirtualScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
 
-            auto path_service = services->get<Path::Path>();
+            //auto path_service = services->get<Path::Path>();
 
-            return path_service->resolvePath("main_game_assets://Scenes/" + b);
+#ifdef PN_PLATFORM_WINDOWS
+            // Windows file path
+            return "main_game_assets://scenes/" + b;
+#elif PN_PLATFORM_ANDROID
+            return "game_assets://scenes/" + b;
+#endif
         }
 
         /*************************
@@ -205,7 +236,9 @@ namespace PAIN {
 
             std::string prefab_filepath = resolvePrefabPath(filepath);
 
+#ifdef PN_PLATFORM_WINDOWS
             assert(std::filesystem::exists(prefab_filepath) && "Prefab file does not exist or path is invalid!");
+#endif
 
             nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
             if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
@@ -234,12 +267,18 @@ namespace PAIN {
             // If do not have the .prefab extension, add it in
             if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
 
+#ifdef PN_PLATFORM_WINDOWS
+            // Windows file path
             return path_service->resolvePath("main_game_assets://prefabs/" + prefab_with_ext);
+#elif PN_PLATFORM_ANDROID
+            // Andriod file path
+            return path_service->resolvePath("game_assets://prefabs/" + prefab_with_ext);
+#endif
         }
 
         bool Service::createNewScene(std::string_view baseName)
         {
-            const std::string path = MakeScenePathFromBase(baseName);
+            const std::string path = makeVirtualScenePathFromBase(baseName);
             return saveSceneToFile(path); // uses existing minimal payload
         }
 
@@ -252,7 +291,7 @@ namespace PAIN {
 
         bool Service::saveSceneAs(std::string_view baseName)
         {
-            const std::string path = MakeScenePathFromBase(baseName);
+            const std::string path = makeVirtualScenePathFromBase(baseName);
             if (!saveSceneToFile(path)) return false;
             curr_scene_file_ = path;
             return true;
@@ -263,7 +302,7 @@ namespace PAIN {
             // !TODO: ADD CHECK FOR WHEN TRYING TO LOAD LEVEL THAT DOESN'T EXIST
 
             PN_CORE_INFO("[Serialization] loadSceneById called with '{}'", sceneIdWithExt);
-            const std::string path = MakeScenePathFromBase(sceneIdWithExt); // normalizes to .scn
+            const std::string path = makeVirtualScenePathFromBase(sceneIdWithExt); 
             PN_CORE_INFO("[Serialization] Trying scene path: {}", path);
             return loadSceneFromFile(path);
         }
@@ -274,7 +313,7 @@ namespace PAIN {
         //{
         //    std::string base(sceneIdWithExt);
         //    if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
-        //    const std::string path = MakeScenePathFromBase(base);
+        //    const std::string path = makeVirtualScenePathFromBase(base);
         //    std::error_code ec;
         //    std::filesystem::remove(path, ec);
         //    if (ec) return false;
@@ -285,7 +324,7 @@ namespace PAIN {
         bool Service::deleteSceneById(std::string_view sceneId)
         {
             // Normalize to the actual on-disk path (adds .scn if needed)
-            const std::string path = MakeScenePathFromBase(sceneId);
+            const std::string path = makeVirtualScenePathFromBase(sceneId);
             PN_CORE_INFO("[Serialization] deleteSceneById trying '{}'", path);
 
 #if !defined(PN_PLATFORM_ANDROID)

@@ -83,7 +83,7 @@ namespace PAIN {
             bool loadSceneFromFile(const std::string& file_path);
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
-            std::string MakeScenePathFromBase(std::string_view base); 
+            std::string makeVirtualScenePathFromBase(std::string_view base); 
                 
             /***********************************
             * Prefab Serializations

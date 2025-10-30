@@ -236,14 +236,27 @@ namespace PAIN {
 
         std::unique_ptr<IFileStream> WindowsPath::createFileStream(const std::string& virtualPath, FileMode mode) {
 
-            //Resolve path and create stream
             auto path = resolvePath(virtualPath);
 
-            //Ensure path exists
-            if (!std::filesystem::exists(path)) {
-                PN_CORE_WARN("File does not exist! Unable to create file stream");
-                return std::unique_ptr<IFileStream>();
+            // Only assert for reads, not writes.
+            if (mode == FileMode::Read) {
+                assert(std::filesystem::exists(path) && "Scene file does not exist or path is invalid!");
+                if (!std::filesystem::exists(path)) {
+                    PN_CORE_WARN("File does not exist! Unable to create file stream for reading");
+                    return std::unique_ptr<IFileStream>();
+                }
             }
+
+#ifdef PN_PLATFORM_WINDOWS
+            // Only windows have writing
+            // For writing: if the parent directory doesn't exist, create it
+            else if (mode == FileMode::Write || mode == FileMode::ReadWrite) {
+                auto p = std::filesystem::path(path);
+                if (p.has_parent_path() && !std::filesystem::exists(p.parent_path())) {
+                    std::filesystem::create_directories(p.parent_path());
+                }
+            }
+#endif
 
             return std::make_unique<WinFileStream>(path, mode);
         }

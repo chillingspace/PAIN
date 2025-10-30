@@ -66,7 +66,7 @@ namespace PAIN {
 
                 // Hooks for future backend integration 
                 ScenesHooks hooks_;
-                char nameBuf_[64] = "Level01";  
+                char nameBuf_[64] = "test";  
 
             private:
                 // helpers

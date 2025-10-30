@@ -493,13 +493,20 @@ namespace PAIN {
 		return std::make_shared<Mesh>(vertices, indices, path_to_mesh);
 	}
 
+	static uint32_t djb2_hash(const std::string& str) {
+		uint32_t hash = 5381;
+		for (char c : str)
+			hash = ((hash << 5) + hash) + (uint8_t)c; /* hash * 33 + c */
+		return hash;
+	}
+
 	uint32_t Scene::cacheMesh(const std::string& path)
 	{
 		std::filesystem::path fsPath(path);
 		std::string filename = fsPath.filename().string();
 
 		auto mesh = loadMesh(path);
-		uint32_t mesh_id = std::hash<std::string>{}(filename);
+		uint32_t mesh_id = djb2_hash(filename);
 		meshCache[mesh_id] = mesh;
 
 		return mesh_id;
@@ -510,7 +517,7 @@ namespace PAIN {
 		std::filesystem::path fsPath(file_name);
 		std::string filename = fsPath.filename().string();
 
-		uint32_t mesh_id = std::hash<std::string>{}(filename);
+		uint32_t mesh_id = djb2_hash(filename);
 		return mesh_id;
 	}
 
