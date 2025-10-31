@@ -49,6 +49,9 @@ android {
             }
         }
     }
+
+    ndkVersion = "27.0.12077973"
+
     java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
