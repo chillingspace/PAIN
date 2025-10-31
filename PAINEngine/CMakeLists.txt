@@ -21,6 +21,7 @@ target_include_directories(PAINEngine
     ${CMAKE_SOURCE_DIR}/vendor/reflcpp
     ${CMAKE_SOURCE_DIR}/vendor/FileWatch
     ${CMAKE_SOURCE_DIR}/vendor/nlohmann
+    ${CMAKE_SOURCE_DIR}/vendor/sol2/include
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine
 )
@@ -41,8 +42,6 @@ target_link_libraries(PAINEngine
         imgui::imgui
         FMOD::core
         Jolt
-	    lua
-	    sol2
         assimp::assimp
         freetype
 )
@@ -56,6 +55,7 @@ target_link_libraries(PAINEngine
         gli_headers
         entt_header_only
 imguizmo
+	lua
 )
 
 # ImGui backends compiled into the engine

@@ -7,7 +7,7 @@
 
 // ECS & Metadata
 #include "ECS/Controller.h"
-#include "ECS/ECSTypes.h"
+//#include "ECS/ECSTypes.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cPhysics.h"
 #include "ECS/Components/cMetadata.h"
@@ -85,8 +85,14 @@ public:
     glm::vec2 GetMouseView() const override;
 
 private:
-    inline static PAIN::ECS::Entity::Type asEntity(int id) {
-        return static_cast<PAIN::ECS::Entity::Type>(id);
+    using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());
+
+    inline static EntityType asEntity(int id) {
+        return static_cast<EntityType>(id);
+    }
+    inline static int asInt(EntityType e) {
+        // Prefer EnTT’s integral helper
+        return static_cast<int>(entt::to_integral(e));
     }
 
 private:

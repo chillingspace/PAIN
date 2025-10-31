@@ -1,4 +1,3 @@
-// external/sol_sanitized.hpp
 #pragma once
 
 // ---- Platform hygiene (Windows) ----

@@ -27,7 +27,6 @@ if(ANDROID)
     target_include_directories(pain PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/native_app_glue
 	   "${PAIN_ROOT}/PAINEngine/src"
-	   "${PAIN_ROOT}/vendor/sol2/include"
     )
 
     # turn off PCH for Jolt (and optionally for PAINEngine if you use PCH there)

@@ -5,8 +5,8 @@
 
 // ---------------- Entities / Prefabs ----------------
 int EngineAPIAdapter::CreateEntity(std::string /*layer*/, std::string /*name*/) {
-    auto e = ecs_.createEntity(); // ECS create/destroy via Controller
-    return static_cast<int>(e);
+    auto e = ecs_.createEntity(); 
+    return asInt(e);
 }
 
 void EngineAPIAdapter::DeleteEntity(int id) {
@@ -25,7 +25,7 @@ int EngineAPIAdapter::CreatePrefabInstance(std::string /*prefab*/,
 std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
     auto opt = meta_.getEntityByName(std::string{ name });   // name lookup in Meta service
     if (!opt) return std::nullopt;
-    return static_cast<int>(*opt);
+    return asInt(*opt);
 }
 
 int EngineAPIAdapter::GetImageID(std::string_view) { 
