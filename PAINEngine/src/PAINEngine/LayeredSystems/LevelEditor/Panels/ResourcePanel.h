@@ -40,6 +40,7 @@ namespace PAIN {
                 // File Event Queue
                 // ----------------------------
                 void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
+                void onEvent(PAIN::Event::Event& event);
 
             private:
 

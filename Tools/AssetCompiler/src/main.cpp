@@ -11,7 +11,7 @@
 #include <limits.h>
 #endif
 
-std::filesystem::path getExecutablePath() {
+static std::filesystem::path getExecutablePath() {
 #ifdef _WIN32
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
@@ -24,19 +24,12 @@ std::filesystem::path getExecutablePath() {
         return std::filesystem::path(buffer).parent_path();
     }
     return std::filesystem::current_path();
-#elif __APPLE__
-    char buffer[PATH_MAX];
-    uint32_t size = sizeof(buffer);
-    if (_NSGetExecutablePath(buffer, &size) == 0) {
-        return std::filesystem::path(buffer).parent_path();
-    }
-    return std::filesystem::current_path();
 #else
     return std::filesystem::current_path();
 #endif
 }
 
-std::filesystem::path findProjectRoot() {
+static std::filesystem::path findProjectRoot() {
     // Get the actual executable directory
     std::filesystem::path execDir = getExecutablePath();
 
@@ -65,12 +58,40 @@ std::filesystem::path findProjectRoot() {
 
 int main(int argc, char* argv[]) {
 
-    //Auto-discover project root from executable location
-    std::filesystem::path projectRoot = findProjectRoot();
-    std::filesystem::path assetsRoot = projectRoot / "assets";
+    std::filesystem::path input_path = findProjectRoot() / "assets";
+    std::filesystem::path output_path = findProjectRoot() / "bin/Debug/assets";
+    PAIN::Assets::Platform build_platform = PAIN::Assets::Platform::Windows;
+
+    //Retrieve input and output directories
+    for (int i = 1; i < argc; ++i) {
+
+        if (std::string(argv[i]) == "--input" && i + 1 < argc) {
+            input_path = std::string(argv[i + 1]);
+        }
+
+        if (std::string(argv[i]) == "--output" && i + 1 < argc) {
+            output_path = std::string(argv[i + 1]);
+        }
+
+        if (std::string(argv[i]) == "--target" && i + 1 < argc) {
+            auto platform_str = std::string(argv[i + 1]);
+
+            if (platform_str == "windows") {
+                build_platform = PAIN::Assets::Platform::Windows;
+            }
+            else if(platform_str == "android") {
+                build_platform = PAIN::Assets::Platform::Android;
+            }
+            else {
+                build_platform = PAIN::Assets::Platform::Windows;
+            }
+
+            std::cout << "Asset Compiler Running On: " << platform_str << std::endl;
+        }
+    }
 
 	//create assset compiler
-    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(assetsRoot);
+    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(input_path, output_path, build_platform,getExecutablePath());
 
     //Enforce a standard structure for assets
     compiler->enforceStandardStructure();
@@ -80,6 +101,17 @@ int main(int argc, char* argv[]) {
 
     //Tidy up any additional directories
     compiler->tidyUpDirectories();
+
+    //Output stamp file
+    std::filesystem::path debug_file = output_path / "assetcompiler_stamp.txt";
+    std::ofstream test_out(debug_file);
+    if (test_out.is_open()) {
+        test_out << "AssetCompiler ran successfully at: " << std::time(nullptr) << std::endl;
+        test_out.close();
+    }
+    else {
+        std::cerr << "Failed to write debug test file: " << debug_file << std::endl;
+    }
 
     //Clean up resource
 	delete compiler;

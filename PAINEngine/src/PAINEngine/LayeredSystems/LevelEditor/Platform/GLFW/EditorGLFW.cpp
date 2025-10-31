@@ -4,6 +4,7 @@
 #ifdef PN_PLATFORM_WINDOWS
 
 #include "EditorGLFW.h"
+#include "ImGuizmo.h" 
 
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -104,15 +105,14 @@ namespace PAIN {
             // Init GLFW/OpenGL3 backends
             ImGui_ImplGlfw_InitForOpenGL(g_window, true);
             ImGui_ImplOpenGL3_Init("#version 450");
-
-            // Load saved layout (docking state, window positions, etc.)
-            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
         }
 
 
 		void EditorGLFW::shutdown() {
 			ImGuiIO& io = ImGui::GetIO();
-			ImGui::SaveIniSettingsToDisk(io.IniFilename);
+
+			//ImGui::SaveIniSettingsToDisk(io.IniFilename);
+            //PN_CORE_INFO("Saved Here: {}", io.IniFilename);
 
 			ImGui_ImplOpenGL3_Shutdown();
 			ImGui_ImplGlfw_Shutdown();
@@ -123,6 +123,7 @@ namespace PAIN {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+            ImGuizmo::BeginFrame();
 		}
 
         void EditorGLFW::updateShortCuts(std::shared_ptr<CommandManager> command) {

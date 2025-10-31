@@ -1,4 +1,4 @@
-/*****************************************************************//**
+﻿/*****************************************************************//**
  * \file   sSerialization.cpp
  * \brief  Definition of serialization service
  *
@@ -10,47 +10,16 @@
 
 #include "pch.h"
 #include "sSerialization.h"
-
- // ---- quick reflected test type ----
-struct _SerSmokeTransform {
-    float x{}, y{}, z{};
-};
-
-REFL_TYPE(_SerSmokeTransform)
-REFL_FIELD(x)
-REFL_FIELD(y)
-REFL_FIELD(z)
-REFL_END
-
-// Will throw error if the test struct is not reflectable
-static_assert(refl::trait::is_reflectable_v<_SerSmokeTransform>, "_SerSmokeTransform not reflectable");
-
-template <typename T>
-void DebugDumpReflectionAndJson(const T& obj, const nlohmann::json& j) {
-    using namespace refl;
-    constexpr auto type = reflect<T>();
-
-    PN_CORE_INFO("[DEBUG] JSON dump:\n{0}\n", j.dump(2));
-    PN_CORE_INFO("[DEBUG] Members:");
-
-    util::for_each(type.members, [&](auto member) {
-        using MemberT = decltype(member);
-        if constexpr (refl::trait::is_field_v<MemberT>) {
-            // Try both .c_str() and .str() depending on refl-cpp version
-            //std::string key;
-            //if constexpr (requires { member.name.c_str(); }) key = member.name.c_str();
-            //else key = std::string(member.name.str());
-
-            constexpr auto cname = member.name;
-            const std::string key = PAIN::Serialization::detail::name_to_string(cname);
+#include "ECS/sMetaData.h"
+#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Path/Android/AndroidPath.h"
 
 
-            PN_CORE_INFO("  - field name: {0}, in JSON? {1}", key, j.contains(key) ? "yes" : "no");
-
-        }
-        });
-}
-
+ // Fail at compile time if reflection didn't bind
+static_assert(refl::trait::is_reflectable_v<PAIN::Serialization::SceneDoc>,
+    "SceneDoc not reflectable");
+static_assert(refl::trait::is_reflectable_v<PAIN::Serialization::SceneDoc::Layer>,
+    "Layer not reflectable");
 
 namespace fs = std::filesystem;
 
@@ -73,17 +42,6 @@ namespace PAIN {
         //}
 
         void PAIN::Serialization::Service::onAttach() {
-            // Placeholder path
-            const std::string scenePath; // MakeScenePathFromBase("lvl1_1");
-
-            PN_CORE_INFO("[Serialization] Attempting to load scene: {0}", scenePath);
-
-            if (loadSceneFromFile(scenePath)) {
-                PN_CORE_INFO("[Serialization] Scene loaded successfully: {0}", scenePath);
-            }
-            else {
-                PN_CORE_INFO("[Serialization] Scene load FAILED: {0}", scenePath);
-            }
         }
 
         void PAIN::Serialization::Service::onDetach() {
@@ -97,337 +55,230 @@ namespace PAIN {
             }
         }
 
-        /*void PAIN::Serialization::Service::onAttach() {
-           
-            // 1) Write a minimal scene file
-            const std::string scenePath = "assets/smoke.scene.json";
-            saveSceneToFile(scenePath);
-
-            // 2) Round-trip a reflected struct
-            _SerSmokeTransform t{ 1.0f, 2.0f, 3.0f };
-            nlohmann::json j = to_json_reflected(t);
-
-            // DEBUG: dump what we serialized
-            PN_CORE_INFO("[Serialization] Serialized JSON:\n{0}", j.dump(2));
-
-            const std::string dataPath = "assets/smoke.data.json";
-            saveJsonFile(dataPath, j);
-
-            // DEBUG: confirm file written
-            if (!std::filesystem::exists(dataPath)) {
-                PN_CORE_INFO("[Serialization] File does not exist: {0}", dataPath);
-            }
-
-            // Load back and compare
-            _SerSmokeTransform t2{};
-            auto jIn = loadJsonFile(dataPath);
-
-            // DEBUG: dump what we loaded
-            PN_CORE_INFO("[Serialization] Loaded JSON:\n{0}", jIn.dump(2));
-
-            if (!jIn.is_null() && !jIn.empty()) {
-                from_json_reflected(t2, jIn);
-            }
-
-            // Optional: simple assert/log
-            const bool ok = (t.x == t2.x && t.y == t2.y && t.z == t2.z);
-            if (!ok) {
-                PN_CORE_INFO("[Serialization] Round-trip FAILED "
-                    "(expected: {0},{1},{2} got: {3},{4},{5})",
-                    t.x, t.y, t.z, t2.x, t2.y, t2.z);
-            }
-            else {
-                PN_CORE_INFO("[Serialization] Round-trip OK");
-            }
-            
-        }*/
-
-        // END OF DEBUG
-
-
         // ----------------------------
         // File helpers
         // ----------------------------
         bool Service::saveJsonFile(const std::string& file_path, const nlohmann::json& data) {
             try {
-                fs::path p{ file_path };
-                if (p.has_parent_path()) {
-                    fs::create_directories(p.parent_path());
+                auto path_service = services->get<Path::Path>();
+                
+                auto stream = path_service->createFileStream(file_path, Path::FileMode::Write);
+
+                if (!stream || !stream->good()) {
+                    PN_CORE_ERROR("Could not open file for writing JSON: {}", file_path);
+                    return false;
                 }
-                std::ofstream out(file_path, std::ios::binary | std::ios::trunc);
-                if (!out) return false;
-                out << data.dump(4);
+
+                // Output as a std::string with pretty formatting
+                std::string contents = data.dump(4);
+                stream->write(contents.data(), contents.size());
+                // Good practice for custom streams
+                stream->flush(); 
+
+                PN_CORE_INFO("Save file: {}", file_path);
                 return true;
             }
             catch (...) {
+                PN_CORE_ERROR("Exception when saving JSON: {}", file_path);
                 return false;
             }
         }
 
+
         nlohmann::json Service::loadJsonFile(const std::string& file_path) {
             nlohmann::json j;
+
+            auto path_service = services->get<Path::Path>();
+
+            // Crash is happening in create file stream
+            auto stream = path_service->createFileStream(file_path, Path::FileMode::Read);
+
+            if (!stream || !stream->good() || stream->size() == 0) {
+                PN_CORE_ERROR("Could not open scene file for JSON: {}", file_path);
+                return j;
+            }
+
+            std::string contents;
+            contents.resize(stream->size());
+            stream->read(contents.data(), contents.size());
+
             try {
-                std::ifstream in(file_path, std::ios::binary);
-                if (!in) return j; // empty on failure
-                in >> j;
+                j = nlohmann::json::parse(contents);
             }
             catch (...) {
-                // leave empty
+                PN_CORE_ERROR("Failed to parse JSON: {}", file_path);
+                // Leave empty
             }
+            PN_CORE_INFO("Load file {}", file_path);
             return j;
         }
 
         // ----------------------------
         // Scene-level placeholders
         // ----------------------------
+
         bool Service::saveSceneToFile(const std::string& file_path) {
-            // TO DO: ADD THIS ONCE ENTITY AND SCENE ARE READY
-            //return false;
+            nlohmann::json scene = to_json_from_doc_(); 
 
-            // Convert our in-memory document to JSON
-            nlohmann::json scene = to_json_from_doc_();
+            // For metadata seri
+            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
+                scene["metadata_service"] = metadata_service->serializeServiceState();
+            }
 
-            // Ensure the path ends with ".scn"
             std::string path = file_path;
-            if (path.size() < 4 || path.rfind(".scn") != path.size() - 4) {
-                path += ".scn";
-            }
-
-            // Write to disk
+            if (path.size() < 4 || path.rfind(".scn") != path.size() - 4) path += ".scn";
             const bool ok = saveJsonFile(path, scene);
-            if (ok) {
-                curr_scene_file_ = file_path;
-                isModifiedScene = false;   // clear dirty flag after saving
-                PN_CORE_INFO("[Serialization] Saved scene: {}", path);
-            }
-            else {
-                PN_CORE_ERROR("[Serialization] Failed to save scene: {}", path);
-            }
+            if (ok) { curr_scene_file_ = file_path; isModifiedScene = false; }
             return ok;
         }
-
         bool Service::loadSceneFromFile(const std::string& file_path) {
-            auto j = loadJsonFile(file_path);
-            if (j.is_null() || j.empty()) {
-                PN_CORE_INFO("[Scene] loadSceneFromFile: empty or invalid: {0}", file_path);
-                return false;
-            }
-            if (!j.is_array()) {
-                PN_CORE_INFO("[Scene] loadSceneFromFile: expected array at root (got {0})", j.type_name());
+
+            const auto j = loadJsonFile(file_path);
+            if (!j.is_object()) {
+                PN_CORE_WARN("[Scene] expected object root (reflection)");
                 return false;
             }
 
-            // Helper: find first section by key (e.g., "Camera", "Grid ID", etc.)
-            auto findSection = [&](const char* key) -> const nlohmann::json* {
-                for (const auto& elem : j) {
-                    if (!elem.is_object()) continue;
-                    auto it = elem.find(key);
-                    if (it != elem.end()) return &(*it);
-                }
-                return nullptr;
-                };
+            // Reflect into doc_
+            // set doc_ + clear dirty
+            doc_from_json_(j);  
 
-            // Build a compact report JSON we can log/save
-            nlohmann::json report;
-            report["file"] = file_path;
-
-            // Grid ID
-            if (const auto* grid = findSection("Grid ID"); grid && grid->is_number_integer())
-                report["grid_id"] = grid->get<int>();
-            else
-                report["grid_id"] = nullptr;
-
-            // Camera
-            if (const auto* cam = findSection("Camera"); cam && cam->is_object()) {
-                auto it = cam->find("Active Cam ID");
-                report["active_cam_id"] = (it != cam->end() && it->is_string()) ? *it : nlohmann::json(nullptr);
-            }
-            else {
-                report["active_cam_id"] = nullptr;
-            }
-
-            // Meta tags
-            if (const auto* meta = findSection("MetaData"); meta && meta->is_object()) {
-                auto it = meta->find("Entity_Tags");
-                report["meta_tags"] = (it != meta->end() && it->is_array()) ? *it : nlohmann::json::array();
-            }
-            else {
-                report["meta_tags"] = nlohmann::json::array();
-            }
-
-            // Declared layer count
-            if (const auto* lc = findSection("Layer Count"); lc && lc->is_number_integer())
-                report["layer_count_declared"] = lc->get<int>();
-            else
-                report["layer_count_declared"] = nullptr;
-
-            // Layers summary
-            nlohmann::json layers_out = nlohmann::json::array();
-            size_t total_entities = 0;
-
-            for (const auto& elem : j) {
-                auto it = elem.find("Layer");
-                if (it == elem.end() || !it->is_object()) continue;
-                const auto& L = *it;
-
-                nlohmann::json Lout;
-                Lout["ID"] = L.value("ID", 0);
-                Lout["Mask"] = L.value("Mask", 0);
-                Lout["B_State"] = L.value("B_State", true);
-
-                // Entities
-                nlohmann::json ents_out = nlohmann::json::array();
-                if (auto ents = L.find("Entities"); ents != L.end() && ents->is_array()) {
-                    for (const auto& ewrap : *ents) {
-                        if (!ewrap.is_object()) continue;
-                        auto eit = ewrap.find("Entity");
-                        if (eit == ewrap.end() || !eit->is_object()) continue;
-
-                        const auto& E = *eit;
-
-                        nlohmann::json Eout;
-                        // Not all scenes have a name/id here; include if present
-                        if (auto n = E.find("Name"); n != E.end() && n->is_string()) Eout["Name"] = *n;
-                        if (auto id = E.find("ID"); id != E.end())                  Eout["ID"] = *id;
-
-                        // Components: output only the component names (keys)
-                        nlohmann::json comps_names = nlohmann::json::array();
-                        if (auto comps = E.find("Components"); comps != E.end() && comps->is_object()) {
-                            for (auto cj = comps->begin(); cj != comps->end(); ++cj) {
-                                comps_names.push_back(cj.key()); // e.g. "Transform::Transform", "Render::Texture"
-                            }
-                        }
-                        Eout["Components"] = comps_names;
-                        ents_out.push_back(std::move(Eout));
-                    }
-                }
-                Lout["entity_count"] = ents_out.size();
-                Lout["Entities"] = std::move(ents_out);
-                total_entities += static_cast<size_t>(Lout["entity_count"]);
-                layers_out.push_back(std::move(Lout));
-            }
-
-            report["layers"] = std::move(layers_out);
-            report["total_entities"] = total_entities;
-
-            // Log a concise summary
-            PN_CORE_INFO("[Scene] {0}: grid={1}, active_cam='{2}', layers={3}, entities={4}",
-                file_path,
-                report["grid_id"].is_null() ? -1 : report["grid_id"].get<int>(),
-                report["active_cam_id"].is_null() ? "(none)" : report["active_cam_id"].get<std::string>(),
-                report["layers"].size(), report["total_entities"].get<size_t>());
-
-            // Log the first few layers/entities to eyeball
-            const size_t max_layers_log = 2;
-            const size_t max_ents_log = 3;
-            size_t lidx = 0;
-            for (const auto& L : report["layers"]) {
-                if (lidx++ >= max_layers_log) break;
-                PN_CORE_INFO("  [Layer ID={0} Mask={1} entities={2}",
-                    L["ID"].get<int>(), L["Mask"].get<int>(),
-                    L["entity_count"].get<size_t>());
-                size_t eidx = 0;
-                for (const auto& E : L["Entities"]) {
-                    if (eidx++ >= max_ents_log) break;
-                    const std::string name = E.contains("Name") ? E["Name"].get<std::string>() : "(noname)";
-                    PN_CORE_INFO("    - Ent name='{0}' comps={1}", name, E["Components"].size());
+            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
+                if (j.contains("metadata_service")) {
+                    metadata_service->deserializeServiceState(j["metadata_service"]);
                 }
             }
 
-#ifdef _DEBUG
-            // Save a report next to the scene (so can inspect with any JSON viewer)
-            //const std::string report_path = file_path + ".report.json";
-            //saveJsonFile(report_path, report);
-            //PN_CORE_INFO("[Scene] Wrote report: {0}", report_path);
-#endif
 
-            curr_scene_file_ = file_path;
+            // Rebuild ECS from the new bolt on section if present
+            if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
+                if (auto controller = services->get<PAIN::ECS::Controller>()) {
+                    controller->destroyAllEntities();
 
-            // Rebuild ECS world from loaded JSON
-            if (auto ecs = services->get<PAIN::ECS::Controller>()) {
-                // Clear all existing entities
-                ecs->destroyAllEntities();
-
-                // Walk through all Layers in the scene JSON
-                for (const auto& elem : j) {
-                    auto it = elem.find("Layer");
-                    if (it == elem.end() || !it->is_object()) continue;
-
-                    const auto& L = *it;
-
-                    if (auto entsIt = L.find("Entities"); entsIt != L.end() && entsIt->is_array()) {
+                    if (auto entsIt = ecsIt->find("Entities"); entsIt != ecsIt->end() && entsIt->is_array()) {
                         for (const auto& ewrap : *entsIt) {
                             if (!ewrap.is_object()) continue;
-
                             auto eit = ewrap.find("Entity");
                             if (eit == ewrap.end() || !eit->is_object()) continue;
 
                             const auto& E = *eit;
-
-                            // Create new entity
-                            auto e = ecs->createEntity();
+                            auto e = controller->createEntity();
 
                             // Name
-                            if (auto n = E.find("Name"); n != E.end() && n->is_string()) {
-                                ecs->addEntityComponent(e, MetaData::EntityName{ n->get<std::string>() });
-                            }
-                            else {
-                                // fallback: keep it deterministic or use the saved ID
-                                ecs->addEntityComponent(e, MetaData::EntityName{ "Entity " + std::to_string((int)e) });
-                            }
+                            if (auto n = E.find("Name"); n != E.end() && n->is_string())
+                                controller->addEntityComponent(e, MetaData::EntityName{ n->get<std::string>() });
+                            else
+                                controller->addEntityComponent(e, MetaData::EntityName{ "Entity " + std::to_string((int)e) });
 
-                            // Rebuild components
+                            // Deserialize all components using their adl_serializer or refl-cpp
                             if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-                                const auto& comps = *compsIt;
-
-                                // Transform
-                                if (auto jt = comps.find("Transform::Transform");
-                                    jt != comps.end() && jt->is_object())
-                                {
-                                    const auto& obj = *jt;
-
-                                    auto rot = obj.value("rotation", nlohmann::json::array());
-                                    auto pos = obj.value("position", nlohmann::json::array());
-                                    auto scl = obj.value("scale", nlohmann::json::array());
-
-                                    if (rot.size() == 4 && pos.size() == 3 && scl.size() == 3) {
-                                        Transform t;
-
-                                        // JSON saved as [x,y,z,w]
-                                        t.rotation = glm::f32quat{
-                                            rot[3].get<float>(),  // w
-                                            rot[0].get<float>(),  // x
-                                            rot[1].get<float>(),  // y
-                                            rot[2].get<float>()   // z
-                                        };
-
-                                        t.position = { pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>() };
-                                        t.scale = { scl[0].get<float>(), scl[1].get<float>(), scl[2].get<float>() };
-
-                                        ecs->addEntityComponent<PAIN::Transform>(e, std::move(t));
-                                    }
-                                }
-
-                                // TODO: hydrate other component types here
+                                controller->loadAllComponentsFromJson(e, *compsIt);
                             }
+                            
                         }
                     }
                 }
             }
+
+            // Remember which file is loaded for saving
+            curr_scene_file_ = file_path;
+
             PN_CORE_INFO("[Serialization] loadSceneFromFile OK, marking scene changed");
             markSceneChanged();
             return true;
         }
 
-        std::string Service::MakeScenePathFromBase(std::string_view base)
+        std::string Service::makeVirtualScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));
-            return std::string("assets/Raw/Game/Scenes/") + b;
+
+            //auto path_service = services->get<Path::Path>();
+
+#ifdef PN_PLATFORM_WINDOWS
+            // Windows file path
+            return "main_game_assets://scenes/" + b;
+#elif PN_PLATFORM_ANDROID
+            return "game_assets://scenes/" + b;
+#endif
+        }
+
+        /*************************
+        * Prefab Seri
+        *************************/
+
+        void Service::savePrefabToFile(const std::string& filepath, const std::vector<entt::entity>& entities)
+        {
+            auto controller = services->get<PAIN::ECS::Controller>();
+            auto metadata_service = services->get<PAIN::MetaData::Service>();
+
+            nlohmann::json prefab_json;
+            nlohmann::json ents = nlohmann::json::array();
+
+            for (auto entity : entities) {
+                nlohmann::json E;
+                E["Components"] = controller->getAllComponentsAsJson(entity);  
+                ents.push_back(E);
+            }
+
+            prefab_json["Entities"] = std::move(ents);
+
+            std::string prefab_filepath = resolvePrefabPath(filepath);
+        
+            saveJsonFile(prefab_filepath, prefab_json);
+        }
+
+        std::vector<entt::entity> PAIN::Serialization::Service::loadPrefabFromFile(const std::string& filepath)
+        {
+            auto controller = services->get<PAIN::ECS::Controller>();
+            auto metadata_service = services->get<PAIN::MetaData::Service>();
+
+            std::vector<entt::entity> entities;
+
+            std::string prefab_filepath = resolvePrefabPath(filepath);
+
+#ifdef PN_PLATFORM_WINDOWS
+            assert(std::filesystem::exists(prefab_filepath) && "Prefab file does not exist or path is invalid!");
+#endif
+
+            nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
+            if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
+
+            for (const auto& E : prefab_json["Entities"]) {
+                // Create new entity
+                entt::entity e = controller->createEntity();
+                entities.push_back(e);
+
+                // Deserialize Components using adl_serializer or refl cpp
+                if (E.contains("Components")) {
+                    controller->loadAllComponentsFromJson(e, E["Components"]);
+                }
+            }
+
+            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_filepath);
+            return entities;
+        }
+
+        std::string Service::resolvePrefabPath(std::string const& prefab)
+        {
+            auto path_service = services->get<Path::Path>();
+
+            std::string prefab_with_ext = prefab;
+
+            // If do not have the .prefab extension, add it in
+            if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
+
+#ifdef PN_PLATFORM_WINDOWS
+            // Windows file path
+            return path_service->resolvePath("main_game_assets://prefabs/" + prefab_with_ext);
+#elif PN_PLATFORM_ANDROID
+            // Andriod file path
+            return path_service->resolvePath("game_assets://prefabs/" + prefab_with_ext);
+#endif
         }
 
         bool Service::createNewScene(std::string_view baseName)
         {
-            const std::string path = MakeScenePathFromBase(baseName);
+            const std::string path = makeVirtualScenePathFromBase(baseName);
             return saveSceneToFile(path); // uses existing minimal payload
         }
 
@@ -440,7 +291,7 @@ namespace PAIN {
 
         bool Service::saveSceneAs(std::string_view baseName)
         {
-            const std::string path = MakeScenePathFromBase(baseName);
+            const std::string path = makeVirtualScenePathFromBase(baseName);
             if (!saveSceneToFile(path)) return false;
             curr_scene_file_ = path;
             return true;
@@ -451,7 +302,7 @@ namespace PAIN {
             // !TODO: ADD CHECK FOR WHEN TRYING TO LOAD LEVEL THAT DOESN'T EXIST
 
             PN_CORE_INFO("[Serialization] loadSceneById called with '{}'", sceneIdWithExt);
-            const std::string path = MakeScenePathFromBase(sceneIdWithExt); // normalizes to .scn
+            const std::string path = makeVirtualScenePathFromBase(sceneIdWithExt); 
             PN_CORE_INFO("[Serialization] Trying scene path: {}", path);
             return loadSceneFromFile(path);
         }
@@ -462,7 +313,7 @@ namespace PAIN {
         //{
         //    std::string base(sceneIdWithExt);
         //    if (base.size() >= 4 && base.substr(base.size() - 4) == ".scn") base.erase(base.size() - 4);
-        //    const std::string path = MakeScenePathFromBase(base);
+        //    const std::string path = makeVirtualScenePathFromBase(base);
         //    std::error_code ec;
         //    std::filesystem::remove(path, ec);
         //    if (ec) return false;
@@ -473,7 +324,7 @@ namespace PAIN {
         bool Service::deleteSceneById(std::string_view sceneId)
         {
             // Normalize to the actual on-disk path (adds .scn if needed)
-            const std::string path = MakeScenePathFromBase(sceneId);
+            const std::string path = makeVirtualScenePathFromBase(sceneId);
             PN_CORE_INFO("[Serialization] deleteSceneById trying '{}'", path);
 
 #if !defined(PN_PLATFORM_ANDROID)
@@ -508,96 +359,70 @@ namespace PAIN {
             return true;
         }
 
-
         nlohmann::json Service::to_json_from_doc_() const
         {
-            json scene = json::array();
+            // Reflection Check
+            /*
+#ifdef _DEBUG
+            {
+                using T = PAIN::Serialization::SceneDoc;
+                constexpr auto type = refl::reflect<T>();
+                size_t field_count = 0;
 
-            scene.push_back(json{ {"Grid ID", doc_.grid_id} });
-            scene.push_back(json{ {"Camera",  json{ {"Active Cam ID", doc_.active_cam_id} } } });
-            scene.push_back(json{ {"MetaData", json{ {"Entity_Tags", doc_.meta_tags} } } });
-            scene.push_back(json{ {"Layer Count", int(doc_.layers.size())} });
-
-            for (const auto& L : doc_.layers) {
-                //json Lobj = {
-                //    {"ID",      L.id},
-                //    {"Mask",    L.mask},
-                //    {"B_State", L.enabled},
-                //    {"Entities", json::array()} // fill when wire ECS
-                //};
-                //scene.push_back(json{ {"Layer", std::move(Lobj)} });
-
-                json ents = json::array();
-
-                if (auto ecs = services->get<PAIN::ECS::Controller>()) {
-
-                    // Use EnTT view to iterate all entities with EntityName component
-                    auto& registry = ecs->getRegistry();
-                    auto view = registry.view<MetaData::EntityName>();
-
-                    for (auto entity : view) {
-
-                        // Cast to own entity type 
-                        ECS::Entity::Type e = static_cast<ECS::Entity::Type>(entity);
-
-                        json E = json::object();
-
-                        // Name
-                        if (auto name = ecs->getEntityComponent<MetaData::EntityName>(e);
-                            name.has_value())
-                        {
-                            // save name
-                            E["Name"] = name->get().name;               
-                        }
-                        // fallback: if no name componen
-                         else { E["Name"] = "Entity " + std::to_string((int)e); }
-
-                        // Optional identifiers
-                        E["ID"] = int(e);
-
-                        // Components block
-                        json C = json::object();
-
-                        // Transform (quat + vec3)
-                        if (auto t = ecs->getEntityComponent<Transform>(e)) {
-                            const auto& tr = t->get();
-                            // Store rotation as [x,y,z,w], position/scale as [x,y,z]
-                            C["Transform::Transform"] = {
-                                {"rotation", {tr.rotation.x, tr.rotation.y, tr.rotation.z, tr.rotation.w}},
-                                {"position", {tr.position.x, tr.position.y, tr.position.z}},
-                                {"scale",    {tr.scale.x,    tr.scale.y,    tr.scale.z}}
-                            };
-                        }
-
-                        // TODO: add other components in the same style
-
-                        E["Components"] = std::move(C);
-                        ents.push_back(json{ {"Entity", std::move(E)} });
+                refl::util::for_each(type.members, [&](auto member) {
+                    if constexpr (refl::trait::is_field_v<decltype(member)>) {
+                        auto key = PAIN::Serialization::detail::name_to_string(member.name);
+                        PN_CORE_INFO("[Reflection] SceneDoc field: {}", key);
+                        ++field_count;
                     }
+                    });
+
+                PN_CORE_INFO("[Reflection] SceneDoc total fields: {}", field_count);
+            }
+#endif
+*/
+
+            // reflection SceneDoc object
+            nlohmann::json root = to_json_reflected(doc_);
+
+            // Attach ECS dump
+            nlohmann::json ecs = nlohmann::json::object();
+            nlohmann::json ents = nlohmann::json::array();
+
+            if (auto controller = services->get<PAIN::ECS::Controller>()) {
+                // Use EnTT view to iterate all entities with EntityName component
+                auto& registry = controller->getRegistry();
+                auto view = registry.view<MetaData::EntityName>();
+                for (auto e : view) {
+
+                    nlohmann::json E = nlohmann::json::object();
+
+                    // Name
+                    if (auto name = controller->getEntityComponent<MetaData::EntityName>(e);
+                        name.has_value()) {
+                        E["Name"] = name->get().name;
+                    }
+                    else {
+                        E["Name"] = "Entity " + std::to_string((int)e);
+                    }
+
+                    // Components
+                    E["Components"] = controller->getAllComponentsAsJson(e);
+
+                    ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
                 }
-
-                json Lobj = {
-                    {"ID",      L.id},
-                    {"Mask",    L.mask},
-                    {"B_State", L.enabled},
-                    {"Entities", std::move(ents)}     // <-- now filled from ECS
-                };
-                scene.push_back(json{ {"Layer", std::move(Lobj)} });
-
             }
 
-            // mask grid, can remove if dw
-            if (!doc_.mask_matrix.empty()) {
-                json m = json::array();
-                for (auto& row : doc_.mask_matrix) m.push_back(row);
-                scene.push_back(json{ {"LayerMaskMatrix", m} });
-            }
+            ecs["Entities"] = std::move(ents);  
+            root["ecs"] = std::move(ecs);            // bolt on section
 
-            return scene;
+            return root;
         }
+
 
         void Service::doc_from_json_(const nlohmann::json& j)
         {
+            /*
             doc_ = {}; // reset
             doc_.grid_id = 0;
             doc_.active_cam_id.clear();
@@ -646,6 +471,11 @@ namespace PAIN {
                 }
             }
 
+            doc_.dirty = false;
+            */
+
+            doc_ = {};
+            from_json_reflected(doc_, j);
             doc_.dirty = false;
         }
 

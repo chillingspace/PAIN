@@ -101,19 +101,23 @@ namespace PAIN {
 
             auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
 
-            //Register panels
-            registerPanel(std::make_shared<Panel::EntityPanel>());
+            // Create EntityPanel first and keep a reference
+            auto entity_panel = std::make_shared<Panel::EntityPanel>();
+            registerPanel(entity_panel);
+
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
             registerPanel(scenesPanel);
             registerPanel(std::make_shared<Panel::ComponentsPanel>());
 
-            // Create ViewportPanel and register it in BOTH panels and services
+            // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
+            viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
+
 
 
             #ifdef PN_PLATFORM_WINDOWS
@@ -131,7 +135,6 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
 #else
-            // For now i do a copy in assets folder andriod
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
 #endif
 
@@ -155,6 +158,9 @@ namespace PAIN {
             ImGuiIO& io = ImGui::GetIO();
             io.IniFilename = m_imgui_ini_path.c_str();
 
+            // Load saved layout (docking state, window positions, etc.)
+            ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+            //PN_CORE_INFO("Taken From: {}", io.IniFilename);
 
             //toggleVisible();
         }
@@ -203,6 +209,12 @@ namespace PAIN {
                         viewport->setSimulationState(false); // false = playing
                     }
                 }
+            }
+            if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
+                editor_debug_mode = (editor_debug_mode + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+                if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
+                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
+                else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
             }
 #endif
 

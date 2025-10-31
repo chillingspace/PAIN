@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_skybox.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17169291338910816269
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "487f8299-9cd2-e843-bf41-4791a0866f8d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_skybox.frag"
+  }
+}

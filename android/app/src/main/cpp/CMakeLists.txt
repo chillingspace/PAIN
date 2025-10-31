@@ -17,6 +17,11 @@ if(ANDROID)
 
     get_filename_component(PAIN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../" ABSOLUTE)
     message(STATUS "PAIN_ROOT = ${PAIN_ROOT}")  # verify in the Gradle/CMake console
+    # Ensures libpain.so
+    set_target_properties(pain PROPERTIES
+            OUTPUT_NAME "pain"
+            DEBUG_POSTFIX ""
+    )
 
     # Include path for the glue header
     target_include_directories(pain PRIVATE
@@ -51,6 +56,7 @@ if(ANDROID)
             log
             EGL
             GLESv3
+            astc_encoder::lib
     )
 
     target_link_options(GameCore PRIVATE
@@ -66,6 +72,7 @@ if(ANDROID)
     target_link_options(pain PRIVATE
             -Wl,-z,common-page-size=4096
             -Wl,-z,max-page-size=16384
+
     )
 
     target_compile_definitions(pain PRIVATE IMGUI_IMPL_OPENGL_ES3=1)

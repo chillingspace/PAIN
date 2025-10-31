@@ -1,13 +1,180 @@
 ﻿#pragma once
 
-#ifdef PN_PLATFORM_WINDOWS
-
 #include "pch.h"
 #include "sLoader.h"
 #include "Applications/AppSystem.h"
+#include "CoreSystems/Path/Path.h"
+
+#include "AssetTypes.h"
+#include "AssetLoader.h"
+
+
 
 namespace PAIN {
     namespace Assets {
+
+		class Manager : public AppSystem {
+		private:
+
+			//Asset registry
+			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_registry;
+
+			//Asset cache
+			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_cache;
+
+			//Asset compiler
+			std::unique_ptr<Loader> asset_loader;
+
+			//Log asset registry
+			void logAssetRegistry() const;
+
+			//Internal finding of guid
+			GUID findGUID(std::string const& name) const;
+			GUID findGUID(std::filesystem::path const& relative_path) const;
+		public:
+
+			Manager() = default;
+
+			virtual ~Manager() = default;
+
+			//Get asset
+			template <typename T>
+			std::shared_ptr<T> getAsset(GUID const& id) {
+
+				//Check if GUID is valid
+				if (!id.IsValid()) {
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Invalid GUID.");
+				}
+
+				//Check if asset register has id
+				if (asset_registry.find(id) == asset_registry.end()) {
+
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Asset doesn't exist in registry.");
+				}
+
+				//Asset template
+				std::shared_ptr<IAsset> asset;
+
+				//Search asset cache
+				auto it = asset_cache.find(id);
+				if (it == asset_cache.end()) {
+
+					//Cache asset
+					asset = cacheAsset(id);
+				}
+				else {
+					asset = it->second;
+				}
+
+				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
+				if (!typed_asset) {
+					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
+				}
+				return typed_asset;
+			}
+
+			template <typename T>
+			std::shared_ptr<T> getAsset(std::string const& name) {
+
+				//Find GUID
+				auto id = findGUID(name);
+
+				//Check if GUID is valid
+				if (!id.IsValid()) {
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Invalid GUID.");
+				}
+
+				//Check if asset register has id
+				if (asset_registry.find(id) == asset_registry.end()) {
+
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Asset doesn't exist in registry.");
+				}
+
+				//Asset template
+				std::shared_ptr<IAsset> asset;
+
+				//Search asset cache
+				auto it = asset_cache.find(id);
+				if (it == asset_cache.end()) {
+
+					//Cache asset
+					asset = cacheAsset(id);
+				}
+				else {
+					asset = it->second;
+				}
+
+				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
+				if (!typed_asset) {
+					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
+				}
+				return typed_asset;
+			}
+
+			template <typename T>
+			std::shared_ptr<T> getAsset(std::filesystem::path const& relative_path) {
+
+				//Find GUID
+				auto id = findGUID(relative_path);
+
+				//Check if GUID is valid
+				if (!id.IsValid()) {
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Invalid GUID.");
+				}
+
+				//Check if asset register has id
+				if (asset_registry.find(id) == asset_registry.end()) {
+
+					//Asset doesnt exist in registry
+					throw std::runtime_error("Asset doesn't exist in registry.");
+				}
+
+				//Asset template
+				std::shared_ptr<IAsset> asset;
+
+				//Search asset cache
+				auto it = asset_cache.find(id);
+				if (it == asset_cache.end()) {
+
+					//Cache asset
+					asset = cacheAsset(id);
+				}
+				else {
+					asset = it->second;
+				}
+
+				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
+				if (!typed_asset) {
+					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
+				}
+				return typed_asset;
+			}
+
+			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
+			void uncacheAsset(GUID const& id);
+			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+
+			//Find asset type
+			std::shared_ptr<IAsset> getAssetData(GUID const& id) const;
+			std::shared_ptr<IAsset> getAssetData(std::string const& name) const;
+			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path) const;
+
+			// AppSystem overrides
+			void onAttach() override;
+			void onUpdate(AppTiming timing) override {}
+			void onDetach() override;
+			void onFixedUpdate(AppTiming timing) override {}
+			void onAppPause() override {}
+			void onAppResume() override {}
+			void onEvent(Event::Event& e) override {}
+		};
+
+#ifdef PN_PLATFORM_WINDOWS
 
 		//Temporary Disable DLL Export Warning
 		#pragma warning(disable: 4251)
@@ -199,10 +366,10 @@ namespace PAIN {
 
 		};
 
+#endif
+
 		//Re-enable DLL Export warning
 		#pragma warning(default: 4251)
 
     } // namespace Assets
 } // namespace PAIN
-
-#endif

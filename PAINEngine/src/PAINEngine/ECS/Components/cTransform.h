@@ -8,9 +8,14 @@
  * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
+#pragma once
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
+//#include "pch.h"
+#include <refl.hpp>
+#include "GLMSerialization.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
 
 namespace PAIN {
@@ -35,6 +40,15 @@ namespace PAIN {
 
 #ifdef _DEBUG
 	// UI Registration function
+	//inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
+	//	panel.registerCompUIFunc<PAIN::Transform>([](Editor::Panel::ComponentsPanel&, PAIN::Transform& t) {
+	//		ImGui::Text("Transform");
+	//		ImGui::Separator();
+	//		DrawWithReflection(t);
+	//		});
+	//}
+
+	/*
 	inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
 		panel.registerCompUIFunc<Transform>([](Editor::Panel::ComponentsPanel& comp_panel, Transform& transform) {
 			ImGui::Text("Transform");
@@ -54,9 +68,40 @@ namespace PAIN {
 			ImGui::DragFloat3("Scale", glm::value_ptr(transform.scale), 0.1f);
 		});
 	}
+	*/
 	
 #endif
-
 }
+
+// No refl macro here, have to use custom GLM serializers, 
+//  refl-cpp doesn't automatically know how to reflect GLM types
+
+// This is needed as json still does not now how to handle seri for the custom comps,
+// These types not supported by refl, so we need add struct-level seri 
+namespace nlohmann {
+	template<>
+	struct adl_serializer<PAIN::Transform> {
+		static void to_json(json& j, const PAIN::Transform& t) {
+			j["position"] = t.position;
+			j["rotation"] = t.rotation;
+			j["scale"] = t.scale;
+		}
+
+		static void from_json(const json& j, PAIN::Transform& t) {
+			t.position = j["position"].get<glm::vec3>();
+			t.rotation = j["rotation"].get<glm::quat>();
+			t.scale = j["scale"].get<glm::vec3>();
+		}
+	};
+}
+
+// Register type & fields for refl-cpp
+REFL_TYPE(PAIN::Transform)
+REFL_FIELD(position)
+REFL_FIELD(rotation)
+REFL_FIELD(scale)
+REFL_END
+
+//static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
 
 #endif

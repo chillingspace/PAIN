@@ -1,23 +1,22 @@
 #include "sRenderer.h"
 #include "CoreSystems/Windows/Window.h"
-#include "CoreSystems/Events/GLFW/KeyEvents.h"
-#include "CoreSystems/Events/GLFW/MouseEvents.h"
-#include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
-#include "Applications/Application.h"
-
+#include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/Material.h"
+#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Renderer/skybox.h"
 
 #include "ECS/Controller.h"
+#include "ECS/Components/cBoundingVolume.h"
 
 //For imgui viewport
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
 
-#include "CoreSystems/Path/Path.h"
-#include "CoreSystems/Audio/Audio.h"
+#include "Systems/Collision/sBVHSystem.h"
 
 namespace PAIN {
 	void sRenderer::onDetach()
@@ -34,31 +33,242 @@ namespace PAIN {
 		//Init scene
 		m_Scene = services->get<Scene>();
 		
-/*
-#ifdef PN_PLATFORM_WINDOWS
-		// Set initial mute state for Windows only
-		auto audioManager = services->get<Audio::Audio>();
-		if (audioManager)
-		{
-			m_musicMuted = true;
-			m_sfxMuted = true;
-			audioManager->setGroupVolumeDb("music", -80.0f);
-			audioManager->setGroupVolumeDb("sfx", -80.0f);
+	}
+
+	void sRenderer::shadowPass()
+	{
+		// populate shadow map first
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
+
+		// Im sure there is a better way to render shadows
+		for (const Light& l : LightSources::get().getAll()) {
+
+			if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED) continue;
+
+			w_renderer->BeginShadowPass(l);
+
+			for (auto e : view) {
+
+				auto transform = ecs->getEntityComponent<Transform>(e);
+
+				auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+
+				glm::mat4 model;
+				if (transform.has_value())
+				{
+					model = transform.value().get().getMatrix();
+				}
+
+				if (mesh.has_value())
+				{
+					auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+					w_renderer->DrawShadows(mesh_ptr.get(), model, l); // uses shadow_shader
+
+				}
+
+
+			}
+			w_renderer->EndShadowPass();
 		}
-#endif
-*/
+	}
+
+	void sRenderer::geometryPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before geometry pass: {}", err);
+		}
+
+		w_renderer->BeginGeometryPass(scene);
+		for (auto e : view) {
+
+  			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			glm::mat4 model;
+			if (transform.has_value())
+			{
+				model = transform.value().get().getMatrix();
+			}
+			if (mesh.has_value())
+			{
+				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+				w_renderer->DrawGeometry(m_Scene, mesh_ptr.get(), model);
+			}
+
+		}
+		w_renderer->EndGeometryPass();
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+		}
+	}
+
+	void sRenderer::reflectionPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+
+		// Use EnTT view to iterate all entities with EntityName component
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		for (auto e : view) {
+
+			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+			glm::mat4 model;
+			if (transform.has_value())
+			{
+				model = transform.value().get().getMatrix();
+			}
+			if (mesh.has_value())
+			{
+				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
+				w_renderer->ReflectionPass(mesh_ptr);
+			}
+
+		}
+	}
+
+	void sRenderer::lightingPass()
+	{
+		auto scene = services->get<Scene>();
+		w_renderer->LightingPass(scene, LightSources::get());
+
+		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+	}
+
+	void sRenderer::debugPass(int debug_mode)
+	{
+		// Mode 0 is OFF
+		if (debug_mode == 0) { return; }
+
+		auto ecs = services->get<ECS::Controller>();
+		auto scene = services->get<Scene>();
+		
+		if (!ecs || !scene || !w_renderer) {
+			PN_CORE_WARN("DebugPass skipped: Missing required services.");
+			return;
+		}
+
+		auto bvhSystem = ecs->getSystem<sBVHSystem>(); // Get BVH system from ECS
+
+		if (!bvhSystem) { // This check is what's firing in your log
+			PN_CORE_WARN("DebugPass skipped: Missing BVH System.");
+			return;
+		}
+
+		Camera* camera = scene->GetActiveCamera();
+		if (!camera) {
+			PN_CORE_WARN("DebugPass skipped: No active camera.");
+			return;
+		}
+
+		// --- Option A (Mode 1): Draw World AABBs from cBoundingVolume ---
+		if (debug_mode == 1)
+		{
+			auto bvView = ecs->getRegistry().view<cBoundingVolume>();
+			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
+
+			for (auto entity : bvView) {
+				const auto& bvComp = bvView.get<cBoundingVolume>(entity);
+				// Check if the AABB is valid
+				if (bvComp.worldAABB.min.x <= bvComp.worldAABB.max.x)
+				{
+					// Call the existing WindowsRenderer::DebugPass function
+					w_renderer->DebugPass(bvComp.worldAABB.min, bvComp.worldAABB.max, color, scene);
+				}
+			}
+		}
+		// --- End Option A ---
+
+
+		// --- Option B (Mode 2): Draw BVH Tree Nodes ---
+		if (debug_mode == 2)
+		{
+			const BVH& bvh = bvhSystem->getBVH();
+			const auto& nodes = bvh.getNodes();
+			int rootIndex = bvh.getRootIndex();
+
+			std::function<void(int nodeIndex, int depth)> drawNodeRecursive =
+				[&](int nodeIndex, int depth) {
+				if (nodeIndex == -1 || nodeIndex >= nodes.size() || nodes[nodeIndex].height == -1) return;
+
+				const BVHNode& node = nodes[nodeIndex];
+				glm::vec4 nodeColor; 
+
+				if (node.isLeaf()) {
+					nodeColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); // Green for leaves
+				} else {
+					int colorIndex = depth % 6;
+					switch (colorIndex) { // Cycle colors for internal nodes
+						case 0: nodeColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); break; // Red
+						case 1: nodeColor = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f); break; // Orange
+						case 2: nodeColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); break; // Yellow
+						case 3: nodeColor = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); break; // Cyan
+						case 4: nodeColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); break; // Blue
+						default: nodeColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f); break; // Magenta
+					}
+				}
+				w_renderer->DebugPass(node.aabb.min, node.aabb.max, nodeColor, scene);
+
+				if (!node.isLeaf()) {
+					drawNodeRecursive(node.child1Index, depth + 1);
+					drawNodeRecursive(node.child2Index, depth + 1);
+				}
+			};
+
+			// Disable depth testing to see all boxes
+			glDisable(GL_DEPTH_TEST);
+			
+			if (rootIndex != -1) {
+				drawNodeRecursive(rootIndex, 0);
+			}
+
+			// Restore depth testing
+			glEnable(GL_DEPTH_TEST);
+		}
+		// --- End Option B ---
+	}
+
+
+	void sRenderer::postProcessPass()
+	{
+		w_renderer->PostProcessPass();
 	}
 
 	void sRenderer::onUpdate(AppTiming timing) {
-		const float dt = timing.dt;
 
 		{
-#ifdef DEBUG
+#ifdef _DEBUG
 			auto editor = services->get<Editor::Editor>();
 			bool editor_visible = editor && editor->isVisible();
+			int editor_debug_mode = editor ? editor->getDebugMode() : 0;
+
 #else
 			bool editor_visible = false;
+			int editor_debug_mode = 0;
 #endif
+
+			GLenum err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
+			}
 
 			if (editor_visible) {
 				glBindFramebuffer(GL_FRAMEBUFFER, w_renderer->getFinalFbo());
@@ -68,181 +278,50 @@ namespace PAIN {
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				// Match viewport to window size
 				auto window = services->get<Window::Window>();
-#ifdef PN_PLATFORM_WINDOWS
-				glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
-				glViewport(0, 0, winWidth, winHeight);
-#else
-				ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
-				winWidth = ANativeWindow_getWidth(nativeWindow);
-				winHeight = ANativeWindow_getHeight(nativeWindow);
-				glViewport(0, 0, winWidth, winHeight);
-#endif
-
+				auto frame_buffer = window->getFrameBuffer();
+				glViewport(0, 0, frame_buffer.x, frame_buffer.y);
 			}
 
 			// Clear
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Render all
-			// populate shadow map first
-			auto ecs = services->get<ECS::Controller>();
-
-			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
-
-			// Im sure there is a better way to render shadows
-			for (const Light& l : LightSources::get().getAll()) {
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-					//glClearDepth(1.0f);  // Explicitly set clear value
-					glClear(GL_DEPTH_BUFFER_BIT);
-
-					// Use EnTT view to iterate all entities with EntityName component
-					auto& registry = ecs->getRegistry();
-					auto view = registry.view<MetaData::EntityName>();
-
-					for (auto e : view) {
-
-						// Cast to own entity type 
-						ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
-
-						auto transform = ecs->getEntityComponent<Transform>(entity);
-
-						auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
-
-						glm::mat4 model;
-						if (transform.has_value())
-						{
-							model = transform.value().get().getMatrix();
-						}
-
-						if (mesh)
-						{
-							if (mesh.value().get().mesh)
-							{
-								w_renderer->RenderGeometryShadows(mesh.value().get().mesh.get(), model, l); // uses shadow_shader
-							}	
-						}
-						
-
-					}
-					
-				}
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err before render passes: {}", err);
 			}
 
-			w_renderer->BeginRendering(m_Scene);
-			// render scene
-
-			// Use EnTT view to iterate all entities with EntityName component
-			auto& registry = ecs->getRegistry();
-			auto view = registry.view<MetaData::EntityName>();
-
-			for (auto e : view) {
-
-				// Cast to own entity type 
-				ECS::Entity::Type entity = static_cast<ECS::Entity::Type>(e);
-
-				auto transform = ecs->getEntityComponent<Transform>(entity);
-				auto mesh = ecs->getEntityComponent<MeshRenderer>(entity);
-				glm::mat4 model;
-				if (transform.has_value())
-				{
-					model = transform.value().get().getMatrix();
-				}
-				if (mesh)
-				{
-					if (mesh.value().get().mesh)
-					{
-						// uses geometry_shader
-						w_renderer->RenderGeometry(m_Scene, mesh.value().get().mesh.get(), model);
-					}
-					
-				}
-				
-
+			// Render all passes
+			shadowPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 			}
-			
-
-			
-			w_renderer->EndRendering(m_Scene);
+			geometryPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
+			}
+			reflectionPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
+			}
+			lightingPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
+			}
+		
+			debugPass(editor_debug_mode);
+			postProcessPass();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 		}
-
-
-		switch (move_mode) {
-		case CAMERA:
-			if (m_Scene->GetActiveCamera()->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
-				// spherical
-				float radius = glm::length(m_Scene->GetActiveCamera()->pos);
-				float theta = atan2(m_Scene->GetActiveCamera()->pos.z, m_Scene->GetActiveCamera()->pos.x);
-				float phi = acos(m_Scene->GetActiveCamera()->pos.y / radius);
-
-				if (W_KEYDOWN) radius -= m_Scene->GetActiveCamera()->speed * dt;
-				if (S_KEYDOWN) radius += m_Scene->GetActiveCamera()->speed * dt;
-				if (A_KEYDOWN) theta += 1.5f * dt;
-				if (D_KEYDOWN) theta -= 1.5f * dt;
-				if (SPACE_KEYDOWN) phi -= 1.5f * dt;
-				if (LCTRL_KEYDOWN) phi += 1.5f * dt;
-
-				// clamp phi
-				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
-
-				// cartesian
-				m_Scene->GetActiveCamera()->pos.x = radius * sin(phi) * cos(theta);
-				m_Scene->GetActiveCamera()->pos.y = radius * cos(phi);
-				m_Scene->GetActiveCamera()->pos.z = radius * sin(phi) * sin(theta);
-
-				// look at origin
-				m_Scene->GetActiveCamera()->forward = -glm::normalize(m_Scene->GetActiveCamera()->pos);
-			}
-
-		case NUM_MOVE_MODES:
-
-				static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
-				if (W_KEYDOWN) {
-					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(m_Scene->GetActiveCamera()->forward, 1.f)) * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos += offset;
-				}
-				if (S_KEYDOWN) {
-					glm::vec3 offset = glm::vec3(mmtx * glm::vec4(m_Scene->GetActiveCamera()->forward, 1.f)) * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos -= offset;
-				}
-				if (A_KEYDOWN) {
-					glm::vec3 offset = glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up)) * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos -= offset;
-				}
-				if (D_KEYDOWN) {
-					glm::vec3 offset = glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up)) * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos += offset;
-				}
-				if (SPACE_KEYDOWN) {
-					glm::vec3 offset = m_Scene->GetActiveCamera()->up * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos += offset;
-				}
-				if (LCTRL_KEYDOWN) {
-					glm::vec3 offset = m_Scene->GetActiveCamera()->up * m_Scene->GetActiveCamera()->speed * dt;
-					m_Scene->GetActiveCamera()->pos -= offset;
-				}
-			
-			break;
-		}
-
-		if (mouseButtonDown && xOffset != 0.f) {
-			// transformation matrix(rotate)
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-m_Scene->GetActiveCamera()->sensitivity * xOffset), m_Scene->GetActiveCamera()->up);
-			m_Scene->GetActiveCamera()->forward = glm::normalize(glm::vec3(rot * glm::vec4(m_Scene->GetActiveCamera()->forward, 0.f)));
-		}
-		if (mouseButtonDown && yOffset != 0.f) {
-			// transformation matrix(rotate)
-			const glm::vec3 right = -glm::normalize(glm::cross(m_Scene->GetActiveCamera()->forward, m_Scene->GetActiveCamera()->up));
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-m_Scene->GetActiveCamera()->sensitivity * yOffset), right);
-			m_Scene->GetActiveCamera()->forward = glm::normalize(glm::vec3(rot * glm::vec4(m_Scene->GetActiveCamera()->forward, 0.f)));
-		}
-		xOffset = 0.f;
-		yOffset = 0.f;
-		//#endif
-
 
 		// set cam light to cam
 		auto olcam = LightSources::get().get("cam");
@@ -254,151 +333,6 @@ namespace PAIN {
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
 	}
 
-	void sRenderer::renderScene()
-	{
-		//auto ecs = services->get<ECS::Controller>();
-		//auto drawable_entities = ecs->getEntitiesWithComponents<Transform>();
 
-		//for (auto entity : drawable_entities) {
-		//	auto& transform = ecs->getEntityComponent<Transform>(entity)->get();
-		//	RenderGeometry(scene, mesh, transform.matrix); // or however your Transform stores it
-		//}
-	}
-
-	void sRenderer::onEvent(Event::Event& e) {
-#ifndef PN_PLATFORM_ANDROID
-		Event::Dispatcher dispatcher(e);
-
-		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
-
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_W:
-				W_KEYDOWN = true;
-				break;
-			case PAIN_KEY_A:
-				A_KEYDOWN = true;
-				break;
-			case PAIN_KEY_S:
-				S_KEYDOWN = true;
-				break;
-			case PAIN_KEY_D:
-				D_KEYDOWN = true;
-				break;
-			case PAIN_KEY_SPACE:
-				SPACE_KEYDOWN = true;
-				break;
-			case PAIN_KEY_LEFT_CONTROL:
-				LCTRL_KEYDOWN = true;
-				break;
-			default:
-				break;
-			}
-
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
-			//PN_CORE_INFO(e.toString());
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_W:
-				W_KEYDOWN = false;
-				break;
-			case PAIN_KEY_A:
-				A_KEYDOWN = false;
-				break;
-			case PAIN_KEY_S:
-				S_KEYDOWN = false;
-				break;
-			case PAIN_KEY_D:
-				D_KEYDOWN = false;
-				break;
-			case PAIN_KEY_SPACE:
-				SPACE_KEYDOWN = false;
-				break;
-			case PAIN_KEY_LEFT_CONTROL:
-				LCTRL_KEYDOWN = false;
-				break;
-			default:
-				break;
-			}
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
-
-#ifdef PN_PLATFORM_WINDOWS
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_TAB:
-				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
-				break;
-			case PAIN_KEY_O:
-				m_Scene->GetActiveCamera()->move_mode = static_cast<Camera::MOVE_MODES>((m_Scene->GetActiveCamera()->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
-				break;
-			case PAIN_KEY_M: { // M key to toggle music
-				m_musicMuted = !m_musicMuted;
-				auto audioManager = services->get<Audio::Audio>();
-				if (audioManager) {
-					// -80.0f is effectively mute, 0.0f is full volume
-					audioManager->setGroupVolumeDb("music", m_musicMuted ? -80.0f : 0.0f);
-					PN_CORE_INFO("Music group muted: {}", m_musicMuted);
-				}
-				break;
-			}
-			case PAIN_KEY_N: { // N key to toggle SFX (footsteps)
-				m_sfxMuted = !m_sfxMuted;
-				auto audioManager = services->get<Audio::Audio>();
-				if (audioManager) {
-					// -80.0f is effectively mute, 0.0f is full volume
-					audioManager->setGroupVolumeDb("sfx", m_sfxMuted ? -80.0f : 0.0f);
-					PN_CORE_INFO("SFX group muted: {}", m_sfxMuted);
-				}
-				break;
-			}
-			default:
-				break;
-			}
-#endif
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
-			//PN_CORE_INFO(e.toString());
-
-			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
-				mouseButtonDown = true;
-			}
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
-
-			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
-				mouseButtonDown = false;
-			}
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-			static float lastX = 0.0f;
-			static float lastY = 0.0f;
-
-			xOffset = e.getWindowPos().x - lastX;
-			yOffset = lastY - e.getWindowPos().y; // reversed since y-coordinates go from bottom to top
-
-
-			lastX = e.getWindowPos().x;
-			lastY = e.getWindowPos().y;
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
-			PN_CORE_INFO(e.toString());
-			return false;
-			});
-#endif
-	}
+	void sRenderer::onEvent(Event::Event& e) {}
 }

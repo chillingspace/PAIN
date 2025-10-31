@@ -84,6 +84,8 @@ namespace PAIN {
 
 			//Android swap buffers
 			void swapBuffers() override;
+
+			glm::uvec2 getFrameBuffer() const override;
 		};
 	}
 }

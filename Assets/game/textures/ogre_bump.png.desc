@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "ogre_bump.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13419815156758845
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "ef77c8ba-f035-8f43-a5c3-714af6765496",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ogre_bump.png"
+  }
+}

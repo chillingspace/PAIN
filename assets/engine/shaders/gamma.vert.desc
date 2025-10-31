@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "gamma.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17655970106416718714
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "f328749f-ec16-8f4b-850d-d10d46084a0c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\gamma.vert"
+  }
+}

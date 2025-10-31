@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(PAINEngine)
 
+message(STATUS "PAINEngine configuration begin.")
+
 # ======================= Engine Sources  =========================
 
 file(GLOB_RECURSE ENGINE_SRC
@@ -35,12 +37,14 @@ target_precompile_headers(PAINEngine
 target_link_libraries(PAINEngine
     PRIVATE  
         glm
-	nlohmann_json
+	    nlohmann_json
         imgui::imgui
-        Jolt
         FMOD::core
-	lua::lua
-	sol2
+        Jolt
+	    lua
+	    sol2
+        assimp::assimp
+        freetype
 )
 
 target_link_libraries(PAINEngine
@@ -51,6 +55,7 @@ target_link_libraries(PAINEngine
 	    reflcpp
         gli_headers
         entt_header_only
+imguizmo
 )
 
 # ImGui backends compiled into the engine
@@ -72,23 +77,16 @@ endif()
 # Platform GL
 if (WIN32 AND NOT ANDROID)
     target_link_libraries(PAINEngine PUBLIC OpenGL::GL glfw GLEW::GLEW imgui::imgui)
-    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS GLEW_STATIC)
+    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS GLEW_STATIC GLM_ENABLE_EXPERIMENTAL)
 else()
     target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue)
-    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID IMGUI_IMPL_OPENGL_ES3=1)
-endif()
-
-# Ensures Lua shared library is next to the app on Windows
-if (WIN32 AND NOT ANDROID)
-    add_custom_command(TARGET PAINEngine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:lua::lua>
-                $<TARGET_FILE_DIR:PAINEngine>)
+    target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID GLM_ENABLE_EXPERIMENTAL IMGUI_IMPL_OPENGL_ES3=1)
 endif()
 
 #Asset Pipeline
 target_link_libraries(PAINEngine
     PUBLIC
+        PAINAssetPipeline
         PAINAssetTypes        # Basic asset types for runtime
     PRIVATE
         # Hot-reload support only on desktop platforms
@@ -127,3 +125,5 @@ foreach(file IN LISTS ENGINE_SRC)
     string(REPLACE "/" "\\" groupPath "${groupPath}")
     source_group("${groupPath}" FILES "${file}")
 endforeach()
+
+message(STATUS "PAINEngine configuration successful.")

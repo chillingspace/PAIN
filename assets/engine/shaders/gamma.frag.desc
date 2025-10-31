@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "gamma.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 11264559971935094161
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "475915ed-d570-8f4a-b03d-895c09738fae",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\gamma.frag"
+  }
+}

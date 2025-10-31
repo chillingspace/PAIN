@@ -1,38 +1,37 @@
-# Define asset root directories
-set(PAIN_ASSETS_ROOT "${CMAKE_SOURCE_DIR}/assets")
+set(ASSETS_INPUT_DIR "${CMAKE_SOURCE_DIR}/assets")
 
-if (NOT ANDROID)
+if(WIN32)
+    set(ASSET_COMPILER_EXE "${CMAKE_BINARY_DIR}/Tools/AssetCompilerTool.exe")
+    set(GAME_ASSET_OUT "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets")
 
-    # Windows Asset Compilation - Tool runs on host to compile assets for Windows
-    add_custom_target(CompileAllAssets
-        COMMAND ${CMAKE_COMMAND} -E echo "=== PAINEngine Dynamic Asset Compilation ==="
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${PAIN_ASSETS_ROOT}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets"
-        
-        COMMAND $<TARGET_FILE:AssetCompilerTool> windows 
-                "${PAIN_ASSETS_ROOT}"
-                "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/assets"
-                --auto-discover
-                
-        DEPENDS AssetCompilerTool
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Compiling assets for Windows using host-built tool"
+    add_custom_target(CompileAllAssets ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${GAME_ASSET_OUT}"
+        COMMAND "${ASSET_COMPILER_EXE}"
+            --input "${ASSETS_INPUT_DIR}"
+            --output "${GAME_ASSET_OUT}"
+            --target "windows"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        COMMENT "Running asset compiler before running the game"
         VERBATIM
+        USES_TERMINAL
     )
-    
-else()
-    # Android Asset Compilation - Tool runs on host to compile assets for Android
-    # Note: This should run during development, not during Android app build
-    add_custom_target(CompileAllAssetsAndroid
-        COMMAND ${CMAKE_COMMAND} -E echo "=== Compiling Assets for Android APK ==="
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/android/app/src/main/assets"
-        
-        # The tool should be built on the host platform and run there
-        # This target would normally be run manually or by CI/CD before Android build
-        COMMAND echo "Run asset compilation on host platform before Android build"
-        
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Assets should be pre-compiled on host before Android build"
+
+    add_dependencies(CompileAllAssets AssetCompilerTool)
+
+elseif(ANDROID)
+    set(ASSET_COMPILER_EXE "${CMAKE_SOURCE_DIR}/build/Tools/AssetCompilerTool.exe")
+    set(ASSETS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/android/app/src/main/assets")
+
+    add_custom_target(CompileAllAssets ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${ASSETS_OUTPUT_DIR}"
+        COMMAND "${ASSET_COMPILER_EXE}"
+            --input "${ASSETS_INPUT_DIR}"
+            --output "${ASSETS_OUTPUT_DIR}"
+            --target "android"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        COMMENT "Running asset compiler before packaging APK"
         VERBATIM
+        USES_TERMINAL
     )
+
 endif()

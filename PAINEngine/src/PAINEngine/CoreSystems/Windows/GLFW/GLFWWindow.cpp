@@ -42,6 +42,9 @@ namespace PAIN {
 			glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+			// Request a debug context
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+
 			glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 			glfwWindowHint(GLFW_DEPTH_BITS, 24);
 			glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);
@@ -59,6 +62,9 @@ namespace PAIN {
 			//Create rendering context
 			m_Context = std::make_unique<OpenGLContext>(ptr_window);
 			m_Context->Init();
+			
+			//Setup gl
+			glViewport(0, 0, frame_buffer.x, frame_buffer.y);
 
 			//Engine Init Successful
 			PN_CORE_INFO("Window Created Successfully");
@@ -285,6 +291,10 @@ namespace PAIN {
 				});
 
 			
+		}
+
+		glm::uvec2 GLFW_Window::getFrameBuffer() const {
+			return frame_buffer;
 		}
 	}
 }

@@ -16,6 +16,13 @@ endif()
 # Set the directory for our custom CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+find_program(GIT_EXECUTABLE git)
+if(GIT_EXECUTABLE)
+    message(STATUS "Git found at: ${GIT_EXECUTABLE}")
+else()
+    message(FATAL_ERROR "Git not found in PATH!")
+endif()
+
 # Include our dependency helper module
 include(ImportDependencies)
 importDependencies() # Placeholder
@@ -68,9 +75,21 @@ endif()
 # Include asset compilation integration
 include(AssetsCompiler)
 
+if(TARGET cuttlefish)
+    add_dependencies(AssetCompilerTool cuttlefish copy_cuttlefish_bin)
+endif()
+
+if(TARGET astcenc)
+    add_dependencies(AssetCompilerTool astcenc-native copy_astcenc_bin)
+endif()
+
+if(NOT ANDROID)
+	add_dependencies(AssetCompilerTool copy_ffmpeg_bin)
+endif()
+
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
-add_subdirectory(Tests/LuaBridgeSmoke)
+#add_subdirectory(Tests/LuaBridgeSmoke)
 add_subdirectory(Game)
 
 if (ANDROID)

@@ -22,10 +22,6 @@ namespace PAIN {
 		~Services() override = default;
 	};
 
-	// !TODO: need to find a diff way to store this, else add event listener to edit this
-	inline int winWidth, winHeight;
-	inline int fps{};
-
 	class AppSystem {
 	private:
 		friend class Application;

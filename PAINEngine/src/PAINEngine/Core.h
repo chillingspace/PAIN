@@ -7,3 +7,4 @@
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cMetadata.h"
+#include "ECS/Components/cLight.h"

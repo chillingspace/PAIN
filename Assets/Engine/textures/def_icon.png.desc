@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "def_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10531861688232822492
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "ef65df1f-7117-9347-8fdd-9b3e08511f29",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\def_icon.png"
+  }
+}

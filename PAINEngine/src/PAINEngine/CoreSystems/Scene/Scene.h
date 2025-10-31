@@ -1,10 +1,11 @@
 #pragma once
 #include "pch.h"
 
+#include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "Camera.h"
-#include "ECS/ECSTypes.h"
+
 
 namespace PAIN {
 
@@ -20,7 +21,15 @@ namespace PAIN {
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
 		// Modified to return the created entity's ID
-		ECS::Entity::Type AddObject(std::shared_ptr<Mesh> mesh, std::string name, glm::vec3 pos, glm::quat quat, glm::vec3 scale);
+		entt::entity AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
+
+		// TO BE MOVEDDDDDDDDDD INTO ASSETS LOADER
+		std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache
+
+		std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
+		uint32_t cacheMesh(const std::string& path);
+		uint32_t getMeshId(const std::string& path);
+		std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
 
 		Camera* GetActiveCamera();
 
@@ -28,17 +37,16 @@ namespace PAIN {
 		std::unique_ptr<Camera> camera;
 
 		// Audio Demo State Variables
-		ECS::Entity::Type audioSourceEntity = ECS::Entity::INVALID;
-		Audio::AudioChannelId audioSourceChannel;
+		entt::entity m_audioSourceEntity = entt::null;
 
 		// Path animation variables
-		float demoTime = 0.0f;
-		int currentPathSegment = 0;
-		float segmentDuration = 4.0f;
-		std::vector<glm::vec3> pathCorners;
+		float m_demoTime = 0.0f;
+		int m_currentPathSegment = 0;
+		float m_segmentDuration = 4.0f;
+		std::vector<glm::vec3> m_pathCorners;
 
 		// Footstep variables
-		float footstepTimer = 0.0f;
-		const float footstepInterval = 0.4f;
+		float m_footstepTimer = 0.0f;
+		const float m_footstepInterval = 0.4f;
 	};
 }

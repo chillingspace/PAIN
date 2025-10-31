@@ -181,7 +181,8 @@ namespace PAIN {
                 if (!makeCurrent()) PN_CORE_ERROR("CONTEXT ERROR");
                 if (!querySurfaceDimensions()) PN_CORE_ERROR("QUERY ERROR");
 
-                // Set viewport
+                frame_buffer.x = ANativeWindow_getWidth(m_Window);
+                frame_buffer.y = ANativeWindow_getHeight(m_Window);
                 glViewport(0, 0, frame_buffer.x, frame_buffer.y);
 
                 // Enable depth testing
@@ -386,6 +387,10 @@ namespace PAIN {
         }
 
         void Android_Window::onEvent(Event::Event& e) {
+        }
+
+        glm::uvec2 Android_Window::getFrameBuffer() const {
+            return frame_buffer;
         }
 	}
 }

@@ -64,7 +64,7 @@ namespace PAIN {
             return !name.empty() && name_lookup.find(name) == name_lookup.end();
         }
 
-        void Service::setEntityName(ECS::Entity::Type entity, std::string const& name) {
+        void Service::setEntityName(entt::entity entity, std::string const& name) {
             auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
 
             if (!name_comp_opt.has_value()) {
@@ -82,19 +82,30 @@ namespace PAIN {
             std::string unique = generateUniqueName(name);
             name_comp_opt->get().name = unique;
             name_lookup[unique] = entity;
+
+            b_entity_changed = true;
         }
 
-        std::string Service::getEntityName(ECS::Entity::Type entity) const {
+        std::string Service::getEntityName(entt::entity entity) const {
             auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
             return name_comp_opt.has_value() ? name_comp_opt->get().name : "";
         }
 
-        std::optional<ECS::Entity::Type> Service::getEntityByName(std::string const& name) const {
+        std::optional<entt::entity> Service::getEntityByName(std::string const& name) const {
             auto it = name_lookup.find(name);
             if (it != name_lookup.end()) {
                 return it->second;
             }
             return std::nullopt;
+        }
+
+        bool Service::entityNameChanged() {
+            // atomically read+clear
+            if (b_entity_changed) {
+                b_entity_changed = false;
+                return true;
+            }
+            return false;
         }
 
         /****************************************************************
@@ -126,7 +137,7 @@ namespace PAIN {
             return registered_tags;
         }
 
-        void Service::addTag(ECS::Entity::Type entity, std::string const& tag) {
+        void Service::addTag(entt::entity entity, std::string const& tag) {
             auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
 
             if (!tag_comp_opt.has_value()) {
@@ -141,14 +152,14 @@ namespace PAIN {
             registered_tags.insert(tag);
         }
 
-        void Service::removeTag(ECS::Entity::Type entity, std::string const& tag) {
+        void Service::removeTag(entt::entity entity, std::string const& tag) {
             auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
             if (tag_comp_opt.has_value()) {
                 tag_comp_opt->get().tags.erase(tag);
             }
         }
 
-        bool Service::hasTag(ECS::Entity::Type entity, std::string const& tag) const {
+        bool Service::hasTag(entt::entity entity, std::string const& tag) const {
             auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
             if (tag_comp_opt.has_value()) {
                 return tag_comp_opt->get().tags.find(tag) != tag_comp_opt->get().tags.end();
@@ -156,8 +167,8 @@ namespace PAIN {
             return false;
         }
 
-        std::vector<ECS::Entity::Type> Service::getEntitiesByTag(std::string const& tag) const {
-            std::vector<ECS::Entity::Type> result;
+        std::vector<entt::entity> Service::getEntitiesByTag(std::string const& tag) const {
+            std::vector<entt::entity> result;
 
             auto& registry = PN_ECS_SERVICE->getRegistry();
             auto view = registry.view<MetaData::Tag>();
@@ -165,35 +176,54 @@ namespace PAIN {
             for (auto entity : view) {
                 auto& tag_comp = view.get<MetaData::Tag>(entity);
                 if (tag_comp.tags.find(tag) != tag_comp.tags.end()) {
-                    result.push_back(static_cast<ECS::Entity::Type>(entity));
+                    result.push_back(entity);
                 }
             }
 
             return result;
         }
 
+        void Service::setEntityTag(entt::entity entity, const std::string& new_tag) {
+            // Remove all existing tags from this entity
+            auto tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
+            if (tag_comp_opt.has_value()) {
+                tag_comp_opt->get().tags.clear();
+            }
+            else {
+                MetaData::Tag new_tag_comp;
+                PN_ECS_SERVICE->addEntityComponent(entity, std::move(new_tag_comp));
+                tag_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity); // refresh
+            }
+            // Add the new tag
+            if (!new_tag.empty()) {
+                tag_comp_opt->get().tags.insert(new_tag);
+                registered_tags.insert(new_tag);
+            }
+        }
+
+
         /****************************************************************
         * Hierarchy System
         **************************************************************/
 
-        bool Service::hasParent(ECS::Entity::Type entity) const {
+        bool Service::hasParent(entt::entity entity) const {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
             return relation_opt.has_value() &&
-                relation_opt->get().parent != ECS::Entity::INVALID;
+                relation_opt->get().parent != entt::null;
         }
 
-        bool Service::hasChildren(ECS::Entity::Type entity) const {
+        bool Service::hasChildren(entt::entity entity) const {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
             return relation_opt.has_value() &&
                 !relation_opt->get().children.empty();
         }
 
-        void Service::addChild(ECS::Entity::Type parent, ECS::Entity::Type child) {
+        void Service::addChild(entt::entity parent, entt::entity child) {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
 
             if (!relation_opt.has_value()) {
                 MetaData::Relation new_relation;
-                new_relation.parent = ECS::Entity::INVALID;
+                new_relation.parent = entt::null;
                 new_relation.children.push_back(child);
                 PN_ECS_SERVICE->addEntityComponent(parent, std::move(new_relation));
             }
@@ -205,7 +235,7 @@ namespace PAIN {
             }
         }
 
-        void Service::removeChild(ECS::Entity::Type parent, ECS::Entity::Type child) {
+        void Service::removeChild(entt::entity parent, entt::entity child) {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
             if (relation_opt.has_value()) {
                 auto& children = relation_opt->get().children;
@@ -216,7 +246,7 @@ namespace PAIN {
             }
         }
 
-        void Service::setParent(ECS::Entity::Type child, ECS::Entity::Type parent) {
+        void Service::setParent(entt::entity child, entt::entity parent) {
             auto child_relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(child);
 
             if (!child_relation_opt.has_value()) {
@@ -225,7 +255,7 @@ namespace PAIN {
                 PN_ECS_SERVICE->addEntityComponent(child, std::move(new_relation));
             }
             else {
-                if (child_relation_opt->get().parent != ECS::Entity::INVALID) {
+                if (child_relation_opt->get().parent != entt::null) {
                     removeChild(child_relation_opt->get().parent, child);
                 }
                 child_relation_opt->get().parent = parent;
@@ -234,38 +264,38 @@ namespace PAIN {
             addChild(parent, child);
         }
 
-        void Service::detachFromParent(ECS::Entity::Type entity) {
+        void Service::detachFromParent(entt::entity entity) {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
             if (!relation_opt.has_value()) return;
 
             auto& relation = relation_opt->get();
-            if (relation.parent == ECS::Entity::INVALID) return;
+            if (relation.parent == entt::null) return;
 
             removeChild(relation.parent, entity);
-            relation.parent = ECS::Entity::INVALID;
+            relation.parent = entt::null;
         }
 
-        std::optional<ECS::Entity::Type> Service::getParent(ECS::Entity::Type entity) const {
+        std::optional<entt::entity> Service::getParent(entt::entity entity) const {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
             if (relation_opt.has_value() &&
-                relation_opt->get().parent != ECS::Entity::INVALID) {
+                relation_opt->get().parent != entt::null) {
                 return relation_opt->get().parent;
             }
             return std::nullopt;
         }
 
-        std::vector<ECS::Entity::Type> Service::getChildren(ECS::Entity::Type entity) const {
+        std::vector<entt::entity> Service::getChildren(entt::entity entity) const {
             auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
             return relation_opt.has_value() ?
                 relation_opt->get().children :
-                std::vector<ECS::Entity::Type>{};
+                std::vector<entt::entity>{};
         }
 
         /****************************************************************
         * Editor Visibility
         **************************************************************/
 
-        void Service::setVisible(ECS::Entity::Type entity, bool visible) {
+        void Service::setVisible(entt::entity entity, bool visible) {
             auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
 
             if (!vis_opt.has_value()) {
@@ -279,12 +309,12 @@ namespace PAIN {
             }
         }
 
-        bool Service::isVisible(ECS::Entity::Type entity) const {
+        bool Service::isVisible(entt::entity entity) const {
             auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
             return vis_opt.has_value() ? vis_opt->get().visible : true;
         }
 
-        void Service::setLocked(ECS::Entity::Type entity, bool locked) {
+        void Service::setLocked(entt::entity entity, bool locked) {
             auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
 
             if (!vis_opt.has_value()) {
@@ -298,7 +328,7 @@ namespace PAIN {
             }
         }
 
-        bool Service::isLocked(ECS::Entity::Type entity) const {
+        bool Service::isLocked(entt::entity entity) const {
             auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
             return vis_opt.has_value() ? vis_opt->get().locked : false;
         }
@@ -338,7 +368,7 @@ namespace PAIN {
                 for (auto entity : view) {
                     auto& group_comp = view.get<MetaData::Group>(entity);
                     if (group_comp.group_name == group_name) {
-                        PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(static_cast<ECS::Entity::Type>(entity));
+                        PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
                     }
                 }
                 
@@ -348,7 +378,7 @@ namespace PAIN {
             return true;
         }
 
-        void Service::assignToGroup(ECS::Entity::Type entity, std::string const& group_name) {
+        void Service::assignToGroup(entt::entity entity, std::string const& group_name) {
             auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
 
             if (!group_opt.has_value()) {
@@ -366,7 +396,7 @@ namespace PAIN {
             }
         }
 
-        void Service::unassignFromGroup(ECS::Entity::Type entity) {
+        void Service::unassignFromGroup(entt::entity entity) {
             auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
             if (group_opt.has_value()) {
                 auto it = groups.find(group_opt->get().group_name);
@@ -377,7 +407,7 @@ namespace PAIN {
             }
         }
 
-        std::optional<std::string> Service::getEntityGroup(ECS::Entity::Type entity) const {
+        std::optional<std::string> Service::getEntityGroup(entt::entity entity) const {
             auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
             if (group_opt.has_value()) {
                 return group_opt->get().group_name;
@@ -407,62 +437,37 @@ namespace PAIN {
         * Serialization
         **************************************************************/
 
-        nlohmann::json Service::serializeEntity(ECS::Entity::Type entity) const {
-            nlohmann::json data;
 
-            auto name_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
-            if (name_opt.has_value()) {
-                data["name"] = name_opt->get().name;
-            }
-
-            auto tag_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Tag>(entity);
-            if (tag_opt.has_value()) {
-                data["tags"] = tag_opt->get().tags;
-            }
-
-            auto vis_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EditorVisible>(entity);
-            if (vis_opt.has_value()) {
-                data["visible"] = vis_opt->get().visible;
-                data["locked"] = vis_opt->get().locked;
-            }
-
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            if (relation_opt.has_value()) {
-                data["parent"] = static_cast<uint32_t>(relation_opt->get().parent);
-                data["children"] = std::vector<uint32_t>(
-                    relation_opt->get().children.begin(),
-                    relation_opt->get().children.end()
-                );
-            }
-
-            auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
-            if (group_opt.has_value()) {
-                data["group"] = group_opt->get().group_name;
-            }
-
-            return data;
-        }
-
-        nlohmann::json Service::serialize() const {
+        nlohmann::json Service::serializeServiceState() const {
             nlohmann::json data;
             data["registered_tags"] = registered_tags;
 
             nlohmann::json groups_data;
             for (auto const& [name, group] : groups) {
+                // Convert set<entt::entity> to vector<uint32_t> manually
+                std::vector<uint32_t> entity_ids;
+                entity_ids.reserve(group.entities.size());
+                for (auto entity : group.entities) {
+                    // Cast each entity
+                    entity_ids.push_back(static_cast<uint32_t>(entity));  
+                }
+
                 groups_data[name] = {
                     {"name", group.name},
                     {"parent_group", group.parent_group.has_value() ? group.parent_group.value() : ""},
                     {"child_groups", group.child_groups},
-                    {"entities", std::vector<uint32_t>(group.entities.begin(), group.entities.end())},
+                    // Use converted entity vector
+                    {"entities", entity_ids},  
                     {"expanded", group.expanded}
                 };
             }
-            data["groups"] = groups_data;
 
+            data["groups"] = groups_data;
             return data;
         }
 
-        void Service::deserialize(nlohmann::json const& data) {
+
+        void Service::deserializeServiceState(nlohmann::json const& data) {
             if (data.contains("registered_tags")) {
                 registered_tags = data["registered_tags"].get<std::set<std::string>>();
             }
@@ -482,7 +487,13 @@ namespace PAIN {
 
                     if (group_json.contains("entities")) {
                         auto entity_array = group_json["entities"].get<std::vector<uint32_t>>();
-                        group.entities = std::set<ECS::Entity::Type>(entity_array.begin(), entity_array.end());
+
+                        std::transform(
+                            entity_array.begin(),
+                            entity_array.end(),
+                            std::inserter(group.entities, group.entities.end()),
+                            [](uint32_t id) { return static_cast<entt::entity>(id); }
+                        );
                     }
 
                     group.expanded = group_json.value("expanded", true);

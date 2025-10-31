@@ -1,104 +1,106 @@
-if (NOT DEFINED VENDOR_DIR)
-  set(VENDOR_DIR "${CMAKE_SOURCE_DIR}/vendor")
+# ======================= Header-Only Wrappers (if needed) =========================
+if(NOT TARGET glm)
+    add_library(glm INTERFACE)
+    target_include_directories(glm INTERFACE "${glm_SOURCE_DIR}")
 endif()
 
-# ======================= Header Only Vendors  =========================
-add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE "${VENDOR_DIR}")
+if(NOT TARGET nlohmann_json)
+    add_library(nlohmann_json INTERFACE)
+    target_include_directories(nlohmann_json INTERFACE "${nlohmann_json_SOURCE_DIR}/include")
+endif()
 
-add_library(nlohmann_json INTERFACE)
-target_include_directories(nlohmann_json INTERFACE "${VENDOR_DIR}/nlohmann/include")
+if(NOT TARGET reflcpp)
+    add_library(reflcpp INTERFACE)
+    target_include_directories(reflcpp INTERFACE "${reflcpp_SOURCE_DIR}/include")
+endif()
 
-add_library(reflcpp INTERFACE)
-target_include_directories(reflcpp INTERFACE "${VENDOR_DIR}/reflcpp")
+if(NOT TARGET spdlog_header_only)
+    add_library(spdlog_header_only INTERFACE)
+    target_include_directories(spdlog_header_only INTERFACE "${spdlog_SOURCE_DIR}/include")
+endif()
 
-add_library(spdlog_header_only INTERFACE)
-target_include_directories(spdlog_header_only INTERFACE "${VENDOR_DIR}/spdlog/include")
+if(NOT TARGET FileWatch_header_only)
+    add_library(FileWatch_header_only INTERFACE)
+    target_include_directories(FileWatch_header_only INTERFACE "${FileWatch_SOURCE_DIR}")
+endif()
 
-add_library(FileWatch_header_only INTERFACE)
-target_include_directories(FileWatch_header_only INTERFACE "${VENDOR_DIR}/FileWatch")
+if(NOT TARGET gli_headers)
+    add_library(gli_headers INTERFACE)
+    target_include_directories(gli_headers INTERFACE "${gli_SOURCE_DIR}")
+    target_link_libraries(gli_headers INTERFACE glm)
+endif()
 
-add_library(gl_headers INTERFACE)
-target_include_directories(gl_headers INTERFACE "${VENDOR_DIR}/GL")
+if(NOT TARGET entt_header_only)
+    add_library(entt_header_only INTERFACE)
+    target_include_directories(entt_header_only INTERFACE "${entt_SOURCE_DIR}/src")
+endif()
 
-add_library(gli_headers INTERFACE)
-target_include_directories(gli_headers INTERFACE "${VENDOR_DIR}/gli")
-target_link_libraries(gli_headers INTERFACE glm) 
+if(NOT TARGET sol2)
+    add_library(sol2 INTERFACE)
+    target_include_directories(sol2 INTERFACE "${sol2_SOURCE_DIR}/include")
+endif()
 
-add_library(entt_header_only INTERFACE)
-target_include_directories(entt_header_only INTERFACE "${VENDOR_DIR}/entt/src")
-
-# ======================= GLEW Vendor  =========================
-
+# ======================= GLEW (Windows) =========================
 if (WIN32 AND NOT ANDROID)
-    set(_GLEW_DIR "${CMAKE_SOURCE_DIR}/vendor/glew")
+# Assume FetchContent has already run and CMake has configured GLEW's targets correctly
+if (TARGET libglew)
+    # Use the provided target
+    add_library(GLEW::GLEW ALIAS libglew)
+elseif(TARGET libglew_static)
+    add_library(GLEW::GLEW ALIAS libglew_static)
+else()
+    message(FATAL_ERROR "GLEW target not found! Check FetchContent_GLEW and its CMakeLists.txt.")
+endif()
+endif()
 
-    add_library(_glew STATIC
-      "${_GLEW_DIR}/src/glew.c"
+# ======================= ImGui =========================
+if(NOT TARGET imgui::imgui)
+    add_library(imgui STATIC
+      "${imgui_SOURCE_DIR}/imgui.cpp"
+      "${imgui_SOURCE_DIR}/imgui_draw.cpp"
+      "${imgui_SOURCE_DIR}/imgui_tables.cpp"
+      "${imgui_SOURCE_DIR}/imgui_widgets.cpp"
+      "${imgui_SOURCE_DIR}/imgui_demo.cpp"
     )
-    target_include_directories(_glew PUBLIC "${_GLEW_DIR}/include")
-    target_compile_definitions(_glew PUBLIC GLEW_STATIC)  # ensure headers use static path
-
-    add_library(GLEW::GLEW ALIAS _glew)
+    target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
+    add_library(imgui::imgui ALIAS imgui)
 endif()
 
-# ======================= ImGui Vendor  =========================
+set(IMGUI_DIR ${imgui_SOURCE_DIR} CACHE PATH "Path to ImGui sources")
 
-add_library(imgui STATIC
-  "${VENDOR_DIR}/ImGui/imgui.cpp"
-  "${VENDOR_DIR}/ImGui/imgui_draw.cpp"
-  "${VENDOR_DIR}/ImGui/imgui_tables.cpp"
-  "${VENDOR_DIR}/ImGui/imgui_widgets.cpp"
-  "${VENDOR_DIR}/ImGui/imgui_demo.cpp"
-)
-target_include_directories(imgui PUBLIC "${VENDOR_DIR}/ImGui")
-add_library(imgui::imgui ALIAS imgui)
-
-# Expose IMGUI dir path to subprojects for backends
-set(IMGUI_DIR "${VENDOR_DIR}/ImGui" CACHE PATH "Path to ImGui sources")
-
-# ======================= GLFW Vendor  =========================
-
-if (WIN32 AND NOT ANDROID)
-    if (EXISTS "${VENDOR_DIR}/GLFW/CMakeLists.txt")
-      set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-      set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-      set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
-      add_subdirectory("${VENDOR_DIR}/GLFW" "${CMAKE_BINARY_DIR}/vendor_glfw")
-    else()
-      add_library(glfw STATIC IMPORTED GLOBAL)
-      set_target_properties(glfw PROPERTIES
-        IMPORTED_LOCATION             "${VENDOR_DIR}/GLFW/lib/glfw3.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/GLFW/include"
-      )
-    endif()
+# ======================= ImGuizmo =========================
+if(NOT TARGET imguizmo)
+    add_library(imguizmo STATIC
+        "${imguizmo_SOURCE_DIR}/ImGuizmo.cpp"
+        "${imguizmo_SOURCE_DIR}/ImGuizmo.h"
+    )
+    # Include both public interface dir and private compilation includes
+    target_include_directories(imguizmo 
+        PUBLIC 
+            ${imguizmo_SOURCE_DIR}
+        PRIVATE
+            ${imgui_SOURCE_DIR}
+    )
+    target_link_libraries(imguizmo PUBLIC imgui::imgui)
+    target_compile_definitions(imguizmo PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 endif()
 
-# ======================= Jolt Vendor  =========================
-
-# (Optional but recommended) choose Jolt options BEFORE add_subdirectory.
-# They�ll become the default values in the Jolt subproject cache.
-# See docs for meaning of these flags. :contentReference[oaicite:1]{index=1}
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)               # build static lib
-set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)                # Jolt default: no RTTI
-# set(JPH_USE_STD_VECTOR OFF CACHE BOOL "" FORCE)            # keep Jolt's Array by default
-# set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE ON CACHE BOOL "" FORCE) # if you want debug draw in Debug/Release
-# set(DEBUG_RENDERER_IN_DISTRIBUTION OFF CACHE BOOL "" FORCE)
-
-# Add the Jolt project (use EXCLUDE_FROM_ALL to avoid building Samples etc. unless asked)
-add_subdirectory("${VENDOR_DIR}/Jolt/Build" "${CMAKE_BINARY_DIR}/vendor_jolt" EXCLUDE_FROM_ALL)
-
-set_property(TARGET Jolt PROPERTY
-  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-# ======================= GL Vendor  =========================
-
+# ======================= stb =========================
 if (WIN32 AND NOT ANDROID)
-  find_package(OpenGL REQUIRED)
+    add_library(stb_implementation STATIC "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp")
+    target_include_directories(stb_implementation PUBLIC "${stb_SOURCE_DIR}")
+
+    add_library(stb INTERFACE)
+    target_include_directories(stb INTERFACE "${stb_SOURCE_DIR}")
+    target_link_libraries(stb INTERFACE stb_implementation)
+endif()
+
+# ======================= Platform-specific/GL/Android/NDK glue =========================
+if (WIN32 AND NOT ANDROID)
+    find_package(OpenGL REQUIRED)
 endif()
 
 if (ANDROID)
-    # Robustly locate the NDK glue dir (CMake sets one of these)
     set(_NDK "${CMAKE_ANDROID_NDK}")
     if(NOT _NDK AND DEFINED ANDROID_NDK)
         set(_NDK "${ANDROID_NDK}")
@@ -106,26 +108,18 @@ if (ANDROID)
     if(NOT _NDK)
         message(FATAL_ERROR "Cannot find NDK path (CMAKE_ANDROID_NDK/ANDROID_NDK not set)")
     endif()
-
     set(NATIVE_APP_GLUE_DIR "${_NDK}/sources/android/native_app_glue")
-
-    add_library(native_app_glue STATIC
-            "${NATIVE_APP_GLUE_DIR}/android_native_app_glue.c"
-    )
-    target_include_directories(native_app_glue PUBLIC
-            "${NATIVE_APP_GLUE_DIR}"
-    )
-
+    add_library(native_app_glue STATIC "${NATIVE_APP_GLUE_DIR}/android_native_app_glue.c")
+    target_include_directories(native_app_glue PUBLIC "${NATIVE_APP_GLUE_DIR}")
     find_library(ANDROID_LIB android)
     find_library(LOG_LIB     log)
     find_library(EGL_LIB     EGL)
     find_library(GLES_LIB    GLESv3)
 endif()
 
-# ======================= FMOD Vendor  =========================
-
+# ======================= FMOD =========================
 add_library(FMOD::core SHARED IMPORTED GLOBAL)
-
+set(VENDOR_DIR "${CMAKE_SOURCE_DIR}/vendor")
 if (WIN32 AND NOT ANDROID)
   set(_FMOD_INC "${VENDOR_DIR}/FMOD/windows/api/core/inc")
   set(_FMOD_LIB "${VENDOR_DIR}/FMOD/windows/api/core/lib/x64")
@@ -165,120 +159,38 @@ elseif(ANDROID)
   target_link_libraries(FMOD::core INTERFACE log android)
 endif()
 
-# ======================= STB (Image Loading & Resize) =========================
-
-# Create STB implementation library
-add_library(stb_implementation STATIC
-    "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp"
-)
-
-target_include_directories(stb_implementation PUBLIC "${VENDOR_DIR}/stb")
-
-# Create interface library for headers
-add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE "${VENDOR_DIR}/stb")
-target_link_libraries(stb INTERFACE stb_implementation)
-
-message(STATUS "STB configured with image loading, resize, and write support")
-
-
-# ======================= Cuttlefish (Texture Compression) Vendor  =========================
-
-if (WIN32 AND NOT ANDROID)
-    # Check if cuttlefish executable exists
-    find_program(CUTTLEFISH_EXECUTABLE 
+# ======================= Cuttlefish Tool Wrapper =========================
+if(WIN32 AND NOT ANDROID)
+    find_program(CUTTLEFISH_EXECUTABLE
         NAMES cuttlefish cuttlefish.exe
-        PATHS 
-            "${VENDOR_DIR}/cuttlefish/bin"
-            "${VENDOR_DIR}/cuttlefish"
-            ENV PATH
+        PATHS "${cuttlefish_SOURCE_DIR}/bin" "${cuttlefish_SOURCE_DIR}"
+        ENV PATH
         DOC "Cuttlefish texture compression tool"
     )
-    
     if(CUTTLEFISH_EXECUTABLE)
-        # Create interface target that provides the executable path
         add_library(Cuttlefish::Cuttlefish INTERFACE IMPORTED GLOBAL)
-        set_target_properties(Cuttlefish::Cuttlefish PROPERTIES
-            INTERFACE_COMPILE_DEFINITIONS "CUTTLEFISH_EXECUTABLE=\"${CUTTLEFISH_EXECUTABLE}\""
-        )
+        set_target_properties(Cuttlefish::Cuttlefish PROPERTIES INTERFACE_COMPILE_DEFINITIONS "CUTTLEFISH_EXECUTABLE=\"${CUTTLEFISH_EXECUTABLE}\"")
         message(STATUS "Cuttlefish found: ${CUTTLEFISH_EXECUTABLE}")
     else()
-        message(STATUS "Cuttlefish not found - BC/ASTC compression will be disabled")
+        message(STATUS "Cuttlefish not found - BC/ASTC compression disabled")
     endif()
 endif()
 
-
-# ======================= Assimp Vendor  =========================
-if (WIN32 AND NOT ANDROID)
-    # Check if assimp exists as submodule or prebuilt
-    if (EXISTS "${VENDOR_DIR}/assimp/CMakeLists.txt")
-        # Build from source (recommended for asset pipeline)
-        
-        # Configure assimp options before adding subdirectory
-        set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
-        
-        # Important: Disable assimp's embedded stb to avoid conflicts
-        set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
-        set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL "" FORCE)
-        
-        # Add assimp subdirectory
-        add_subdirectory("${VENDOR_DIR}/assimp" "${CMAKE_BINARY_DIR}/vendor_assimp" EXCLUDE_FROM_ALL)
-        
-        # Set runtime library to match your project
-        set_property(TARGET assimp PROPERTY
-            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-            
-        # DON'T create alias - assimp already creates assimp::assimp for us!
-        # The alias is automatically created by assimp's CMakeLists.txt
-
-        # Create a stable alias if the subproject didn't (some assimp versions dont define assimp::assimp, ensures target always exists for downstream target_link_lib calls)
-        if(NOT TARGET assimp::assimp)
-          add_library(assimp::assimp ALIAS assimp)
-        endif()
-        
-        message(STATUS "Assimp built from source - assimp::assimp target available")
-        
-    elseif (EXISTS "${VENDOR_DIR}/assimp/lib")
-        # Use prebuilt libraries
-        add_library(assimp STATIC IMPORTED GLOBAL)
-        set_target_properties(assimp PROPERTIES
-            IMPORTED_LOCATION_DEBUG     "${VENDOR_DIR}/assimp/lib/assimp-vc142-mtd.lib"
-            IMPORTED_LOCATION_RELEASE   "${VENDOR_DIR}/assimp/lib/assimp-vc142-mt.lib"
-            INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_DIR}/assimp/include"
-        )
-        
-        # Only create alias for prebuilt version
-        add_library(assimp::assimp ALIAS assimp)
-        message(STATUS "Assimp using prebuilt libraries - assimp::assimp alias created")
-        
-    else()
-        message(STATUS "Assimp not found - 3D model import will be disabled")
-    endif()
+# ======================= Assimp, GLFW, Jolt: Use Official Targets =========================
+# No manual add_library needed; just link to assimp::assimp, glfw, Jolt, etc.
+if(NOT TARGET Jolt)
+    add_library(Jolt INTERFACE)
+    target_include_directories(Jolt INTERFACE "${jolt_SOURCE_DIR}")
 endif()
 
+message(STATUS "All vendor targets configured for FetchContent system")
 
-# ======================= Lua Vendor (Shared) =========================
-if (EXISTS "${VENDOR_DIR}/lua/CMakeLists.txt")
-  # Build Lua from source as a shared library (.dll / .so)
-  add_subdirectory("${VENDOR_DIR}/lua" "${CMAKE_BINARY_DIR}/vendor_lua" EXCLUDE_FROM_ALL)
-
-  # NOTE: vendor/lua/CMakeLists sets include dirs + platform defs and creates:
-  #   target: lua (SHARED) and alias: lua::lua
-  message(STATUS "Lua: building from ${VENDOR_DIR}/lua (shared)")
-else()
-  message(FATAL_ERROR "Lua not found at ${VENDOR_DIR}/lua. Please drop Lua 5.4 sources there.")
+# ======================= FreeType =========================
+if(NOT TARGET freetype)
+    # FreeType builds itself via its own CMakeLists.txt
+    # This assumes freetype is fetched via FetchContent in ImportDependencies.cmake
+    # If not, you need to add it there first
+    message(STATUS "FreeType configured from: ${freetype_SOURCE_DIR}")
 endif()
 
-# sol2 (header-only)
-if (EXISTS "${VENDOR_DIR}/sol2")
-  add_library(sol2 INTERFACE)
-  target_include_directories(sol2 INTERFACE "${VENDOR_DIR}/sol2/include")
-  message(STATUS "sol2 headers available")
-endif()
+message(STATUS "All vendor targets configured for FetchContent system")

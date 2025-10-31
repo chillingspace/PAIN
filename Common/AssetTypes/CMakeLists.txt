@@ -38,6 +38,14 @@ if(TARGET nlohmann_json)
     target_link_libraries(PAINAssetTypes INTERFACE nlohmann_json)
 endif()
 
+if(TARGET glm)
+    target_link_libraries(PAINAssetTypes INTERFACE glm)
+endif()
+
+if(TARGET spdlog_header_only)
+    target_link_libraries(PAINAssetTypes INTERFACE spdlog_header_only)
+endif()
+
 # Optional: Add compile definitions
 target_compile_definitions(PAINAssetTypes INTERFACE
     PAIN_ASSET_TYPES_VERSION_MAJOR=1

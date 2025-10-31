@@ -1,0 +1,347 @@
+{
+    "active_cam_id": "",
+    "dirty": false,
+    "ecs": {
+        "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 3,
+                            "localAABB": {
+                                "max": [
+                                    0.49837300181388855,
+                                    0.7077509760856628,
+                                    1.302780032157898
+                                ],
+                                "min": [
+                                    -0.2137649953365326,
+                                    0.028404299169778824,
+                                    -1.2722200155258179
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    38.16659927368164,
+                                    20.232528686523438,
+                                    4.951190948486328
+                                ],
+                                "min": [
+                                    -39.083396911621094,
+                                    -0.1478710174560547,
+                                    -16.412952423095703
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "sdcc"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 2635003211
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                -1.0,
+                                -10.0
+                            ],
+                            "rotation": [
+                                -0.0,
+                                -0.7071067690849304,
+                                -0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                30.0,
+                                30.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "sdcc"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "playTrigger": false,
+                            "soundPath": "C:\\Y3S1-SIT\\GAM\\PAIN\\bin\\Debug\\assets\\game\\Audio\\Music\\Boss_Music.wav",
+                            "state": 1,
+                            "stopTrigger": false,
+                            "volumeDb": 0.0
+                        },
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 8,
+                            "localAABB": {
+                                "max": [
+                                    0.5,
+                                    0.5,
+                                    0.009999999776482582
+                                ],
+                                "min": [
+                                    -0.5,
+                                    -0.5,
+                                    -0.009999999776482582
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.9657249450683594,
+                                    1.5,
+                                    4.010000228881836
+                                ],
+                                "min": [
+                                    -0.034275054931640625,
+                                    0.5,
+                                    3.990000009536743
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "screen"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 3700497305
+                        },
+                        "Transform": {
+                            "position": [
+                                0.3690948486328125,
+                                1.0,
+                                4.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "screen"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 2,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.4720239639282227,
+                                    1.5271880626678467,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -2.5279760360717773,
+                                    0.33994901180267334,
+                                    -0.39153599739074707
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_3"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 4128762491
+                        },
+                        "Transform": {
+                            "position": [
+                                -2.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 7,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    2.5279760360717773,
+                                    1.5271880626678467,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    1.4720239639282227,
+                                    0.33994901180267334,
+                                    -0.39153599739074707
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_2"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 4128762491
+                        },
+                        "Transform": {
+                            "position": [
+                                2.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 5,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    1.5271880626678467,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    0.33994901180267334,
+                                    -0.39153599739074707
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "MeshRenderer": {
+                            "mesh_id": 404225140
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_1"
+                }
+            }
+        ]
+    },
+    "grid_id": 0,
+    "layers": [],
+    "mask_matrix": [],
+    "meta_tags": [],
+    "metadata_service": {
+        "groups": null,
+        "registered_tags": [
+            "Enemy",
+            "Environment",
+            "Player",
+            "Untagged"
+        ]
+    }
+}

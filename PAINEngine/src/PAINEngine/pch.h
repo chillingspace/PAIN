@@ -53,7 +53,7 @@
  * Asset Parser includes
  *********************************************************************/
 #ifdef PN_PLATFORM_WINDOWS
-#include "gli/gli.hpp"
+//#include "gli/gli.hpp"
 #endif
 
 // Math Lib
@@ -92,7 +92,7 @@
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
-#include "refl.hpp"
+#include <refl.hpp>
 
  /*****************************************************************//**
  * STL
@@ -133,8 +133,8 @@ using json = nlohmann::json;
 #include "Utility/Log.h"
 
 //Ban normal logging
-#define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
-#define cerr  PN_IOSTREAM_FORBIDDEN__use_logger_instead
+//#define cout  PN_IOSTREAM_FORBIDDEN__use_logger_instead
+//#define cerr  PN_IOSTREAM_FORBIDDEN__use_logger_instead
 
 #ifdef PN_PLATFORM_ANDROID
 #include "./Utility/AndroidFs.h"

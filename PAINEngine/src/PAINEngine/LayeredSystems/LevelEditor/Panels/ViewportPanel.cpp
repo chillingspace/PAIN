@@ -1,15 +1,31 @@
-#include "pch.h"
-#include "ViewportPanel.h"
-
 #ifdef _DEBUG
+
+#include "pch.h"
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
+#include "ViewportPanel.h"
+#include "ImGuizmo.h"
+#include <cmath>
+#include <glm/gtc/type_ptr.hpp>
+
+
 #include "../Editor.h" 
+#include "ECS/Controller.h"
+#include "CoreSystems/Scene/Scene.h"
+#include "EntityPanel.h"
 
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
 
 			ViewportPanel::ViewportPanel()
-				: renderTexture(0), texWidth(0), texHeight(0), isInputPaused(true), isSimulationPaused(false) // Start both paused by default
+				: renderTexture(0), texWidth(0), texHeight(0), isInputPaused(true), isSimulationPaused(false),
+				m_GizmoOperation(ImGuizmo::TRANSLATE), m_GizmoMode(ImGuizmo::WORLD)
 			{
 				name = "##ViewportPanel";
 
@@ -20,7 +36,6 @@ namespace PAIN {
 			}
 
 			void ViewportPanel::nextWindowSettings() {
-				// No fullscreen behavior here — keep it dockable like AudioPanel
 			}
 
 			void ViewportPanel::setRenderTexture(ImTextureID texID, int width, int height) {
@@ -37,34 +52,190 @@ namespace PAIN {
 				return isSimulationPaused ? 0.0f : 1.0f;
 			}
 
-			void ViewportPanel::onUpdate(AppTiming timing) {
+			glm::vec3 ViewportPanel::getCameraPosition(const glm::mat4& viewMatrix) {
+				glm::mat4 inverseView = glm::inverse(viewMatrix);
+				return glm::vec3(inverseView[3]);
+			}
 
+			glm::vec3 ViewportPanel::screenToWorldRay(ImVec2 mousePos, ImVec2 viewportSize,
+				const glm::mat4& view, const glm::mat4& projection) {
+
+				float x = mousePos.x / viewportSize.x;
+				float y = mousePos.y / viewportSize.y;
+
+				// Remove the negative sign from ndcX
+				float ndcX = x * 2.0f - 1.0f;  // Back to original
+				float ndcY = (1.0f - y) * 2.0f - 1.0f;
+
+				glm::vec4 rayClip = glm::vec4(ndcX, ndcY, -1.0f, 1.0f);
+				glm::vec4 rayEye = glm::inverse(projection) * rayClip;
+				rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+				glm::vec4 rayWorldTemp = glm::inverse(view) * rayEye;
+				glm::vec3 rayWorld = glm::vec3(rayWorldTemp.x, rayWorldTemp.y, rayWorldTemp.z);
+
+				return glm::normalize(rayWorld);
+			}
+
+
+			bool ViewportPanel::rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+				const glm::vec3& sphereCenter, float sphereRadius,
+				float& distance) {
+				glm::vec3 oc = rayOrigin - sphereCenter;
+
+				float a = glm::dot(rayDir, rayDir);
+				float b = 2.0f * glm::dot(oc, rayDir);
+				float c = glm::dot(oc, oc) - sphereRadius * sphereRadius;
+
+				float discriminant = b * b - 4.0f * a * c;
+
+				if (discriminant < 0.0f) {
+					return false;
+				}
+
+				float t = (-b - sqrt(discriminant)) / (2.0f * a);
+
+				if (t < 0.0f) {
+					t = (-b + sqrt(discriminant)) / (2.0f * a);
+					if (t < 0.0f) {
+						return false;
+					}
+				}
+
+				distance = t;
+				return true;
+			}
+
+			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+				const Transform& transform, float& distance) {
+				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
+				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
+
+				float tMin = 0.0f;
+				float tMax = (std::numeric_limits<float>::max)();
+
+				for (int i = 0; i < 3; i++) {
+					if (abs(rayDir[i]) < 0.0001f) {
+						if (rayOrigin[i] < minBound[i] || rayOrigin[i] > maxBound[i]) {
+							return false;
+						}
+					}
+					else {
+						float t1 = (minBound[i] - rayOrigin[i]) / rayDir[i];
+						float t2 = (maxBound[i] - rayOrigin[i]) / rayDir[i];
+
+						if (t1 > t2) std::swap(t1, t2);
+
+						tMin = std::max(tMin, t1);
+						tMax = std::min(tMax, t2);
+
+						if (tMin > tMax) {
+							return false;
+						}
+					}
+				}
+
+				distance = tMin;
+				return tMin >= 0.0f;
+			}
+
+			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
+				auto scene = services->get<Scene>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!camera || !ecs || !m_EntityPanel) {
+					return;
+				}
+
+				// Get camera matrices
+				glm::mat4 viewMatrix = camera->view();
+				glm::mat4 projMatrix = camera->projection();
+
+				// Get ray origin and direction
+				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
+				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
+
+				// Find closest entity
+				entt::entity closestEntity = entt::null;
+				float closestDistance = (std::numeric_limits<float>::max)();
+
+				// Iterate through all entities with transforms
+				auto view = ecs->getRegistry().view<Transform>();
+
+				for (auto entity : view) {
+					auto& transform = view.get<Transform>(entity);
+
+					// Skip very large objects (likely background/floor)
+					if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
+						continue;
+					}
+
+					float distance;
+
+					// Use AABB only for accurate picking
+					if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
+						if (distance < closestDistance) {
+							closestDistance = distance;
+							closestEntity = entity;
+						}
+					}
+				}
+
+				// Update EntityPanel selection
+				m_EntityPanel->setSelectedEntity(closestEntity);
+			}
+
+
+			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
 
-				// Larger initial size (was 800x600, now 1280x720)
 				ImVec2 initialSize(1280, 720);
 				ImGui::SetNextWindowSize(initialSize, ImGuiCond_FirstUseEver);
 
-				// Begin viewport window
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-					// Toolbar with Play/Pause buttons
+					auto editor = services->get<PAIN::Editor::Editor>();
+					auto scene = services->get<Scene>();
+					auto ecs = services->get<ECS::Controller>();
+
+					// Toolbar
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
 					{
-						auto editor = services->get<PAIN::Editor::Editor>();
-						// Simulation controls
 						if (ImGui::Button(editor->isPaused() ? "Play Scene" : "Pause Scene")) {
 							editor->togglePause();
 						}
 
+						ImGui::SameLine();
+						ImGui::Spacing();
+						ImGui::SameLine();
+
+						if (ImGui::RadioButton("Translate (T)", m_GizmoOperation == ImGuizmo::TRANSLATE))
+							m_GizmoOperation = ImGuizmo::TRANSLATE;
+						ImGui::SameLine();
+						if (ImGui::RadioButton("Rotate (R)", m_GizmoOperation == ImGuizmo::ROTATE))
+							m_GizmoOperation = ImGuizmo::ROTATE;
+						ImGui::SameLine();
+						if (ImGui::RadioButton("Scale (Y)", m_GizmoOperation == ImGuizmo::SCALE))
+							m_GizmoOperation = ImGuizmo::SCALE;
+
+						ImGui::SameLine();
+						ImGui::Spacing();
+						ImGui::SameLine();
+
+						if (ImGui::RadioButton("World", m_GizmoMode == ImGuizmo::WORLD))
+							m_GizmoMode = ImGuizmo::WORLD;
+						ImGui::SameLine();
+						if (ImGui::RadioButton("Local", m_GizmoMode == ImGuizmo::LOCAL))
+							m_GizmoMode = ImGuizmo::LOCAL;
 					}
 					ImGui::EndChild();
 
+					// Viewport rendering
 					ImVec2 avail = ImGui::GetContentRegionAvail();
-
-					// Maintain aspect ratio
 					float aspect = (float)texWidth / (float)texHeight;
 					ImVec2 size = avail;
+
 					if (size.x / size.y > aspect) {
 						size.x = size.y * aspect;
 					}
@@ -72,49 +243,295 @@ namespace PAIN {
 						size.y = size.x / aspect;
 					}
 
-					// Flip Y because ImGui expects UVs differently than many renderers
+					ImVec2 viewportPos = ImGui::GetCursorScreenPos();
 					ImGui::Image(renderTexture, size, ImVec2(0, 1), ImVec2(1, 0));
 
 					contentHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup
 						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
-					// Forward input only when NOT paused AND the viewport wants it
-					if (!isSimulationPaused && wantsInput()) {
+					// ========================================
+					// === ImGuizmo - RENDER FIRST ===
+					// ========================================
+					if (m_EntityPanel) {
+						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+
+						if (selectedEntity != entt::null) {
+							auto transformOpt = ecs->getEntityComponent<Transform>(selectedEntity);
+
+							if (transformOpt.has_value()) {
+								Transform& transform = transformOpt.value().get();
+								auto camera = scene->GetActiveCamera();
+
+								if (camera) {
+									glm::mat4 viewMatrix = camera->view();
+									glm::mat4 projectionMatrix = camera->projection();
+									glm::mat4 modelMatrix = transform.getMatrix();
+
+									ImGuizmo::SetOrthographic(false);
+									ImGuizmo::SetDrawlist();
+									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+
+									// Hotkeys
+									if (ImGui::IsKeyPressed(ImGuiKey_T))
+										m_GizmoOperation = ImGuizmo::TRANSLATE;
+									if (ImGui::IsKeyPressed(ImGuiKey_R))
+										m_GizmoOperation = ImGuizmo::ROTATE;
+									if (ImGui::IsKeyPressed(ImGuiKey_Y))
+										m_GizmoOperation = ImGuizmo::SCALE;
+
+									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
+
+									// Setup snapping
+									bool useSnap = ImGui::GetIO().KeyCtrl; // Hold Ctrl to enable snapping
+									float snapValue = 0.5f;
+
+									// Different snap values for different operations
+									if (m_GizmoOperation == ImGuizmo::ROTATE) {
+										snapValue = 45.0f; // Snap to 45 degrees for rotation
+									}
+									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+										snapValue = 0.5f; // Snap to 0.5 units for translation
+									}
+									else if (m_GizmoOperation == ImGuizmo::SCALE) {
+										snapValue = 0.1f; // Snap to 0.1 for scale
+									}
+
+									float snapValues[3] = { snapValue, snapValue, snapValue };
+
+									// Draw the gizmo
+									ImGuizmo::Manipulate(
+										glm::value_ptr(viewMatrix),
+										glm::value_ptr(projectionMatrix),
+										m_GizmoOperation,
+										m_GizmoMode,
+										glm::value_ptr(modelMatrix),
+										nullptr,
+										useSnap ? snapValues : nullptr // Pass snap values if Ctrl is held
+									);
+
+									// FIXED: Cache values and only update the component being manipulated
+									static bool wasUsing = false;
+									static glm::vec3 cachedPosition = glm::vec3(0.0f);
+									static glm::vec3 cachedRotation = glm::vec3(0.0f);
+									static glm::vec3 cachedScale = glm::vec3(1.0f);
+									static glm::vec3 lastFrameRotation = glm::vec3(0.0f); // Track last frame's rotation
+									static entt::entity lastSelectedEntity = entt::null;
+									static glm::mat4 originalMatrix = glm::mat4(1.0f);
+
+									bool isCurrentlyUsing = ImGuizmo::IsUsing();
+
+									// Reset cache if entity changed
+									if (selectedEntity != lastSelectedEntity) {
+										wasUsing = false;
+										lastSelectedEntity = selectedEntity;
+									}
+
+									// Just started using - cache the original values AND matrix
+									if (isCurrentlyUsing && !wasUsing) {
+										cachedPosition.x = transform.position.x;
+										cachedPosition.y = transform.position.y;
+										cachedPosition.z = transform.position.z;
+
+										cachedRotation.x = transform.rotation.x;
+										cachedRotation.y = transform.rotation.y;
+										cachedRotation.z = transform.rotation.z;
+
+										cachedScale.x = transform.scale.x;
+										cachedScale.y = transform.scale.y;
+										cachedScale.z = transform.scale.z;
+
+										lastFrameRotation = cachedRotation; // Initialize last frame rotation
+
+										originalMatrix = modelMatrix;
+									}
+
+									// Currently manipulating
+									if (isCurrentlyUsing) {
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
+											transform.rotation = cachedRotation;
+											transform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											glm::vec3 newRotation = glm::vec3(rotation[0], rotation[1], rotation[2]);
+
+											// Compare against LAST FRAME's rotation, not original cached
+											glm::vec3 deltaRotation = newRotation - lastFrameRotation;
+
+											// Check for reasonable change (less than 90 degrees per frame)
+											float maxDeltaPerFrame = 90.0f;
+											bool isReasonable = (abs(deltaRotation.x) < maxDeltaPerFrame &&
+												abs(deltaRotation.y) < maxDeltaPerFrame &&
+												abs(deltaRotation.z) < maxDeltaPerFrame);
+
+											if (isReasonable) {
+												transform.rotation = newRotation;
+												lastFrameRotation = newRotation; // Update for next frame comparison
+											}
+											else {
+												// Reject the change - keep last frame's rotation
+												transform.rotation = lastFrameRotation;
+											}
+
+											transform.position = cachedPosition;
+											transform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											float translation[3], rotation[3], scale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(modelMatrix),
+												translation,
+												rotation,
+												scale
+											);
+
+											transform.position = cachedPosition;
+											transform.rotation = cachedRotation;
+											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+										}
+									}
+
+									// Just released - final update
+									if (!isCurrentlyUsing && wasUsing) {
+										float translation[3], rotation[3], scale[3];
+										ImGuizmo::DecomposeMatrixToComponents(
+											glm::value_ptr(modelMatrix),
+											translation,
+											rotation,
+											scale
+										);
+
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											glm::vec3 finalRotation = glm::vec3(rotation[0], rotation[1], rotation[2]);
+
+											// Normalize angles to -180 to 180 range
+											finalRotation.x = fmod(finalRotation.x + 180.0f, 360.0f) - 180.0f;
+											finalRotation.y = fmod(finalRotation.y + 180.0f, 360.0f) - 180.0f;
+											finalRotation.z = fmod(finalRotation.z + 180.0f, 360.0f) - 180.0f;
+
+											transform.rotation = finalRotation;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+										}
+									}
+
+									wasUsing = isCurrentlyUsing;
+
+
+
+
+								}
+							}
+						}
+					}
+
+					// ========================================
+					// === Mouse Picking - AFTER GIZMO ===
+					// ========================================
+					if (contentHovered
+						&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+						&& !ImGuizmo::IsUsing()
+						&& !ImGuizmo::IsOver()) {
+
+						ImVec2 mousePos = ImGui::GetMousePos();
+						ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+						performMousePicking(localMousePos, size);
+					}
+
+					// ========================================
+					// === Camera Controls ===
+					// ========================================
+					if (!isSimulationPaused && wantsInput() && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver()) {
 						ImGuiIO& io = ImGui::GetIO();
+						auto camera = services->get<sCameraController>();
 
-						auto renderer = services->get<sRenderer>();
-						if (renderer) {
-							// Keyboard
-							renderer->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-							renderer->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-							renderer->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-							renderer->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							renderer->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-							renderer->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+						if (camera) {
+							bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right) && contentHovered;
 
-							// Mouse (LMB drag rotates in your code)
-							renderer->mouseButtonDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+							if (rightMouseHeld) {
+								camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+								camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+								camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+								camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+								camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+								camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							}
+							else {
+								camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
+								camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
+							}
 
-							// Provide per-frame mouse movement
-							if (renderer->mouseButtonDown) {
-								renderer->xOffset = io.MouseDelta.x;
-								renderer->yOffset = io.MouseDelta.y;
+							camera->mouseButtonDown = rightMouseHeld;
+
+							if (camera->mouseButtonDown) {
+								camera->xOffset = io.MouseDelta.x;
+								camera->yOffset = io.MouseDelta.y;
+							}
+							else {
+								camera->xOffset = 0.0f;
+								camera->yOffset = 0.0f;
+							}
+
+							// Mouse wheel zoom
+							if (contentHovered && io.MouseWheel != 0.0f) {
+								float mouseWheel = io.MouseWheel;
+								float zoomSpeed = 0.1f;
+								auto activeCamera = scene->GetActiveCamera();
+
+								if (activeCamera) {
+									glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
+
+									if (mouseWheel > 0.0f) {
+										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+											* activeCamera->speed * zoomSpeed * mouseWheel;
+										activeCamera->pos += offset;
+									}
+									else if (mouseWheel < 0.0f) {
+										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+											* activeCamera->speed * zoomSpeed * abs(mouseWheel);
+										activeCamera->pos -= offset;
+									}
+								}
 							}
 						}
 					}
 					else {
-						// When viewport loses focus/hover OR is paused, ensure keys don't "stick"
-						if (auto renderer = services->get<sRenderer>()) {
-							renderer->W_KEYDOWN = renderer->A_KEYDOWN = renderer->S_KEYDOWN = renderer->D_KEYDOWN = false;
-							renderer->SPACE_KEYDOWN = renderer->LCTRL_KEYDOWN = false;
-							renderer->mouseButtonDown = false;
+						auto camera = services->get<sCameraController>();
+						if (camera) {
+							camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
+							camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
+							camera->mouseButtonDown = false;
+							camera->xOffset = 0.0f;
+							camera->yOffset = 0.0f;
 						}
 					}
-
 				}
 				ImGui::End();
 			}
+
+
 
 		} // namespace Panel
 	} // namespace Editor

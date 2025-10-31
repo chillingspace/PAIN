@@ -8,23 +8,16 @@
  * @copyright Copyright (c) 2025
  *
  */
-
-
- //#ifdef PN_PLATFORM_WINDOWS
-
+#include "CoreSystems/Assets/sAssets.h"
 #include "WindowsRenderer.h"
+#include "CoreSystems/Renderer/text.h"
+#include "CoreSystems/Renderer/skybox.h"
 
-#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Windows/Window.h"
+
 
 
 namespace PAIN {
-
-	Material material = {
-		0.1f,		// 0.1 -> smooth, 1 -> rough
-		0.3f,
-		{1.f,0.f,0.f}
-	};
-
 	//Light light = {
 	//	{2.f, 3.f, 2.f},	// position
 	//	{0.2f, 0.2f, 0.2f},					// intensity
@@ -39,64 +32,99 @@ namespace PAIN {
 		Cleanup();
 	}
 
-	std::string WindowsRenderer::ReadFile(const std::filesystem::path& path)
+	void WindowsRenderer::initShaders()
 	{
-		std::ifstream file(path);
-		if (!file.is_open()) {
-			PN_CORE_WARN("Failed to open shader file: {}", path.string());
-			assert(0);
-		}
-		std::stringstream buffer;
-		buffer << file.rdbuf();
 
-		return buffer.str();
-	}
-
-	std::unique_ptr<Shader> WindowsRenderer::LoadShaders(const std::string& vert_file, const std::string& frag_file)
-	{
-		PN_CORE_INFO("Compiling shaders {0}, {1}", vert_file, frag_file);
-
+		//Identify all paths
 #ifdef PN_PLATFORM_WINDOWS
-		// Get current working directory and build paths from there
-		std::filesystem::path current_path = std::filesystem::current_path();
-		std::filesystem::path project_root = current_path / "PAIN"; // Adjust as needed
-
-		// Or try to find the project root by looking for a marker file
-		std::filesystem::path search_path = current_path;
-		while (search_path.has_parent_path()) {
-			if (std::filesystem::exists(search_path / "PAIN" / "assets")) {
-				project_root = search_path / "PAIN";
-				break;
-			}
-			search_path = search_path.parent_path();
-		}
-		
-		//Get path service
-		auto path_service = services->get<Path::Path>();
-
-		std::filesystem::path vert_full = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-		std::filesystem::path frag_full = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
-
-		PN_CORE_INFO("Using paths: {0}, {1}", vert_full.string(), frag_full.string());
-
-		std::string vert_code = ReadFile(vert_full);
-		PN_CORE_INFO("Successfully read vertex shader");
-		std::string frag_code = ReadFile(frag_full);
-		PN_CORE_INFO("Successfully read fragment shader");
-#else
-		PN_CORE_INFO("Using Android asset manager for shaders");
-
-        //Get path service
-        auto path_service = services->get<Path::Path>();
-        auto vert_path = path_service->resolvePath("engine_assets://Shaders/" + vert_file);
-        auto frag_path = path_service->resolvePath("engine_assets://Shaders/" + frag_file);
-		std::string vert_code = ReadFileAndroid(vert_path);
-		std::string frag_code = ReadFileAndroid(frag_path);
+		std::filesystem::path pbr_path = "engine/shaders/pbr.vert";
+		std::filesystem::path geometry_path = "engine/shaders/geometry.vert";
+		std::filesystem::path floor_path = "engine/shaders/floor.vert";
+		std::filesystem::path passthrough_path = "engine/shaders/passthrough.vert";
+		std::filesystem::path shadow_path = "engine/shaders/shadow.vert";
+		std::filesystem::path texture2d_path = "engine/shaders/texture2d.vert";
+		std::filesystem::path gamma_path = "engine/shaders/gamma.vert";
+		std::filesystem::path debug_geometry_path = "engine/shaders/debug_geometry.vert";
+#else	
+		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
+		std::filesystem::path geometry_path = "engine\\shaders\\android_geometry.vert";
+		std::filesystem::path floor_path = "engine\\shaders\\android_floor.vert";
+		std::filesystem::path passthrough_path = "engine\\shaders\\android_passthrough.vert";
+		std::filesystem::path shadow_path = "engine\\shaders\\android_shadow.vert";
+		std::filesystem::path texture2d_path = "engine\\shaders\\android_texture2d.vert";
+		std::filesystem::path gamma_path = "engine\\shaders\\android_gamma.vert";
+		std::filesystem::path debug_geometry_path = "engine\\shaders\\android_debug_geometry.vert";
 #endif
 
-		return std::make_unique<Shader>(vert_code, frag_code);
+		//Get assets loader
+		auto assets_loader = services->get<Assets::Manager>();
+
+		//PBR Shader
+		pbr_shader = assets_loader->getAsset<Assets::Shader>(pbr_path);
+
+		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Geometry shader
+		geometry_shader = assets_loader->getAsset<Assets::Shader>(geometry_path);
+
+		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//FLoor shader
+		floor_shader = assets_loader->getAsset<Assets::Shader>(floor_path);
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Pass through shader
+		passthrough_shader = assets_loader->getAsset<Assets::Shader>(passthrough_path);
+
+		if (!passthrough_shader || passthrough_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Shadow shader
+		shadow_shader = assets_loader->getAsset<Assets::Shader>(shadow_path);
+
+		if (!shadow_shader || shadow_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Texture shader
+		texture2d_shader = assets_loader->getAsset<Assets::Shader>(texture2d_path);
+
+		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Gamma shader
+		gamma_shader = assets_loader->getAsset<Assets::Shader>(gamma_path);
+
+		if (!gamma_shader || gamma_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Debug shader
+		debug_shader = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
+
+		if (!debug_shader || debug_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
 	}
 
+	// TO BE MOVED
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment) {
 		glGenTextures(1, &tex);
 		if (!tex) {
@@ -128,6 +156,7 @@ namespace PAIN {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, gl_color_attachment, GL_TEXTURE_2D, tex, 0);
 	}
 
+	// TO BE MOVED
 	void WindowsRenderer::_initDeferredShadingBuffers() {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}", winWidth, winHeight);
 
@@ -136,9 +165,8 @@ namespace PAIN {
 			return;
 		}
 
-		// fbo/texture for deferred shading
+		// === Final FBO/Texture For Deffered Shading ===
 		// !TODO: resize when window resizes
-
 		{
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -146,7 +174,7 @@ namespace PAIN {
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 2, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 
 			unsigned int attachments[4] = {
 				GL_COLOR_ATTACHMENT0,
@@ -171,8 +199,7 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// final fbo/texture(final output, for rendering)
-
+		// === Final VAO/Texture (final output, for rendering) ===
 		{
 			glGenFramebuffers(1, &final_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -190,11 +217,30 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
+			glGenRenderbuffers(1, &final_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, final_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth, winHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, final_rbo);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// final_texture_2 for ping-pong if needed in post-processing
+			glGenTextures(1, &final_texture_2);
+			if (final_texture_2 == 0) {
+				PN_CORE_ERROR("Failed to create final texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+
 		}
 
-		// vao/vbo for final passthrough texture
-
+		// === VAO/VBO For Final Passthrough Texture ===
 		{
 			static constexpr float quadVertices[] = {
 				// positions    // texCoords
@@ -221,23 +267,170 @@ namespace PAIN {
 
 			glBindVertexArray(0);
 		}
+
+		// === VAO/VBO For Geometry Shaders ===
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &geometry_vao);
+			glBindVertexArray(geometry_vao);
+
+			// Generate and bind VBO
+			glGenBuffers(1, &geometry_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+			// Generate and bind EBO (index buffer)
+			glGenBuffers(1, &geometry_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			// Normal attribute, layout(location = 1)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+			glEnableVertexAttribArray(1);
+
+			// texcoords attribute, layout(location = 2)
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+			glEnableVertexAttribArray(2);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
+
+
+		// === VAO/VBO For Debug Shaders ===
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &debug_VAO);
+			glBindVertexArray(debug_VAO);
+
+
+			// Generate and bind VBO
+			glGenBuffers(1, &debug_VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+
+			// Color attribute, layout(location = 1)
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+			glBindVertexArray(0);
+		}
 	}
 
-	void WindowsRenderer::BeginRendering(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
+		services = app_services;
+	
+		//Set win width and height
+		auto window_service = services->get<Window::Window>();
+		winWidth = window_service->getFrameBuffer().x;
+		winHeight = window_service->getFrameBuffer().y;
+
+		initShaders();
+
+		// fallback or placeholder VAO to avoid OpenGL errors 
+		glGenVertexArrays(1, &empty_vao);
+		if (empty_vao == 0) {
+			PN_CORE_ERROR("Failed to create empty VAO");
+			return;
+		}
+
+		_initDeferredShadingBuffers();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+	}
+
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
+		if (texture_id == 0) {
+			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
+			return;
+		}
+
+		if (!texture2d_shader) {
+			PN_CORE_ERROR("Unable to find texture2d_shader");
+			return;
+		}
+
+		texture2d_shader->Bind();
+		texture2d_shader->SetUniform("pos", pos);
+		texture2d_shader->SetUniform("ndc_scale", scale);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		texture2d_shader->SetUniform("tex", 6);
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::BeginShadowPass(const Light& l)
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+		//glClearDepth(1.0f);  // Explicitly set clear value
 
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// disable color writes
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
 
+		glClear(GL_DEPTH_BUFFER_BIT);
 
+	}
+
+	void WindowsRenderer::DrawShadows(Mesh* mesh, const glm::mat4& M, const Light& l)
+	{
+		if (!mesh || !shadow_shader) return;
+
+		shadow_shader->Bind();
+
+		shadow_shader->SetUniform("u_M", M);
+		shadow_shader->SetUniform("u_V", l.view());
+		shadow_shader->SetUniform("u_P", l.projection());
+
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+	}
+
+	void WindowsRenderer::EndShadowPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android
+		// reenable color writes
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
+	}
+	
+	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
+	{
 		glViewport(0, 0, winWidth, winHeight);
-
-		// Setup framebuffers, clear buffers
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
 
-	void WindowsRenderer::EndRendering(std::shared_ptr<Scene> scene)
-	{
-		
+		//GLenum err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error before drawing skybox: {}", err);
+		//}
+
+		//// draw skybox
+		//{
+		//	Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+		//}
+		//err = glGetError();
+		//if (err != GL_NO_ERROR) {
+		//	PN_CORE_ERROR("OpenGL error after drawing skybox: {}", err);
+		//}
 
 		// draw floor
 		{
@@ -255,6 +448,89 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
+		}
+
+		geometry_shader->Bind();
+		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+	}
+
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M)
+	{
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
+		}
+
+		if (!mesh || !geometry_shader) return;
+
+		geometry_shader->SetUniform("u_M", M);
+
+		geometry_shader->SetUniform("material.rough", mesh->material.rough);
+		geometry_shader->SetUniform("material.metal", mesh->material.metal);
+		geometry_shader->SetUniform("material.color", mesh->material.color);
+		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
+		geometry_shader->SetUniform("material.alwaysLit", mesh->material.alwaysLit ? 1.f : 0.f);
+
+		if (mesh->material.useTex) {
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mesh->material.tex);
+			geometry_shader->SetUniform("material.tex", 6);
+
+			if (GraphicsSettings::get().ao && mesh->material.useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, mesh->material.aoTex);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.f);
+			}
+		}
+
+		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after DrawGeometry: {}", err);
+		}
+	}
+
+	void WindowsRenderer::EndGeometryPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void WindowsRenderer::ReflectionPass(const std::shared_ptr<Mesh>& m)
+	{
+		if (m->material.reflection_type == m->material.REFLECTION_TYPES::NONE) {
+			return;
+		}
+
+
+	}
+
+	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
+	{
+		//{
+		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
+
+		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//	passthrough_shader->Bind();
+
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_2D, col_texture);
+
+		//	glBindVertexArray(passthrough_vao);
+		//	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//	return;
+		//}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -270,6 +546,10 @@ namespace PAIN {
 
 		{
 			// pbr pass
+
+			// lighting shouldnt write to depth buffer
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
 
 			pbr_shader->Bind();
 
@@ -360,162 +640,149 @@ namespace PAIN {
 
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			glEnable(GL_DEPTH_TEST);
+
+			// After lighting pass, final_fbo has the lit scene but NO depth buffer yet
+			// So we copy it:
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, ds_fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
+			glBlitFramebuffer(0, 0, winWidth, winHeight,
+				0, 0, winWidth, winHeight,
+				GL_DEPTH_BUFFER_BIT, GL_NEAREST);  // Copy depth only
+
+			// Now final_fbo has depth info. Render skybox:
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glDepthFunc(GL_LEQUAL);  // Pass if depth <= existing depth
+			glDepthMask(GL_FALSE);   // Don't write to depth buffer
+
+			Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
+
+			glDepthMask(GL_TRUE);
+			glDepthFunc(GL_LESS);
 		}
 
+	}
 
-		//{
-		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
 
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//	passthrough_shader->Bind();
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	{
+		if (!debug_VAO || !debug_shader) return;
 
-		//	glActiveTexture(GL_TEXTURE0);
-		//	glBindTexture(GL_TEXTURE_2D, col_texture);
+		std::vector<float> verts; verts.reserve(24 * 7);
 
-		//	glBindVertexArray(passthrough_vao);
-		//	glDrawArrays(GL_TRIANGLES, 0, 6);
+		// converts min/max into 8 corners,
+		glm::vec3 v[8] = {
+		  {min_p.x,min_p.y,min_p.z},{max_p.x,min_p.y,min_p.z},
+		  {max_p.x,max_p.y,min_p.z},{min_p.x,max_p.y,min_p.z},
+		  {min_p.x,min_p.y,max_p.z},{max_p.x,min_p.y,max_p.z},
+		  {max_p.x,max_p.y,max_p.z},{min_p.x,max_p.y,max_p.z}
+		};
 
-		//	return;
-		//}
+		// edge index list (tells which pairs of the 8 AABB corners should be connected to form the 12 box edges)
+		int e[24] = { 0,1,1,2,2,3,3,0, 4,5,5,6,6,7,7,4, 0,4,1,5,2,6,3,7 };
 
+		// xyz and rgba
+		auto push = [&](const glm::vec3& p, const glm::vec4& c) {
+			verts.insert(verts.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
+		};
+
+		// The loop iterates over all 12 edges by stepping i += 2, takes the two endpoint corners for each edge via v[e[i]] and v[e[i+1]], and pushes both endpoints
+		for (int i = 0; i < 24; i += 2) { 
+			push(v[e[i]], color);
+			push(v[e[i + 1]], color); 
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		debug_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+		glDrawArrays(GL_LINES, 0, 24);
+
+		glDepthMask(GL_TRUE);
+		glBindVertexArray(0);
+	}
+
+
+	void WindowsRenderer::PostProcessPass()
+	{
+		int postprocess_passes = 0;
+
+		// gamma correction
+		if (GraphicsSettings::get().gamma_correction) {
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+			gamma_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			gamma_shader->SetUniform("tex", 0);
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			++postprocess_passes;
+		}
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err during PostProcessPass: {}", err);
+		}
+
+		// make sure final_texture now holds the gamma corrected texture
+		// use passthrough to render final_texture_2 to final_texture if odd number of passes
+		if (postprocess_passes % 2) {
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+			passthrough_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			passthrough_shader->SetUniform("tex", 0);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+		// set back to use final_fbo and final_texture for further rendering
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		// render 2D textures onto screen
+		{
+			// !TODO: add queue and iterate through all 2D textures to be rendered last
+			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
+			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
+		}
+
+		// render text onto screen
+		{
+			TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
+			TextRenderer::get().debugRenderQuad();
+		}
+
+		glEnable(GL_DEPTH_TEST);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
+		}
 
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
-
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, final_texture);
-
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
-		services = app_services;
-#ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
-#else
-		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
-#endif
-
-		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
-#else
-		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
-#endif
-
-		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-#ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("texture.vert", "texture.frag");
-#else
-		passthrough_shader = LoadShaders("android_texture.vert", "android_texture.frag");
-#endif
-
-#ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
-#else
-		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
-#endif
-
-		glGenVertexArrays(1, &empty_vao);
-		if (empty_vao == 0) {
-			PN_CORE_ERROR("Failed to create empty VAO");
-			return;
-		}
-
-		_initDeferredShadingBuffers();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		
-		// init light source(s)
-
-		LightSources::get().create("cam");
-		auto olcam = LightSources::get().get("cam");
-		Light& lcam = olcam.value();
-		lcam.L_intensity = glm::vec3(0.01f);
-		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
-
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(4.f, 4.f, -8.f);
-		la.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("b");
-		auto olb = LightSources::get().get("b");
-		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		lb.L_intensity = glm::vec3(0.2f);
-
-		LightSources::get().create("c");
-		auto olc = LightSources::get().get("c");
-		Light& lc = olc.value();
-		lc.position = glm::vec3(0.f, 30.f, 0.f);
-		lc.forward = -glm::normalize(lc.position);		// point at origin for dir light
-		lc.L_intensity = glm::vec3(0.5f);
-		lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-		lc.type = Light::TYPES::DIRECTIONAL;
-		//lc.far_plane = 200.f;
-		//lc.forward = -lc.position;
-	}
-
-
-	void WindowsRenderer::RenderGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& model)
-	{
-		if (!mesh || !geometry_shader) return;
-
-		geometry_shader->Bind();
-
-		geometry_shader->SetUniform("u_M", model);
-		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
-
-		geometry_shader->SetUniform("material.rough", material.rough);
-		geometry_shader->SetUniform("material.metal", material.metal);
-		geometry_shader->SetUniform("material.color", material.color);
-
-		mesh->Draw();
-	}
-
-	void WindowsRenderer::RenderGeometryShadows(Mesh* mesh, const glm::mat4& model, const Light& light) {
-		if (!mesh || !shadow_shader) return;
-
-		shadow_shader->Bind();
-
-		shadow_shader->SetUniform("u_M", model);
-		shadow_shader->SetUniform("u_V", light.view());
-		shadow_shader->SetUniform("u_P", light.projection());
-
-		mesh->Draw();
-	}
-
 	void WindowsRenderer::Cleanup() {
-		if (vao != 0) {
-			glDeleteVertexArrays(1, &vao);
-			vao = 0;
+		if (geometry_vao != 0) {
+			glDeleteVertexArrays(1, &geometry_vao);
+			geometry_vao = 0;
 		}
 
 		if (empty_vao != 0) {
@@ -523,14 +790,24 @@ namespace PAIN {
 			empty_vao = 0;
 		}
 
-		if (vbo != 0) {
-			glDeleteBuffers(1, &vbo);
-			vbo = 0;
+		if (geometry_vbo != 0) {
+			glDeleteBuffers(1, &geometry_vbo);
+			geometry_vbo = 0;
 		}
 
-		if (ebo != 0) {
-			glDeleteBuffers(1, &ebo);
-			ebo = 0;
+		if (geometry_ebo != 0) {
+			glDeleteBuffers(1, &geometry_ebo);
+			geometry_ebo = 0;
+		}
+
+		if (debug_VAO) {
+			glDeleteVertexArrays(1, &debug_VAO);
+			debug_VAO = 0;
+		}
+
+		if (debug_VBO) {
+			glDeleteBuffers(1, &debug_VBO); 
+			debug_VBO = 0;
 		}
 
 		if (pbr_shader) {

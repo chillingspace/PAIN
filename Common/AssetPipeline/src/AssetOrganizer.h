@@ -11,9 +11,10 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
+#include <unordered_set>
 
 //Include asset compiler
-#include "AssetTypes.h"
+#include "AssetData.h"
 #include "AssetCompiler.h"
 
 namespace PAIN {
@@ -27,10 +28,12 @@ namespace PAIN {
             std::unique_ptr<Compiler> compiler;
 
             //Assets info for sorting
-            std::vector<Info> assets;
+            std::vector<IAsset> assets;
 
             //Assets root path
             std::filesystem::path assets_root;
+            std::filesystem::path exec_path;
+            std::filesystem::path output_dir;
 
             //Paths
             std::unordered_map<Type, std::filesystem::path> game_dir;
@@ -49,12 +52,6 @@ namespace PAIN {
             //Check if path is derived
             bool isPathPartOfRoot(std::filesystem::path const& path, std::filesystem::path const& root) const;
 
-            //Reposition file
-            bool repositionFile(std::filesystem::path const& file_path, std::filesystem::path const& target_path) const;
-
-            //Delete file
-            bool deleteFile(std::filesystem::path const& file_path) const;
-
             //Create or rename folder
             void instantiateFolder(std::filesystem::path const& path) const;
 
@@ -63,10 +60,14 @@ namespace PAIN {
             void enforceEngineAssetLocation(Info& asset) const;
 
             //Recursively scan the directory
-            void recursiveScanAllDirectories(std::filesystem::path const& path, std::function<void(std::filesystem::path const& file)> func);
+            void recursiveScanAllDirectories(std::filesystem::path const& path,
+                std::function<void(std::filesystem::path const& file)> file_func,
+                std::function<void(std::filesystem::path const& file)> dir_func);
 
+            //Export asset registry
+            void ExportAssetRegistry();
         public:
-            AssetOrganizer(std::filesystem::path const& assets_root);
+            AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
             ~AssetOrganizer() = default;
 
             //Game folders

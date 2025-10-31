@@ -7,6 +7,7 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Audio/AudioManager.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Scene/sCameraController.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -29,9 +30,13 @@
 #include "Systems/AI/sysAI.h" 
 #include "Systems/Animation/sysAnimation.h" 
 #include "Systems/Scripting/sysScripting.h" 
-#include "Systems/Logic/sysLogic.h" 
+#include "Systems/Logic/sysLogic.h"
+#include "Systems/Audio/sysAudio.h"
+#include "Systems/Collision/sBVHSystem.h"
 
-#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h" 
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+
+#include "CoreSystems/Renderer/text.h"
 
 namespace PAIN {
 
@@ -90,34 +95,30 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// Match viewport to window size
 		auto window = services->get<Window::Window>();
-#ifdef PN_PLATFORM_WINDOWS
-		glfwGetFramebufferSize((GLFWwindow*)window->getNativeWindow(), &winWidth, &winHeight);
-		glViewport(0, 0, winWidth, winHeight);
-#else
-		ANativeWindow* nativeWindow = (ANativeWindow*)window->getNativeWindow();
-		winWidth = ANativeWindow_getWidth(nativeWindow);
-		winHeight = ANativeWindow_getHeight(nativeWindow);
-		glViewport(0, 0, winWidth, winHeight);
-#endif
-
 
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
 		services->get<Path::Path>()->logVirtualPaths();
 
+		//Create asset service
+		addCoreSystem(std::make_shared<Assets::Manager>());
+
 		//Create and add the AudioManager to the core systems
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
+		// dependency injection
+		TextRenderer::init(services);
+
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS
-        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
-        app_audio->play(asset_path);
+        //app_audio->play(asset_path);
 #else
-        app_audio->loadSound("file:///android_asset/Game/Audio/Music/Boss_Music.wav", true, false, false);
-        app_audio->play("file:///android_asset/Game/Audio/Music/Boss_Music.wav");
+        app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
+        app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack
@@ -137,6 +138,8 @@ namespace PAIN {
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
 		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
+		services->get<ECS::Controller>()->registerSystem<Audio::System>();
+		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 #endif
 
 		// Register components here
@@ -151,6 +154,9 @@ namespace PAIN {
 #endif
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
+
+		// Camera System
+		addCoreSystem(std::make_shared<sCameraController>());
 
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
@@ -186,7 +192,7 @@ namespace PAIN {
 		timing.dt = std::chrono::duration<float>(now - last_time).count();
 		last_time = now;
 
-		fps = static_cast<int>(1.f / timing.dt);
+		auto fps = static_cast<int>(1.f / timing.dt);
 #ifdef PN_PLATFORM_WINDOWS
 		static float avgFps = 0.f;
 		static float timeSinceLastUpdate = 0.0f;
@@ -241,6 +247,9 @@ namespace PAIN {
 		//Update timing variables
 		timing.steps_this_frame = steps;
 		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
+		// clear errors before next rendering loop
+		while (glGetError());
 
 		//Update all core systems
 		for (auto& core : core_stack) core.lock()->onUpdate(timing);

@@ -15,6 +15,7 @@
 #define S_ASSET_COMPILER_H
 
 #include "Applications/AppSystem.h"
+#include <nlohmann/json.hpp>
 //#include <assimp/include/assimp/Importer.hpp>
 //#include <assimp/include/assimp/scene.h>
 //#include <assimp/include/assimp/postprocess.h>

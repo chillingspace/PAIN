@@ -1,6 +1,9 @@
-#pragma once
+﻿#pragma once
 
-#include <CoreSystems/Renderer/Mesh.h>
+#include "pch.h"
+// Somehow, if i dont include this, refl macro cannot be foundl, even tho is in pch...
+#include "refl.hpp"
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
 
 namespace PAIN {
 
@@ -10,10 +13,30 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct MeshRenderer {
-		std::shared_ptr<Mesh> mesh;
+		//std::shared_ptr<Mesh> mesh;
+		uint32_t mesh_id;
 	};
 
+#ifdef _DEBUG
+	// UI Registration function
+	inline void RegisterMeshRendererUI(Editor::Panel::ComponentsPanel& panel) {
+		panel.registerCompUIFunc<MeshRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, MeshRenderer& mesh) {
+			ImGui::Text("Mesh Renderer");
+			ImGui::Separator();
+			
+			unsigned int step = 1;
+			ImGui::InputScalar("Mesh ID", ImGuiDataType_U32, &mesh.mesh_id, &step);
 
+		});
+
+	}
+
+#endif
 
 }
+
+
+REFL_TYPE(PAIN::MeshRenderer)
+REFL_FIELD(mesh_id)
+REFL_END
 

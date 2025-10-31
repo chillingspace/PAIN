@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Material.h"
+
 namespace PAIN {
 
 	struct Vertex {
@@ -9,21 +11,33 @@ namespace PAIN {
 		glm::vec2 uv;
 	};
 
-
 	class Mesh {
 
 	public:
-		Mesh(const std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::string& ref);
 		~Mesh();
-		void Draw() const;
+		void Draw(unsigned int vao, unsigned int vbo, unsigned int ebo) const;
 
-		static std::shared_ptr<Mesh> LoadObj(const std::string& mesh_file = "");
+		const glm::vec3& getAABBMin() const { return aabb_min; }
+		const glm::vec3& getAABBMax() const { return aabb_max; }
+
+		const std::vector<Vertex>& getVertices() const { return vertices; }
+		const std::vector<unsigned int>& getIndices() const { return indices; }
+
+		unsigned int texture_id = 0;
+		Material material{};
+
+		std::string getRef() const {
+			return ref;
+		}
 
 	private:
+		std::string ref;
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		glm::vec3 aabb_min{ 0 }, aabb_max{ 0 };
 
-		unsigned int vao = 0;
-		unsigned int vbo = 0;
-		unsigned int ebo = 0;
-		size_t index_count;
+		static constexpr int MAX_VERTICES = 1000000;
+		static constexpr int MAX_INDICES = 1000000;
 	};
 }

@@ -169,8 +169,17 @@ namespace PAIN {
 
 			impl_->sys->set3DSettings(1.0f, 1.0f, 1.0f);
 
-			// Make default groups
-			impl_->ensureGroup("master");
+			// Get the REAL master group
+			FMOD::ChannelGroup* masterGroup = nullptr;
+			r = impl_->sys->getMasterChannelGroup(&masterGroup);
+			if (r != FMOD_OK) return AudioResult::BackendError;
+
+			// Store it in our map
+			Impl::Group masterGroupWrapper;
+			masterGroupWrapper.cg = masterGroup;
+			impl_->groups.emplace("master", masterGroupWrapper);
+
+			// Create other groups (which will now be correctly parented to the real master)
 			impl_->ensureGroup("music");
 			impl_->ensureGroup("sfx");
 			impl_->ensureGroup("ui");
@@ -330,7 +339,9 @@ namespace PAIN {
 
 		void FmodAudio::pauseAll()
 		{
+			if (!impl_->initialized) return;
 			for (auto& pair : impl_->groups) {
+				if (pair.first == "master") continue;
 				auto& g = pair.second;
 				if (g.cg) g.cg->setPaused(true);
 			}
@@ -338,10 +349,30 @@ namespace PAIN {
 
 		void FmodAudio::resumeAll()
 		{
-			for (auto& pair : impl_->groups) {
+			if (!impl_->initialized) return;
+			for (auto& pair : impl_->groups) 
+			{
+				if (pair.first == "master") continue;
 				auto& g = pair.second;
 				if (g.cg) g.cg->setPaused(false);
 			}
+		}
+
+		AudioResult FmodAudio::setMuteAll(bool mute) {
+			if (!impl_->initialized) return AudioResult::NotInitialized;
+
+			// GET the "master" group, which was stored during init
+			auto it = impl_->groups.find("master");
+			if (it == impl_->groups.end()) {
+				return AudioResult::NotFound; // Should not happen if init() was successful
+			}
+
+			auto& masterGroup = it->second;
+			if (!masterGroup.cg) return AudioResult::NotFound;
+
+			// Use setMute, which is separate from setPaused
+			PN_CORE_INFO("Setting Master Mute: {}", mute);
+			return toResult(masterGroup.cg->setMute(mute));
 		}
 
 		AudioResult FmodAudio::setVolumeDb(AudioChannelId chId, float db) {

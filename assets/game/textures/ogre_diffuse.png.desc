@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "ogre_diffuse.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13307359218468193681
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "5923aab8-5293-f945-958e-496acd0218c3",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ogre_diffuse.png"
+  }
+}
