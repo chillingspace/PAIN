@@ -19,7 +19,7 @@ static LuaManager gLua;
 static void RunLuaStateSmokeTest() {
     PAIN::Scripting::LuaState L;
     L.init(false);
-    L.doFile("Game/Scripts/test.lua");
+    L.doFile("game/scripts/test.lua");
 }
 
 //-----------------------------------------------
@@ -27,7 +27,7 @@ static void RunLuaStateSmokeTest() {
 //-----------------------------------------------
 static void RunLuaManagerSmokeTest() {
     gLua.init(nullptr, /*shipping=*/true);
-    gLua.loadScriptForEntity(1, "Game/Scripts/test.lua", {}, true);
+    gLua.loadScriptForEntity(1, "game/scripts/test.lua", {}, true);
     gLua.tick(0.016);
 }
 
