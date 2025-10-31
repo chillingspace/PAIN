@@ -133,9 +133,8 @@ namespace PAIN {
             // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
 
 #ifdef PN_PLATFORM_WINDOWS
-            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("document://imgui_layout.ini");
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
 #else
-            // For now i do a copy in assets folder andriod
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
 #endif
 

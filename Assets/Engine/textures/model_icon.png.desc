@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "model_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16116161174687106989
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "3f07c536-9f68-1144-a9e7-bc68705f2f72",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\model_icon.png"
+  }
+}

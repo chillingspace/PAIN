@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "lua_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1156608560781210576
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "d7806020-67fa-c143-a09a-eb3ea6c07f30",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\lua_icon.png"
+  }
+}

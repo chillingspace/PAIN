@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "grid_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8725910098036052540
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "20975c5e-11d9-f44b-b540-5b8dc153666f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\grid_icon.png"
+  }
+}
