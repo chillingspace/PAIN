@@ -26,7 +26,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Install NDK 27.0.12077973
-        run: yes | "${ANDROID_HOME}/tools/bin/sdkmanager" "ndk;27.0.12077973"
+        run: ${ANDROID_HOME}/tools/bin/sdkmanager "ndk;27.0.12077973"
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Run build.bat first
