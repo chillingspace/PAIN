@@ -19,7 +19,9 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags.addAll(listOf("-std=c++17"))
-                arguments.addAll(listOf("-DANDROID_STL=c++_shared"))
+                arguments.addAll(listOf("-DANDROID_STL=c++_shared",
+					"-DPAIN_ENABLE_LUA_SMOKETEST=ON"
+		))
             }
         }
     }

@@ -1,0 +1,17 @@
+{
+  "asset_info": {
+    "name": "test",
+    "type": "Script"
+  },
+  "build_data": {
+    "raw_last_modified": 13406392100638
+  },
+  "created_timestamp": 1761922493348,
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "312938f8-05dd-2c46-9d28-58857a7b3ede",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "C:\\Users\\aynar\\source\\repos\\PAIN\\assets\\Game\\Scripts\\test.lua"
+  }
+}

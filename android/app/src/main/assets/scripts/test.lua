@@ -1,1 +1,0 @@
-printLog("HELLO FROM LUA")

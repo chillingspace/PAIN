@@ -1,4 +1,4 @@
- #include "LuaState.h"
+ #include "luaState.h"
  #include "Utility/Log.h"
  #include <fstream>
 
@@ -11,11 +11,13 @@
 #ifdef __ANDROID__
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-// Provide this from your app glue once at startup if you want asset-reads here:
 extern AAssetManager* g_AssetMgr;
 #endif
 
 namespace {
+
+    // Reads a whole asset file into a std::string (Android only).
+    // Returns empty string if not found / not readable.
 #ifdef __ANDROID__
     static std::string readAssetText(AAssetManager* mgr, const char* path) {
         if (!mgr) return {};
@@ -29,12 +31,14 @@ namespace {
     }
 #endif
 
+    // reads file contents either from APK assets (Android) or filesystem (all platforms).
+    // on Android, we first try the asset manager (scripts packaged into APK).
+    // if not found in assets, we fall back to filesystem (useful on dev builds).
     static std::string readFileAll(const std::string& path) {
 #ifdef __ANDROID__
-        // If an asset manager is available, prefer it (let you package Lua in APK)
-        extern AAssetManager* g_AssetMgr;
-        if (g_AssetMgr) {
-            auto s = readAssetText(g_AssetMgr, path.c_str());
+        // prefer APK assets when available
+        if (::g_AssetMgr) {
+            auto s = readAssetText(::g_AssetMgr, path.c_str());
             if (!s.empty()) return s;
             // fall through to filesystem if not found in assets
         }
@@ -44,13 +48,16 @@ namespace {
         return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
     }
 
-} // anonymous namespace
+} 
 
  namespace PAIN::Scripting {
 
      LuaState::LuaState() = default;
      LuaState::~LuaState() = default;
 
+     // initializes the Lua VM and opens the allowed standard libraries
+     //  - Shipping (SCRIPT_SHIPPING_SANDBOX=1): tightly sandboxed libs
+     //  - Dev (SCRIPT_SHIPPING_SANDBOX=0): can opt io/os/package via enableIoOs
      void LuaState::init(bool enableIoOs) {
 #if SCRIPT_SHIPPING_SANDBOX
          (void)enableIoOs; // shipping builds are always sandboxed
@@ -62,11 +69,11 @@ namespace {
              sol::lib::utf8
          );
 #ifndef NDEBUG
-         // helpful, but keep it out of release to reduce surface
+         // debug lib helpful while developing, but keep out of release
          L_.open_libraries(sol::lib::debug);
 #endif
 #else
-         // Dev mode: optionally allow broader std libs
+         // dev mode: optionally allow broader std libs
          if (enableIoOs) {
              L_.open_libraries(
                  sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::string,
@@ -87,29 +94,39 @@ namespace {
          bindEngineAPI();
      }
 
-
+ // loads and executes a lua file in global environment
  bool LuaState::doFile(const std::string& filePath) {
      try {
-         sol::load_result chunk = L_.load_file(filePath);
-         if (!chunk.valid()) {
-             sol::error e = chunk;
-             PN_ERROR("[Lua load:file] %s\n", e.what());
+         // Read from APK assets if available (Android), else from filesystem.
+         std::string code = readFileAll(filePath);
+         if (code.empty()) {
+             PN_ERROR("[Lua load:file] could not read '{}'", filePath);
              return false;
          }
+
+         // Load the string (not the file path) so it works both on Android and desktop.
+         sol::load_result chunk = L_.load(code);
+         if (!chunk.valid()) {
+             sol::error e = chunk;
+             PN_ERROR("[Lua load:file] {}", e.what());
+             return false;
+         }
+
          sol::protected_function_result r = chunk();
          if (!r.valid()) {
              sol::error e = r;
-             PN_ERROR("[Lua run:file] %s\n", e.what());
+             PN_ERROR("[Lua run:file] {}", e.what());
              return false;
          }
          return true;
      }
      catch (const sol::error& e) {
-         PN_ERROR("[Lua exception:file] %s\n", e.what());
+         PN_ERROR("[Lua exception:file] {}", e.what());
          return false;
      }
  }
 
+ // loads and executes a lua buffer, useful for pipelines that feed compiled/packed lua from memory
  bool LuaState::doBuffer(const char* data, size_t size, const char* debugName) {
      try {
          sol::load_result chunk = L_.load_buffer(data, size, debugName ? debugName : "buffer");
@@ -132,6 +149,7 @@ namespace {
      }
  }
 
+ // executes script inside a fresh env table
  bool LuaState::runScriptInEnv(const ScriptSource& src,
                                sol::environment& outEnv,
                                std::function<void(sol::environment&)> inject) {
@@ -141,7 +159,6 @@ namespace {
      sol::protected_function_result r;
      try {
          if (src.kind == ScriptSource::Kind::FilePath) {
-             // Load from file (or asset, on Android)
              std::string code = readFileAll(src.path);
              if (code.empty()) {
                  PN_ERROR("[Lua env] could not read script '%s'\n", src.path.c_str());
@@ -153,11 +170,11 @@ namespace {
                  PN_ERROR("[Lua env load:file] %s\n", e.what());
                  return false;
              }
-             // Apply environment by calling chunk with env
+             // apply environment by calling chunk with env
              r = chunk(outEnv);
          }
          else {
-             // Load from provided buffer
+             // load from provided buffer
              if (src.buffer.empty()) {
                  PN_ERROR("[Lua env] empty buffer for '%s'\n", src.name.c_str());
                  return false;
@@ -189,7 +206,6 @@ namespace {
  sol::protected_function_result LuaState::ErrorHandler(lua_State* L, sol::protected_function_result pfr) {
      sol::error err = pfr;
      std::string msg = err.what();
-     // Add Lua stack trace
      luaL_traceback(L, L, msg.c_str(), 1);
      const char* tb = lua_tostring(L, -1);
      PN_ERROR("[Lua Error] %s\n", tb ? tb : msg.c_str());
@@ -198,19 +214,10 @@ namespace {
  }
 
  void LuaState::bindEngineAPI() {
-     // Simple printf-style logger exposed to Lua
+     // printf-style logger exposed to Lua
      L_.set_function("log_info", [](const std::string& s) {
-         PN_ERROR("[Lua] %s\n", s.c_str());
+         PN_INFO("[Lua] %s\n", s.c_str());
          });
-
-     //// Example type
-     //struct Vec3 { float x{}, y{}, z{}; };
-     //L_.new_usertype<Vec3>("Vec3",
-     //    sol::constructors<Vec3(), Vec3(float,float,float)>(),
-     //    "x", &Vec3::x,
-     //    "y", &Vec3::y,
-     //    "z", &Vec3::z
-     //);
 
      // Registration hooks
      // L_.set_function("registerUpdate",  [&](sol::protected_function f){ /* push to queue */ });

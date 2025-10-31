@@ -1,9 +1,8 @@
-#include "LuaManager.h"
+#include "luaManager.h"
 #include "IEngineAPI.h"
 #include "Utility/Log.h"
 
 #include <fstream>
-#include <iostream>
 #include <chrono>
 #include <deque>
 #include <queue>
@@ -130,8 +129,8 @@ void LuaManager::openLibs(bool shipping) { // decides which lua standard lib to 
 }
 
 void LuaManager::bindUsertypes() {
-    // NOTE: Bind your usertypes here if needed (Vectors, proxies, etc.)
-    // Keeping this empty is fine; the manager doesnt depend on ECS details.
+    // NOTE: Bind your usertypes here if needed 
+    // Keeping this empty is fine, the manager doesnt depend on ECS details.
 }
 
 void LuaManager::bindRegistration() {
@@ -163,7 +162,7 @@ void LuaManager::bindRegistration() {
         pauseHandlers_.push_back({ currentEntity_, fn, /*runWhenPaused*/ true });
         };
 
-    // SetTimeout (list-based member exists in header; will keep the API but
+    // SetTimeout (list-based member exists in header, will keep the API but
     // use a local min-heap in tick() for performance
     lua_["setTimeout"] = [this](sol::protected_function fn, float delay) {
         // Store temporarily; converted to a heap node on next tick()
@@ -235,7 +234,7 @@ void LuaManager::bindEngineAPI() {
     // (Optional) Euler helpers:
     //lua_.set_function("rotateEulerDeg", [this](int id, float rx, float ry, float rz) { if (api_) api_->RotateEulerDeg(id, { rx,ry,rz }); });
 
-    // -------- Physics (velocity only; safe) --------
+    // -------- Physics (velocity only, safe) --------
     lua_.set_function("getVelocity", [this](int id) {
         if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
         auto v = api_->GetVelocity(id);
@@ -325,13 +324,11 @@ bool LuaManager::runFileIntoEnv(const std::string& path, int entityId,
 // Tick & Event processing
 // ----------------------------------------------------------------------------
 
-// Local timeout heap (O(log N)); keeps header unchanged.
 namespace {
     struct TimeoutNode {
         double wake;
         sol::protected_function fn;
-        // priority_queue is max-heap by default; invert comparator for min-heap
-        bool operator<(const TimeoutNode& other) const noexcept { return wake > other.wake; }
+        bool operator<(const TimeoutNode& other) const noexcept { return wake > other.wake; } // priorityqueue is max-heap by default, invert comparator for min-heap
     };
 }
 
@@ -367,8 +364,6 @@ void LuaManager::tick(double dt) {
     // 4) Execute collision callbacks
     for (auto& cb : collisionQueue_) {
         if (!gamePaused_ || cb.fn.valid()) {
-            // Typical signature in your scripts was either fn() or fn(a,b).
-            // try (a,b); if it fails (arity mismatch), fall back to ().
             sol::protected_function_result r = cb.fn(cb.currentEntityId, cb.collidedEntityId);
             if (!r.valid()) {
                 // try calling without args
@@ -387,11 +382,11 @@ void LuaManager::tick(double dt) {
         }
     }
 
-    // 6) Run any queued C++ operations (safe structural edits)
+    // 6) Run any queued C++ operations 
     for (auto& op : delayedOps_) op();
     delayedOps_.clear();
 
-    // 7) Apply pending scene change once per frame (re-entrancy guard)
+    // 7) Apply pending scene change once per frame
     static bool sceneChangeQueued = false;
     if (pendingSceneChange_ && !sceneChangeQueued) {
         sceneChangeQueued = true;
@@ -418,8 +413,8 @@ void LuaManager::onClick() {
 }
 
 void LuaManager::onMouseInOut() {
-    // NOTE: Without engine-side hit-testing here, we just alternate states.
-    // If you have hit-testing via IEngineAPI, plug it in to decide which callback to queue.
+    // no engine-side hit-testing here, just alternating states for now
+
     for (auto& m : mouseInOut_) {
         if (m.state == MouseInOutLuaFunction::State::MouseOut) {
             inputQueue_.push_back(m.mouseIn);
@@ -433,7 +428,7 @@ void LuaManager::onMouseInOut() {
 }
 
 void LuaManager::onCollision(int a, int b) {
-    // Look up callbacks registered on entity `a`
+    // Look up callbacks registered on entity 'a'
     if (auto it = onCollision_.find(a); it != onCollision_.end()) {
         for (const auto& cb : it->second) {
             if (cb.collidedEntityId == b || cb.collidedEntityId == -1 /*ANY_ENTITY*/) {
@@ -441,7 +436,7 @@ void LuaManager::onCollision(int a, int b) {
             }
         }
     }
-    // Also check callbacks registered on entity `b` (symmetric)
+    // also check callbacks registered on entity 'b' 
     if (auto it = onCollision_.find(b); it != onCollision_.end()) {
         for (const auto& cb : it->second) {
             if (cb.collidedEntityId == a || cb.collidedEntityId == -1 /*ANY_ENTITY*/) {

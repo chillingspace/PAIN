@@ -1,48 +1,36 @@
- #pragma once
- //#include <sol/sol.hpp>
- #include "sol_sanitized.h"
- #include <string>
- #include <vector>
- #include <functional>
+#pragma once
+//#include <sol/sol.hpp>
+#include "sol_sanitized.h"
+#include <string>
+#include <vector>
+#include <functional>
 
- namespace PAIN::Scripting {
+namespace PAIN::Scripting {
 
- struct ScriptSource {
-     enum class Kind { FilePath, MemoryBuffer };
-     Kind kind{};
-     std::string path;                 // if FilePath
-     std::string name;                 // debug name (both kinds)
-     std::vector<char> buffer;         // if MemoryBuffer
- };
+     struct ScriptSource {
+         enum class Kind { FilePath, MemoryBuffer };
+         Kind kind{};
+         std::string path;                
+         std::string name;                 
+         std::vector<char> buffer;         
+     };
 
- class LuaState {
- public:
-     LuaState();
-     ~LuaState();
+     class LuaState {
+     public:
+         LuaState();
+         ~LuaState();
 
-     // Init & teardown
-     void init(bool enableIoOs = false); // desktop: true; android: false
+         void init(bool enableIoOs = false); // desktop: true, android: false
+         bool doFile(const std::string& filePath);
+         bool doBuffer(const char* data, size_t size, const char* debugName);
 
-     // Load/execute (global env)
-     bool doFile(const std::string& filePath);
-     bool doBuffer(const char* data, size_t size, const char* debugName);
+         bool runScriptInEnv(const ScriptSource& src, sol::environment& outEnv, std::function<void(sol::environment&)> inject = {}); // sandboxed per-script execution
+         void bindEngineAPI();
+         sol::state& lua() { return L_; }
 
-     // Sandboxed per-script execution
-     bool runScriptInEnv(const ScriptSource& src,
-                         sol::environment& outEnv,
-                         std::function<void(sol::environment&)> inject = {});
+     private:
+         sol::state L_;
+         static sol::protected_function_result ErrorHandler(lua_State* L, sol::protected_function_result pfr);
+     };
 
-     // Binding surface
-     void bindEngineAPI();
-
-     // Access
-     sol::state& lua() { return L_; }
-
- private:
-     sol::state L_;
-
-     // Error handling wrapper
-     static sol::protected_function_result ErrorHandler(lua_State* L, sol::protected_function_result pfr);
- };
-
- } // namespace PAIN::Scripting
+} // namespace PAIN::Scripting

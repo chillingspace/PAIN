@@ -5,7 +5,7 @@
 
 // ---------------- Entities / Prefabs ----------------
 int EngineAPIAdapter::CreateEntity(std::string /*layer*/, std::string /*name*/) {
-    auto e = ecs_.createEntity();                    // ECS create/destroy via Controller
+    auto e = ecs_.createEntity(); // ECS create/destroy via Controller
     return static_cast<int>(e);
 }
 
@@ -16,8 +16,8 @@ void EngineAPIAdapter::DeleteEntity(int id) {
 int EngineAPIAdapter::CreatePrefabInstance(std::string /*prefab*/,
                                            std::string /*layer*/,
                                            std::string /*name*/) {
-    // TODO: Hook to your prefab system when available.
-    // For now, just create a plain entity so scripts dont break
+    // @TODO: Hook to prefab system 
+    // now, just create a plain entity so scripts dont break
     return CreateEntity();
 }
 
@@ -30,7 +30,7 @@ std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
 
 int EngineAPIAdapter::GetImageID(std::string_view) { 
     return -1; 
-} // TODO: Asset system
+} // @TODO: Asset system
 
 int EngineAPIAdapter::GetAnimationID(std::string_view) { 
     return -1; 
@@ -129,13 +129,13 @@ void EngineAPIAdapter::SetVelocity(int id, glm::vec3 v) {
     if (auto opt = ecs_.getEntityComponent<PAIN::Physics::RigidBody3D>(asEntity(id))) {
         auto& rb = opt->get();
         rb.velocity = { v.x, v.y, v.z };
-        // TODO: also push to Jolt body if needed (rb.bodyID)
+        // @TODO: also push to Jolt body if needed (rb.bodyID)
     }
 }
 
 // ---------------- Audio ----------------
 std::optional<int> EngineAPIAdapter::PlayAudio(int /*entityId*/, std::string_view /*sound*/) {
-    // TODO: bridge to AudioSystem; return instance id
+    // @TODO: bridge to AudioSystem; return instance id
     return std::nullopt;
 }
 void EngineAPIAdapter::PauseAudio(int /*instanceId*/) {
@@ -151,15 +151,15 @@ void EngineAPIAdapter::SetVolume(int /*instanceId*/, float /*v*/) {
 }
 
 // ---------------- Scene / System ----------------
-void  EngineAPIAdapter::ChangeScene(std::string /*name*/) {
+void EngineAPIAdapter::ChangeScene(std::string /*name*/) {
 
 }
 
-void  EngineAPIAdapter::PauseAllSystems(bool /*toPause*/) {
+void EngineAPIAdapter::PauseAllSystems(bool /*toPause*/) {
 
 }
 
-bool  EngineAPIAdapter::IsGamePaused() const { 
+bool EngineAPIAdapter::IsGamePaused() const { 
     return false; 
 }
 
@@ -167,7 +167,7 @@ float EngineAPIAdapter::GetFps() const {
     return 0.0f; 
 }
 
-void  EngineAPIAdapter::SetDeltaMultiplier(float /*m*/) {
+void EngineAPIAdapter::SetDeltaMultiplier(float /*m*/) {
 
 }
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(pain_android_entry LANGUAGES C CXX)
 
+option(PAIN_ENABLE_LUA_SMOKETEST "Run Lua smoke test at startup" OFF)
+
 if(ANDROID)
     # Build the entry shared lib that your NativeActivity loads
     add_library(pain SHARED
@@ -8,9 +10,19 @@ if(ANDROID)
             native_app_glue/android_native_app_glue.c   # vendored glue
     )
 
+  if(PAIN_ENABLE_LUA_SMOKETEST)
+    target_sources(pain PRIVATE android_lua_smoketest.cpp)
+    target_compile_definitions(pain PRIVATE PAIN_ENABLE_LUA_SMOKETEST=1)
+  endif()
+
+    get_filename_component(PAIN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../" ABSOLUTE)
+    message(STATUS "PAIN_ROOT = ${PAIN_ROOT}")  # verify in the Gradle/CMake console
+
     # Include path for the glue header
     target_include_directories(pain PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/native_app_glue
+	   "${PAIN_ROOT}/PAINEngine/src"
+	   "${PAIN_ROOT}/vendor/sol2/include"
     )
 
     # turn off PCH for Jolt (and optionally for PAINEngine if you use PCH there)

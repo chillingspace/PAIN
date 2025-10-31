@@ -47,8 +47,7 @@ private:
     void bindRegistration();
     void bindEngineAPI();
 
-    bool runFileIntoEnv(const std::string& path, int entityId,
-        const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
+    bool runFileIntoEnv(const std::string& path, int entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
 
 private:
     sol::state lua_;
@@ -71,7 +70,6 @@ private:
     std::list<std::function<void(void)>> delayedOps_;
     std::optional<std::function<void(void)>> pendingSceneChange_;
 
-    // scratch for “currently parsing”
     int currentEntity_{ -1 };
     bool currentRunWhenPaused_{ false };
 };
