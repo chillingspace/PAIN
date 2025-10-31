@@ -38,9 +38,10 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
+        val abiEnv = System.getenv("CI_ABI")
         ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+            abiFilters.addAll(if (abiEnv != null) listOf(abiEnv) else 
+            listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
         externalNativeBuild {
             cmake {

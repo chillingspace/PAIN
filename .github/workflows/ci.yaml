@@ -33,6 +33,8 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Run build.bat first
         run: .\build.bat
-      - name: Build Android app
+      - name: Build Android app (x86_64)
         working-directory: android
+        env:
+          CI_ABI: x86_64
         run: .\gradlew.bat assembleDebug
