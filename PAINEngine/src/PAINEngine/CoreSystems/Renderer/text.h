@@ -10,10 +10,10 @@
 
 #include "pch.h"
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Assets/sAssets.h"
 #include "Applications/AppSystem.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "CoreSystems/Renderer/Shader.h"
 
 #include "CoreSystems/Windows/Window.h"
 
@@ -37,7 +37,7 @@ namespace PAIN {
 		std::unordered_map<unsigned char, Character> characters;
 
 		unsigned int vao, vbo;
-		Shader shader;
+		std::shared_ptr<Assets::Shader> shader;
 
 		static int winWidth;
 		static int winHeight;

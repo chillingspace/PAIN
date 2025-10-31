@@ -13,7 +13,7 @@ namespace PAIN {
 		void Manager::logAssetRegistry() const {
 
 			for (auto const& asset : asset_registry) {
-				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second.relative_path.string());
+				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second->relative_path.string());
 			}
 		}
 
@@ -22,8 +22,8 @@ namespace PAIN {
 
 			//Find asset guid
 			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second.name == name) {
-					guid = it->second.guid;
+				if (it->second->name == name) {
+					guid = it->second->guid;
 				}
 			}
 
@@ -35,8 +35,8 @@ namespace PAIN {
 
 			//Find asset guid
 			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second.relative_path == relative_path) {
-					guid = it->second.guid;
+				if (it->second->relative_path == relative_path) {
+					guid = it->second->guid;
 				}
 			}
 
@@ -58,6 +58,42 @@ namespace PAIN {
 			asset_loader->RegisterLoader(Type::Model, [this](std::string const& virtual_path) {
 
 				return asset_loader->ImportModel(virtual_path);
+				});
+
+			//Register Model loader
+			asset_loader->RegisterLoader(Type::Shader, [this](std::string const& virtual_path) {
+
+				//Get path service
+				auto path_service = services->get<Path::Path>();
+
+				//Get alias & relative
+				auto relative_path = path_service->getRelative(virtual_path);
+				auto alias = path_service->getAlias(virtual_path);
+
+				//Craft vert & frag
+				auto vert = std::filesystem::path(relative_path).replace_extension(".vert");
+				auto frag = std::filesystem::path(relative_path).replace_extension(".frag");
+
+				//Check for shader has already been cached in vert
+				auto vert_id = findGUID(vert);
+				auto vert_it = asset_cache.find(vert_id);
+				if (vert_it != asset_cache.end()) {
+					return std::dynamic_pointer_cast<Shader>(vert_it->second);
+				}
+
+				//Check for shader has already been cached in frag
+				auto frag_id = findGUID(frag);
+				auto frag_it = asset_cache.find(frag_id);
+				if (frag_it != asset_cache.end()) {
+					return std::dynamic_pointer_cast<Shader>(frag_it->second);
+				}
+
+				//Craft frag and vert virtual paths
+				auto virtual_vert = path_service->aliasCombineRelative(alias, vert.string());
+				auto virtual_frag = path_service->aliasCombineRelative(alias, frag.string());
+
+				//Else import shader
+				return asset_loader->ImportShader(virtual_vert, virtual_frag);
 				});
 
 			//Import asset registry
@@ -86,10 +122,10 @@ namespace PAIN {
 			}
 
 			//Resolve asset path
-			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second.relative_path.string());
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->relative_path.string());
 
 			//Load assset through registered loaded
-			auto asset = asset_loader->GetLoader(registry_it->second.type)(virtual_path);
+			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
 
 			//Insert loaded asset into asset cache
 			asset_cache.emplace(id, asset);
@@ -111,6 +147,56 @@ namespace PAIN {
 
 			//Cache asset
 			return cacheAsset(id);
+		}
+
+		//Find asset type
+		std::shared_ptr<IAsset> Manager::getAssetData(GUID const& id) const {
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			return std::make_shared<IAsset>(*registry_it->second);
+		}
+
+		std::shared_ptr<IAsset> Manager::getAssetData(std::string const& name) const {
+
+			//Find GUID
+			auto id = findGUID(name);
+
+			//Check if GUID is valid
+			if (!id.IsValid()) {
+				//Asset doesnt exist in registry
+				throw std::runtime_error("Invalid GUID.");
+			}
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			return std::make_shared<IAsset>(*registry_it->second);
+		}
+		
+		std::shared_ptr<IAsset> Manager::getAssetData(std::filesystem::path const& relative_path) const {
+			//Find GUID
+			auto id = findGUID(relative_path);
+
+			//Check if GUID is valid
+			if (!id.IsValid()) {
+				//Asset doesnt exist in registry
+				throw std::runtime_error("Invalid GUID.");
+			}
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
 		// ----------------------------

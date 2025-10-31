@@ -10,11 +10,12 @@
  */
 #include "CoreSystems/Assets/sAssets.h"
 #include "WindowsRenderer.h"
-#include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
 
 #include "CoreSystems/Windows/Window.h"
+
+
 
 namespace PAIN {
 	//Light light = {
@@ -31,95 +32,96 @@ namespace PAIN {
 		Cleanup();
 	}
 
-	// TO BE MOVED 
-	std::unique_ptr<Shader> WindowsRenderer::LoadShaders(const std::string& vert_file, const std::string& frag_file)
-	{
-		PN_CORE_INFO("Compiling shaders {0}, {1}", vert_file, frag_file);
-		
-		//Get path service
-		auto path_service = services->get<Path::Path>();
-
-		std::string virtual_vert = path_service->aliasCombineRelative("engine_assets", "shaders/" + vert_file);
-		std::string virtual_frag = path_service->aliasCombineRelative("engine_assets", "shaders/" + frag_file);
-
-		PN_CORE_INFO("Using paths: {0}, {1}", virtual_vert, virtual_frag);
-		auto vert_stream = path_service->createFileStream(virtual_vert, Path::FileMode::Read);
-		std::string vert_code(vert_stream->size(), '\0');
-		size_t chunk = vert_stream->read(&vert_code[0], vert_code.size());
-		PN_CORE_INFO("Successfully read vertex shader");
-		auto frag_stream = path_service->createFileStream(virtual_frag, Path::FileMode::Read);
-		std::string frag_code(frag_stream->size(), '\0');
-		chunk = frag_stream->read(&frag_code[0], frag_code.size());
-		PN_CORE_INFO("Successfully read fragment shader");
-
-		return std::make_unique<Shader>(vert_code, frag_code);
-	}
-
 	void WindowsRenderer::initShaders()
 	{
+
+		//Identify all paths
 #ifdef PN_PLATFORM_WINDOWS
-		pbr_shader = LoadShaders("pbr.vert", "pbr.frag");
-#else
-		pbr_shader = LoadShaders("android_pbr.vert", "android_pbr.frag");
+		std::filesystem::path pbr_path = "engine/shaders/pbr.vert";
+		std::filesystem::path geometry_path = "engine/shaders/geometry.vert";
+		std::filesystem::path floor_path = "engine/shaders/floor.vert";
+		std::filesystem::path passthrough_path = "engine/shaders/passthrough.vert";
+		std::filesystem::path shadow_path = "engine/shaders/shadow.vert";
+		std::filesystem::path texture2d_path = "engine/shaders/texture2d.vert";
+		std::filesystem::path gamma_path = "engine/shaders/gamma.vert";
+		std::filesystem::path debug_geometry_path = "engine/shaders/debug_geometry.vert";
+#else	
+		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
+		std::filesystem::path geometry_path = "engine\\shaders\\android_geometry.vert";
+		std::filesystem::path floor_path = "engine\\shaders\\android_floor.vert";
+		std::filesystem::path passthrough_path = "engine\\shaders\\android_passthrough.vert";
+		std::filesystem::path shadow_path = "engine\\shaders\\android_shadow.vert";
+		std::filesystem::path texture2d_path = "engine\\shaders\\android_texture2d.vert";
+		std::filesystem::path gamma_path = "engine\\shaders\\android_gamma.vert";
+		std::filesystem::path debug_geometry_path = "engine\\shaders\\android_debug_geometry.vert";
 #endif
+
+		//Get assets loader
+		auto assets_loader = services->get<Assets::Manager>();
+
+		//PBR Shader
+		pbr_shader = assets_loader->getAsset<Assets::Shader>(pbr_path);
 
 		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
-		else {
-			PN_CORE_INFO("Successfully linked shader");
-		}
-#ifdef PN_PLATFORM_WINDOWS
-		geometry_shader = LoadShaders("geometry.vert", "geometry.frag");
-#else
-		geometry_shader = LoadShaders("android_geometry.vert", "android_geometry.frag");
-#endif
+
+		//Geometry shader
+		geometry_shader = assets_loader->getAsset<Assets::Shader>(geometry_path);
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
-#ifdef PN_PLATFORM_WINDOWS
-		floor_shader = LoadShaders("floor.vert", "floor.frag");
-#else
-		floor_shader = LoadShaders("android_floor.vert", "android_floor.frag");
-#endif
+
+		//FLoor shader
+		floor_shader = assets_loader->getAsset<Assets::Shader>(floor_path);
 
 		if (!floor_shader || floor_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		passthrough_shader = LoadShaders("passthrough.vert", "passthrough.frag");
-#else
-		passthrough_shader = LoadShaders("android_passthrough.vert", "android_passthrough.frag");
-#endif
+		//Pass through shader
+		passthrough_shader = assets_loader->getAsset<Assets::Shader>(passthrough_path);
 
-#ifdef PN_PLATFORM_WINDOWS
-		shadow_shader = LoadShaders("shadow.vert", "shadow.frag");
-#else
-		shadow_shader = LoadShaders("android_shadow.vert", "android_shadow.frag");
-#endif
+		if (!passthrough_shader || passthrough_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		texture2d_shader = LoadShaders("texture2d.vert", "texture2d.frag");
-#else
-		texture2d_shader = LoadShaders("android_texture2d.vert", "android_texture2d.frag");
-#endif
+		//Shadow shader
+		shadow_shader = assets_loader->getAsset<Assets::Shader>(shadow_path);
 
-#ifdef PN_PLATFORM_WINDOWS
-		gamma_shader = LoadShaders("gamma.vert", "gamma.frag");
-#else
-		gamma_shader = LoadShaders("android_gamma.vert", "android_gamma.frag");
-#endif
+		if (!shadow_shader || shadow_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		debug_shader = LoadShaders("debug_geometry.vert", "debug_geometry.frag");
-#else
-		debug_shader = LoadShaders("android_debug_geometry.vert", "android_debug_geometry.frag");
-#endif
+		//Texture shader
+		texture2d_shader = assets_loader->getAsset<Assets::Shader>(texture2d_path);
+
+		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Gamma shader
+		gamma_shader = assets_loader->getAsset<Assets::Shader>(gamma_path);
+
+		if (!gamma_shader || gamma_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Debug shader
+		debug_shader = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
+
+		if (!debug_shader || debug_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
 	}
 
 	// TO BE MOVED

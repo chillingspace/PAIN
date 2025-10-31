@@ -16,7 +16,6 @@
 #define __WINDOWS_RENDERER_H__
 
 #include "pch.h"
-#include "../Shader.h"
 #include "../Mesh.h"
 
 #include "../Light.h"
@@ -25,6 +24,7 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/Camera.h"
 #include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Assets/sAssets.h"
 
 namespace PAIN {
 	extern Material material;
@@ -111,16 +111,14 @@ namespace PAIN {
 		unsigned int debug_VBO = 0;
 
 		// === Shaders ===
-		std::unique_ptr<Shader> pbr_shader = nullptr;
-		std::unique_ptr<Shader> geometry_shader = nullptr;
-		std::unique_ptr<Shader> floor_shader = nullptr;
-		std::unique_ptr<Shader> passthrough_shader = nullptr;
-		std::unique_ptr<Shader> shadow_shader = nullptr;
-		std::unique_ptr<Shader> texture2d_shader = nullptr;
-		std::unique_ptr<Shader> debug_shader = nullptr;
-		std::unique_ptr<Shader> gamma_shader = nullptr;
-
-
+		std::shared_ptr<Assets::Shader> pbr_shader = nullptr;
+		std::shared_ptr<Assets::Shader> geometry_shader = nullptr;
+		std::shared_ptr<Assets::Shader> floor_shader = nullptr;
+		std::shared_ptr<Assets::Shader> passthrough_shader = nullptr;
+		std::shared_ptr<Assets::Shader> shadow_shader = nullptr;
+		std::shared_ptr<Assets::Shader> texture2d_shader = nullptr;
+		std::shared_ptr<Assets::Shader> debug_shader = nullptr;
+		std::shared_ptr<Assets::Shader> gamma_shader = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 2> fbos{
@@ -140,10 +138,6 @@ namespace PAIN {
 		};
 
 		std::shared_ptr<Services> services;
-
-		std::string ReadFile(const std::filesystem::path& path);
-		std::unique_ptr<Shader> LoadShaders(const std::string& vert_file, const std::string& frag_file);
-
 		void initShaders();
 
 		/**

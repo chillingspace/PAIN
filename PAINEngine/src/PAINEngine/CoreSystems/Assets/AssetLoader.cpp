@@ -7,7 +7,6 @@
 namespace PAIN {
 	namespace Assets {
 
-
         void Loader::RegisterLoader(Type const& type, LoaderFunc const& func) {
 
             //Check if type already regist
@@ -36,8 +35,8 @@ namespace PAIN {
             return false;
         }
 
-        std::unordered_map<GUID, IAsset> Loader::ImportAssetRegistry(std::string const& virtual_path) const {
-            std::unordered_map<GUID, IAsset> assets;
+        std::unordered_map<GUID, std::shared_ptr<IAsset>> Loader::ImportAssetRegistry(std::string const& virtual_path) const {
+            std::unordered_map<GUID, std::shared_ptr<IAsset>> assets;
 
             //Use your custom input stream API
             auto fileStream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
@@ -74,8 +73,8 @@ namespace PAIN {
                 asset.guid = guid;
                 asset.type = stringToAssetType(obj["type"]);
                 asset.name = obj.value("name", "");
-                asset.relative_path = obj.value("relative_path", "");
-                assets[guid] = asset;
+                asset.relative_path = std::filesystem::path(obj.value("relative_path", ""));
+                assets[guid] = std::make_shared<IAsset>(asset);
             }
             fileStream = nullptr;
             return assets;
@@ -460,5 +459,141 @@ namespace PAIN {
 
             return std::make_shared<Model>(std::move(asset));
 		}
+
+        bool Loader::CheckShader(GLuint shader, const char* label) const {
+            GLint compiled = GL_FALSE;
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+            if (compiled == GL_TRUE) return true;
+
+            GLint len = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+            std::string log(len ? len - 1 : 0, '\0');
+            if (len > 1) glGetShaderInfoLog(shader, len, nullptr, log.data());
+#ifdef PN_PLATFORM_ANDROID
+            PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
+#else
+            PN_CORE_ERROR("[Shader] Compile failed ({0}):\n{1}", label, log);
+#endif
+            return false;
+        }
+
+        bool Loader::CheckProgram(GLuint program) const {
+            GLint linked = GL_FALSE;
+            glGetProgramiv(program, GL_LINK_STATUS, &linked);
+            if (linked == GL_TRUE) return true;
+
+            GLint len = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+            std::string log(len ? len - 1 : 0, '\0');
+            if (len > 1) glGetProgramInfoLog(program, len, nullptr, log.data());
+#ifdef PN_PLATFORM_ANDROID
+            PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
+#else
+            PN_CORE_ERROR("[Shader] Link failed:\n{0}", log);
+#endif
+            return false;
+        }
+
+        uint32_t Loader::CompileShader(unsigned int type, const std::string& source) const
+        {
+            // Create vert & frag shaders
+            uint32_t shader = glCreateShader(type);
+            const char* src = source.c_str();
+
+            PN_CORE_INFO("Compiling {} shader", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
+            // PN_CORE_INFO("Shader source:\n{0}", source);
+
+            glShaderSource(shader, 1, &src, nullptr);
+            glCompileShader(shader);
+
+            // Check compilation
+            int success;
+
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                char infoLog[512];
+                glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+#ifdef PN_PLATFORM_ANDROID
+                PN_CORE_ERROR("Shader compile error {0}: {1}\nSource: {2}",
+                    type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog, source);
+#else
+                PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+#endif
+
+                assert(false);
+            }
+
+            return shader;
+
+        }
+
+        uint32_t Loader::LinkProgram(unsigned int vert_shader, unsigned int frag_shader) const
+        {
+            GLuint program = glCreateProgram();
+            glAttachShader(program, vert_shader);
+            glAttachShader(program, frag_shader);
+            glLinkProgram(program);
+
+            GLint numUniforms = 0;
+            glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
+            PN_CORE_INFO("Linked program {} has {} active uniforms", program, numUniforms);
+
+            for (int i = 0; i < numUniforms; i++) {
+                char name[256] = { 0 };
+                GLsizei length = 0;
+                GLint size = 0;
+                GLenum type = 0;
+                glGetActiveUniform(program, i, 256, &length, &size, &type, name);
+                PN_CORE_INFO("  Uniform {}: '{}'", i, name);
+            }
+
+            if (!CheckProgram(program)) {
+#ifdef PN_PLATFORM_ANDROID
+                PN_CORE_ERROR("Program link FAILED");
+#else
+                PN_CORE_ERROR("Program link FAILED");
+#endif
+                assert("Program link failed");
+            }
+            else {
+                PN_CORE_INFO("Program link succeeded");
+            }
+
+            // (Optional but recommended)
+            glDetachShader(program, vert_shader);
+            glDetachShader(program, frag_shader);
+
+            return program;
+        }
+
+        std::shared_ptr<Shader> Loader::ImportShader(std::string const& virtual_vert, std::string const& virtual_frag) const {
+
+            //Get path service
+            auto path_service = services->get<Path::Path>();
+
+            //Read data
+            PN_CORE_INFO("Using paths: {0}, {1}", virtual_vert, virtual_frag);
+            auto vert_stream = path_service->createFileStream(virtual_vert, Path::FileMode::Read);
+            std::string vert_code(vert_stream->size(), '\0');
+            size_t chunk = vert_stream->read(&vert_code[0], vert_code.size());
+            PN_CORE_INFO("Successfully read vertex shader");
+            auto frag_stream = path_service->createFileStream(virtual_frag, Path::FileMode::Read);
+            std::string frag_code(frag_stream->size(), '\0');
+            chunk = frag_stream->read(&frag_code[0], frag_code.size());
+            PN_CORE_INFO("Successfully read fragment shader");
+
+            //Compiler shader
+            uint32_t vert_shader = CompileShader(GL_VERTEX_SHADER, vert_code);
+            uint32_t frag_shader = CompileShader(GL_FRAGMENT_SHADER, frag_code);
+
+            //Link program
+            std::shared_ptr<Shader> shader = std::make_shared<Shader>(LinkProgram(vert_shader, frag_shader));
+
+            // Clean up shaders (they're linked now)
+            glDeleteShader(vert_shader);
+            glDeleteShader(frag_shader);
+
+            return shader;
+        }
 	}
 }

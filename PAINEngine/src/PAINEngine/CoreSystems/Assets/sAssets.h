@@ -17,7 +17,7 @@ namespace PAIN {
 		private:
 
 			//Asset registry
-			std::unordered_map<GUID, IAsset> asset_registry;
+			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_registry;
 
 			//Asset cache
 			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_cache;
@@ -158,6 +158,11 @@ namespace PAIN {
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void uncacheAsset(GUID const& id);
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+
+			//Find asset type
+			std::shared_ptr<IAsset> getAssetData(GUID const& id) const;
+			std::shared_ptr<IAsset> getAssetData(std::string const& name) const;
+			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path) const;
 
 			// AppSystem overrides
 			void onAttach() override;

@@ -6,7 +6,6 @@
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
-#include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -132,7 +131,7 @@ namespace PAIN {
 		// ao map
 		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_rest.png");
 		auto ogre_rest_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("43dea636-43ff-864f-b059-bf1f4999b063"));
-		ogre_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "ogre_ao");
+		ogre_mesh->texture_id = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"))->gl_texture;
 		ogreMat.aoTex = ogre_rest_tex->gl_texture;
 		ogreMat.useAo = true;
 

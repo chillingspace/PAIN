@@ -9,7 +9,6 @@
 #include "CoreSystems/Assets/sPath.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Assets/sLoader.h"
-#include "CoreSystems/Renderer/texture.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 
 #define PN_PATH_SERVICE  services->get<Path::Service>()
@@ -127,51 +126,49 @@ namespace PAIN {
 			}
 
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& path) {
-				//Get assets icons
-				if (PN_ASSETS_SERVICE->getAssetType(path) == Assets::Types::Texture && PN_ASSETS_SERVICE->isAssetCached(path)) {
 
-					//Check if asset has been loaded
-					std::string icon_ref = PN_ASSETS_SERVICE->getIDFromPath(path.string(), false);
+				//Icon path
+				std::filesystem::path icon_path;
 
-					auto tex_path = path.string();
-					return isTextureLoaded(tex_path.c_str(), icon_ref);
-				}
-				else {
-					std::string ext = path.extension().string();
+//				//Get assets service
+//				auto asset_service = services->get<Assets::Manager>();
+//				auto path_service = services->get<Path::Path>();
+//
+//				//Get relative path
+//				auto relative_path = std::filesystem::relative(path, std::filesystem::path(path_service->resolvePath("assets://")));
+//
+//				//Discover iconref
+//				if (asset_service->getAssetData(relative_path)->type == Assets::Type::Texture) {
+//
+//					auto parent_path = relative_path.parent_path();
+//
+//					//Get file path
+//#ifdef PN_PLATFORM_WINDOWS
+//					icon_path = parent_path / (relative_path.stem().string() + ".dds");
+//#else
+//					icon_path = parent_path / (relative_path.stem().string() + ".astc");
+//#endif
+//				}
+//				else {
+					//Def icon ref
+					std::string icon_ref = "def_icon";
 
-					std::string icon_ref;
+					//Identify extension
+					auto ext = path.extension().string();
+
 					if (!ext.empty() && ext.size() > 1) {
-						icon_ref = ext.substr(1) + "_icon.png";  // remove leading dot
-					}
-					else {
-						icon_ref = "def_icon.png";  // fallback icon
+						icon_ref = ext.substr(1) + "_icon";
 					}
 
-					auto icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/" + icon_ref);
+					//Find texture path
+#ifdef PN_PLATFORM_WINDOWS
+					icon_path = "engine/textures/" + (icon_ref + ".dds");
+#else
+					icon_path = std::filesystem::path("engine\\textures") / (icon_ref + ".astc");
+#endif
+//				}
 
-					if (std::filesystem::exists(icon_path)) {
-						return isTextureLoaded(icon_path.string().c_str(), icon_ref);
-					}
-					else {
-						//Load default file icon
-						auto def_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/def_icon.png");
-						return isTextureLoaded(def_icon_path.string().c_str(), "def_icon.png");
-					}
-				}
-
-				return 0;
-			}
-
-			unsigned int ResourcePanel::isTextureLoaded(const char* file_path, const std::string& ref) {
-				// Check if texture already loaded
-				auto& texture_map = TextureManager::get().getTextureMap();
-				auto it = texture_map.find(ref);
-				if (it != texture_map.end()) {
-					return it->second;
-				}
-
-				// Otherwise, load and store
-				return TextureManager::get().load(file_path, ref);
+				return static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path)->gl_texture);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -204,16 +201,18 @@ namespace PAIN {
 
 					ImGui::BeginGroup();
 
-					//Folder icon
-					//ImTextureID icon = static_cast<ImTextureID>(PN_ASSETS_SERVICE->getAsset<Assets::Texture>("folder_icon.png")->gl_data);
-					auto folder_icon_path = PN_PATH_SERVICE->resolvePath("Engine_Assets://Textures/folder_icon.png");
-					unsigned int tex_id = isTextureLoaded(folder_icon_path.string().c_str(), "folder_icon");
+#ifdef PN_PLATFORM_WINDOWS
+					std::filesystem::path folder_path = "engine/textures/folder_icon.dds";
+#else
+					std::filesystem::path folder_path = "engine\\textures\\folder_icon.astc";
+#endif
 
-					ImTextureID icon = (ImTextureID)(static_cast<uintptr_t>(tex_id));
+					//Folder icon
+					ImTextureID icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
 
 					//Display directory icon
-					ImVec2 uv0(0.0f, 1.0f);
-					ImVec2 uv1(1.0f, 0.0f);
+					ImVec2 uv0(0.0f, 0.0f);
+					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
 					if (ImGui::ImageButton(std::string("##" + dir.filename().string()).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
@@ -262,8 +261,8 @@ namespace PAIN {
 					ImTextureID icon = fileIcon(file);
 
 					//Display file icon
-					ImVec2 uv0(0.0f, 1.0f);
-					ImVec2 uv1(1.0f, 0.0f);
+					ImVec2 uv0(0.0f, 0.0f);
+					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					if (ImGui::ImageButton(std::string("##" + file.filename().string()).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
 						selected_asset_id = file.filename().string();

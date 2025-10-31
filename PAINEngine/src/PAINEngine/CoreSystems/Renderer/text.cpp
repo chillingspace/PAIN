@@ -119,39 +119,13 @@ namespace PAIN {
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_ANDROID
-			std::string path_vert = "engine_assets://shaders/android_text.vert";
-			std::string path_frag = "engine_assets://shaders/android_text.frag";
-
-			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
-			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
+			std::filesystem::path text_path = "engine\\shaders\\android_text.vert";
 #else
-			std::string path_vert = "engine_assets://shaders/text.vert";
-			std::string path_frag = "engine_assets://shaders/text.frag";
-
-
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
-			std::stringstream buffer;
-			buffer << ifs.rdbuf();
-			const std::string vert = buffer.str();
-
-			ifs.close();
-
-			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
-			buffer.str(std::string());
-			buffer << ifs.rdbuf();
-			const std::string frag = buffer.str();
+			std::filesystem::path text_path = "engine\\shaders\\text.vert";
 #endif
 
-			error = glGetError();
-			if (error != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL error before compiling text shader 2: {}", error);
-			}
-
-
-			PN_CORE_INFO("Compiling text shader from {} and {}", path_vert, path_frag);
-			PN_CORE_TRACE("Vertex shader source:\n{0}", vert);
-			shader = Shader(vert.c_str(), frag.c_str());
-			PN_CORE_INFO("Text shader compiled, ID: {}", shader.GetRendererID());
+			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
+			PN_CORE_INFO("Text shader compiled, ID: {}", shader->GetRendererID());
 		}
 		error = glGetError();
 		if (error != GL_NO_ERROR) {
@@ -191,18 +165,18 @@ namespace PAIN {
 
 	void TextRenderer::renderText(const std::string& text, float x, float y, float scale, const glm::vec3& color)
 	{
-		if (shader.GetRendererID() == 0) {
+		if (shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("TextRenderer shader not initialized!");
 			return;
 		}
 
 		// activate corresponding render state	
-		shader.Bind();
+		shader->Bind();
 
 		glActiveTexture(GL_TEXTURE0);
-		shader.SetUniform("projection", projection());
-		shader.SetUniform("textColor", color);
-		shader.SetUniform("text", 0);
+		shader->SetUniform("projection", projection());
+		shader->SetUniform("textColor", color);
+		shader->SetUniform("text", 0);
 		glBindVertexArray(vao);
 
 		glEnable(GL_BLEND);

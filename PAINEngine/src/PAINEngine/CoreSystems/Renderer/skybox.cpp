@@ -18,6 +18,11 @@
 
 #include "CoreSystems/Windows/Window.h"
 
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#endif
+#include "stb_image.h"
+
 namespace PAIN {
 	Skybox::Skybox() {
 	}
@@ -161,9 +166,9 @@ namespace PAIN {
 		};
 
 		// Conversion shader setup
-		conversionShader.Bind();
-		conversionShader.SetUniform("equirectangularMap", 0);
-		conversionShader.SetUniform("projection", captureProjection);
+		conversionShader->Bind();
+		conversionShader->SetUniform("equirectangularMap", 0);
+		conversionShader->SetUniform("projection", captureProjection);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, skybox_tex);
@@ -173,7 +178,7 @@ namespace PAIN {
 
 		// Render to each face
 		for (unsigned int i = 0; i < 6; ++i) {
-			conversionShader.SetUniform("view", captureViews[i]);
+			conversionShader->SetUniform("view", captureViews[i]);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap_tex, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -203,33 +208,13 @@ namespace PAIN {
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_ANDROID
-			const std::string path_vert = "engine_assets://shaders/android_eqr_to_skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/android_eqr_to_skybox.frag";
-
-
-			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
-			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
+			std::filesystem::path eqr_shader_path = "engine\\shaders\\android_eqr_to_skybox.vert";
 #else
-			const std::string path_vert = "engine_assets://shaders/eqr_to_skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/eqr_to_skybox.frag";
-
-
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
-			std::stringstream buffer;
-			buffer << ifs.rdbuf();
-			const std::string vert = buffer.str();
-
-			ifs.close();
-
-			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
-			buffer.str(std::string());
-			buffer << ifs.rdbuf();
-			const std::string frag = buffer.str();
+			std::filesystem::path eqr_shader_path = "engine\\shaders\\eqr_to_skybox.vert";
 #endif
 
-			PN_CORE_INFO("Compiling equirectangular to cubemap shader from {} and {}", path_vert, path_frag);
-			conversionShader = Shader(vert.c_str(), frag.c_str());
-			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader.GetRendererID());
+			conversionShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(eqr_shader_path);
+			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader->GetRendererID());
 		}
 
 		loadHdr(skybox_path);
@@ -238,32 +223,12 @@ namespace PAIN {
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_ANDROID
-			const std::string path_vert = "engine_assets://shaders/android_skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/android_skybox.frag";
-
-			const std::string vert = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_vert));
-			const std::string frag = ReadFileAndroid(services->get<Path::Path>()->resolvePath(path_frag));
+			std::filesystem::path skybox_shader_path = "engine\\shaders\\android_skybox.vert";
 #else
-			const std::string path_vert = "engine_assets://shaders/skybox.vert";
-			const std::string path_frag = "engine_assets://shaders/skybox.frag";
-
-
-			std::ifstream ifs(services->get<Path::Path>()->resolvePath(path_vert));
-			std::stringstream buffer;
-			buffer << ifs.rdbuf();
-			const std::string vert = buffer.str();
-
-			ifs.close();
-
-			ifs.open(services->get<Path::Path>()->resolvePath(path_frag));
-			buffer.str(std::string());
-			buffer << ifs.rdbuf();
-			const std::string frag = buffer.str();
+			std::filesystem::path skybox_shader_path = "engine\\shaders\\skybox.vert";
 #endif
-
-			PN_CORE_INFO("Compiling skybox shader from {} and {}", path_vert, path_frag);
-			shader = Shader(vert.c_str(), frag.c_str());
-			PN_CORE_INFO("Skybox shader compiled, ID: {}", shader.GetRendererID());
+			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(skybox_shader_path);
+			PN_CORE_INFO("Skybox shader compiled, ID: {}", shader->GetRendererID());
 		}
 	}
 
@@ -271,14 +236,14 @@ namespace PAIN {
 		glDisable(GL_CULL_FACE);	// we are inside cube, so disable culling
 		glDepthFunc(GL_LEQUAL);  // so skybox renders at max depth
 
-		shader.Bind();
+		shader->Bind();
 
 		// skybox to follow cam
 		glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(view));
 
-		shader.SetUniform("view", viewNoTranslation);
-		shader.SetUniform("projection", proj);
-		shader.SetUniform("skybox", 0);
+		shader->SetUniform("view", viewNoTranslation);
+		shader->SetUniform("projection", proj);
+		shader->SetUniform("skybox", 0);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);

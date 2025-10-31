@@ -8,9 +8,10 @@
 
 
 #include "pch.h"
-#include "CoreSystems/Renderer/Shader.h"
 #include "CoreSystems/Path/Path.h"
 #include "Applications/AppSystem.h"
+
+#include "CoreSystems/Assets/sAssets.h"
 
 
 namespace PAIN {
@@ -26,8 +27,8 @@ namespace PAIN {
 		void convertEquirectangularToCubemap();
 		void renderCube();
 
-		Shader conversionShader;
-		Shader shader;
+		std::shared_ptr<Assets::Shader> conversionShader;
+		std::shared_ptr<Assets::Shader> shader;
 
 		std::shared_ptr<Services> services;
 

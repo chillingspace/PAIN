@@ -89,6 +89,11 @@ namespace PAIN {
 				return alias;
 			}
 
+			std::string getRelative(const std::string& virtualPath) const {
+				auto [alias, relativePath] = parseVirtualPath(virtualPath);
+				return relativePath;
+			}
+
 			void logVirtualPaths() const {
 				PN_CORE_INFO("=== Windows Virtual Paths ===");
 				for (const auto& [alias, path] : virtual_paths) {
