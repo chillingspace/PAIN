@@ -68,6 +68,11 @@ macro(importDependencies)
     )
     FetchContent_MakeAvailable(sol2)
 
+    #add_library(sol2::sol2 INTERFACE IMPORTED)
+    #set_target_properties(sol2::sol2 PROPERTIES
+    #  INTERFACE_INCLUDE_DIRECTORIES "${sol2_SOURCE_DIR}/include"
+    #)
+
     # lua
     FetchContent_Declare(
       lua
