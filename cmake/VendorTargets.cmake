@@ -35,9 +35,10 @@ if(NOT TARGET entt_header_only)
     target_include_directories(entt_header_only INTERFACE "${entt_SOURCE_DIR}/src")
 endif()
 
-if(NOT TARGET sol2)
+if(NOT TARGET sol2::sol2)
     add_library(sol2 INTERFACE)
     target_include_directories(sol2 INTERFACE "${sol2_SOURCE_DIR}/include")
+    add_library(sol2::sol2 ALIAS sol2)
 endif()
 
 # ======================= GLEW (Windows) =========================

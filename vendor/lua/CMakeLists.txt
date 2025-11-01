@@ -12,3 +12,5 @@ if(ANDROID)
 endif()
 
 set_target_properties(lua PROPERTIES OUTPUT_NAME "lua")
+
+add_library(lua::lua ALIAS lua)
