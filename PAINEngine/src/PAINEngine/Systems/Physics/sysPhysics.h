@@ -44,15 +44,15 @@ namespace PAIN {
 
 			void create_floor();
 
+			// Getters
+			JPH::PhysicsSystem* GetPhysicsSystem() const { return jolt_physics.get(); }
+			JPH::BodyInterface& GetBodyInterface() { return jolt_physics->GetBodyInterface(); }
+
 		private:
 
 			std::unique_ptr<JPH::PhysicsSystem> jolt_physics;
 
 			JPH::BodyInterface* body_interface = nullptr;
-
-			//JPH::PhysicsSystem* jolt_physics_system = nullptr;
-
-			//JPH::
 
 			// Jolt init values
 

@@ -141,18 +141,22 @@ namespace PAIN {
 
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
+					// Get rotation
+					const glm::quat& q = transform.rotation;
+					JPH::Quat rotationQuat(q.x, q.y, q.z, q.w); // Jolt uses x, y, z, w order
+
 					// Create Jolt body settings
 					// Create BoxShape
 					JPH::BoxShape* boxShape = new JPH::BoxShape(
 						JPH::Vec3(0.5f * transform.scale.x, 0.5f * transform.scale.y, 0.5f * transform.scale.z),
-						0.0f // convex radius
+						0.0f // convex radius, default 0.0f
 					);
 
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
 						boxShape,
 						JPH::RVec3(transform.position.x, transform.position.y, transform.position.z),
-						JPH::Quat::sIdentity(),
+						rotationQuat,
 						JPH::EMotionType::Dynamic,
 						NIKE::Layer::MOVING
 					);

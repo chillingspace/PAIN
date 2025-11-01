@@ -19,6 +19,8 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "EntityPanel.h"
 
+#include "Systems/Physics/sysPhysics.h"
+
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
@@ -321,6 +323,7 @@ namespace PAIN {
 
 									bool isCurrentlyUsing = ImGuizmo::IsUsing();
 
+
 									// Reset cache if entity changed
 									if (selectedEntity != lastSelectedEntity) {
 										wasUsing = false;
@@ -346,8 +349,13 @@ namespace PAIN {
 										originalMatrix = modelMatrix;
 									}
 
+									// Get RigidBody ID for selected object if it has one
+									auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+
 									// Currently manipulating
 									if (isCurrentlyUsing) {
+										
+
 										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
 											float translation[3], rotation[3], scale[3];
 											ImGuizmo::DecomposeMatrixToComponents(
@@ -360,6 +368,23 @@ namespace PAIN {
 											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
 											transform.rotation = cachedRotation;
 											transform.scale = cachedScale;
+
+											// If object has RigidBody3D, it is a physics object, disable physics temporarily
+											if (rbOpt.has_value()) {
+												auto& rb = rbOpt.value().get();
+												auto physics_system = ecs->getSystem<Physics::System>();
+
+												if (physics_system) {
+													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+													body_interface.DeactivateBody(rb.bodyID);
+													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+
+													JPH::RVec3 pos(transform.position.x, transform.position.y, transform.position.z);
+
+													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
+												}
+											}
 										}
 										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
 											float translation[3], rotation[3], scale[3];
@@ -392,6 +417,23 @@ namespace PAIN {
 
 											transform.position = cachedPosition;
 											transform.scale = cachedScale;
+
+											if (rbOpt.has_value()) {
+												auto& rb = rbOpt.value().get();
+												auto physics_system = ecs->getSystem<Physics::System>();
+
+												if (physics_system) {
+													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+													// Disable physics temporarily
+													body_interface.DeactivateBody(rb.bodyID);
+													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+
+													JPH::Quat rot(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+
+													body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
+												}
+											}
 										}
 										else if (m_GizmoOperation == ImGuizmo::SCALE) {
 											float translation[3], rotation[3], scale[3];
@@ -405,6 +447,8 @@ namespace PAIN {
 											transform.position = cachedPosition;
 											transform.rotation = cachedRotation;
 											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+
+											// Jolt does not allow run-time scale changing.
 										}
 									}
 
@@ -434,12 +478,22 @@ namespace PAIN {
 										else if (m_GizmoOperation == ImGuizmo::SCALE) {
 											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
 										}
+
+										// Reactivate physics for physics object
+										if (rbOpt.has_value()) {
+											auto& rb = rbOpt.value().get();
+											auto physics_system = ecs->getSystem<Physics::System>();
+											JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+											// Set back to dynamic (or whatever it was before)
+											body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
+
+											// Optional: ensure the body is awake
+											body_interface.ActivateBody(rb.bodyID);
+										}
 									}
 
 									wasUsing = isCurrentlyUsing;
-
-
-
 
 								}
 							}
