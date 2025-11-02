@@ -23,9 +23,9 @@ namespace PAIN {
 		void onUpdate(AppTiming timing) override;
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
-        void beginTouchLook(int pointerId, float x, float y);
-        void updateTouchLook(int pointerId, float x, float y);
-        void endTouchLook(int pointerId);
+        void beginTouchControls(int pointerId, float x, float y);
+        void updateTouchControls(int pointerId, float x, float y);
+        void endTouchControls(int pointerId);
 
 		// Camera Controls
 		bool W_KEYDOWN = false;

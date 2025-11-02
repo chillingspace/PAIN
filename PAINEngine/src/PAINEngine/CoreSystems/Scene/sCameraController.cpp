@@ -11,7 +11,7 @@ namespace PAIN {
 
 	}
 
-    void sCameraController::beginTouchLook(int pointerId, float x, float y) {
+    void sCameraController::beginTouchControls(int pointerId, float x, float y) {
 
         float screen_center = m_surfaceWidth / 2.f;
 		if (x >= screen_center){
@@ -36,20 +36,21 @@ namespace PAIN {
 
     }
 
-    void sCameraController::updateTouchLook(int pointerId, float x, float y) {
+    void sCameraController::updateTouchControls(int pointerId, float x, float y) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
-            // Match desktop: yOffset = lastY - y so drag up looks up
+            // yOffset = lastY - y so drag up looks up
             xOffset += (x - m_touchLastX);
             yOffset += (m_touchLastY - y);
             m_touchLastX = x;
             m_touchLastY = y;
         }
         if (m_move.active && pointerId == m_move.id){
+			// acts as a jpy stick
             // Compute vector from stick center to current
             float dx = x - m_move.start_x;
             float dy = y - m_move.start_y;
 
-            // Deadzone
+            // if the touch is back at the origin don't move
             float len = sqrtf(dx*dx + dy*dy);
             if (len < m_moveDeadzonePx) {
                 dx = 0.f; dy = 0.f; len = 0.f;
@@ -71,16 +72,13 @@ namespace PAIN {
             m_move.last_y = y;
 
             // Save the normalized vector for onUpdate movement this frame.
-            // Easiest: directly move position here using dt and speed.
-            // But since dt is only available in onUpdate, cache nx/ny in members or
-            // move here and pass dt from your input path. Simpler: store nx/ny now:
             m_cachedMoveX = nx;
             m_cachedMoveY = ny;
         }
 
     }
 
-    void sCameraController::endTouchLook(int pointerId) {
+    void sCameraController::endTouchControls(int pointerId) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
             m_touchLooking = false;
             m_touchPointerId = -1;
@@ -312,19 +310,19 @@ namespace PAIN {
 			});
 #else
         dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
-            beginTouchLook(e.getPointerId(), e.getX(), e.getY());
+            beginTouchControls(e.getPointerId(), e.getX(), e.getY());
             return true;
         });
         dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-            updateTouchLook(e.getPointerId(), e.getX(), e.getY());
+            updateTouchControls(e.getPointerId(), e.getX(), e.getY());
             return true;
         });
         dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
-            endTouchLook(e.getPointerId());
+            endTouchControls(e.getPointerId());
             return true;
         });
         dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
-            endTouchLook(e.getPointerId());
+            endTouchControls(e.getPointerId());
             return true;
         });
 
