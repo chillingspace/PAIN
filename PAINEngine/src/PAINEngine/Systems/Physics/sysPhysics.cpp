@@ -2,8 +2,8 @@
  * \file   sysPhysics.cpp
  * \brief  Definition of physics system states
  *
- * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
- * \co-author
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (5%)
+ * \co-author Ong Jun Han, Benjamin, 2301532, o.junhanbenjamin@digipen.edu (95%)
  * \date   September 2025
  * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
@@ -14,9 +14,11 @@
 static constexpr float PI = 3.14159265358979323846f;
 
 namespace PAIN {
-
+	
+	// To-do for ben: add proper documentation
 	namespace Physics {
 
+		// Jolt Physics setup
 		void System::joltSetup()
 		{
 			// Important: Follow the setup order below, otherwise creating bodies will crash if any step is missed

@@ -14,6 +14,7 @@
 
 #include "pch.h"
 
+// To-do for ben: add proper documentation
 namespace NIKE {
 	namespace Layer {
 

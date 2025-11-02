@@ -22,6 +22,7 @@ using namespace glm;
 
 namespace PAIN {
 
+	// To-do for ben: add proper documentation
 	namespace Physics {
 
 		class System : public ECS::System::ISystem
