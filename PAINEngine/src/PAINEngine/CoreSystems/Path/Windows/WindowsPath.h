@@ -70,6 +70,8 @@ namespace PAIN {
 			WindowsPath() { init(); };
 			virtual ~WindowsPath() { destroy(); }
 
+			std::string getVirtualParentPath(std::string const& virtual_path) const override;
+
 			//Override functions from path interface
 			void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) override;
 			void updateVirtualPath(const std::string& alias, const std::string& path) override;

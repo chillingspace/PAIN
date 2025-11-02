@@ -67,6 +67,10 @@ namespace PAIN {
             //Original asset registry parsing logic
             for (auto it = json_package.begin(); it != json_package.end(); ++it) {
                 GUID guid = GUID(it.key());
+
+                //ensure GUID is valid
+                if (!guid.IsValid()) continue;
+
                 const auto& obj = it.value();
 
                 IAsset asset;

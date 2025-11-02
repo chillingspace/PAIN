@@ -17,36 +17,83 @@ namespace PAIN {
 			}
 		}
 
-		GUID Manager::findGUID(std::string const& name) const {
-			GUID guid;
+		Descriptor Manager::readDescriptor(std::filesystem::path const& relative_path) {
 
-			//Find asset guid
-			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second->name == name) {
-					guid = it->second->guid;
-				}
+			//Make an internal copy
+			auto relative = relative_path;
+
+			//Pre check
+			if (relative.extension() != Assets::descriptor_ext) {
+				relative += Assets::descriptor_ext;
 			}
 
-			return guid;
+			//Desc cache check
+			auto cacheIt = desc_cache.find(relative);
+			if (cacheIt != desc_cache.end())
+				return cacheIt->second;
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Ensure alias is always pointing to main asset folder
+			std::filesystem::path path = path_service->resolvePath(Path::main_assets_alias, relative.string());
+
+			//Check path exists
+			if (!std::filesystem::exists(path)) {
+				return Descriptor();
+			}
+
+			Descriptor desc = asset_compiler->readDescFile(path);
+			desc_cache.emplace(relative, desc); // store in cache
+			return desc;
 		}
 
-		GUID Manager::findGUID(std::filesystem::path const& relative_path) const {
-			GUID guid;
+		GUID Manager::findGUID(std::filesystem::path const& relative_path) {
+			
+			//Try reading desc file
+			auto desc = readDescriptor(relative_path);
+			if (desc.guid.IsValid()) return desc.guid;
 
-			//Find asset guid
-			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second->relative_path == relative_path) {
-					guid = it->second->guid;
-				}
-			}
+			//Return empty guid
+			return GUID();
 
-			return guid;
+			////Continue fallback searching
+			//GUID guid;
+
+			////Find asset guid
+			//for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
+			//	if (it->second->relative_path == relative_path) {
+			//		guid = it->second->guid;
+			//		return guid;
+			//	}
+			//}
+
+			//return guid;
 		}
 
 		void Manager::onAttach() {
 
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
 			//Create unique asset loader
 			asset_loader = std::make_unique<Loader>(services);
+
+#ifdef PN_PLATFORM_ANDROID
+			Platform platform = Platform::Android;
+#else
+			Platform platform = Platform::Windows;
+#endif
+
+			//Create unique asset compiler
+			asset_compiler = std::make_unique<Compiler>(path_service->resolvePath(Path::main_assets_alias, ""),
+														path_service->resolvePath(Path::assets_alias, ""),
+														platform, getExecutablePath());
+
+			//Create unique asset compiler
+			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
+														path_service->resolvePath(Path::assets_alias, ""),
+														platform, getExecutablePath());
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
@@ -107,6 +154,63 @@ namespace PAIN {
 			asset_loader = nullptr;
 		}
 
+		void Manager::registerAsset(std::filesystem::path const& relative_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Double check to ensure asset is not registered
+			if (checkAssetRegistered(findGUID(relative_path))) return;
+
+			//Process asset
+			auto asset = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
+
+			//Check to ensure that GUID is valid
+			if (!asset.guid.IsValid()) return;
+
+			//Get asset registry data
+			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
+		}
+
+		void Manager::registerAsset(std::shared_ptr<IAsset> asset) {
+
+			//Check to ensure that GUID is valid
+			if (!asset->guid.IsValid()) return;
+
+			//Get asset registry data
+			asset_registry[asset->guid] = asset;
+		}
+
+		void Manager::unregisterAsset(GUID const& id) {
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				registry_it = asset_registry.erase(registry_it);
+			}
+		}
+
+		bool Manager::checkAssetRegistered(GUID const& id) const {
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				return true;
+			}
+
+			return false;
+		}
+
+		bool Manager::checkAssetRegistered(std::filesystem::path const& relative_path) {
+
+			//Find GUID
+			auto id = findGUID(relative_path);
+
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				return true;
+			}
+
+			return false;
+		}
+
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 
 			//Get asset registry data
@@ -133,6 +237,24 @@ namespace PAIN {
 			return asset;
 		}
 
+		void Manager::batchCacheAssets(std::vector<GUID> batch_ids) {
+
+			//Get all batch ids
+			for (auto id : batch_ids) {
+
+				//check registration
+				if (checkAssetRegistered(id)) {
+
+					//Check asset cache
+					if (!checkAssetCached(id)) {
+						
+						//Cache asset
+						cacheAsset(id);
+					}
+				}
+			}
+		}
+
 		void Manager::uncacheAsset(GUID const& id) {
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
@@ -149,7 +271,16 @@ namespace PAIN {
 			return cacheAsset(id);
 		}
 
-		//Find asset type
+		bool Manager::checkAssetCached(GUID const& id) const {
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				return true;
+			}
+
+			return false;
+		}
+
 		std::shared_ptr<IAsset> Manager::getAssetData(GUID const& id) const {
 			//Get asset registry data
 			auto registry_it = asset_registry.find(id);
@@ -159,28 +290,8 @@ namespace PAIN {
 
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
-
-		std::shared_ptr<IAsset> Manager::getAssetData(std::string const& name) const {
-
-			//Find GUID
-			auto id = findGUID(name);
-
-			//Check if GUID is valid
-			if (!id.IsValid()) {
-				//Asset doesnt exist in registry
-				throw std::runtime_error("Invalid GUID.");
-			}
-
-			//Get asset registry data
-			auto registry_it = asset_registry.find(id);
-			if (registry_it == asset_registry.end()) {
-				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
-			}
-
-			return std::make_shared<IAsset>(*registry_it->second);
-		}
 		
-		std::shared_ptr<IAsset> Manager::getAssetData(std::filesystem::path const& relative_path) const {
+		std::shared_ptr<IAsset> Manager::getAssetData(std::filesystem::path const& relative_path) {
 			//Find GUID
 			auto id = findGUID(relative_path);
 
@@ -199,6 +310,24 @@ namespace PAIN {
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
+#ifdef _DEBUG
+		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const {
+
+			//Move file
+			if (asset_organizer->moveFile(from, to)) {
+
+				//Update asset info
+			}
+		}
+
+		void Manager::removeFile(std::filesystem::path const& file_path) const {
+
+			//Remove file
+			if (asset_organizer->removeFile(file_path)) {
+
+			}
+		}
+#endif
 		// ----------------------------
 		// Asset Service 
 		// ----------------------------

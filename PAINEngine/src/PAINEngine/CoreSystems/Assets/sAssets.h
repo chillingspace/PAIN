@@ -7,8 +7,8 @@
 
 #include "AssetTypes.h"
 #include "AssetLoader.h"
-
-
+#include "AssetOrganizer.h"
+#include "AssetCompiler.h"
 
 namespace PAIN {
     namespace Assets {
@@ -22,64 +22,46 @@ namespace PAIN {
 			//Asset cache
 			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_cache;
 
-			//Asset compiler
+			//Descriptor cache
+			std::unordered_map<std::filesystem::path, Descriptor> desc_cache;
+
+			//Asset loader
 			std::unique_ptr<Loader> asset_loader;
+
+			//Asset Organizer
+			std::unique_ptr<Organizer> asset_organizer;
+
+			//Asset compiler
+			std::unique_ptr<Compiler> asset_compiler;
 
 			//Log asset registry
 			void logAssetRegistry() const;
 
-			//Internal finding of guid
-			GUID findGUID(std::string const& name) const;
-			GUID findGUID(std::filesystem::path const& relative_path) const;
+			//Read descriptors
+			Descriptor readDescriptor(std::filesystem::path const& relative_path);
 		public:
 
 			Manager() = default;
 
 			virtual ~Manager() = default;
 
+			//Internal finding of guid
+			GUID findGUID(std::filesystem::path const& relative_path);
+
+			//Register asset
+			void registerAsset(std::filesystem::path const& relative_path);
+			void registerAsset(std::shared_ptr<IAsset> asset);
+
+			//Unregister asset
+			void unregisterAsset(GUID const& id);
+
+			//Check asset registered
+			bool checkAssetRegistered(std::filesystem::path const& relative_path);
+			bool checkAssetRegistered(GUID const& id) const;
+
 			//Get asset
 			template <typename T>
 			std::shared_ptr<T> getAsset(GUID const& id) {
-
-				//Check if GUID is valid
-				if (!id.IsValid()) {
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Invalid GUID.");
-				}
-
-				//Check if asset register has id
-				if (asset_registry.find(id) == asset_registry.end()) {
-
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Asset doesn't exist in registry.");
-				}
-
-				//Asset template
-				std::shared_ptr<IAsset> asset;
-
-				//Search asset cache
-				auto it = asset_cache.find(id);
-				if (it == asset_cache.end()) {
-
-					//Cache asset
-					asset = cacheAsset(id);
-				}
-				else {
-					asset = it->second;
-				}
-
-				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
-				if (!typed_asset) {
-					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
-				}
-				return typed_asset;
-			}
-
-			template <typename T>
-			std::shared_ptr<T> getAsset(std::string const& name) {
-
-				//Find GUID
-				auto id = findGUID(name);
 
 				//Check if GUID is valid
 				if (!id.IsValid()) {
@@ -155,16 +137,29 @@ namespace PAIN {
 				return typed_asset;
 			}
 
+			//Caching of assets
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
+			void batchCacheAssets(std::vector<GUID> batch_ids);
 			void uncacheAsset(GUID const& id);
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+			bool checkAssetCached(GUID const& id) const;
 
 			//Find asset type
 			std::shared_ptr<IAsset> getAssetData(GUID const& id) const;
-			std::shared_ptr<IAsset> getAssetData(std::string const& name) const;
-			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path) const;
+			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path);
 
-			// AppSystem overrides
+#ifdef _DEBUG
+
+			//Debug only editor mode functions
+
+			//Move file function
+			void moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const;
+
+			//Delete file function
+			void removeFile(std::filesystem::path const& file_path) const;
+#endif
+
+			//AppSystem overrides
 			void onAttach() override;
 			void onUpdate(AppTiming timing) override {}
 			void onDetach() override;

@@ -68,27 +68,63 @@ namespace PAIN {
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
             // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
-            std::filesystem::path project_root = std::filesystem::current_path().parent_path().parent_path();
+            std::filesystem::path project_root = Assets::findProjectRoot();
             std::string project_root_str = normalizePath(project_root.string());
 
             //Register default virtual paths
             registerVirtualPath("out", out_path);
 
             //Temp paths to be changed
-            registerVirtualPath("assets", out_path + "/assets", true);
-            registerVirtualPath("game_assets", out_path + "/assets/" + relative_game_folder, true);
-            registerVirtualPath("engine_assets", out_path + "/assets/" + relative_engine_folder, true);
-            registerVirtualPath("local", localdata_path + "/" + app_name, true);
-            registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
-            registerVirtualPath("documents", documents_path + "/" + app_name, true);
-            registerVirtualPath("temp", localdata_path + "/" + app_name + "/temp", true);
-            registerVirtualPath("main_game_assets", project_root_str + "/assets/" + relative_game_folder, false);
-            registerVirtualPath("config", project_root_str + "/Config", false);
-            registerVirtualPath("main_engine_assets", project_root_str + "/assets/" + relative_engine_folder, false);
+            registerVirtualPath(main_assets_alias, project_root_str + "/assets", false);
+            registerVirtualPath(main_game_assets_alias, project_root_str + "/assets/" + relative_game_folder, false);
+            registerVirtualPath(main_engine_assets_alias, project_root_str + "/assets/" + relative_engine_folder, false);
+            registerVirtualPath(assets_alias, out_path + "/assets", true);
+            registerVirtualPath(game_assets_alias, out_path + "/assets/" + relative_game_folder, true);
+            registerVirtualPath(engine_assets_alias, out_path + "/assets/" + relative_engine_folder, true);
+            registerVirtualPath(local_alias, localdata_path + "/" + app_name, true);
+            registerVirtualPath(roaming_alias, roamingdata_path + "/" + app_name, true);
+            registerVirtualPath(documents_alias, documents_path + "/" + app_name, true);
+            registerVirtualPath(temp_alias, localdata_path + "/" + app_name + "/temp", true);
+            registerVirtualPath(config_alias, project_root_str + "/Config", false);
         }
 
         void WindowsPath::destroy() {
             virtual_paths.clear();
+        }
+
+        std::string WindowsPath::getVirtualParentPath(std::string const& virtual_path) const {
+
+            //Get alias
+            auto alias = getAlias(virtual_path);
+
+            //Get alias full path
+            std::filesystem::path alias_path = normalizePath(virtual_paths.at(alias));
+
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Get parent path
+            std::filesystem::path parent_path = normalizePath(actual_path.parent_path().string());
+
+            //Return parent path
+            if (parent_path != alias_path) {
+
+                //Check if iteration of parent path exceeds alias
+                if (parent_path.string().find(alias_path.string()) == std::string::npos) {
+                    return alias + getVirtualSymbol();
+                }
+
+                //Get relative path from parent path
+                std::string relative_path = parent_path.string().substr(alias_path.string().size() + 1);
+
+                //Convert parent path back to virtual path
+                return alias + getVirtualSymbol() + relative_path;
+            }
+            else {
+
+                //Return alias
+                return alias + getVirtualSymbol();
+            }
         }
 
         void WindowsPath::registerVirtualPath(const std::string& alias, const std::string& path, bool create_new) {

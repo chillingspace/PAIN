@@ -4,62 +4,10 @@
 #include <iostream>
 #include <filesystem>
 
-#ifdef _WIN32
-#include <windows.h>
-#elif __linux__ || __APPLE__
-#include <unistd.h>
-#include <limits.h>
-#endif
-
-static std::filesystem::path getExecutablePath() {
-#ifdef _WIN32
-    char buffer[MAX_PATH];
-    GetModuleFileNameA(NULL, buffer, MAX_PATH);
-    return std::filesystem::path(buffer).parent_path();
-#elif __linux__
-    char buffer[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-    if (len != -1) {
-        buffer[len] = '\0';
-        return std::filesystem::path(buffer).parent_path();
-    }
-    return std::filesystem::current_path();
-#else
-    return std::filesystem::current_path();
-#endif
-}
-
-static std::filesystem::path findProjectRoot() {
-    // Get the actual executable directory
-    std::filesystem::path execDir = getExecutablePath();
-
-    std::cout << "Executable directory: " << execDir << std::endl;
-
-    // Search upward from executable location
-    std::filesystem::path currentPath = execDir;
-
-    for (int levels = 0; levels < 10; levels++) {
-        std::filesystem::path assetsPath = currentPath / "assets";
-
-
-        if (std::filesystem::exists(assetsPath)) {
-            std::cout << "Found project root: " << currentPath << std::endl;
-            return currentPath;
-        }
-
-        currentPath = currentPath.parent_path();
-        if (currentPath.empty() || currentPath == currentPath.root_path()) {
-            break;
-        }
-    }
-
-    throw std::runtime_error("Could not find project root containing Assets/ directory");
-}
-
 int main(int argc, char* argv[]) {
 
-    std::filesystem::path input_path = findProjectRoot() / "assets";
-    std::filesystem::path output_path = findProjectRoot() / "bin/Debug/assets";
+    std::filesystem::path input_path = PAIN::Assets::findProjectRoot() / "assets";
+    std::filesystem::path output_path = PAIN::Assets::findProjectRoot() / "bin/Debug/assets";
     PAIN::Assets::Platform build_platform = PAIN::Assets::Platform::Windows;
 
     //Retrieve input and output directories
@@ -91,16 +39,16 @@ int main(int argc, char* argv[]) {
     }
 
 	//create assset compiler
-    PAIN::Assets::AssetOrganizer* compiler = new PAIN::Assets::AssetOrganizer(input_path, output_path, build_platform,getExecutablePath());
+    PAIN::Assets::Organizer* organizer = new PAIN::Assets::Organizer(input_path, output_path, build_platform, PAIN::Assets::getExecutablePath());
 
     //Enforce a standard structure for assets
-    compiler->enforceStandardStructure();
+    organizer->enforceStandardStructure();
 
     //Scan directory
-    compiler->scanAssetDirectories();
+    organizer->scanAssetDirectories();
 
     //Tidy up any additional directories
-    compiler->tidyUpDirectories();
+    organizer->tidyUpDirectories();
 
     //Output stamp file
     std::filesystem::path debug_file = output_path / "assetcompiler_stamp.txt";
@@ -114,5 +62,5 @@ int main(int argc, char* argv[]) {
     }
 
     //Clean up resource
-	delete compiler;
+	delete organizer;
 }
