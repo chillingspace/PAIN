@@ -13,6 +13,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
         run: .\build.bat
 
@@ -26,7 +28,7 @@ jobs:
           # Start the exe, wait 10s, kill if still running
           Start-Process .\Game.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Pain -ErrorAction SilentlyContinue
+          Stop-Process -Name Game -ErrorAction SilentlyContinue
         shell: pwsh
 
       - name: Build Release solution
@@ -38,7 +40,7 @@ jobs:
           cd ../bin/Release
           Start-Process .\Game.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Pain -ErrorAction SilentlyContinue
+          Stop-Process -Name Game -ErrorAction SilentlyContinue
         shell: pwsh
 
 
