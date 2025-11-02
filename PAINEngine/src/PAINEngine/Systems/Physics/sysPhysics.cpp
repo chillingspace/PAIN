@@ -142,7 +142,8 @@ namespace PAIN {
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
-					const glm::quat& q = transform.rotation;
+					const glm::quat q = glm::normalize(transform.rotation); // Normalize to avoid scaling issues
+
 					JPH::Quat rotationQuat(q.x, q.y, q.z, q.w); // Jolt uses x, y, z, w order
 
 					// Create Jolt body settings
