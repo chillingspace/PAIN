@@ -111,7 +111,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
             j["angular_velocity"] = rb.angular_velocity;
             j["mass"] = rb.mass;
             // Store as uint32
-			// j["bodyID"] = rb.bodyID.GetIndexAndSequenceNumber(); // Don't read bodyID from previous session
+            j["bodyID"] = rb.bodyID.GetIndexAndSequenceNumber(); 
             j["is_dynamic"] = rb.b_is_dynamic;
         }
         
@@ -122,7 +122,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
             
             // Reconstruct BodyID from stored value
             uint32_t bodyIDValue = j["bodyID"].get<uint32_t>();
-			rb.bodyID = JPH::BodyID(); // Don't save BodyID, Jolt will assign a new one when creating the body
+            rb.bodyID = JPH::BodyID(bodyIDValue);
             
             rb.b_is_dynamic = j["is_dynamic"].get<bool>();
         }
