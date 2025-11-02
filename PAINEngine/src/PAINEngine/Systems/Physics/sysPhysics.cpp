@@ -96,6 +96,7 @@ namespace PAIN {
 			if (temp_allocator && job_system && jolt_physics)
 			{
 				syncNewBodies(registry);
+
 				jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
 
 				auto view = registry.view<Transform, Physics::RigidBody3D>();
@@ -142,7 +143,7 @@ namespace PAIN {
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
-					const glm::quat& q = glm::normalize(transform.rotation);
+					const glm::quat& q = glm::normalize(transform.rotation); // Normalize to avoid ASSERT
 
 					JPH::Quat rotationQuat(q.x, q.y, q.z, q.w); // Jolt uses x, y, z, w order
 
