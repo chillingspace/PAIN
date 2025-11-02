@@ -521,9 +521,14 @@ namespace PAIN {
 						ImGuiIO& io = ImGui::GetIO();
 						auto camera = services->get<sCameraController>();
 
-						if (camera) {
-							bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right) && contentHovered;
 
+						if (camera) {
+							
+							#ifdef PN_PLATFORM_WINDOWS
+							bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right) && contentHovered;
+							#else
+							bool rightMouseHeld = true;
+							#endif 
 							if (rightMouseHeld) {
 								camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
 								camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
@@ -540,8 +545,12 @@ namespace PAIN {
 							camera->mouseButtonDown = rightMouseHeld;
 
 							if (camera->mouseButtonDown) {
+
+
+								#ifdef PN_PLATFORM_WINDOWS
 								camera->xOffset = io.MouseDelta.x;
 								camera->yOffset = io.MouseDelta.y;
+								#endif
 							}
 							else {
 								camera->xOffset = 0.0f;

@@ -252,7 +252,6 @@ namespace PAIN {
             }
 #endif
 
-            // ... rest of the function
 
 
             if (editor_visible) {
