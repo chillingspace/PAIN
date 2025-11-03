@@ -56,19 +56,6 @@ namespace PAIN {
 
 			//Return empty guid
 			return GUID();
-
-			////Continue fallback searching
-			//GUID guid;
-
-			////Find asset guid
-			//for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-			//	if (it->second->relative_path == relative_path) {
-			//		guid = it->second->guid;
-			//		return guid;
-			//	}
-			//}
-
-			//return guid;
 		}
 
 		void Manager::onAttach() {
@@ -88,12 +75,12 @@ namespace PAIN {
 			//Create unique asset compiler
 			asset_compiler = std::make_unique<Compiler>(path_service->resolvePath(Path::main_assets_alias, ""),
 														path_service->resolvePath(Path::assets_alias, ""),
-														platform, findProjectRoot() / "build/Tools");
+														platform, getExecutablePath());
 
 			//Create unique asset compiler
 			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
 														path_service->resolvePath(Path::assets_alias, ""),
-														platform, findProjectRoot() / "build/Tools");
+														platform, getExecutablePath());
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
