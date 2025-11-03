@@ -93,8 +93,20 @@ namespace PAIN {
             // Crash is happening in create file stream
             auto stream = path_service->createFileStream(file_path, Path::FileMode::Read);
 
-            if (!stream || !stream->good() || stream->size() == 0) {
+            // Check if unique_ptr is null
+            if (!stream) {
+                PN_CORE_ERROR("Failed to create file stream: {}", file_path);
+                return j;
+            }
+
+            if (!stream->good()) {
                 PN_CORE_ERROR("Could not open scene file for JSON: {}", file_path);
+                return j;
+            }
+
+            // Check if file is empty
+            if (stream->size() == 0) {
+                PN_CORE_ERROR("JSON file is empty: {}", file_path);
                 return j;
             }
 
@@ -102,14 +114,28 @@ namespace PAIN {
             contents.resize(stream->size());
             stream->read(contents.data(), contents.size());
 
+            // Validate JSON syntax before parsing
+            if (!nlohmann::json::accept(contents)) {
+                PN_CORE_ERROR("Invalid JSON syntax: {}", file_path);
+                return j;
+            }
+
             try {
                 j = nlohmann::json::parse(contents);
+
+                if (!j.is_object()) {
+                    PN_CORE_WARN("JSON root is not an object: {}", file_path);
+                }
+            }
+            catch (const nlohmann::json::exception& e) {
+                PN_CORE_ERROR("JSON parse exception: {} - File: {}", e.what(), file_path);
             }
             catch (...) {
-                PN_CORE_ERROR("Failed to parse JSON: {}", file_path);
-                // Leave empty
+                PN_CORE_ERROR("Unknown error parsing JSON: {}", file_path);
             }
-            PN_CORE_INFO("Load file {}", file_path);
+
+
+            PN_CORE_INFO("Successfully Load file {}", file_path);
             return j;
         }
 
