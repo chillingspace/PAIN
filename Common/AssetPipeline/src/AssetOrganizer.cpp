@@ -47,7 +47,12 @@ namespace PAIN {
 
         bool Organizer::removeFile(std::filesystem::path const& file_path) const {
             //Reposition asset into the right directory
-            if (deleteFile(file_path)) {
+            if (!std::filesystem::exists(file_path) || deleteFile(file_path)) {
+
+                //Identify if there are lagging files
+                if (std::filesystem::is_directory(file_path)) {
+                    return true;
+                }
 
                 //Update lagging desc files if there are any
                 auto lagging_desc = assets_root / std::filesystem::relative(file_path, assets_root).parent_path() / (file_path.string() + desc_ext);
@@ -63,12 +68,17 @@ namespace PAIN {
 
         bool Organizer::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const {
             //Reposition asset into the right directory
-            if (repositionFile(from, to)) {
+            if ((!std::filesystem::exists(from) && std::filesystem::exists(to)) || repositionFile(from, to)) {
+
+                //Identify if there are lagging files
+                if (std::filesystem::is_directory(from)) {
+                    return true;
+                }
 
                 //Update lagging desc files if there are any
-                auto lagging_desc = assets_root / std::filesystem::relative(from, assets_root).parent_path() / (from.string() + desc_ext);
+                auto lagging_desc = assets_root / std::filesystem::relative(from, assets_root).parent_path() / (from.filename().string() + desc_ext);
                 if (std::filesystem::exists(lagging_desc)) {
-                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (from.string() + desc_ext);
+                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (from.filename().string() + desc_ext);
                     repositionFile(lagging_desc, target_desc);
                 }
 
@@ -80,12 +90,12 @@ namespace PAIN {
 
         bool Organizer::moveFile(Info& asset, std::filesystem::path const& to) const {
             //Reposition asset into the right directory
-            if (repositionFile(asset.raw_path, to)) {
+            if ((!std::filesystem::exists(asset.raw_path) && std::filesystem::exists(to)) || repositionFile(asset.raw_path, to)) {
 
                 //Update lagging desc files if there are any
-                auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.filename().string() + desc_ext);
                 if (std::filesystem::exists(lagging_desc)) {
-                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (asset.raw_path.string() + desc_ext);
+                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (asset.raw_path.filename().string() + desc_ext);
                     repositionFile(lagging_desc, target_desc);
                 }
 

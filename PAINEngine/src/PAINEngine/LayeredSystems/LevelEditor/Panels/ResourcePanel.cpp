@@ -44,17 +44,18 @@ namespace PAIN {
 				//Drop target
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "_FILE").c_str())) {
-						////Get asset ID
-						//std::string asset_id(static_cast<const char*>(payload->Data));
+						//Get asset ID
+						File* file(static_cast<File*>(payload->Data));
 
-						////Craft the destination path
-						//std::filesystem::path dest_path = PN_PATH_SERVICE->resolvePath(virtual_path) / asset_id;
+						//Rename asset
+						asset_service->moveFile(file->path, path_service->resolvePath(virtual_path + "/" + file->file_name));
+					}
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "DIR").c_str())) {
+						//Get asset ID
+						Dir* dir(static_cast<Dir*>(payload->Data));
 
-						////Copy file
-						//std::filesystem::rename(PN_ASSETS_SERVICE->getAssetPath(asset_id), dest_path);
-
-						////Update files
-						//files = PN_PATH_SERVICE->listFiles(current_path);
+						//Rename asset
+						asset_service->moveFile(dir->path, path_service->resolvePath(virtual_path + "/" + dir->file_name));
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -124,11 +125,11 @@ namespace PAIN {
 					Dir temp;
 
 					//Instantiate file system
-					std::filesystem::path dir_path = dir;
+					temp.path = dir;
 
 					//Get root folder path
 					static std::filesystem::path root = path_service->resolvePath(root_path);
-					temp.relative_path = std::filesystem::relative(dir_path, root);
+					auto relative = std::filesystem::relative(temp.path, root);
 
 					//Get display icon
 					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
@@ -137,7 +138,7 @@ namespace PAIN {
 					temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
 
 					//Instantiate name
-					temp.file_name = temp.relative_path.filename().string();
+					temp.file_name = relative.filename().string();
 
 					//Add this to file vector
 					directories.push_back(temp);
@@ -157,20 +158,20 @@ namespace PAIN {
 					File temp;
 
 					//Instantiate file system
-					std::filesystem::path file_path = file;
+					temp.path = file;
 
 					//Get root folder path
 					static std::filesystem::path root = path_service->resolvePath(root_path);
-					temp.relative_path = std::filesystem::relative(file_path, root);
+					auto relative = std::filesystem::relative(temp.path, root);
 
 					//Find asset GUID
-					temp.id = asset_service->findGUID(temp.relative_path);
+					temp.id = asset_service->findGUID(relative);
 
 					//Get display icon
-					temp.icon = fileIcon(temp.relative_path);
+					temp.icon = fileIcon(relative);
 
 					//Instantiate name
-					temp.file_name = temp.relative_path.filename().string();
+					temp.file_name = relative.filename().string();
 
 					//Add this to file vector
 					files.push_back(temp);
@@ -276,6 +277,22 @@ namespace PAIN {
 					ImGui::PopStyleColor();
 					moveFileAcceptPayload(virtual_path + '/' + dir.file_name);
 
+					//Start drag-and-drop source ( Disable drag for desc files )
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+						//Static copy of payload
+						static Dir dir_copy;
+						dir_copy = dir;
+
+						//Set drag payload with asset name
+						ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
+
+						//Render the icon or name at the cursor during dragging
+						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
+						ImGui::TextWrapped(dir_copy.file_name.c_str());
+						ImGui::EndDragDropSource();
+					}
+
 					//Display directory name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
 					ImGui::TextWrapped(dir.file_name.c_str());
@@ -300,7 +317,7 @@ namespace PAIN {
 					}
 
 					//Check path is desc
-					if (file.relative_path.extension() == Assets::descriptor_ext && !b_show_desc_files) {
+					if (file.path.extension() == Assets::descriptor_ext && !b_show_desc_files) {
 						continue;
 					}
 
@@ -327,16 +344,23 @@ namespace PAIN {
 					}
 					ImGui::PopStyleColor();
 
-					//Start drag-and-drop source
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-						//auto filetype_string = Assets::getTypeStringMapping().at(asset_service->getAssetData(file_guid)->type);
-						////Set drag payload with asset name
-						//ImGui::SetDragDropPayload(std::string(filetype_string + "_FILE").c_str(), /*file_path.filename().string().c_str()*/, file_path.filename().string().size() + 1);
-						//payload_typestring = filetype_string;
+					//Start drag-and-drop source ( Disable drag for desc files )
+					if (file.path.extension() != Assets::descriptor_ext && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
-						////Render the icon or name at the cursor during dragging
-						//ImGui::Image(icon, { 64, 64 }, uv0, uv1);
-						//ImGui::TextWrapped(file_path.filename().string().c_str());
+						//Get file type string
+						auto filetype_string = Assets::getTypeStringMapping().at(asset_service->getAssetData(file.id)->type);
+
+						//Static copy of payload
+						static File file_copy;
+						file_copy = file;
+
+						//Set drag payload with asset name
+						ImGui::SetDragDropPayload(std::string(filetype_string + "_FILE").c_str(), &file_copy, sizeof(file_copy) + 1);
+						payload_typestring = filetype_string;
+
+						//Render the icon or name at the cursor during dragging
+						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
+						ImGui::TextWrapped(file.file_name.c_str());
 						ImGui::EndDragDropSource();
 					}
 
@@ -719,7 +743,6 @@ namespace PAIN {
 				//	}
 				//});
 			}
-
 
 			void ResourcePanel::render() {
 

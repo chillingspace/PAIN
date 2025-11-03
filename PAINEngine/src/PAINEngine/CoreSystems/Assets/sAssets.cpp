@@ -182,6 +182,13 @@ namespace PAIN {
 		}
 
 		void Manager::unregisterAsset(GUID const& id) {
+
+			//Find cache it and uncache
+			auto cahce_it = asset_cache.find(id);
+			if (cahce_it != asset_cache.end()) {
+				cahce_it = asset_cache.erase(cahce_it);
+			}
+
 			//Get asset registry data
 			auto registry_it = asset_registry.find(id);
 			if (registry_it != asset_registry.end()) {
@@ -314,18 +321,13 @@ namespace PAIN {
 		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const {
 
 			//Move file
-			if (asset_organizer->moveFile(from, to)) {
-
-				//Update asset info
-			}
+			asset_organizer->moveFile(from, to);
 		}
 
 		void Manager::removeFile(std::filesystem::path const& file_path) const {
 
 			//Remove file
-			if (asset_organizer->removeFile(file_path)) {
-
-			}
+			asset_organizer->removeFile(file_path);
 		}
 #endif
 		// ----------------------------

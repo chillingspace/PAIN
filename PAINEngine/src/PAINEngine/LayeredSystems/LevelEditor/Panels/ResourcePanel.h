@@ -57,12 +57,12 @@ namespace PAIN {
                 // File & Directory
                 // ----------------------------
                 struct Dir {
-                    std::filesystem::path relative_path;
+                    std::filesystem::path path;
                     ImTextureID icon;
                     std::string file_name;
                 };
                 struct File {
-                    std::filesystem::path relative_path;
+                    std::filesystem::path path;
                     Assets::GUID id;
                     ImTextureID icon;
                     std::string file_name;
