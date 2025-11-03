@@ -56,16 +56,22 @@ namespace PAIN {
                 // ----------------------------
                 // File & Directory
                 // ----------------------------
+                struct Dir {
+                    std::filesystem::path relative_path;
+                    ImTextureID icon;
+                    std::string file_name;
+                };
                 struct File {
                     std::filesystem::path relative_path;
                     Assets::GUID id;
                     ImTextureID icon;
                     std::string file_name;
                 };
-                std::vector<std::string> directories; //Directories
+                std::vector<Dir> directories; //Directories
                 std::vector<File> files; //Files
 
                 //Function to population files
+                void populateDirs(std::string const& virtual_path);
                 void populateFiles(std::string const& virtual_path);
 
 
