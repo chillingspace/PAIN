@@ -18,17 +18,13 @@ jobs:
       - name: Build Windows (build.bat)
         run: .\build.bat
 
-      - name: List full directory tree in PowerShell
-        run: Get-ChildItem -Path . -Recurse
-        shell: pwsh
-
       - name: Build Debug solution
         run: |
           cd build
           msbuild pain.sln /p:Configuration=Debug
       - name: Run Debug executable and test for leaks/crashes
         run: |
-          cd ../bin/Debug
+          cd bin/Debug
           # Start the exe, wait 10s, kill if still running
           Start-Process .\Game.exe
           Start-Sleep -Seconds 10
@@ -41,7 +37,7 @@ jobs:
           msbuild pain.sln /p:Configuration=Release
       - name: Run Release executable and test for crashes
         run: |
-          cd ../bin/Release
+          cd bin/Release
           Start-Process .\Game.exe
           Start-Sleep -Seconds 10
           Stop-Process -Name Game -ErrorAction SilentlyContinue
