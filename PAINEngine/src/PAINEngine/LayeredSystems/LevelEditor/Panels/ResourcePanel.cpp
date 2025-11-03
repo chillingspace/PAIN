@@ -193,19 +193,25 @@ namespace PAIN {
 			}
 
 			void ResourcePanel::DrawDirectoryTree(std::string const& virtual_dir) {
+
+				//Populat directory cache
+				populateDirectoryCache(virtual_dir);
+				bool has_children = !directoryCache[virtual_dir].empty();
+
 				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
+				if (!has_children)
+					node_flags |= ImGuiTreeNodeFlags_Leaf;
 				bool is_selected = (virtual_dir == current_path);
 				if (is_selected) node_flags |= ImGuiTreeNodeFlags_Selected;
 
 				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
 				bool open = ImGui::TreeNodeEx(dir.filename().string().c_str(), node_flags);
-				if (ImGui::IsItemClicked()) {
+				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					current_path = virtual_dir;
 					populateDirs(current_path);
 					populateFiles(current_path);
 				}
 				if (open) {
-					populateDirectoryCache(virtual_dir);
 					for (const std::string& subdir : directoryCache[virtual_dir]) {
 						DrawDirectoryTree(subdir);
 					}
