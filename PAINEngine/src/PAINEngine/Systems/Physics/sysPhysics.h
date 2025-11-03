@@ -45,6 +45,8 @@ namespace PAIN {
 
 			void create_floor();
 
+			void applyBounce(entt::registry&, entt::entity, float jumpImpulse);
+
 			// Getters
 			JPH::PhysicsSystem* GetPhysicsSystem() const { return jolt_physics.get(); }
 			JPH::BodyInterface& GetBodyInterface() { return jolt_physics->GetBodyInterface(); }
