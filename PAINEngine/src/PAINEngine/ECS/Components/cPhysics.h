@@ -36,7 +36,7 @@ namespace PAIN {
 			glm::f32vec3 velocity;
 			glm::f32vec3 angular_velocity;
 			glm::f32 mass;
-			JPH::BodyID bodyID;
+			JPH::BodyID bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
 			bool b_is_dynamic;
 		};
 	}

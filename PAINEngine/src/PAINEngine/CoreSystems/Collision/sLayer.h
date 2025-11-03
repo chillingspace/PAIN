@@ -15,7 +15,7 @@
 #include "pch.h"
 
 // To-do for ben: add proper documentation
-namespace NIKE {
+namespace PAIN {
 	namespace Layer {
 
 		static constexpr JPH::ObjectLayer UNUSED1 = 0; // 4 unused values so that broadphase layers values don't match with object layer values (for testing purposes)
