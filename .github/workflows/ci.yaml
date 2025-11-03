@@ -24,7 +24,7 @@ jobs:
       - name: Run Debug executable and test for leaks/crashes
         run: |
           cd bin/Debug
-          $process = Start-Process .\Game.exe -PassThru -RedirectStandardError leak_report.txt
+          $process = Start-Process .\Game.exe -PassThru -RedirectStandardError leak_report.txt -EnvironmentVariables @{ "CI" = "1" }
           
           # Wait up to 10 seconds
           $timeout = 10
@@ -34,17 +34,17 @@ jobs:
             $elapsed++
           }
           
-          # Force kill if still running after timeout
+          # Force kill if still running
           if (!$process.HasExited) {
             Stop-Process -Id $process.Id -Force
           }
           
-          # Wait for process to fully exit
           Wait-Process -Id $process.Id -ErrorAction SilentlyContinue
           
-          # Check exit code for crashes (non-zero = crash/error)
-          if ($process.ExitCode -ne 0 -and $process.ExitCode -ne $null) {
-            Write-Error "Application crashed with exit code: $($process.ExitCode)"
+          # Check for early crashes (before timeout)
+          if ($elapsed -lt $timeout -and $process.ExitCode -ne 0) {
+            Write-Error "Application crashed early with exit code: $($process.ExitCode)"
+            Get-Content leak_report.txt -ErrorAction SilentlyContinue
             exit 1
           }
           
@@ -56,8 +56,11 @@ jobs:
               exit 1
             }
           }
+          
+          Write-Host "Debug build test completed successfully"
         shell: pwsh
-        
+
+
       - name: Build Release solution
         run: |
           cd build
