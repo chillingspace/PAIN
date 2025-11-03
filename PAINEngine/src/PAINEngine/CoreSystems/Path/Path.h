@@ -8,6 +8,32 @@
 namespace PAIN {
 	namespace Path {
 
+		//Global alias
+		static std::string assets_alias = "assets";
+		static std::string game_assets_alias = "game_assets";
+		static std::string engine_assets_alias = "engine_assets";
+
+#ifdef PN_PLATFORM_WINDOWS
+		//Platform specific alias
+		static std::string main_assets_alias = "main_assets";
+		static std::string main_game_assets_alias = "main_game_assets";
+		static std::string main_engine_assets_alias = "main_engine_assets";
+		static std::string local_alias = "local";
+		static std::string roaming_alias = "roaming";
+		static std::string documents_alias = "documents";
+		static std::string temp_alias = "temp";
+		static std::string config_alias = "config";
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+		//Platform specific alias
+		static std::string internal_alias = "internal";
+		static std::string external_alias = "external";
+		static std::string cache_alias = "cache";
+		static std::string temp_alias = "temp";
+#endif
+
+
 		//Different file modes
 		enum class FileMode {
 			Read,
@@ -71,6 +97,10 @@ namespace PAIN {
 			std::string aliasCombineRelative(std::string const& alias, std::string const& relative) const {
 				return alias + getVirtualSymbol() + relative;
 			}
+
+			virtual std::string normalizePath(const std::string& path) const = 0;
+
+			virtual std::string getVirtualParentPath(std::string const& virtual_path) const = 0;
 
 			virtual void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) = 0;
 			virtual void updateVirtualPath(const std::string& alias, const std::string& path) = 0;

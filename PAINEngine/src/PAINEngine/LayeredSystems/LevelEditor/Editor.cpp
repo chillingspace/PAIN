@@ -119,10 +119,10 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
-
-            #ifdef PN_PLATFORM_WINDOWS
+            //Register resource panel
+#ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
-            #endif
+#endif
 
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
@@ -311,6 +311,11 @@ namespace PAIN {
 
             //Pass down events to platform for handling
             platform->handleEvents(event);
+
+            //Dispatch events on to panels
+            panels->forEachOfType<Panel::IPanel>([&event](std::shared_ptr<Panel::IPanel> panel) {
+                panel->onEvent(event);
+                });
         }
 
         void Editor::buildDockspace() {

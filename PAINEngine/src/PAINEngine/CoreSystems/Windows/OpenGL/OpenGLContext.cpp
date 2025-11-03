@@ -12,6 +12,10 @@ namespace PAIN {
 	{
 		glfwMakeContextCurrent(m_WindowHandle);
 
+		if (glfwGetCurrentContext() != m_WindowHandle) {
+			PN_CORE_ERROR("GLFW context is NOT current for window handle! Possible error during make current.");
+			throw std::runtime_error("GLFW context is not current.");
+		}
 
 		//Creating window
 		GLenum err = glewInit();

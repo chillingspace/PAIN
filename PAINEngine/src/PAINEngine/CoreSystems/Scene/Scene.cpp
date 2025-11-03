@@ -151,15 +151,15 @@ namespace PAIN {
 		auto loopingSoundPath = ("file:///android_asset/game/audio/music/Boss_Music.ogg");
 		#endif
 
-		audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f); // Still need to load it
+		//audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f); // Still need to load it
 
-		m_audioSourceEntity = AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
-		ecs->addEntityComponent(m_audioSourceEntity, Audio::AudioSource {
-			.soundPath = loopingSoundPath,
-			.is3D = true,
-			.looping = true,
-			.playTrigger = true // Tell the AudioSystem to play this on its first update
-		});
+		//m_audioSourceEntity = AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+		//ecs->addEntityComponent(m_audioSourceEntity, Audio::AudioSource {
+		//	.soundPath = loopingSoundPath,
+		//	.is3D = true,
+		//	.looping = true,
+		//	.playTrigger = true // Tell the AudioSystem to play this on its first update
+		//});
 
 
 		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/sdcc.obj");
@@ -257,46 +257,46 @@ namespace PAIN {
 		}
 	#endif
 
-		// Apply time scale to deltaTime for simulation
-		float scaledDt = timing.dt * timeScale;
+		//// Apply time scale to deltaTime for simulation
+		//float scaledDt = timing.dt * timeScale;
 
-		{
-			auto olc = LightSources::get().get("world");
-			Light& lc = olc.value();
-			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
-		}
+		//{
+		//	auto olc = LightSources::get().get("world");
+		//	Light& lc = olc.value();
+		//	lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
+		//}
 
-		auto ecs = services->get<ECS::Controller>();
-		auto audioManager = services->get<Audio::Audio>();
-		if (!audioManager || m_audioSourceEntity == entt::null) return;
+		//auto ecs = services->get<ECS::Controller>();
+		//auto audioManager = services->get<Audio::Audio>();
+		//if (!audioManager || m_audioSourceEntity == entt::null) return;
 
-		// The AudioSystem now handles pause/resume automatically via the AppSystem interface
+		//// The AudioSystem now handles pause/resume automatically via the AppSystem interface
 
-		// Animate the audio source object along a predefined path (respects pause)
-		m_demoTime += scaledDt; // Changed from timing.dt
-		float progress = fmod(m_demoTime, m_segmentDuration) / m_segmentDuration;
-		int segment = static_cast<int>(m_demoTime / m_segmentDuration) % 4;
-		if (segment != m_currentPathSegment) {
-			m_currentPathSegment = segment;
-		}
-		glm::vec3 startPos = m_pathCorners[m_currentPathSegment];
-		glm::vec3 endPos = m_pathCorners[(m_currentPathSegment + 1) % 4];
-		glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
+		//// Animate the audio source object along a predefined path (respects pause)
+		//m_demoTime += scaledDt; // Changed from timing.dt
+		//float progress = fmod(m_demoTime, m_segmentDuration) / m_segmentDuration;
+		//int segment = static_cast<int>(m_demoTime / m_segmentDuration) % 4;
+		//if (segment != m_currentPathSegment) {
+		//	m_currentPathSegment = segment;
+		//}
+		//glm::vec3 startPos = m_pathCorners[m_currentPathSegment];
+		//glm::vec3 endPos = m_pathCorners[(m_currentPathSegment + 1) % 4];
+		//glm::vec3 currentPosition = glm::mix(startPos, endPos, progress);
 
-		// Update the Transform component in the ECS for the renderer
-		if (auto transform = ecs->getEntityComponent<Transform>(m_audioSourceEntity)) {
-			transform->get().position = currentPosition;
-		}
+		//// Update the Transform component in the ECS for the renderer
+		//if (auto transform = ecs->getEntityComponent<Transform>(m_audioSourceEntity)) {
+		//	transform->get().position = currentPosition;
+		//}
 
-		// Handle footstep playback at intervals (respects pause)
-		m_footstepTimer -= scaledDt; // Changed from timing.dt
-		if (m_footstepTimer <= 0.0f)
-		{
-			// This is a "one-shot" sound, not tied to a component.
-			// It's fine to keep calling the service directly for this.
-			audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
-			m_footstepTimer = m_footstepInterval;
-		}
+		//// Handle footstep playback at intervals (respects pause)
+		//m_footstepTimer -= scaledDt; // Changed from timing.dt
+		//if (m_footstepTimer <= 0.0f)
+		//{
+		//	// This is a "one-shot" sound, not tied to a component.
+		//	// It's fine to keep calling the service directly for this.
+		//	audioManager->playRandom("FootstepsGrass", currentPosition, 0.0f);
+		//	m_footstepTimer = m_footstepInterval;
+		//}
 	}
 
 	void Scene::onEvent(Event::Event& e) {}

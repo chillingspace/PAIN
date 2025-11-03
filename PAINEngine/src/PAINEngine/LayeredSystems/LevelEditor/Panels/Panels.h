@@ -94,6 +94,9 @@ namespace PAIN {
 				//Virtual panel update
 				virtual void onUpdate(AppTiming timing) = 0;
 
+				//Virtual panel events
+				virtual void onEvent(Event::Event& event) {}
+
 				//Draw panel window
 				void drawWindow(PAIN::AppTiming timing);
 

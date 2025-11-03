@@ -59,7 +59,6 @@ namespace PAIN {
 
 			//Internal path functions
 			std::string getKnownFolderPath(const GUID& folderId) const;
-			std::string normalizePath(const std::string& path) const;
 
 
 			//Private initialize and destroy
@@ -69,6 +68,10 @@ namespace PAIN {
 
 			WindowsPath() { init(); };
 			virtual ~WindowsPath() { destroy(); }
+
+			std::string normalizePath(const std::string& path) const override;
+
+			std::string getVirtualParentPath(std::string const& virtual_path) const override;
 
 			//Override functions from path interface
 			void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) override;
