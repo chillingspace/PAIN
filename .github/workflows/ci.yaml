@@ -24,7 +24,10 @@ jobs:
       - name: Run Debug executable and test for leaks/crashes
         run: |
           cd bin/Debug
-          $process = Start-Process .\Game.exe -PassThru -RedirectStandardError leak_report.txt -EnvironmentVariables @{ "CI" = "1" }
+          # Set CI environment variable
+          $env:CI = "1"
+          
+          $process = Start-Process .\Game.exe -PassThru -RedirectStandardError leak_report.txt
           
           # Wait up to 10 seconds
           $timeout = 10
@@ -59,6 +62,7 @@ jobs:
           
           Write-Host "Debug build test completed successfully"
         shell: pwsh
+
 
 
       - name: Build Release solution
