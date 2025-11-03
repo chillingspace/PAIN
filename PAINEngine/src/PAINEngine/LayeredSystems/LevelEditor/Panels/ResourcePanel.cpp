@@ -991,7 +991,7 @@ namespace PAIN {
 
 				//File dropped popup
 				if (b_file_dropped && !checkPopUpShowing()) {
-					openPopUp("Success");
+					//openPopUp("Success");
 					b_file_dropped = false;
 				}
 
