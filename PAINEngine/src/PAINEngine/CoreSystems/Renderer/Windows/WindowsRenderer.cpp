@@ -47,6 +47,7 @@ namespace PAIN {
 		std::filesystem::path debug_geometry_path = "engine/shaders/debug_geometry.vert";
 		std::filesystem::path blur_path = "engine/shaders/blur.vert";
 		std::filesystem::path bloom_path = "engine/shaders/bloom.vert";
+		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 #else	
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
@@ -59,6 +60,7 @@ namespace PAIN {
 		std::filesystem::path debug_geometry_path = "engine\\shaders\\android_debug_geometry.vert";
 		std::filesystem::path blur_path = "engine\\shaders\\android_blur.vert";
 		std::filesystem::path bloom_path = "engine\\shaders\\android_bloom.vert";
+		std::filesystem::path bloom_blend_path = "engine\\shaders\\android_bloom_blend.vert";
 		std::filesystem::path tone_path = "engine\\shaders\\android_tone.vert";
 #endif
 
@@ -116,6 +118,20 @@ namespace PAIN {
 		//Tone mapping shader
 		tone_shader = assets_loader->getAsset<Assets::Shader>(tone_path);
 		if (!tone_shader || tone_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Bloom shader
+		bloom_shader = assets_loader->getAsset<Assets::Shader>(bloom_path);
+		if (!bloom_shader || bloom_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		// Bloom blend shader
+		bloom_blend_shader = assets_loader->getAsset<Assets::Shader>(bloom_blend_path);
+		if (!bloom_blend_shader || bloom_blend_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
@@ -260,6 +276,25 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pp_texture, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// pp2_texture for ping-pong if needed in post-processing
+			glGenFramebuffers(1, &pp2_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, pp2_fbo);
+
+			glGenTextures(1, &pp2_texture);
+			if (pp2_texture == 0) {
+				PN_CORE_ERROR("Failed to create final texture");
+				return;
+			}
+			glBindTexture(GL_TEXTURE_2D, pp2_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pp2_texture, 0);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
@@ -761,6 +796,83 @@ namespace PAIN {
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
+		}
+
+		// bloom pass
+		if (GraphicsSettings::get().bloom) {
+			// save scene_tex to final_texture first
+			if (postprocess_passes % 2) {
+				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				passthrough_shader->Bind();
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, pp_texture);
+				passthrough_shader->SetUniform("tex", 0);
+				glBindVertexArray(passthrough_vao);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+			}
+
+			// extract bright areas with bloom_shader
+			{
+				const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : pp2_fbo;
+				const unsigned int src_tex = final_texture;
+
+				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				bloom_shader->Bind();
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, src_tex);
+				bloom_shader->SetUniform("tex", 0);
+				bloom_shader->SetUniform("threshold", GraphicsSettings::get().bloom_threshold);
+				glBindVertexArray(empty_vao);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				++postprocess_passes;
+			}
+
+			// blur bright areas above threshold
+			{
+
+				blur_shader->Bind();
+				blur_shader->SetUniform("tex", 0);
+				blur_shader->SetUniform("strength", GraphicsSettings::get().bloom_blur_strength);
+
+				for (int i{}; i < GraphicsSettings::get().bloom_quality; ++i) {
+					const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : pp2_fbo;
+					const unsigned int src_tex = postprocess_passes % 2 == 0 ? pp2_texture : pp_texture;
+
+					glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, src_tex);
+					blur_shader->SetUniform("is_horizontal_pass", i % 2 ? 0.f : 1.f);
+					glBindVertexArray(empty_vao);
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+					++postprocess_passes;
+				}
+			}
+
+			// add blurred bright areas back to original image
+			{
+				const unsigned int dest_fbo = final_fbo;
+				const unsigned int bloom_tex = postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
+
+				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				bloom_blend_shader->Bind();
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, final_texture);
+				bloom_blend_shader->SetUniform("scene_tex", 0);
+
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, bloom_tex);
+				bloom_blend_shader->SetUniform("bloom_tex", 1);
+
+				bloom_blend_shader->SetUniform("bloom_strength", GraphicsSettings::get().bloom_strength);
+
+				glBindVertexArray(empty_vao);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+				// reset postprocess_passes since we wrote to final_fbo directly
+				postprocess_passes = 0;
+			}
 		}
 
 
