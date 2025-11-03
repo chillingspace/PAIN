@@ -295,6 +295,11 @@ namespace PAIN {
                     tex->data.data() + offset
                 );
 
+                if (glfwGetCurrentContext() == nullptr) {
+                    PN_CORE_ERROR("No current OpenGL context - cannot upload texture!");
+                    throw std::runtime_error("No current OpenGL context.");
+                }
+
                 GLenum err = glGetError();
                 if (err != GL_NO_ERROR) {
                     throw std::runtime_error("OpenGL error uploading mip " +

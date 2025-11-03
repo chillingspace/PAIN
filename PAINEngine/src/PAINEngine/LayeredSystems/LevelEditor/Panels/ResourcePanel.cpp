@@ -118,6 +118,40 @@ namespace PAIN {
 				//event->setEventProcessed(true);
 			}
 
+			void ResourcePanel::populateFiles(std::string const& virtual_path) {
+
+				//Retrieve file
+				auto fetch_files = path_service->listFiles(virtual_path);
+
+				//Clear file directory
+				files.clear();
+
+				//Iterate through fetched files
+				for (auto const& file : fetch_files) {
+					File temp;
+
+					//Instantiate file system
+					std::filesystem::path file_path = file;
+
+					//Get root folder path
+					static std::filesystem::path root = path_service->resolvePath(root_path);
+					temp.relative_path = std::filesystem::relative(file_path, root);
+
+					//Find asset GUID
+					temp.id = asset_service->findGUID(temp.relative_path);
+
+					//Get display icon
+					temp.icon = fileIcon(temp.relative_path);
+
+					//Instantiate name
+					temp.file_name = temp.relative_path.filename().string();
+
+					//Add this to file vector
+					files.push_back(temp);
+				}
+
+			}
+
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
@@ -213,7 +247,7 @@ namespace PAIN {
 
 						//Update directories & files
 						directories = path_service->listDirectories(current_path);
-						files = path_service->listFiles(current_path);
+						populateFiles(current_path);
 
 						//Break from files
 						ImGui::PopStyleColor();
@@ -237,7 +271,7 @@ namespace PAIN {
 				for (const auto& file : files) {
 
 					//Skip file not matching searching filter
-					if (file.find(search_filter) == file.npos) {
+					if (file.file_name.find(search_filter) == file.file_name.npos) {
 						continue;
 					}
 
@@ -246,23 +280,13 @@ namespace PAIN {
 						ImGui::SameLine();
 					}
 
-					//Instantiate file system
-					std::filesystem::path file_path = file;
-
-					//Get root folder path
-					static std::filesystem::path root = path_service->resolvePath(root_path);
-					auto file_relative = std::filesystem::relative(file_path, root);
-
 					//Check path is desc
-					if (file_relative.extension() == Assets::descriptor_ext && !b_show_desc_files) {
+					if (file.relative_path.extension() == Assets::descriptor_ext && !b_show_desc_files) {
 						continue;
 					}
 
-					//Find asset GUID
-					auto file_guid = asset_service->findGUID(file_relative);
-
 					//Check that asset is registered
-					if (!asset_service->checkAssetRegistered(file_guid)) {
+					if (!asset_service->checkAssetRegistered(file.id)) {
 						continue;
 					}
 
@@ -271,16 +295,16 @@ namespace PAIN {
 					++shown_count;
 
 					//Extension cases
-					ImTextureID icon = fileIcon(file_relative);
+					ImTextureID icon = file.icon;
 
 					//Display file icon
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-					if (ImGui::ImageButton(std::string("##" + file_path.filename().string()).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
+					if (ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
 
 						//Identify selected asset GUID
-						selected_asset_id = file_guid;
+						selected_asset_id = file.id;
 					}
 					ImGui::PopStyleColor();
 
@@ -299,7 +323,7 @@ namespace PAIN {
 
 					//Display file name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
-					ImGui::TextWrapped(file_path.filename().string().c_str());
+					ImGui::TextWrapped(file.file_name.c_str());
 					ImGui::PopTextWrapPos();
 
 					ImGui::EndGroup();
@@ -587,7 +611,7 @@ namespace PAIN {
 
 				//Update directories & files
 				directories = path_service->listDirectories(current_path);
-				files = path_service->listFiles(current_path);
+				populateFiles(current_path);
 
 				//Search up till 32 characters
 				search_filter.resize(32);
@@ -710,7 +734,7 @@ namespace PAIN {
 
 						//Update directories & files
 						directories = path_service->listDirectories(current_path);
-						files = path_service->listFiles(current_path);
+						populateFiles(current_path);
 					}
 					moveFileAcceptPayload(path_service->getVirtualParentPath(current_path));
 				}
@@ -844,7 +868,7 @@ namespace PAIN {
 
 						//Update directories & files
 						directories = path_service->listDirectories(current_path);
-						files = path_service->listFiles(current_path);
+						populateFiles(current_path);
 					}
 				}
 

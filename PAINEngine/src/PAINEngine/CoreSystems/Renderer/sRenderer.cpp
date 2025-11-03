@@ -33,6 +33,8 @@ namespace PAIN {
 		//Init scene
 		m_Scene = services->get<Scene>();
 		
+		//Call update one frame to ensure initialization
+		onUpdate(AppTiming());
 	}
 
 	void sRenderer::shadowPass()

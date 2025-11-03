@@ -160,7 +160,6 @@ namespace PAIN {
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
-
 		//Editor only added when debug mode
 #ifdef _DEBUG
 		// !NOTE: IMGUI eats events
