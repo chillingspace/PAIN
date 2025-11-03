@@ -8,11 +8,6 @@
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 
-//#define PN_PATH_SERVICE  services->get<Path::Service>()
-//#define PN_LOADER_SERVICE  services->get<Loader::Service>()
-//#define PN_ASSETS_SERVICE  services->get<Assets::Service>()
-
-
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -65,7 +60,6 @@ namespace PAIN {
 				}
 			}
 
-			// File Drop Event
 			void ResourcePanel::onEvent(PAIN::Event::Event& event) {
 
 				if (event.getType() == PAIN::Event::Type::FileDrop) {
@@ -574,14 +568,14 @@ namespace PAIN {
 					//Display each component as a button
 					if (ImGui::Button("Create")) {
 
-						////Create a new directory
-						//std::filesystem::create_directory(PN_PATH_SERVICE->resolvePath(current_path) / folder_name);
+						//Create a new directory
+						path_service->createDirectory(current_path + "/" + folder_name);
 
-						////Update directories & files
-						//directories = PN_PATH_SERVICE->listDirectories(current_path);
+						//Update directories & files
+						populateDirs(current_path);
 
-						////Reset folder name buffer
-						//folder_name.assign("");
+						//Reset folder name buffer
+						folder_name.assign("");
 
 						//Close popup
 						closePopUp(popup_id);
@@ -628,7 +622,7 @@ namespace PAIN {
 				//registerPopUp("Success", defPopUp("Success", success_msg));
 				//registerPopUp("Delete Asset", deleteAssetPopup("Delete Asset"));
 				//registerPopUp("Clear Directory", deleteDirectoryPopup("Clear Directory"));
-				//registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("New Folder", newFolderPopup("New Folder"));
 
 				//Initialize root and current path
 				root_path = Path::main_assets_alias + "://";
@@ -896,6 +890,9 @@ namespace PAIN {
 						populateFiles(current_path);
 					}
 				}
+
+				//Render popups
+				renderPopUps();
 
 				ImGui::EndMenuBar();
 

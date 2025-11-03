@@ -74,7 +74,6 @@ namespace PAIN {
                 void populateDirs(std::string const& virtual_path);
                 void populateFiles(std::string const& virtual_path);
 
-
                 std::string root_path; //Root Path
                 std::string current_path; //Current Path
 
