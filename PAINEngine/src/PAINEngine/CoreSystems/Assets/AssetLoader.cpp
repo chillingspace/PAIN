@@ -77,7 +77,8 @@ namespace PAIN {
                 asset.guid = guid;
                 asset.type = stringToAssetType(obj["type"]);
                 asset.name = obj.value("name", "");
-                asset.relative_path = std::filesystem::path(obj.value("relative_path", ""));
+                asset.main_relative_path = std::filesystem::path(obj.value("main_relative_path", ""));
+                asset.shipped_relative_path = std::filesystem::path(obj.value("shipped_relative_path", ""));
                 assets[guid] = std::make_shared<IAsset>(asset);
             }
             fileStream = nullptr;

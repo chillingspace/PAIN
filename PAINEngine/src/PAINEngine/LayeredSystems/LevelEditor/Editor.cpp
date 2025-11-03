@@ -119,10 +119,10 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
-
-            #ifdef PN_PLATFORM_WINDOWS
+            //Register resource panel
+#ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
-            #endif
+#endif
 
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {

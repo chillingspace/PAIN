@@ -211,7 +211,8 @@ namespace PAIN {
                     registry[info.guid.ToString()] = {
                         {"type", assetTypeToString(info.type)},
                         {"name", info.name},
-                        {"relative_path", info.relative_path.string()}
+                        {"main_relative_path", info.main_relative_path.string()},
+                        {"shipped_relative_path", info.shipped_relative_path.string()}
                     };
                 }
 
@@ -341,7 +342,8 @@ namespace PAIN {
             asset_interface.guid = asset.guid;
             asset_interface.name = asset.shipped_path.filename().string();
             asset_interface.type = asset.type;
-            asset_interface.relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
+            asset_interface.main_relative_path = asset.relative_path;
+            asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
 
             return asset_interface;
         }

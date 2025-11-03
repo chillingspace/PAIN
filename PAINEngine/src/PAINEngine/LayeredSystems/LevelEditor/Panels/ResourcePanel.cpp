@@ -1,4 +1,4 @@
-#ifdef PN_PLATFORM_WINDOWS
+
 #ifdef _DEBUG
 
 #include "pch.h"
@@ -41,6 +41,7 @@ namespace PAIN {
             }
 
 			void ResourcePanel::moveFileAcceptPayload(std::string const& virtual_path) {
+#ifdef PN_PLATFORM_WINDOWS
 				//Drop target
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "_FILE").c_str())) {
@@ -59,10 +60,11 @@ namespace PAIN {
 					}
 					ImGui::EndDragDropTarget();
 				}
+#endif
 			}
 
 			void ResourcePanel::onEvent(Event::Event& event) {
-
+#ifdef PN_PLATFORM_WINDOWS
 				if (event.getType() == PAIN::Event::Type::FileDrop) {
 
 					//Create event dispatcher
@@ -91,6 +93,7 @@ namespace PAIN {
 						return true;
 						});
 				}
+#endif
 			}
 
 			void ResourcePanel::populateDirs(std::string const& virtual_path) {
@@ -163,11 +166,9 @@ namespace PAIN {
 
 				std::vector<std::string> children;
 				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
-				for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-					if (entry.is_directory()) {
-						auto relative = std::filesystem::relative(entry, dir);
-						children.push_back(virtual_dir + "/" + relative.string());
-					}
+				for (const auto& entry : path_service->listDirectories(virtual_dir)) {
+					auto relative = std::filesystem::relative(entry, dir);
+					children.push_back(virtual_dir + "/" + relative.string());
 				}
 				directoryCache[virtual_dir] = std::move(children);
 			}
@@ -185,7 +186,8 @@ namespace PAIN {
 				if (is_selected) node_flags |= ImGuiTreeNodeFlags_Selected;
 
 				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
-				bool open = ImGui::TreeNodeEx(dir.filename().string().c_str(), node_flags);
+				std::string name = dir.filename().string() != "" ? dir.filename().string() : "assets";
+				bool open = ImGui::TreeNodeEx(name.c_str(), node_flags);
 				moveFileAcceptPayload(virtual_dir);
 				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					current_path = virtual_dir;
@@ -299,7 +301,8 @@ namespace PAIN {
 					ImGui::PopStyleColor();
 					moveFileAcceptPayload(virtual_path + '/' + dir.file_name);
 
-					//Start drag-and-drop source ( Disable drag for desc files )
+					//Start drag-and-drop source
+#ifdef PN_PLATFORM_WINDOWS
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
 						//Static copy of payload
@@ -311,13 +314,14 @@ namespace PAIN {
 
 						//Render the icon or name at the cursor during dragging
 						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
-						ImGui::TextWrapped(dir_copy.file_name.c_str());
+						ImGui::TextWrapped("%s", dir_copy.file_name.c_str());
 						ImGui::EndDragDropSource();
 					}
+#endif
 
 					//Display directory name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
-					ImGui::TextWrapped(dir.file_name.c_str());
+					ImGui::TextWrapped("%s", dir.file_name.c_str());
 					ImGui::PopTextWrapPos();
 
 					ImGui::EndGroup();
@@ -339,8 +343,35 @@ namespace PAIN {
 					}
 
 					//Check path is desc
-					if (file.path.extension() == Assets::descriptor_ext && !b_show_desc_files) {
-						continue;
+					if (file.path.extension() == Assets::descriptor_ext) {
+						if(!b_show_desc_files)continue;
+
+						//Begin file group
+						ImGui::BeginGroup();
+						++shown_count;
+
+						//Extension cases
+						ImTextureID icon = file.icon;
+
+						//Display file icon
+						ImVec2 uv0(0.0f, 0.0f);
+						ImVec2 uv1(1.0f, 1.0f);
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+						if (ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
+
+							//Identify selected asset GUID
+							selected_asset_id = file.id;
+						}
+						ImGui::PopStyleColor();
+
+						//Display file name
+						ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
+						ImGui::TextWrapped("%s", file.file_name.c_str());
+						ImGui::PopTextWrapPos();
+
+						ImGui::EndGroup();
+
+						itemIndex++;
 					}
 
 					//Check that asset is registered
@@ -367,7 +398,8 @@ namespace PAIN {
 					ImGui::PopStyleColor();
 
 					//Start drag-and-drop source ( Disable drag for desc files )
-					if (file.path.extension() != Assets::descriptor_ext && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+#ifdef PN_PLATFORM_WINDOWS
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
 						//Get file type string
 						auto filetype_string = Assets::assetTypeToString(asset_service->getAssetData(file.id)->type);
@@ -382,13 +414,14 @@ namespace PAIN {
 
 						//Render the icon or name at the cursor during dragging
 						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
-						ImGui::TextWrapped(file.file_name.c_str());
+						ImGui::TextWrapped("%s", file.file_name.c_str());
 						ImGui::EndDragDropSource();
 					}
+#endif
 
 					//Display file name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
-					ImGui::TextWrapped(file.file_name.c_str());
+					ImGui::TextWrapped("%s", file.file_name.c_str());
 					ImGui::PopTextWrapPos();
 
 					ImGui::EndGroup();
@@ -671,7 +704,11 @@ namespace PAIN {
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
 
 				//Initialize root and current path
+#ifdef PN_PLATFORM_ANDROID
+				root_path = Path::assets_alias + "://";
+#else
 				root_path = Path::main_assets_alias + "://";
+#endif
 				current_path = root_path;
 
 				//Update directories & files
@@ -1066,5 +1103,4 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif

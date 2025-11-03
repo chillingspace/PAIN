@@ -13,48 +13,28 @@ namespace PAIN {
 		void Manager::logAssetRegistry() const {
 
 			for (auto const& asset : asset_registry) {
-				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second->relative_path.string());
+				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second->shipped_relative_path.string());
 			}
-		}
-
-		Descriptor Manager::readDescriptor(std::filesystem::path const& relative_path) {
-
-			//Make an internal copy
-			auto relative = relative_path;
-
-			//Pre check
-			if (relative.extension() != Assets::descriptor_ext) {
-				relative += Assets::descriptor_ext;
-			}
-
-			//Desc cache check
-			auto cacheIt = desc_cache.find(relative);
-			if (cacheIt != desc_cache.end())
-				return cacheIt->second;
-
-			//Get path service
-			auto path_service = services->get<Path::Path>();
-
-			//Ensure alias is always pointing to main asset folder
-			std::filesystem::path path = path_service->resolvePath(Path::main_assets_alias, relative.string());
-
-			//Check path exists
-			if (!std::filesystem::exists(path)) {
-				return Descriptor();
-			}
-
-			Descriptor desc = asset_compiler->readDescFile(path);
-			desc_cache.emplace(relative, desc); // store in cache
-			return desc;
 		}
 
 		GUID Manager::findGUID(std::filesystem::path const& relative_path) {
-			
-			//Try reading desc file
-			auto desc = readDescriptor(relative_path);
-			if (desc.guid.IsValid()) return desc.guid;
 
-			//Return empty guid
+			//Normalize path first
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path norm_path = path_service->normalizePath(relative_path.string());
+			
+			//Find GUID
+			auto main_it = main_path_to_guid.find(norm_path);
+			if (main_it != main_path_to_guid.end()) {
+				return main_it->second;
+			}
+			else {
+				auto shipped_it = shipped_path_to_guid.find(norm_path);
+				if (shipped_it != shipped_path_to_guid.end()) {
+					return shipped_it->second;
+				}
+			}
+
 			return GUID();
 		}
 
@@ -66,21 +46,14 @@ namespace PAIN {
 			//Create unique asset loader
 			asset_loader = std::make_unique<Loader>(services);
 
-#ifdef PN_PLATFORM_ANDROID
-			Platform platform = Platform::Android;
-#else
+#ifdef PN_PLATFORM_WINDOWS
 			Platform platform = Platform::Windows;
-#endif
-
-			//Create unique asset compiler
-			asset_compiler = std::make_unique<Compiler>(path_service->resolvePath(Path::main_assets_alias, ""),
-														path_service->resolvePath(Path::assets_alias, ""),
-														platform, getExecutablePath());
 
 			//Create unique asset compiler
 			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
-														path_service->resolvePath(Path::assets_alias, ""),
-														platform, getExecutablePath());
+				path_service->resolvePath(Path::assets_alias, ""),
+				platform, getExecutablePath());
+#endif
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
@@ -133,6 +106,14 @@ namespace PAIN {
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
+			//Instantiate the path to guid
+			for (auto const& asset : asset_registry) {
+                std::filesystem::path norm_shipped = path_service->normalizePath(asset.second->shipped_relative_path.string());
+                std::filesystem::path norm_main = path_service->normalizePath(asset.second->main_relative_path.string());
+				shipped_path_to_guid[norm_shipped] = asset.second->guid;
+				main_path_to_guid[norm_main] = asset.second->guid;
+			}
+
 			//Dump asset registry
 			logAssetRegistry();
 		}
@@ -141,8 +122,8 @@ namespace PAIN {
 			asset_loader = nullptr;
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
 		void Manager::registerAsset(std::filesystem::path const& relative_path) {
-
 			//Get path service
 			auto path_service = services->get<Path::Path>();
 
@@ -158,6 +139,7 @@ namespace PAIN {
 			//Get asset registry data
 			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
 		}
+#endif
 
 		void Manager::registerAsset(std::shared_ptr<IAsset> asset) {
 
@@ -220,7 +202,7 @@ namespace PAIN {
 			}
 
 			//Resolve asset path
-			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->relative_path.string());
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->shipped_relative_path.string());
 
 			//Load assset through registered loaded
 			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
@@ -304,6 +286,7 @@ namespace PAIN {
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const {
 
@@ -316,6 +299,7 @@ namespace PAIN {
 			//Remove file
 			asset_organizer->removeFile(file_path);
 		}
+#endif
 #endif
 		// ----------------------------
 		// Asset Service 

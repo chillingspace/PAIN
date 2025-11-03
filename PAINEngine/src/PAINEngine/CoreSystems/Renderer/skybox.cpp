@@ -19,7 +19,9 @@
 #include "CoreSystems/Windows/Window.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
-//#define STB_IMAGE_IMPLEMENTATION
+#ifdef PN_PLATFORM_ANDROID
+#define STB_IMAGE_IMPLEMENTATION
+#endif
 #endif
 #include "stb_image.h"
 

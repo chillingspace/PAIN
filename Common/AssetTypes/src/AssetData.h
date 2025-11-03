@@ -282,7 +282,7 @@ namespace PAIN {
             // Search upward from executable location
             std::filesystem::path currentPath = execDir;
 
-            for (int levels = 0; levels < 10; levels++) {
+            for (int levels = 0; levels < 25; levels++) {
                 std::filesystem::path readme = currentPath / "README.md";
                 std::filesystem::path buildbat = currentPath / "build.bat";
 

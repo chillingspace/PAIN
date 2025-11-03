@@ -130,16 +130,16 @@ namespace PAIN {
 				app_name = "PAINEngine";
 			}
 
-			//Special case: manually register asset path
-			virtual_paths["game_assets"] = relative_game_folder;
-			virtual_paths["engine_assets"] = relative_engine_folder;
-			virtual_paths["assets"] = "";
+			//Register assets path
+			virtual_paths[assets_alias] = "";
+			virtual_paths[game_assets_alias] = relative_game_folder;
+			virtual_paths[engine_assets_alias] = relative_engine_folder;
 
-			// Register default virtual paths
-			registerVirtualPath("internal", internal_path, true);
-			registerVirtualPath("external", external_path, true);
-			registerVirtualPath("cache", cache_path, true);
-			registerVirtualPath("temp", internal_path + "/temp", true);
+			//Register default virtual paths
+			registerVirtualPath(internal_alias, internal_path, true);
+			registerVirtualPath(external_alias, external_path, true);
+			registerVirtualPath(cache_alias, cache_path, true);
+			registerVirtualPath(temp_alias, internal_path + "/temp", true);
 		}
 
 		void AndroidPath::destroy() {
@@ -182,10 +182,10 @@ namespace PAIN {
 
 		void AndroidPath::registerVirtualPath(const std::string& alias, const std::string& raw_path, bool create_new) {
 			// Always normalize file system paths BEFORE any queries, existence checks, or storage.
-			std::string path = isAssetPath(alias) ? normalizePath(raw_path) : normalizeFileIOPath(raw_path);
+			std::string path = isAssetPath(alias + getVirtualSymbol()) ? normalizePath(raw_path) : normalizeFileIOPath(raw_path);
 
 			// Only perform disk/FS existence check for non-asset paths.
-			if (!isAssetPath(alias)) {
+			if (!isAssetPath(alias + getVirtualSymbol())) {
 				if (!isValidPath(path)) {
 					if (create_new) {
 						createDirectoryRecursive(path);
@@ -208,9 +208,9 @@ namespace PAIN {
 		}
 
 		void AndroidPath::updateVirtualPath(const std::string& alias, const std::string& raw_path) {
-			std::string path = isAssetPath(alias) ? normalizePath(raw_path) : normalizeFileIOPath(raw_path);
+			std::string path = isAssetPath(alias + getVirtualSymbol()) ? normalizePath(raw_path) : normalizeFileIOPath(raw_path);
 
-			if (!isAssetPath(alias)) {
+			if (!isAssetPath(alias + getVirtualSymbol())) {
 				if (!isValidPath(path)) {
 					PN_CORE_WARN("Path: {} does not exist. Invalid registering of path.", path);
 					return;
@@ -228,7 +228,7 @@ namespace PAIN {
 		}
 
 		std::string AndroidPath::resolvePath(const std::string& virtualPath) const {
-			auto [alias, relativePath] = parseVirtualPath(normalizePath(virtualPath)); // Normalize any input!
+			auto [alias, relativePath] = parseVirtualPath(virtualPath); // Normalize any input!
 
 			auto it = virtual_paths.find(alias);
 			if (it == virtual_paths.end()) {
@@ -241,7 +241,7 @@ namespace PAIN {
 			}
 
 			// Always return normalized path.
-			return isAssetPath(alias) ? normalizePath(fullPath) : normalizeFileIOPath(fullPath);
+			return isAssetPath(alias + getVirtualSymbol()) ? normalizePath(fullPath) : normalizeFileIOPath(fullPath);
 		}
 
 		std::string AndroidPath::resolvePath(const std::string& alias, std::string const& relative) const {
@@ -253,16 +253,15 @@ namespace PAIN {
 			if (!relative.empty()) {
 				fullPath = fullPath.empty() ? relative : (fullPath + "/" + relative);
 			}
-			return isAssetPath(alias) ? normalizePath(fullPath) : normalizeFileIOPath(fullPath);
+			return isAssetPath(alias + getVirtualSymbol()) ? normalizePath(fullPath) : normalizeFileIOPath(fullPath);
 		}
 
 		std::vector<std::string> AndroidPath::listFiles(const std::string& virtualPath, const std::string& filter, const std::string& extension) const {
-			std::string normalizedVirtualPath = normalizePath(virtualPath);
 
 			// Asset (APK) directory listing
-			if (isAssetPath(normalizedVirtualPath)) {
+			if (isAssetPath(virtualPath)) {
 				std::vector<std::string> files;
-				std::string assetDir = resolvePath(normalizedVirtualPath);
+				std::string assetDir = resolvePath(virtualPath);
 
 				auto* mgr = m_app ? m_app->activity->assetManager : nullptr;
 				if (!mgr) {
@@ -289,7 +288,7 @@ namespace PAIN {
 			}
 
 			// Filesystem listing
-			std::string actualPath = resolvePath(normalizedVirtualPath);
+			std::string actualPath = resolvePath(virtualPath);
 
 			if (!isValidPath(actualPath)) {
 				throw std::runtime_error("Path does not exist or is not a directory: " + actualPath);
@@ -317,12 +316,11 @@ namespace PAIN {
 		}
 
 		std::vector<std::string> AndroidPath::listDirectories(const std::string& virtualPath, const std::string& filter) const {
-			std::string normalizedVirtualPath = normalizePath(virtualPath);
 
 			// Asset (APK) directory listing
-			if (isAssetPath(normalizedVirtualPath)) {
+			if (isAssetPath(virtualPath)) {
 				std::vector<std::string> directories;
-				std::string assetDir = resolvePath(normalizedVirtualPath);
+				std::string assetDir = resolvePath(virtualPath);
 
 				auto* mgr = m_app ? m_app->activity->assetManager : nullptr;
 				if (!mgr) {
@@ -348,7 +346,7 @@ namespace PAIN {
 			}
 
 			// Filesystem listing
-			std::string actualPath = resolvePath(normalizedVirtualPath);
+			std::string actualPath = resolvePath(virtualPath);
 			if (!isValidPath(actualPath)) {
 				throw std::runtime_error("Path does not exist or is not a directory: " + actualPath);
 			}
@@ -404,7 +402,7 @@ namespace PAIN {
 		}
 
 		bool AndroidPath::isAssetPath(const std::string& virtualPath) const {
-			return parseVirtualPath(virtualPath).first == "assets" || parseVirtualPath(virtualPath).first == "engine_assets" || parseVirtualPath(virtualPath).first == "game_assets";
+			return parseVirtualPath(virtualPath).first == assets_alias || parseVirtualPath(virtualPath).first == engine_assets_alias || parseVirtualPath(virtualPath).first == game_assets_alias;
 		}
 
 		std::unique_ptr<IFileStream> AndroidPath::createFileStream(const std::string& virtualPath, FileMode mode) {

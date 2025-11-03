@@ -22,23 +22,20 @@ namespace PAIN {
 			//Asset cache
 			std::unordered_map<GUID, std::shared_ptr<IAsset>> asset_cache;
 
-			//Descriptor cache
-			std::unordered_map<std::filesystem::path, Descriptor> desc_cache;
+			//Path to GUID mapping
+			std::unordered_map<std::filesystem::path, GUID> shipped_path_to_guid;
+			std::unordered_map<std::filesystem::path, GUID> main_path_to_guid;
 
 			//Asset loader
 			std::unique_ptr<Loader> asset_loader;
 
 			//Asset Organizer
+#ifdef PN_PLATFORM_WINDOWS
 			std::unique_ptr<Organizer> asset_organizer;
-
-			//Asset compiler
-			std::unique_ptr<Compiler> asset_compiler;
+#endif
 
 			//Log asset registry
 			void logAssetRegistry() const;
-
-			//Read descriptors
-			Descriptor readDescriptor(std::filesystem::path const& relative_path);
 		public:
 
 			Manager() = default;
@@ -49,7 +46,9 @@ namespace PAIN {
 			GUID findGUID(std::filesystem::path const& relative_path);
 
 			//Register asset
+#ifdef PN_PLATFORM_WINDOWS
 			void registerAsset(std::filesystem::path const& relative_path);
+#endif
 			void registerAsset(std::shared_ptr<IAsset> asset);
 
 			//Unregister asset
@@ -148,6 +147,7 @@ namespace PAIN {
 			std::shared_ptr<IAsset> getAssetData(GUID const& id) const;
 			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path);
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 
 			//Debug only editor mode functions
@@ -157,6 +157,7 @@ namespace PAIN {
 
 			//Delete file function
 			void removeFile(std::filesystem::path const& file_path) const;
+#endif
 #endif
 
 			//AppSystem overrides

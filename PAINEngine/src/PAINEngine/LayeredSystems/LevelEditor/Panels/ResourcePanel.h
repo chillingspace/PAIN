@@ -1,4 +1,3 @@
-#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 
 #pragma once
@@ -157,5 +156,4 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif
