@@ -145,7 +145,12 @@ namespace PAIN {
 		
 		// New audio demo test
 		// Add the looping sound to the "screen" entity as a component
+		#ifdef PN_PLATFORM_WINDOWS
 		auto loopingSoundPath = pathService->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
+		#else
+		auto loopingSoundPath = ("file:///android_asset/game/audio/music/Boss_Music.ogg");
+		#endif
+
 		audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f); // Still need to load it
 
 		m_audioSourceEntity = AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
@@ -207,8 +212,15 @@ namespace PAIN {
 			footstepPlaylist.name = "FootstepsGrass";
 			for (int i = 1; i <= 8; ++i)
 			{
+
+
+				#ifdef PN_PLATFORM_WINDOWS
 				std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".wav";
 				std::string footstepPath = pathService->resolvePath("game_assets://Audio/SFX/MovingSFX/" + footstepFile);
+				#else
+				std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".ogg";
+				std::string footstepPath = ("file:///android_asset/game/audio/sfx/movingsfx/" + footstepFile);
+				#endif
 				audioManager->loadSound(footstepPath, true, false, false, 1.0f, 15.0f);
 				footstepPlaylist.paths.push_back(footstepPath);
 			}

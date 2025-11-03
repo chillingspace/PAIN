@@ -128,19 +128,19 @@ namespace PAIN {
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
+		// Physics system not cross platform yet
+		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 		
 #ifdef PN_PLATFORM_WINDOWS	
 
-		// Physics system not cross platform yet
-		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 
 		services->get<ECS::Controller>()->registerSystem<AI::System>();
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
 		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
 		services->get<ECS::Controller>()->registerSystem<Audio::System>();
-		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 #endif
+		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();

@@ -1097,8 +1097,6 @@ namespace PAIN {
 					ImGui::EndChild();
 				}
 			}
-
-
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN

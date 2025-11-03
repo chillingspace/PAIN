@@ -22,12 +22,14 @@ using namespace glm;
 
 namespace PAIN {
 
+	// To-do for ben: add proper documentation
 	namespace Physics {
 
 		class System : public ECS::System::ISystem
 		{
 		public:
 			explicit System(std::shared_ptr<Services> svc);
+
 			~System();
 
 			// To add virtual and override in when abstract systems come in
@@ -35,15 +37,25 @@ namespace PAIN {
 
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override;
+
+			void syncNewBodies(entt::registry& registry);
+
+			// Get system name
 			std::string getSysName() const override { return "Physics System"; }
+
+			void create_floor();
+
+			void applyBounce(entt::registry&, entt::entity, float jumpImpulse);
+
+			// Getters
+			JPH::PhysicsSystem* GetPhysicsSystem() const { return jolt_physics.get(); }
+			JPH::BodyInterface& GetBodyInterface() { return jolt_physics->GetBodyInterface(); }
 
 		private:
 
 			std::unique_ptr<JPH::PhysicsSystem> jolt_physics;
 
-			// Owned memory helpers, for jolt update
-			std::unique_ptr<JPH::TempAllocator> temp_allocator;
-			std::unique_ptr<JPH::JobSystem> job_system;
+			JPH::BodyInterface* body_interface = nullptr;
 
 			// Jolt init values
 
@@ -65,14 +77,25 @@ namespace PAIN {
 			// This caps how many constraints the solver can handle per step.
 			const i32 c_max_contact_constraints;
 
+			PAIN::BPLayerInterfaceImpl	mBroadPhaseLayerInterface;									// The broadphase layer interface that maps object layers to broadphase layers
+			PAIN::ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;					// Class that filters object vs broadphase layers
+			PAIN::ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;								// Class that filters object vs object layers
+
+			// Owned memory helpers, for jolt update
+			std::unique_ptr<JPH::TempAllocator> temp_allocator;
+
+			std::unique_ptr<JPH::JobSystem> job_system;
+
+			JPH::PhysicsSettings physics_settings;
+
 			const i32 collision_steps;
 
 			// Jolt init setup
 			void joltSetup();
-
 		};
-	}
 
-}
+	} // Physics
+
+} // PAIN
 
 #endif

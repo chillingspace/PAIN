@@ -36,7 +36,7 @@ namespace PAIN {
 			glm::f32vec3 velocity;
 			glm::f32vec3 angular_velocity;
 			glm::f32 mass;
-			JPH::BodyID bodyID;
+			JPH::BodyID bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
 			bool b_is_dynamic;
 		};
 	}
@@ -110,8 +110,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
             j["velocity"] = rb.velocity;
             j["angular_velocity"] = rb.angular_velocity;
             j["mass"] = rb.mass;
+
+			// There is no need to serialize BodyID directly, as it is managed by Jolt internally. A new one will be created upon loading.
             // Store as uint32
-            j["bodyID"] = rb.bodyID.GetIndexAndSequenceNumber(); 
+            // j["bodyID"] = rb.bodyID.GetIndexAndSequenceNumber(); 
+
             j["is_dynamic"] = rb.b_is_dynamic;
         }
         
@@ -120,9 +123,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
             rb.angular_velocity = j["angular_velocity"].get<glm::vec3>();
             rb.mass = j["mass"].get<float>();
             
+			// Likewise, no need to read BodyID here as Jolt will create a new one.
             // Reconstruct BodyID from stored value
-            uint32_t bodyIDValue = j["bodyID"].get<uint32_t>();
-            rb.bodyID = JPH::BodyID(bodyIDValue);
+            //uint32_t bodyIDValue = j["bodyID"].get<uint32_t>();
+            // rb.bodyID = JPH::BodyID(bodyIDValue);
             
             rb.b_is_dynamic = j["is_dynamic"].get<bool>();
         }
