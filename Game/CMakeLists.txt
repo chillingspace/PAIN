@@ -31,19 +31,21 @@ else()
             "$<TARGET_FILE_DIR:Game>/assets"
     COMMENT "Copying game assets...")
 
-add_custom_command(TARGET Game POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/build/Tools/cuttlefish"
-        "$<TARGET_FILE_DIR:Game>/cuttlefish"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/build/Tools/astc"
-        "$<TARGET_FILE_DIR:Game>/astc"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/build/Tools/ffmpeg"
-        "$<TARGET_FILE_DIR:Game>/ffmpeg"
-    COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
-    CONFIGURATIONS Debug
-)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_command(TARGET Game POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/build/Tools/cuttlefish"
+            "$<TARGET_FILE_DIR:Game>/cuttlefish"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/build/Tools/astc"
+            "$<TARGET_FILE_DIR:Game>/astc"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/build/Tools/ffmpeg"
+            "$<TARGET_FILE_DIR:Game>/ffmpeg"
+        COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
+        CONFIGURATIONS Debug
+    )
+endif()
 
   # VS debugger working directory
   set_target_properties(Game PROPERTIES
