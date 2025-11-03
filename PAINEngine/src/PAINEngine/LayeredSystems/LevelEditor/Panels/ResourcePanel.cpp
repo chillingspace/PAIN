@@ -206,6 +206,7 @@ namespace PAIN {
 
 				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
 				bool open = ImGui::TreeNodeEx(dir.filename().string().c_str(), node_flags);
+				moveFileAcceptPayload(virtual_dir);
 				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					current_path = virtual_dir;
 					populateDirs(current_path);
