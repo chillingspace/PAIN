@@ -93,6 +93,9 @@ namespace PAIN {
                 float auto_refresh_timer = 0.0f;
                 const float AUTO_REFRESH_INTERVAL = 2.0f;
 
+                //Side bar size ratio
+                const float SIDE_BAR_RATIO = 0.2f;
+
                 //Show case file option
                 bool b_show_desc_files = false;
 

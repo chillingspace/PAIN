@@ -198,7 +198,7 @@ namespace PAIN {
 				populateDirectoryCache(virtual_dir);
 				bool has_children = !directoryCache[virtual_dir].empty();
 
-				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
+				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen;
 				if (!has_children)
 					node_flags |= ImGuiTreeNodeFlags_Leaf;
 				bool is_selected = (virtual_dir == current_path);
@@ -806,9 +806,9 @@ namespace PAIN {
 				//	}
 				//}
 
-				// Get the available width at the start of your layout
+				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;
-				float sidebarWidth = totalWidth * 0.2f;
+				float sidebarWidth = totalWidth * SIDE_BAR_RATIO;
 				float mainWidth = totalWidth - sidebarWidth;
 
 				{
@@ -829,23 +829,6 @@ namespace PAIN {
 
 					{
 						ImGui::BeginMenuBar();
-
-						//Parent path navigation
-						{
-							//Back button
-							if (!current_path.empty() && current_path != root_path && ImGui::Button("< Back")) {
-
-								//Parent path
-								current_path = path_service->getVirtualParentPath(current_path);
-
-								//Update directories & files
-								populateDirs(current_path);
-								populateFiles(current_path);
-							}
-							moveFileAcceptPayload(path_service->getVirtualParentPath(current_path));
-						}
-
-						ImGui::Spacing();
 
 						//New folder
 						{
