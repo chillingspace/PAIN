@@ -88,12 +88,12 @@ namespace PAIN {
 			//Create unique asset compiler
 			asset_compiler = std::make_unique<Compiler>(path_service->resolvePath(Path::main_assets_alias, ""),
 														path_service->resolvePath(Path::assets_alias, ""),
-														platform, getExecutablePath());
+														platform, findProjectRoot() / "build/Tools");
 
 			//Create unique asset compiler
 			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
 														path_service->resolvePath(Path::assets_alias, ""),
-														platform, getExecutablePath());
+														platform, findProjectRoot() / "build/Tools");
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {

@@ -319,11 +319,16 @@ namespace PAIN {
                 //Enforce asset location
                 enforceGameAssetLocation(asset);
             }
-            if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
+            else if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
 
                 //Enforce asset location
                 enforceEngineAssetLocation(asset);
             }
+            else {
+                //Enforce asset location into game folder
+                enforceGameAssetLocation(asset);
+            }
+            
 
             //Update asset relative path
             asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);

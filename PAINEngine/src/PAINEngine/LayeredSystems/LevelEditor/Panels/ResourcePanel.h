@@ -43,7 +43,7 @@ namespace PAIN {
                 // File Event Queue
                 // ----------------------------
                 void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
-                void onEvent(PAIN::Event::Event& event);
+                void onEvent(Event::Event& event) override;
 
             private:
 
@@ -86,7 +86,6 @@ namespace PAIN {
                 Assets::GUID selected_asset_id; //Selected file
                 std::string payload_typestring; //File payload type string
 
-                int directory_mode; //Selected directory mode
                 bool b_file_dropped; //File dropped
 
                 //Assets auto refresh timer

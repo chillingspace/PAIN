@@ -61,56 +61,36 @@ namespace PAIN {
 				}
 			}
 
-			void ResourcePanel::onEvent(PAIN::Event::Event& event) {
+			void ResourcePanel::onEvent(Event::Event& event) {
 
 				if (event.getType() == PAIN::Event::Type::FileDrop) {
 
-					//auto& fileEvent = static_cast<PAIN::Event::FileDropped&>(event);
-					//// Now, use fileEvent's data
-					//int file_count = fileEvent.getFilesCount();
-					//const char** file_paths = fileEvent.getPaths();
+					//Create event dispatcher
+					Event::Dispatcher dispatcher(event);
 
-					////Initialize message
-					//std::string message = "Files Added: " + std::to_string(file_count) + " \n";
+					//Dispatch window resized event
+					dispatcher.Dispatch<Event::FileDropped>([&](Event::FileDropped& e) -> bool {
 
-					//for (int i = 0; i < file_count; ++i) {
-					//	std::filesystem::path src_file_path{ file_paths[i] };
+						//iterate through files
+						for (auto path : e.getPaths()) {
 
-					//	//Check if path is valid
-					//	if (PN_ASSETS_SERVICE->isPathValid(src_file_path.string(), false)) {
+							//Get file path
+							std::filesystem::path file_path = path;
 
-					//		//Get asset id
-					//		auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(src_file_path.string(), false);
+							//Target directory ( main game asset folder )
+							auto target = path_service->resolvePath(Path::main_assets_alias, file_path.filename().string());
 
-					//		//Check if asset has already been registered
-					//		if (PN_ASSETS_SERVICE->isAssetRegistered(asset_id)) {
-					//			//Delete assets old registration
-					//			std::filesystem::remove(PN_ASSETS_SERVICE->getAssetPath(asset_id));
-					//		}
+							//Throw asset into the game asset folder
+							std::filesystem::copy(file_path, target, std::filesystem::copy_options::overwrite_existing);
 
-					//		//Copy file
-					//		std::filesystem::copy(src_file_path, PN_PATH_SERVICE->resolvePath(current_path), std::filesystem::copy_options::overwrite_existing);
+							//Sort asset into registry
+							asset_service->registerAsset(target);
+						}
 
-					//		//Log success
-					//		PN_CORE_INFO("File " + src_file_path.string() + " successfully copied into" + PN_PATH_SERVICE->resolvePath(current_path).string());
-					//		message += std::string(file_paths[i]) + "\n";
-					//	}
-					//	else {
-					//		PN_CORE_ERROR("Error Unsupported File Type: {}", file_paths[i]);
-					//		message = "Error Unsupported File Type: " + src_file_path.filename().extension().string();
-					//	}
-					//}
-
-					////Update directories & files
-					//directories = PN_PATH_SERVICE->listDirectories(current_path);
-					//files = PN_PATH_SERVICE->listFiles(current_path);
-
-					////Show success popup
-					//success_msg->assign(message);
-					//b_file_dropped = true;
+						//Return false: continue dispatching, true = stop dispatching 
+						return true;
+						});
 				}
-
-				//event->setEventProcessed(true);
 			}
 
 			void ResourcePanel::populateDirs(std::string const& virtual_path) {
@@ -235,7 +215,7 @@ namespace PAIN {
 					auto parent_path = relative_path.parent_path();
 
 					//Get file path
-					icon_path = parent_path / (relative_path.stem().string() + ".png");
+					icon_path = parent_path / (relative_path.filename());
 				}
 				else {
 					//Def icon ref
@@ -390,7 +370,7 @@ namespace PAIN {
 					if (file.path.extension() != Assets::descriptor_ext && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
 						//Get file type string
-						auto filetype_string = Assets::getTypeStringMapping().at(asset_service->getAssetData(file.id)->type);
+						auto filetype_string = Assets::assetTypeToString(asset_service->getAssetData(file.id)->type);
 
 						//Static copy of payload
 						static File file_copy;
@@ -843,82 +823,6 @@ namespace PAIN {
 						{
 							//Show desc files trigger
 							ImGui::Checkbox("Desc Files", &b_show_desc_files);
-						}
-
-						ImGui::Spacing();
-
-						//Directory level actions
-						{
-							////Array of load directories
-							//const char* load_directory[] = { "Current", "Current *", "Root *" };
-
-							////Render the dropdown
-							//ImGui::PushItemWidth(100.0f);
-							//ImGui::Combo("##Directory", &directory_mode, load_directory, IM_ARRAYSIZE(load_directory));
-							//ImGui::PopItemWidth();
-
-							////Load all from directory
-							//if (ImGui::Button("Load All")) {
-
-							//	//Check for directory mode
-							//	switch (directory_mode) {
-							//		case 0: {
-							//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path);
-							//			success_msg->assign("All assets in: \"" + current_path + "\" loaded.");
-							//			openPopUp("Success");
-							//			break;
-							//		}
-							//		case 1: {
-							//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path, true);
-							//			success_msg->assign("All assets in: \"" + current_path + "*\" loaded.");
-							//			openPopUp("Success");
-							//			break;
-							//		}
-							//		case 2: {
-							//			PN_ASSETS_SERVICE->cacheAssetDirectory(root_path, true);
-							//			success_msg->assign("All assets in: \"" + root_path + "*\" loaded.");
-							//			openPopUp("Success");
-							//			break;
-							//		}
-							//		default: {
-							//			break;
-							//		}
-							//	}
-							//}
-
-							////Unload all from directory
-							//if (ImGui::Button("Unload All")) {
-
-							//	//Check for directory mode
-							//	switch (directory_mode) {
-							//	case 0: {
-							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path);
-							//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							//		openPopUp("Success");
-							//		break;
-							//	}
-							//	case 1: {
-							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path, true);
-							//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							//		openPopUp("Success");
-							//		break;
-							//	}
-							//	case 2: {
-							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(root_path, true);
-							//		success_msg->assign("All assets in: \"" + root_path + "*\" unloaded.");
-							//		openPopUp("Success");
-							//		break;
-							//	}
-							//	default: {
-							//		break;
-							//	}
-							//	}
-							//}
-
-							////Delete all from directory
-							//if (ImGui::Button("Delete All")) {
-							//	openPopUp("Clear Directory");
-							//}
 						}
 
 						ImGui::Spacing();
