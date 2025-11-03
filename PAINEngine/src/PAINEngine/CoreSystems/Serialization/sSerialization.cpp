@@ -112,7 +112,7 @@ namespace PAIN {
 
             std::string contents;
             contents.resize(stream->size());
-            stream->read(contents.data(), contents.size());\
+            stream->read(contents.data(), contents.size());
 
             // Validate JSON syntax before parsing
             if (!nlohmann::json::accept(contents)) {
