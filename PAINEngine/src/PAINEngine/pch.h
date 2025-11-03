@@ -151,4 +151,13 @@ using json = nlohmann::json;
 #include "./Utility/AndroidFs.h"
 #endif
 
+#define glCheck(call) \
+    call; \
+    { \
+        GLenum err = glGetError(); \
+        if (err != GL_NO_ERROR) { \
+            PN_CORE_ERROR("OpenGL error {} at {}:{} - {}", err, __FILE__, __LINE__, #call); \
+        } \
+    }
+
 #endif //PCH_H

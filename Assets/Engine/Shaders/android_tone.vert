@@ -1,5 +1,7 @@
 #version 300 es
 
+precision highp float;
+
 out vec2 TexCoords;
 
 void main() {

@@ -734,6 +734,12 @@ namespace PAIN {
 
 	void WindowsRenderer::PostProcessPass()
 	{
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before tone mapping pass: {}", err);
+		}
+
+
 		int postprocess_passes = 0;
 
 		// tone mapping pass
@@ -741,16 +747,20 @@ namespace PAIN {
 			const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
 			const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
-			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo));
 			tone_shader->Bind();
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, src_tex);
-			tone_shader->SetUniform("tex", 0);
-			tone_shader->SetUniform("exposure", GraphicsSettings::get().tone_mapping_exposure);
-			tone_shader->SetUniform("toneMapMode", static_cast<float>(GraphicsSettings::get().tone_mapping_mode));
-			glBindVertexArray(empty_vao);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glCheck(glActiveTexture(GL_TEXTURE0));
+			glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+			glCheck(tone_shader->SetUniform("tex", 0));
+			glCheck(tone_shader->SetUniform("exposure", GraphicsSettings::get().tone_mapping_exposure));
+			glCheck(tone_shader->SetUniform("toneMapMode", static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			glCheck(glBindVertexArray(empty_vao));
+			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			++postprocess_passes;
+		}
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
 		}
 
 
@@ -775,6 +785,11 @@ namespace PAIN {
 				++postprocess_passes;
 			}
 		}
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after blur pass: {}", err);
+		}
+
 
 		// gamma correction
 		if (GraphicsSettings::get().gamma_correction) {
@@ -791,9 +806,9 @@ namespace PAIN {
 			++postprocess_passes;
 		}
 
-		GLenum err = glGetError();
+		err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err during PostProcessPass: {}", err);
+			PN_CORE_ERROR("OpenGL err after gamma pass: {}", err);
 		}
 
 		// make sure final_texture now holds the gamma corrected texture
@@ -806,6 +821,10 @@ namespace PAIN {
 			passthrough_shader->SetUniform("tex", 0);
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after finalizing post process pass: {}", err);
 		}
 
 		// set back to use final_fbo and final_texture for further rendering
@@ -822,19 +841,22 @@ namespace PAIN {
 				auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
 				Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
 			}
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after Render2DTexture in PostProcessPass: {}", err);
+			}
 
 			// render text onto screen
 			{
 				TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
 				TextRenderer::get().debugRenderQuad();
 			}
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after TextRenderer in PostProcessPass: {}", err);
+			}
 
 			glEnable(GL_DEPTH_TEST);
-		}
-
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
 
 		// render to actual screen
@@ -844,6 +866,11 @@ namespace PAIN {
 		glBindTexture(GL_TEXTURE_2D, final_texture);
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
+		}
 	}
 
 	void WindowsRenderer::Cleanup() {
