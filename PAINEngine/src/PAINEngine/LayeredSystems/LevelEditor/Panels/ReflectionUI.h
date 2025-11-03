@@ -10,7 +10,7 @@
 #include "ComponentsPanel.h"
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cAudioSource.h"
-
+#include "ECS/Components/cBoundingVolume.h"
 
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
@@ -100,6 +100,32 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
     return changed;
 }
 
+// ----- PAIN::AABB drawer (read-only UI) -----
+namespace PAIN { struct AABB; } // For Bounding Volume
+
+inline bool DrawField(const char* label, PAIN::AABB& aabb) {
+    bool changed = false;
+    ImGui::SeparatorText(label);
+
+    ImGui::BeginDisabled(true);
+    ImGui::InputFloat3("Min", glm::value_ptr(aabb.min), "%.3f");
+    ImGui::InputFloat3("Max", glm::value_ptr(aabb.max), "%.3f");
+    ImGui::EndDisabled();
+
+    // Small helpers (don’t flip changed flags; they don’t edit the struct)
+    ImGui::SameLine();
+    if (ImGui::Button("Copy##AABB")) {
+        char buf[256];
+        std::snprintf(buf, sizeof(buf),
+            "Min(%.3f, %.3f, %.3f) Max(%.3f, %.3f, %.3f)",
+            aabb.min.x, aabb.min.y, aabb.min.z,
+            aabb.max.x, aabb.max.y, aabb.max.z);
+        ImGui::SetClipboardText(buf);
+    }
+    return changed; // drawer is read-only
+}
+
+
 // ----- AudioState Enum -----
 inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
     const char* names[] = { "Stopped", "Playing", "Paused" };
@@ -124,22 +150,48 @@ inline bool DrawField(const char* label, T&) {
 }
 
 // ---------- Reflection driver ----------
-template <typename T>
+ template <typename T>
 bool DrawWithReflection(T& obj) {
     bool changed = false;
 
-    constexpr auto type = refl::reflect<T>();         
-    refl::util::for_each(type.members, [&](auto m) {   
+    constexpr auto type = refl::reflect<T>();
+    refl::util::for_each(type.members, [&](auto m) {
         if constexpr (refl::descriptor::is_field(m)) {
             auto& field = m(obj);
             ImGui::PushID(m.name.c_str());
-            changed |= DrawField(m.name.c_str(), field);
+
+            // If the field has ReadOnlyTag, grey it out
+            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)) {
+                ImGui::BeginDisabled(true);
+                changed |= DrawField(m.name.c_str(), field);
+                ImGui::EndDisabled();
+            }
+            else {
+                changed |= DrawField(m.name.c_str(), field);
+            }
+
             ImGui::PopID();
         }
         });
-
     return changed;
 }
+
+//template <typename T>
+//bool DrawWithReflection(T& obj) {
+//    bool changed = false;
+//
+//    constexpr auto type = refl::reflect<T>();         
+//    refl::util::for_each(type.members, [&](auto m) {   
+//        if constexpr (refl::descriptor::is_field(m)) {
+//            auto& field = m(obj);
+//            ImGui::PushID(m.name.c_str());
+//            changed |= DrawField(m.name.c_str(), field);
+//            ImGui::PopID();
+//        }
+//        });
+//
+//    return changed;
+//}
 
 #ifdef _DEBUG
 namespace PAIN {

@@ -5,6 +5,7 @@
 
 // Include AABB definition globally if needed by other files including this one
 #include "CoreSystems/Collision/BoundingVolume.h"
+#include <refl.hpp>
 
 namespace PAIN {
 
@@ -78,6 +79,20 @@ namespace nlohmann {
         }
     };
 }
+
+// Mark fields as read-only in the reflected UI
+struct ReadOnlyTag {};
+
+// Reflection
+REFL_TYPE(PAIN::cBoundingVolume)
+REFL_FIELD(localAABB, (ReadOnlyTag()))
+REFL_FIELD(worldAABB, (ReadOnlyTag()))
+REFL_FIELD(bvhNodeIndex, (ReadOnlyTag()))
+REFL_FIELD(needsUpdate)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::cBoundingVolume>,
+    "cBoundingVolume must be reflected before drawing.");
 
 
 #endif // C_BOUNDING_VOLUME_H
