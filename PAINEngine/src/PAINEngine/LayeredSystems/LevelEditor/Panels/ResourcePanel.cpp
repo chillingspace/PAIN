@@ -17,7 +17,7 @@ namespace PAIN {
                 name = "Resource Panel";
 
                 //Set panel flag
-                flags = ImGuiWindowFlags_MenuBar;
+                //flags = ImGuiWindowFlags_MenuBar;
 
                 // Default icon size
                 icon_size = { 128.0f, 128.0f };
@@ -175,6 +175,41 @@ namespace PAIN {
 
 					//Add this to file vector
 					files.push_back(temp);
+				}
+			}
+
+			void ResourcePanel::populateDirectoryCache(const std::string& virtual_dir) {
+				if (directoryCache.count(virtual_dir) > 0) return; // Already cached
+
+				std::vector<std::string> children;
+				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
+				for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+					if (entry.is_directory()) {
+						auto relative = std::filesystem::relative(entry, dir);
+						children.push_back(virtual_dir + "/" + relative.string());
+					}
+				}
+				directoryCache[virtual_dir] = std::move(children);
+			}
+
+			void ResourcePanel::DrawDirectoryTree(std::string const& virtual_dir) {
+				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
+				bool is_selected = (virtual_dir == current_path);
+				if (is_selected) node_flags |= ImGuiTreeNodeFlags_Selected;
+
+				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
+				bool open = ImGui::TreeNodeEx(dir.filename().string().c_str(), node_flags);
+				if (ImGui::IsItemClicked()) {
+					current_path = virtual_dir;
+					populateDirs(current_path);
+					populateFiles(current_path);
+				}
+				if (open) {
+					populateDirectoryCache(virtual_dir);
+					for (const std::string& subdir : directoryCache[virtual_dir]) {
+						DrawDirectoryTree(subdir);
+					}
+					ImGui::TreePop();
 				}
 			}
 
@@ -764,345 +799,372 @@ namespace PAIN {
 				//	}
 				//}
 
-				ImGui::BeginMenuBar();
+				// Get the available width at the start of your layout
+				float totalWidth = ImGui::GetContentRegionAvail().x;
+				float sidebarWidth = totalWidth * 0.2f;
+				float mainWidth = totalWidth - sidebarWidth;
 
-				//Parent path navigation
 				{
-					//Back button
-					if (!current_path.empty() && current_path != root_path && ImGui::Button("< Back")) {
+					ImGui::BeginChild("Sidebar", ImVec2(sidebarWidth, 0), true);
 
-						//Parent path
-						current_path = path_service->getVirtualParentPath(current_path);
+					//Draw directory tree
+					DrawDirectoryTree(root_path);
 
-						//Update directories & files
-						populateDirs(current_path);
-						populateFiles(current_path);
+					ImGui::EndChild();
+				}
+
+				//Same line separataion between side bar and main content
+				ImGui::SameLine();
+
+				{
+
+					ImGui::BeginChild("MainContent", ImVec2(mainWidth, 0), false, ImGuiWindowFlags_MenuBar);
+
+					{
+						ImGui::BeginMenuBar();
+
+						//Parent path navigation
+						{
+							//Back button
+							if (!current_path.empty() && current_path != root_path && ImGui::Button("< Back")) {
+
+								//Parent path
+								current_path = path_service->getVirtualParentPath(current_path);
+
+								//Update directories & files
+								populateDirs(current_path);
+								populateFiles(current_path);
+							}
+							moveFileAcceptPayload(path_service->getVirtualParentPath(current_path));
+						}
+
+						ImGui::Spacing();
+
+						//New folder
+						{
+							//Create new folder popup
+							if (ImGui::Button("New Folder")) {
+								openPopUp("New Folder");
+							}
+						}
+
+						ImGui::Spacing();
+
+						{
+							//Show desc files trigger
+							ImGui::Checkbox("Desc Files", &b_show_desc_files);
+						}
+
+						ImGui::Spacing();
+
+						//Directory level actions
+						{
+							////Array of load directories
+							//const char* load_directory[] = { "Current", "Current *", "Root *" };
+
+							////Render the dropdown
+							//ImGui::PushItemWidth(100.0f);
+							//ImGui::Combo("##Directory", &directory_mode, load_directory, IM_ARRAYSIZE(load_directory));
+							//ImGui::PopItemWidth();
+
+							////Load all from directory
+							//if (ImGui::Button("Load All")) {
+
+							//	//Check for directory mode
+							//	switch (directory_mode) {
+							//		case 0: {
+							//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path);
+							//			success_msg->assign("All assets in: \"" + current_path + "\" loaded.");
+							//			openPopUp("Success");
+							//			break;
+							//		}
+							//		case 1: {
+							//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path, true);
+							//			success_msg->assign("All assets in: \"" + current_path + "*\" loaded.");
+							//			openPopUp("Success");
+							//			break;
+							//		}
+							//		case 2: {
+							//			PN_ASSETS_SERVICE->cacheAssetDirectory(root_path, true);
+							//			success_msg->assign("All assets in: \"" + root_path + "*\" loaded.");
+							//			openPopUp("Success");
+							//			break;
+							//		}
+							//		default: {
+							//			break;
+							//		}
+							//	}
+							//}
+
+							////Unload all from directory
+							//if (ImGui::Button("Unload All")) {
+
+							//	//Check for directory mode
+							//	switch (directory_mode) {
+							//	case 0: {
+							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path);
+							//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
+							//		openPopUp("Success");
+							//		break;
+							//	}
+							//	case 1: {
+							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path, true);
+							//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
+							//		openPopUp("Success");
+							//		break;
+							//	}
+							//	case 2: {
+							//		PN_ASSETS_SERVICE->uncacheAssetDirectory(root_path, true);
+							//		success_msg->assign("All assets in: \"" + root_path + "*\" unloaded.");
+							//		openPopUp("Success");
+							//		break;
+							//	}
+							//	default: {
+							//		break;
+							//	}
+							//	}
+							//}
+
+							////Delete all from directory
+							//if (ImGui::Button("Delete All")) {
+							//	openPopUp("Clear Directory");
+							//}
+						}
+
+						ImGui::Spacing();
+
+						//Customize icon size
+						{
+							ImGui::Text("Icon Size: ");
+							ImGui::PushItemWidth(50.0f);
+							ImGui::DragFloat("##IconSizing", &icon_size.x, 1.0f, 32.0f, 256.0f, "%.f", ImGuiSliderFlags_AlwaysClamp);
+							ImGui::PopItemWidth();
+							icon_size.y = icon_size.x;
+						}
+
+						ImGui::Spacing();
+
+						//Search filter
+						{
+							//Input filter
+							ImGui::Text("Filter: ");
+							ImGui::SameLine();
+							ImGui::PushItemWidth(100.0f);
+							if (ImGui::InputTextWithHint("##SearchFilter", "Search...", search_filter.data(), search_filter.capacity() + 1)) {
+								search_filter.resize(strlen(search_filter.c_str()));
+							}
+							ImGui::PopItemWidth();
+						}
+
+						ImGui::Spacing();
+
+						//Refresh directory
+						{
+							if (ImGui::Button("Refresh") || auto_refresh_timer > AUTO_REFRESH_INTERVAL) {
+
+								//Reset timer
+								auto_refresh_timer = 0.0f;
+
+								//Update directories & files
+								populateDirs(current_path);
+								populateFiles(current_path);
+							}
+						}
+
+						//Render popups
+						renderPopUps();
+
+						ImGui::EndMenuBar();
 					}
-					moveFileAcceptPayload(path_service->getVirtualParentPath(current_path));
-				}
 
-				ImGui::Spacing();
+					//Render all assets & folders
+					renderAssetsBrowser(current_path);
 
-				//New folder
-				{
-					//Create new folder popup
-					if (ImGui::Button("New Folder")) {
-						openPopUp("New Folder");
+					//Set window dock id
+					dock_id = ImGui::GetWindowDockID();
+
+					{
+						////Render selected asset options
+						//if (!selected_asset_id.empty() && PN_ASSETS_SERVICE->isAssetRegistered(selected_asset_id)) {
+
+						//	// Center the panel
+						//	ImGui::Begin("Selected Asset", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
+
+						//	//Get selected asset path
+						//	auto path = PN_ASSETS_SERVICE->getAssetPath(selected_asset_id);
+
+						//	//Asset metadata
+						//	ImGui::Text("Asset: %s", selected_asset_id.c_str());
+						//	ImGui::Text("Type: %s", PN_ASSETS_SERVICE->getAssetTypeString(selected_asset_id).c_str());
+
+						//	//Get selected asset texture display
+						//	ImTextureID display = static_cast<ImTextureID>(fileIcon(path));
+
+						//	//Display image
+						//	ImVec2 uv0(0.0f, 1.0f);
+						//	ImVec2 uv1(1.0f, 0.0f);
+						//	ImGui::Image(display, { 256, 256 }, uv0, uv1);
+
+						//	//Loadable type actions
+						//	if (PN_ASSETS_SERVICE->isAssetLoadable(selected_asset_id)) {
+
+						//		//Show audio length if asset is loaded & an audio file
+						//		//if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id) && (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
+						//		//	PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music)) {
+
+						//		//	//Show audio length
+						//		//	auto length = PN_ASSETS_SERVICE->getAsset<Audio::IAudio>(selected_asset_id)->getLength(NIKE_AUDIO_TIMEUNIT_MS);
+						//		//	ImGui::Text("Length:");
+						//		//	ImGui::Text("%d ms", length);
+						//		//	ImGui::Text("%.2f s", length / 1000.0f);
+						//		//	ImGui::Text("%.2f mins", (length / 1000.0f) / 60.0f);
+						//		//}
+
+						//		//Asset loading or unloading
+						//		if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id)) {
+						//			//Unload action
+						//			if (ImGui::Button("Unload")) {
+
+						//				//Unload asset
+						//				PN_ASSETS_SERVICE->uncacheAsset(selected_asset_id);
+						//				success_msg->assign("Asset: \"" + selected_asset_id + "\" unloaded.");
+						//				openPopUp("Success");
+						//			}
+
+						//			//Audio asset preview
+						//			if (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
+						//				PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music) {
+
+						//				//Same line
+						//				ImGui::SameLine();
+
+						//				//Play button
+						//				if (ImGui::Button("Play")) {
+						//					//Check if channel group has been created
+						//					//if (!PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
+						//					//	PN_AUDIO_SERVICE->createChannelGroup("Audio Preview");
+						//					//}
+
+						//					////Get audio group
+						//					//auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
+
+						//					////Toggle audio state
+						//					//if (group->getPaused()) {
+						//					//	group->setPaused(false);
+						//					//}
+						//					//else {
+						//					//	//Play music
+						//					//	bool is_music = PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music ? true : false;
+						//					//	PN_AUDIO_SERVICE->playAudio(selected_asset_id, "", "Audio Preview", 0.5f, 0.5f, false, is_music);
+						//					//}
+						//				}
+
+						//				//Manage preview audio group
+						//				//if (PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
+						//				//	auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
+
+						//				//	if (group->isPlaying()) {
+						//				//		//Same line
+						//				//		ImGui::SameLine();
+
+						//				//		//Pause audio preview
+						//				//		if (ImGui::Button("Pause")) {
+						//				//			group->setPaused(true);
+						//				//		}
+
+						//				//		//Same line
+						//				//		ImGui::SameLine();
+
+						//				//		//Pause audio preview
+						//				//		if (ImGui::Button("Stop")) {
+						//				//			group->stop();
+						//				//		}
+						//				//	}
+						//				//	else if (!group->isPlaying() && !group->getPaused()) {
+						//				//		PN_AUDIO_SERVICE->unloadChannelGroup("Audio Preview");
+						//				//	}
+						//				//}
+						//			}
+
+
+						//		}
+						//		else {
+						//			//Load action
+						//			if (ImGui::Button("Load")) {
+
+						//				//Load asset
+						//				PN_ASSETS_SERVICE->cacheAsset(selected_asset_id);
+						//				success_msg->assign("Asset: \"" + selected_asset_id + "\" loaded.");
+						//				openPopUp("Success");
+						//			}
+						//		}
+
+						//		//Same line
+						//		ImGui::SameLine();
+						//	}
+
+						//	//Editable type actions
+						//	if (PN_ASSETS_SERVICE->isAssetEditable(selected_asset_id)) {
+						//		if (ImGui::Button("Edit##EditableAsset")) {
+
+						//			//Read file into string
+						//			std::ifstream file(PN_ASSETS_SERVICE->getAssetPath(selected_asset_id));
+						//			if (file.is_open()) {
+
+						//				//Check if file is already open
+						//				if (file_editing_map.find(selected_asset_id) == file_editing_map.end()) {
+						//					file_editing_map[selected_asset_id].reserve(1024 * 1024); // 1mb storage for file editing
+						//					// Read file content
+						//					file_editing_map[selected_asset_id].assign((std::istreambuf_iterator<char>(file)),
+						//						std::istreambuf_iterator<char>());
+						//					file.close();
+						//				}
+						//			}
+						//			else {
+						//				PN_CORE_WARN("Failed to open file");
+						//				file.close();
+						//			}
+						//		}
+
+						//		//Same line
+						//		ImGui::SameLine();
+						//	}
+
+						//	//Delete asset
+						//	if (ImGui::Button("Delete##DeleteAsset")) {
+						//		openPopUp("Delete Asset");
+						//	}
+
+						//	//Same line
+						//	ImGui::SameLine();
+
+						//	//Unload action
+						//	if (ImGui::Button("Close##CloseAsset")) {
+
+						//		//Reset selected asset id
+						//		selected_asset_id.clear();
+						//	}
+
+						//	//Render popups
+						//	renderPopUps();
+						//}
 					}
-				}
 
-				ImGui::Spacing();
+					//Render file editor
+					renderFileEditor();
 
-				{
-					//Show desc files trigger
-					ImGui::Checkbox("Desc Files", &b_show_desc_files);
-				}
-
-				ImGui::Spacing();
-
-				//Directory level actions
-				{
-					////Array of load directories
-					//const char* load_directory[] = { "Current", "Current *", "Root *" };
-
-					////Render the dropdown
-					//ImGui::PushItemWidth(100.0f);
-					//ImGui::Combo("##Directory", &directory_mode, load_directory, IM_ARRAYSIZE(load_directory));
-					//ImGui::PopItemWidth();
-
-					////Load all from directory
-					//if (ImGui::Button("Load All")) {
-
-					//	//Check for directory mode
-					//	switch (directory_mode) {
-					//		case 0: {
-					//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path);
-					//			success_msg->assign("All assets in: \"" + current_path + "\" loaded.");
-					//			openPopUp("Success");
-					//			break;
-					//		}
-					//		case 1: {
-					//			PN_ASSETS_SERVICE->cacheAssetDirectory(current_path, true);
-					//			success_msg->assign("All assets in: \"" + current_path + "*\" loaded.");
-					//			openPopUp("Success");
-					//			break;
-					//		}
-					//		case 2: {
-					//			PN_ASSETS_SERVICE->cacheAssetDirectory(root_path, true);
-					//			success_msg->assign("All assets in: \"" + root_path + "*\" loaded.");
-					//			openPopUp("Success");
-					//			break;
-					//		}
-					//		default: {
-					//			break;
-					//		}
-					//	}
-					//}
-
-					////Unload all from directory
-					//if (ImGui::Button("Unload All")) {
-
-					//	//Check for directory mode
-					//	switch (directory_mode) {
-					//	case 0: {
-					//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path);
-					//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-					//		openPopUp("Success");
-					//		break;
-					//	}
-					//	case 1: {
-					//		PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path, true);
-					//		success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-					//		openPopUp("Success");
-					//		break;
-					//	}
-					//	case 2: {
-					//		PN_ASSETS_SERVICE->uncacheAssetDirectory(root_path, true);
-					//		success_msg->assign("All assets in: \"" + root_path + "*\" unloaded.");
-					//		openPopUp("Success");
-					//		break;
-					//	}
-					//	default: {
-					//		break;
-					//	}
-					//	}
-					//}
-
-					////Delete all from directory
-					//if (ImGui::Button("Delete All")) {
-					//	openPopUp("Clear Directory");
-					//}
-				}
-
-				ImGui::Spacing();
-
-				//Customize icon size
-				{
-					ImGui::Text("Icon Size: ");
-					ImGui::PushItemWidth(50.0f);
-					ImGui::DragFloat("##IconSizing", &icon_size.x, 1.0f, 32.0f, 256.0f, "%.f", ImGuiSliderFlags_AlwaysClamp);
-					ImGui::PopItemWidth();
-					icon_size.y = icon_size.x;
-				}
-
-				ImGui::Spacing();
-
-				//Search filter
-				{
-					//Input filter
-					ImGui::Text("Filter: ");
-					ImGui::SameLine();
-					ImGui::PushItemWidth(100.0f);
-					if (ImGui::InputTextWithHint("##SearchFilter", "Search...", search_filter.data(), search_filter.capacity() + 1)) {
-						search_filter.resize(strlen(search_filter.c_str()));
+					//File dropped popup
+					if (b_file_dropped && !checkPopUpShowing()) {
+						//openPopUp("Success");
+						//b_file_dropped = false;
 					}
-					ImGui::PopItemWidth();
+
+					//Render popups
+					renderPopUps();
+
+					//End main content child
+					ImGui::EndChild();
 				}
-
-				ImGui::Spacing();
-
-				//Refresh directory
-				{
-					if (ImGui::Button("Refresh") || auto_refresh_timer > AUTO_REFRESH_INTERVAL) {
-
-						//Reset timer
-						auto_refresh_timer = 0.0f;
-
-						//Update directories & files
-						populateDirs(current_path);
-						populateFiles(current_path);
-					}
-				}
-
-				//Render popups
-				renderPopUps();
-
-				ImGui::EndMenuBar();
-
-				//Render all assets & folders
-				renderAssetsBrowser(current_path);
-
-				//Set window dock id
-				dock_id = ImGui::GetWindowDockID();
-
-				{
-					////Render selected asset options
-					//if (!selected_asset_id.empty() && PN_ASSETS_SERVICE->isAssetRegistered(selected_asset_id)) {
-
-					//	// Center the panel
-					//	ImGui::Begin("Selected Asset", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
-
-					//	//Get selected asset path
-					//	auto path = PN_ASSETS_SERVICE->getAssetPath(selected_asset_id);
-
-					//	//Asset metadata
-					//	ImGui::Text("Asset: %s", selected_asset_id.c_str());
-					//	ImGui::Text("Type: %s", PN_ASSETS_SERVICE->getAssetTypeString(selected_asset_id).c_str());
-
-					//	//Get selected asset texture display
-					//	ImTextureID display = static_cast<ImTextureID>(fileIcon(path));
-
-					//	//Display image
-					//	ImVec2 uv0(0.0f, 1.0f);
-					//	ImVec2 uv1(1.0f, 0.0f);
-					//	ImGui::Image(display, { 256, 256 }, uv0, uv1);
-
-					//	//Loadable type actions
-					//	if (PN_ASSETS_SERVICE->isAssetLoadable(selected_asset_id)) {
-
-					//		//Show audio length if asset is loaded & an audio file
-					//		//if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id) && (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-					//		//	PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music)) {
-
-					//		//	//Show audio length
-					//		//	auto length = PN_ASSETS_SERVICE->getAsset<Audio::IAudio>(selected_asset_id)->getLength(NIKE_AUDIO_TIMEUNIT_MS);
-					//		//	ImGui::Text("Length:");
-					//		//	ImGui::Text("%d ms", length);
-					//		//	ImGui::Text("%.2f s", length / 1000.0f);
-					//		//	ImGui::Text("%.2f mins", (length / 1000.0f) / 60.0f);
-					//		//}
-
-					//		//Asset loading or unloading
-					//		if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id)) {
-					//			//Unload action
-					//			if (ImGui::Button("Unload")) {
-
-					//				//Unload asset
-					//				PN_ASSETS_SERVICE->uncacheAsset(selected_asset_id);
-					//				success_msg->assign("Asset: \"" + selected_asset_id + "\" unloaded.");
-					//				openPopUp("Success");
-					//			}
-
-					//			//Audio asset preview
-					//			if (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-					//				PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music) {
-
-					//				//Same line
-					//				ImGui::SameLine();
-
-					//				//Play button
-					//				if (ImGui::Button("Play")) {
-					//					//Check if channel group has been created
-					//					//if (!PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-					//					//	PN_AUDIO_SERVICE->createChannelGroup("Audio Preview");
-					//					//}
-
-					//					////Get audio group
-					//					//auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-					//					////Toggle audio state
-					//					//if (group->getPaused()) {
-					//					//	group->setPaused(false);
-					//					//}
-					//					//else {
-					//					//	//Play music
-					//					//	bool is_music = PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music ? true : false;
-					//					//	PN_AUDIO_SERVICE->playAudio(selected_asset_id, "", "Audio Preview", 0.5f, 0.5f, false, is_music);
-					//					//}
-					//				}
-
-					//				//Manage preview audio group
-					//				//if (PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-					//				//	auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-					//				//	if (group->isPlaying()) {
-					//				//		//Same line
-					//				//		ImGui::SameLine();
-
-					//				//		//Pause audio preview
-					//				//		if (ImGui::Button("Pause")) {
-					//				//			group->setPaused(true);
-					//				//		}
-
-					//				//		//Same line
-					//				//		ImGui::SameLine();
-
-					//				//		//Pause audio preview
-					//				//		if (ImGui::Button("Stop")) {
-					//				//			group->stop();
-					//				//		}
-					//				//	}
-					//				//	else if (!group->isPlaying() && !group->getPaused()) {
-					//				//		PN_AUDIO_SERVICE->unloadChannelGroup("Audio Preview");
-					//				//	}
-					//				//}
-					//			}
-
-
-					//		}
-					//		else {
-					//			//Load action
-					//			if (ImGui::Button("Load")) {
-
-					//				//Load asset
-					//				PN_ASSETS_SERVICE->cacheAsset(selected_asset_id);
-					//				success_msg->assign("Asset: \"" + selected_asset_id + "\" loaded.");
-					//				openPopUp("Success");
-					//			}
-					//		}
-
-					//		//Same line
-					//		ImGui::SameLine();
-					//	}
-
-					//	//Editable type actions
-					//	if (PN_ASSETS_SERVICE->isAssetEditable(selected_asset_id)) {
-					//		if (ImGui::Button("Edit##EditableAsset")) {
-
-					//			//Read file into string
-					//			std::ifstream file(PN_ASSETS_SERVICE->getAssetPath(selected_asset_id));
-					//			if (file.is_open()) {
-
-					//				//Check if file is already open
-					//				if (file_editing_map.find(selected_asset_id) == file_editing_map.end()) {
-					//					file_editing_map[selected_asset_id].reserve(1024 * 1024); // 1mb storage for file editing
-					//					// Read file content
-					//					file_editing_map[selected_asset_id].assign((std::istreambuf_iterator<char>(file)),
-					//						std::istreambuf_iterator<char>());
-					//					file.close();
-					//				}
-					//			}
-					//			else {
-					//				PN_CORE_WARN("Failed to open file");
-					//				file.close();
-					//			}
-					//		}
-
-					//		//Same line
-					//		ImGui::SameLine();
-					//	}
-
-					//	//Delete asset
-					//	if (ImGui::Button("Delete##DeleteAsset")) {
-					//		openPopUp("Delete Asset");
-					//	}
-
-					//	//Same line
-					//	ImGui::SameLine();
-
-					//	//Unload action
-					//	if (ImGui::Button("Close##CloseAsset")) {
-
-					//		//Reset selected asset id
-					//		selected_asset_id.clear();
-					//	}
-
-					//	//Render popups
-					//	renderPopUps();
-					//}
-				}
-
-				//Render file editor
-				renderFileEditor();
-
-				//File dropped popup
-				if (b_file_dropped && !checkPopUpShowing()) {
-					//openPopUp("Success");
-					//b_file_dropped = false;
-				}
-
-				//Render popups
-				renderPopUps();
 			}
 
 
