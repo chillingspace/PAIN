@@ -851,7 +851,7 @@ namespace PAIN {
 
 			// add blurred bright areas back to original image
 			{
-				const unsigned int dest_fbo = final_fbo;
+				const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp2_fbo : pp_fbo;
 				const unsigned int bloom_tex = postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
@@ -870,8 +870,7 @@ namespace PAIN {
 				glBindVertexArray(empty_vao);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-				// reset postprocess_passes since we wrote to final_fbo directly
-				postprocess_passes = 0;
+				++postprocess_passes;
 			}
 		}
 
