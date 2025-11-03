@@ -15,6 +15,8 @@
 
 #include "pch.h"
 #include "ECS/System/ISystem.h"
+#include "ECS/Components/cMetadata.h"
+#include "ECS/Components/cAudioSource.h"
 #include "CoreSystems/Collision/sCollision.h"
 #include "CoreSystems/Collision/sLayer.h"
 
@@ -77,6 +79,7 @@ namespace PAIN {
 			// This caps how many constraints the solver can handle per step.
 			const i32 c_max_contact_constraints;
 
+			// Filters and layer interfaces
 			PAIN::BPLayerInterfaceImpl	mBroadPhaseLayerInterface;									// The broadphase layer interface that maps object layers to broadphase layers
 			PAIN::ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;					// Class that filters object vs broadphase layers
 			PAIN::ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;								// Class that filters object vs object layers

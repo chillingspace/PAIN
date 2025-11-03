@@ -107,27 +107,18 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
     template<>
     struct adl_serializer<PAIN::Physics::RigidBody3D> {
         static void to_json(json& j, const PAIN::Physics::RigidBody3D& rb) {
+			// There is no need to serialize BodyID directly, as it is managed by Jolt internally. A new one will be created upon loading
             j["velocity"] = rb.velocity;
             j["angular_velocity"] = rb.angular_velocity;
             j["mass"] = rb.mass;
-
-			// There is no need to serialize BodyID directly, as it is managed by Jolt internally. A new one will be created upon loading.
-            // Store as uint32
-            // j["bodyID"] = rb.bodyID.GetIndexAndSequenceNumber(); 
-
             j["is_dynamic"] = rb.b_is_dynamic;
         }
         
         static void from_json(const json& j, PAIN::Physics::RigidBody3D& rb) {
+			// Likewise, no need to read BodyID here as Jolt will create a new one
             rb.velocity = j["velocity"].get<glm::vec3>();
             rb.angular_velocity = j["angular_velocity"].get<glm::vec3>();
             rb.mass = j["mass"].get<float>();
-            
-			// Likewise, no need to read BodyID here as Jolt will create a new one.
-            // Reconstruct BodyID from stored value
-            //uint32_t bodyIDValue = j["bodyID"].get<uint32_t>();
-            // rb.bodyID = JPH::BodyID(bodyIDValue);
-            
             rb.b_is_dynamic = j["is_dynamic"].get<bool>();
         }
     };
