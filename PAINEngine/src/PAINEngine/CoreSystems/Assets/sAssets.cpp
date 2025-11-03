@@ -138,6 +138,10 @@ namespace PAIN {
 
 			//Get asset registry data
 			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
+
+			//Register paths to guid
+			shipped_path_to_guid[asset.shipped_relative_path] = asset.guid;
+			main_path_to_guid[asset.main_relative_path] = asset.guid;
 		}
 #endif
 
@@ -148,19 +152,35 @@ namespace PAIN {
 
 			//Get asset registry data
 			asset_registry[asset->guid] = asset;
+
+			//Register paths to guid
+			shipped_path_to_guid[asset->shipped_relative_path] = asset->guid;
+			main_path_to_guid[asset->main_relative_path] = asset->guid;
 		}
 
 		void Manager::unregisterAsset(GUID const& id) {
 
 			//Find cache it and uncache
-			auto cahce_it = asset_cache.find(id);
-			if (cahce_it != asset_cache.end()) {
-				cahce_it = asset_cache.erase(cahce_it);
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				cache_it = asset_cache.erase(cache_it);
 			}
 
 			//Get asset registry data
 			auto registry_it = asset_registry.find(id);
 			if (registry_it != asset_registry.end()) {
+
+				//Remove paths to guid
+				auto shipped_it = shipped_path_to_guid.find(registry_it->second->shipped_relative_path);
+				if (shipped_it != shipped_path_to_guid.end()) {
+					shipped_it = shipped_path_to_guid.erase(shipped_it);
+				}
+
+				auto main_it = main_path_to_guid.find(registry_it->second->main_relative_path);
+				if (main_it != main_path_to_guid.end()) {
+					main_it = main_path_to_guid.erase(main_it);
+				}
+
 				registry_it = asset_registry.erase(registry_it);
 			}
 		}
@@ -288,16 +308,39 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
-		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const {
+		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+			std::filesystem::path relative_from = std::filesystem::relative(from, root);
+			std::filesystem::path relative_to = std::filesystem::relative(to, root);
+
+			//Ensure relative
+			if (relative_from.empty() || relative_to.empty()) return;
 
 			//Move file
-			asset_organizer->moveFile(from, to);
+			if (asset_organizer->moveFile(from, to)) {
+
+				unregisterAsset(findGUID(from));
+				registerAsset(relative_to);
+			}
 		}
 
-		void Manager::removeFile(std::filesystem::path const& file_path) const {
+		void Manager::removeFile(std::filesystem::path const& file_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+			std::filesystem::path relative = std::filesystem::relative(file_path, root);
+
+			//Ensure relative
+			if (relative.empty()) return;
 
 			//Remove file
-			asset_organizer->removeFile(file_path);
+			if (asset_organizer->removeFile(file_path)) {
+				unregisterAsset(findGUID(relative));
+			}
 		}
 #endif
 #endif

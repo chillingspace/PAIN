@@ -153,10 +153,10 @@ namespace PAIN {
 			//Debug only editor mode functions
 
 			//Move file function
-			void moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const;
+			void moveFile(std::filesystem::path const& from, std::filesystem::path const& to);
 
 			//Delete file function
-			void removeFile(std::filesystem::path const& file_path) const;
+			void removeFile(std::filesystem::path const& file_path);
 #endif
 #endif
 
