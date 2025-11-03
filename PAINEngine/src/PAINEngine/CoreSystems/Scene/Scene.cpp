@@ -46,26 +46,26 @@ namespace PAIN {
 			LightSources::get().create("world");
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
-			lc.forward = glm::normalize(glm::vec3{ -0.5, -1, -0.5 });
-			lc.position = -lc.forward * 10.f;
-			lc.L_intensity = glm::vec3(1.5f);
+			lc.forward = glm::normalize(glm::vec3{ -0.5, -1, -0.2 });
+			//lc.position = -lc.forward * 10.f;					// follows camera
+			lc.L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
 			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 			lc.type = Light::TYPES::DIRECTIONAL;
 		}
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(4.f, 4.f, -8.f);
-		la.L_intensity = glm::vec3(0.2f);
+		//LightSources::get().create("a");
+		//auto ola = LightSources::get().get("a");
+		//Light& la = ola.value();
+		//la.position = glm::vec3(4.f, 4.f, -8.f);
+		//la.L_intensity = glm::vec3(0.2f);
 
-		LightSources::get().create("b");
-		auto olb = LightSources::get().get("b");
-		Light& lb = olb.value();
-		lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		lb.L_intensity = glm::vec3(0.2f);
+		//LightSources::get().create("b");
+		//auto olb = LightSources::get().get("b");
+		//Light& lb = olb.value();
+		//lb.position = glm::vec3(-4.f, 4.f, -8.f);
+		//lb.L_intensity = glm::vec3(0.2f);
 
 		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();

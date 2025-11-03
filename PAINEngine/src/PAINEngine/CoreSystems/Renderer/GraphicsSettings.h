@@ -30,6 +30,14 @@ namespace PAIN {
 			HARD
 		};
 
+		enum class TONE_MAPPING_TYPES {
+			NONE = 0,
+			ACES,
+			REINHARD,
+			UNCHARTED2,
+			NUM_TONE_MAPPING_TYPES
+		};
+
 		// width = height for shadow maps. dont follow screen resolution
 		const std::unordered_map<SHADOW_TYPES, int> SHADOW_MAP_WIDTHS{
 			{SHADOW_TYPES::SOFTEST, 4096},
@@ -48,5 +56,14 @@ namespace PAIN {
 		bool daytime = true;
 		float fov = 90.f;
 		bool ao = true;		// ambient occlusion
+		
+		int blur_quality = 10;	// number of blur passes. higher = blurrier, BUT SLOWER
+		// using hdr, so range of [0,inf)
+		float blur_strength = 0.f;
+		float bloom_strength = 1.f;
+		float global_light_intensity = 1.5f;
+
+		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
+		float tone_mapping_exposure = 1.f;
 	};
 }
