@@ -21,7 +21,7 @@
 		#endif
 		
 		// Purposely added mem leak here to test in CI
-		int* leak = new int[1];
+		//int* leak = new int[1];
 
 		// Check if running in CI environment
 		bool is_CI = std::getenv("CI") != nullptr || std::getenv("GITHUB_ACTIONS") != nullptr;
