@@ -1,16 +1,16 @@
 {
   "asset_info": {
-    "name": "floor.frag",
+    "name": "blur.vert",
     "type": "Shader"
   },
   "build_data": {
-    "hash": 217297290620262468
+    "hash": 17655970106416718714
   },
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "5cd73fd6-5603-044f-a6d3-8df76c6aa5d9",
+  "guid": "2d6d9af2-8bd1-034b-b62a-eefabd3aaa7d",
   "import_settings": null,
   "meta_data": {
-    "source_file": "engine\\shaders\\floor.frag"
+    "source_file": "engine\\shaders\\blur.vert"
   }
 }

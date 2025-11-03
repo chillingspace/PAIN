@@ -45,6 +45,9 @@ namespace PAIN {
 		std::filesystem::path texture2d_path = "engine/shaders/texture2d.vert";
 		std::filesystem::path gamma_path = "engine/shaders/gamma.vert";
 		std::filesystem::path debug_geometry_path = "engine/shaders/debug_geometry.vert";
+		std::filesystem::path blur_path = "engine/shaders/blur.vert";
+		std::filesystem::path bloom_path = "engine/shaders/bloom.vert";
+		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 #else	
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path = "engine\\shaders\\android_geometry.vert";
@@ -54,6 +57,9 @@ namespace PAIN {
 		std::filesystem::path texture2d_path = "engine\\shaders\\android_texture2d.vert";
 		std::filesystem::path gamma_path = "engine\\shaders\\android_gamma.vert";
 		std::filesystem::path debug_geometry_path = "engine\\shaders\\android_debug_geometry.vert";
+		std::filesystem::path blur_path = "engine\\shaders\\android_blur.vert";
+		std::filesystem::path bloom_path = "engine\\shaders\\android_bloom.vert";
+		std::filesystem::path tone_path = "engine\\shaders\\android_tone.vert";
 #endif
 
 		//Get assets loader
@@ -103,6 +109,20 @@ namespace PAIN {
 		texture2d_shader = assets_loader->getAsset<Assets::Shader>(texture2d_path);
 
 		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		//Tone mapping shader
+		tone_shader = assets_loader->getAsset<Assets::Shader>(tone_path);
+		if (!tone_shader || tone_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program");
+			return;
+		}
+
+		// Blur shader
+		blur_shader = assets_loader->getAsset<Assets::Shader>(blur_path);
+		if (!blur_shader || blur_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
@@ -224,20 +244,24 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			// final_texture_2 for ping-pong if needed in post-processing
-			glGenTextures(1, &final_texture_2);
-			if (final_texture_2 == 0) {
+			// pp_texture for ping-pong if needed in post-processing
+			glGenFramebuffers(1, &pp_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
+
+			glGenTextures(1, &pp_texture);
+			if (pp_texture == 0) {
 				PN_CORE_ERROR("Failed to create final texture");
 				return;
 			}
-			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			glBindTexture(GL_TEXTURE_2D, pp_texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pp_texture, 0);
 
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		// === VAO/VBO For Final Passthrough Texture ===
@@ -712,13 +736,55 @@ namespace PAIN {
 	{
 		int postprocess_passes = 0;
 
+		// tone mapping pass
+		{
+			const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
+			const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
+
+			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			tone_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, src_tex);
+			tone_shader->SetUniform("tex", 0);
+			tone_shader->SetUniform("exposure", GraphicsSettings::get().tone_mapping_exposure);
+			tone_shader->SetUniform("toneMapMode", static_cast<float>(GraphicsSettings::get().tone_mapping_mode));
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			++postprocess_passes;
+		}
+
+
+		// blur pass
+		if (GraphicsSettings::get().blur_strength) {
+			const int blur_iterations = GraphicsSettings::get().blur_quality;
+
+			blur_shader->Bind();
+			blur_shader->SetUniform("tex", 0);
+			blur_shader->SetUniform("strength", GraphicsSettings::get().blur_strength);
+
+			for (int i{}; i < blur_iterations; ++i) {
+				const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
+				const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
+
+				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, src_tex);
+				blur_shader->SetUniform("is_horizontal_pass", i % 2 ? 0.f : 1.f);
+				glBindVertexArray(empty_vao);
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				++postprocess_passes;
+			}
+		}
+
 		// gamma correction
 		if (GraphicsSettings::get().gamma_correction) {
-			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture_2, 0);
+			const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
+			const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
+
+			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
 			gamma_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, final_texture);
+			glBindTexture(GL_TEXTURE_2D, src_tex);
 			gamma_shader->SetUniform("tex", 0);
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -731,39 +797,40 @@ namespace PAIN {
 		}
 
 		// make sure final_texture now holds the gamma corrected texture
-		// use passthrough to render final_texture_2 to final_texture if odd number of passes
+		// use passthrough to render pp_texture to final_texture if odd number of passes
 		if (postprocess_passes % 2) {
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 			passthrough_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, final_texture_2);
+			glBindTexture(GL_TEXTURE_2D, pp_texture);
 			passthrough_shader->SetUniform("tex", 0);
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
 		// set back to use final_fbo and final_texture for further rendering
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
+;		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-
-		// render 2D textures onto screen
 		{
-			// !TODO: add queue and iterate through all 2D textures to be rendered last
-			auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
-			Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
-		}
+			glDisable(GL_DEPTH_TEST);
+			glDepthMask(GL_TRUE);
 
-		// render text onto screen
-		{
-			TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
-			TextRenderer::get().debugRenderQuad();
-		}
+			// render 2D textures onto screen
+			{
+				// !TODO: add queue and iterate through all 2D textures to be rendered last
+				auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
+				Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
+			}
 
-		glEnable(GL_DEPTH_TEST);
+			// render text onto screen
+			{
+				TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
+				TextRenderer::get().debugRenderQuad();
+			}
+
+			glEnable(GL_DEPTH_TEST);
+		}
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
