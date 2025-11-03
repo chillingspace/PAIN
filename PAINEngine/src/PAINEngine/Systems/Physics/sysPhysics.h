@@ -77,9 +77,9 @@ namespace PAIN {
 			// This caps how many constraints the solver can handle per step.
 			const i32 c_max_contact_constraints;
 
-			NIKE::BPLayerInterfaceImpl	mBroadPhaseLayerInterface;									// The broadphase layer interface that maps object layers to broadphase layers
-			NIKE::ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;					// Class that filters object vs broadphase layers
-			NIKE::ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;								// Class that filters object vs object layers
+			PAIN::BPLayerInterfaceImpl	mBroadPhaseLayerInterface;									// The broadphase layer interface that maps object layers to broadphase layers
+			PAIN::ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;					// Class that filters object vs broadphase layers
+			PAIN::ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;								// Class that filters object vs object layers
 
 			// Owned memory helpers, for jolt update
 			std::unique_ptr<JPH::TempAllocator> temp_allocator;

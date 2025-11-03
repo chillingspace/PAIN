@@ -30,12 +30,22 @@ namespace PAIN {
 
 			// Allocator + job system inits to run jolt update
 			// 10 MB allocation 
+#ifdef PN_PLATFORM_WINDOWS
 			temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(32 * 1024 * 1024);
+			unsigned numThreads = std::thread::hardware_concurrency() - 1;
+
+#else
+			temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(1 * 1024 * 1024);
+			unsigned numThreads = std::max<unsigned>(1u, std::thread::hardware_concurrency() - 1);
+#endif
 
 			job_system = std::make_unique<JPH::JobSystemThreadPool>(
 				JPH::cMaxPhysicsJobs,
 				JPH::cMaxPhysicsBarriers,
-				std::thread::hardware_concurrency() - 1);
+				numThreads);
+	
+			if (temp_allocator == nullptr) PN_CORE_WARN("Temp Alloc failed!");
+			if (job_system == nullptr) PN_CORE_WARN("Job System failed!");
 
 			// Create new physics system
 			jolt_physics = std::make_unique<JPH::PhysicsSystem>();
@@ -65,7 +75,7 @@ namespace PAIN {
 			body_interface = &jolt_physics->GetBodyInterface();
 		}
 
-		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_bodies{ 10240 }, c_num_body_mutexes{ 0 }, c_max_body_pairs{ 65536 }, c_max_contact_constraints{ 20480 }, collision_steps{ 1 }
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_bodies{ 512 }, c_num_body_mutexes{ 64 }, c_max_body_pairs{ 2048 }, c_max_contact_constraints{ 1024 }, collision_steps{ 1 }
 		{
 			joltSetup();
 
@@ -161,7 +171,7 @@ namespace PAIN {
 			for (auto&& [entity, transform, rigidBody] : view.each()) {
 				transform = view.get<Transform>(entity);
 				rigidBody = view.get<Physics::RigidBody3D>(entity);
-
+				
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
@@ -171,9 +181,9 @@ namespace PAIN {
 
 					// Create Jolt body settings
 					// Create BoxShape
-					JPH::BoxShape* boxShape = new JPH::BoxShape(
+					JPH::Ref<JPH::BoxShape> boxShape = new JPH::BoxShape(
 						JPH::Vec3(0.5f * transform.scale.x, 0.5f * transform.scale.y, 0.5f * transform.scale.z),
-						0.0f // convex radius, default 0.0f
+						0.0f
 					);
 
 					// Create Jolt body settings
@@ -182,7 +192,7 @@ namespace PAIN {
 						JPH::RVec3(transform.position.x, transform.position.y, transform.position.z),
 						rotationQuat,
 						JPH::EMotionType::Dynamic,
-						NIKE::Layer::MOVING
+						PAIN::Layer::MOVING
 					);
 
 					settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
@@ -192,9 +202,12 @@ namespace PAIN {
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;
 
-					PN_CORE_INFO("Created Jolt body for entity {} with ID {}",
+					PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
 						(uint32_t)entity,
 						rigidBody.bodyID.GetIndexAndSequenceNumber());
+				}
+				else {
+					PN_CORE_TRACE("Failed or Jolt body already exists for entity {}", (uint32_t)entity);
 				}
 			}
 		}
@@ -250,7 +263,7 @@ namespace PAIN {
 				JPH::RVec3(0.0f, -1.f, 0.0f), // move down by halfHeight
 				JPH::Quat::sIdentity(),
 				JPH::EMotionType::Static,
-				NIKE::Layer::NON_MOVING
+				PAIN::Layer::NON_MOVING
 			);
 
 			// Create and add
