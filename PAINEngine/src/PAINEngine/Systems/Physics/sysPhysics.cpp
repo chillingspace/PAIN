@@ -30,12 +30,22 @@ namespace PAIN {
 
 			// Allocator + job system inits to run jolt update
 			// 10 MB allocation 
+#ifdef PN_PLATFORM_WINDOWS
 			temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(32 * 1024 * 1024);
+			unsigned numThreads = std::thread::hardware_concurrency() - 1;
+
+#else
+			temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(1 * 1024 * 1024);
+			unsigned numThreads = std::max<unsigned>(1u, std::thread::hardware_concurrency() - 1);
+#endif
 
 			job_system = std::make_unique<JPH::JobSystemThreadPool>(
 				JPH::cMaxPhysicsJobs,
 				JPH::cMaxPhysicsBarriers,
-				std::thread::hardware_concurrency() - 1);
+				numThreads);
+	
+			if (temp_allocator == nullptr) PN_CORE_WARN("Temp Alloc failed!");
+			if (job_system == nullptr) PN_CORE_WARN("Job System failed!");
 
 			// Create new physics system
 			jolt_physics = std::make_unique<JPH::PhysicsSystem>();
@@ -65,7 +75,7 @@ namespace PAIN {
 			body_interface = &jolt_physics->GetBodyInterface();
 		}
 
-		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_bodies{ 10240 }, c_num_body_mutexes{ 0 }, c_max_body_pairs{ 65536 }, c_max_contact_constraints{ 20480 }, collision_steps{ 1 }
+		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_bodies{ 512 }, c_num_body_mutexes{ 64 }, c_max_body_pairs{ 2048 }, c_max_contact_constraints{ 1024 }, collision_steps{ 1 }
 		{
 			joltSetup();
 
@@ -100,30 +110,51 @@ namespace PAIN {
 				syncNewBodies(registry);
 				jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
 
+				auto& body_interface = jolt_physics->GetBodyInterface();
+
 				auto view = registry.view<Transform, Physics::RigidBody3D>();
 				for (auto&& [entity, transform, rigidBody] : view.each()) {
-					//PN_CORE_TRACE("Arrived here");
-
-					//PN_CORE_TRACE("Entity name {}", name.name);
 
 					transform = view.get<Transform>(entity);
 					rigidBody = view.get<Physics::RigidBody3D>(entity);
 
-					// Lock the body for reading (thread-safe)
-					const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), rigidBody.bodyID);
-					if (lock.Succeeded()) {
-						const JPH::Body& body = lock.GetBody();
-						const JPH::RVec3 position = body.GetPosition();
-						const JPH::Quat rotation = body.GetRotation();
+					{
+						// Lock the body for reading (thread-safe)
+						const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), rigidBody.bodyID);
+						if (lock.Succeeded()) {
+							const JPH::Body& body = lock.GetBody();
+							const JPH::RVec3 position = body.GetPosition();
+							const JPH::Quat rotation = body.GetRotation();
 
-						transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
-						transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
+							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
+							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 
-						//std::cout << "pos = " << transform.position.x << ", " << transform.position.y << ", " << transform.position.z << "\n";
+
+						}
+						else {
+							PN_CORE_WARN("Failed to lock body for reading");
+						}
 					}
-					else {
-						PN_CORE_WARN("Failed to lock body for reading");
-					}
+
+					//// === Ground check ===
+					//// Cast a ray downward a small distance from the body
+					//glm::f32 half_height = 0.5f * transform.scale.y;
+					//JPH::RRayCast ray{};
+					//ray.mOrigin = JPH::RVec3(transform.position.x, transform.position.y - (half_height + 0.05f), transform.position.z);
+					//ray.mDirection = JPH::Vec3(0, -1, 0) * 0.5f;
+
+					//JPH::RayCastResult result;
+					//bool onGround = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
+
+
+					//if (onGround) {
+					//	 // === Apply jump impulse ===
+					//	body_interface.ActivateBody(rigidBody.bodyID);
+
+					//	float jumpImpulse = 10.0f; // tune this
+					//	body_interface.AddImpulse(rigidBody.bodyID, JPH::Vec3(0, jumpImpulse, 0));
+					//}
+
 				}
 				//PN_CORE_TRACE("updating physics");
 			}
@@ -140,7 +171,7 @@ namespace PAIN {
 			for (auto&& [entity, transform, rigidBody] : view.each()) {
 				transform = view.get<Transform>(entity);
 				rigidBody = view.get<Physics::RigidBody3D>(entity);
-
+				
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
@@ -150,9 +181,9 @@ namespace PAIN {
 
 					// Create Jolt body settings
 					// Create BoxShape
-					JPH::BoxShape* boxShape = new JPH::BoxShape(
+					JPH::Ref<JPH::BoxShape> boxShape = new JPH::BoxShape(
 						JPH::Vec3(0.5f * transform.scale.x, 0.5f * transform.scale.y, 0.5f * transform.scale.z),
-						0.0f // convex radius, default 0.0f
+						0.0f
 					);
 
 					// Create Jolt body settings
@@ -161,7 +192,7 @@ namespace PAIN {
 						JPH::RVec3(transform.position.x, transform.position.y, transform.position.z),
 						rotationQuat,
 						JPH::EMotionType::Dynamic,
-						NIKE::Layer::MOVING
+						PAIN::Layer::MOVING
 					);
 
 					settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
@@ -171,10 +202,47 @@ namespace PAIN {
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;
 
-					PN_CORE_INFO("Created Jolt body for entity {} with ID {}",
+					PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
 						(uint32_t)entity,
 						rigidBody.bodyID.GetIndexAndSequenceNumber());
 				}
+				else {
+					PN_CORE_TRACE("Failed or Jolt body already exists for entity {}", (uint32_t)entity);
+				}
+			}
+		}
+
+		void System::applyBounce(entt::registry& registry, entt::entity targetEntity, float jumpImpulse)
+		{
+			auto view = registry.view<Transform, RigidBody3D>();
+			if (!view.contains(targetEntity))
+				return;
+
+			auto& transform = view.get<Transform>(targetEntity);
+			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
+
+			// Lock body for reading
+			const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), rigidBody.bodyID);
+			if (!lock.Succeeded()) {
+				PN_CORE_WARN("Failed to lock body for reading");
+				return;
+			}
+
+			const JPH::Body& body = lock.GetBody();
+
+			// Ground check
+			glm::f32 half_height = 0.5f * transform.scale.y;
+			JPH::RRayCast ray{};
+			ray.mOrigin = JPH::RVec3(transform.position.x, transform.position.y - (half_height + 0.05f), transform.position.z);
+			ray.mDirection = JPH::Vec3(0, -1, 0) * 0.5f;
+
+			JPH::RayCastResult result;
+			bool onGround = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
+
+			if (onGround) {
+				// Apply jump impulse
+				body_interface->ActivateBody(rigidBody.bodyID);
+				body_interface->AddImpulse(rigidBody.bodyID, JPH::Vec3(0, jumpImpulse, 0));
 			}
 		}
 
@@ -195,7 +263,7 @@ namespace PAIN {
 				JPH::RVec3(0.0f, -1.f, 0.0f), // move down by halfHeight
 				JPH::Quat::sIdentity(),
 				JPH::EMotionType::Static,
-				NIKE::Layer::NON_MOVING
+				PAIN::Layer::NON_MOVING
 			);
 
 			// Create and add

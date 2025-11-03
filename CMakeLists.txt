@@ -7,7 +7,7 @@ project(PAIN)
 
 # Set Cmake Standards
 if(ANDROID)
-	set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJPH_DISABLE_ASSERTS -DNDEBUG")
 else()
 	set(CMAKE_CXX_STANDARD 20)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,6 +31,13 @@ importDependencies() # Placeholder
 if (ANDROID)
   add_compile_definitions(PLATFORM_ANDROID)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+	
+add_compile_definitions(
+    JPH_DISABLE_ASSERTS
+    JPH_PROFILE_ENABLED=0
+    JPH_DEBUG_RENDERER=0
+    NDEBUG
+  )
 
   # Target a compatible instruction set for x86_64 emulators to prevent SIGILL crashes
   if(CMAKE_ANDROID_ARCH_ABI STREQUAL "x86_64")
