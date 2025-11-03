@@ -119,10 +119,10 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
-
-            #ifdef PN_PLATFORM_WINDOWS
+            //Register resource panel
+#ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
-            #endif
+#endif
 
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
@@ -248,6 +248,24 @@ namespace PAIN {
                     }
                 }
 
+                const char* debug_mode_labels[] = {
+                "Show Debug Lines (Entity AABBs)",
+                "Show Debug Lines (BVH Tree)",
+                "Hide Debug Lines"
+                };
+
+                // Button to toggle debug lines in andriod
+                if (ImGui::Button(debug_mode_labels[editor_debug_mode])) {
+                    editor_debug_mode = (editor_debug_mode + 1) % 3;
+
+                    if (editor_debug_mode == 0)
+                        PN_CORE_INFO("Editor debug rendering: OFF");
+                    else if (editor_debug_mode == 1)
+                        PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
+                    else
+                        PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                }
+
                 ImGui::End();
             }
 #endif
@@ -293,6 +311,11 @@ namespace PAIN {
 
             //Pass down events to platform for handling
             platform->handleEvents(event);
+
+            //Dispatch events on to panels
+            panels->forEachOfType<Panel::IPanel>([&event](std::shared_ptr<Panel::IPanel> panel) {
+                panel->onEvent(event);
+                });
         }
 
         void Editor::buildDockspace() {

@@ -9,13 +9,14 @@
 
 		//// Enable run-time memory check for debug builds.
 		#if defined(DEBUG) | defined(_DEBUG)
-				_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		#endif
 
+		// Normal mode - initialize graphics and run game
 		auto game = PAIN::CreateApplication();
 		game->Init();
 		game->Run();
-		delete game;
+		delete game;	
 	}
 
 #endif

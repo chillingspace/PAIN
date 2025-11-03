@@ -18,10 +18,6 @@ jobs:
       - name: Build Windows (build.bat)
         run: .\build.bat
 
-      - name: List full directory tree in PowerShell
-        run: Get-ChildItem -Path . -Recurse
-        shell: pwsh
-
       - name: Build Debug solution
         run: |
           cd build

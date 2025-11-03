@@ -137,19 +137,12 @@ namespace PAIN {
 		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
 		services->get<ECS::Controller>()->registerSystem<Audio::System>();
-		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 #endif
+		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
 
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
 
-		// Windows only have paths, andriods have to use AASettmanager
-#ifdef PN_PLATFORM_WINDOWS
-		addCoreSystem(std::make_shared<Path::Service>());
-		services->get<Path::Service>()->init("assets/Config.json");
-		addCoreSystem(std::make_shared<Assets::Service>());
-		addCoreSystem(std::make_shared<Compiler::Service>());
-#endif
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
 
@@ -158,7 +151,6 @@ namespace PAIN {
 
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
-
 
 		//Editor only added when debug mode
 #ifdef _DEBUG

@@ -83,7 +83,6 @@ namespace PAIN {
             android_app* m_app;
 
             // Internal path functions
-            std::string normalizePath(const std::string& path) const;
             std::string normalizeFileIOPath(const std::string& path) const;
 
             bool isValidPath(const std::string& path) const;
@@ -99,6 +98,10 @@ namespace PAIN {
 
             // Native initialization - takes android_app* pointer
             void initWithNativeApp(android_app* app);
+
+            std::string normalizePath(const std::string& path) const override;
+
+            std::string getVirtualParentPath(std::string const& virtual_path) const override;
 
             // Override functions from path interface
 			void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) override;

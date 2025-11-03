@@ -1,8 +1,10 @@
-#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 
 #pragma once
 #include "Panels.h"
+
+#include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Path/Path.h"
 
 namespace PAIN {
     namespace Editor {
@@ -40,15 +42,36 @@ namespace PAIN {
                 // File Event Queue
                 // ----------------------------
                 void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
-                void onEvent(PAIN::Event::Event& event);
+                void onEvent(Event::Event& event) override;
 
             private:
 
                 // ----------------------------
                 // File & Directory
                 // ----------------------------
-                std::vector<std::filesystem::path> directories; //Directories
-                std::vector<std::filesystem::path> files; //Files
+                std::shared_ptr<Path::Path> path_service;
+                std::shared_ptr<Assets::Manager> asset_service;
+
+                // ----------------------------
+                // File & Directory
+                // ----------------------------
+                struct Dir {
+                    std::filesystem::path path;
+                    ImTextureID icon;
+                    std::string file_name;
+                };
+                struct File {
+                    std::filesystem::path path;
+                    Assets::GUID id;
+                    ImTextureID icon;
+                    std::string file_name;
+                };
+                std::vector<Dir> directories; //Directories
+                std::vector<File> files; //Files
+
+                //Function to population files
+                void populateDirs(std::string const& virtual_path);
+                void populateFiles(std::string const& virtual_path);
 
                 std::string root_path; //Root Path
                 std::string current_path; //Current Path
@@ -59,12 +82,20 @@ namespace PAIN {
                 std::string search_filter; //Search filter
                 ImVec2 icon_size; //Icon size
 
-                std::string selected_asset_id; //Selected file
+                Assets::GUID selected_asset_id; //Selected file
                 std::string payload_typestring; //File payload type string
 
-                int directory_mode; //Selected directory mode
                 bool b_file_dropped; //File dropped
 
+                //Assets auto refresh timer
+                float auto_refresh_timer = 0.0f;
+                const float AUTO_REFRESH_INTERVAL = 2.0f;
+
+                //Side bar size ratio
+                const float SIDE_BAR_RATIO = 0.2f;
+
+                //Show case file option
+                bool b_show_desc_files = false;
 
                 // ----------------------------
                 // File
@@ -93,7 +124,12 @@ namespace PAIN {
                 // ----------------------------
                 // Internal Helpers
                 // ----------------------------
-                unsigned int fileIcon(std::filesystem::path const& path); //Internal asset icon picking
+                std::unordered_map<std::string, std::vector<std::string>> directoryCache;
+
+                void populateDirectoryCache(std::string const& virtual_dir);
+
+                void DrawDirectoryTree(std::string const& virtual_dir);
+                unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
                 void renderFileEditor(); //Internal rendering of a file editor
 
@@ -120,5 +156,4 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
 #endif

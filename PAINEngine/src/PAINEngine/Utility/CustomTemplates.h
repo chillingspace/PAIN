@@ -54,15 +54,15 @@ namespace PAIN {
             template<class Iface, class Func>
             void forEachOfType(Func&& callback) const {
                 for (const auto& [key, ptr] : map_) {
-                    try {
+                    //try {
                         auto casted = std::static_pointer_cast<Iface>(ptr.ptr);
                         if (casted) {
                             callback(casted);
                         }
-                    }
-                    catch (std::exception const& e) {
-                        throw std::runtime_error("Invalid class casted.");
-                    }
+                    //}
+                    //catch (std::exception const& e) {
+                    //    throw std::runtime_error("Invalid class casted.");
+                    //}
                 }
             }
         };
