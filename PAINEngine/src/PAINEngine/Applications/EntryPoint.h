@@ -13,6 +13,9 @@
 		#endif
 
 		auto game = PAIN::CreateApplication();
+
+		int* p = new int[4];
+
 		game->Init();
 		game->Run();
 		delete game;
