@@ -129,6 +129,8 @@ namespace PAIN {
                 void populateDirectoryCache(std::string const& virtual_dir);
 
                 void DrawDirectoryTree(std::string const& virtual_dir);
+                void renderPopUpContext(File const& file);
+                void renderPopUpContext(Dir const& file);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
                 void renderFileEditor(); //Internal rendering of a file editor

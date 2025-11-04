@@ -202,6 +202,54 @@ namespace PAIN {
 				}
 			}
 
+			void ResourcePanel::renderPopUpContext(File const& file) {
+
+				ImGui::PushID(file.path.string().c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextItem("AssetContextMenu")) {
+					if (ImGui::MenuItem("Open")) {
+						// Open asset logic
+					}
+					if (ImGui::MenuItem("Rename")) {
+						// Rename asset logic
+					}
+					if (ImGui::MenuItem("Delete")) {
+						// Delete asset logic
+					}
+					if (ImGui::MenuItem("Duplicate")) {
+						// Duplicate asset logic
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+			}
+
+			void ResourcePanel::renderPopUpContext(Dir const& dir) {
+
+				ImGui::PushID(dir.path.string().c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextItem("AssetContextMenu##dir")) {
+					if (ImGui::MenuItem("Open##dir")) {
+						// Open asset logic
+					}
+					if (ImGui::MenuItem("Rename##dir")) {
+						// Rename asset logic
+					}
+					if (ImGui::MenuItem("Delete##dir")) {
+						// Delete asset logic
+					}
+					if (ImGui::MenuItem("Duplicate##dir")) {
+						// Duplicate asset logic
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+			}
+
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
@@ -284,7 +332,6 @@ namespace PAIN {
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-
 					if (ImGui::ImageButton(std::string("##" + dir.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
 						//Change current path to folder path clicked
 						current_path = virtual_path + '/' + dir.file_name;
@@ -300,6 +347,9 @@ namespace PAIN {
 					}
 					ImGui::PopStyleColor();
 					moveFileAcceptPayload(virtual_path + '/' + dir.file_name);
+
+					//Render context
+					renderPopUpContext(dir);
 
 					//Start drag-and-drop source
 #ifdef PN_PLATFORM_WINDOWS
@@ -396,6 +446,9 @@ namespace PAIN {
 						selected_asset_id = file.id;
 					}
 					ImGui::PopStyleColor();
+
+					//Render context
+					renderPopUpContext(file);
 
 					//Start drag-and-drop source ( Disable drag for desc files )
 #ifdef PN_PLATFORM_WINDOWS
@@ -913,7 +966,6 @@ namespace PAIN {
 
 					//Set window dock id
 					dock_id = ImGui::GetWindowDockID();
-
 					{
 						////Render selected asset options
 						//if (!selected_asset_id.empty() && PN_ASSETS_SERVICE->isAssetRegistered(selected_asset_id)) {
