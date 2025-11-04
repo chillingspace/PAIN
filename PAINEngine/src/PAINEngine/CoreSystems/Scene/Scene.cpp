@@ -260,11 +260,11 @@ namespace PAIN {
 		//// Apply time scale to deltaTime for simulation
 		//float scaledDt = timing.dt * timeScale;
 
-		//{
-		//	auto olc = LightSources::get().get("world");
-		//	Light& lc = olc.value();
-		//	lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
-		//}
+		{
+			auto olc = LightSources::get().get("world");
+			Light& lc = olc.value();
+			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
+		}
 
 		//auto ecs = services->get<ECS::Controller>();
 		//auto audioManager = services->get<Audio::Audio>();
