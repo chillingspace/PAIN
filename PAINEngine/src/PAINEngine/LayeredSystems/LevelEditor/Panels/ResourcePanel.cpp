@@ -1,4 +1,4 @@
-
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 
 #include "pch.h"
@@ -164,6 +164,11 @@ namespace PAIN {
 					//Find asset GUID
 					temp.id = asset_service->findGUID(relative);
 
+					//Find asset type
+					if (temp.id.IsValid()) {
+						temp.type = asset_service->getAssetData(temp.id)->type;
+					}
+
 					//Get display icon
 					temp.icon = fileIcon(relative);
 
@@ -226,12 +231,9 @@ namespace PAIN {
 
 				//Right-click context
 				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
-					
-					//Set selected file
-					selected_file = file;
 
 					if (ImGui::MenuItem("Open##file")) {
-						// Open asset logic
+						open_files.push_back(file);
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
@@ -278,13 +280,10 @@ namespace PAIN {
 						openPopUp("Rename Folder", std::make_shared<Dir>(dir));
 					}
 					if (ImGui::MenuItem("Delete##dir")) {
-						//openPopUp("Delete Asset");
+						openPopUp("Delete Folder", std::make_shared<Dir>(dir));
 					}
 					if (ImGui::MenuItem("New Folder##dir")) {
 						openPopUp("New Folder");
-					}
-					if (ImGui::MenuItem("Duplicate##dir")) {
-						// Duplicate asset logic
 					}
 					ImGui::EndPopup();
 				}
@@ -380,7 +379,8 @@ namespace PAIN {
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-					if (ImGui::ImageButton(std::string("##" + dir.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
+					ImGui::ImageButton(std::string("##" + dir.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 						//Change current path to folder path clicked
 						current_path = virtual_path + '/' + dir.file_name;
 
@@ -458,10 +458,9 @@ namespace PAIN {
 						ImVec2 uv0(0.0f, 0.0f);
 						ImVec2 uv1(1.0f, 1.0f);
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-						if (ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
-
-							//Identify selected asset GUID
-							selected_file = file;
+						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+							open_files.push_back(file);
 						}
 						ImGui::PopStyleColor();
 
@@ -491,10 +490,9 @@ namespace PAIN {
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-					if (ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
-
-						//Identify selected asset GUID
-						selected_file = file;
+					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+						open_files.push_back(file);
 					}
 					ImGui::PopStyleColor();
 
@@ -538,6 +536,103 @@ namespace PAIN {
 
 				if (shown_count == 0) {
 					ImGui::Text("No results.");
+				}
+			}
+
+			void ResourcePanel::renderOpenFiles() {
+
+				//Local files to close
+				std::vector<File> files_to_close;
+
+				//Iterate through all open files
+				for (auto const& file : open_files) {
+
+					//Begin window
+					ImGui::Begin(file.file_name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+					//Display icon
+					{
+						ImVec2 icon_size(256, 256);
+						ImGui::Image(file.icon, icon_size);
+					}
+
+					ImGui::Spacing();
+
+					//File Name
+					ImGui::TextColored(ImVec4(1, 1, 0, 1), "%s", file.file_name.c_str());
+					ImGui::Separator();
+
+					//File Type
+					ImGui::Text("Type: %s", Assets::assetTypeToString(file.type).c_str());
+
+					//Path
+					ImGui::Text("Path: %s", file.path.string().c_str());
+
+					//File size
+					try {
+						auto size = std::filesystem::file_size(file.path);
+						ImGui::Text("Size: %llu bytes", static_cast<unsigned long long>(size));
+					}
+					catch (std::filesystem::filesystem_error& e) {
+						ImGui::Text("Size: N/A");
+					}
+
+					//Last Modified
+					try {
+						auto ftime = std::filesystem::last_write_time(file.path);
+
+						// Convert to system_clock::time_point
+#if defined(_WIN32)
+	// On MSVC, file_time_type may not be system_clock; do the conversion
+						auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+							ftime - std::filesystem::file_time_type::clock::now()
+							+ std::chrono::system_clock::now());
+#else
+						auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(ftime);
+#endif
+						std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+
+						char buf[64];
+#if defined(_MSC_VER)
+						ctime_s(buf, sizeof(buf), &cftime);
+#else
+						std::strftime(buf, sizeof(buf), "%c", std::localtime(&cftime));
+#endif
+						ImGui::Text("Last Modified: %s", buf);
+					}
+					catch (std::filesystem::filesystem_error& e) {
+						ImGui::Text("Last Modified: N/A");
+					}
+
+					ImGui::Separator();
+
+					//Operations
+					if (ImGui::Button(std::string("Rename##" + file.file_name).c_str())) {
+						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(std::string("Delete##" + file.file_name).c_str())) {
+						openPopUp("Delete File", std::make_shared<File>(file));
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(std::string("Close##" + file.file_name).c_str())) {
+						files_to_close.push_back(file);
+					}
+
+					ImGui::End();
+				}
+
+				//Close file
+				for (auto close_it = files_to_close.begin(); close_it != files_to_close.end(); ++close_it) {
+					for (auto it = open_files.begin(); it != open_files.end();) {
+						if (it->id == close_it->id) {
+							it = open_files.erase(it);
+							break;
+						}
+						else {
+							++it;
+						}
+					}
 				}
 			}
 
@@ -629,7 +724,7 @@ namespace PAIN {
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
 
 					//Select a component to add
-					ImGui::Text("Are you sure you want to delete file/folder?");
+					ImGui::Text("Are you sure you want to delete file?");
 
 					//Add spacing
 					ImGui::Spacing();
@@ -642,6 +737,16 @@ namespace PAIN {
 
 							//Cast to file and remove file
 							auto file = std::any_cast<std::shared_ptr<File>>(data);
+
+							//Find open files and remove
+							for (auto it = open_files.begin(); it != open_files.end();) {
+								if (it->id == file->id) {
+									it = open_files.erase(it);
+								}
+								else {
+									++it;
+								}
+							}
 
 							//Delete asset
 							asset_service->removeFile(file->path);
@@ -703,6 +808,16 @@ namespace PAIN {
 							//Rename file
 							asset_service->moveFile(file->path, target_path);
 
+							//Find open files and remove
+							for (auto it = open_files.begin(); it != open_files.end();) {
+								if (it->id == file->id) {
+									it = open_files.erase(it);
+								}
+								else {
+									++it;
+								}
+							}
+
 							//Reset folder name buffer
 							file_name.assign("");
 
@@ -736,14 +851,15 @@ namespace PAIN {
 					};
 			}
 
-			std::function<void(std::any const&)> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {
+
+			std::function<void(std::any const&)> ResourcePanel::deleteFolderPopup(std::string const& popup_id) {
 				return [this, popup_id](std::any const& data) {
 
 					//Warning message
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
 
 					//Select a component to add
-					ImGui::Text("Are you sure you want to delete everything in selected directory?");
+					ImGui::Text("Are you sure you want to delete folder? It's contents will be deleted as well.");
 
 					//Add spacing
 					ImGui::Spacing();
@@ -751,48 +867,18 @@ namespace PAIN {
 					//Display each component as a button
 					if (ImGui::Button("Confirm")) {
 
-						////Check for directory mode
-						//switch (directory_mode) {
-						//case 0: {
+						//Check for cast validity
+						if (data.has_value() && data.type() == typeid(std::shared_ptr<Dir>)) {
 
-						//	//Remove all files in current directory
-						//	for (auto const& file : files) {
-						//		std::filesystem::remove(file);
-						//	}
-						//	break;
-						//}
-						//case 1: {
+							//Cast to file and remove file
+							auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
 
-						//	//Remove all files & folders in current directory
-						//	for (auto const& file : files) {
-						//		std::filesystem::remove(file);
-						//	}
-						//	for (auto const& dir : directories) {
-						//		std::filesystem::remove_all(dir);
-						//	}
-						//	break;
-						//}
-						//case 2: {
+							//Delete asset
+							asset_service->removeFile(dir->path);
 
-						//	//Remove all files & folders in root directory
-						//	for (auto const& file : PN_PATH_SERVICE->listFiles(root_path)) {
-						//		std::filesystem::remove(file);
-						//	}
-						//	for (auto const& dir : PN_PATH_SERVICE->listDirectories(root_path)) {
-						//		std::filesystem::remove_all(dir);
-						//	}
-						//	current_path = root_path;
-						//	break;
-						//}
-						//default: {
-						//	break;
-						//}
-						//}
-
-
-						////Update directories & files
-						//directories = PN_PATH_SERVICE->listDirectories(current_path);
-						//files = PN_PATH_SERVICE->listFiles(current_path);
+							//Populate files and directories
+							populateDirs(current_path);
+						}
 
 						//Close popup
 						closePopUp(popup_id);
@@ -807,52 +893,7 @@ namespace PAIN {
 						//Close popup
 						closePopUp(popup_id);
 					}
-				};
-			}
-
-			std::function<void(std::any const&)> ResourcePanel::newFolderPopup(std::string const& popup_id) {
-				return [this, popup_id](std::any const& data) {
-
-					//Select a component to add
-					ImGui::Text("New folder name: ");
-
-					//New folder name
-					static std::string folder_name = "";
-					folder_name.resize(32);
-					ImGui::InputText("##NewFolderName", folder_name.data(), folder_name.capacity() + 1);
-
-					//Add spacing
-					ImGui::Spacing();
-
-					//Display each component as a button
-					if (ImGui::Button("Create")) {
-
-						//Create a new directory
-						path_service->createDirectory(current_path + "/" + folder_name);
-
-						//Update directories & files
-						populateDirs(current_path);
-
-						//Reset folder name buffer
-						folder_name.assign("");
-
-						//Close popup
-						closePopUp(popup_id);
-					}
-
-					//Same line
-					ImGui::SameLine();
-
-					//Cancel deleting asset
-					if (ImGui::Button("Cancel")) {
-
-						//Reset folder name buffer
-						folder_name.assign("");
-
-						//Close popup
-						closePopUp(popup_id);
-					}
-				};
+					};
 			}
 
 			std::function<void(std::any const&)> ResourcePanel::renameFolderPopup(std::string const& popup_id) {
@@ -925,6 +966,51 @@ namespace PAIN {
 					};
 			}
 
+			std::function<void(std::any const&)> ResourcePanel::newFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Select a component to add
+					ImGui::Text("New folder name: ");
+
+					//New folder name
+					static std::string folder_name = "";
+					folder_name.resize(32);
+					ImGui::InputText("##NewFolderName", folder_name.data(), folder_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Create")) {
+
+						//Create a new directory
+						path_service->createDirectory(current_path + "/" + folder_name);
+
+						//Update directories & files
+						populateDirs(current_path);
+
+						//Reset folder name buffer
+						folder_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						folder_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
 			void ResourcePanel::pushFileEvent(std::function<void()> callback) {
 				std::lock_guard<std::mutex> lock(file_event_mutex);
 				file_event_queue.push(std::move(callback));
@@ -936,23 +1022,10 @@ namespace PAIN {
 				path_service = services->get<Path::Path>();
 				asset_service = services->get<Assets::Manager>();
 
-				//Setup events listening
-				std::shared_ptr<ResourcePanel> resourcepanel_wrapped(this, [](ResourcePanel*) {});
-				/*NIKE_EVENTS_SERVICE->addEventListeners<Assets::FileDropEvent>(resourcepanel_wrapped);
-
-				entities_panel = std::dynamic_pointer_cast<EntitiesPanel>(NIKE_LVLEDITOR_SERVICE->getPanel(EntitiesPanel::getStaticName()));*/
-
-				////Register popups
-				//error_msg = std::make_shared<std::string>("Error");
-				//success_msg = std::make_shared<std::string>("Success");
-
-				//// Pop UP
-				//registerPopUp("Error", defPopUp("Error", error_msg));
-				//registerPopUp("Success", defPopUp("Success", success_msg));
-				//registerPopUp("Delete Asset", deleteAssetPopup("Delete Asset"));
-				//registerPopUp("Clear Directory", deleteDirectoryPopup("Clear Directory"));
+				//Pop UP
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));
 				registerPopUp("Rename File", renameFilePopup("Rename File"));
+				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
 				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
 				registerPopUp("Info", defPopUp("Info"));
@@ -976,16 +1049,6 @@ namespace PAIN {
 
 				//Default icon size
 				icon_size = { 128.0f, 128.0f };
-
-				////Register all engine icons
-				//PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Textures");
-
-				////Init all directories & files
-				//directories = PN_PATH_SERVICE->listDirectories(current_path);
-				//files = PN_PATH_SERVICE->listFiles(current_path);
-
-				//// Create a weak_ptr for safe capturing in filewatch callbacks
-				//std::weak_ptr<ResourcePanel> weak_this = resourcepanel_wrapped;
 
 				////Setup directory watching 
 				//PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/", [weak_this, this](std::filesystem::path const& file, filewatch::Event event) {
@@ -1162,183 +1225,11 @@ namespace PAIN {
 					//Render all assets & folders
 					renderAssetsBrowser(current_path);
 
-					//Set window dock id
-					dock_id = ImGui::GetWindowDockID();
-					{
-						////Render selected asset options
-						//if (!selected_asset_id.empty() && PN_ASSETS_SERVICE->isAssetRegistered(selected_asset_id)) {
-
-						//	// Center the panel
-						//	ImGui::Begin("Selected Asset", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
-
-						//	//Get selected asset path
-						//	auto path = PN_ASSETS_SERVICE->getAssetPath(selected_asset_id);
-
-						//	//Asset metadata
-						//	ImGui::Text("Asset: %s", selected_asset_id.c_str());
-						//	ImGui::Text("Type: %s", PN_ASSETS_SERVICE->getAssetTypeString(selected_asset_id).c_str());
-
-						//	//Get selected asset texture display
-						//	ImTextureID display = static_cast<ImTextureID>(fileIcon(path));
-
-						//	//Display image
-						//	ImVec2 uv0(0.0f, 1.0f);
-						//	ImVec2 uv1(1.0f, 0.0f);
-						//	ImGui::Image(display, { 256, 256 }, uv0, uv1);
-
-						//	//Loadable type actions
-						//	if (PN_ASSETS_SERVICE->isAssetLoadable(selected_asset_id)) {
-
-						//		//Show audio length if asset is loaded & an audio file
-						//		//if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id) && (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-						//		//	PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music)) {
-
-						//		//	//Show audio length
-						//		//	auto length = PN_ASSETS_SERVICE->getAsset<Audio::IAudio>(selected_asset_id)->getLength(NIKE_AUDIO_TIMEUNIT_MS);
-						//		//	ImGui::Text("Length:");
-						//		//	ImGui::Text("%d ms", length);
-						//		//	ImGui::Text("%.2f s", length / 1000.0f);
-						//		//	ImGui::Text("%.2f mins", (length / 1000.0f) / 60.0f);
-						//		//}
-
-						//		//Asset loading or unloading
-						//		if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id)) {
-						//			//Unload action
-						//			if (ImGui::Button("Unload")) {
-
-						//				//Unload asset
-						//				PN_ASSETS_SERVICE->uncacheAsset(selected_asset_id);
-						//				success_msg->assign("Asset: \"" + selected_asset_id + "\" unloaded.");
-						//				openPopUp("Success");
-						//			}
-
-						//			//Audio asset preview
-						//			if (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-						//				PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music) {
-
-						//				//Same line
-						//				ImGui::SameLine();
-
-						//				//Play button
-						//				if (ImGui::Button("Play")) {
-						//					//Check if channel group has been created
-						//					//if (!PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-						//					//	PN_AUDIO_SERVICE->createChannelGroup("Audio Preview");
-						//					//}
-
-						//					////Get audio group
-						//					//auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-						//					////Toggle audio state
-						//					//if (group->getPaused()) {
-						//					//	group->setPaused(false);
-						//					//}
-						//					//else {
-						//					//	//Play music
-						//					//	bool is_music = PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music ? true : false;
-						//					//	PN_AUDIO_SERVICE->playAudio(selected_asset_id, "", "Audio Preview", 0.5f, 0.5f, false, is_music);
-						//					//}
-						//				}
-
-						//				//Manage preview audio group
-						//				//if (PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-						//				//	auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-						//				//	if (group->isPlaying()) {
-						//				//		//Same line
-						//				//		ImGui::SameLine();
-
-						//				//		//Pause audio preview
-						//				//		if (ImGui::Button("Pause")) {
-						//				//			group->setPaused(true);
-						//				//		}
-
-						//				//		//Same line
-						//				//		ImGui::SameLine();
-
-						//				//		//Pause audio preview
-						//				//		if (ImGui::Button("Stop")) {
-						//				//			group->stop();
-						//				//		}
-						//				//	}
-						//				//	else if (!group->isPlaying() && !group->getPaused()) {
-						//				//		PN_AUDIO_SERVICE->unloadChannelGroup("Audio Preview");
-						//				//	}
-						//				//}
-						//			}
-
-
-						//		}
-						//		else {
-						//			//Load action
-						//			if (ImGui::Button("Load")) {
-
-						//				//Load asset
-						//				PN_ASSETS_SERVICE->cacheAsset(selected_asset_id);
-						//				success_msg->assign("Asset: \"" + selected_asset_id + "\" loaded.");
-						//				openPopUp("Success");
-						//			}
-						//		}
-
-						//		//Same line
-						//		ImGui::SameLine();
-						//	}
-
-						//	//Editable type actions
-						//	if (PN_ASSETS_SERVICE->isAssetEditable(selected_asset_id)) {
-						//		if (ImGui::Button("Edit##EditableAsset")) {
-
-						//			//Read file into string
-						//			std::ifstream file(PN_ASSETS_SERVICE->getAssetPath(selected_asset_id));
-						//			if (file.is_open()) {
-
-						//				//Check if file is already open
-						//				if (file_editing_map.find(selected_asset_id) == file_editing_map.end()) {
-						//					file_editing_map[selected_asset_id].reserve(1024 * 1024); // 1mb storage for file editing
-						//					// Read file content
-						//					file_editing_map[selected_asset_id].assign((std::istreambuf_iterator<char>(file)),
-						//						std::istreambuf_iterator<char>());
-						//					file.close();
-						//				}
-						//			}
-						//			else {
-						//				PN_CORE_WARN("Failed to open file");
-						//				file.close();
-						//			}
-						//		}
-
-						//		//Same line
-						//		ImGui::SameLine();
-						//	}
-
-						//	//Delete asset
-						//	if (ImGui::Button("Delete##DeleteAsset")) {
-						//		openPopUp("Delete Asset");
-						//	}
-
-						//	//Same line
-						//	ImGui::SameLine();
-
-						//	//Unload action
-						//	if (ImGui::Button("Close##CloseAsset")) {
-
-						//		//Reset selected asset id
-						//		selected_asset_id.clear();
-						//	}
-
-						//	//Render popups
-						//	renderPopUps();
-						//}
-					}
+					//Render open files
+					renderOpenFiles();
 
 					//Render file editor
 					renderFileEditor();
-
-					//File dropped popup
-					if (b_file_dropped && !checkPopUpShowing()) {
-						//openPopUp("Success");
-						//b_file_dropped = false;
-					}
 
 					//End main content child
 					ImGui::EndChild();
@@ -1351,4 +1242,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif

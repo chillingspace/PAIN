@@ -335,7 +335,7 @@ namespace PAIN {
 			//Check if from is a directory
 			if (std::filesystem::is_directory(from)) {
 
-				//Recursive unregister and register
+				//Recursive get old relatives
 				recurse(from, old_relative);
 			}
 
@@ -372,11 +372,42 @@ namespace PAIN {
 			std::filesystem::path relative = std::filesystem::relative(file_path, root);
 
 			//Ensure relative
-			if (relative.empty()) return;
+			if (relative.empty() || file_path.extension() == Assets::descriptor_ext) return;
 
-			//Remove file
-			if (asset_organizer->removeFile(file_path)) {
-				unregisterAsset(findGUID(relative));
+			//Check if from is a directory
+			if (std::filesystem::is_directory(file_path)) {
+
+				//Vector of old paths
+				std::vector<std::filesystem::path> old_relative;
+
+				//Create recursive directory
+				std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
+				recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
+					for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+						if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
+							out_vec.push_back(std::filesystem::relative(entry.path(), root));
+						}
+					}
+					};
+
+				//Recursive get file_paths
+				recurse(file_path, old_relative);
+
+				//File operations to delete all
+				if (std::filesystem::remove_all(file_path)) {
+					if (!old_relative.empty()) {
+						//Unregister old relative
+						for (auto old : old_relative) {
+							unregisterAsset(findGUID(old));
+						}
+					}
+				}
+			}
+			else {
+				//Remove file
+				if (asset_organizer->removeFile(file_path)) {
+						unregisterAsset(findGUID(relative));
+				}
 			}
 		}
 

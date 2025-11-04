@@ -78,7 +78,7 @@ namespace PAIN {
                 //Update lagging desc files if there are any
                 auto lagging_desc = assets_root / std::filesystem::relative(from, assets_root).parent_path() / (from.filename().string() + desc_ext);
                 if (std::filesystem::exists(lagging_desc)) {
-                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (from.filename().string() + desc_ext);
+                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (to.filename().string() + desc_ext);
                     repositionFile(lagging_desc, target_desc);
                 }
 
@@ -95,7 +95,7 @@ namespace PAIN {
                 //Update lagging desc files if there are any
                 auto lagging_desc = assets_root / std::filesystem::relative(asset.raw_path, assets_root).parent_path() / (asset.raw_path.filename().string() + desc_ext);
                 if (std::filesystem::exists(lagging_desc)) {
-                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (asset.raw_path.filename().string() + desc_ext);
+                    auto target_desc = assets_root / std::filesystem::relative(to, assets_root).parent_path() / (to.filename().string() + desc_ext);
                     repositionFile(lagging_desc, target_desc);
                 }
 
@@ -329,7 +329,6 @@ namespace PAIN {
                 //Enforce asset location into game folder
                 enforceGameAssetLocation(asset);
             }
-            
 
             //Update asset relative path
             asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);

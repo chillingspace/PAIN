@@ -1,3 +1,4 @@
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 
 #pragma once
@@ -63,6 +64,7 @@ namespace PAIN {
                 struct File {
                     std::filesystem::path path;
                     Assets::GUID id;
+                    Assets::Type type;
                     ImTextureID icon;
                     std::string file_name;
                 };
@@ -83,10 +85,11 @@ namespace PAIN {
                 std::string search_filter; //Search filter
                 ImVec2 icon_size; //Icon size
 
-                File selected_file; //Selected file
-                std::string payload_typestring; //File payload type string
+                //Payload
+                std::string payload_typestring;
 
-                bool b_file_dropped; //File dropped
+                //Vector of opened files
+                std::vector<File> open_files;
 
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
@@ -116,13 +119,6 @@ namespace PAIN {
 
 
                 // ----------------------------
-                // Feedback
-                // ----------------------------
-                std::shared_ptr<std::string> error_msg; //Setting error message ( Usage: Editing error popup message )
-                std::shared_ptr<std::string> success_msg; //Setting success message ( Usage: Editing success popup message )
-
-
-                // ----------------------------
                 // Internal Helpers
                 // ----------------------------
                 std::unordered_map<std::string, std::vector<std::string>> directoryCache;
@@ -134,6 +130,8 @@ namespace PAIN {
                 bool renderPopUpContext(Dir const& file);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
+
+                void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 
                 // ----------------------------
@@ -141,24 +139,20 @@ namespace PAIN {
                 // ----------------------------
                 std::function<void(std::any const&)> deleteFilePopup(std::string const& popup_id);
                 std::function<void(std::any const&)> renameFilePopup(std::string const& popup_id);
-                std::function<void(std::any const&)> deleteDirectoryPopup(std::string const& popup_id);
-                std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
 
 
                 // ----------------------------
                 // File Operations
                 // ----------------------------
                 void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
-
-                //Entities panel for string reference
-                //std::weak_ptr<EntitiesPanel> entities_panel;
-                //On drop file event
-                //void onEvent(std::shared_ptr<Assets::FileDropEvent> event) override;
             };
 
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN
 
+#endif
 #endif
