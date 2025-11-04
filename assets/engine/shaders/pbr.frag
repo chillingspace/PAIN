@@ -191,13 +191,44 @@ void main() {
         if (u_UseIbl > 0.5) {
             // IBL
             vec3 N = normalize(normal);
+
+// #define DEBUG_IRRADIANCE_MAP
+#ifdef DEBUG_IRRADIANCE_MAP
+            {
+                vec3 irradiance = texture(irradianceMap, N).rgb;
+                FragColor = vec4(irradiance, 1.0);
+                return;
+            }
+#endif
+
             vec3 V = normalize(u_CamPos - fragPos);
             vec3 R = reflect(-V, N);
+
+#ifdef DEBUG_PREFILTER_MAP
+            // DEBUG: Show the prefilter map. should look like perfect mirror
+            {
+                vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
+                FragColor = vec4(prefilteredColor, 1.0);
+                return;
+            }
+#endif
             
             vec3 F0 = vec3(0.04);
             F0 = mix(F0, material.color, material.metal);
             
             float NdotV = max(dot(N, V), 0.0);
+
+// #define DEBUG_BRDF_LUT
+#ifdef DEBUG_BRDF_LUT
+            // debug brdf lut. should look like gradient red/orange
+            {
+                vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+                FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
+                return;
+            }
+#endif
+
+
             vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
             
             vec3 kS = F;
@@ -205,13 +236,14 @@ void main() {
             kD *= 1.0 - material.metal;
             
             vec3 irradiance = texture(irradianceMap, N).rgb;
+            irradiance = irradiance / (irradiance + vec3(1.0));         // a bit of tone mapping for super bright hdr skyboxes  
             vec3 diffuse = irradiance * material.color;
             
             const float MAX_REFLECTION_LOD = 4.0;
             vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
             vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
             vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-            
+
             ambient = kD * diffuse + specular;
         } else {
             ambient = material.color * u_AmbientLight;

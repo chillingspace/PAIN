@@ -42,7 +42,7 @@ namespace PAIN {
 		lcam.L_intensity = glm::vec3(0.01f);
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
-		GraphicsSettings::get().daytime = false;
+		//GraphicsSettings::get().daytime = false;
 
 		if (GraphicsSettings::get().daytime) {
 			LightSources::get().create("world");
@@ -118,13 +118,15 @@ namespace PAIN {
 		smile_ogre_mesh->material.useTex = true;
 		smile_ogre_mesh->material.aoTex = ogre_smile_tex->gl_texture;
 		smile_ogre_mesh->material.useAo = true;
+		smile_ogre_mesh->material.metal = 0.f;
+		smile_ogre_mesh->material.rough = 1.f;
 
 
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
 		//ogreMat.alwaysLit = true;
 		ogreMat.color = { 1.f, 1.f, 1.f };
-		ogreMat.rough = 0.8f;
+		ogreMat.rough = 1.f;
 		ogreMat.metal = 0.2f;
 
 		// diffuse color texture
