@@ -101,29 +101,29 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
 }
 
 // ----- PAIN::AABB drawer (read-only UI) -----
-namespace PAIN { struct AABB; } // For Bounding Volume
+ namespace PAIN { struct AABB; } // For Bounding Volume
 
-inline bool DrawField(const char* label, PAIN::AABB& aabb) {
-    bool changed = false;
-    ImGui::SeparatorText(label);
+ inline bool DrawField(const char* label, PAIN::AABB& aabb) {
+     bool changed = false;
+     ImGui::SeparatorText(label);
 
-    ImGui::BeginDisabled(true);
-    ImGui::InputFloat3("Min", glm::value_ptr(aabb.min), "%.3f");
-    ImGui::InputFloat3("Max", glm::value_ptr(aabb.max), "%.3f");
-    ImGui::EndDisabled();
+     ImGui::BeginDisabled(true);
+     ImGui::InputFloat3("Min", glm::value_ptr(aabb.min), "%.3f");
+     ImGui::InputFloat3("Max", glm::value_ptr(aabb.max), "%.3f");
+     ImGui::EndDisabled();
 
-    // Small helpers (don’t flip changed flags; they don’t edit the struct)
-    ImGui::SameLine();
-    if (ImGui::Button("Copy##AABB")) {
-        char buf[256];
-        std::snprintf(buf, sizeof(buf),
-            "Min(%.3f, %.3f, %.3f) Max(%.3f, %.3f, %.3f)",
-            aabb.min.x, aabb.min.y, aabb.min.z,
-            aabb.max.x, aabb.max.y, aabb.max.z);
-        ImGui::SetClipboardText(buf);
-    }
-    return changed; // drawer is read-only
-}
+     // Small helpers (don't flip changed flags; they don't edit the struct)
+     ImGui::SameLine();
+     if (ImGui::Button("Copy##AABB")) {
+         char buf[256];
+         std::snprintf(buf, sizeof(buf),
+             "Min(%.3f, %.3f, %.3f) Max(%.3f, %.3f, %.3f)",
+             aabb.min.x, aabb.min.y, aabb.min.z,
+             aabb.max.x, aabb.max.y, aabb.max.z);
+         ImGui::SetClipboardText(buf);
+     }
+     return changed; // drawer is read-only
+ }
 
 
 // ----- AudioState Enum -----

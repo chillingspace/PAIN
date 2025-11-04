@@ -5,11 +5,12 @@
 
 // Include AABB definition globally if needed by other files including this one
 #include "CoreSystems/Collision/BoundingVolume.h"
-#include <refl.hpp>
+#include "pch.h" // Include pch inside namespace
+#include "imgui.h" // Direct include for ImGui functions
+#include "glm/gtc/type_ptr.hpp" // For glm::value_ptr
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h" // For Panel type definition
 
 namespace PAIN {
-
-#include "pch.h" // Include pch inside namespace
 
     // ECS Component holding bounding volume data for an entity
     struct cBoundingVolume {
@@ -21,36 +22,33 @@ namespace PAIN {
 
 #ifdef _DEBUG
     // Includes specific to the debug UI function
-#include "imgui.h" // Direct include for ImGui functions
-#include "glm/gtc/type_ptr.hpp" // For glm::value_ptr
-#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h" // For Panel type definition
 
 // Inline function definition for debug UI registration
 // Marked UNUSED as per previous instruction to not modify editor panels for now
-    inline void RegisterBoundingVolumeUI_UNUSED(PAIN::Editor::Panel::ComponentsPanel& panel) {
-        // Register a lambda function to draw the UI for cBoundingVolume
-        panel.registerCompUIFunc<cBoundingVolume>([](PAIN::Editor::Panel::ComponentsPanel& comp_panel, cBoundingVolume& volume) {
-            // Use ImGui calls to display component data
-            ImGui::Text("Bounding Volume");
-            ImGui::Separator();
+    //inline void RegisterBoundingVolumeUI_UNUSED(PAIN::Editor::Panel::ComponentsPanel& panel) {
+    //    // Register a lambda function to draw the UI for cBoundingVolume
+    //    panel.registerCompUIFunc<cBoundingVolume>([](PAIN::Editor::Panel::ComponentsPanel& comp_panel, cBoundingVolume& volume) {
+    //        // Use ImGui calls to display component data
+    //        ImGui::Text("Bounding Volume");
+    //        ImGui::Separator();
 
-            ImGui::Text("Local AABB:");
-            // Display min/max vectors, read-only
-            ImGui::InputFloat3("Min##Local", glm::value_ptr(volume.localAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
-            ImGui::InputFloat3("Max##Local", glm::value_ptr(volume.localAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+    //        ImGui::Text("Local AABB:");
+    //        // Display min/max vectors, read-only
+    //        ImGui::InputFloat3("Min##Local", glm::value_ptr(volume.localAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+    //        ImGui::InputFloat3("Max##Local", glm::value_ptr(volume.localAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
 
-            ImGui::Spacing();
+    //        ImGui::Spacing();
 
-            ImGui::Text("World AABB:");
-            ImGui::InputFloat3("Min##World", glm::value_ptr(volume.worldAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
-            ImGui::InputFloat3("Max##World", glm::value_ptr(volume.worldAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+    //        ImGui::Text("World AABB:");
+    //        ImGui::InputFloat3("Min##World", glm::value_ptr(volume.worldAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+    //        ImGui::InputFloat3("Max##World", glm::value_ptr(volume.worldAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
 
-            ImGui::Spacing();
-            // Display internal state
-            ImGui::Text("BVH Node Index: %d", volume.bvhNodeIndex);
-            ImGui::Text("Needs Update: %s", volume.needsUpdate ? "Yes" : "No");
-            });
-    }
+    //        ImGui::Spacing();
+    //        // Display internal state
+    //        ImGui::Text("BVH Node Index: %d", volume.bvhNodeIndex);
+    //        ImGui::Text("Needs Update: %s", volume.needsUpdate ? "Yes" : "No");
+    //        });
+    //}
 #endif // _DEBUG
 
 } // namespace PAIN
@@ -81,18 +79,18 @@ namespace nlohmann {
 }
 
 // Mark fields as read-only in the reflected UI
-struct ReadOnlyTag {};
+struct ReadOnlyTag : refl::attr::usage::field {};
 
 // Reflection
 REFL_TYPE(PAIN::cBoundingVolume)
-REFL_FIELD(localAABB, (ReadOnlyTag()))
-REFL_FIELD(worldAABB, (ReadOnlyTag()))
-REFL_FIELD(bvhNodeIndex, (ReadOnlyTag()))
+REFL_FIELD(localAABB)
+REFL_FIELD(worldAABB)
+REFL_FIELD(bvhNodeIndex)
 REFL_FIELD(needsUpdate)
 REFL_END
 
-static_assert(refl::trait::is_reflectable_v<PAIN::cBoundingVolume>,
-    "cBoundingVolume must be reflected before drawing.");
+static_assert(refl::trait::is_reflectable_v<PAIN::cBoundingVolume>);
+
 
 
 #endif // C_BOUNDING_VOLUME_H
