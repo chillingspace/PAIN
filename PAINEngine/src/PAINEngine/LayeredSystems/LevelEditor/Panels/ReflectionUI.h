@@ -13,6 +13,7 @@
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
+#include "ECS/Components/cPhysics.h"
 
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
@@ -177,6 +178,86 @@ inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
     return changed; // 'changed' will always be false
 }
 
+// ---- SHAPE enum drawer ----
+inline bool DrawField(const char* label, PAIN::SHAPE& v) {
+    const char* names[] = { "Box", "Sphere", "Capsule", "Mesh" };
+    int idx = static_cast<int>(v);
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, names[idx])) {
+        for (int i = 0; i < 4; ++i) {
+            bool sel = (i == idx);
+            if (ImGui::Selectable(names[i], sel)) { idx = i; v = static_cast<PAIN::SHAPE>(i); changed = true; }
+            if (sel) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+// ---- Collider drawer (Manual : Unions don't work in reflection) ----
+inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
+    bool changed = false;
+
+    //ImGui::SeparatorText(label);
+
+    // Shape (switching sets sensible defaults for the active union member)
+    if (DrawField("Shape", c.shape)) {
+        changed = true;
+        switch (c.shape) {
+        case PAIN::SHAPE::Box:     c.box_size = glm::vec3(1.0f);     break;
+        case PAIN::SHAPE::Sphere:  c.sphere_radius = 0.5f;           break;
+        case PAIN::SHAPE::Capsule: c.capsule = { 0.25f, 1.0f };      break;
+        case PAIN::SHAPE::Mesh:    /* no size fields */              break;
+        }
+    }
+
+    // Active shape params
+    switch (c.shape) {
+    case PAIN::SHAPE::Box: {
+        glm::vec3 s = c.box_size;
+        if (ImGui::DragFloat3("Box Size", glm::value_ptr(s), 0.01f, 0.0f)) {
+            c.box_size = glm::max(s, glm::vec3(0.0f));
+            changed = true;
+        }
+    } break;
+
+    case PAIN::SHAPE::Sphere: {
+        float r = c.sphere_radius;
+        if (ImGui::DragFloat("Radius", &r, 0.01f, 0.0f)) {
+            c.sphere_radius = glm::max(r, 0.0f);
+            changed = true;
+        }
+    } break;
+
+    case PAIN::SHAPE::Capsule: {
+        float r = c.capsule.radius;
+        float h = c.capsule.height;
+        if (ImGui::DragFloat("Capsule Radius", &r, 0.01f, 0.0f)) { c.capsule.radius = glm::max(r, 0.0f); changed = true; }
+        if (ImGui::DragFloat("Capsule Height", &h, 0.01f, 0.0f)) { c.capsule.height = glm::max(h, 0.0f); changed = true; }
+    } break;
+
+    case PAIN::SHAPE::Mesh: {
+        ImGui::TextDisabled("Mesh collider uses the mesh’s triangles (no size input).");
+    } break;
+    }
+
+    // Common properties
+    {
+        float f = c.friction;
+        float b = c.restitution;
+        if (ImGui::DragFloat("Friction", &f, 0.01f, 0.0f, 1.0f)) { c.friction = std::clamp(f, 0.0f, 1.0f); changed = true; }
+        if (ImGui::DragFloat("Restitution", &b, 0.01f, 0.0f, 1.0f)) { c.restitution = std::clamp(b, 0.0f, 1.0f); changed = true; }
+
+        // You already have uint16_t & bool drawers
+        changed |= DrawField("Collision Layer", c.collision_layer);
+        changed |= DrawField("Is Trigger", c.is_trigger);
+    }
+
+    return changed;
+}
+
+
 
 
 // ---------- Fallback for unknown types ----------
@@ -243,6 +324,14 @@ namespace PAIN {
                     DrawWithReflection(comp);
                     });
             }
+
+            inline void RegisterColliderUI(PAIN::Editor::Panel::ComponentsPanel& panel) {
+                panel.registerCompUIFunc<Collision::Collider>("Collider",
+                    [](PAIN::Editor::Panel::ComponentsPanel&, Collision::Collider& c) {
+                        DrawField("Collider", c);   // custom drawer
+                    });
+            }
+
         }
     }
 }

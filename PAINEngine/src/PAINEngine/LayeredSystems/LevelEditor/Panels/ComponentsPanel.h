@@ -28,7 +28,7 @@ namespace PAIN {
 				//Set comp removal string reference
 				void setCompStringRef(std::string const& to_set);
 
-				//Add component UI function
+				//Add component UI function (by type-derived key)
 				template<typename T>
 				void registerCompUIFunc(std::function<void(ComponentsPanel&, T&)> comp_func) {
 					if (comps_ui.find(ECS::Utility::convertTypeString(typeid(T).name())) != comps_ui.end()) {
@@ -38,6 +38,17 @@ namespace PAIN {
 					comps_ui.emplace(ECS::Utility::convertTypeString(typeid(T).name()), [comp_func](ComponentsPanel& comp_panel, void* comp) { comp_func(comp_panel, *static_cast<T*>(comp)); });
 				}
 
+				// overload (by explicit ECS key)
+				template<typename T>
+				void registerCompUIFunc(const std::string& key,
+					std::function<void(ComponentsPanel&, T&)> comp_func) {
+					if (comps_ui.count(key)) {
+						throw std::runtime_error("Component UI function already registered for key: " + key);
+					}
+					comps_ui.emplace(key, [comp_func](ComponentsPanel& comp_panel, void* comp) {
+						comp_func(comp_panel, *static_cast<T*>(comp));
+						});
+				}
 				void renderEntityComponents(entt::entity entity);
 
 

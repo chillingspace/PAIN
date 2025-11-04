@@ -31,6 +31,8 @@ namespace PAIN {
 
                 PAIN::Editor::Panel::RegisterReflected<PAIN::Hierarchy>(*this, "Hierarchy");
 
+                PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
+
                 //auto ecs = services->get<ECS::Controller>();
                 //for (auto const& [name, _] : ecs->getComponentFactories()) {
                 //    PN_CORE_INFO("Factory: {}", name); 
