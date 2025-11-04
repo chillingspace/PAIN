@@ -813,7 +813,7 @@ namespace PAIN {
 
 			// extract bright areas with bloom_shader
 			{
-				const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : pp2_fbo;
+				const unsigned int dest_fbo = pp_fbo;
 				const unsigned int src_tex = final_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
@@ -824,8 +824,10 @@ namespace PAIN {
 				bloom_shader->SetUniform("threshold", GraphicsSettings::get().bloom_threshold);
 				glBindVertexArray(empty_vao);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-				++postprocess_passes;
 			}
+
+			// reset postprocess_passes for bloom blur
+			postprocess_passes = 0;
 
 			// blur bright areas above threshold
 			{
@@ -834,9 +836,11 @@ namespace PAIN {
 				blur_shader->SetUniform("tex", 0);
 				blur_shader->SetUniform("strength", GraphicsSettings::get().bloom_blur_strength);
 
+				// on i = 0, bright areas are in pp_texture
+
 				for (int i{}; i < GraphicsSettings::get().bloom_quality; ++i) {
-					const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : pp2_fbo;
-					const unsigned int src_tex = postprocess_passes % 2 == 0 ? pp2_texture : pp_texture;
+					const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp2_fbo : pp_fbo;
+					const unsigned int src_tex = postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
 
 					glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
 
@@ -849,10 +853,13 @@ namespace PAIN {
 				}
 			}
 
+			// as blur pass will always be an even number (istg if yall put odd yall trolling me),
+			// final blurred bright will be in pp_texture
+
 			// add blurred bright areas back to original image
 			{
-				const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp2_fbo : pp_fbo;
-				const unsigned int bloom_tex = postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
+				const unsigned int dest_fbo = pp2_fbo;
+				const unsigned int bloom_tex = pp_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
 				bloom_blend_shader->Bind();
@@ -869,8 +876,22 @@ namespace PAIN {
 
 				glBindVertexArray(empty_vao);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			}
 
-				++postprocess_passes;
+			// set back to final_texture
+			{
+				const unsigned int src_tex = pp2_texture;
+
+				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				passthrough_shader->Bind();
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, src_tex);
+				passthrough_shader->SetUniform("tex", 0);
+				glBindVertexArray(passthrough_vao);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+
+				// reset postprocess_passes
+				postprocess_passes = 0;
 			}
 		}
 
