@@ -5,7 +5,7 @@ out vec4 FragColor;
 
 uniform sampler2D tex;
 uniform float is_horizontal_pass;
-uniform float strength;     // within range [0, inf) - hdr
+uniform float strength;     // within range [0, inf) - hdr. blur radius
 
 
 #define PRECALCULATE_GAUSSIAN

@@ -1,16 +1,16 @@
 {
   "asset_info": {
-    "name": "blur.frag",
+    "name": "bloom.vert",
     "type": "Shader"
   },
   "build_data": {
-    "hash": 8532944496900011953
+    "hash": 17655970106416718714
   },
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "21fda66c-c116-1e49-887c-4e9a4245e8d9",
+  "guid": "22cc4a7f-f69f-d04d-9b9c-63e9752bac13",
   "import_settings": null,
   "meta_data": {
-    "source_file": "engine\\shaders\\blur.frag"
+    "source_file": "engine\\shaders\\bloom.vert"
   }
 }
