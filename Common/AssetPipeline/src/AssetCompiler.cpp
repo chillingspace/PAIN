@@ -596,6 +596,9 @@ namespace PAIN {
             if (generate_tangents) ppFlags |= aiProcess_CalcTangentSpace;
             if (desc_file.import_settings.value("generate_normals", false)) ppFlags |= aiProcess_GenNormals;
 
+            ppFlags |= aiProcess_GenSmoothNormals;
+            ppFlags |= aiProcess_FlipUVs;
+
             // Load with Assimp
             Assimp::Importer importer;
             const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);

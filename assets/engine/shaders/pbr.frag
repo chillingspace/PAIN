@@ -74,7 +74,7 @@ vec3 schlickFresnel(float lDotH) {
 
 // for ibl. schlickFresnel but with roughness
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 
@@ -216,7 +216,7 @@ void main() {
             vec3 F0 = vec3(0.04);
             F0 = mix(F0, material.color, material.metal);
             
-            float NdotV = max(dot(N, V), 0.0);
+            float NdotV = max(dot(N, V), 0.001);
 
 // #define DEBUG_BRDF_LUT
 #ifdef DEBUG_BRDF_LUT
@@ -231,20 +231,27 @@ void main() {
 
             vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
             
-            vec3 kS = F;
-            vec3 kD = 1.0 - kS;
-            kD *= 1.0 - material.metal;
-            
+            // Diffuse component
+            vec3 kD = (1.0 - F) * (1.0 - material.metal);
             vec3 irradiance = texture(irradianceMap, N).rgb;
-            irradiance = irradiance / (irradiance + vec3(1.0));         // a bit of tone mapping for super bright hdr skyboxes  
-            vec3 diffuse = irradiance * material.color;
-            
+            irradiance = irradiance / (irradiance + vec3(1.0));
+            vec3 diffuse = kD * irradiance * material.color;
+
+// #define DEBUG_IBL_DIFFUSE
+#ifdef DEBUG_IBL_DIFFUSE
+            FragColor = vec4(diffuse, 1.0);
+            return;
+#endif
+
+            // Specular component  
             const float MAX_REFLECTION_LOD = 4.0;
             vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
-            vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
-            vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+            prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
-            ambient = kD * diffuse + specular;
+            vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+
+            ambient = diffuse + specular;
         } else {
             ambient = material.color * u_AmbientLight;
         }

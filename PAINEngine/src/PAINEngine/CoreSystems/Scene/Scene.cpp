@@ -43,6 +43,7 @@ namespace PAIN {
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		//GraphicsSettings::get().daytime = false;
+		//GraphicsSettings::get().ibl = false;
 
 		if (GraphicsSettings::get().daytime) {
 			LightSources::get().create("world");
