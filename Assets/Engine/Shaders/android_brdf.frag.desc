@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_brdf.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "49acf26b-945c-1940-b34c-7fc07043105d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_brdf.frag"
+  }
+}
