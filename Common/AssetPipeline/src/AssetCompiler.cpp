@@ -1122,11 +1122,26 @@ namespace PAIN {
         }
 
         bool Compiler::needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const {
-            //Check if asset needs to be recompiled
-            auto shipped = asset_info.shipped_path;
-            if (std::filesystem::exists(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
 
-            return true;
+            //Get shipped path
+            auto shipped = asset_info.shipped_path;
+
+            //Check shipped asset exists
+            if (!std::filesystem::exists(shipped))
+                return true;
+
+            //Compare source and output timestamps
+            auto raw_time = std::filesystem::last_write_time(asset_info.raw_path);
+            auto shipped_time = std::filesystem::last_write_time(shipped);
+            if (raw_time > shipped_time)
+                return true;
+
+            //Compare content hashes for safety
+            if (fileHashing(asset_info.raw_path) != desc_file.hash)
+                return true;
+
+            //All up to date
+            return false;
         }
 
 		void Compiler::processAsset(Info& asset_info) {
