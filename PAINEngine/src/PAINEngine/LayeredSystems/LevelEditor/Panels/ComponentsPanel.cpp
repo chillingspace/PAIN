@@ -27,8 +27,15 @@ namespace PAIN {
 
                 PAIN::Editor::Panel::RegisterReflected<PAIN::Audio::AudioSource>(*this, "Audio Source");
 
-                PAIN::Editor::Panel::RegisterReflected<PAIN::cBoundingVolume>(*this, "Bounding Volume");
+                PAIN::Editor::Panel::RegisterReflected<PAIN::BoundingVolume>(*this, "Bounding Volume"); 
 
+                PAIN::Editor::Panel::RegisterReflected<PAIN::Hierarchy>(*this, "Hierarchy");
+
+                //auto ecs = services->get<ECS::Controller>();
+                //for (auto const& [name, _] : ecs->getComponentFactories()) {
+                //    PN_CORE_INFO("Factory: {}", name); 
+                //}
+                
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {

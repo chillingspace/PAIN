@@ -13,7 +13,7 @@
 namespace PAIN {
 
     // ECS Component holding bounding volume data for an entity
-    struct cBoundingVolume {
+    struct BoundingVolume {
         AABB localAABB; // AABB relative to model origin
         AABB worldAABB; // AABB in world space
         int bvhNodeIndex = -1; // Index in BVH node pool, -1 if not added
@@ -59,8 +59,8 @@ namespace PAIN {
 //
 namespace nlohmann {
     template<>
-    struct adl_serializer<PAIN::cBoundingVolume> {
-        static void to_json(json& j, const PAIN::cBoundingVolume& bv) {
+    struct adl_serializer<PAIN::BoundingVolume> {
+        static void to_json(json& j, const PAIN::BoundingVolume& bv) {
             j = json{
                 {"localAABB", bv.localAABB},
                 {"worldAABB", bv.worldAABB},
@@ -69,7 +69,7 @@ namespace nlohmann {
             };
         }
 
-        static void from_json(const json& j, PAIN::cBoundingVolume& bv) {
+        static void from_json(const json& j, PAIN::BoundingVolume& bv) {
             j.at("localAABB").get_to(bv.localAABB);
             j.at("worldAABB").get_to(bv.worldAABB);
             j.at("bvhNodeIndex").get_to(bv.bvhNodeIndex);
@@ -82,14 +82,14 @@ namespace nlohmann {
 struct ReadOnlyTag : refl::attr::usage::field {};
 
 // Reflection
-REFL_TYPE(PAIN::cBoundingVolume)
+REFL_TYPE(PAIN::BoundingVolume)
 REFL_FIELD(localAABB)
 REFL_FIELD(worldAABB)
 REFL_FIELD(bvhNodeIndex)
 REFL_FIELD(needsUpdate)
 REFL_END
 
-static_assert(refl::trait::is_reflectable_v<PAIN::cBoundingVolume>);
+static_assert(refl::trait::is_reflectable_v<PAIN::BoundingVolume>);
 
 
 

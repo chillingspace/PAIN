@@ -182,11 +182,11 @@ namespace PAIN {
 		// --- Option A (Mode 1): Draw World AABBs from cBoundingVolume ---
 		if (debug_mode == 1)
 		{
-			auto bvView = ecs->getRegistry().view<cBoundingVolume>();
+			auto bvView = ecs->getRegistry().view<BoundingVolume>();
 			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
 
 			for (auto entity : bvView) {
-				const auto& bvComp = bvView.get<cBoundingVolume>(entity);
+				const auto& bvComp = bvView.get<BoundingVolume>(entity);
 				// Check if the AABB is valid
 				if (bvComp.worldAABB.min.x <= bvComp.worldAABB.max.x)
 				{

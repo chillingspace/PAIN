@@ -80,7 +80,7 @@ namespace PAIN {
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collider");
             registerComponent<Joint>("Joint");
-            registerComponent<cBoundingVolume>("BoundingVolume");
+            registerComponent<BoundingVolume>("BoundingVolume");
             registerComponent<Audio::AudioSource>("AudioSource");
 
             // Metadata components

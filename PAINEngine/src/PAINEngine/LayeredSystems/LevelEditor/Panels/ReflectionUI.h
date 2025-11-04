@@ -7,10 +7,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/constants.hpp>
+#include <entt/entt.hpp>
 #include "ComponentsPanel.h"
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cBoundingVolume.h"
+#include "ECS/Components/cHierarchy.h"
 
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
@@ -125,6 +127,39 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
      return changed; // drawer is read-only
  }
 
+ // ---------- entt::entity drawer ----------
+ inline bool DrawField(const char* label, entt::entity& e) {
+     using id_t = entt::id_type;
+     bool changed = false;
+
+     id_t id = (e == entt::null) ? 0u : static_cast<id_t>(e);
+     ImGui::SetNextItemWidth(-1);
+     if (ImGui::InputScalar(label, ImGuiDataType_U32, &id, nullptr, nullptr, "%u",
+         ImGuiInputTextFlags_CharsDecimal)) {
+         e = (id == 0u) ? entt::null : static_cast<entt::entity>(id);
+         changed = true;
+     }
+     ImGui::SameLine();
+     if (ImGui::SmallButton("Clear")) { e = entt::null; changed = true; }
+     return changed;
+ }
+
+ // ---------- generic vector drawer (uses element drawers) ----------
+ template <typename T>
+ inline bool DrawField(const char* label, std::vector<T>& v) {
+     bool changed = false;
+     if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+         for (size_t i = 0; i < v.size(); ++i) {
+             ImGui::PushID(static_cast<int>(i));
+             std::string item = "[" + std::to_string(i) + "]";
+             changed |= DrawField(item.c_str(), v[i]);
+             ImGui::PopID();
+         }
+         ImGui::TreePop();
+     }
+     return changed;
+ }
+
 
 // ----- AudioState Enum -----
 inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
@@ -141,6 +176,8 @@ inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
 
     return changed; // 'changed' will always be false
 }
+
+
 
 // ---------- Fallback for unknown types ----------
 template <typename T>
@@ -175,6 +212,7 @@ bool DrawWithReflection(T& obj) {
         });
     return changed;
 }
+
 
 //template <typename T>
 //bool DrawWithReflection(T& obj) {
