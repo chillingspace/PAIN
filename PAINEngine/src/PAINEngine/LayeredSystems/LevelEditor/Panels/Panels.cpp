@@ -87,7 +87,7 @@ namespace PAIN {
 			// ----------------------------
 			bool IPanel::b_popup_showing = false;
 
-			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(void*)> popup_func) {
+			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
 				//Check if popup has already been registered
 				if (popups.find(popup_id) != popups.end()) {
 					throw std::runtime_error("Popup already registered");
@@ -97,7 +97,7 @@ namespace PAIN {
 				popups.emplace(popup_id, InternalPopUp{ nullptr, false, std::move(popup_func) });
 			}
 
-			void IPanel::editPopUp(std::string const& popup_id, std::function<void(void*)> popup_func) {
+			void IPanel::editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
 				//Check if popup has been registered
 				if (popups.find(popup_id) == popups.end()) {
 					throw std::runtime_error("Popup not yet registered");
@@ -106,7 +106,7 @@ namespace PAIN {
 				popups.at(popup_id) = InternalPopUp{ nullptr, false, popup_func };
 			}
 
-			void IPanel::openPopUp(std::string const& popup_id, void* data) {
+			void IPanel::openPopUp(std::string const& popup_id, std::any&& data) {
 				auto it = popups.find(popup_id);
 
 				if (it == popups.end()) {
@@ -162,17 +162,24 @@ namespace PAIN {
 				return b_popup_showing;
 			}
 
-			std::function<void(void*)> IPanel::defPopUp(std::string const& id) {
-				return [this, id](void* data) {
+			std::function<void(std::any const&)> IPanel::defPopUp(std::string const& id) {
+				return [this, id](std::any const& data) {
 
 					//Cast into vector of strings
-					auto vec = static_cast<std::vector<std::string>*>(data);
-					
-					//Iterate through vec
-					for (auto text : *vec) {
-						//Show message
-						ImGui::Text("%s", text.c_str());
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<std::vector<std::string>>)) {
+						auto vec = std::any_cast<std::shared_ptr<std::vector<std::string>>>(data);
+
+						//Iterate through vec
+						for (auto text : *vec) {
+							//Show message
+							ImGui::Text("%s", text.c_str());
+						}
 					}
+					else {
+						//Show message
+						ImGui::Text("%s", "Hello World!");
+					}
+				
 
 					//Add Spacing
 					ImGui::Spacing();

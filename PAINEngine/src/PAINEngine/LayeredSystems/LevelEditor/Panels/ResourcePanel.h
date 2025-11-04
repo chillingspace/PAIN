@@ -139,11 +139,11 @@ namespace PAIN {
                 // ----------------------------
                 // Popups
                 // ----------------------------
-                std::function<void(void*)> deleteFilePopup(std::string const& popup_id);
-                std::function<void(void*)> renameFilePopup(std::string const& popup_id);
-                std::function<void(void*)> deleteDirectoryPopup(std::string const& popup_id);
-                std::function<void(void*)> newFolderPopup(std::string const& popup_id);
-                std::function<void(void*)> renameFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteFilePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> renameFilePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteDirectoryPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
 
 
                 // ----------------------------

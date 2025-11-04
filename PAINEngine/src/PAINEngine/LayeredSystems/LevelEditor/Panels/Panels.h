@@ -50,9 +50,9 @@ namespace PAIN {
 				static bool b_popup_showing;
 
 				struct InternalPopUp {
-					void* data = nullptr;
+					std::any data = nullptr;
 					bool b_is_open = false;
-					std::function<void(void*)> popUpFunction;
+					std::function<void(std::any)> popUpFunction;
 				};
 
 				//Map of popups
@@ -105,13 +105,13 @@ namespace PAIN {
 				// Internal PopUps
 				// ----------------------------
 				//Register new popup
-				void registerPopUp(std::string const& popup_id, std::function<void(void*)> popup_func);
+				void registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);
 
 				//Edit registered popup
-				void editPopUp(std::string const& popup_id, std::function<void(void*)> popup_func);
+				void editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);
 
 				//Open popup
-				void openPopUp(std::string const& popup_id, void* data = nullptr);
+				void openPopUp(std::string const& popup_id, std::any&& data = nullptr);
 
 				//Close popup
 				void closePopUp(std::string const& popup_id);
@@ -123,7 +123,7 @@ namespace PAIN {
 				static bool checkPopUpShowing();
 
 				//Default Popup
-				std::function<void(void*)> defPopUp(std::string const& id);
+				std::function<void(std::any const&)> defPopUp(std::string const& id);
 			};
 		}
 	}

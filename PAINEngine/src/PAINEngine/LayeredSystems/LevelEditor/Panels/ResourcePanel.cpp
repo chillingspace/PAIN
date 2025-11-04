@@ -74,8 +74,7 @@ namespace PAIN {
 					dispatcher.Dispatch<Event::FileDropped>([&](Event::FileDropped& e) -> bool {
 
 						//File dropped msg
-						static std::vector<std::string> msg;
-						msg.clear();
+						std::vector<std::string> msg;
 						msg.push_back("Files Dropped:");
 
 						//iterate through files
@@ -97,7 +96,7 @@ namespace PAIN {
 						}
 
 						//Craft message
-						openPopUp("Info", &msg);
+						openPopUp("Info", std::make_shared<std::vector<std::string>>(msg));
 
 						//Return false: continue dispatching, true = stop dispatching 
 						return true;
@@ -615,8 +614,8 @@ namespace PAIN {
 				}
 			}
 
-			std::function<void(void*)> ResourcePanel::deleteFilePopup(std::string const& popup_id) {
-				return [this, popup_id](void* data) {
+			std::function<void(std::any const&)> ResourcePanel::deleteFilePopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Warning message
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
@@ -652,8 +651,8 @@ namespace PAIN {
 				};
 			}
 
-			std::function<void(void*)> ResourcePanel::renameFilePopup(std::string const& popup_id) {
-				return [this, popup_id](void* data) {
+			std::function<void(std::any const&)> ResourcePanel::renameFilePopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Select a component to add
 					ImGui::Text("New file name: ");
@@ -688,8 +687,8 @@ namespace PAIN {
 					};
 			}
 
-			std::function<void(void*)> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {
-				return [this, popup_id](void* data) {
+			std::function<void(std::any const&)> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Warning message
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
@@ -762,8 +761,8 @@ namespace PAIN {
 				};
 			}
 
-			std::function<void(void*)> ResourcePanel::newFolderPopup(std::string const& popup_id) {
-				return [this, popup_id](void* data) {
+			std::function<void(std::any const&)> ResourcePanel::newFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Select a component to add
 					ImGui::Text("New folder name: ");
@@ -807,8 +806,8 @@ namespace PAIN {
 				};
 			}
 
-			std::function<void(void*)> ResourcePanel::renameFolderPopup(std::string const& popup_id) {
-				return [this, popup_id](void* data) {
+			std::function<void(std::any const&)> ResourcePanel::renameFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Select a component to add
 					ImGui::Text("New folder name: ");

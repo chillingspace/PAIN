@@ -39,8 +39,8 @@ namespace PAIN {
                 registerPopUp("Error", defPopUp("Error"));
             }
 
-            std::function<void(void*)> EntityPanel::createEntityPopUp(std::string const& popup_id) {
-                return [this, popup_id](void* data) {
+            std::function<void(std::any const&)> EntityPanel::createEntityPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     static char entity_name[128] = "";
 
                     ImGui::Text("Enter a name for the new entity:");
@@ -88,8 +88,8 @@ namespace PAIN {
                     };
             }
 
-            std::function<void(void*)> EntityPanel::removeEntityPopUp(std::string const& popup_id) {
-                return [this, popup_id](void* data) {
+            std::function<void(std::any const&)> EntityPanel::removeEntityPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     std::string selected_name = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(selected_entity).value().get().name;
 
                     ImGui::Spacing();
@@ -132,8 +132,8 @@ namespace PAIN {
                     };
             }
 
-            std::function<void(void*)> EntityPanel::cloneEntityPopUp(std::string const& popup_id) {
-                return [this, popup_id](void* data) {
+            std::function<void(std::any const&)> EntityPanel::cloneEntityPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     static char entity_name[128] = "";
 
                     ImGui::Text("Enter a new name for the cloned entity:");
