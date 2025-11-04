@@ -342,6 +342,34 @@ namespace PAIN {
 				unregisterAsset(findGUID(relative));
 			}
 		}
+
+		void Manager::duplicateFile(std::filesystem::path const& file_path) {
+
+			//Get root
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+
+			//Build new file name
+			std::filesystem::path destination = file_path.parent_path() /
+				(file_path.stem().string() + " - Copy" + file_path.extension().string());
+
+			//If the duplicate exists, append a number
+			int i = 2;
+			while (std::filesystem::exists(destination)) {
+				destination = file_path.parent_path() /
+					(file_path.stem().string() + "- Copy (" + std::to_string(i) + ")" + file_path.extension().string());
+				++i;
+			}
+
+			//Actually copy the file
+			std::filesystem::copy_file(file_path, destination);
+
+			//Get relative destination
+			std::filesystem::path relative = std::filesystem::relative(destination, root);
+
+			//Register duplicated asset
+			registerAsset(relative);
+		}
 #endif
 #endif
 		// ----------------------------

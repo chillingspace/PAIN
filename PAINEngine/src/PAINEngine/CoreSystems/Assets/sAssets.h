@@ -157,6 +157,9 @@ namespace PAIN {
 
 			//Delete file function
 			void removeFile(std::filesystem::path const& file_path);
+
+			//Duplicate file function
+			void duplicateFile(std::filesystem::path const& file_path);
 #endif
 #endif
 

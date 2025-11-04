@@ -229,7 +229,7 @@ namespace PAIN {
 						openPopUp("New Folder");
 					}
 					if (ImGui::MenuItem("Duplicate##file")) {
-						// Duplicate asset logic
+						asset_service->duplicateFile(file.path);
 					}
 					ImGui::EndPopup();
 				}
@@ -640,6 +640,42 @@ namespace PAIN {
 						closePopUp(popup_id);
 					}
 				};
+			}
+
+			std::function<void()> ResourcePanel::renameFilePopup(std::string const& popup_id) {
+				return [this, popup_id]() {
+
+					//Select a component to add
+					ImGui::Text("New file name: ");
+
+					//New folder name
+					static std::string folder_name = "";
+					folder_name.resize(32);
+					ImGui::InputText("##RenameFileName", folder_name.data(), folder_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Rename")) {
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						folder_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
 			}
 
 			std::function<void()> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {

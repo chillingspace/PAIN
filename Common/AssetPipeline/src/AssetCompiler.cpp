@@ -440,6 +440,7 @@ namespace PAIN {
             if (!needsRecompilation(asset_info, desc_file)) return;
 
             //Load texture data using STB
+            stbi_set_flip_vertically_on_load(false);
             int width, height, channels;
             unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
                 &width, &height, &channels, STBI_rgb_alpha);
