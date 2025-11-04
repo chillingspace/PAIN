@@ -120,6 +120,8 @@ namespace PAIN {
             std::string roughnessMap;
             std::string aoMap;
             std::string emissionMap;
+            std::string bumpMap;
+			std::string heightMap;
             glm::vec3 baseColor;
             float metallic;
             float roughness;
