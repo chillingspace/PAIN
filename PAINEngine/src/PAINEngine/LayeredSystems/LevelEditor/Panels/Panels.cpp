@@ -113,18 +113,9 @@ namespace PAIN {
 					throw std::runtime_error("Popup doest not exist");
 				}
 
-				//Calculate the center of the viewport
-				ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-				ImVec2 viewport_pos = ImGui::GetMainViewport()->Pos;
-				ImVec2 popup_pos = ImVec2(viewport_pos.x + viewport_size.x * 0.5f, viewport_pos.y + viewport_size.y * 0.5f);
-
-				//Center the popup
-				ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
 				//Set pop management variables
 				b_popup_showing = true;
 				popups.at(popup_id).b_is_open = true;
-				ImGui::OpenPopup(popup_id.c_str());
 			}
 
 			void IPanel::closePopUp(std::string const& popup_id) {
@@ -143,9 +134,22 @@ namespace PAIN {
 
 				//Iterate through all popup and render
 				for (auto& popup : popups) {
-					if (popup.second.b_is_open && ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-						popup.second.popUpFunction();
-						ImGui::EndPopup();
+					if (popup.second.b_is_open){
+
+						//Calculate the center of the viewport
+						ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
+						ImVec2 viewport_pos = ImGui::GetMainViewport()->Pos;
+						ImVec2 popup_pos = ImVec2(viewport_pos.x + viewport_size.x * 0.5f, viewport_pos.y + viewport_size.y * 0.5f);
+
+						//Center the popup
+						ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+						ImGui::OpenPopup(popup.first.c_str());
+						
+						//Begin popup modal
+						if (ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+							popup.second.popUpFunction();
+							ImGui::EndPopup();
+						}
 					}
 				}
 			}

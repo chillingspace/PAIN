@@ -74,6 +74,7 @@ namespace PAIN {
                 void populateFiles(std::string const& virtual_path);
 
                 std::string root_path; //Root Path
+                std::filesystem::path root;
                 std::string current_path; //Current Path
 
                 // ----------------------------
@@ -82,7 +83,7 @@ namespace PAIN {
                 std::string search_filter; //Search filter
                 ImVec2 icon_size; //Icon size
 
-                Assets::GUID selected_asset_id; //Selected file
+                File selected_file; //Selected file
                 std::string payload_typestring; //File payload type string
 
                 bool b_file_dropped; //File dropped
@@ -129,8 +130,8 @@ namespace PAIN {
                 void populateDirectoryCache(std::string const& virtual_dir);
 
                 void DrawDirectoryTree(std::string const& virtual_dir);
-                void renderPopUpContext(File const& file);
-                void renderPopUpContext(Dir const& file);
+                bool renderPopUpContext(File const& file);
+                bool renderPopUpContext(Dir const& file);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
                 void renderFileEditor(); //Internal rendering of a file editor
@@ -138,9 +139,10 @@ namespace PAIN {
                 // ----------------------------
                 // Popups
                 // ----------------------------
-                std::function<void()> deleteAssetPopup(std::string const& popup_id); //Delete asset popup
+                std::function<void()> deleteFilePopup(std::string const& popup_id); //Delete asset popup
                 std::function<void()> deleteDirectoryPopup(std::string const& popup_id); //Delete directory content popup
                 std::function<void()> newFolderPopup(std::string const& popup_id); //New folder popup
+                std::function<void()> renameFolderPopup(std::string const& popup_id); //New folder popup
 
 
                 // ----------------------------
