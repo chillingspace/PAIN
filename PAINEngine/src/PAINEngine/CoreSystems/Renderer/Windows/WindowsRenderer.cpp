@@ -709,7 +709,7 @@ namespace PAIN {
 
 			glActiveTexture(GL_TEXTURE6);
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
-			pbr_shader->SetUniform("bdrfLut", 6);
+			pbr_shader->SetUniform("brdfLut", 6);
 
 
 			//#endif
