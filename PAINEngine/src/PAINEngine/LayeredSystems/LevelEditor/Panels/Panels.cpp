@@ -87,26 +87,26 @@ namespace PAIN {
 			// ----------------------------
 			bool IPanel::b_popup_showing = false;
 
-			void IPanel::registerPopUp(std::string const& popup_id, std::function<void()> popup_func) {
+			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(void*)> popup_func) {
 				//Check if popup has already been registered
 				if (popups.find(popup_id) != popups.end()) {
 					throw std::runtime_error("Popup already registered");
 				}
 
 				//Emplace popup
-				popups.emplace(popup_id, InternalPopUp{ false, std::move(popup_func) });
+				popups.emplace(popup_id, InternalPopUp{ nullptr, false, std::move(popup_func) });
 			}
 
-			void IPanel::editPopUp(std::string const& popup_id, std::function<void()> popup_func) {
+			void IPanel::editPopUp(std::string const& popup_id, std::function<void(void*)> popup_func) {
 				//Check if popup has been registered
 				if (popups.find(popup_id) == popups.end()) {
 					throw std::runtime_error("Popup not yet registered");
 				}
 
-				popups.at(popup_id) = InternalPopUp{ false, popup_func };
+				popups.at(popup_id) = InternalPopUp{ nullptr, false, popup_func };
 			}
 
-			void IPanel::openPopUp(std::string const& popup_id) {
+			void IPanel::openPopUp(std::string const& popup_id, void* data) {
 				auto it = popups.find(popup_id);
 
 				if (it == popups.end()) {
@@ -116,6 +116,7 @@ namespace PAIN {
 				//Set pop management variables
 				b_popup_showing = true;
 				popups.at(popup_id).b_is_open = true;
+				popups.at(popup_id).data = std::move(data);
 			}
 
 			void IPanel::closePopUp(std::string const& popup_id) {
@@ -147,8 +148,11 @@ namespace PAIN {
 						
 						//Begin popup modal
 						if (ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-							popup.second.popUpFunction();
+							popup.second.popUpFunction(popup.second.data);
 							ImGui::EndPopup();
+						}
+						else {
+							PN_CORE_WARN("Failed to open popup.");
 						}
 					}
 				}
@@ -158,10 +162,17 @@ namespace PAIN {
 				return b_popup_showing;
 			}
 
-			std::function<void()> IPanel::defPopUp(std::string const& id, std::shared_ptr<std::string> msg) {
-				return [this, id, msg]() {
-					//Show error message
-					ImGui::Text("%s", msg->c_str());
+			std::function<void(void*)> IPanel::defPopUp(std::string const& id) {
+				return [this, id](void* data) {
+
+					//Cast into vector of strings
+					auto vec = static_cast<std::vector<std::string>*>(data);
+					
+					//Iterate through vec
+					for (auto text : *vec) {
+						//Show message
+						ImGui::Text("%s", text.c_str());
+					}
 
 					//Add Spacing
 					ImGui::Spacing();

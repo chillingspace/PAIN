@@ -56,18 +56,18 @@ namespace PAIN {
 
 
                 //Add tag popup
-                std::function<void()> addTagPopUp(std::string const& popup_id);
+                std::function<void(void*)> addTagPopUp(std::string const& popup_id);
 
                 //Remove tag popup
-                std::function<void()> removeTagPopUp(std::string const& popup_id);
+                std::function<void(void*)> removeTagPopUp(std::string const& popup_id);
 
                 //Create entity popup
-                std::function<void()> createEntityPopUp(std::string const& popup_id);
+                std::function<void(void*)> createEntityPopUp(std::string const& popup_id);
 
-                std::function<void()> removeEntityPopUp(std::string const& popup_id);
+                std::function<void(void*)> removeEntityPopUp(std::string const& popup_id);
 
                 //Clone entity popup
-                std::function<void()> cloneEntityPopUp(std::string const& popup_id);
+                std::function<void(void*)> cloneEntityPopUp(std::string const& popup_id);
 
                 char search_buffer[256] = "";
                 bool sort_alphabetically = false;
