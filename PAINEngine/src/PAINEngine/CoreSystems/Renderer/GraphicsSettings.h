@@ -70,5 +70,8 @@ namespace PAIN {
 
 		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
 		float tone_mapping_exposure = 1.f;
+
+		// image based lighting
+		bool ibl = true;
 	};
 }

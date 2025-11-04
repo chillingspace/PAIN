@@ -695,6 +695,23 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
+			// for image based lighting
+			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
+			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
+			
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
+			pbr_shader->SetUniform("irradianceMap", 4);
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getPrefilterMap());
+			pbr_shader->SetUniform("prefilterMap", 5);
+
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
+			pbr_shader->SetUniform("bdrfLut", 6);
+
+
 			//#endif
 
 			glBindVertexArray(passthrough_vao);

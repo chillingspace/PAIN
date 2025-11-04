@@ -39,6 +39,13 @@ uniform sampler2D gCol;
 uniform sampler2D gNorm;
 uniform sampler2D gMaterial;
 
+// for ibl
+uniform float u_UseIbl;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLut;
+uniform vec3 u_CamPos;
+
 #define MAX_SHADOWMAPPED_LIGHTS 4
 uniform sampler2D u_ShadowMaps[MAX_SHADOWMAPPED_LIGHTS];
 uniform float u_NumShadowMaps;
@@ -64,6 +71,12 @@ vec3 schlickFresnel(float lDotH) {
         f0 = material.color;
     return f0 + (1.0f - f0) * pow(1.0f - lDotH, 5);
 }
+
+// for ibl. schlickFresnel but with roughness
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l;
@@ -142,13 +155,8 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     return shadow;
 }
 
-void main() {
-    // vec3 vFragPosViewSpace = (u_V * vec4(vFragPos, 1.0)).xyz;
-    // vec3 vNormalViewSpace = mat3(u_V) * normalize(vNormal);
-    
-    // vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
-    // FragColor = vec4(color, 1.0);
 
+void main() {
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
     vec3 normal = texture(gNorm, TexCoords).rgb;
@@ -164,27 +172,104 @@ void main() {
     vec3 color = vec3(0);
 
     if (material.alwaysLit == 0.0) {
-        color = material.color * u_AmbientLight;
-        for (int i=0; i < int(u_NumLights); i++) {
+        // Direct lighting
+        vec3 directLighting = vec3(0);
+        for (int i = 0; i < int(u_NumLights); i++) {
             vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
 
             if (u_Lights[i].shadowMapIdx > -0.5) {
-                // light has shadow map
-                float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);   // in range [0,1]
-                float light_intensity = 1.0 - shadow_intensity;                 // in range [0,1]
+                float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);
+                float light_intensity = 1.0 - shadow_intensity;
                 light_contrib *= light_intensity;
             }
 
-            color += light_contrib;
+            directLighting += light_contrib;
         }
+        
+        // Ambient/IBL
+        vec3 ambient = vec3(0);
+        if (u_UseIbl > 0.5) {
+            // IBL
+            vec3 N = normalize(normal);
+            vec3 V = normalize(u_CamPos - fragPos);
+            vec3 R = reflect(-V, N);
+            
+            vec3 F0 = vec3(0.04);
+            F0 = mix(F0, material.color, material.metal);
+            
+            float NdotV = max(dot(N, V), 0.0);
+            vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
+            
+            vec3 kS = F;
+            vec3 kD = 1.0 - kS;
+            kD *= 1.0 - material.metal;
+            
+            vec3 irradiance = texture(irradianceMap, N).rgb;
+            vec3 diffuse = irradiance * material.color;
+            
+            const float MAX_REFLECTION_LOD = 4.0;
+            vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+            vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+            
+            ambient = kD * diffuse + specular;
+        } else {
+            ambient = material.color * u_AmbientLight;
+        }
+        
+        color = directLighting + ambient;
     }
     else {
         color = material.color;
     }
+    
     FragColor = vec4(color, 1.0);
-
-    // FragColor = vec4(u_NumShadowMaps, u_NumShadowMaps, u_NumShadowMaps, 1.0);
-    // FragColor = vec4(1, 0, 0, 1);
-
-    // FragColor = vec4(material.alwaysLit, material.alwaysLit, material.alwaysLit, 1.0);
 }
+
+
+// void main() {
+//     // vec3 vFragPosViewSpace = (u_V * vec4(vFragPos, 1.0)).xyz;
+//     // vec3 vNormalViewSpace = mat3(u_V) * normalize(vNormal);
+    
+//     // vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
+//     // FragColor = vec4(color, 1.0);
+
+//     vec3 fragPos = texture(gPos, TexCoords).rgb;
+//     material.color = texture(gCol, TexCoords).rgb;
+//     vec3 normal = texture(gNorm, TexCoords).rgb;
+//     vec3 m = texture(gMaterial, TexCoords).rgb;
+
+//     material.rough = m.r;
+//     material.metal = m.g;
+//     material.alwaysLit = m.b;
+
+//     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
+//     vec3 viewNormal = mat3(u_V) * normalize(normal);
+
+//     vec3 color = vec3(0);
+
+//     if (material.alwaysLit == 0.0) {
+//         color = material.color * u_AmbientLight;
+//         for (int i=0; i < int(u_NumLights); i++) {
+//             vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
+
+//             if (u_Lights[i].shadowMapIdx > -0.5) {
+//                 // light has shadow map
+//                 float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);   // in range [0,1]
+//                 float light_intensity = 1.0 - shadow_intensity;                 // in range [0,1]
+//                 light_contrib *= light_intensity;
+//             }
+
+//             color += light_contrib;
+//         }
+//     }
+//     else {
+//         color = material.color;
+//     }
+//     FragColor = vec4(color, 1.0);
+
+//     // FragColor = vec4(u_NumShadowMaps, u_NumShadowMaps, u_NumShadowMaps, 1.0);
+//     // FragColor = vec4(1, 0, 0, 1);
+
+//     // FragColor = vec4(material.alwaysLit, material.alwaysLit, material.alwaysLit, 1.0);
+// }
