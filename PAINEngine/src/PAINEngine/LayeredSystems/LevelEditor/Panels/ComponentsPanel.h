@@ -50,10 +50,10 @@ namespace PAIN {
 				//Component setting success message ( Usage: Editing success popup message )
 				std::shared_ptr<std::string> success_msg;
 
-				std::function<void()> addComponentPopUp(std::string const& popup_id);
+				std::function<void(void*)> addComponentPopUp(std::string const& popup_id);
 
 
-				std::function<void()> removeComponentPopUp(std::string const& popup_id);
+				std::function<void(void*)> removeComponentPopUp(std::string const& popup_id);
 
 				bool should_open_remove_popup = false;
 
