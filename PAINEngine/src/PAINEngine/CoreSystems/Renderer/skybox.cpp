@@ -299,17 +299,21 @@ namespace PAIN {
 			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
-		// Load irradiance shader (add this to your init somewhere)
-		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(
-			std::filesystem::path("engine\\shaders\\irradiance_convolution.vert")
-		);
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
+#else
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
+#endif
+
+		// Load irradiance shader
+		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
 
 		irradianceShader->Bind();
 		irradianceShader->SetUniform("environmentMap", 0);
 		irradianceShader->SetUniform("projection", captureProjection);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex); // Use your existing cubemap!
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
 		glViewport(0, 0, 32, 32);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -353,10 +357,14 @@ namespace PAIN {
 		// Generate mipmaps for the cubemap
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path prefilter_shader_path = "engine\\shaders\\android_prefilter.vert";
+#else
+		std::filesystem::path prefilter_shader_path = "engine\\shaders\\prefilter.vert";
+#endif
+
 		// Load prefilter shader
-		auto prefilterShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(
-			std::filesystem::path("engine\\shaders\\prefilter.vert")
-		);
+		auto prefilterShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
 
 		// Setup projection and views (same as before)
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -438,10 +446,15 @@ namespace PAIN {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdf_tex, 0);
 
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path brdf_shader_path = "engine\\shaders\\android_brdf.vert";
+#else
+		std::filesystem::path brdf_shader_path = "engine\\shaders\\brdf.vert";
+#endif
+
+
 		// Load BRDF shader
-		auto brdfShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(
-			std::filesystem::path("engine\\shaders\\brdf.vert")
-		);
+		auto brdfShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
 
 		glViewport(0, 0, 512, 512);
 		brdfShader->Bind();
