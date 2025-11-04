@@ -45,6 +45,8 @@ void main() {
     // convert from sRGB to linear space
     vec3 color = pow(texture(material.tex, vTexCoords).rgb, vec3(2.2));
 
+    // vec3 color = texture(material.tex, vTexCoords).rgb;
+
     if (material.use_ao == 0.0) {
         gCol = color;
         return;
@@ -53,6 +55,9 @@ void main() {
     // use ambient occlusion texture
     // also convert from sRGB to linear space
     float ao = pow(texture(material.ao_map, vTexCoords).r, 2.2);       // grayscale, just use red channel
+
+    // float ao = texture(material.ao_map, vTexCoords).r;       // grayscale, just use red channel
+
     gCol = color * ao;
     // gCol = vec3(1,0,0);
 }

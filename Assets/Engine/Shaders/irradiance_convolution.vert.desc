@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "irradiance_convolution.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 8537450205556229465
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "3372e083-42f5-7f43-adbe-cd12d7e0dcbf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\irradiance_convolution.vert"
+  }
+}

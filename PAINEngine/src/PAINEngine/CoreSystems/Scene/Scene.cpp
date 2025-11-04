@@ -42,6 +42,9 @@ namespace PAIN {
 		lcam.L_intensity = glm::vec3(0.01f);
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
+		//GraphicsSettings::get().daytime = false;
+		//GraphicsSettings::get().ibl = false;
+
 		if (GraphicsSettings::get().daytime) {
 			LightSources::get().create("world");
 			auto olc = LightSources::get().get("world");
@@ -116,12 +119,16 @@ namespace PAIN {
 		smile_ogre_mesh->material.useTex = true;
 		smile_ogre_mesh->material.aoTex = ogre_smile_tex->gl_texture;
 		smile_ogre_mesh->material.useAo = true;
+		smile_ogre_mesh->material.metal = 0.f;
+		smile_ogre_mesh->material.rough = 1.f;
 
 
 		auto ogre_mesh = getMesh(ogre_mesh_id);
 		Material ogreMat;
 		//ogreMat.alwaysLit = true;
 		ogreMat.color = { 1.f, 1.f, 1.f };
+		ogreMat.rough = 1.f;
+		ogreMat.metal = 0.2f;
 
 		// diffuse color texture
 		ogreMat.useTex = true;
@@ -260,7 +267,7 @@ namespace PAIN {
 		//// Apply time scale to deltaTime for simulation
 		//float scaledDt = timing.dt * timeScale;
 
-		{
+		if (GraphicsSettings::get().daytime) {
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
 			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;

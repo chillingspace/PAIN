@@ -1,16 +1,16 @@
 {
   "asset_info": {
-    "name": "geometry.frag",
+    "name": "android_brdf.frag",
     "type": "Shader"
   },
   "build_data": {
-    "hash": 5702081177513008590
+    "hash": 0
   },
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "3271387d-704a-074b-b0e9-b644ae09c07c",
+  "guid": "49acf26b-945c-1940-b34c-7fc07043105d",
   "import_settings": null,
   "meta_data": {
-    "source_file": "engine\\shaders\\geometry.frag"
+    "source_file": "engine\\shaders\\android_brdf.frag"
   }
 }

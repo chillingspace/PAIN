@@ -1,16 +1,16 @@
 {
   "asset_info": {
-    "name": "geometry.frag",
+    "name": "prefilter.frag",
     "type": "Shader"
   },
   "build_data": {
-    "hash": 5702081177513008590
+    "hash": 14419760398238862912
   },
   "dependencies": [],
   "descriptor_version": 1,
-  "guid": "3271387d-704a-074b-b0e9-b644ae09c07c",
+  "guid": "ba252a2e-1ee1-a045-914d-1f8ad2e4d2bf",
   "import_settings": null,
   "meta_data": {
-    "source_file": "engine\\shaders\\geometry.frag"
+    "source_file": "engine\\shaders\\prefilter.frag"
   }
 }

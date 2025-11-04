@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_irradiance_convolution.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "9977f9b9-4de6-a447-ad52-05999ef61e31",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_irradiance_convolution.vert"
+  }
+}
