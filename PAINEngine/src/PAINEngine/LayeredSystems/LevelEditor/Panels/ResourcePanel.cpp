@@ -127,7 +127,12 @@ namespace PAIN {
 					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
 					//Folder icon
-					temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
+						temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					}
+					else {
+						temp.icon = 0;
+					}
 
 					//Instantiate name
 					temp.file_name = relative.filename().string();
@@ -229,10 +234,10 @@ namespace PAIN {
 						// Open asset logic
 					}
 					if (ImGui::MenuItem("Rename##file")) {
-						openPopUp("Rename File");
+						openPopUp("Rename File", std::make_shared<File>(file));
 					}
 					if (ImGui::MenuItem("Delete##file")) {
-						openPopUp("Delete File");
+						openPopUp("Delete File", std::make_shared<File>(file));
 					}
 					if (ImGui::MenuItem("New Folder##file")) {
 						openPopUp("New Folder");
@@ -270,9 +275,7 @@ namespace PAIN {
 						b_break = true;
 					}
 					if (ImGui::MenuItem("Rename##dir")) {
-						
-						//Rename folder
-						
+						openPopUp("Rename Folder", std::make_shared<Dir>(dir));
 					}
 					if (ImGui::MenuItem("Delete##dir")) {
 						//openPopUp("Delete Asset");
@@ -327,7 +330,12 @@ namespace PAIN {
 					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(icon_path)->gl_texture);
 				}
 				else {
-					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
+					if (asset_service->checkAssetRegistered(def_icon_path)) {
+						return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
+					}
+					else {
+						return ImTextureID(0);
+					}
 				}
 			}
 
@@ -629,11 +637,18 @@ namespace PAIN {
 					//Display each component as a button
 					if (ImGui::Button("Confirm")) {
 
-						//Delete asset
-						asset_service->removeFile(selected_file.path);
+						//Check for cast validity
+						if (data.has_value() && data.type() == typeid(std::shared_ptr<File>)) {
 
-						//Populate files and directories
-						populateFiles(current_path);
+							//Cast to file and remove file
+							auto file = std::any_cast<std::shared_ptr<File>>(data);
+
+							//Delete asset
+							asset_service->removeFile(file->path);
+
+							//Populate files and directories
+							populateFiles(current_path);
+						}
 
 						//Close popup
 						closePopUp(popup_id);
@@ -654,33 +669,67 @@ namespace PAIN {
 			std::function<void(std::any const&)> ResourcePanel::renameFilePopup(std::string const& popup_id) {
 				return [this, popup_id](std::any const& data) {
 
-					//Select a component to add
-					ImGui::Text("New file name: ");
+					//Check for cast validity
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<File>)) {
 
-					//New folder name
-					static std::string folder_name = "";
-					folder_name.resize(32);
-					ImGui::InputText("##RenameFileName", folder_name.data(), folder_name.capacity() + 1);
+						//Cast to file and remove file
+						auto file = std::any_cast<std::shared_ptr<File>>(data);
 
-					//Add spacing
-					ImGui::Spacing();
+						//Select a component to add
+						ImGui::Text("Rename File To: ");
 
-					//Display each component as a button
-					if (ImGui::Button("Rename")) {
+						//New folder name
+						static std::string file_name = "";
+						static bool name_init = false;
+						if (!name_init) {
+							file_name = file->path.stem().string();
+							name_init = true;
+						}
+						file_name.resize(32);
+						ImGui::InputText("##RenameFileName", file_name.data(), file_name.capacity() + 1);
 
-						//Close popup
-						closePopUp(popup_id);
+						//Add spacing
+						ImGui::Spacing();
+
+						//Display each component as a button
+						if (ImGui::Button("Rename")) {
+
+							//Craft target path
+							std::filesystem::path old_path = file->path;
+							std::filesystem::path new_name = file_name.c_str();
+							new_name.replace_extension(old_path.extension());
+							std::filesystem::path target_path = old_path.parent_path() / new_name;
+
+							//Rename file
+							asset_service->moveFile(file->path, target_path);
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+
+						//Same line
+						ImGui::SameLine();
+
+						//Cancel deleting asset
+						if (ImGui::Button("Cancel")) {
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
 					}
-
-					//Same line
-					ImGui::SameLine();
-
-					//Cancel deleting asset
-					if (ImGui::Button("Cancel")) {
-
-						//Reset folder name buffer
-						folder_name.assign("");
-
+					else {
 						//Close popup
 						closePopUp(popup_id);
 					}
@@ -809,33 +858,67 @@ namespace PAIN {
 			std::function<void(std::any const&)> ResourcePanel::renameFolderPopup(std::string const& popup_id) {
 				return [this, popup_id](std::any const& data) {
 
-					//Select a component to add
-					ImGui::Text("New folder name: ");
+					//Check for cast validity
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<Dir>)) {
 
-					//New folder name
-					static std::string folder_name = "";
-					folder_name.resize(32);
-					ImGui::InputText("##RenameFolderName", folder_name.data(), folder_name.capacity() + 1);
+						//Cast to dir
+						auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
 
-					//Add spacing
-					ImGui::Spacing();
+						//Select a component to add
+						ImGui::Text("Rename Folder To: ");
 
-					//Display each component as a button
-					if (ImGui::Button("Rename")) {
+						//New folder name
+						static std::string file_name = "";
+						static bool name_init = false;
+						if (!name_init) {
+							file_name = dir->path.stem().string();
+							name_init = true;
+						}
+						file_name.resize(32);
+						ImGui::InputText("##RenameFolderName", file_name.data(), file_name.capacity() + 1);
 
-						//Close popup
-						closePopUp(popup_id);
+						//Add spacing
+						ImGui::Spacing();
+
+						//Display each component as a button
+						if (ImGui::Button("Rename")) {
+
+							//Craft target path
+							std::filesystem::path old_path = dir->path;
+							std::filesystem::path new_name = file_name.c_str();
+							new_name.replace_extension(old_path.extension());
+							std::filesystem::path target_path = old_path.parent_path() / new_name;
+
+							//Rename file
+							asset_service->moveFile(dir->path, target_path);
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+
+						//Same line
+						ImGui::SameLine();
+
+						//Cancel deleting asset
+						if (ImGui::Button("Cancel")) {
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
 					}
-
-					//Same line
-					ImGui::SameLine();
-
-					//Cancel deleting asset
-					if (ImGui::Button("Cancel")) {
-
-						//Reset folder name buffer
-						folder_name.assign("");
-
+					else {
 						//Close popup
 						closePopUp(popup_id);
 					}
@@ -870,6 +953,7 @@ namespace PAIN {
 				//registerPopUp("Clear Directory", deleteDirectoryPopup("Clear Directory"));
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));
 				registerPopUp("Rename File", renameFilePopup("Rename File"));
+				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
 				registerPopUp("Info", defPopUp("Info"));
 

@@ -317,13 +317,50 @@ namespace PAIN {
 			std::filesystem::path relative_to = std::filesystem::relative(to, root);
 
 			//Ensure relative
-			if (relative_from.empty() || relative_to.empty()) return;
+			if (relative_from.empty() || relative_to.empty() || from.extension() == Assets::descriptor_ext || to.extension() == Assets::descriptor_ext) return;
+
+			//Vector of old paths
+			std::vector<std::filesystem::path> old_relative;
+
+			//Create recursive directory
+			std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
+			recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+					if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
+						out_vec.push_back(std::filesystem::relative(entry.path(), root));
+					}
+				}
+				};
+
+			//Check if from is a directory
+			if (std::filesystem::is_directory(from)) {
+
+				//Recursive unregister and register
+				recurse(from, old_relative);
+			}
 
 			//Move file
 			if (asset_organizer->moveFile(from, to)) {
 
-				unregisterAsset(findGUID(from));
-				registerAsset(relative_to);
+				//Check registry operation
+				if (!old_relative.empty() || std::filesystem::is_directory(to)) {
+
+					//Unregister old relative
+					for (auto old : old_relative) {
+						unregisterAsset(findGUID(old));
+					}
+
+					//Register new relative
+					std::vector<std::filesystem::path> new_relative;
+					recurse(to, new_relative);
+					for (auto new_ : new_relative) {
+						registerAsset(new_);
+					}
+				}
+				else {
+					unregisterAsset(findGUID(relative_from));
+					registerAsset(relative_to);
+				}
 			}
 		}
 
