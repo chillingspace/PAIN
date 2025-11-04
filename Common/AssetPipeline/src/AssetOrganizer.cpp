@@ -361,6 +361,16 @@ namespace PAIN {
                 //Temp skip config.json
                 if (file.filename() == "Config.json") return;
 
+				// skip .bin files that are dependencies of .gltf files
+				// .bin files aren't models themselves, but are required by .gltf files
+                if (file.extension() == ".bin") {
+                    // Only skip if there's a corresponding .gltf file
+                    std::filesystem::path gltf_file = file.parent_path() / (file.stem().string() + ".gltf");
+                    if (std::filesystem::exists(gltf_file)) {
+                        return; // Skip this .bin, it's a GLTF dependency
+                    }
+                }
+
                 //Check if asset is a desc file, locate raw asset in same directory
                 if (file.extension() == desc_ext) {
 
