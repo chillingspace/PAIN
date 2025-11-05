@@ -226,7 +226,7 @@ REFL_TYPE(PAIN::Physics::RigidBody3D)
 REFL_FIELD(velocity)
 REFL_FIELD(angular_velocity)
 REFL_FIELD(mass)
-//REFL_FIELD(bodyID)   // Uneditable
+//REFL_FIELD(bodyID)   // Uneditable; Uncommenting this causes issues with the serialization
 REFL_FIELD(b_is_dynamic)
 REFL_END
 

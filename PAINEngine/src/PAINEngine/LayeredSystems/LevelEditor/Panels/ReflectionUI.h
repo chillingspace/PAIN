@@ -14,7 +14,6 @@
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
-//#include "ECS/Components/AllComponents.h"
 
 
 // Mark fields as read-only in the reflected UI

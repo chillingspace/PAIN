@@ -30,7 +30,11 @@ namespace PAIN {
                 PAIN::Editor::Panel::RegisterReflected<PAIN::Lighting>(*this, "Lighting");
 
                 // ---- AudioSource ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Audio::AudioSource>(*this, "Audio Source");
+                //PAIN::Editor::Panel::RegisterReflected<Audio::AudioSource>(*this, "AudioSource");
+                // For some reason can't register normally EITHER
+                registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
+                    [](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as); });
+
 
                 // ---- BoundingVolume ----
                 PAIN::Editor::Panel::RegisterReflected<PAIN::BoundingVolume>(*this, "Bounding Volume"); 
@@ -41,11 +45,11 @@ namespace PAIN {
                 // ---- Physics ----
                 PAIN::Editor::Panel::RegisterReflected<PAIN::Joint>(*this, "Joint");
 
-                //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
-
-                // !TODO: Find out why this isn't registering normally
+                // For some reason RigidBody3D can't register normally
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
+                //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
+
 
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
