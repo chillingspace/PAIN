@@ -14,6 +14,11 @@
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
+//#include "ECS/Components/AllComponents.h"
+
+
+// Mark fields as read-only in the reflected UI
+struct ReadOnlyTag : refl::attr::usage::field {};
 
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
@@ -175,10 +180,10 @@ inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
     ImGui::SameLine();
     ImGui::TextDisabled("%s", preview);
 
-    return changed; // 'changed' will always be false
+    return changed; // changed will always be false
 }
 
-// ---- SHAPE enum drawer ----
+// ---- SHAPE enum drawer (cPhysics) ----
 inline bool DrawField(const char* label, PAIN::SHAPE& v) {
     const char* names[] = { "Box", "Sphere", "Capsule", "Mesh" };
     int idx = static_cast<int>(v);
@@ -195,13 +200,49 @@ inline bool DrawField(const char* label, PAIN::SHAPE& v) {
     return changed;
 }
 
+// ---- JOINT enum drawer (cPhysics) ----
+inline bool DrawField(const char* label, PAIN::JOINT_TYPE& v) {
+    const char* names[] = { "Fixed", "Hinge" };
+    int idx = static_cast<int>(v);
+    if (idx < 0 || idx > 1) idx = 0;
+
+    bool changed = false;
+    const char* preview = names[idx];
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < 2; ++i) {
+            bool sel = (i == idx);
+            if (ImGui::Selectable(names[i], sel)) {
+                v = static_cast<PAIN::JOINT_TYPE>(i);
+                changed = true;
+            }
+            if (sel) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+// ---- RigidBody3D (cPhysics) ----
+inline bool DrawField(const char* label, JPH::BodyID& id) {
+    // Jolt exposes either GetIndexAndSequenceNumber() or GetValue() depending on version.
+    // Use whichever your Jolt has. If both exist, prefer GetIndexAndSequenceNumber().
+    const uint32_t val = id.GetIndexAndSequenceNumber();
+
+    ImGui::BeginDisabled(true);
+    ImGui::Text("%s: %u", label, static_cast<unsigned>(val));
+    ImGui::EndDisabled();
+    return false; // read-only
+}
+
+
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
     bool changed = false;
 
     //ImGui::SeparatorText(label);
 
-    // Shape (switching sets sensible defaults for the active union member)
+    // Shape (switching sets defaults for the active union member)
     if (DrawField("Shape", c.shape)) {
         changed = true;
         switch (c.shape) {
@@ -249,7 +290,7 @@ inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
         if (ImGui::DragFloat("Friction", &f, 0.01f, 0.0f, 1.0f)) { c.friction = std::clamp(f, 0.0f, 1.0f); changed = true; }
         if (ImGui::DragFloat("Restitution", &b, 0.01f, 0.0f, 1.0f)) { c.restitution = std::clamp(b, 0.0f, 1.0f); changed = true; }
 
-        // You already have uint16_t & bool drawers
+        // Existing uint16_t & bool drawers
         changed |= DrawField("Collision Layer", c.collision_layer);
         changed |= DrawField("Is Trigger", c.is_trigger);
     }
@@ -325,10 +366,20 @@ namespace PAIN {
                     });
             }
 
+            //template <typename T>
+            //inline void RegisterReflected(PAIN::Editor::Panel::ComponentsPanel& panel) {
+            //    const char* ecs_key = getComponentName<T>();
+            //    panel.registerCompUIFunc<T>(ecs_key, [](auto&, T& comp) {
+            //        DrawWithReflection(comp); 
+            //        });
+            //}
+
+
+            // Manual UI for collider comp
             inline void RegisterColliderUI(PAIN::Editor::Panel::ComponentsPanel& panel) {
                 panel.registerCompUIFunc<Collision::Collider>("Collider",
                     [](PAIN::Editor::Panel::ComponentsPanel&, Collision::Collider& c) {
-                        DrawField("Collider", c);   // custom drawer
+                        DrawField("Collider", c);  
                     });
             }
 

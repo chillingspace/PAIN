@@ -78,9 +78,6 @@ namespace nlohmann {
     };
 }
 
-// Mark fields as read-only in the reflected UI
-struct ReadOnlyTag : refl::attr::usage::field {};
-
 // Reflection
 REFL_TYPE(PAIN::BoundingVolume)
 REFL_FIELD(localAABB)

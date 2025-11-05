@@ -22,8 +22,9 @@
  #include <Jolt/Core/JobSystemThreadPool.h> 
  #include <Jolt/Physics/Collision/ObjectLayer.h>
  #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
-
-#include "GLMSerialization.h"
+ //#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h" 
+ #include "GLMSerialization.h"
+ #include <refl.hpp>
 
 namespace PAIN {
 
@@ -208,5 +209,27 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
     };
 }
 
+// Reflections
+// Joint
+REFL_TYPE(PAIN::Joint)
+REFL_FIELD(anchor)
+REFL_FIELD(axis)
+REFL_FIELD(limit_min)
+REFL_FIELD(limit_max)
+REFL_FIELD(joint_type)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Joint>);
+
+// Rigid Body 3D
+REFL_TYPE(PAIN::Physics::RigidBody3D)
+REFL_FIELD(velocity)
+REFL_FIELD(angular_velocity)
+REFL_FIELD(mass)
+//REFL_FIELD(bodyID)   // Uneditable
+REFL_FIELD(b_is_dynamic)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
 
 #endif
