@@ -872,6 +872,9 @@ namespace PAIN {
 								}
 							}
 
+							//Repopulate files
+							populateFiles(current_path);
+
 							//Reset folder name buffer
 							file_name.assign("");
 
@@ -989,6 +992,9 @@ namespace PAIN {
 
 							//Rename file
 							asset_service->moveFile(dir->path, target_path);
+
+							//Repopulate dir
+							populateDirs(current_path);
 
 							//Reset folder name buffer
 							file_name.assign("");
@@ -1116,6 +1122,15 @@ namespace PAIN {
 					//Operate own internal changes for directories
 					if (std::filesystem::is_directory(file)) {
 
+						//Check event set
+						if (event_set.find(file) != event_set.end()) return;
+
+						//Lock events
+						std::lock_guard<std::mutex> lock(file_event_mutex);
+
+						//Insert file into event set
+						event_set.insert(file);
+
 						//Push to file event queue
 						pushFileEvent([&, file]() {
 							PN_CORE_INFO("Directory event: {}", file.string());
@@ -1124,9 +1139,34 @@ namespace PAIN {
 							});
 					}
 
+					//Lock only for event_set/current_path access for thread safety
+					bool skip = false;
+					{
+						std::lock_guard<std::mutex> lock(file_event_mutex);
+
+						if (event == filewatch::Event::added ||
+							event == filewatch::Event::removed ||
+							event == filewatch::Event::modified)
+						{
+							//Update event set
+							if (event_set.find(file) != event_set.end()) skip = true;
+							else event_set.insert(file);
+
+							//If update current path safely
+							if (event == filewatch::Event::removed && file == path_service->resolvePath(current_path)) {
+								current_path = root_path;
+							}
+						}
+					}
+
+					if (skip) return;
+
 					//Watch for events
 					switch (event) {
 					case filewatch::Event::added: {
+
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
 
 						//Push to file event queue
 						pushFileEvent([&, file]() {
@@ -1141,9 +1181,11 @@ namespace PAIN {
 
 						//Check if current path is pointing to dir
 						if (file == path_service->resolvePath(current_path)) {
-							std::lock_guard<std::mutex> lock(file_event_mutex);
 							current_path = root_path;
 						}
+
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
 
 						//Push to file event queue
 						pushFileEvent([&, file]() {
@@ -1155,6 +1197,9 @@ namespace PAIN {
 						break;
 					}
 					case filewatch::Event::modified: {
+
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
 
 						//Push to file event queue
 						pushFileEvent([&, file]() {
@@ -1195,6 +1240,9 @@ namespace PAIN {
 						PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
 					}
 				}
+
+				//Clear event set
+				event_set.clear();
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;

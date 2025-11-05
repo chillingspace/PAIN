@@ -106,6 +106,7 @@ namespace PAIN {
                 // File
                 // ----------------------------
                 std::queue<std::function<void()>> file_event_queue; //File Watching Queue
+                std::set<std::filesystem::path> event_set;
                 std::mutex file_event_mutex; //Mutex for thread safety
 
                 std::unordered_map<std::string, std::string> file_editing_map; //Map of file content
