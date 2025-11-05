@@ -278,7 +278,7 @@ inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
     } break;
 
     case PAIN::SHAPE::Mesh: {
-        ImGui::TextDisabled("Mesh collider uses the mesh’s triangles (no size input).");
+        ImGui::TextDisabled("Mesh collider uses the mesh's triangles (no size input).");
     } break;
     }
 

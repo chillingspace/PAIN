@@ -54,10 +54,10 @@ namespace PAIN {
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
 
-                auto ecs = services->get<ECS::Controller>();
-                for (auto const& [name, _] : ecs->getComponentFactories()) {
-                    PN_CORE_INFO("Factory: {}", name); 
-                }
+                //auto ecs = services->get<ECS::Controller>();
+                //for (auto const& [name, _] : ecs->getComponentFactories()) {
+                //    PN_CORE_INFO("Factory: {}", name); 
+                //}
                 
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();
