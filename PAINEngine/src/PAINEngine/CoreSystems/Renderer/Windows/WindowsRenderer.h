@@ -88,6 +88,10 @@ namespace PAIN {
 		unsigned int final_fbo = 0;
 		unsigned int final_rbo = 0;
 
+		unsigned int pp_fbo = 0;			// post-processing framebuffer (for ping-pong)
+		unsigned int pp2_fbo = 0;			// post-processing framebuffer 2 (for ping-pong)	needed for stuff like bloom
+		unsigned int out_fbo = 0;			// output framebuffer (for imgui/display)
+
 		// === Textures ===
 		unsigned int pos_texture = 0;
 		unsigned int col_texture = 0;
@@ -104,7 +108,8 @@ namespace PAIN {
 		unsigned int passthrough_vbo = 0;
 
 		unsigned int final_texture = 0;		// for imgui/post-processing/display
-		unsigned int final_texture_2 = 0;	// for ping-pong for post-processing
+		unsigned int pp_texture = 0;	// for ping-pong for post-processing
+		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
 
 		// === Debug Buffers ===
 		unsigned int debug_VAO = 0;
@@ -119,22 +124,29 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> texture2d_shader = nullptr;
 		std::shared_ptr<Assets::Shader> debug_shader = nullptr;
 		std::shared_ptr<Assets::Shader> gamma_shader = nullptr;
+		std::shared_ptr<Assets::Shader> blur_shader = nullptr;
+		std::shared_ptr<Assets::Shader> bloom_shader = nullptr;
+		std::shared_ptr<Assets::Shader> tone_shader = nullptr;
+		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 
 		// for easy access to clear memory
-		std::array<unsigned int*, 2> fbos{
+		std::array<unsigned int*, 4> fbos{
 			&ds_fbo,
 			//&shadow_fbo, 
-			&final_fbo
+			&final_fbo,
+			&pp_fbo,
+			&pp2_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
-		std::array<unsigned int*, 6> texs{
+		std::array<unsigned int*, 7> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
 			//&shadow_texture,
 			&final_texture,
-			& final_texture_2
+			&pp_texture,
+			&pp2_texture,
 		};
 
 		std::shared_ptr<Services> services;

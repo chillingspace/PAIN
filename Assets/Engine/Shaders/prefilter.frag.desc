@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "prefilter.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 14419760398238862912
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "ba252a2e-1ee1-a045-914d-1f8ad2e4d2bf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\prefilter.frag"
+  }
+}

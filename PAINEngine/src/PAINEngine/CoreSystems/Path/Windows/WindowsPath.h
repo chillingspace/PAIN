@@ -59,8 +59,12 @@ namespace PAIN {
 
 			//Internal path functions
 			std::string getKnownFolderPath(const GUID& folderId) const;
-			std::string normalizePath(const std::string& path) const;
 
+			//List of watchers
+			std::unordered_map<std::filesystem::path, std::unique_ptr<filewatch::FileWatch<std::string>>> dir_watchers;
+
+			//File write times
+			//std::unordered_map<std::filesystem::path, std::filesystem::file_time_type> file_write_times;
 
 			//Private initialize and destroy
 			void init();
@@ -69,6 +73,10 @@ namespace PAIN {
 
 			WindowsPath() { init(); };
 			virtual ~WindowsPath() { destroy(); }
+
+			std::string normalizePath(const std::string& path) const override;
+
+			std::string getVirtualParentPath(std::string const& virtual_path) const override;
 
 			//Override functions from path interface
 			void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) override;
@@ -81,6 +89,24 @@ namespace PAIN {
 			bool createDirectory(const std::string& virtualPath) const override;
 
 			std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) override;
+
+			//Watch directory
+			void watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) override;
+
+			//Watch directory & child directories
+			void watchDirectoryTree(std::string const& virtual_path, FileWatchEventCallback callback) override;
+
+			//Stop watching directory
+			void stopWatchingDirectory(std::string const& virtual_path) override;
+
+			//Stop watching directory & child directories
+			void stopWatchingDirectoryTree(std::string const& virtual_path) override;
+
+			//Stop watching all directories
+			void stopWatchingAllDirectories() override;
+
+			//Log watched directories
+			void logWatchedDirectories() const override;
 		};
 
 	}

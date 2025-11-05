@@ -179,9 +179,19 @@ endif()
 
 # ======================= Assimp, GLFW, Jolt: Use Official Targets =========================
 # No manual add_library needed; just link to assimp::assimp, glfw, Jolt, etc.
-if(NOT TARGET Jolt)
-    add_library(Jolt INTERFACE)
-    target_include_directories(Jolt INTERFACE "${jolt_SOURCE_DIR}")
+# ======================= Jolt Physics =========================
+# Check if Jolt was built as a real compiled target
+if(TARGET Jolt)
+    if(ANDROID)
+        # Only add the essential definitions
+        target_compile_definitions(Jolt PUBLIC
+            JPH_DISABLE_ASSERTS
+            NDEBUG
+        )
+        message(STATUS "Android: Jolt configured for Release mode")
+    endif()
+else()
+    message(WARNING "Jolt target not found - check ImportDependencies.cmake")
 endif()
 
 message(STATUS "All vendor targets configured for FetchContent system")

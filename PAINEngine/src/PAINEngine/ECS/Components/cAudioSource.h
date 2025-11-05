@@ -31,10 +31,12 @@ namespace PAIN {
             // --- STATE (Managed by AudioSystem) ---
             AudioState state = AudioState::Stopped;
 
+            bool playOnStart = true;  // NEW: Serialized - determines if sound plays when scene loads
+
             // --- TRIGGERS (Set by other systems/scripts) ---
             // Set to true to make the AudioSystem play this sound.
             // The system will reset this to false after processing.
-            bool playTrigger = false;
+            bool playTrigger = true;
 
             // Set to true to make the AudioSystem stop this sound.
             // The system will reset this to false after processing.
@@ -56,7 +58,7 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     REFL_FIELD(volumeDb)      // Serialized
     REFL_FIELD(minDistance)   // Serialized
     REFL_FIELD(maxDistance)   // Serialized
-    REFL_FIELD(playTrigger)   // Serialized (will save as "playTrigger")
+    REFL_FIELD(playOnStart)   // Serialized (will save as "playOnStart")
     //
     // Intentionally NOT reflecting the runtime fields:
     // - state

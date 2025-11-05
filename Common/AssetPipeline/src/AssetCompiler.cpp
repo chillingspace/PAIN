@@ -97,8 +97,8 @@ namespace PAIN {
                     constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024; // 1MB
                     isMusic = fileSize > MUSIC_FILESIZE_THRESHOLD;
                 }
-               isMusic = (isMusic || asset.shipped_path.string().find("music") != std::string::npos ||
-                    asset.shipped_path.string().find("bgm") != std::string::npos);
+               isMusic = (isMusic || asset.raw_path.string().find("music") != std::string::npos ||
+                    asset.raw_path.string().find("bgm") != std::string::npos);
 
                 if (isMusic) {
                     settings["loop"] = true;
@@ -305,6 +305,47 @@ namespace PAIN {
             }
         }
 
+        Descriptor Compiler::readDescFile(std::filesystem::path const& path) const {
+
+            Descriptor desc;
+
+            try {
+                std::ifstream file(path);
+                nlohmann::json desc_json;
+                file >> desc_json;
+
+                desc.descriptor_version = desc_json.value("descriptor_version", 1);
+                desc.guid = GUID(desc_json["guid"].get<std::string>());
+
+                //Asset info
+                auto asset_info = desc_json["asset_info"];
+                desc.type = stringToAssetType(asset_info["type"].get<std::string>());
+                desc.name = asset_info.value("name", "");
+
+                //Settings and build data
+                desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
+                auto build_data = desc_json["build_data"];
+                desc.hash = build_data.value("hash", std::size_t(0));
+
+                //Dependencies
+                auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
+                for (const auto& dep_str : deps_array) {
+                    desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
+                }
+
+                desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
+                desc.meta_data["source_file"] = desc.meta_data.value("source_file", "");
+
+                file.close();
+
+                return desc;
+            }
+            catch (const std::exception& e) {
+                std::cout << "Error encountered reading desc file, some information might be invalid." << std::endl;
+                return desc;
+            }
+        }
+
         bool Compiler::saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const {
             //Save generated descriptor
             try {
@@ -399,6 +440,7 @@ namespace PAIN {
             if (!needsRecompilation(asset_info, desc_file)) return;
 
             //Load texture data using STB
+            stbi_set_flip_vertically_on_load(false);
             int width, height, channels;
             unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
                 &width, &height, &channels, STBI_rgb_alpha);
@@ -554,6 +596,9 @@ namespace PAIN {
             if (desc_file.import_settings.value("remove_redundant_materials", true)) ppFlags |= aiProcess_RemoveRedundantMaterials;
             if (generate_tangents) ppFlags |= aiProcess_CalcTangentSpace;
             if (desc_file.import_settings.value("generate_normals", false)) ppFlags |= aiProcess_GenNormals;
+
+            ppFlags |= aiProcess_GenSmoothNormals;
+            ppFlags |= aiProcess_FlipUVs;
 
             // Load with Assimp
             Assimp::Importer importer;
@@ -1081,11 +1126,26 @@ namespace PAIN {
         }
 
         bool Compiler::needsRecompilation(Info const& asset_info, Descriptor const& desc_file) const {
-            //Check if asset needs to be recompiled
-            auto shipped = asset_info.shipped_path;
-            if (std::filesystem::exists(shipped) && fileHashing(asset_info.raw_path) == desc_file.hash) return false;
 
-            return true;
+            //Get shipped path
+            auto shipped = asset_info.shipped_path;
+
+            //Check shipped asset exists
+            if (!std::filesystem::exists(shipped))
+                return true;
+
+            //Compare source and output timestamps
+            auto raw_time = std::filesystem::last_write_time(asset_info.raw_path);
+            auto shipped_time = std::filesystem::last_write_time(shipped);
+            if (raw_time > shipped_time)
+                return true;
+
+            //Compare content hashes for safety
+            if (fileHashing(asset_info.raw_path) != desc_file.hash)
+                return true;
+
+            //All up to date
+            return false;
         }
 
 		void Compiler::processAsset(Info& asset_info) {

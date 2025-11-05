@@ -30,6 +30,14 @@ namespace PAIN {
 			HARD
 		};
 
+		enum class TONE_MAPPING_TYPES {
+			NONE = 0,
+			ACES,
+			REINHARD,
+			UNCHARTED2,
+			NUM_TONE_MAPPING_TYPES
+		};
+
 		// width = height for shadow maps. dont follow screen resolution
 		const std::unordered_map<SHADOW_TYPES, int> SHADOW_MAP_WIDTHS{
 			{SHADOW_TYPES::SOFTEST, 4096},
@@ -48,5 +56,22 @@ namespace PAIN {
 		bool daytime = true;
 		float fov = 90.f;
 		bool ao = true;		// ambient occlusion
+		
+		int blur_quality = 4;	// number of blur passes. higher = blurrier, BUT SLOWER, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2. too high won't help. sublinear growth.
+		// using hdr, so range of [0,inf)
+		float blur_strength = 0.f;
+
+		bool bloom = true;
+		float bloom_threshold = 1.5f;			// generally [0.8,1.5] - min brightness to bloom. 0 = disabled(technically blooms everything but why would we want that)
+		float bloom_blur_strength = 1.f;	// generally [0.5,10] - higher = bloomier, BUT SLOWER. bloom blur strength is how big the blur radius is when blurring the bright areas.
+		float bloom_strength = 0.f;		// generally [0.0,5.0] - bloom strength is how visible the bloom is when blended back onto the scene. 
+		float global_light_intensity = 1.5f;
+		int bloom_quality = 4;		// number of blur passes for bloom. higher = bloomier, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2
+
+		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
+		float tone_mapping_exposure = 1.f;
+
+		// image based lighting
+		bool ibl = true;
 	};
 }

@@ -60,7 +60,8 @@ namespace PAIN {
             std::string name;
 
             //Asset relative folder
-            std::filesystem::path relative_path;
+            std::filesystem::path main_relative_path;
+            std::filesystem::path shipped_relative_path;
         };
 
         // Vertex structure suitable for PBR, skinning, and morph targets
@@ -119,6 +120,8 @@ namespace PAIN {
             std::string roughnessMap;
             std::string aoMap;
             std::string emissionMap;
+            std::string bumpMap;
+			std::string heightMap;
             glm::vec3 baseColor;
             float metallic;
             float roughness;

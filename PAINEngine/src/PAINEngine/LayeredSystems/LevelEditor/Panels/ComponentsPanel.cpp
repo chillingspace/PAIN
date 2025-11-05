@@ -76,8 +76,8 @@ namespace PAIN {
                 ImGui::SetNextWindowSize(ImVec2(350, 600), ImGuiCond_FirstUseEver);
             }
 
-            std::function<void()> ComponentsPanel::addComponentPopUp(std::string const& popup_id) {
-                return [this, popup_id]() {
+            std::function<void(std::any const&)> ComponentsPanel::addComponentPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     auto ecs = services->get<ECS::Controller>();
                     auto entity_panel = entities_panel.lock();
 
@@ -165,8 +165,8 @@ namespace PAIN {
             }
 
 
-            std::function<void()> ComponentsPanel::removeComponentPopUp(std::string const& popup_id) {
-                return [this, popup_id]() {
+            std::function<void(std::any const&)> ComponentsPanel::removeComponentPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     auto ecs = services->get<ECS::Controller>();
                     auto entity_panel = entities_panel.lock();
 

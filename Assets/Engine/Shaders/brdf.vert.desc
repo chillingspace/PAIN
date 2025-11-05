@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "brdf.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4843862080439974098
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "a273b4d3-8ab4-f64d-a903-559c6dafdc0b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\brdf.vert"
+  }
+}

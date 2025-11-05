@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "android_blur.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 2455463354011812184
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "9f996287-3788-6f40-8272-4a4128eaf5a1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_blur.frag"
+  }
+}

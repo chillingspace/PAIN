@@ -67,13 +67,18 @@ namespace PAIN {
             //Original asset registry parsing logic
             for (auto it = json_package.begin(); it != json_package.end(); ++it) {
                 GUID guid = GUID(it.key());
+
+                //ensure GUID is valid
+                if (!guid.IsValid()) continue;
+
                 const auto& obj = it.value();
 
                 IAsset asset;
                 asset.guid = guid;
                 asset.type = stringToAssetType(obj["type"]);
                 asset.name = obj.value("name", "");
-                asset.relative_path = std::filesystem::path(obj.value("relative_path", ""));
+                asset.main_relative_path = std::filesystem::path(obj.value("main_relative_path", ""));
+                asset.shipped_relative_path = std::filesystem::path(obj.value("shipped_relative_path", ""));
                 assets[guid] = std::make_shared<IAsset>(asset);
             }
             fileStream = nullptr;
@@ -290,6 +295,11 @@ namespace PAIN {
                     mipSize,
                     tex->data.data() + offset
                 );
+
+                if (glfwGetCurrentContext() == nullptr) {
+                    PN_CORE_ERROR("No current OpenGL context - cannot upload texture!");
+                    throw std::runtime_error("No current OpenGL context.");
+                }
 
                 GLenum err = glGetError();
                 if (err != GL_NO_ERROR) {

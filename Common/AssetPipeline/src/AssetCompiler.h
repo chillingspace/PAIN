@@ -39,14 +39,11 @@ namespace PAIN {
 			//Generate default asset settings
 			nlohmann::json generateDefaultCompileSettings(Type const& type, Info const& asset) const;
 
-			//Create default desc file
-			Descriptor createDefaultDesc(Info& asset, std::filesystem::path const& path) const;
-
 			//Read desc file
 			Descriptor readDescFile(Info& asset, std::filesystem::path const& path) const;
 
-			//Save desc file
-			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
+			//Create default desc file
+			Descriptor createDefaultDesc(Info& asset, std::filesystem::path const& path) const;
 
 			//Compile and ship
 			void compileAndShip(Descriptor& desc_file, Info& asset_info) const;
@@ -77,6 +74,12 @@ namespace PAIN {
 
 			//Public process asset
 			void processAsset(Info& asset_info);
+
+			//Read desc file overload, read only
+			Descriptor readDescFile(std::filesystem::path const& path) const;
+
+			//Save desc file
+			bool saveDescFile(Descriptor const& desc_file, std::filesystem::path const& path) const;
 		};
 	}
 }
