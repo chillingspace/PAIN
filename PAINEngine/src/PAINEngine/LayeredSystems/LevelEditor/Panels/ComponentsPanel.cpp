@@ -21,35 +21,36 @@ namespace PAIN {
                 // Register component-specific UI
                 
                 // ---- Transform ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Transform>(*this, "Transform");
+                registerCompUIFunc<PAIN::Transform>("Transform",
+                    [](ComponentsPanel&, PAIN::Transform& as) { DrawWithReflection(as); });
 
                 // ---- MeshRenderer ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::MeshRenderer>(*this, "Mesh Renderer");
+                registerCompUIFunc<PAIN::MeshRenderer>("MeshRenderer",
+                    [](ComponentsPanel&, PAIN::MeshRenderer& as) { DrawWithReflection(as); });
 
                 // ---- Light ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Lighting>(*this, "Lighting");
+                registerCompUIFunc<PAIN::Lighting>("Lighting",
+                    [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
 
                 // ---- AudioSource ----
-                //PAIN::Editor::Panel::RegisterReflected<Audio::AudioSource>(*this, "AudioSource");
-                // For some reason can't register normally EITHER
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
                     [](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as); });
 
-
                 // ---- BoundingVolume ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::BoundingVolume>(*this, "Bounding Volume"); 
+                registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
+                    [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
 
                 // ---- Hierarchy ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Hierarchy>(*this, "Hierarchy");
+                registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
+                    [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
 
                 // ---- Physics ----
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Joint>(*this, "Joint");
+                registerCompUIFunc<PAIN::Joint>("Joint",
+                    [](ComponentsPanel&, PAIN::Joint& as) { DrawWithReflection(as); });
 
-                // For some reason RigidBody3D can't register normally
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
                 //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
-
 
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions

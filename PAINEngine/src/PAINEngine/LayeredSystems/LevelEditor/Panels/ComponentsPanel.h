@@ -49,6 +49,7 @@ namespace PAIN {
 						comp_func(comp_panel, *static_cast<T*>(comp));
 						});
 				}
+
 				void renderEntityComponents(entt::entity entity);
 
 
