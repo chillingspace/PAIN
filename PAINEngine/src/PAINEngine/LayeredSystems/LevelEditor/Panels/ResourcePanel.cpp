@@ -905,7 +905,6 @@ namespace PAIN {
 					};
 			}
 
-
 			std::function<void(std::any const&)> ResourcePanel::deleteFolderPopup(std::string const& popup_id) {
 				return [this, popup_id](std::any const& data) {
 
@@ -1108,9 +1107,6 @@ namespace PAIN {
 				//Default icon size
 				icon_size = { 128.0f, 128.0f };
 
-				std::shared_ptr<ResourcePanel> resourcepanel_wrapped(this, [](ResourcePanel*) {});
-				std::weak_ptr<ResourcePanel> weak_this = resourcepanel_wrapped;
-
 				//Setup directory watching 
 				path_service->watchDirectoryTree(root_path, [this](std::filesystem::path const& file, filewatch::Event event) {
 
@@ -1145,6 +1141,7 @@ namespace PAIN {
 
 						//Check if current path is pointing to dir
 						if (file == path_service->resolvePath(current_path)) {
+							std::lock_guard<std::mutex> lock(file_event_mutex);
 							current_path = root_path;
 						}
 
