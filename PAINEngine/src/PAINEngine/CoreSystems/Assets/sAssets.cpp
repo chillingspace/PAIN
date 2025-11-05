@@ -46,14 +46,12 @@ namespace PAIN {
 			//Create unique asset loader
 			asset_loader = std::make_unique<Loader>(services);
 
-#ifdef PN_PLATFORM_WINDOWS
 			Platform platform = Platform::Windows;
 
 			//Create unique asset compiler
 			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
 				path_service->resolvePath(Path::assets_alias, ""),
 				platform, getExecutablePath());
-#endif
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
@@ -122,7 +120,6 @@ namespace PAIN {
 			asset_loader = nullptr;
 		}
 
-#ifdef PN_PLATFORM_WINDOWS
 		void Manager::registerAsset(std::filesystem::path const& relative_path) {
 			//Get path service
 			auto path_service = services->get<Path::Path>();
@@ -143,7 +140,6 @@ namespace PAIN {
 			shipped_path_to_guid[asset.shipped_relative_path] = asset.guid;
 			main_path_to_guid[asset.main_relative_path] = asset.guid;
 		}
-#endif
 
 		void Manager::registerAsset(std::shared_ptr<IAsset> asset) {
 

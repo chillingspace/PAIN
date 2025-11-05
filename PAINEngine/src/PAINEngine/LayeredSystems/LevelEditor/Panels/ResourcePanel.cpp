@@ -1050,75 +1050,59 @@ namespace PAIN {
 				//Default icon size
 				icon_size = { 128.0f, 128.0f };
 
-				////Setup directory watching 
-				//PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/", [weak_this, this](std::filesystem::path const& file, filewatch::Event event) {
-				//	if (auto shared_this = weak_this.lock()) { // Check if the object is still alive
+				std::shared_ptr<ResourcePanel> resourcepanel_wrapped(this, [](ResourcePanel*) {});
+				std::weak_ptr<ResourcePanel> weak_this = resourcepanel_wrapped;
 
-				//		//Engine engine assets path
-				//		static auto engine_assets = PN_PATH_SERVICE->resolvePath("Engine_Assets:/");
+				//Setup directory watching 
+				path_service->watchDirectoryTree(root_path, [this](std::filesystem::path const& file, filewatch::Event event) {
 
-				//		//Skip directories & invalid paths
-				//		if (std::filesystem::is_directory(file) ||
-				//			!PN_ASSETS_SERVICE->isPathValid(file.string(), false) ||
-				//			file.string().find(engine_assets.string()) != std::string::npos) {
-				//			return;
-				//		}
+					//Skip directories & invalid paths
+					if (std::filesystem::is_directory(file) || !std::filesystem::exists(file)) return;
 
-				//		//Watch for events
-				//		switch (event) {
-				//		case filewatch::Event::added: {
+					//Watch for events
+					switch (event) {
+					case filewatch::Event::added: {
 
-				//			PN_CORE_INFO("Add Event for Path: " + file.string() + " " + file.extension().string());
+						PN_CORE_INFO("Add Event for Path: {}", file.string());
 
-				//			//Push to file event queue
-				//			shared_this->pushFileEvent([&, file]() {
+						//Push to file event queue
+						pushFileEvent([&, file]() {
 
-				//				//Register asset if needed
-				//				auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(file.string(), false);
-				//				if (!PN_ASSETS_SERVICE->isAssetRegistered(asset_id)) {
-				//					PN_ASSETS_SERVICE->registerAsset(file.string(), false);
-				//				}
-				//				});
+							});
 
-				//			break;
-				//		}
-				//		case filewatch::Event::removed: {
+						break;
+					}
+					case filewatch::Event::removed: {
 
-				//			PN_CORE_INFO("Remove Event for Path: " + file.string() + " " + file.extension().string());
+						PN_CORE_INFO("Remove Event for Path: {}", file.string());
 
-				//			//Push to file event queue
-				//			shared_this->pushFileEvent([&, file]() {
+						//Push to file event queue
+						pushFileEvent([&, file]() {
 
-				//				//Unregister asset if needed
-				//				PN_ASSETS_SERVICE->unregisterAsset(PN_ASSETS_SERVICE->getIDFromPath(file.string(), false));
-				//				});
+							});
 
-				//			break;
-				//		}
-				//		case filewatch::Event::modified: {
+						break;
+					}
+					case filewatch::Event::modified: {
 
-				//			PN_CORE_INFO("Modified Event for Path: " + file.string() + " " + file.extension().string());
+						PN_CORE_INFO("Modified Event for Path: {}", file.string());
 
-				//			//Push to file event queue
-				//			shared_this->pushFileEvent([&, file]() {
+						//Push to file event queue
+						pushFileEvent([&, file]() {
 
-				//				//Only recache assets that are already cached
-				//				auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(file.string(), false);
-				//				if (PN_ASSETS_SERVICE->isAssetCached(asset_id)) {
+							});
 
-				//					//Recache asset
-				//					PN_ASSETS_SERVICE->recacheAsset(asset_id);
-				//				}
-				//				});
+						break;
+					}
+					default: {
+						break;
+					}
+					}
+				});
+			}
 
-				//			break;
-				//		}
-				//		default: {
-				//			break;
-				//		}
-				//		}
-				//	}
-				//});
+			void ResourcePanel::onDetach() {
+				path_service->stopWatchingDirectoryTree(root_path);
 			}
 
 			void ResourcePanel::render() {

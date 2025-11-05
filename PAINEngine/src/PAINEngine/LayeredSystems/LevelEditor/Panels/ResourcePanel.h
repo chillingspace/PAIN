@@ -27,6 +27,7 @@ namespace PAIN {
                 // ----------------------------
 
                 void onAttach() override;
+                void onDetach() override;
                 void render();
 
                 // ----------------------------

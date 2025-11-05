@@ -174,6 +174,11 @@ namespace PAIN {
 
             // Once set from io.inifilename, do not have to call the write io again
 
+            //Call onDetach on all registered panels
+            panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
+                panel->onDetach();
+                });
+
             panels = nullptr;
             platform = nullptr;
             command_manager = nullptr;

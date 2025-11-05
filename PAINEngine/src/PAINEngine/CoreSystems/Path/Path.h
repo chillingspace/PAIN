@@ -23,6 +23,8 @@ namespace PAIN {
 		static std::string documents_alias = "documents";
 		static std::string temp_alias = "temp";
 		static std::string config_alias = "config";
+
+		#include "FileWatch.hpp"
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -133,6 +135,30 @@ namespace PAIN {
 
 			//Gettors
 			std::unordered_map<std::string, std::string> getAllVirtualPaths() const { return virtual_paths; }
+
+#ifdef PN_PLATFORM_WINDOWS
+
+			//Event callback
+			using FileWatchEventCallback = std::function<void(std::filesystem::path const&, filewatch::Event)>;
+
+			//Watch directory
+			virtual void watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) = 0;
+
+			//Watch directory & child directories
+			virtual void watchDirectoryTree(std::string const& virtual_path, FileWatchEventCallback callback) = 0;
+
+			//Stop watching directory
+			virtual void stopWatchingDirectory(std::string const& virtual_path) = 0;
+
+			//Stop watching directory & child directories
+			virtual void stopWatchingDirectoryTree(std::string const& virtual_path) = 0;
+
+			//Stop watching all directories
+			virtual void stopWatchingAllDirectories() = 0;
+
+			//Log watched directories
+			virtual void logWatchedDirectories() const = 0;
+#endif
 
 			//Create path service
 			static Path* create(void* app);

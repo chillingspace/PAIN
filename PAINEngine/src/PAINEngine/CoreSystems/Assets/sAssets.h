@@ -30,9 +30,7 @@ namespace PAIN {
 			std::unique_ptr<Loader> asset_loader;
 
 			//Asset Organizer
-#ifdef PN_PLATFORM_WINDOWS
 			std::unique_ptr<Organizer> asset_organizer;
-#endif
 
 			//Log asset registry
 			void logAssetRegistry() const;
@@ -46,9 +44,7 @@ namespace PAIN {
 			GUID findGUID(std::filesystem::path const& relative_path);
 
 			//Register asset
-#ifdef PN_PLATFORM_WINDOWS
 			void registerAsset(std::filesystem::path const& relative_path);
-#endif
 			void registerAsset(std::shared_ptr<IAsset> asset);
 
 			//Unregister asset
