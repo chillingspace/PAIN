@@ -41,7 +41,6 @@ namespace PAIN {
             }
 
 			void ResourcePanel::moveFileAcceptPayload(std::string const& virtual_path) {
-#ifdef PN_PLATFORM_WINDOWS
 				//Drop target
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "_FILE").c_str())) {
@@ -60,11 +59,9 @@ namespace PAIN {
 					}
 					ImGui::EndDragDropTarget();
 				}
-#endif
 			}
 
 			void ResourcePanel::onEvent(Event::Event& event) {
-#ifdef PN_PLATFORM_WINDOWS
 				if (event.getType() == PAIN::Event::Type::FileDrop) {
 
 					//Create event dispatcher
@@ -102,12 +99,21 @@ namespace PAIN {
 						return true;
 						});
 				}
-#endif
 			}
 
 			void ResourcePanel::populateDirs(std::string const& virtual_path) {
+
+				//Safety check
+				std::string path;
+				if (!path_service->pathExists(virtual_path)) {
+					path = root_path;
+				}
+				else {
+					path = virtual_path;
+				}
+
 				//Retrieve file
-				auto fetch_dirs = path_service->listDirectories(virtual_path);
+				auto fetch_dirs = path_service->listDirectories(path);
 
 				//Clear file directory
 				directories.clear();
@@ -144,8 +150,17 @@ namespace PAIN {
 
 			void ResourcePanel::populateFiles(std::string const& virtual_path) {
 
+				//Safety check
+				std::string path;
+				if (!path_service->pathExists(virtual_path)) {
+					path = root_path;
+				}
+				else {
+					path = virtual_path;
+				}
+
 				//Retrieve file
-				auto fetch_files = path_service->listFiles(virtual_path);
+				auto fetch_files = path_service->listFiles(path);
 
 				//Clear file directory
 				files.clear();
@@ -207,17 +222,58 @@ namespace PAIN {
 				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
 				std::string name = dir.filename().string() != "" ? dir.filename().string() : "assets";
 				bool open = ImGui::TreeNodeEx(name.c_str(), node_flags);
-				moveFileAcceptPayload(virtual_dir);
+
+				//Check for activation
 				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					current_path = virtual_dir;
 					populateDirs(current_path);
 					populateFiles(current_path);
 				}
+
+				//Accept payload
+				moveFileAcceptPayload(virtual_dir);
+
+				//Render context
+				renderPopUpContext({dir,0, dir.filename().string() });
+
+				//Render if open
 				if (open) {
 					for (const std::string& subdir : directoryCache[virtual_dir]) {
 						DrawDirectoryTree(subdir);
 					}
 					ImGui::TreePop();
+				}
+				
+				//Start drag-and-drop source
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+					//Static copy of payload
+					static Dir dir_copy;
+					dir_copy.path = dir;
+					dir_copy.file_name = dir.filename().string();
+
+					//Get display icon
+					static std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
+
+					//Folder icon
+					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
+						dir_copy.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					}
+					else {
+						dir_copy.icon = 0;
+					}
+
+					//Set drag payload with asset name
+					ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
+
+					//Display directory icon
+					ImVec2 uv0(0.0f, 0.0f);
+					ImVec2 uv1(1.0f, 1.0f);
+
+					//Render the icon or name at the cursor during dragging
+					ImGui::Image(dir_copy.icon, { 64, 64 }, uv0, uv1);
+					ImGui::TextWrapped("%s", dir_copy.file_name.c_str());
+					ImGui::EndDragDropSource();
 				}
 			}
 
@@ -403,7 +459,6 @@ namespace PAIN {
 					}
 
 					//Start drag-and-drop source
-#ifdef PN_PLATFORM_WINDOWS
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 
 						//Static copy of payload
@@ -418,7 +473,6 @@ namespace PAIN {
 						ImGui::TextWrapped("%s", dir_copy.file_name.c_str());
 						ImGui::EndDragDropSource();
 					}
-#endif
 
 					//Display directory name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
@@ -873,11 +927,15 @@ namespace PAIN {
 							//Cast to file and remove file
 							auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
 
-							//Delete asset
-							asset_service->removeFile(dir->path);
+							//Disable deletion of root path
+							if (dir->path != path_service->resolvePath(root_path)) {
 
-							//Populate files and directories
-							populateDirs(current_path);
+								//Delete asset
+								asset_service->removeFile(dir->path);
+
+								//Populate files and directories
+								populateDirs(current_path);
+							}
 						}
 
 						//Close popup
@@ -1056,17 +1114,28 @@ namespace PAIN {
 				//Setup directory watching 
 				path_service->watchDirectoryTree(root_path, [this](std::filesystem::path const& file, filewatch::Event event) {
 
-					//Skip directories & invalid paths
-					if (std::filesystem::is_directory(file) || !std::filesystem::exists(file)) return;
+					//Skip desc paths
+					if (file.extension() == Assets::descriptor_ext) return;
+
+					//Operate own internal changes for directories
+					if (std::filesystem::is_directory(file)) {
+
+						//Push to file event queue
+						pushFileEvent([&, file]() {
+							PN_CORE_INFO("Directory event: {}", file.string());
+							//Repopulate the directory cache & directories
+							directoryCache.clear();
+							});
+					}
 
 					//Watch for events
 					switch (event) {
 					case filewatch::Event::added: {
 
-						PN_CORE_INFO("Add Event for Path: {}", file.string());
-
 						//Push to file event queue
 						pushFileEvent([&, file]() {
+
+							PN_CORE_INFO("Add Event for Path: {}", file.string());
 
 							});
 
@@ -1074,10 +1143,15 @@ namespace PAIN {
 					}
 					case filewatch::Event::removed: {
 
-						PN_CORE_INFO("Remove Event for Path: {}", file.string());
+						//Check if current path is pointing to dir
+						if (file == path_service->resolvePath(current_path)) {
+							current_path = root_path;
+						}
 
 						//Push to file event queue
 						pushFileEvent([&, file]() {
+
+							PN_CORE_INFO("Remove Event for Path: {}", file.string());
 
 							});
 
@@ -1085,10 +1159,10 @@ namespace PAIN {
 					}
 					case filewatch::Event::modified: {
 
-						PN_CORE_INFO("Modified Event for Path: {}", file.string());
-
 						//Push to file event queue
 						pushFileEvent([&, file]() {
+
+							PN_CORE_INFO("Modified Event for Path: {}", file.string());
 
 							});
 
@@ -1107,23 +1181,23 @@ namespace PAIN {
 
 			void ResourcePanel::render() {
 
-				////Update resource panel with file change events
-				//while (!file_event_queue.empty()) {
+				//Update resource panel with file change events
+				while (!file_event_queue.empty()) {
 
-				//	try {
-				//		//Call callback function if valid
-				//		if (file_event_queue.front()) {
-				//			//Execute file event callback
-				//			file_event_queue.front()();
-				//		}
+					try {
+						//Call callback function if valid
+						if (file_event_queue.front()) {
+							//Execute file event callback
+							file_event_queue.front()();
+						}
 
-				//		//Pop from queue
-				//		file_event_queue.pop();
-				//	}
-				//	catch (std::exception const&) {
-				//		PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
-				//	}
-				//}
+						//Pop from queue
+						file_event_queue.pop();
+					}
+					catch (std::exception const&) {
+						PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+					}
+				}
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;
@@ -1196,6 +1270,10 @@ namespace PAIN {
 
 								//Reset timer
 								auto_refresh_timer = 0.0f;
+
+								//Reset directory cache
+								directoryCache.clear();
+								populateDirectoryCache(current_path);
 
 								//Update directories & files
 								populateDirs(current_path);
