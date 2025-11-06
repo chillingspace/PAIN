@@ -57,6 +57,9 @@ void main() {
     else if (toneMapMode == 3.0) {
         mapped = Uncharted2(x);
     }
+    else {
+        mapped = vec3(1.0, 0.0, 1.0);
+    }
 
     FragColor = vec4(mapped, 1.0);
 }
