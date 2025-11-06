@@ -172,6 +172,9 @@ namespace PAIN {
 			void onAppPause() override {}
 			void onAppResume() override {}
 			void onEvent(Event::Event& e) override {}
+
+			GUID findByName(const std::string& name) const; // wraps findGUID
+			Type getTypeByGUID(const GUID& id) const; // wraps getAssetData(id)
 		};
 
 #ifdef PN_PLATFORM_WINDOWS

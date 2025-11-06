@@ -33,6 +33,7 @@
 #include "Systems/Logic/sysLogic.h"
 #include "Systems/Audio/sysAudio.h"
 #include "Systems/Collision/sBVHSystem.h"
+#include "Systems/Scripting/GameScriptingSystem.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 
@@ -67,7 +68,6 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
-
 		core_system->services = services;
 		core_system->onAttach();
 		services->set<T>(core_system);
@@ -109,7 +109,6 @@ namespace PAIN {
 
 		// dependency injection
 		TextRenderer::init(services);
-
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS
         auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
@@ -130,7 +129,6 @@ namespace PAIN {
 
 		
 #ifdef PN_PLATFORM_WINDOWS	
-
 		// Physics system not cross platform yet
 		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 
@@ -144,6 +142,7 @@ namespace PAIN {
 
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
+
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS
@@ -161,12 +160,72 @@ namespace PAIN {
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
+		// game scripting system
+		addCoreSystem<GameScriptingSystem>(std::make_shared<GameScriptingSystem>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
 		// !NOTE: IMGUI eats events
 		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
 		addLayerSystem(editor);
+#endif
+
+#ifdef _DEBUG  // THIS BLOCK WAS FOR TESTING LUA
+		PN_CORE_INFO("Testing Lua on Debug");
+
+		auto ecs_ptr = services->get<ECS::Controller>();
+		auto meta_ptr = services->get<MetaData::Service>();
+		auto scripting_ptr = services->get<GameScriptingSystem>();
+
+
+		if (ecs_ptr && meta_ptr && scripting_ptr) {
+			auto& ecs = *ecs_ptr;
+			auto& meta = *meta_ptr;
+			auto& scripting = *scripting_ptr;
+
+			// Create test player entity
+			auto player = ecs.createEntity();
+			meta.setEntityName(player, "Player");
+
+			// Add Transform component (minimal for testing)
+			ecs.addEntityComponent<Transform>(player, Transform{});
+
+			// Attach Lua script
+			int entityId = static_cast<int>(entt::to_integral(player));
+			scripting.attachScript(entityId, "game/scripts/PlayerController.lua");
+			PN_CORE_INFO("Test player spawned with entity ID: {}", entityId);
+		} 
+		else {
+			PN_CORE_ERROR("Failed to spawn test player - services not available");
+		}
+#else
+		PN_CORE_INFO("Testing Lua on Release");
+
+		auto ecs_ptr = services->get<ECS::Controller>();
+		auto meta_ptr = services->get<MetaData::Service>();
+		auto scripting_ptr = services->get<GameScriptingSystem>();
+
+
+		if (ecs_ptr && meta_ptr && scripting_ptr) {
+			auto& ecs = *ecs_ptr;
+			auto& meta = *meta_ptr;
+			auto& scripting = *scripting_ptr;
+
+			// Create test player entity
+			auto player = ecs.createEntity();
+			meta.setEntityName(player, "Player");
+
+			// Add Transform component (minimal for testing)
+			ecs.addEntityComponent<Transform>(player, Transform{});
+
+			// Attach Lua script
+			int entityId = static_cast<int>(entt::to_integral(player));
+			scripting.attachScript(entityId, "game/scripts/PlayerController.lua");
+			PN_CORE_INFO("Test player spawned with entity ID: {}", entityId);
+		}
+		else {
+			PN_CORE_ERROR("Failed to spawn test player - services not available");
+		}
 #endif
 
 		//Mark engine as ready
@@ -182,7 +241,8 @@ namespace PAIN {
 	while (b_app_running) {
 
 		//Poll events
-		services->get<Window::Window>()->pollEvents();
+		auto window = services->get<Window::Window>();
+		if (window) window->pollEvents();
 
 		//Drain all events in queue
 		drainEventQueue();
@@ -224,21 +284,34 @@ namespace PAIN {
 		//Accumulate for fixed updates (use scaled time)
 		accumulator += timing.dt;  // Changed from timing.dt
 
+
 		//Skip all other systems when window is not active
 		if (!services->get<Window::Window>()->getActive()) {
 			services->get<Window::Window>()->swapBuffers();
 			continue;
 		}
 
+
 		//Update fixed delta
 		int steps = 0;
 		while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
 
 			//Update all core systems
-			for (auto& core : core_stack) core.lock()->onFixedUpdate(timing);
+			for (auto& core : core_stack) {
+				//if (auto core_ptr = core.lock()) core_ptr->onFixedUpdate(timing);
+
+				auto core_ptr = core.lock();
+				if (core_ptr) core_ptr->onFixedUpdate(timing);
+			}
 
 			//Update all layered systems
-			for (auto& layer : layer_stack) layer.lock()->onFixedUpdate(timing);
+			for (auto& layer : layer_stack) {
+				//if (auto layer_ptr = core.lock()) layer_ptr->onFixedUpdate(timing);
+
+				auto layer_ptr = layer.lock();
+				if (layer_ptr) layer_ptr->onFixedUpdate(timing);
+
+			}
 
 			accumulator -= timing.fixed_dt;
 			++steps;
@@ -249,13 +322,20 @@ namespace PAIN {
 		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
 		// clear errors before next rendering loop
+
 		while (glGetError());
 
 		//Update all core systems
-		for (auto& core : core_stack) core.lock()->onUpdate(timing);
+		for (auto& core : core_stack) {
+			auto core_ptr = core.lock();
+            if (core_ptr) core_ptr->onUpdate(timing);
+		}
 
 		//Update all layered systems
-		for (auto& layer : layer_stack) layer.lock()->onUpdate(timing);
+		for (auto& layer : layer_stack) {
+			auto layer_ptr = layer.lock();
+            if (layer_ptr) layer_ptr->onUpdate(timing);
+		}
 
 		//Swap buffer
 		services->get<Window::Window>()->swapBuffers();
@@ -274,6 +354,9 @@ namespace PAIN {
 		//Dispatch to core from bottom up
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
+			auto layer_ptr = it->lock();
+        	if (!layer_ptr) continue; // skip null weak_ptr
+
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
 			handled = e.checkHandled();
@@ -285,6 +368,9 @@ namespace PAIN {
 
 		//Dispatch to layer bottom up
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
+
+			auto core_ptr = it->lock();
+        	if (!core_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -299,11 +385,10 @@ namespace PAIN {
 
 		//Dispatch to layer top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
-
-			//Dispatch event down layers
-			(*it).lock()->onEvent(e);
-			handled = e.checkHandled();
-			if (handled) break;
+			if (auto layer_ptr = it->lock()) {
+           		layer_ptr->onEvent(e);
+           		if (e.checkHandled()) return;
+       		}
 		}
 
 		//Check if handled
@@ -313,9 +398,10 @@ namespace PAIN {
 		for (auto it = core_stack.rbegin(); it != core_stack.rend(); ++it) {
 
 			//Dispatch event down layers
-			(*it).lock()->onEvent(e);
-			handled = e.checkHandled();
-			if (handled) break;
+			if (auto core_ptr = it->lock()) {
+            	core_ptr->onEvent(e);
+            	if (e.checkHandled()) return;
+	       	}
 		}
 	}
 

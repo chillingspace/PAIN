@@ -107,6 +107,17 @@ namespace PAIN {
 			asset_loader = nullptr;
 		}
 
+		GUID Manager::findByName(const std::string& name) const
+		{
+			return findGUID(name);
+		}
+
+		Type Manager::getTypeByGUID(const GUID& id) const
+		{
+			auto meta = getAssetData(id);  
+			return meta ? meta->type : Type::Other; 
+		}
+
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 
 			//Get asset registry data

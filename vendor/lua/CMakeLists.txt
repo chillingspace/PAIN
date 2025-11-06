@@ -3,6 +3,10 @@ project(lua_vendor LANGUAGES C)
 
 file(GLOB LUA_SRC "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 
+# EXCLUDE lua.c and onelua.c which contain main()
+list(FILTER LUA_SRC EXCLUDE REGEX ".*/lua\\.c$")
+list(FILTER LUA_SRC EXCLUDE REGEX ".*/onelua\\.c$")
+
 # On Android, build a static library with appropriate properties
 add_library(lua STATIC ${LUA_SRC})
 target_include_directories(lua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -16,7 +16,7 @@ extern PAIN::Application* PAIN::CreateApplication();
 AAssetManager* assetManager = nullptr;
 AAssetManager* g_AssetMgr = nullptr;
 
-extern "C" void PAIN_RunLuaSmokeTests();
+//extern "C" void PAIN_RunLuaSmokeTests();
 
 extern "C" void android_main(android_app* app) {
     assetManager = app->activity->assetManager;
@@ -34,9 +34,9 @@ extern "C" void android_main(android_app* app) {
     //Run engine
     game->Init(app);
 
-#if defined(PAIN_ENABLE_LUA_SMOKETEST) && PAIN_ENABLE_LUA_SMOKETEST
-    PAIN_RunLuaSmokeTests();
-#endif
+// #if defined(PAIN_ENABLE_LUA_SMOKETEST) && PAIN_ENABLE_LUA_SMOKETEST
+//     PAIN_RunLuaSmokeTests();
+// #endif
 
     game->Run();
     delete game;

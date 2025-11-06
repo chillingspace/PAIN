@@ -33,6 +33,8 @@ namespace PAIN {
 
 		Camera* GetActiveCamera();
 
+		//void loadSceneFromJson(const std::string& jsonPath);
+
 	private:
 		std::unique_ptr<Camera> camera;
 

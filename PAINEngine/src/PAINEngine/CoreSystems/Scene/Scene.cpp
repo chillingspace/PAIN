@@ -11,6 +11,8 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
+#include "Systems/Scripting/GameScriptingSystem.h"
+#include "CoreSystems/Scripting/luaManager.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
@@ -243,6 +245,9 @@ namespace PAIN {
 		//	std::string name = nameOpt ? nameOpt->get().name : "<no name>";
 		//}
 
+		//loadSceneFromJson("game_assets://scenes/level_01.json");
+		//PN_CORE_INFO("Scene loaded from JSON");
+
 	}
 
 	void Scene::onUpdate(AppTiming timing)
@@ -316,6 +321,58 @@ namespace PAIN {
 	{
 		return camera.get();
 	}
+
+	//void Scene::loadSceneFromJson(const std::string& jsonPath)
+	//{
+	//	auto ecs = services->get<ECS::Controller>();
+	//	auto scripting = services->get<GameScriptingSystem>();
+	//	auto path_service = services->get<Path::Path>();
+	//	// load json file
+	//	std::string realPath = path_service->resolvePath(jsonPath);
+	//	std::ifstream file(realPath);
+	//	if (!file.is_open()) {
+	//		PN_CORE_ERROR("Failed to load scene: {}", jsonPath);
+	//		return;
+	//	}
+	//	json sceneData;
+	//	file >> sceneData;
+	//	file.close();
+	//	//PN_CORE_INFO("Loading scene: {}", sceneData["scene"]["name"]);
+	//	// create entities from json
+	//	for (const auto& entityData : sceneData["scene"]["entities"]) {
+	//		std::string name = entityData["name"];
+	//		glm::vec3 pos = glm::vec3(
+	//			entityData["position"][0],
+	//			entityData["position"][1],
+	//			entityData["position"][2]
+	//		);
+	//		glm::vec3 scale = glm::vec3(
+	//			entityData["scale"][0],
+	//			entityData["scale"][1],
+	//			entityData["scale"][2]
+	//		);
+	//		// create entity with mesh
+	//		uint32_t meshId = getMeshId(entityData["mesh"]);
+	//		auto entity = AddObject(meshId, name, pos, glm::quat(), scale);
+	//		int entityId = static_cast<int>(entt::to_integral(entity));
+	//		//PN_CORE_INFO("Created entity: {} (ID: {})", name, entityId);
+	//		// multiple script folders
+	//		if (entityData.contains("scripts")) {
+	//			if (entityData["scripts"].is_array()) {
+	//				// Array of script folder configs
+	//				for (const auto& scriptConfig : entityData["scripts"]) {
+	//					scripting->loadAllScriptsForEntityFromVDir(
+	//						entityId,
+	//						"game_assets://",
+	//						scriptConfig["folder"],
+	//						scriptConfig.value("recursive", true),
+	//						false
+	//					);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	std::shared_ptr<Mesh> Scene::loadMesh(const std::string& path_to_mesh)
 	{

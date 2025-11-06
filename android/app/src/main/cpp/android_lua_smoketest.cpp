@@ -1,34 +1,33 @@
 #include <android/asset_manager.h>
-
-#include "PAINEngine/CoreSystems/Scripting/luaState.h"
 #include "PAINEngine/CoreSystems/Scripting/luaManager.h"
+//#include "PAINEngine/CoreSystems/Scripting/EngineAPIAdapter.h"
+#include "PAINEngine/CoreSystems/Scripting/Bridge.h"
 
 extern AAssetManager* g_AssetMgr;
 
-// forwars declare 
-namespace PAIN {
-namespace ECS  { struct Controller {}; }
-namespace MetaData { struct Service {}; }
-}
-
+static std::optional<PAIN::Scripting::EngineWiring> gWiring;
 static LuaManager gLua;
 
 //-----------------------------------------------
 // Basic sol2 LuaState test (no LuaManager)
 //-----------------------------------------------
 static void RunLuaStateSmokeTest() {
-    PAIN::Scripting::LuaState L;
-    L.init(false);
-    L.doFile("game/scripts/test.lua");
+    // PAIN::Scripting::LuaState L;
+    // L.init(false);
+    // L.doFile("game/scripts/test_2.lua");
 }
 
 //-----------------------------------------------
 // Minimal LuaManager test 
 //-----------------------------------------------
 static void RunLuaManagerSmokeTest() {
-    gLua.init(nullptr, /*shipping=*/true);
-    gLua.loadScriptForEntity(1, "game/scripts/test.lua", {}, true);
-    gLua.tick(0.016);
+    gWiring = PAIN::Scripting::CreateMinimalEngineForAndroid();
+
+    //gLua.setPathService(gWiring->fs.get());
+    gLua.init(gWiring->api, /*shipping=*/true);
+
+    gLua.loadScriptForEntity(1, "game/scripts/test_2.lua", {}, true);
+    gLua.tick(0.016f);
 }
 
 //-----------------------------------------------

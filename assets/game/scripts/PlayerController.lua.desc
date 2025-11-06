@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "PlayerController.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 17263774076179860167
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "e3c50a66-69d0-534d-84eb-9171cf379d8d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\PlayerController.lua"
+  }
+}
