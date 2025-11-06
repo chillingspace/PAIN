@@ -35,6 +35,11 @@ namespace PAIN {
 		
 		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after sRenderer attach: {}", err);
+		}
 	}
 
 	void sRenderer::shadowPass()
@@ -331,6 +336,11 @@ namespace PAIN {
 		lcam.fov = m_Scene->GetActiveCamera()->fov;
 		lcam.forward = m_Scene->GetActiveCamera()->forward;
 		lcam.aspect_ratio = m_Scene->GetActiveCamera()->aspect_ratio;
+
+		GLenum err = glGetError();
+		while (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+		}
 	}
 
 

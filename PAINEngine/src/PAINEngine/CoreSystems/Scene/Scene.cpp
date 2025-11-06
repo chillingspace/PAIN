@@ -44,7 +44,7 @@ namespace PAIN {
 		lcam.L_intensity = glm::vec3(0.01f);
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
-		//GraphicsSettings::get().daytime = false;
+		GraphicsSettings::get().daytime = false;
 		//GraphicsSettings::get().ibl = false;
 
 		if (GraphicsSettings::get().daytime) {

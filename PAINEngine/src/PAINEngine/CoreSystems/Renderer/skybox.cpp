@@ -220,6 +220,11 @@ namespace PAIN {
 	}
 
 	void Skybox::init(const std::shared_ptr<Services>& s, const std::string& skybox_path) {
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before Skybox init: {}", err);
+		}
+
 		services = s;
 
 		//Set win width and height
@@ -256,6 +261,11 @@ namespace PAIN {
 #endif
 			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(skybox_shader_path);
 			PN_CORE_INFO("Skybox shader compiled, ID: {}", shader->GetRendererID());
+		}
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after Skybox init: {}", err);
 		}
 	}
 
@@ -395,14 +405,25 @@ namespace PAIN {
 				128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
 
+#ifdef PN_PLATFORM_ANDROID
+		// Allocate storage for ALL mip levels upfront
+		for (unsigned int mip = 0; mip < 5; ++mip) {
+			unsigned int mipSize = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+			for (unsigned int i = 0; i < 6; ++i) {
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, GL_RGB16F,
+					mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
+			}
+		}
+#else
+		// Generate mipmaps for the cubemap
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+#endif
+
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// Generate mipmaps for the cubemap
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 #ifdef PN_PLATFORM_ANDROID
 		std::filesystem::path prefilter_shader_path = "engine\\shaders\\android_prefilter.vert";
@@ -436,11 +457,15 @@ namespace PAIN {
 		glGenRenderbuffers(1, &captureRBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete!");
-		}
+#ifdef PN_PLATFORM_ANDROID
+		// On Android, create RBO once at max size and never resize
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 128, 128); // Use 16-bit depth
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+#endif
 
-		unsigned int maxMipLevels = 5;
+
+		const unsigned int maxMipLevels = 5;
 
 		// Render for each mip level (each roughness level)
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
@@ -449,8 +474,11 @@ namespace PAIN {
 			unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
 			unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
 
+#ifndef PN_PLATFORM_ANDROID
 			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+#endif
 			glViewport(0, 0, mipWidth, mipHeight);
 
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
@@ -462,9 +490,44 @@ namespace PAIN {
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
 
+				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+					PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete! mip: {}, side: {}", mip, i);
+					GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+					switch (status) {
+					case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+					case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+					case GL_FRAMEBUFFER_UNSUPPORTED:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
+					default:
+						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+					}
+				}
+
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				renderCube();
 			}
+		}
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 4);
+
+		// debug
+		{
+			// Read back a pixel from the center of the irradiance map
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X, prefilter_map, 0);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			GLfloat pixel[4];
+			glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
+			PN_CORE_INFO("Prefilter center pixel: R={}, G={}, B={}, A={}",
+				pixel[0], pixel[1], pixel[2], pixel[3]);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -490,11 +553,13 @@ namespace PAIN {
 		// Setup framebuffer
 		unsigned int captureFBO, captureRBO;
 		glGenFramebuffers(1, &captureFBO);
-		//glGenRenderbuffers(1, &captureRBO);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-		//glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+//#ifdef PN_PLATFORM_ANDROID
+//		glGenRenderbuffers(1, &captureRBO);
+//		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+//		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+//#endif
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdf_tex, 0);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

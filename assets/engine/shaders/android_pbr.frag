@@ -177,6 +177,20 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
 
 void main() {
+// FragColor = vec4(1,1,0,1);
+// return;
+
+    if (int(u_NumShadowMaps) > MAX_SHADOWMAPPED_LIGHTS) {
+        FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+        return;
+    }
+
+// #define DEBUG_USE_IBL
+#ifdef DEBUG_USE_IBL
+        FragColor = vec4(vec3(u_UseIbl),1);
+        return;
+#endif
+
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
     vec3 normal = texture(gNorm, TexCoords).rgb;
@@ -224,6 +238,7 @@ void main() {
             vec3 V = normalize(u_CamPos - fragPos);
             vec3 R = reflect(-V, N);
 
+// #define DEBUG_PREFILTER_MAP
 #ifdef DEBUG_PREFILTER_MAP
             // DEBUG: Show the prefilter map. should look like perfect mirror
             {
