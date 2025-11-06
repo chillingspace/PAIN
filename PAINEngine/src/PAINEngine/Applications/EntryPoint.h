@@ -8,9 +8,9 @@
 	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 		//// Enable run-time memory check for debug builds.
-		#if defined(DEBUG) | defined(_DEBUG)
-		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF);
-		#endif
+#if defined(DEBUG) | defined(_DEBUG)
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
 		{
 		// Normal mode - initialize graphics and run game
@@ -20,9 +20,12 @@
 		delete game;	
 		}
 
-		#if defined(DEBUG) | defined(_DEBUG)
-    	_CrtDumpMemoryLeaks();   
-		#endif
+		//new int[67]; // Intentional memory leak for testing
+
+		// can't do this. intentional memory leak above was not caught
+//#if defined(DEBUG) | defined(_DEBUG)
+//    	_CrtDumpMemoryLeaks();   
+//#endif
 	}
 
 #endif
