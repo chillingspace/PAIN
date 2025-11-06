@@ -79,7 +79,7 @@ namespace PAIN {
 
         for (auto entity : view) {
              auto& transform = view.get<Transform>(entity); // Get transform component
-             cBoundingVolume* bvComponent = registry.try_get<cBoundingVolume>(entity); // Try to get existing BV component
+             BoundingVolume* bvComponent = registry.try_get<BoundingVolume>(entity); // Try to get existing BV component
 
              // If no BV component, try to create one from MeshRenderer
              if (!bvComponent) {
@@ -88,7 +88,7 @@ namespace PAIN {
                      auto mesh = sceneService->getMesh(meshRenderer->mesh_id); // Get mesh from scene cache
                      if (mesh) { // Check if mesh was found
                         // Add cBoundingVolume component to the entity
-                        bvComponent = &registry.emplace<cBoundingVolume>(entity);
+                        bvComponent = &registry.emplace<BoundingVolume>(entity);
                         // Calculate local AABB from the mesh
                         bvComponent->localAABB = calculateLocalAABB(mesh);
                         bvComponent->needsUpdate = true; // Mark for world AABB update
@@ -131,13 +131,13 @@ namespace PAIN {
              // Check if it's an active leaf node associated with a valid entity
              if (node.isLeaf() && node.height != -1 && registry.valid(node.entity)) {
                  // Update the bvhNodeIndex in the entity's component
-                 if (auto* bvComp = registry.try_get<cBoundingVolume>(node.entity)) {
+                 if (auto* bvComp = registry.try_get<BoundingVolume>(node.entity)) {
                      bvComp->bvhNodeIndex = i; // Store the index of this leaf node
                  }
              }
          }
          // Clear indices for components whose entities were not included in the last build
-         auto bvView = registry.view<cBoundingVolume>();
+         auto bvView = registry.view<BoundingVolume>();
          for (auto entity : bvView) {
              bool foundInBvhItems = false;
              for(const auto& item : bvhItems) { // Check if the entity was part of the build input
@@ -147,7 +147,7 @@ namespace PAIN {
                  }
              }
              if (!foundInBvhItems) { // Reset index if entity wasn't processed
-                 bvView.get<cBoundingVolume>(entity).bvhNodeIndex = -1;
+                 bvView.get<BoundingVolume>(entity).bvhNodeIndex = -1;
              }
          }
     } // End of onUpdate

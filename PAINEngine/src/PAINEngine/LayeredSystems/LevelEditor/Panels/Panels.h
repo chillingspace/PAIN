@@ -50,8 +50,9 @@ namespace PAIN {
 				static bool b_popup_showing;
 
 				struct InternalPopUp {
+					std::any data = nullptr;
 					bool b_is_open = false;
-					std::function<void()> popUpFunction;
+					std::function<void(std::any)> popUpFunction;
 				};
 
 				//Map of popups
@@ -88,11 +89,17 @@ namespace PAIN {
 				//Get panel dock id
 				unsigned int getDockID() const { return dock_id; }
 
-				//Virtual panel update
-				virtual void onAttach() = 0;
+				//Virtual panel attach
+				virtual void onAttach() {};
+
+				//Virtual panel detach
+				virtual void onDetach() {};
 
 				//Virtual panel update
 				virtual void onUpdate(AppTiming timing) = 0;
+
+				//Virtual panel events
+				virtual void onEvent(Event::Event& event) {}
 
 				//Draw panel window
 				void drawWindow(PAIN::AppTiming timing);
@@ -101,13 +108,13 @@ namespace PAIN {
 				// Internal PopUps
 				// ----------------------------
 				//Register new popup
-				void registerPopUp(std::string const& popup_id, std::function<void()> popup_func);
+				void registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);
 
 				//Edit registered popup
-				void editPopUp(std::string const& popup_id, std::function<void()> popup_func);
+				void editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);
 
 				//Open popup
-				void openPopUp(std::string const& popup_id);
+				void openPopUp(std::string const& popup_id, std::any&& data = nullptr);
 
 				//Close popup
 				void closePopUp(std::string const& popup_id);
@@ -119,7 +126,7 @@ namespace PAIN {
 				static bool checkPopUpShowing();
 
 				//Default Popup
-				std::function<void()> defPopUp(std::string const& id, std::shared_ptr<std::string> msg);
+				std::function<void(std::any const&)> defPopUp(std::string const& id);
 			};
 		}
 	}

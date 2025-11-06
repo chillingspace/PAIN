@@ -17,6 +17,7 @@ namespace PAIN {
         {
             auto audioService = getServices()->get<PAIN::Audio::Audio>();
             auto scene = getServices()->get<Scene>();
+            auto pathService = getServices()->get<Path::Path>();
 
             if (!audioService || !scene) {
                 return; // Services not ready
@@ -35,6 +36,12 @@ namespace PAIN {
                 auto& audioSrc = view.get<AudioSource>(entity);
                 auto& transform = view.get<Transform>(entity);
 
+                static std::unordered_set<entt::entity> initialized;
+                if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
+                    audioSrc.playTrigger = true;
+                    initialized.insert(entity);
+                }
+
                 // 3. Handle Play/Stop Triggers
                 if (audioSrc.playTrigger)
                 {
@@ -43,9 +50,12 @@ namespace PAIN {
                         audioService->stop(audioSrc.channelId);
                     }
 
+					// Resolve the sound path
+                    std::string resolvedPath = pathService->resolvePath(audioSrc.soundPath);
+
                     // Play the sound
                     auto channelOpt = audioService->play(
-                        audioSrc.soundPath,
+                        resolvedPath,
                         transform.position,
                         audioSrc.volumeDb
                     );

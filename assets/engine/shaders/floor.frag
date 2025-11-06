@@ -24,8 +24,8 @@ void main() {
 
     float dark_tile_intensity = mod(tile_coords.x + tile_coords.y, 2.0);
 
-    const vec3 dark = vec3(0.2, 0.2, 0.2);
-    const vec3 light = vec3(0.5, 0.5, 0.5);
+    const vec3 dark = vec3(0.05);
+    const vec3 light = vec3(0.5);
 
     // outColor = vec4(mix(light, dark, dark_tile_intensity), 1.0);
 

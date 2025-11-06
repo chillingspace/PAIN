@@ -33,6 +33,8 @@ namespace PAIN {
 		//Init scene
 		m_Scene = services->get<Scene>();
 		
+		//Call update one frame to ensure initialization
+		onUpdate(AppTiming());
 	}
 
 	void sRenderer::shadowPass()
@@ -166,13 +168,6 @@ namespace PAIN {
 			return;
 		}
 
-		auto bvhSystem = ecs->getSystem<sBVHSystem>(); // Get BVH system from ECS
-
-		if (!bvhSystem) { // This check is what's firing in your log
-			PN_CORE_WARN("DebugPass skipped: Missing BVH System.");
-			return;
-		}
-
 		Camera* camera = scene->GetActiveCamera();
 		if (!camera) {
 			PN_CORE_WARN("DebugPass skipped: No active camera.");
@@ -182,25 +177,34 @@ namespace PAIN {
 		// --- Option A (Mode 1): Draw World AABBs from cBoundingVolume ---
 		if (debug_mode == 1)
 		{
-			auto bvView = ecs->getRegistry().view<cBoundingVolume>();
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<MetaData::EntityName>();
 			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
 
-			for (auto entity : bvView) {
-				const auto& bvComp = bvView.get<cBoundingVolume>(entity);
-				// Check if the AABB is valid
-				if (bvComp.worldAABB.min.x <= bvComp.worldAABB.max.x)
+			for (auto entity : view) {
+				auto bounding_vol = ecs->getEntityComponent<BoundingVolume>(entity);
+
+				// Check if entity has comp
+				if (bounding_vol.has_value())
 				{
-					// Call the existing WindowsRenderer::DebugPass function
-					w_renderer->DebugPass(bvComp.worldAABB.min, bvComp.worldAABB.max, color, scene);
+					w_renderer->DebugPass(bounding_vol->get().worldAABB.min, bounding_vol->get().worldAABB.max, color, scene);
 				}
 			}
 		}
-		// --- End Option A ---
+
 
 
 		// --- Option B (Mode 2): Draw BVH Tree Nodes ---
 		if (debug_mode == 2)
 		{
+
+			auto bvhSystem = ecs->getSystem<sBVHSystem>(); // Get BVH system from ECS
+
+			if (!bvhSystem) { // This check is what's firing in your log
+				PN_CORE_WARN("DebugPass skipped: Missing BVH System.");
+				return;
+			}
+
 			const BVH& bvh = bvhSystem->getBVH();
 			const auto& nodes = bvh.getNodes();
 			int rootIndex = bvh.getRootIndex();
@@ -233,15 +237,11 @@ namespace PAIN {
 				}
 			};
 
-			// Disable depth testing to see all boxes
-			glDisable(GL_DEPTH_TEST);
-			
+
 			if (rootIndex != -1) {
 				drawNodeRecursive(rootIndex, 0);
 			}
 
-			// Restore depth testing
-			glEnable(GL_DEPTH_TEST);
 		}
 		// --- End Option B ---
 	}

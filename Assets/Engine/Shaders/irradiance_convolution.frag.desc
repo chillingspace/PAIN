@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "irradiance_convolution.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4092530724304945125
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "fa59bdcb-5827-ca43-af38-2c9faa522fb2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\irradiance_convolution.frag"
+  }
+}

@@ -6,32 +6,21 @@
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
-#include "CoreSystems/Assets/sPath.h"
-#include "CoreSystems/Assets/sAssets.h"
-#include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
-
-#define PN_PATH_SERVICE  services->get<Path::Service>()
-#define PN_LOADER_SERVICE  services->get<Loader::Service>()
-#define PN_ASSETS_SERVICE  services->get<Assets::Service>()
-
 
 namespace PAIN {
     namespace Editor {
         namespace Panel {
 
             ResourcePanel::ResourcePanel() {
+
                 name = "Resource Panel";
 
                 //Set panel flag
-                flags = ImGuiWindowFlags_MenuBar;
+                //flags = ImGuiWindowFlags_MenuBar;
 
                 // Default icon size
                 icon_size = { 128.0f, 128.0f };
-
-                // Initialize root and current path
-                root_path = "Game_Assets:/";
-                current_path = root_path;
 
                 // Search filter
                 search_filter.resize(32);
@@ -43,12 +32,11 @@ namespace PAIN {
             }
 
             void ResourcePanel::onUpdate(AppTiming timing) {
-                //// Currently empty, could be used for background updates
-                static bool initialized = false;
-                if (!initialized) {
-                    initialized = true;
-                }
 
+				//Increment timer
+				auto_refresh_timer += timing.dt;
+
+				//Render asset browser
 				render();
             }
 
@@ -57,118 +45,353 @@ namespace PAIN {
 				if (ImGui::BeginDragDropTarget()) {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "_FILE").c_str())) {
 						//Get asset ID
-						std::string asset_id(static_cast<const char*>(payload->Data));
+						File* file(static_cast<File*>(payload->Data));
 
-						//Craft the destination path
-						std::filesystem::path dest_path = PN_PATH_SERVICE->resolvePath(virtual_path) / asset_id;
+						//Rename asset
+						asset_service->moveFile(file->path, path_service->resolvePath(virtual_path + "/" + file->file_name));
+					}
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "DIR").c_str())) {
+						//Get asset ID
+						Dir* dir(static_cast<Dir*>(payload->Data));
 
-						//Copy file
-						std::filesystem::rename(PN_ASSETS_SERVICE->getAssetPath(asset_id), dest_path);
-
-						//Update files
-						files = PN_PATH_SERVICE->listFiles(current_path);
+						//Rename asset
+						asset_service->moveFile(dir->path, path_service->resolvePath(virtual_path + "/" + dir->file_name));
 					}
 					ImGui::EndDragDropTarget();
 				}
 			}
 
-			// File Drop Event
-			void ResourcePanel::onEvent(PAIN::Event::Event& event) {
-
+			void ResourcePanel::onEvent(Event::Event& event) {
 				if (event.getType() == PAIN::Event::Type::FileDrop) {
 
-					auto& fileEvent = static_cast<PAIN::Event::FileDropped&>(event);
-					// Now, use fileEvent's data
-					int file_count = fileEvent.getFilesCount();
-					const char** file_paths = fileEvent.getPaths();
+					//Create event dispatcher
+					Event::Dispatcher dispatcher(event);
 
-					//Initialize message
-					std::string message = "Files Added: " + std::to_string(file_count) + " \n";
+					//Dispatch window resized event
+					dispatcher.Dispatch<Event::FileDropped>([&](Event::FileDropped& e) -> bool {
 
-					for (int i = 0; i < file_count; ++i) {
-						std::filesystem::path src_file_path{ file_paths[i] };
+						//File dropped msg
+						std::vector<std::string> msg;
+						msg.push_back("Files Dropped:");
 
-						//Check if path is valid
-						if (PN_ASSETS_SERVICE->isPathValid(src_file_path.string(), false)) {
+						//iterate through files
+						for (auto path : e.getPaths()) {
 
-							//Get asset id
-							auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(src_file_path.string(), false);
+							//Get file path
+							std::filesystem::path file_path = path;
 
-							//Check if asset has already been registered
-							if (PN_ASSETS_SERVICE->isAssetRegistered(asset_id)) {
-								//Delete assets old registration
-								std::filesystem::remove(PN_ASSETS_SERVICE->getAssetPath(asset_id));
-							}
+							//Target directory ( main game asset folder )
+							auto target = path_service->resolvePath(Path::main_assets_alias, file_path.filename().string());
 
-							//Copy file
-							std::filesystem::copy(src_file_path, PN_PATH_SERVICE->resolvePath(current_path), std::filesystem::copy_options::overwrite_existing);
+							//Throw asset into the game asset folder
+							std::filesystem::copy(file_path, target, std::filesystem::copy_options::overwrite_existing);
 
-							//Log success
-							PN_CORE_INFO("File " + src_file_path.string() + " successfully copied into" + PN_PATH_SERVICE->resolvePath(current_path).string());
-							message += std::string(file_paths[i]) + "\n";
+							//Sort asset into registry
+							asset_service->registerAsset(target);
+
+							msg.push_back(file_path.string());
 						}
-						else {
-							PN_CORE_ERROR("Error Unsupported File Type: {}", file_paths[i]);
-							message = "Error Unsupported File Type: " + src_file_path.filename().extension().string();
-						}
-					}
 
-					//Update directories & files
-					directories = PN_PATH_SERVICE->listDirectories(current_path);
-					files = PN_PATH_SERVICE->listFiles(current_path);
+						//Craft message
+						openPopUp("Info", std::make_shared<std::vector<std::string>>(msg));
 
-					//Show success popup
-					success_msg->assign(message);
-					b_file_dropped = true;
+						//Return false: continue dispatching, true = stop dispatching 
+						return true;
+						});
 				}
-
-				//event->setEventProcessed(true);
 			}
 
-			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& path) {
+			void ResourcePanel::populateDirs(std::string const& virtual_path) {
+
+				//Safety check
+				std::string path;
+				if (!path_service->pathExists(virtual_path)) {
+					path = root_path;
+				}
+				else {
+					path = virtual_path;
+				}
+
+				//Retrieve file
+				auto fetch_dirs = path_service->listDirectories(path);
+
+				//Clear file directory
+				directories.clear();
+
+				//Iterate through fetched files
+				for (auto const& dir : fetch_dirs) {
+					Dir temp;
+
+					//Instantiate file system
+					temp.path = dir;
+
+					//Get root folder path
+					
+					auto relative = std::filesystem::relative(temp.path, root);
+
+					//Get display icon
+					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
+
+					//Folder icon
+					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
+						temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					}
+					else {
+						temp.icon = 0;
+					}
+
+					//Instantiate name
+					temp.file_name = relative.filename().string();
+
+					//Add this to file vector
+					directories.push_back(temp);
+				}
+			}
+
+			void ResourcePanel::populateFiles(std::string const& virtual_path) {
+
+				//Safety check
+				std::string path;
+				if (!path_service->pathExists(virtual_path)) {
+					path = root_path;
+				}
+				else {
+					path = virtual_path;
+				}
+
+				//Retrieve file
+				auto fetch_files = path_service->listFiles(path);
+
+				//Clear file directory
+				files.clear();
+
+				//Iterate through fetched files
+				for (auto const& file : fetch_files) {
+					File temp;
+
+					//Instantiate file system
+					temp.path = file;
+
+					//Get root folder path
+					
+					auto relative = std::filesystem::relative(temp.path, root);
+
+					//Find asset GUID
+					temp.id = asset_service->findGUID(relative);
+
+					//Find asset type
+					if (temp.id.IsValid()) {
+						temp.type = asset_service->getAssetData(temp.id)->type;
+					}
+
+					//Get display icon
+					temp.icon = fileIcon(relative);
+
+					//Instantiate name
+					temp.file_name = relative.filename().string();
+
+					//Add this to file vector
+					files.push_back(temp);
+				}
+			}
+
+			void ResourcePanel::populateDirectoryCache(const std::string& virtual_dir) {
+				if (directoryCache.count(virtual_dir) > 0) return; // Already cached
+
+				std::vector<std::string> children;
+				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
+				for (const auto& entry : path_service->listDirectories(virtual_dir)) {
+					auto relative = std::filesystem::relative(entry, dir);
+					children.push_back(virtual_dir + "/" + relative.string());
+				}
+				directoryCache[virtual_dir] = std::move(children);
+			}
+
+			void ResourcePanel::DrawDirectoryTree(std::string const& virtual_dir) {
+
+				//Populat directory cache
+				populateDirectoryCache(virtual_dir);
+				bool has_children = !directoryCache[virtual_dir].empty();
+
+				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen;
+				if (!has_children)
+					node_flags |= ImGuiTreeNodeFlags_Leaf;
+				bool is_selected = (virtual_dir == current_path);
+				if (is_selected) node_flags |= ImGuiTreeNodeFlags_Selected;
+
+				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
+				std::string name = dir.filename().string() != "" ? dir.filename().string() : "assets";
+				bool open = ImGui::TreeNodeEx(name.c_str(), node_flags);
+
+				//Check for activation
+				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+					current_path = virtual_dir;
+					populateDirs(current_path);
+					populateFiles(current_path);
+				}
+
+				//Accept payload
+				moveFileAcceptPayload(virtual_dir);
+
+				//Render context
+				renderPopUpContext({dir,0, dir.filename().string() });
+
+				//Render if open
+				if (open) {
+					for (const std::string& subdir : directoryCache[virtual_dir]) {
+						DrawDirectoryTree(subdir);
+					}
+					ImGui::TreePop();
+				}
+				
+				//Start drag-and-drop source
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+					//Static copy of payload
+					static Dir dir_copy;
+					dir_copy.path = dir;
+					dir_copy.file_name = dir.filename().string();
+
+					//Get display icon
+					static std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
+
+					//Folder icon
+					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
+						dir_copy.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					}
+					else {
+						dir_copy.icon = 0;
+					}
+
+					//Set drag payload with asset name
+					ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
+
+					//Display directory icon
+					ImVec2 uv0(0.0f, 0.0f);
+					ImVec2 uv1(1.0f, 1.0f);
+
+					//Render the icon or name at the cursor during dragging
+					ImGui::Image(dir_copy.icon, { 64, 64 }, uv0, uv1);
+					ImGui::TextWrapped("%s", dir_copy.file_name.c_str());
+					ImGui::EndDragDropSource();
+				}
+			}
+
+			bool ResourcePanel::renderPopUpContext(File const& file) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(file.path.string().c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
+
+					if (ImGui::MenuItem("Open##file")) {
+						open_files.push_back(file);
+					}
+					if (ImGui::MenuItem("Rename##file")) {
+						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					if (ImGui::MenuItem("Delete##file")) {
+						openPopUp("Delete File", std::make_shared<File>(file));
+					}
+					if (ImGui::MenuItem("New Folder##file")) {
+						openPopUp("New Folder");
+					}
+					if (ImGui::MenuItem("Duplicate##file")) {
+						asset_service->duplicateFile(file.path);
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
+			bool ResourcePanel::renderPopUpContext(Dir const& dir) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(dir.path.string().c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextItem("AssetContextMenu##dir")) {
+					if (ImGui::MenuItem("Open##dir")) {
+
+						//Set current path
+						auto relative = std::filesystem::relative(dir.path, root);
+						current_path = root_path + relative.string();
+
+						//Update directories & files
+						populateDirs(current_path);
+						populateFiles(current_path);
+
+						b_break = true;
+					}
+					if (ImGui::MenuItem("Rename##dir")) {
+						openPopUp("Rename Folder", std::make_shared<Dir>(dir));
+					}
+					if (ImGui::MenuItem("Delete##dir")) {
+						openPopUp("Delete Folder", std::make_shared<Dir>(dir));
+					}
+					if (ImGui::MenuItem("New Folder##dir")) {
+						openPopUp("New Folder");
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
+			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
 				std::filesystem::path icon_path;
 
-//				//Get assets service
-//				auto asset_service = services->get<Assets::Manager>();
-//				auto path_service = services->get<Path::Path>();
-//
-//				//Get relative path
-//				auto relative_path = std::filesystem::relative(path, std::filesystem::path(path_service->resolvePath("assets://")));
-//
-//				//Discover iconref
-//				if (asset_service->getAssetData(relative_path)->type == Assets::Type::Texture) {
-//
-//					auto parent_path = relative_path.parent_path();
-//
-//					//Get file path
-//#ifdef PN_PLATFORM_WINDOWS
-//					icon_path = parent_path / (relative_path.stem().string() + ".dds");
-//#else
-//					icon_path = parent_path / (relative_path.stem().string() + ".astc");
-//#endif
-//				}
-//				else {
+				//Def icon path
+				std::string def_icon = "def_icon";
+				std::filesystem::path def_icon_path = std::filesystem::path("engine\\textures") / (def_icon + ".png");
+
+				//Discover iconref
+				if (Assets::getAssetType(relative_path) == Assets::Type::Texture) {
+
+					auto parent_path = relative_path.parent_path();
+
+					//Get file path
+					icon_path = parent_path / (relative_path.filename());
+				}
+				else {
 					//Def icon ref
-					std::string icon_ref = "def_icon";
+					std::string icon_ref;
 
 					//Identify extension
-					auto ext = path.extension().string();
+					auto ext = relative_path.extension().string();
 
 					if (!ext.empty() && ext.size() > 1) {
 						icon_ref = ext.substr(1) + "_icon";
 					}
 
 					//Find texture path
-#ifdef PN_PLATFORM_WINDOWS
-					icon_path = "engine/textures/" + (icon_ref + ".dds");
-#else
-					icon_path = std::filesystem::path("engine\\textures") / (icon_ref + ".astc");
-#endif
-//				}
+					icon_path = std::filesystem::path("engine\\textures") / (icon_ref + ".png");
+				}
 
-				return static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path)->gl_texture);
+				//Check if icon path valid
+				if (asset_service->checkAssetRegistered(icon_path)) {
+					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(icon_path)->gl_texture);
+				}
+				else {
+					if (asset_service->checkAssetRegistered(def_icon_path)) {
+						return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
+					}
+					else {
+						return ImTextureID(0);
+					}
+				}
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -186,11 +409,14 @@ namespace PAIN {
 				//Track item index
 				int itemIndex = 0;
 
+				//Local shown count
+				int shown_count = 0;
+
 				//Display all directories
 				for (const auto& dir : directories) {
 
 					//Skip dir not matching searching filter
-					if (dir == PN_PATH_SERVICE->resolvePath("Engine_Assets:/") || dir.string().find(search_filter) == dir.string().npos) {
+					if (dir.file_name.find(search_filter) == dir.file_name.npos) {
 						continue;
 					}
 
@@ -200,28 +426,23 @@ namespace PAIN {
 					}
 
 					ImGui::BeginGroup();
-
-#ifdef PN_PLATFORM_WINDOWS
-					std::filesystem::path folder_path = "engine/textures/folder_icon.dds";
-#else
-					std::filesystem::path folder_path = "engine\\textures\\folder_icon.astc";
-#endif
+					++shown_count;
 
 					//Folder icon
-					ImTextureID icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
+					ImTextureID icon = dir.icon;
 
 					//Display directory icon
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-
-					if (ImGui::ImageButton(std::string("##" + dir.filename().string()).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
+					ImGui::ImageButton(std::string("##" + dir.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 						//Change current path to folder path clicked
-						current_path = virtual_path + '/' + dir.filename().string();
+						current_path = virtual_path + '/' + dir.file_name;
 
 						//Update directories & files
-						directories = PN_PATH_SERVICE->listDirectories(current_path);
-						files = PN_PATH_SERVICE->listFiles(current_path);
+						populateDirs(current_path);
+						populateFiles(current_path);
 
 						//Break from files
 						ImGui::PopStyleColor();
@@ -229,11 +450,33 @@ namespace PAIN {
 						break;
 					}
 					ImGui::PopStyleColor();
-					moveFileAcceptPayload(virtual_path + '/' + dir.filename().string());
+					moveFileAcceptPayload(virtual_path + '/' + dir.file_name);
+
+					//Render context
+					if (renderPopUpContext(dir)) {
+						ImGui::EndGroup();
+						break;
+					}
+
+					//Start drag-and-drop source
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+						//Static copy of payload
+						static Dir dir_copy;
+						dir_copy = dir;
+
+						//Set drag payload with asset name
+						ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
+
+						//Render the icon or name at the cursor during dragging
+						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
+						ImGui::TextWrapped("%s", dir_copy.file_name.c_str());
+						ImGui::EndDragDropSource();
+					}
 
 					//Display directory name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
-					ImGui::TextWrapped(dir.filename().string().c_str());
+					ImGui::TextWrapped("%s", dir.file_name.c_str());
 					ImGui::PopTextWrapPos();
 
 					ImGui::EndGroup();
@@ -245,7 +488,7 @@ namespace PAIN {
 				for (const auto& file : files) {
 
 					//Skip file not matching searching filter
-					if (file.string().find(search_filter) == file.string().npos) {
+					if (file.file_name.find(search_filter) == file.file_name.npos) {
 						continue;
 					}
 
@@ -254,42 +497,196 @@ namespace PAIN {
 						ImGui::SameLine();
 					}
 
+					//Check path is desc
+					if (file.path.extension() == Assets::descriptor_ext) {
+						if(!b_show_desc_files)continue;
+
+						//Begin file group
+						ImGui::BeginGroup();
+						++shown_count;
+
+						//Extension cases
+						ImTextureID icon = file.icon;
+
+						//Display file icon
+						ImVec2 uv0(0.0f, 0.0f);
+						ImVec2 uv1(1.0f, 1.0f);
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+							open_files.push_back(file);
+						}
+						ImGui::PopStyleColor();
+
+						//Display file name
+						ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
+						ImGui::TextWrapped("%s", file.file_name.c_str());
+						ImGui::PopTextWrapPos();
+
+						ImGui::EndGroup();
+
+						itemIndex++;
+					}
+
+					//Check that asset is registered
+					if (!asset_service->checkAssetRegistered(file.id)) {
+						continue;
+					}
+
 					//Begin file group
 					ImGui::BeginGroup();
+					++shown_count;
 
 					//Extension cases
-					ImTextureID icon = fileIcon(file);
+					ImTextureID icon = file.icon;
 
 					//Display file icon
 					ImVec2 uv0(0.0f, 0.0f);
 					ImVec2 uv1(1.0f, 1.0f);
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-					if (ImGui::ImageButton(std::string("##" + file.filename().string()).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1)) {
-						selected_asset_id = file.filename().string();
+					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
+					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+						open_files.push_back(file);
 					}
 					ImGui::PopStyleColor();
 
-					//Start drag-and-drop source
-					if (PN_ASSETS_SERVICE->isAssetRegistered(file.filename().string()) && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-						auto filetype_string = PN_ASSETS_SERVICE->getAssetTypeString(file.filename().string());
+					//Render context
+					if (renderPopUpContext(file)) {
+						ImGui::EndGroup();
+						break;
+					}
+
+					//Start drag-and-drop source ( Disable drag for desc files )
+#ifdef PN_PLATFORM_WINDOWS
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+						//Get file type string
+						auto filetype_string = Assets::assetTypeToString(asset_service->getAssetData(file.id)->type);
+
+						//Static copy of payload
+						static File file_copy;
+						file_copy = file;
+
 						//Set drag payload with asset name
-						ImGui::SetDragDropPayload(std::string(filetype_string + "_FILE").c_str(), file.filename().string().c_str(), file.filename().string().size() + 1);
+						ImGui::SetDragDropPayload(std::string(filetype_string + "_FILE").c_str(), &file_copy, sizeof(file_copy) + 1);
 						payload_typestring = filetype_string;
 
 						//Render the icon or name at the cursor during dragging
 						ImGui::Image(icon, { 64, 64 }, uv0, uv1);
-						ImGui::TextWrapped(file.filename().string().c_str());
+						ImGui::TextWrapped("%s", file.file_name.c_str());
 						ImGui::EndDragDropSource();
 					}
+#endif
 
 					//Display file name
 					ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + icon_size.x);
-					ImGui::TextWrapped(file.filename().string().c_str());
+					ImGui::TextWrapped("%s", file.file_name.c_str());
 					ImGui::PopTextWrapPos();
 
 					ImGui::EndGroup();
 
 					itemIndex++;
+				}
+
+				if (shown_count == 0) {
+					ImGui::Text("No results.");
+				}
+			}
+
+			void ResourcePanel::renderOpenFiles() {
+
+				//Local files to close
+				std::vector<File> files_to_close;
+
+				//Iterate through all open files
+				for (auto const& file : open_files) {
+
+					//Begin window
+					ImGui::Begin(file.file_name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+					//Display icon
+					{
+						ImVec2 icon_size(256, 256);
+						ImGui::Image(file.icon, icon_size);
+					}
+
+					ImGui::Spacing();
+
+					//File Name
+					ImGui::TextColored(ImVec4(1, 1, 0, 1), "%s", file.file_name.c_str());
+					ImGui::Separator();
+
+					//File Type
+					ImGui::Text("Type: %s", Assets::assetTypeToString(file.type).c_str());
+
+					//Path
+					ImGui::Text("Path: %s", file.path.string().c_str());
+
+					//File size
+					try {
+						auto size = std::filesystem::file_size(file.path);
+						ImGui::Text("Size: %llu bytes", static_cast<unsigned long long>(size));
+					}
+					catch (std::filesystem::filesystem_error& e) {
+						ImGui::Text("Size: N/A");
+					}
+
+					//Last Modified
+					try {
+						auto ftime = std::filesystem::last_write_time(file.path);
+
+						// Convert to system_clock::time_point
+#if defined(_WIN32)
+	// On MSVC, file_time_type may not be system_clock; do the conversion
+						auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+							ftime - std::filesystem::file_time_type::clock::now()
+							+ std::chrono::system_clock::now());
+#else
+						auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(ftime);
+#endif
+						std::time_t cftime = std::chrono::system_clock::to_time_t(sctp);
+
+						char buf[64];
+#if defined(_MSC_VER)
+						ctime_s(buf, sizeof(buf), &cftime);
+#else
+						std::strftime(buf, sizeof(buf), "%c", std::localtime(&cftime));
+#endif
+						ImGui::Text("Last Modified: %s", buf);
+					}
+					catch (std::filesystem::filesystem_error& e) {
+						ImGui::Text("Last Modified: N/A");
+					}
+
+					ImGui::Separator();
+
+					//Operations
+					if (ImGui::Button(std::string("Rename##" + file.file_name).c_str())) {
+						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(std::string("Delete##" + file.file_name).c_str())) {
+						openPopUp("Delete File", std::make_shared<File>(file));
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(std::string("Close##" + file.file_name).c_str())) {
+						files_to_close.push_back(file);
+					}
+
+					ImGui::End();
+				}
+
+				//Close file
+				for (auto close_it = files_to_close.begin(); close_it != files_to_close.end(); ++close_it) {
+					for (auto it = open_files.begin(); it != open_files.end();) {
+						if (it->id == close_it->id) {
+							it = open_files.erase(it);
+							break;
+						}
+						else {
+							++it;
+						}
+					}
 				}
 			}
 
@@ -336,29 +733,29 @@ namespace PAIN {
 						it->second.resize(strlen(it->second.c_str()));
 					}
 
-					//Special lua intellisense
-					if (PN_ASSETS_SERVICE->getAssetType(it->first) == Assets::Types::Script) {
-						//Lua intellisense
-						static std::string current_word;
-						current_word.reserve(64);
-						extractCurrentWord(it->second, editor_state.cursor_pos, current_word);
-						showLuaIntellisense(it->second, editor_state.cursor_pos, current_word);
-					}
+					////Special lua intellisense
+					//if (PN_ASSETS_SERVICE->getAssetType(it->first) == Assets::Types::Script) {
+					//	//Lua intellisense
+					//	static std::string current_word;
+					//	current_word.reserve(64);
+					//	extractCurrentWord(it->second, editor_state.cursor_pos, current_word);
+					//	showLuaIntellisense(it->second, editor_state.cursor_pos, current_word);
+					//}
 
 					ImGui::Spacing();
 
 					//Save file
 					if (ImGui::Button("Save##Save file") || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))) {
-						std::ofstream file(PN_ASSETS_SERVICE->getAssetPath(it->first));
-						if (file.is_open()) {
-							file << it->second;
-							file.close();
-							PN_CORE_INFO("File saved.");
-						}
-						else {
-							PN_CORE_WARN("Failed to save file");
-							file.close();
-						}
+						//std::ofstream file(PN_ASSETS_SERVICE->getAssetPath(it->first));
+						//if (file.is_open()) {
+						//	file << it->second;
+						//	file.close();
+						//	PN_CORE_INFO("File saved.");
+						//}
+						//else {
+						//	PN_CORE_WARN("Failed to save file");
+						//	file.close();
+						//}
 					}
 
 					ImGui::SameLine();
@@ -374,14 +771,14 @@ namespace PAIN {
 				}
 			}
 
-			std::function<void()> ResourcePanel::deleteAssetPopup(std::string const& popup_id) {
-				return [this, popup_id]() {
+			std::function<void(std::any const&)> ResourcePanel::deleteFilePopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Warning message
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
 
 					//Select a component to add
-					ImGui::Text("Are you sure you want to delete this asset?");
+					ImGui::Text("Are you sure you want to delete file?");
 
 					//Add spacing
 					ImGui::Spacing();
@@ -389,13 +786,28 @@ namespace PAIN {
 					//Display each component as a button
 					if (ImGui::Button("Confirm")) {
 
-						//Get selected asset path
-						auto path = PN_ASSETS_SERVICE->getAssetPath(selected_asset_id);
+						//Check for cast validity
+						if (data.has_value() && data.type() == typeid(std::shared_ptr<File>)) {
 
-						//Remove path and clear selected asset text buffer
-						std::filesystem::remove(path);
-						selected_asset_id.clear();
-						files = PN_PATH_SERVICE->listFiles(current_path);
+							//Cast to file and remove file
+							auto file = std::any_cast<std::shared_ptr<File>>(data);
+
+							//Find open files and remove
+							for (auto it = open_files.begin(); it != open_files.end();) {
+								if (it->id == file->id) {
+									it = open_files.erase(it);
+								}
+								else {
+									++it;
+								}
+							}
+
+							//Delete asset
+							asset_service->removeFile(file->path);
+
+							//Populate files and directories
+							populateFiles(current_path);
+						}
 
 						//Close popup
 						closePopUp(popup_id);
@@ -413,14 +825,97 @@ namespace PAIN {
 				};
 			}
 
-			std::function<void()> ResourcePanel::deleteDirectoryPopup(std::string const& popup_id) {
-				return [this, popup_id]() {
+			std::function<void(std::any const&)> ResourcePanel::renameFilePopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Check for cast validity
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<File>)) {
+
+						//Cast to file and remove file
+						auto file = std::any_cast<std::shared_ptr<File>>(data);
+
+						//Select a component to add
+						ImGui::Text("Rename File To: ");
+
+						//New folder name
+						static std::string file_name = "";
+						static bool name_init = false;
+						if (!name_init) {
+							file_name = file->path.stem().string();
+							name_init = true;
+						}
+						file_name.resize(32);
+						ImGui::InputText("##RenameFileName", file_name.data(), file_name.capacity() + 1);
+
+						//Add spacing
+						ImGui::Spacing();
+
+						//Display each component as a button
+						if (ImGui::Button("Rename")) {
+
+							//Craft target path
+							std::filesystem::path old_path = file->path;
+							std::filesystem::path new_name = file_name.c_str();
+							new_name.replace_extension(old_path.extension());
+							std::filesystem::path target_path = old_path.parent_path() / new_name;
+
+							//Rename file
+							asset_service->moveFile(file->path, target_path);
+
+							//Find open files and remove
+							for (auto it = open_files.begin(); it != open_files.end();) {
+								if (it->id == file->id) {
+									it = open_files.erase(it);
+								}
+								else {
+									++it;
+								}
+							}
+
+							//Repopulate files
+							populateFiles(current_path);
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+
+						//Same line
+						ImGui::SameLine();
+
+						//Cancel deleting asset
+						if (ImGui::Button("Cancel")) {
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+					}
+					else {
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
+			std::function<void(std::any const&)> ResourcePanel::deleteFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Warning message
 					ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "This action cannot be undone!");
 
 					//Select a component to add
-					ImGui::Text("Are you sure you want to delete everything in selected directory?");
+					ImGui::Text("Are you sure you want to delete folder? It's contents will be deleted as well.");
 
 					//Add spacing
 					ImGui::Spacing();
@@ -428,48 +923,22 @@ namespace PAIN {
 					//Display each component as a button
 					if (ImGui::Button("Confirm")) {
 
-						//Check for directory mode
-						switch (directory_mode) {
-						case 0: {
+						//Check for cast validity
+						if (data.has_value() && data.type() == typeid(std::shared_ptr<Dir>)) {
 
-							//Remove all files in current directory
-							for (auto const& file : files) {
-								std::filesystem::remove(file);
-							}
-							break;
-						}
-						case 1: {
+							//Cast to file and remove file
+							auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
 
-							//Remove all files & folders in current directory
-							for (auto const& file : files) {
-								std::filesystem::remove(file);
-							}
-							for (auto const& dir : directories) {
-								std::filesystem::remove_all(dir);
-							}
-							break;
-						}
-						case 2: {
+							//Disable deletion of root path
+							if (dir->path != path_service->resolvePath(root_path)) {
 
-							//Remove all files & folders in root directory
-							for (auto const& file : PN_PATH_SERVICE->listFiles(root_path)) {
-								std::filesystem::remove(file);
-							}
-							for (auto const& dir : PN_PATH_SERVICE->listDirectories(root_path)) {
-								std::filesystem::remove_all(dir);
-							}
-							current_path = root_path;
-							break;
-						}
-						default: {
-							break;
-						}
-						}
+								//Delete asset
+								asset_service->removeFile(dir->path);
 
-
-						//Update directories & files
-						directories = PN_PATH_SERVICE->listDirectories(current_path);
-						files = PN_PATH_SERVICE->listFiles(current_path);
+								//Populate files and directories
+								populateDirs(current_path);
+							}
+						}
 
 						//Close popup
 						closePopUp(popup_id);
@@ -484,11 +953,84 @@ namespace PAIN {
 						//Close popup
 						closePopUp(popup_id);
 					}
-				};
+					};
 			}
 
-			std::function<void()> ResourcePanel::newFolderPopup(std::string const& popup_id) {
-				return [this, popup_id]() {
+			std::function<void(std::any const&)> ResourcePanel::renameFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Check for cast validity
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<Dir>)) {
+
+						//Cast to dir
+						auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
+
+						//Select a component to add
+						ImGui::Text("Rename Folder To: ");
+
+						//New folder name
+						static std::string file_name = "";
+						static bool name_init = false;
+						if (!name_init) {
+							file_name = dir->path.stem().string();
+							name_init = true;
+						}
+						file_name.resize(32);
+						ImGui::InputText("##RenameFolderName", file_name.data(), file_name.capacity() + 1);
+
+						//Add spacing
+						ImGui::Spacing();
+
+						//Display each component as a button
+						if (ImGui::Button("Rename")) {
+
+							//Craft target path
+							std::filesystem::path old_path = dir->path;
+							std::filesystem::path new_name = file_name.c_str();
+							new_name.replace_extension(old_path.extension());
+							std::filesystem::path target_path = old_path.parent_path() / new_name;
+
+							//Rename file
+							asset_service->moveFile(dir->path, target_path);
+
+							//Repopulate dir
+							populateDirs(current_path);
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+
+						//Same line
+						ImGui::SameLine();
+
+						//Cancel deleting asset
+						if (ImGui::Button("Cancel")) {
+
+							//Reset folder name buffer
+							file_name.assign("");
+
+							//Reset name init
+							name_init = false;
+
+							//Close popup
+							closePopUp(popup_id);
+						}
+					}
+					else {
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
+			std::function<void(std::any const&)> ResourcePanel::newFolderPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
 
 					//Select a component to add
 					ImGui::Text("New folder name: ");
@@ -505,10 +1047,10 @@ namespace PAIN {
 					if (ImGui::Button("Create")) {
 
 						//Create a new directory
-						std::filesystem::create_directory(PN_PATH_SERVICE->resolvePath(current_path) / folder_name);
+						path_service->createDirectory(current_path + "/" + folder_name);
 
 						//Update directories & files
-						directories = PN_PATH_SERVICE->listDirectories(current_path);
+						populateDirs(current_path);
 
 						//Reset folder name buffer
 						folder_name.assign("");
@@ -529,7 +1071,7 @@ namespace PAIN {
 						//Close popup
 						closePopUp(popup_id);
 					}
-				};
+					};
 			}
 
 			void ResourcePanel::pushFileEvent(std::function<void()> callback) {
@@ -539,26 +1081,30 @@ namespace PAIN {
 
 			void ResourcePanel::onAttach() {
 
-				//Setup events listening
-				std::shared_ptr<ResourcePanel> resourcepanel_wrapped(this, [](ResourcePanel*) {});
-				/*NIKE_EVENTS_SERVICE->addEventListeners<Assets::FileDropEvent>(resourcepanel_wrapped);
+				//Set up services
+				path_service = services->get<Path::Path>();
+				asset_service = services->get<Assets::Manager>();
 
-				entities_panel = std::dynamic_pointer_cast<EntitiesPanel>(NIKE_LVLEDITOR_SERVICE->getPanel(EntitiesPanel::getStaticName()));*/
-
-				//Register popups
-				error_msg = std::make_shared<std::string>("Error");
-				success_msg = std::make_shared<std::string>("Success");
-
-				// Pop UP
-				registerPopUp("Error", defPopUp("Error", error_msg));
-				registerPopUp("Success", defPopUp("Success", success_msg));
-				registerPopUp("Delete Asset", deleteAssetPopup("Delete Asset"));
-				registerPopUp("Clear Directory", deleteDirectoryPopup("Clear Directory"));
+				//Pop UP
+				registerPopUp("Delete File", deleteFilePopup("Delete File"));
+				registerPopUp("Rename File", renameFilePopup("Rename File"));
+				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
+				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("Info", defPopUp("Info"));
 
-				//Initialize root
-				root_path = "Game_Assets:/";
+				//Initialize root and current path
+#ifdef PN_PLATFORM_ANDROID
+				root_path = Path::assets_alias + "://";
+#else
+				root_path = Path::main_assets_alias + "://";
+#endif
+				root = path_service->resolvePath(root_path);
 				current_path = root_path;
+
+				//Update directories & files
+				populateDirs(current_path);
+				populateFiles(current_path);
 
 				//Search up till 32 characters
 				search_filter.resize(32);
@@ -567,87 +1113,113 @@ namespace PAIN {
 				//Default icon size
 				icon_size = { 128.0f, 128.0f };
 
-				//Register all engine icons
-				PN_ASSETS_SERVICE->scanAssetDirectory("Engine_Assets:/Textures");
-
-				//Init all directories & files
-				directories = PN_PATH_SERVICE->listDirectories(current_path);
-				files = PN_PATH_SERVICE->listFiles(current_path);
-
-				// Create a weak_ptr for safe capturing in filewatch callbacks
-				std::weak_ptr<ResourcePanel> weak_this = resourcepanel_wrapped;
-
 				//Setup directory watching 
-				PN_PATH_SERVICE->watchDirectoryTree("Game_Assets:/", [weak_this, this](std::filesystem::path const& file, filewatch::Event event) {
-					if (auto shared_this = weak_this.lock()) { // Check if the object is still alive
+				path_service->watchDirectoryTree(root_path, [this](std::filesystem::path const& file, filewatch::Event event) {
 
-						//Engine engine assets path
-						static auto engine_assets = PN_PATH_SERVICE->resolvePath("Engine_Assets:/");
+					//Skip desc paths
+					if (file.extension() == Assets::descriptor_ext) return;
 
-						//Skip directories & invalid paths
-						if (std::filesystem::is_directory(file) ||
-							!PN_ASSETS_SERVICE->isPathValid(file.string(), false) ||
-							file.string().find(engine_assets.string()) != std::string::npos) {
-							return;
+					//Operate own internal changes for directories
+					if (std::filesystem::is_directory(file)) {
+
+						//Check event set
+						if (event_set.find(file) != event_set.end()) return;
+
+						//Lock events
+						std::lock_guard<std::mutex> lock(file_event_mutex);
+
+						//Insert file into event set
+						event_set.insert(file);
+
+						//Push to file event queue
+						pushFileEvent([&, file]() {
+							PN_CORE_INFO("Directory event: {}", file.string());
+							//Repopulate the directory cache & directories
+							directoryCache.clear();
+							});
+					}
+
+					//Lock only for event_set/current_path access for thread safety
+					bool skip = false;
+					{
+						std::lock_guard<std::mutex> lock(file_event_mutex);
+
+						if (event == filewatch::Event::added ||
+							event == filewatch::Event::removed ||
+							event == filewatch::Event::modified)
+						{
+							//Update event set
+							if (event_set.find(file) != event_set.end()) skip = true;
+							else event_set.insert(file);
+
+							//If update current path safely
+							if (event == filewatch::Event::removed && file == path_service->resolvePath(current_path)) {
+								current_path = root_path;
+							}
+						}
+					}
+
+					if (skip) return;
+
+					//Watch for events
+					switch (event) {
+					case filewatch::Event::added: {
+
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
+
+						//Push to file event queue
+						pushFileEvent([&, file]() {
+
+							PN_CORE_INFO("Add Event for Path: {}", file.string());
+
+							});
+
+						break;
+					}
+					case filewatch::Event::removed: {
+
+						//Check if current path is pointing to dir
+						if (file == path_service->resolvePath(current_path)) {
+							current_path = root_path;
 						}
 
-						//Watch for events
-						switch (event) {
-						case filewatch::Event::added: {
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
 
-							PN_CORE_INFO("Add Event for Path: " + file.string() + " " + file.extension().string());
+						//Push to file event queue
+						pushFileEvent([&, file]() {
 
-							//Push to file event queue
-							shared_this->pushFileEvent([&, file]() {
+							PN_CORE_INFO("Remove Event for Path: {}", file.string());
 
-								//Register asset if needed
-								auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(file.string(), false);
-								if (!PN_ASSETS_SERVICE->isAssetRegistered(asset_id)) {
-									PN_ASSETS_SERVICE->registerAsset(file.string(), false);
-								}
-								});
+							});
 
-							break;
-						}
-						case filewatch::Event::removed: {
+						break;
+					}
+					case filewatch::Event::modified: {
 
-							PN_CORE_INFO("Remove Event for Path: " + file.string() + " " + file.extension().string());
+						//Ignore directory noise
+						if (std::filesystem::is_directory(file)) return;
 
-							//Push to file event queue
-							shared_this->pushFileEvent([&, file]() {
+						//Push to file event queue
+						pushFileEvent([&, file]() {
 
-								//Unregister asset if needed
-								PN_ASSETS_SERVICE->unregisterAsset(PN_ASSETS_SERVICE->getIDFromPath(file.string(), false));
-								});
+							PN_CORE_INFO("Modified Event for Path: {}", file.string());
 
-							break;
-						}
-						case filewatch::Event::modified: {
+							});
 
-							PN_CORE_INFO("Modified Event for Path: " + file.string() + " " + file.extension().string());
-
-							//Push to file event queue
-							shared_this->pushFileEvent([&, file]() {
-
-								//Only recache assets that are already cached
-								auto asset_id = PN_ASSETS_SERVICE->getIDFromPath(file.string(), false);
-								if (PN_ASSETS_SERVICE->isAssetCached(asset_id)) {
-
-									//Recache asset
-									PN_ASSETS_SERVICE->recacheAsset(asset_id);
-								}
-								});
-
-							break;
-						}
-						default: {
-							break;
-						}
-						}
+						break;
+					}
+					default: {
+						break;
+					}
 					}
 				});
 			}
 
+			void ResourcePanel::onDetach() {
+				path_service->stopWatchingDirectoryTree(root_path);
+			}
 
 			void ResourcePanel::render() {
 
@@ -669,338 +1241,110 @@ namespace PAIN {
 					}
 				}
 
-				ImGui::BeginMenuBar();
+				//Clear event set
+				event_set.clear();
 
-				//Parent path navigation
+				//Get the available width at the start of your layout
+				float totalWidth = ImGui::GetContentRegionAvail().x;
+				float sidebarWidth = totalWidth * SIDE_BAR_RATIO;
+				float mainWidth = totalWidth - sidebarWidth;
+
 				{
-					//Back button
-					if (!current_path.empty() && ImGui::Button("< Back")) {
+					ImGui::BeginChild("Sidebar", ImVec2(sidebarWidth, 0), true);
 
-						//Stop searching for parent at root directory
-						if (current_path != root_path) {
-							current_path = PN_PATH_SERVICE->getVirtualParentPath(current_path);
+					//Draw directory tree
+					DrawDirectoryTree(root_path);
 
-							//Update directories & files
-							directories = PN_PATH_SERVICE->listDirectories(current_path);
-							files = PN_PATH_SERVICE->listFiles(current_path);
-						}
-					}
-					moveFileAcceptPayload(PN_PATH_SERVICE->getVirtualParentPath(current_path));
+					ImGui::EndChild();
 				}
 
-				ImGui::Spacing();
+				//Same line separataion between side bar and main content
+				ImGui::SameLine();
 
-				//New folder
 				{
-					//Create new folder popup
-					if (ImGui::Button("New Folder")) {
-						openPopUp("New Folder");
-					}
-				}
+					ImGui::BeginChild("MainContent", ImVec2(mainWidth, 0), false, ImGuiWindowFlags_MenuBar);
 
-				ImGui::Spacing();
+					{
+						ImGui::BeginMenuBar();
 
-				//Directory level actions
-				{
-					//Array of load directories
-					const char* load_directory[] = { "Current", "Current *", "Root *" };
-
-					//Render the dropdown
-					ImGui::PushItemWidth(100.0f);
-					ImGui::Combo("##Directory", &directory_mode, load_directory, IM_ARRAYSIZE(load_directory));
-					ImGui::PopItemWidth();
-
-					//Load all from directory
-					if (ImGui::Button("Load All")) {
-
-						//Check for directory mode
-						switch (directory_mode) {
-							case 0: {
-								PN_ASSETS_SERVICE->cacheAssetDirectory(current_path);
-								success_msg->assign("All assets in: \"" + current_path + "\" loaded.");
-								openPopUp("Success");
-								break;
-							}
-							case 1: {
-								PN_ASSETS_SERVICE->cacheAssetDirectory(current_path, true);
-								success_msg->assign("All assets in: \"" + current_path + "*\" loaded.");
-								openPopUp("Success");
-								break;
-							}
-							case 2: {
-								PN_ASSETS_SERVICE->cacheAssetDirectory(root_path, true);
-								success_msg->assign("All assets in: \"" + root_path + "*\" loaded.");
-								openPopUp("Success");
-								break;
-							}
-							default: {
-								break;
-							}
-						}
-					}
-
-					//Unload all from directory
-					if (ImGui::Button("Unload All")) {
-
-						//Check for directory mode
-						switch (directory_mode) {
-						case 0: {
-							PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path);
-							success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							openPopUp("Success");
-							break;
-						}
-						case 1: {
-							PN_ASSETS_SERVICE->uncacheAssetDirectory(current_path, true);
-							success_msg->assign("All assets in: \"" + current_path + "*\" unloaded.");
-							openPopUp("Success");
-							break;
-						}
-						case 2: {
-							PN_ASSETS_SERVICE->uncacheAssetDirectory(root_path, true);
-							success_msg->assign("All assets in: \"" + root_path + "*\" unloaded.");
-							openPopUp("Success");
-							break;
-						}
-						default: {
-							break;
-						}
-						}
-					}
-
-					//Delete all from directory
-					if (ImGui::Button("Delete All")) {
-						openPopUp("Clear Directory");
-					}
-				}
-
-				ImGui::Spacing();
-
-				//Customize icon size
-				{
-					ImGui::Text("Icon Size: ");
-					ImGui::PushItemWidth(50.0f);
-					ImGui::DragFloat("##IconSizing", &icon_size.x, 1.0f, 32.0f, 256.0f, "%.f", ImGuiSliderFlags_AlwaysClamp);
-					ImGui::PopItemWidth();
-					icon_size.y = icon_size.x;
-				}
-
-				ImGui::Spacing();
-
-				//Search filter
-				{
-					//Input filter
-					ImGui::Text("Filter: ");
-					ImGui::SameLine();
-					ImGui::PushItemWidth(100.0f);
-					if (ImGui::InputTextWithHint("##SearchFilter", "Search...", search_filter.data(), search_filter.capacity() + 1)) {
-						search_filter.resize(strlen(search_filter.c_str()));
-					}
-					ImGui::PopItemWidth();
-				}
-
-				ImGui::Spacing();
-
-				//Refresh directory
-				{
-					if (ImGui::Button("Refresh")) {
-						//Update directories & files
-						directories = PN_PATH_SERVICE->listDirectories(current_path);
-						files = PN_PATH_SERVICE->listFiles(current_path);
-					}
-				}
-
-				//Render popups
-				renderPopUps();
-
-				ImGui::EndMenuBar();
-
-				//Render all assets & folders
-				renderAssetsBrowser(current_path);
-
-				//Set window dock id
-				dock_id = ImGui::GetWindowDockID();
-
-				//Render selected asset options
-				if (!selected_asset_id.empty() && PN_ASSETS_SERVICE->isAssetRegistered(selected_asset_id)) {
-
-					// Center the panel
-					ImGui::Begin("Selected Asset", nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings);
-
-					//Get selected asset path
-					auto path = PN_ASSETS_SERVICE->getAssetPath(selected_asset_id);
-
-					//Asset metadata
-					ImGui::Text("Asset: %s", selected_asset_id.c_str());
-					ImGui::Text("Type: %s", PN_ASSETS_SERVICE->getAssetTypeString(selected_asset_id).c_str());
-
-					//Get selected asset texture display
-					ImTextureID display = static_cast<ImTextureID>(fileIcon(path));
-
-					//Display image
-					ImVec2 uv0(0.0f, 1.0f);
-					ImVec2 uv1(1.0f, 0.0f);
-					ImGui::Image(display, { 256, 256 }, uv0, uv1);
-
-					//Loadable type actions
-					if (PN_ASSETS_SERVICE->isAssetLoadable(selected_asset_id)) {
-
-						//Show audio length if asset is loaded & an audio file
-						//if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id) && (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-						//	PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music)) {
-
-						//	//Show audio length
-						//	auto length = PN_ASSETS_SERVICE->getAsset<Audio::IAudio>(selected_asset_id)->getLength(NIKE_AUDIO_TIMEUNIT_MS);
-						//	ImGui::Text("Length:");
-						//	ImGui::Text("%d ms", length);
-						//	ImGui::Text("%.2f s", length / 1000.0f);
-						//	ImGui::Text("%.2f mins", (length / 1000.0f) / 60.0f);
-						//}
-
-						//Asset loading or unloading
-						if (PN_ASSETS_SERVICE->isAssetCached(selected_asset_id)) {
-							//Unload action
-							if (ImGui::Button("Unload")) {
-
-								//Unload asset
-								PN_ASSETS_SERVICE->uncacheAsset(selected_asset_id);
-								success_msg->assign("Asset: \"" + selected_asset_id + "\" unloaded.");
-								openPopUp("Success");
-							}
-
-							//Audio asset preview
-							if (PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Sound ||
-								PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music) {
-
-								//Same line
-								ImGui::SameLine();
-
-								//Play button
-								if (ImGui::Button("Play")) {
-									//Check if channel group has been created
-									//if (!PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-									//	PN_AUDIO_SERVICE->createChannelGroup("Audio Preview");
-									//}
-
-									////Get audio group
-									//auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-									////Toggle audio state
-									//if (group->getPaused()) {
-									//	group->setPaused(false);
-									//}
-									//else {
-									//	//Play music
-									//	bool is_music = PN_ASSETS_SERVICE->getAssetType(selected_asset_id) == Assets::Types::Music ? true : false;
-									//	PN_AUDIO_SERVICE->playAudio(selected_asset_id, "", "Audio Preview", 0.5f, 0.5f, false, is_music);
-									//}
-								}
-
-								//Manage preview audio group
-								//if (PN_AUDIO_SERVICE->checkChannelGroupExist("Audio Preview")) {
-								//	auto group = PN_AUDIO_SERVICE->getChannelGroup("Audio Preview");
-
-								//	if (group->isPlaying()) {
-								//		//Same line
-								//		ImGui::SameLine();
-
-								//		//Pause audio preview
-								//		if (ImGui::Button("Pause")) {
-								//			group->setPaused(true);
-								//		}
-
-								//		//Same line
-								//		ImGui::SameLine();
-
-								//		//Pause audio preview
-								//		if (ImGui::Button("Stop")) {
-								//			group->stop();
-								//		}
-								//	}
-								//	else if (!group->isPlaying() && !group->getPaused()) {
-								//		PN_AUDIO_SERVICE->unloadChannelGroup("Audio Preview");
-								//	}
-								//}
-							}
-
-
-						}
-						else {
-							//Load action
-							if (ImGui::Button("Load")) {
-
-								//Load asset
-								PN_ASSETS_SERVICE->cacheAsset(selected_asset_id);
-								success_msg->assign("Asset: \"" + selected_asset_id + "\" loaded.");
-								openPopUp("Success");
+						//New folder
+						{
+							//Create new folder popup
+							if (ImGui::Button("New Folder")) {
+								openPopUp("New Folder");
 							}
 						}
 
-						//Same line
-						ImGui::SameLine();
-					}
+						ImGui::Spacing();
 
-					//Editable type actions
-					if (PN_ASSETS_SERVICE->isAssetEditable(selected_asset_id)) {
-						if (ImGui::Button("Edit##EditableAsset")) {
+						{
+							//Show desc files trigger
+							ImGui::Checkbox("Desc Files", &b_show_desc_files);
+						}
 
-							//Read file into string
-							std::ifstream file(PN_ASSETS_SERVICE->getAssetPath(selected_asset_id));
-							if (file.is_open()) {
+						ImGui::Spacing();
 
-								//Check if file is already open
-								if (file_editing_map.find(selected_asset_id) == file_editing_map.end()) {
-									file_editing_map[selected_asset_id].reserve(1024 * 1024); // 1mb storage for file editing
-									// Read file content
-									file_editing_map[selected_asset_id].assign((std::istreambuf_iterator<char>(file)),
-										std::istreambuf_iterator<char>());
-									file.close();
-								}
+						//Customize icon size
+						{
+							ImGui::Text("Icon Size: ");
+							ImGui::PushItemWidth(50.0f);
+							ImGui::DragFloat("##IconSizing", &icon_size.x, 1.0f, 32.0f, 256.0f, "%.f", ImGuiSliderFlags_AlwaysClamp);
+							ImGui::PopItemWidth();
+							icon_size.y = icon_size.x;
+						}
+
+						ImGui::Spacing();
+
+						//Search filter
+						{
+							//Input filter
+							ImGui::Text("Filter: ");
+							ImGui::SameLine();
+							ImGui::PushItemWidth(100.0f);
+							if (ImGui::InputTextWithHint("##SearchFilter", "Search...", search_filter.data(), search_filter.capacity() + 1)) {
+								search_filter.resize(strlen(search_filter.c_str()));
 							}
-							else {
-								PN_CORE_WARN("Failed to open file");
-								file.close();
+							ImGui::PopItemWidth();
+						}
+
+						ImGui::Spacing();
+
+						//Refresh directory
+						{
+							if (ImGui::Button("Refresh") || auto_refresh_timer > AUTO_REFRESH_INTERVAL) {
+
+								//Reset timer
+								auto_refresh_timer = 0.0f;
+
+								//Reset directory cache
+								directoryCache.clear();
+								populateDirectoryCache(current_path);
+
+								//Update directories & files
+								populateDirs(current_path);
+								populateFiles(current_path);
 							}
 						}
 
-						//Same line
-						ImGui::SameLine();
+						ImGui::EndMenuBar();
 					}
 
-					//Delete asset
-					if (ImGui::Button("Delete##DeleteAsset")) {
-						openPopUp("Delete Asset");
-					}
+					//Render all assets & folders
+					renderAssetsBrowser(current_path);
 
-					//Same line
-					ImGui::SameLine();
+					//Render open files
+					renderOpenFiles();
 
-					//Unload action
-					if (ImGui::Button("Close##CloseAsset")) {
+					//Render file editor
+					renderFileEditor();
 
-						//Reset selected asset id
-						selected_asset_id.clear();
-					}
+					//End main content child
+					ImGui::EndChild();
 
 					//Render popups
 					renderPopUps();
 				}
-
-				//Render file editor
-				renderFileEditor();
-
-				//File dropped popup
-				if (b_file_dropped && !checkPopUpShowing()) {
-					//openPopUp("Success");
-					b_file_dropped = false;
-				}
-
-				//Render popups
-				renderPopUps();
-
 			}
-
-
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN

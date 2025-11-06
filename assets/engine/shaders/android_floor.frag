@@ -16,8 +16,8 @@ void main() {
 
     float dark_tile_intensity = mod(tile_coords.x + tile_coords.y, 2.0);
 
-    const vec3 dark = vec3(0.2, 0.2, 0.2);
-    const vec3 light = vec3(0.5, 0.5, 0.5);
+    const vec3 dark = vec3(0.05);
+    const vec3 light = vec3(0.5);
 
     const float roughness = 0.1;        // 1 -> rough, 0.1 -> smooth
     const float metallic = 0.3;         // metal

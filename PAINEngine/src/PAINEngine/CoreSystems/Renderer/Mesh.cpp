@@ -10,8 +10,8 @@ namespace PAIN {
 		glm::vec3 mn(FLT_MAX), mx(-FLT_MAX);
 #ifdef PN_PLATFORM_WINDOWS
 		for (const auto& v : verts) {
-			mn.x = min(mn.x, v.pos.x); mn.y = min(mn.y, v.pos.y); mn.z = min(mn.z, v.pos.z);
-			mx.x = max(mx.x, v.pos.x); mx.y = max(mx.y, v.pos.y); mx.z = max(mx.z, v.pos.z);
+			mn.x = std::min(mn.x, v.pos.x); mn.y = std::min(mn.y, v.pos.y); mn.z = std::min(mn.z, v.pos.z);
+			mx.x = std::max(mx.x, v.pos.x); mx.y = std::max(mx.y, v.pos.y); mx.z = std::max(mx.z, v.pos.z);
 		}
 #else
         for (const auto& v : verts) {

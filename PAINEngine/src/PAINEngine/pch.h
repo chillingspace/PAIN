@@ -37,6 +37,8 @@
 #include <Jolt/Physics/Collision/CollideShape.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexShape.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
 
  /*****************************************************************//**
  * Engine Specific Library
@@ -148,5 +150,14 @@ using json = nlohmann::json;
 #ifdef PN_PLATFORM_ANDROID
 #include "./Utility/AndroidFs.h"
 #endif
+
+#define glCheck(call) \
+    call; \
+    { \
+        GLenum err = glGetError(); \
+        if (err != GL_NO_ERROR) { \
+            PN_CORE_ERROR("OpenGL error {} at {}:{} - {}", err, __FILE__, __LINE__, #call); \
+        } \
+    }
 
 #endif //PCH_H

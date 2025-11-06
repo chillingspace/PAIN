@@ -68,27 +68,63 @@ namespace PAIN {
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
             // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
-            std::filesystem::path project_root = std::filesystem::current_path().parent_path().parent_path();
+            std::filesystem::path project_root = Assets::findProjectRoot();
             std::string project_root_str = normalizePath(project_root.string());
 
             //Register default virtual paths
             registerVirtualPath("out", out_path);
 
             //Temp paths to be changed
-            registerVirtualPath("assets", out_path + "/assets", true);
-            registerVirtualPath("game_assets", out_path + "/assets/" + relative_game_folder, true);
-            registerVirtualPath("engine_assets", out_path + "/assets/" + relative_engine_folder, true);
-            registerVirtualPath("local", localdata_path + "/" + app_name, true);
-            registerVirtualPath("roaming", roamingdata_path + "/" + app_name, true);
-            registerVirtualPath("documents", documents_path + "/" + app_name, true);
-            registerVirtualPath("temp", localdata_path + "/" + app_name + "/temp", true);
-            registerVirtualPath("main_game_assets", project_root_str + "/assets/" + relative_game_folder, false);
-            registerVirtualPath("config", project_root_str + "/Config", false);
-            registerVirtualPath("main_engine_assets", project_root_str + "/assets/" + relative_engine_folder, false);
+            registerVirtualPath(main_assets_alias, project_root_str + "/assets", false);
+            registerVirtualPath(main_game_assets_alias, project_root_str + "/assets/" + relative_game_folder, false);
+            registerVirtualPath(main_engine_assets_alias, project_root_str + "/assets/" + relative_engine_folder, false);
+            registerVirtualPath(assets_alias, out_path + "/assets", true);
+            registerVirtualPath(game_assets_alias, out_path + "/assets/" + relative_game_folder, true);
+            registerVirtualPath(engine_assets_alias, out_path + "/assets/" + relative_engine_folder, true);
+            registerVirtualPath(local_alias, localdata_path + "/" + app_name, true);
+            registerVirtualPath(roaming_alias, roamingdata_path + "/" + app_name, true);
+            registerVirtualPath(documents_alias, documents_path + "/" + app_name, true);
+            registerVirtualPath(temp_alias, localdata_path + "/" + app_name + "/temp", true);
+            registerVirtualPath(config_alias, project_root_str + "/Config", false);
         }
 
         void WindowsPath::destroy() {
             virtual_paths.clear();
+        }
+
+        std::string WindowsPath::getVirtualParentPath(std::string const& virtual_path) const {
+
+            //Get alias
+            auto alias = getAlias(virtual_path);
+
+            //Get alias full path
+            std::filesystem::path alias_path = normalizePath(virtual_paths.at(alias));
+
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Get parent path
+            std::filesystem::path parent_path = normalizePath(actual_path.parent_path().string());
+
+            //Return parent path
+            if (parent_path != alias_path) {
+
+                //Check if iteration of parent path exceeds alias
+                if (parent_path.string().find(alias_path.string()) == std::string::npos) {
+                    return alias + getVirtualSymbol();
+                }
+
+                //Get relative path from parent path
+                std::string relative_path = parent_path.string().substr(alias_path.string().size() + 1);
+
+                //Convert parent path back to virtual path
+                return alias + getVirtualSymbol() + relative_path;
+            }
+            else {
+
+                //Return alias
+                return alias + getVirtualSymbol();
+            }
         }
 
         void WindowsPath::registerVirtualPath(const std::string& alias, const std::string& path, bool create_new) {
@@ -259,6 +295,145 @@ namespace PAIN {
 #endif
 
             return std::make_unique<WinFileStream>(path, mode);
+        }
+
+        void WindowsPath::watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) {
+
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Check if path exists
+            if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
+                throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
+            }
+
+            //Initialize last write times for all files in the directory
+            //for (const auto& file : std::filesystem::recursive_directory_iterator(actual_path)) {
+            //    if (file.is_regular_file()) {
+            //        file_write_times[file.path()] = std::filesystem::last_write_time(file);
+            //    }
+            //}
+
+            //Add watcher for the directory
+            dir_watchers.emplace(actual_path,
+                std::make_unique<filewatch::FileWatch<std::string>>(actual_path.string(),
+                    [actual_path, callback, this](std::string const& file, filewatch::Event event) {
+
+                        ////Get file updated write time
+                        //auto w_time = std::filesystem::last_write_time(actual_path / file);
+
+                        ////Invalidate access events ( If prev last write time is the same as new write time )
+                        //if (event == filewatch::Event::modified && w_time == file_write_times[actual_path / file]) {
+                        //    return;
+                        //}
+
+                        ////Update with new write time
+                        //file_write_times[actual_path / file] = w_time;
+
+                        //Call callback
+                        callback(actual_path / file, event);
+                    }));
+        }
+
+        void WindowsPath::watchDirectoryTree(std::string const& virtual_path, FileWatchEventCallback callback) {
+
+            //Get alias
+            auto alias = getAlias(virtual_path);
+
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Check if path exists
+            if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
+                throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
+            }
+
+            //Function to add watcher for a directory
+            auto addWatcher = [this, alias, callback](std::filesystem::path const& dir_path) {
+                watchDirectory(aliasCombineRelative(alias, dir_path.string()), callback);
+                PN_CORE_INFO("New Directory Watched: " + dir_path.string());
+                };
+
+            //Add watcher for child directories
+            for (const auto& dir : std::filesystem::recursive_directory_iterator(actual_path)) {
+
+                //Register directory
+                if (dir.is_directory()) {
+                    addWatcher(dir.path());
+                }
+            }
+
+            //Watch the root directory and dynamically add watchers for new directories
+            watchDirectory(virtual_path, [this, callback, addWatcher](std::filesystem::path const& path, filewatch::Event event) {
+
+                //Add a watcher for the new directory
+                if (event == filewatch::Event::added && std::filesystem::is_directory(path)) {
+                    addWatcher(path);
+                    return;
+                }
+
+                //Pass the event to the callback
+                callback(path, event);
+                });
+        }
+
+        void WindowsPath::stopWatchingDirectory(std::string const& virtual_path) {
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Check if path exists
+            if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
+                throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
+            }
+
+            //Erase directory from watchers
+            auto it = dir_watchers.find(actual_path);
+            if (it != dir_watchers.end()) {
+                dir_watchers.erase(it);
+            }
+        }
+
+        void WindowsPath::stopWatchingDirectoryTree(std::string const& virtual_path) {
+            //Get alias
+            auto alias = getAlias(virtual_path);
+
+            //Get actual path
+            std::filesystem::path actual_path = resolvePath(virtual_path);
+
+            //Check if path exists
+            if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
+                throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
+            }
+
+            //Add watcher for child directories
+            for (const auto& dir : std::filesystem::recursive_directory_iterator(actual_path)) {
+                if (dir.is_directory()) {
+                    auto path = aliasCombineRelative(alias, dir.path().string());
+
+                    //Erase directory from watchers
+                    auto it = dir_watchers.find(path);
+                    if (it != dir_watchers.end()) {
+                        dir_watchers.erase(it);
+                    }
+                }
+            }
+
+            //Erase directory from watchers
+            auto it = dir_watchers.find(virtual_path);
+            if (it != dir_watchers.end()) {
+                dir_watchers.erase(it);
+            }
+        }
+
+        void WindowsPath::stopWatchingAllDirectories() {
+            dir_watchers.clear();
+        }
+
+        void WindowsPath::logWatchedDirectories() const {
+            PN_CORE_INFO("Currently watched directories:");
+            for (const auto& [path, watcher] : dir_watchers) {
+                PN_CORE_INFO(path.string());
+            }
         }
 	}
 }

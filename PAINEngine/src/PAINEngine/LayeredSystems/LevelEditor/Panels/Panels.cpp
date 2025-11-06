@@ -87,44 +87,36 @@ namespace PAIN {
 			// ----------------------------
 			bool IPanel::b_popup_showing = false;
 
-			void IPanel::registerPopUp(std::string const& popup_id, std::function<void()> popup_func) {
+			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
 				//Check if popup has already been registered
 				if (popups.find(popup_id) != popups.end()) {
 					throw std::runtime_error("Popup already registered");
 				}
 
 				//Emplace popup
-				popups.emplace(popup_id, InternalPopUp{ false, std::move(popup_func) });
+				popups.emplace(popup_id, InternalPopUp{ nullptr, false, std::move(popup_func) });
 			}
 
-			void IPanel::editPopUp(std::string const& popup_id, std::function<void()> popup_func) {
+			void IPanel::editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
 				//Check if popup has been registered
 				if (popups.find(popup_id) == popups.end()) {
 					throw std::runtime_error("Popup not yet registered");
 				}
 
-				popups.at(popup_id) = InternalPopUp{ false, popup_func };
+				popups.at(popup_id) = InternalPopUp{ nullptr, false, popup_func };
 			}
 
-			void IPanel::openPopUp(std::string const& popup_id) {
+			void IPanel::openPopUp(std::string const& popup_id, std::any&& data) {
 				auto it = popups.find(popup_id);
 
 				if (it == popups.end()) {
 					throw std::runtime_error("Popup doest not exist");
 				}
 
-				//Calculate the center of the viewport
-				ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-				ImVec2 viewport_pos = ImGui::GetMainViewport()->Pos;
-				ImVec2 popup_pos = ImVec2(viewport_pos.x + viewport_size.x * 0.5f, viewport_pos.y + viewport_size.y * 0.5f);
-
-				//Center the popup
-				ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
 				//Set pop management variables
 				b_popup_showing = true;
 				popups.at(popup_id).b_is_open = true;
-				ImGui::OpenPopup(popup_id.c_str());
+				popups.at(popup_id).data = std::move(data);
 			}
 
 			void IPanel::closePopUp(std::string const& popup_id) {
@@ -143,9 +135,25 @@ namespace PAIN {
 
 				//Iterate through all popup and render
 				for (auto& popup : popups) {
-					if (popup.second.b_is_open && ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-						popup.second.popUpFunction();
-						ImGui::EndPopup();
+					if (popup.second.b_is_open){
+
+						//Calculate the center of the viewport
+						ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
+						ImVec2 viewport_pos = ImGui::GetMainViewport()->Pos;
+						ImVec2 popup_pos = ImVec2(viewport_pos.x + viewport_size.x * 0.5f, viewport_pos.y + viewport_size.y * 0.5f);
+
+						//Center the popup
+						ImGui::SetNextWindowPos(popup_pos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+						ImGui::OpenPopup(popup.first.c_str());
+						
+						//Begin popup modal
+						if (ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+							popup.second.popUpFunction(popup.second.data);
+							ImGui::EndPopup();
+						}
+						else {
+							PN_CORE_WARN("Failed to open popup.");
+						}
 					}
 				}
 			}
@@ -154,10 +162,24 @@ namespace PAIN {
 				return b_popup_showing;
 			}
 
-			std::function<void()> IPanel::defPopUp(std::string const& id, std::shared_ptr<std::string> msg) {
-				return [this, id, msg]() {
-					//Show error message
-					ImGui::Text("%s", msg->c_str());
+			std::function<void(std::any const&)> IPanel::defPopUp(std::string const& id) {
+				return [this, id](std::any const& data) {
+
+					//Cast into vector of strings
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<std::vector<std::string>>)) {
+						auto vec = std::any_cast<std::shared_ptr<std::vector<std::string>>>(data);
+
+						//Iterate through vec
+						for (auto text : *vec) {
+							//Show message
+							ImGui::Text("%s", text.c_str());
+						}
+					}
+					else {
+						//Show message
+						ImGui::Text("%s", "Hello World!");
+					}
+				
 
 					//Add Spacing
 					ImGui::Spacing();

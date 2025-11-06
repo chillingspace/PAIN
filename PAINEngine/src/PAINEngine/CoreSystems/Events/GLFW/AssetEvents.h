@@ -11,18 +11,17 @@ namespace PAIN {
 
 		class FileDropped : public Event {
 		private:
-			int count;
-			const char** paths;
+			std::vector<std::string> paths;
 		public:
 
 			//Construct event
-			FileDropped(int count, const char** paths) : count{ count }, paths{ paths } {}
+			FileDropped(int count, const char** raw_paths) {
+				for (int i = 0; i < count; ++i)
+					paths.emplace_back(raw_paths[i]);
+			}
 
 			//Get Files Count
-			int getFilesCount() const { return count; }
-
-			//Get Files Count
-			const char** getPaths() const { return paths; }
+			std::vector<std::string> getPaths() const { return paths; }
 
 			//Register Event
 			EVENT_CLASS_TYPE(FileDrop);

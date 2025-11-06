@@ -21,7 +21,7 @@ namespace PAIN {
     namespace Assets {
 
         //Asset compiler class
-        class AssetOrganizer {
+        class Organizer {
         private:
 
             //Assset compiler
@@ -55,6 +55,9 @@ namespace PAIN {
             //Create or rename folder
             void instantiateFolder(std::filesystem::path const& path) const;
 
+            //Move file
+            bool moveFile(Info& asset, std::filesystem::path const& to) const;
+
             //Check asset is in right directory and reposition
             void enforceGameAssetLocation(Info& asset) const;
             void enforceEngineAssetLocation(Info& asset) const;
@@ -67,8 +70,8 @@ namespace PAIN {
             //Export asset registry
             void ExportAssetRegistry();
         public:
-            AssetOrganizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
-            ~AssetOrganizer() = default;
+            Organizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
+            ~Organizer() = default;
 
             //Game folders
             void initGameFolders(Type type, std::string const& folder);
@@ -78,6 +81,15 @@ namespace PAIN {
 
             //Create standard structure
             void enforceStandardStructure();
+
+            //Move file function
+            bool moveFile(std::filesystem::path const& from, std::filesystem::path const& to) const;
+
+            //Delete file function
+            bool removeFile(std::filesystem::path const& file_path) const;
+
+            //Organize and process asset
+            IAsset organizeAndProcessAsset(std::filesystem::path const& file_path) const;
 
             //core functions
             void scanAssetDirectories();

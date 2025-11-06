@@ -19,17 +19,47 @@ namespace PAIN {
 
             void ComponentsPanel::onAttach() {
                 // Register component-specific UI
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Transform>(*this, "Transform");
-                //RegisterTransformUI(*this);
+                
+                // ---- Transform ----
+                registerCompUIFunc<PAIN::Transform>("Transform",
+                    [](ComponentsPanel&, PAIN::Transform& as) { DrawWithReflection(as); });
 
-                PAIN::Editor::Panel::RegisterReflected<PAIN::MeshRenderer>(*this, "Mesh Renderer");
-                //RegisterMeshRendererUI(*this);
+                // ---- MeshRenderer ----
+                registerCompUIFunc<PAIN::MeshRenderer>("MeshRenderer",
+                    [](ComponentsPanel&, PAIN::MeshRenderer& as) { DrawWithReflection(as); });
 
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Lighting>(*this, "Lighting");
-                //RegisterLightUI(*this);
+                // ---- Light ----
+                registerCompUIFunc<PAIN::Lighting>("Lighting",
+                    [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
 
-                PAIN::Editor::Panel::RegisterReflected<PAIN::Audio::AudioSource>(*this, "Audio Source");
+                // ---- AudioSource ----
+                registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
+                    [](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as); });
 
+                // ---- BoundingVolume ----
+                registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
+                    [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
+
+                // ---- Hierarchy ----
+                registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
+                    [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
+
+                // ---- Physics ----
+                registerCompUIFunc<PAIN::Joint>("Joint",
+                    [](ComponentsPanel&, PAIN::Joint& as) { DrawWithReflection(as); });
+
+                registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
+                    [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
+                //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
+
+
+                PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
+
+                //auto ecs = services->get<ECS::Controller>();
+                //for (auto const& [name, _] : ecs->getComponentFactories()) {
+                //    PN_CORE_INFO("Factory: {}", name); 
+                //}
+                
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {
@@ -47,8 +77,8 @@ namespace PAIN {
                 ImGui::SetNextWindowSize(ImVec2(350, 600), ImGuiCond_FirstUseEver);
             }
 
-            std::function<void()> ComponentsPanel::addComponentPopUp(std::string const& popup_id) {
-                return [this, popup_id]() {
+            std::function<void(std::any const&)> ComponentsPanel::addComponentPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     auto ecs = services->get<ECS::Controller>();
                     auto entity_panel = entities_panel.lock();
 
@@ -136,8 +166,8 @@ namespace PAIN {
             }
 
 
-            std::function<void()> ComponentsPanel::removeComponentPopUp(std::string const& popup_id) {
-                return [this, popup_id]() {
+            std::function<void(std::any const&)> ComponentsPanel::removeComponentPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
                     auto ecs = services->get<ECS::Controller>();
                     auto entity_panel = entities_panel.lock();
 

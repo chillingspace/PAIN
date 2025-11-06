@@ -12,7 +12,7 @@
 #ifndef C_TRANSFORM_H
 #define C_TRANSFORM_H
 
-//#include "pch.h"
+#include "pch.h"
 #include <refl.hpp>
 #include "GLMSerialization.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
@@ -37,40 +37,6 @@ namespace PAIN {
 			return T * R * S;
 		}
 	};
-
-#ifdef _DEBUG
-	// UI Registration function
-	//inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
-	//	panel.registerCompUIFunc<PAIN::Transform>([](Editor::Panel::ComponentsPanel&, PAIN::Transform& t) {
-	//		ImGui::Text("Transform");
-	//		ImGui::Separator();
-	//		DrawWithReflection(t);
-	//		});
-	//}
-
-	/*
-	inline void RegisterTransformUI(Editor::Panel::ComponentsPanel& panel) {
-		panel.registerCompUIFunc<Transform>([](Editor::Panel::ComponentsPanel& comp_panel, Transform& transform) {
-			ImGui::Text("Transform");
-			ImGui::Separator();
-
-			// Position - use glm::value_ptr to get float pointer
-			ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 0.1f);
-
-			// Rotation - convert quaternion to Euler angles for editing
-			glm::vec3 euler = glm::degrees(glm::eulerAngles(transform.rotation));
-			if (ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 1.0f)) {
-				// Convert back to quaternion
-				transform.rotation = glm::quat(glm::radians(euler));
-			}
-
-			// Scale - use glm::value_ptr to get float pointer
-			ImGui::DragFloat3("Scale", glm::value_ptr(transform.scale), 0.1f);
-		});
-	}
-	*/
-	
-#endif
 }
 
 // No refl macro here, have to use custom GLM serializers, 
@@ -102,6 +68,6 @@ REFL_FIELD(rotation)
 REFL_FIELD(scale)
 REFL_END
 
-//static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
+static_assert(refl::trait::is_reflectable_v<PAIN::Transform>);
 
 #endif

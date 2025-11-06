@@ -34,6 +34,21 @@ namespace PAIN {
 
 		int winWidth = 0;
 		int winHeight = 0;
+	private:
+		// for image based lighting
+
+		unsigned int irradiance_map;
+		void generateIrradianceMap();
+
+		unsigned int prefilter_map;
+		void generatePrefilterMap();
+
+		unsigned int brdf_tex;
+		void generateBRDFLUT();
+
+		void renderQuad();
+
+
 	public:
 		static Skybox& get() {
 			static Skybox instance;
@@ -44,6 +59,18 @@ namespace PAIN {
 
 		unsigned int getSkyboxTex() const {
 			return skybox_tex;
+		}
+
+		unsigned int getIrradianceMap() const {
+			return irradiance_map;
+		}
+
+		unsigned int getPrefilterMap() const {
+			return prefilter_map;
+		}
+
+		unsigned int getBrdfLUT() const {
+			return brdf_tex;
 		}
 
 		void render(const glm::mat4& view, const glm::mat4& proj);

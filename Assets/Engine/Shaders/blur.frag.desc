@@ -1,0 +1,16 @@
+{
+  "asset_info": {
+    "name": "blur.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 8532944496900011953
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "21fda66c-c116-1e49-887c-4e9a4245e8d9",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\blur.frag"
+  }
+}

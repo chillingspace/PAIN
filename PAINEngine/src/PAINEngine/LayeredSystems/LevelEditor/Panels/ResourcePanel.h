@@ -4,6 +4,9 @@
 #pragma once
 #include "Panels.h"
 
+#include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Path/Path.h"
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -24,6 +27,7 @@ namespace PAIN {
                 // ----------------------------
 
                 void onAttach() override;
+                void onDetach() override;
                 void render();
 
                 // ----------------------------
@@ -40,17 +44,40 @@ namespace PAIN {
                 // File Event Queue
                 // ----------------------------
                 void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
-                void onEvent(PAIN::Event::Event& event);
+                void onEvent(Event::Event& event) override;
 
             private:
 
                 // ----------------------------
                 // File & Directory
                 // ----------------------------
-                std::vector<std::filesystem::path> directories; //Directories
-                std::vector<std::filesystem::path> files; //Files
+                std::shared_ptr<Path::Path> path_service;
+                std::shared_ptr<Assets::Manager> asset_service;
+
+                // ----------------------------
+                // File & Directory
+                // ----------------------------
+                struct Dir {
+                    std::filesystem::path path;
+                    ImTextureID icon;
+                    std::string file_name;
+                };
+                struct File {
+                    std::filesystem::path path;
+                    Assets::GUID id;
+                    Assets::Type type;
+                    ImTextureID icon;
+                    std::string file_name;
+                };
+                std::vector<Dir> directories; //Directories
+                std::vector<File> files; //Files
+
+                //Function to population files
+                void populateDirs(std::string const& virtual_path);
+                void populateFiles(std::string const& virtual_path);
 
                 std::string root_path; //Root Path
+                std::filesystem::path root;
                 std::string current_path; //Current Path
 
                 // ----------------------------
@@ -59,17 +86,27 @@ namespace PAIN {
                 std::string search_filter; //Search filter
                 ImVec2 icon_size; //Icon size
 
-                std::string selected_asset_id; //Selected file
-                std::string payload_typestring; //File payload type string
+                //Payload
+                std::string payload_typestring;
 
-                int directory_mode; //Selected directory mode
-                bool b_file_dropped; //File dropped
+                //Vector of opened files
+                std::vector<File> open_files;
 
+                //Assets auto refresh timer
+                float auto_refresh_timer = 0.0f;
+                const float AUTO_REFRESH_INTERVAL = 2.0f;
+
+                //Side bar size ratio
+                const float SIDE_BAR_RATIO = 0.2f;
+
+                //Show case file option
+                bool b_show_desc_files = false;
 
                 // ----------------------------
                 // File
                 // ----------------------------
                 std::queue<std::function<void()>> file_event_queue; //File Watching Queue
+                std::set<std::filesystem::path> event_set;
                 std::mutex file_event_mutex; //Mutex for thread safety
 
                 std::unordered_map<std::string, std::string> file_editing_map; //Map of file content
@@ -84,36 +121,35 @@ namespace PAIN {
 
 
                 // ----------------------------
-                // Feedback
-                // ----------------------------
-                std::shared_ptr<std::string> error_msg; //Setting error message ( Usage: Editing error popup message )
-                std::shared_ptr<std::string> success_msg; //Setting success message ( Usage: Editing success popup message )
-
-
-                // ----------------------------
                 // Internal Helpers
                 // ----------------------------
-                unsigned int fileIcon(std::filesystem::path const& path); //Internal asset icon picking
+                std::unordered_map<std::string, std::vector<std::string>> directoryCache;
+
+                void populateDirectoryCache(std::string const& virtual_dir);
+
+                void DrawDirectoryTree(std::string const& virtual_dir);
+                bool renderPopUpContext(File const& file);
+                bool renderPopUpContext(Dir const& file);
+                unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
+
+                void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 
                 // ----------------------------
                 // Popups
                 // ----------------------------
-                std::function<void()> deleteAssetPopup(std::string const& popup_id); //Delete asset popup
-                std::function<void()> deleteDirectoryPopup(std::string const& popup_id); //Delete directory content popup
-                std::function<void()> newFolderPopup(std::string const& popup_id); //New folder popup
+                std::function<void(std::any const&)> deleteFilePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> renameFilePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
 
 
                 // ----------------------------
                 // File Operations
                 // ----------------------------
                 void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
-
-                //Entities panel for string reference
-                //std::weak_ptr<EntitiesPanel> entities_panel;
-                //On drop file event
-                //void onEvent(std::shared_ptr<Assets::FileDropEvent> event) override;
             };
 
         } // namespace Panel

@@ -13,40 +13,48 @@ namespace PAIN {
 		void Manager::logAssetRegistry() const {
 
 			for (auto const& asset : asset_registry) {
-				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second->relative_path.string());
+				PN_CORE_INFO("GUID: {} Path: {}", asset.first.ToString(), asset.second->shipped_relative_path.string());
 			}
 		}
 
-		GUID Manager::findGUID(std::string const& name) const {
-			GUID guid;
+		GUID Manager::findGUID(std::filesystem::path const& relative_path) {
 
-			//Find asset guid
-			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second->name == name) {
-					guid = it->second->guid;
+			//Normalize path first
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path norm_path = path_service->normalizePath(relative_path.string());
+			
+			//Find GUID
+			auto main_it = main_path_to_guid.find(norm_path);
+			if (main_it != main_path_to_guid.end()) {
+				return main_it->second;
+			}
+			else {
+				auto shipped_it = shipped_path_to_guid.find(norm_path);
+				if (shipped_it != shipped_path_to_guid.end()) {
+					return shipped_it->second;
 				}
 			}
 
-			return guid;
-		}
-
-		GUID Manager::findGUID(std::filesystem::path const& relative_path) const {
-			GUID guid;
-
-			//Find asset guid
-			for (auto it = asset_registry.begin(); it != asset_registry.end(); ++it) {
-				if (it->second->relative_path == relative_path) {
-					guid = it->second->guid;
-				}
-			}
-
-			return guid;
+			return GUID();
 		}
 
 		void Manager::onAttach() {
 
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
 			//Create unique asset loader
 			asset_loader = std::make_unique<Loader>(services);
+
+#ifdef PN_PLATFORM_WINDOWS
+            //Init platform for organizer
+			Platform platform = Platform::Windows;
+
+			//Create unique asset compiler
+			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
+				path_service->resolvePath(Path::assets_alias, ""),
+				platform, getExecutablePath());
+#endif
 
 			//Register texture loader
 			asset_loader->RegisterLoader(Type::Texture, [this](std::string const& virtual_path) {
@@ -99,6 +107,14 @@ namespace PAIN {
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
+			//Instantiate the path to guid
+			for (auto const& asset : asset_registry) {
+                std::filesystem::path norm_shipped = path_service->normalizePath(asset.second->shipped_relative_path.string());
+                std::filesystem::path norm_main = path_service->normalizePath(asset.second->main_relative_path.string());
+				shipped_path_to_guid[norm_shipped] = asset.second->guid;
+				main_path_to_guid[norm_main] = asset.second->guid;
+			}
+
 			//Dump asset registry
 			logAssetRegistry();
 		}
@@ -117,6 +133,91 @@ namespace PAIN {
 			auto meta = getAssetData(id);  
 			return meta ? meta->type : Type::Other; 
 		}
+		
+#ifdef PN_PLATFORM_WINDOWS
+		void Manager::registerAsset(std::filesystem::path const& relative_path) {
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Double check to ensure asset is not registered
+			if (checkAssetRegistered(findGUID(relative_path))) return;
+
+			//Process asset
+			auto asset = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
+
+			//Check to ensure that GUID is valid
+			if (!asset.guid.IsValid()) return;
+
+			//Get asset registry data
+			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
+
+			//Register paths to guid
+			shipped_path_to_guid[asset.shipped_relative_path] = asset.guid;
+			main_path_to_guid[asset.main_relative_path] = asset.guid;
+		}
+#endif
+
+		void Manager::registerAsset(std::shared_ptr<IAsset> asset) {
+
+			//Check to ensure that GUID is valid
+			if (!asset->guid.IsValid()) return;
+
+			//Get asset registry data
+			asset_registry[asset->guid] = asset;
+
+			//Register paths to guid
+			shipped_path_to_guid[asset->shipped_relative_path] = asset->guid;
+			main_path_to_guid[asset->main_relative_path] = asset->guid;
+		}
+
+		void Manager::unregisterAsset(GUID const& id) {
+
+			//Find cache it and uncache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				cache_it = asset_cache.erase(cache_it);
+			}
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+
+				//Remove paths to guid
+				auto shipped_it = shipped_path_to_guid.find(registry_it->second->shipped_relative_path);
+				if (shipped_it != shipped_path_to_guid.end()) {
+					shipped_it = shipped_path_to_guid.erase(shipped_it);
+				}
+
+				auto main_it = main_path_to_guid.find(registry_it->second->main_relative_path);
+				if (main_it != main_path_to_guid.end()) {
+					main_it = main_path_to_guid.erase(main_it);
+				}
+
+				registry_it = asset_registry.erase(registry_it);
+			}
+		}
+
+		bool Manager::checkAssetRegistered(GUID const& id) const {
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				return true;
+			}
+
+			return false;
+		}
+
+		bool Manager::checkAssetRegistered(std::filesystem::path const& relative_path) {
+
+			//Find GUID
+			auto id = findGUID(relative_path);
+
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				return true;
+			}
+
+			return false;
+		}
 
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 
@@ -133,7 +234,7 @@ namespace PAIN {
 			}
 
 			//Resolve asset path
-			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->relative_path.string());
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->shipped_relative_path.string());
 
 			//Load assset through registered loaded
 			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
@@ -142,6 +243,24 @@ namespace PAIN {
 			asset_cache.emplace(id, asset);
 
 			return asset;
+		}
+
+		void Manager::batchCacheAssets(std::vector<GUID> batch_ids) {
+
+			//Get all batch ids
+			for (auto id : batch_ids) {
+
+				//check registration
+				if (checkAssetRegistered(id)) {
+
+					//Check asset cache
+					if (!checkAssetCached(id)) {
+						
+						//Cache asset
+						cacheAsset(id);
+					}
+				}
+			}
 		}
 
 		void Manager::uncacheAsset(GUID const& id) {
@@ -160,7 +279,16 @@ namespace PAIN {
 			return cacheAsset(id);
 		}
 
-		//Find asset type
+		bool Manager::checkAssetCached(GUID const& id) const {
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				return true;
+			}
+
+			return false;
+		}
+
 		std::shared_ptr<IAsset> Manager::getAssetData(GUID const& id) const {
 			//Get asset registry data
 			auto registry_it = asset_registry.find(id);
@@ -170,28 +298,8 @@ namespace PAIN {
 
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
-
-		std::shared_ptr<IAsset> Manager::getAssetData(std::string const& name) const {
-
-			//Find GUID
-			auto id = findGUID(name);
-
-			//Check if GUID is valid
-			if (!id.IsValid()) {
-				//Asset doesnt exist in registry
-				throw std::runtime_error("Invalid GUID.");
-			}
-
-			//Get asset registry data
-			auto registry_it = asset_registry.find(id);
-			if (registry_it == asset_registry.end()) {
-				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
-			}
-
-			return std::make_shared<IAsset>(*registry_it->second);
-		}
 		
-		std::shared_ptr<IAsset> Manager::getAssetData(std::filesystem::path const& relative_path) const {
+		std::shared_ptr<IAsset> Manager::getAssetData(std::filesystem::path const& relative_path) {
 			//Find GUID
 			auto id = findGUID(relative_path);
 
@@ -210,6 +318,140 @@ namespace PAIN {
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+			std::filesystem::path relative_from = std::filesystem::relative(from, root);
+			std::filesystem::path relative_to = std::filesystem::relative(to, root);
+
+			//Ensure relative
+			if (relative_from.empty() || relative_to.empty() || from.extension() == Assets::descriptor_ext || to.extension() == Assets::descriptor_ext) return;
+
+			//Vector of old paths
+			std::vector<std::filesystem::path> old_relative;
+
+			//Create recursive directory
+			std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
+			recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+					if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
+						out_vec.push_back(std::filesystem::relative(entry.path(), root));
+					}
+				}
+				};
+
+			//Check if from is a directory
+			if (std::filesystem::is_directory(from)) {
+
+				//Recursive get old relatives
+				recurse(from, old_relative);
+			}
+
+			//Move file
+			if (asset_organizer->moveFile(from, to)) {
+
+				//Check registry operation
+				if (!old_relative.empty() || std::filesystem::is_directory(to)) {
+
+					//Unregister old relative
+					for (auto old : old_relative) {
+						unregisterAsset(findGUID(old));
+					}
+
+					//Register new relative
+					std::vector<std::filesystem::path> new_relative;
+					recurse(to, new_relative);
+					for (auto new_ : new_relative) {
+						registerAsset(new_);
+					}
+				}
+				else {
+					unregisterAsset(findGUID(relative_from));
+					registerAsset(relative_to);
+				}
+			}
+		}
+
+		void Manager::removeFile(std::filesystem::path const& file_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+			std::filesystem::path relative = std::filesystem::relative(file_path, root);
+
+			//Ensure relative
+			if (relative.empty() || file_path.extension() == Assets::descriptor_ext) return;
+
+			//Check if from is a directory
+			if (std::filesystem::is_directory(file_path)) {
+
+				//Vector of old paths
+				std::vector<std::filesystem::path> old_relative;
+
+				//Create recursive directory
+				std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
+				recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
+					for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+						if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
+							out_vec.push_back(std::filesystem::relative(entry.path(), root));
+						}
+					}
+					};
+
+				//Recursive get file_paths
+				recurse(file_path, old_relative);
+
+				//File operations to delete all
+				if (std::filesystem::remove_all(file_path)) {
+					if (!old_relative.empty()) {
+						//Unregister old relative
+						for (auto old : old_relative) {
+							unregisterAsset(findGUID(old));
+						}
+					}
+				}
+			}
+			else {
+				//Remove file
+				if (asset_organizer->removeFile(file_path)) {
+						unregisterAsset(findGUID(relative));
+				}
+			}
+		}
+
+		void Manager::duplicateFile(std::filesystem::path const& file_path) {
+
+			//Get root
+			auto path_service = services->get<Path::Path>();
+			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
+
+			//Build new file name
+			std::filesystem::path destination = file_path.parent_path() /
+				(file_path.stem().string() + " - Copy" + file_path.extension().string());
+
+			//If the duplicate exists, append a number
+			int i = 2;
+			while (std::filesystem::exists(destination)) {
+				destination = file_path.parent_path() /
+					(file_path.stem().string() + "- Copy (" + std::to_string(i) + ")" + file_path.extension().string());
+				++i;
+			}
+
+			//Actually copy the file
+			std::filesystem::copy_file(file_path, destination);
+
+			//Get relative destination
+			std::filesystem::path relative = std::filesystem::relative(destination, root);
+
+			//Register duplicated asset
+			registerAsset(relative);
+		}
+#endif
+#endif
 		// ----------------------------
 		// Asset Service 
 		// ----------------------------

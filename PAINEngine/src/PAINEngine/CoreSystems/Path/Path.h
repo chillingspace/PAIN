@@ -8,6 +8,34 @@
 namespace PAIN {
 	namespace Path {
 
+		//Global alias
+		static std::string assets_alias = "assets";
+		static std::string game_assets_alias = "game_assets";
+		static std::string engine_assets_alias = "engine_assets";
+
+#ifdef PN_PLATFORM_WINDOWS
+		//Platform specific alias
+		static std::string main_assets_alias = "main_assets";
+		static std::string main_game_assets_alias = "main_game_assets";
+		static std::string main_engine_assets_alias = "main_engine_assets";
+		static std::string local_alias = "local";
+		static std::string roaming_alias = "roaming";
+		static std::string documents_alias = "documents";
+		static std::string temp_alias = "temp";
+		static std::string config_alias = "config";
+
+		#include "FileWatch.hpp"
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+		//Platform specific alias
+		static std::string internal_alias = "internal";
+		static std::string external_alias = "external";
+		static std::string cache_alias = "cache";
+		static std::string temp_alias = "temp";
+#endif
+
+
 		//Different file modes
 		enum class FileMode {
 			Read,
@@ -72,6 +100,10 @@ namespace PAIN {
 				return alias + getVirtualSymbol() + relative;
 			}
 
+			virtual std::string normalizePath(const std::string& path) const = 0;
+
+			virtual std::string getVirtualParentPath(std::string const& virtual_path) const = 0;
+
 			virtual void registerVirtualPath(const std::string& alias, const std::string& path, bool create_new = false) = 0;
 			virtual void updateVirtualPath(const std::string& alias, const std::string& path) = 0;
 			virtual std::string resolvePath(const std::string& virtualPath) const = 0;
@@ -103,6 +135,30 @@ namespace PAIN {
 
 			//Gettors
 			std::unordered_map<std::string, std::string> getAllVirtualPaths() const { return virtual_paths; }
+
+#ifdef PN_PLATFORM_WINDOWS
+
+			//Event callback
+			using FileWatchEventCallback = std::function<void(std::filesystem::path const&, filewatch::Event)>;
+
+			//Watch directory
+			virtual void watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) = 0;
+
+			//Watch directory & child directories
+			virtual void watchDirectoryTree(std::string const& virtual_path, FileWatchEventCallback callback) = 0;
+
+			//Stop watching directory
+			virtual void stopWatchingDirectory(std::string const& virtual_path) = 0;
+
+			//Stop watching directory & child directories
+			virtual void stopWatchingDirectoryTree(std::string const& virtual_path) = 0;
+
+			//Stop watching all directories
+			virtual void stopWatchingAllDirectories() = 0;
+
+			//Log watched directories
+			virtual void logWatchedDirectories() const = 0;
+#endif
 
 			//Create path service
 			static Path* create(void* app);

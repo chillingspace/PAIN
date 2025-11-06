@@ -45,20 +45,52 @@ macro(importDependencies)
     FetchContent_MakeAvailable(entt)
 
     # Jolt Physics
-    FetchContent_Declare(
-      Jolt
-      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
-      GIT_TAG v5.4.0
-    )
-    FetchContent_MakeAvailable(Jolt)
+if(ANDROID)
+    # CRITICAL: Set these BEFORE fetching/configuring Jolt
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)
+    set(ENABLE_ASSERTS OFF CACHE BOOL "" FORCE)
+    set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    
+    # Prevent Jolt from enabling debug features
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DJPH_DISABLE_ASSERTS -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DJPH_DISABLE_ASSERTS -DNDEBUG")
+    
+    message(STATUS "Android: Configuring Jolt with asserts disabled")
+else()
+    # Windows/Desktop: Normal configuration
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)
+endif()
 
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)               # build static lib
-    set(CPP_RTTI_ENABLED OFF CACHE BOOL "" FORCE)                # Jolt default: no RTTI
-    # set(JPH_USE_STD_VECTOR OFF CACHE BOOL "" FORCE)            # keep Jolt's Array by default
-    # set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE ON CACHE BOOL "" FORCE) # if you want debug draw in Debug/Release
-    # set(DEBUG_RENDERER_IN_DISTRIBUTION OFF CACHE BOOL "" FORCE)
-    add_subdirectory("${jolt_SOURCE_DIR}/Build" EXCLUDE_FROM_ALL)
-    set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+FetchContent_Declare(
+  Jolt
+  GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
+  GIT_TAG v5.4.0
+)
+
+# Use FetchContent to populate (download) but don't call MakeAvailable yet
+FetchContent_GetProperties(Jolt)
+if(NOT jolt_POPULATED)
+    FetchContent_Populate(Jolt)
+    
+    # Now add the subdirectory with our configured options
+    add_subdirectory("${jolt_SOURCE_DIR}/Build" ${jolt_BINARY_DIR} EXCLUDE_FROM_ALL)
+    
+    # Set MSVC runtime library
+    if(MSVC AND TARGET Jolt)
+        set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    endif()
+    
+    # Extra safety: add compile definitions directly to Jolt target
+    if(ANDROID AND TARGET Jolt)
+        target_compile_definitions(Jolt PUBLIC
+            JPH_DISABLE_ASSERTS
+            NDEBUG
+        )
+        message(STATUS "Jolt configured for Android (assertions disabled)")
+    endif()
+endif()
 
     # sol2
     FetchContent_Declare(

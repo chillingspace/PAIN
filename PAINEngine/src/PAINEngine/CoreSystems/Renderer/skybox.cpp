@@ -19,7 +19,9 @@
 #include "CoreSystems/Windows/Window.h"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
+#ifdef PN_PLATFORM_ANDROID
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #endif
 #include "stb_image.h"
 
@@ -31,6 +33,8 @@ namespace PAIN {
 	}
 
 	void Skybox::loadHdr(const std::string& path) {
+		PN_CORE_INFO("Loading skybox {}", path);
+
 		stbi_set_flip_vertically_on_load(true);
 		int width, height, nrComponents;
 #ifdef PN_PLATFORM_ANDROID
@@ -154,6 +158,10 @@ namespace PAIN {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in cETC not complete!");
+		}
+
 		// fov has to be 90 degree fov no matter what user sets
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
@@ -189,6 +197,20 @@ namespace PAIN {
 			PN_CORE_ERROR("Capture Framebuffer not complete!");
 		}
 
+		// debug
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubemap_tex, 0);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			GLfloat pixel[4];
+			glReadPixels(256, 256, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 512x512
+			PN_CORE_INFO("Cubemap center pixel: R={}, G={}, B={}, A={}",
+				pixel[0], pixel[1], pixel[2], pixel[3]);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, winWidth, winHeight);
@@ -219,6 +241,11 @@ namespace PAIN {
 
 		loadHdr(skybox_path);
 		convertEquirectangularToCubemap();
+
+		// generate IBL textures
+		generateIrradianceMap();
+		generatePrefilterMap();
+		generateBRDFLUT();
 
 		// compile and link shader
 		{
@@ -252,5 +279,279 @@ namespace PAIN {
 
 		glDepthFunc(GL_LESS);  // reset depth function to default
 		glEnable(GL_CULL_FACE);
+	}
+
+	void Skybox::generateIrradianceMap() {
+		// Create irradiance cubemap
+		glGenTextures(1, &irradiance_map);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance_map);
+
+		// Irradiance map is typically smaller (32x32 is enough)
+		for (unsigned int i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+				32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Setup framebuffer
+		unsigned int captureFBO, captureRBO;
+		glGenFramebuffers(1, &captureFBO);
+		glGenRenderbuffers(1, &captureRBO);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
+		}
+
+		// Same projection and views as your existing code
+		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		glm::mat4 captureViews[] = {
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+		};
+
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
+#else
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
+#endif
+
+		// Load irradiance shader
+		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
+
+		irradianceShader->Bind();
+		irradianceShader->SetUniform("environmentMap", 0);
+		irradianceShader->SetUniform("projection", captureProjection);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+		glViewport(0, 0, 32, 32);
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+		// debug
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
+		}
+
+		// Render to each cubemap face
+		for (unsigned int i = 0; i < 6; ++i) {
+			irradianceShader->SetUniform("view", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			renderCube();
+		}
+
+		// debug
+		{
+			// Read back a pixel from the center of the irradiance map
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X, irradiance_map, 0);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			GLfloat pixel[4];
+			glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
+			PN_CORE_INFO("Irradiance center pixel: R={}, G={}, B={}, A={}",
+				pixel[0], pixel[1], pixel[2], pixel[3]);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+
+		glDeleteFramebuffers(1, &captureFBO);
+		glDeleteRenderbuffers(1, &captureRBO);
+
+		PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
+	}
+
+	void Skybox::generatePrefilterMap() {
+		// Create prefiltered cubemap
+		glGenTextures(1, &prefilter_map);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
+
+		// Generate mipmaps for different roughness levels
+		for (unsigned int i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+				128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Generate mipmaps for the cubemap
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path prefilter_shader_path = "engine\\shaders\\android_prefilter.vert";
+#else
+		std::filesystem::path prefilter_shader_path = "engine\\shaders\\prefilter.vert";
+#endif
+
+		// Load prefilter shader
+		auto prefilterShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
+
+		// Setup projection and views (same as before)
+		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		glm::mat4 captureViews[] = {
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+		};
+
+		prefilterShader->Bind();
+		prefilterShader->SetUniform("environmentMap", 0);
+		prefilterShader->SetUniform("projection", captureProjection);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+		unsigned int captureFBO, captureRBO;
+		glGenFramebuffers(1, &captureFBO);
+		glGenRenderbuffers(1, &captureRBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete!");
+		}
+
+		unsigned int maxMipLevels = 5;
+
+		// Render for each mip level (each roughness level)
+		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+		{
+			// Resize framebuffer according to mip-level size
+			unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+			unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+
+			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+			glViewport(0, 0, mipWidth, mipHeight);
+
+			float roughness = (float)mip / (float)(maxMipLevels - 1);
+			prefilterShader->SetUniform("roughness", roughness);
+
+			for (unsigned int i = 0; i < 6; ++i)
+			{
+				prefilterShader->SetUniform("view", captureViews[i]);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
+
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				renderCube();
+			}
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+
+		glDeleteFramebuffers(1, &captureFBO);
+		glDeleteRenderbuffers(1, &captureRBO);
+
+		PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
+	}
+
+	void Skybox::generateBRDFLUT() {
+		// Create BRDF LUT texture
+		glGenTextures(1, &brdf_tex);
+		glBindTexture(GL_TEXTURE_2D, brdf_tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Setup framebuffer
+		unsigned int captureFBO, captureRBO;
+		glGenFramebuffers(1, &captureFBO);
+		//glGenRenderbuffers(1, &captureRBO);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		//glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdf_tex, 0);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generateBRDFLUT not complete!");
+		}
+
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path brdf_shader_path = "engine\\shaders\\android_brdf.vert";
+#else
+		std::filesystem::path brdf_shader_path = "engine\\shaders\\brdf.vert";
+#endif
+
+
+		// Load BRDF shader
+		auto brdfShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
+
+		glViewport(0, 0, 512, 512);
+		brdfShader->Bind();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		renderQuad(); // Render a fullscreen quad (see below)
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+
+		glDeleteFramebuffers(1, &captureFBO);
+		glDeleteRenderbuffers(1, &captureRBO);
+
+		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
+	}
+
+	void Skybox::renderQuad() {
+		static unsigned int quadVAO = 0;
+		static unsigned int quadVBO = 0;
+
+		if (quadVAO == 0) {
+			float quadVertices[] = {
+				// positions        // texture Coords
+				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+
+			glGenVertexArrays(1, &quadVAO);
+			glGenBuffers(1, &quadVBO);
+			glBindVertexArray(quadVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		}
+
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 }

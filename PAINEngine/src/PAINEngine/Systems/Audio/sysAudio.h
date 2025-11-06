@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "ECS/System/ISystem.h"
+#include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {

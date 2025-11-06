@@ -44,7 +44,7 @@ namespace PAIN {
         Physics::RigidBody3D,
         Collision::Collider,
         Joint,
-        cBoundingVolume,
+        BoundingVolume,
         Audio::AudioSource
     >;
 
@@ -63,9 +63,9 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, MeshRenderer>) return "MeshRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
-        else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collidor";
+        else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collider";
         else if constexpr (std::is_same_v<T, Joint>) return "Joint";
-        else if constexpr (std::is_same_v<T, cBoundingVolume>) return "BoundingVolume";
+        else if constexpr (std::is_same_v<T, BoundingVolume>) return "BoundingVolume";
         else if constexpr (std::is_same_v<T, Audio::AudioSource>) return "AudioSource";
         else return "Unknown";
     }
