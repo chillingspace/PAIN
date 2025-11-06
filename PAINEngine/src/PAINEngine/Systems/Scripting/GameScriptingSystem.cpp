@@ -61,6 +61,7 @@ namespace PAIN {
 
     void GameScriptingSystem::onDetach() {
         PN_CORE_INFO("[GameScriptingSystem] Detaching...");
+        luaManager_.onDetach();
     }
 
     void GameScriptingSystem::onUpdate(AppTiming timing) {

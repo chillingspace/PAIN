@@ -182,6 +182,28 @@ void LuaManager::Input_EndFrame() {
     }
 }
 
+void LuaManager::onDetach() {
+    // clear script environments, timers, and callback vectors
+    updates_.clear();
+    keyDown_.clear();
+    keyUp_.clear();
+    onClick_.clear();
+    onCollision_.clear();
+    pauseHandlers_.clear();
+    timeouts_.clear();
+
+    inputQueue_.clear();
+    collisionQueue_.clear();
+    mouseInOut_.clear();
+    collisionInterests_.clear();
+    delayedOps_.clear();
+    while (!timeoutHeap_.empty()) timeoutHeap_.pop();
+    pendingSceneChange_.reset();
+
+    api_.reset();
+}
+
+
 void LuaManager::openLibs(bool shipping) { // decides which lua standard lib to open
 #if SCRIPT_SHIPPING_SANDBOX
     (void)shipping; // always sandbox in shipping
@@ -258,7 +280,7 @@ void LuaManager::bindRegistration() {
         };
 
     lua_["registerOnCollision"] = [this](sol::protected_function fn, int entityToCheck) {
-        onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false });
+        onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false, currentRunWhenPaused_ });
         collisionInterests_.push_back({ currentEntity_, entityToCheck });
         };
 
@@ -529,51 +551,55 @@ bool LuaManager::runFileIntoEnv(const std::string& path, int entityId,
 // ----------------------------------------------------------------------------
 
 namespace {
-    struct TimeoutNode {
-        double wake;
-        sol::protected_function fn;
-        bool operator<(const TimeoutNode& other) const noexcept { return wake > other.wake; } // priorityqueue is max-heap by default, invert comparator for min-heap
-    };
+    
 }
 
 void LuaManager::tick(double dt) {
     // 1) Move any newly scheduled timeouts into the heap with absolute times
-    static std::priority_queue<TimeoutNode> timeoutHeap;
     if (!timeouts_.empty()) {
         const double base = nowSeconds();
         for (auto& t : timeouts_) {
-            timeoutHeap.push(TimeoutNode{ base + static_cast<double>(t.remaining), t.fn });
+            timeoutHeap_.push(TimeoutNode{ base + static_cast<double>(t.remaining), t.fn });
         }
         timeouts_.clear();
     }
 
     // 2) Pump due timeouts
     const double now = nowSeconds();
-    while (!timeoutHeap.empty() && timeoutHeap.top().wake <= now) {
-        auto node = timeoutHeap.top();
-        timeoutHeap.pop();
+    while (!timeoutHeap_.empty() && timeoutHeap_.top().wake <= now) {
+        auto node = timeoutHeap_.top();
+        timeoutHeap_.pop();
         sol::protected_function_result r = node.fn();
-        if (!r.valid()) { sol::error e = r; logError("Timeout", e); }
+        if (!r.valid()) {
+            sol::error e = r;
+            logError("Timeout", e);
+        }
     }
 
     // 3) Execute queued input callbacks
     for (auto& cb : inputQueue_) {
         if (!gamePaused_ || cb.runWhenPaused) {
             sol::protected_function_result r = cb.fn();
-            if (!r.valid()) { sol::error e = r; logError("Input callback", e); }
+            if (!r.valid()) {
+                sol::error e = r;
+                logError("Input callback", e);
+            }
         }
     }
     inputQueue_.clear();
 
     // 4) Execute collision callbacks
     for (auto& cb : collisionQueue_) {
-        if (!gamePaused_ || cb.fn.valid()) {
+        if (!gamePaused_ || cb.runWhenPaused) {                  
             sol::protected_function_result r = cb.fn(cb.currentEntityId, cb.collidedEntityId);
             if (!r.valid()) {
                 // try calling without args
                 r = cb.fn();
             }
-            if (!r.valid()) { sol::error e = r; logError("Collision callback", e); }
+            if (!r.valid()) {
+                sol::error e = r;
+                logError("Collision callback", e);
+            }
         }
     }
     collisionQueue_.clear();
@@ -582,7 +608,10 @@ void LuaManager::tick(double dt) {
     for (auto& cb : updates_) {
         if (!gamePaused_ || cb.runWhenPaused) {
             sol::protected_function_result r = cb.fn(dt);
-            if (!r.valid()) { sol::error e = r; logError("Update", e); }
+            if (!r.valid()) {
+                sol::error e = r;
+                logError("Update", e);
+            }
         }
     }
 
@@ -591,12 +620,11 @@ void LuaManager::tick(double dt) {
     delayedOps_.clear();
 
     // 7) Apply pending scene change once per frame
-    static bool sceneChangeQueued = false;
-    if (pendingSceneChange_ && !sceneChangeQueued) {
-        sceneChangeQueued = true;
+    if (pendingSceneChange_ && !sceneChangeQueued_) {
+        sceneChangeQueued_ = true;
         (*pendingSceneChange_)();
         pendingSceneChange_.reset();
-        sceneChangeQueued = false;
+        sceneChangeQueued_ = false;
     }
 }
 

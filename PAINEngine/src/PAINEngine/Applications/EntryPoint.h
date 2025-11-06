@@ -17,6 +17,10 @@
 		game->Init();
 		game->Run();
 		delete game;	
+
+		#if defined(DEBUG) | defined(_DEBUG)
+    	_CrtDumpMemoryLeaks();   
+		#endif
 	}
 
 #endif

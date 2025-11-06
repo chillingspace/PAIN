@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <list>
 #include <optional>
+#include <queue>
 #include "PAINEngine/CoreSystems/Events/Event.h"
 
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
@@ -14,7 +15,7 @@ namespace PAIN { namespace Path { class Path; } }
 class LuaManager {
 public:
     struct LuaFunction { int entityId; sol::protected_function fn; bool runWhenPaused = false; };
-    struct CollisionLuaFunction { int currentEntityId; int collidedEntityId; sol::protected_function fn; bool hasCollided = false; };
+    struct CollisionLuaFunction { int currentEntityId; int collidedEntityId; sol::protected_function fn; bool hasCollided = false; bool runWhenPaused = false; };
     struct MouseInOutLuaFunction {
         enum class State { MouseIn, MouseOut };
         int entityId; LuaFunction mouseIn; LuaFunction mouseOut; bool runWhenPaused = false; State state = State::MouseOut;
@@ -60,6 +61,7 @@ public:
 
     void Input_OnEvent(PAIN::Event::Event& e);
     void Input_EndFrame();
+    void onDetach();
 
 private:
     // bindings
@@ -71,6 +73,14 @@ private:
     bool runFileIntoEnv(const std::string& path, int entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
 
 private:
+    struct TimeoutNode {
+        double wake;
+        sol::protected_function fn;
+        bool operator<(const TimeoutNode& other) const noexcept { return wake > other.wake; } // priorityqueue is max-heap by default, invert comparator for min-heap
+    };
+    std::priority_queue<TimeoutNode> timeoutHeap_;
+    bool sceneChangeQueued_ = false;
+
     sol::state lua_;
     std::shared_ptr<IEngineAPI> api_;
     bool shipping_{ false };
