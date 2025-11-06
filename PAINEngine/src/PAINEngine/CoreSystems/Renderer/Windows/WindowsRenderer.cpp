@@ -385,7 +385,7 @@ namespace PAIN {
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
-	
+
 		//Set win width and height
 		auto window_service = services->get<Window::Window>();
 		winWidth = window_service->getFrameBuffer().x;
@@ -470,7 +470,7 @@ namespace PAIN {
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
 	}
-	
+
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
 	{
 		glViewport(0, 0, winWidth, winHeight);
@@ -590,6 +590,11 @@ namespace PAIN {
 		//	return;
 		//}
 
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err before lighting pass: {}", err);
+		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -624,7 +629,12 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
 
-			int tex_id = 4;
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
+			}
+
+			int tex_id = 7;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
@@ -685,6 +695,12 @@ namespace PAIN {
 
 				i++;
 			}
+
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
+			}
+
 			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
 
 			pbr_shader->SetUniform("gPos", 0);
@@ -695,10 +711,15 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
 
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after setting lighting pbr uniforms: {}", err);
+			}
+
 			// for image based lighting
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
 			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
-			
+
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
 			pbr_shader->SetUniform("irradianceMap", 4);
@@ -711,23 +732,40 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
 			pbr_shader->SetUniform("brdfLut", 6);
 
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after setting ibl uniforms: {}", err);
+			}
+
 
 			//#endif
 
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
-			glEnable(GL_DEPTH_TEST);
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after drawing lighting pass: {}", err);
+			}
+		}
 
-			// After lighting pass, final_fbo has the lit scene but NO depth buffer yet
-			// So we copy it:
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, ds_fbo);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
-			glBlitFramebuffer(0, 0, winWidth, winHeight,
-				0, 0, winWidth, winHeight,
-				GL_DEPTH_BUFFER_BIT, GL_NEAREST);  // Copy depth only
+		glEnable(GL_DEPTH_TEST);
 
-			// Now final_fbo has depth info. Render skybox:
+		// After lighting pass, final_fbo has the lit scene but NO depth buffer yet
+		// So we copy it:
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, ds_fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_fbo);
+		glBlitFramebuffer(0, 0, winWidth, winHeight,
+			0, 0, winWidth, winHeight,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);  // Copy depth only
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after blitting depth buffer: {}", err);
+		}
+
+		// Now final_fbo has depth info. Render skybox:
+		{
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 			glDepthFunc(GL_LEQUAL);  // Pass if depth <= existing depth
 			glDepthMask(GL_FALSE);   // Don't write to depth buffer
@@ -736,6 +774,11 @@ namespace PAIN {
 
 			glDepthMask(GL_TRUE);
 			glDepthFunc(GL_LESS);
+		}
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after drawing skybox in lighting pass: {}", err);
 		}
 
 	}
@@ -761,12 +804,12 @@ namespace PAIN {
 		// xyz and rgba
 		auto push = [&](const glm::vec3& p, const glm::vec4& c) {
 			verts.insert(verts.end(), { p.x,p.y,p.z, c.r,c.g,c.b,c.a });
-		};
+			};
 
 		// The loop iterates over all 12 edges by stepping i += 2, takes the two endpoint corners for each edge via v[e[i]] and v[e[i+1]], and pushes both endpoints
-		for (int i = 0; i < 24; i += 2) { 
+		for (int i = 0; i < 24; i += 2) {
 			push(v[e[i]], color);
-			push(v[e[i + 1]], color); 
+			push(v[e[i + 1]], color);
 		}
 
 		glBindVertexArray(debug_VAO);
@@ -977,7 +1020,7 @@ namespace PAIN {
 		}
 
 		// set back to use final_fbo and final_texture for further rendering
-;		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		;		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
 		{
@@ -1049,7 +1092,7 @@ namespace PAIN {
 		}
 
 		if (debug_VBO) {
-			glDeleteBuffers(1, &debug_VBO); 
+			glDeleteBuffers(1, &debug_VBO);
 			debug_VBO = 0;
 		}
 
