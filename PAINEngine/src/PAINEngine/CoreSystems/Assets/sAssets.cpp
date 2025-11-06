@@ -418,7 +418,7 @@ namespace PAIN {
 			else {
 				//Remove file
 				if (asset_organizer->removeFile(file_path)) {
-						unregisterAsset(findGUID(relative));
+					unregisterAsset(findGUID(relative));
 				}
 			}
 		}
