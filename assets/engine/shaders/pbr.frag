@@ -157,6 +157,13 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
 
 void main() {
+    if (u_NumShadowMaps > MAX_SHADOWMAPPED_LIGHTS) {
+        FragColor = vec4(1, 0, 1, 1);
+        return;
+    }
+
+
+
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
     vec3 normal = texture(gNorm, TexCoords).rgb;

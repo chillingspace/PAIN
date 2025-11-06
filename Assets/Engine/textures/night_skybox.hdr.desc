@@ -1,0 +1,22 @@
+{
+  "asset_info": {
+    "name": "night_skybox.hdr",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8679418748255883690
+  },
+  "dependencies": [],
+  "descriptor_version": 1,
+  "guid": "5f7f4de2-f195-0d49-97d1-5a1159e35a94",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\night_skybox.hdr"
+  }
+}

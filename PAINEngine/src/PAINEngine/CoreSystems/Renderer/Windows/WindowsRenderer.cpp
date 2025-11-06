@@ -634,7 +634,7 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
 
-			int tex_id = 7;
+			int tex_id = 4;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
@@ -720,17 +720,17 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
 			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
 
-			glActiveTexture(GL_TEXTURE4);
+			glActiveTexture(GL_TEXTURE0 + tex_id);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
-			pbr_shader->SetUniform("irradianceMap", 4);
+			pbr_shader->SetUniform("irradianceMap", tex_id++);
 
-			glActiveTexture(GL_TEXTURE5);
+			glActiveTexture(GL_TEXTURE0 + tex_id);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getPrefilterMap());
-			pbr_shader->SetUniform("prefilterMap", 5);
+			pbr_shader->SetUniform("prefilterMap", tex_id++);
 
-			glActiveTexture(GL_TEXTURE6);
+			glActiveTexture(GL_TEXTURE0 + tex_id);
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
-			pbr_shader->SetUniform("brdfLut", 6);
+			pbr_shader->SetUniform("brdfLut", tex_id++);
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {

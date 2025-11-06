@@ -33,6 +33,8 @@ namespace PAIN {
 	}
 
 	void Skybox::loadHdr(const std::string& path) {
+		PN_CORE_INFO("Loading skybox {}", path);
+
 		stbi_set_flip_vertically_on_load(true);
 		int width, height, nrComponents;
 #ifdef PN_PLATFORM_ANDROID
@@ -156,6 +158,10 @@ namespace PAIN {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in cETC not complete!");
+		}
+
 		// fov has to be 90 degree fov no matter what user sets
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
@@ -191,6 +197,20 @@ namespace PAIN {
 			PN_CORE_ERROR("Capture Framebuffer not complete!");
 		}
 
+		// debug
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubemap_tex, 0);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			GLfloat pixel[4];
+			glReadPixels(256, 256, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 512x512
+			PN_CORE_INFO("Cubemap center pixel: R={}, G={}, B={}, A={}",
+				pixel[0], pixel[1], pixel[2], pixel[3]);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, winWidth, winHeight);
@@ -288,6 +308,10 @@ namespace PAIN {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
+		}
+
 		// Same projection and views as your existing code
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
@@ -318,6 +342,13 @@ namespace PAIN {
 		glViewport(0, 0, 32, 32);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
+		// debug
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
+		}
+
 		// Render to each cubemap face
 		for (unsigned int i = 0; i < 6; ++i) {
 			irradianceShader->SetUniform("view", captureViews[i]);
@@ -326,6 +357,22 @@ namespace PAIN {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			renderCube();
+		}
+
+		// debug
+		{
+			// Read back a pixel from the center of the irradiance map
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X, irradiance_map, 0);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			GLfloat pixel[4];
+			glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
+			PN_CORE_INFO("Irradiance center pixel: R={}, G={}, B={}, A={}",
+				pixel[0], pixel[1], pixel[2], pixel[3]);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -389,6 +436,10 @@ namespace PAIN {
 		glGenRenderbuffers(1, &captureRBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete!");
+		}
+
 		unsigned int maxMipLevels = 5;
 
 		// Render for each mip level (each roughness level)
@@ -439,12 +490,16 @@ namespace PAIN {
 		// Setup framebuffer
 		unsigned int captureFBO, captureRBO;
 		glGenFramebuffers(1, &captureFBO);
-		glGenRenderbuffers(1, &captureRBO);
+		//glGenRenderbuffers(1, &captureRBO);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		//glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdf_tex, 0);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generateBRDFLUT not complete!");
+		}
 
 #ifdef PN_PLATFORM_ANDROID
 		std::filesystem::path brdf_shader_path = "engine\\shaders\\android_brdf.vert";

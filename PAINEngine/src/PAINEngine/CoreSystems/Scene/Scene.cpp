@@ -239,7 +239,7 @@ namespace PAIN {
 
 		// skybox
 		Skybox::get().init(
-			services, services->get<Path::Path>()->resolvePath("engine_assets://textures/skybox.hdr")
+			services, services->get<Path::Path>()->resolvePath("engine_assets://textures/night_skybox.hdr")
 		);
 
 		// Test load prefab

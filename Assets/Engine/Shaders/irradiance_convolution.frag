@@ -39,8 +39,19 @@ void main()
             nrSamples++;
         }
     }
+
+    // DEBUG: Check for div by zero
+    if (nrSamples < 1.0) {
+        FragColor = vec4(1.0, 0.0, 1.0, 1.0); // Magenta = error
+        return;
+    }
     
     irradiance = PI * irradiance * (1.0 / float(nrSamples));
+    // irradiance = PI * irradiance / nrSamples;
     
+    // Safety clamp
+    // irradiance = min(irradiance, vec3(100.0));
+    
+    irradiance = min(irradiance, vec3(1000.0));
     FragColor = vec4(irradiance, 1.0);
 }
