@@ -123,7 +123,7 @@ namespace PAIN {
 			asset_loader = nullptr;
 		}
 
-		GUID Manager::findByName(const std::string& name) const
+		GUID Manager::findByName(const std::string& name) 
 		{
 			return findGUID(name);
 		}

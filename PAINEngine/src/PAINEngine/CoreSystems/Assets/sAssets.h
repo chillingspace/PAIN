@@ -170,7 +170,7 @@ namespace PAIN {
 			void onAppResume() override {}
 			void onEvent(Event::Event& e) override {}
 
-			GUID findByName(const std::string& name) const; // wraps findGUID
+			GUID findByName(const std::string& name); // wraps findGUID
 			Type getTypeByGUID(const GUID& id) const; // wraps getAssetData(id)
 		};
 
