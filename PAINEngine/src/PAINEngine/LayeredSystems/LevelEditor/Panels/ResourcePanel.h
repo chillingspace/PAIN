@@ -7,6 +7,8 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
+#include <chrono>
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -43,7 +45,7 @@ namespace PAIN {
                 // ----------------------------
                 // File Event Queue
                 // ----------------------------
-                void pushFileEvent(std::function<void()> callback); //Thread safe insertion for file event queue
+                void pushFileEvent(std::filesystem::path const& file, std::function<void()>&& callback); //Thread safe insertion for file event queue
                 void onEvent(Event::Event& event) override;
 
             private:
@@ -105,9 +107,14 @@ namespace PAIN {
                 // ----------------------------
                 // File
                 // ----------------------------
-                std::queue<std::function<void()>> file_event_queue; //File Watching Queue
-                std::set<std::filesystem::path> event_set;
-                std::mutex file_event_mutex; //Mutex for thread safety
+                struct EventEntry {
+                    std::function<void()> callback;
+                    std::chrono::steady_clock::time_point last_updated;
+                };
+                std::queue<std::function<void()>> file_event_queue;
+                std::unordered_map<std::filesystem::path, EventEntry> event_functions;
+                std::mutex file_event_mutex;
+                const std::chrono::milliseconds debounce_time{ 200 };
 
                 std::unordered_map<std::string, std::string> file_editing_map; //Map of file content
 
@@ -123,11 +130,11 @@ namespace PAIN {
                 // ----------------------------
                 // Internal Helpers
                 // ----------------------------
-                std::unordered_map<std::string, std::vector<std::string>> directoryCache;
+                std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>> directoryCache;
 
-                void populateDirectoryCache(std::string const& virtual_dir);
+                void populateDirectoryCache(std::filesystem::path const& path);
 
-                void DrawDirectoryTree(std::string const& virtual_dir);
+                void DrawDirectoryTree(std::filesystem::path const& path);
                 bool renderPopUpContext(File const& file);
                 bool renderPopUpContext(Dir const& file);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking

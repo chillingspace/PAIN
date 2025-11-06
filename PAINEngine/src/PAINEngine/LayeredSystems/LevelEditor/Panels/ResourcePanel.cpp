@@ -49,6 +49,9 @@ namespace PAIN {
 
 						//Rename asset
 						asset_service->moveFile(file->path, path_service->resolvePath(virtual_path + "/" + file->file_name));
+
+						//Repopulate Files
+						populateFiles(current_path);
 					}
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(payload_typestring + "DIR").c_str())) {
 						//Get asset ID
@@ -56,6 +59,9 @@ namespace PAIN {
 
 						//Rename asset
 						asset_service->moveFile(dir->path, path_service->resolvePath(virtual_path + "/" + dir->file_name));
+
+						//Repopulate Dir
+						populateDirs(current_path);
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -195,50 +201,55 @@ namespace PAIN {
 				}
 			}
 
-			void ResourcePanel::populateDirectoryCache(const std::string& virtual_dir) {
-				if (directoryCache.count(virtual_dir) > 0) return; // Already cached
+			void ResourcePanel::populateDirectoryCache(std::filesystem::path const& path) {
+				if (directoryCache.count(path) > 0) return; // Already cached
 
-				std::vector<std::string> children;
-				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
-				for (const auto& entry : path_service->listDirectories(virtual_dir)) {
-					auto relative = std::filesystem::relative(entry, dir);
-					children.push_back(virtual_dir + "/" + relative.string());
+				//Virtual path
+				std::string virtual_path = root_path + "/" + std::filesystem::relative(path, root).string();
+
+				std::vector<std::filesystem::path> children;
+				std::filesystem::path dir = path;
+				for (const auto& entry : path_service->listDirectories(virtual_path)) {
+					children.push_back(entry);
 				}
-				directoryCache[virtual_dir] = std::move(children);
+				directoryCache[path] = std::move(children);
 			}
 
-			void ResourcePanel::DrawDirectoryTree(std::string const& virtual_dir) {
+			void ResourcePanel::DrawDirectoryTree(std::filesystem::path const& path) {
+
+				//Virtual path
+				std::string virtual_path = root_path + "/" + std::filesystem::relative(path, root).string();
 
 				//Populat directory cache
-				populateDirectoryCache(virtual_dir);
-				bool has_children = !directoryCache[virtual_dir].empty();
+				populateDirectoryCache(path);
+				bool has_children = !directoryCache[path].empty();
 
 				ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen;
 				if (!has_children)
 					node_flags |= ImGuiTreeNodeFlags_Leaf;
-				bool is_selected = (virtual_dir == current_path);
+				bool is_selected = (path == path_service->resolvePath(current_path));
 				if (is_selected) node_flags |= ImGuiTreeNodeFlags_Selected;
 
-				std::filesystem::path dir = path_service->resolvePath(virtual_dir);
+				std::filesystem::path dir = path;
 				std::string name = dir.filename().string() != "" ? dir.filename().string() : "assets";
 				bool open = ImGui::TreeNodeEx(name.c_str(), node_flags);
 
 				//Check for activation
 				if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-					current_path = virtual_dir;
+					current_path = virtual_path;
 					populateDirs(current_path);
 					populateFiles(current_path);
 				}
 
 				//Accept payload
-				moveFileAcceptPayload(virtual_dir);
+				moveFileAcceptPayload(virtual_path);
 
 				//Render context
 				renderPopUpContext({dir,0, dir.filename().string() });
 
 				//Render if open
 				if (open) {
-					for (const std::string& subdir : directoryCache[virtual_dir]) {
+					for (const std::filesystem::path& subdir : directoryCache[path]) {
 						DrawDirectoryTree(subdir);
 					}
 					ImGui::TreePop();
@@ -429,7 +440,7 @@ namespace PAIN {
 					++shown_count;
 
 					//Folder icon
-					ImTextureID icon = dir.icon;
+					ImTextureID icon = dir.icon ? dir.icon : 0;
 
 					//Display directory icon
 					ImVec2 uv0(0.0f, 0.0f);
@@ -538,7 +549,7 @@ namespace PAIN {
 					++shown_count;
 
 					//Extension cases
-					ImTextureID icon = file.icon;
+					ImTextureID icon = file.icon ? file.icon : 0;
 
 					//Display file icon
 					ImVec2 uv0(0.0f, 0.0f);
@@ -588,6 +599,7 @@ namespace PAIN {
 					itemIndex++;
 				}
 
+				//Display nothing
 				if (shown_count == 0) {
 					ImGui::Text("No results.");
 				}
@@ -930,13 +942,21 @@ namespace PAIN {
 							auto dir = std::any_cast<std::shared_ptr<Dir>>(data);
 
 							//Disable deletion of root path
-							if (dir->path != path_service->resolvePath(root_path)) {
+							if (dir->path != root) {
 
 								//Delete asset
 								asset_service->removeFile(dir->path);
 
 								//Populate files and directories
 								populateDirs(current_path);
+
+								//Reset directory cache
+								directoryCache.clear();
+
+								//Check if current path is present within deleted folder
+								if (path_service->resolvePath(current_path) == dir->path) {
+									current_path = root_path;
+								}
 							}
 						}
 
@@ -992,6 +1012,14 @@ namespace PAIN {
 
 							//Rename file
 							asset_service->moveFile(dir->path, target_path);
+
+							//Reset directory cache
+							directoryCache.clear();
+
+							//Check if current path is in the previous path
+							if (path_service->resolvePath(current_path) == old_path) {
+								current_path = root_path + "/" + std::filesystem::relative(target_path, root).string();
+							}
 
 							//Repopulate dir
 							populateDirs(current_path);
@@ -1052,6 +1080,9 @@ namespace PAIN {
 						//Update directories & files
 						populateDirs(current_path);
 
+						//Reset directory cache
+						directoryCache[current_path].clear();
+
 						//Reset folder name buffer
 						folder_name.assign("");
 
@@ -1074,9 +1105,12 @@ namespace PAIN {
 					};
 			}
 
-			void ResourcePanel::pushFileEvent(std::function<void()> callback) {
+			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, std::function<void()>&& callback) {
+
 				std::lock_guard<std::mutex> lock(file_event_mutex);
-				file_event_queue.push(std::move(callback));
+
+				auto now = std::chrono::steady_clock::now();
+				event_functions[file] = { std::move(callback), now };
 			}
 
 			void ResourcePanel::onAttach() {
@@ -1119,58 +1153,32 @@ namespace PAIN {
 					//Skip desc paths
 					if (file.extension() == Assets::descriptor_ext) return;
 
-					//Operate own internal changes for directories
-					if (std::filesystem::is_directory(file)) {
+					//Check for removed directories or renamed directories
+					if (event == filewatch::Event::removed || event == filewatch::Event::renamed_old) {
 
-						//Check event set
-						if (event_set.find(file) != event_set.end()) return;
-
-						//Lock events
+						//Lock events and update current path
 						std::lock_guard<std::mutex> lock(file_event_mutex);
 
-						//Insert file into event set
-						event_set.insert(file);
+						//Check for invalidated current path
+						if (file == path_service->resolvePath(current_path)) current_path = root_path;
 
-						//Push to file event queue
-						pushFileEvent([&, file]() {
-							PN_CORE_INFO("Directory event: {}", file.string());
-							//Repopulate the directory cache & directories
-							directoryCache.clear();
-							});
-					}
-
-					//Lock only for event_set/current_path access for thread safety
-					bool skip = false;
-					{
-						std::lock_guard<std::mutex> lock(file_event_mutex);
-
-						if (event == filewatch::Event::added ||
-							event == filewatch::Event::removed ||
-							event == filewatch::Event::modified)
-						{
-							//Update event set
-							if (event_set.find(file) != event_set.end()) skip = true;
-							else event_set.insert(file);
-
-							//If update current path safely
-							if (event == filewatch::Event::removed && file == path_service->resolvePath(current_path)) {
-								current_path = root_path;
-							}
+						//Check if path is in directory cache
+						if (directoryCache.find(file) != directoryCache.end()) {
+							directoryCache[file].clear();
 						}
 					}
 
-					if (skip) return;
+					//Return of directories
+					if (file.extension().string() == "") return;
 
 					//Watch for events
 					switch (event) {
 					case filewatch::Event::added: {
 
-						//Ignore directory noise
-						if (std::filesystem::is_directory(file)) return;
-
 						//Push to file event queue
-						pushFileEvent([&, file]() {
+						pushFileEvent(file, [&, file]() {
 
+							//Log added event
 							PN_CORE_INFO("Add Event for Path: {}", file.string());
 
 							});
@@ -1179,17 +1187,10 @@ namespace PAIN {
 					}
 					case filewatch::Event::removed: {
 
-						//Check if current path is pointing to dir
-						if (file == path_service->resolvePath(current_path)) {
-							current_path = root_path;
-						}
-
-						//Ignore directory noise
-						if (std::filesystem::is_directory(file)) return;
-
 						//Push to file event queue
-						pushFileEvent([&, file]() {
+						pushFileEvent(file, [&, file]() {
 
+							//Log removed event
 							PN_CORE_INFO("Remove Event for Path: {}", file.string());
 
 							});
@@ -1198,13 +1199,35 @@ namespace PAIN {
 					}
 					case filewatch::Event::modified: {
 
-						//Ignore directory noise
-						if (std::filesystem::is_directory(file)) return;
+						//Push to file event queue
+						pushFileEvent(file, [&, file]() {
+
+							//Log modified event
+							PN_CORE_INFO("Modified Event for Path: {}", file.string());
+
+							});
+
+						break;
+					}
+					case filewatch::Event::renamed_new: {
 
 						//Push to file event queue
-						pushFileEvent([&, file]() {
+						pushFileEvent(file, [&, file]() {
 
-							PN_CORE_INFO("Modified Event for Path: {}", file.string());
+							//Log modified event
+							PN_CORE_INFO("Renamed New Path Event for Path: {}", file.string());
+
+							});
+
+						break;
+					}
+					case filewatch::Event::renamed_old: {
+
+						//Push to file event queue
+						pushFileEvent(file, [&, file]() {
+
+							//Log modified event
+							PN_CORE_INFO("Renamed Old Path Event for Path: {}", file.string());
 
 							});
 
@@ -1224,25 +1247,38 @@ namespace PAIN {
 			void ResourcePanel::render() {
 
 				//Update resource panel with file change events
-				while (!file_event_queue.empty()) {
+				{
+					std::lock_guard<std::mutex> lock(file_event_mutex);
 
-					try {
-						//Call callback function if valid
-						if (file_event_queue.front()) {
-							//Execute file event callback
-							file_event_queue.front()();
+					auto now = std::chrono::steady_clock::now();
+					for (auto it = event_functions.begin(); it != event_functions.end(); ) {
+						if (now - it->second.last_updated > debounce_time) {
+							file_event_queue.push(std::move(it->second.callback));
+							it = event_functions.erase(it);
 						}
-
-						//Pop from queue
-						file_event_queue.pop();
+						else {
+							++it;
+						}
 					}
-					catch (std::exception const&) {
-						PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+
+					while (!file_event_queue.empty()) {
+
+						try {
+
+							//Ensure function
+							if (file_event_queue.front()) {
+								//Execute file event callback
+								file_event_queue.front()();
+							}
+
+							//Pop from queue
+							file_event_queue.pop();
+						}
+						catch (std::exception const&) {
+							PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+						}
 					}
 				}
-
-				//Clear event set
-				event_set.clear();
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;
@@ -1253,7 +1289,7 @@ namespace PAIN {
 					ImGui::BeginChild("Sidebar", ImVec2(sidebarWidth, 0), true);
 
 					//Draw directory tree
-					DrawDirectoryTree(root_path);
+					DrawDirectoryTree(root);
 
 					ImGui::EndChild();
 				}

@@ -148,10 +148,10 @@ namespace PAIN {
 
 		// Windows only have paths, andriods have to use AASettmanager
 #ifdef PN_PLATFORM_WINDOWS
-		addCoreSystem(std::make_shared<Path::Service>());
-		services->get<Path::Service>()->init("assets/Config.json");
-		addCoreSystem(std::make_shared<Assets::Service>());
-		addCoreSystem(std::make_shared<Compiler::Service>());
+		//addCoreSystem(std::make_shared<Path::Service>());
+		//services->get<Path::Service>()->init("assets/Config.json");
+		//addCoreSystem(std::make_shared<Assets::Service>());
+		//addCoreSystem(std::make_shared<Compiler::Service>());
 #endif
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
