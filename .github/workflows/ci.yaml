@@ -17,6 +17,8 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
         run: .\build.bat
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 4
 
       - name: Build Debug solution
         run: |

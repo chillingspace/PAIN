@@ -37,9 +37,16 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Build the project
-echo [3/3] Building project (Debug configuration)...
-cmake --build . --config Debug
+REM Determine parallel job count
+if defined CMAKE_BUILD_PARALLEL_LEVEL (
+    set PARALLEL_JOBS=%CMAKE_BUILD_PARALLEL_LEVEL%
+) else (
+    set PARALLEL_JOBS=%NUMBER_OF_PROCESSORS%
+)
+
+REM Build the project with multi threading
+echo [3/3] Building project (Debug configuration) with %PARALLEL_JOBS% parallel jobs...
+cmake --build . --config Debug -j %PARALLEL_JOBS%
 if %errorlevel% neq 0 (
     echo ERROR: Build failed.
     cd ..
