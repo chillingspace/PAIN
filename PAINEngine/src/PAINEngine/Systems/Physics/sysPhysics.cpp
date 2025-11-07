@@ -21,6 +21,14 @@ namespace PAIN {
 		// Jolt Physics setup
 		void System::joltSetup()
 		{
+			static bool jolt_initialized = false;
+
+			if (jolt_initialized) {
+				return;
+			}
+
+			jolt_initialized = true;
+
 			// Important: Follow the setup order below, otherwise creating bodies will crash if any step is missed
 
 			// Register allocators + types
@@ -85,27 +93,43 @@ namespace PAIN {
 														c_max_contact_constraints{ 1024 }, 
 														collision_steps{ 1 }
 		{
+			PN_CORE_TRACE("Physics::System constructor");
+
 			joltSetup();
 
 			create_floor();
+
 		}
 
 		System::~System()
 		{
 			// Cleanup
-			// 1. Destroy PhysicsSystem first (before destroying allocators it depends on)
-			jolt_physics.reset();
+			PN_CORE_TRACE("Physics::System destructor starting");
 
-			// 2. Destroy job system and temp allocator
+			// Clear body interface reference
+			body_interface = nullptr;
+
+			// Destroy physics system FIRST
+			if (jolt_physics) {
+				jolt_physics.reset();
+				PN_CORE_TRACE("jolt_physics destroyed");
+			}
+
+			// Destroy allocators
 			job_system.reset();
 			temp_allocator.reset();
+			PN_CORE_TRACE("allocators destroyed");
 
-			// 3. Unregister all types and clean up default material
+			// CRITICAL: Unregister types before deleting factory
 			JPH::UnregisterTypes();
+			PN_CORE_TRACE("types unregistered");
 
-			// 4. Delete the factory instance
-			delete JPH::Factory::sInstance;
-			JPH::Factory::sInstance = nullptr;
+			// Delete factory
+			if (JPH::Factory::sInstance) {
+				delete JPH::Factory::sInstance;
+				JPH::Factory::sInstance = nullptr;
+				PN_CORE_TRACE("factory deleted");
+			}
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry)
