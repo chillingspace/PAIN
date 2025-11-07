@@ -62,9 +62,9 @@ namespace PAIN {
 		float blur_strength = 0.f;
 
 		bool bloom = true;
-		float bloom_threshold = 1.5f;			// generally [0.8,1.5] - min brightness to bloom. 0 = disabled(technically blooms everything but why would we want that)
+		float bloom_threshold = 1.f;			// generally [0.8,1.5] - min brightness to bloom. 0 = disabled(technically blooms everything but why would we want that)
 		float bloom_blur_strength = 1.f;	// generally [0.5,10] - higher = bloomier, BUT SLOWER. bloom blur strength is how big the blur radius is when blurring the bright areas.
-		float bloom_strength = 0.f;		// generally [0.0,5.0] - bloom strength is how visible the bloom is when blended back onto the scene. 
+		float bloom_strength = 1.f;		// generally [0.0,5.0] - bloom strength is how visible the bloom is when blended back onto the scene. 
 		float global_light_intensity = 1.5f;
 		int bloom_quality = 4;		// number of blur passes for bloom. higher = bloomier, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2
 

@@ -60,11 +60,11 @@ namespace PAIN {
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 
-		//LightSources::get().create("a");
-		//auto ola = LightSources::get().get("a");
-		//Light& la = ola.value();
-		//la.position = glm::vec3(4.f, 4.f, -8.f);
-		//la.L_intensity = glm::vec3(0.2f);
+		LightSources::get().create("a");
+		auto ola = LightSources::get().get("a");
+		Light& la = ola.value();
+		la.position = glm::vec3(0.f, 1.f, -8.f);
+		la.L_intensity = glm::vec3(2.f);
 
 		//LightSources::get().create("b");
 		//auto olb = LightSources::get().get("b");
@@ -181,7 +181,7 @@ namespace PAIN {
 		sdcc_mesh->texture_id = sdcc_tex->gl_texture;
 		sdcc_mesh->material.useTex = true;
 		sdcc_mesh->material.tex = sdcc_tex->gl_texture;
-		AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
+		//AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
 
 		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/city.obj");
 		//cacheMesh(obj_path);
