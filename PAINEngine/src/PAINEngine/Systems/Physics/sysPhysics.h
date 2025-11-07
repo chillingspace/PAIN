@@ -37,6 +37,8 @@ namespace PAIN {
 			// To add virtual and override in when abstract systems come in
 			void onUpdate(AppTiming timing, entt::registry& reg) override;
 
+			void onFixedUpdate(AppTiming timing, entt::registry& reg) override;
+			
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override;
 

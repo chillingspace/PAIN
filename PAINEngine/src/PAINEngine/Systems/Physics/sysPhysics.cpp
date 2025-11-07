@@ -132,16 +132,38 @@ namespace PAIN {
 			}
 		}
 
+		void System::onFixedUpdate(AppTiming timing, entt::registry& registry)
+        {
+            // Use the fixed delta time from the application loop
+            const float delta_time = timing.fixed_dt;
+
+            if (temp_allocator && job_system && jolt_physics)
+            {
+                // Only update if time has actually passed
+                if (delta_time > 0.0f)
+                {
+                    syncNewBodies(registry);
+                    jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+                }
+            }
+        }
+
 		void System::onUpdate(AppTiming timing, entt::registry& registry)
 		{
 			// To get fixed delta time here
-			const float delta_time = 1.f / 60.f;
+			// const float delta_time = 1.f / 60.f; // <-- REMOVE THIS
+            
+            // The main simulation step is no longer here.
+            // if (temp_allocator && job_system && jolt_physics)
+            // {
+            //    syncNewBodies(registry);
+            //    jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+            // }
+            // ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
 
+            // onUpdate is now ONLY responsible for syncing the physics state back to the transforms for rendering.
 			if (temp_allocator && job_system && jolt_physics)
 			{
-				syncNewBodies(registry);
-				jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
-
 				auto& body_interface = jolt_physics->GetBodyInterface();
 
 				// Find all entities with Transform and RigidBody3D components
