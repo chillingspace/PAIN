@@ -55,6 +55,60 @@ namespace PAIN {
 		if (data) {
 			PN_CORE_INFO("Loaded HDR image with size: {}x{} and {} components", width, height, nrComponents);
 
+			//			// remap hdr to prevent super bright spots
+			//			{
+			//				static constexpr float MAX_HDR_VALUE = 10000.f;
+			//
+			//				// first, find min and max in the data
+			//				float minVal = std::numeric_limits<float>::max();
+			//				float maxVal = std::numeric_limits<float>::lowest();
+			//
+			//				for (int i = 0; i < width * height * nrComponents; ++i) {
+			//					if (data[i] < minVal) minVal = data[i];
+			//					if (data[i] > maxVal) maxVal = data[i];
+			//				}
+			//
+			//				PN_CORE_TRACE("HDR data range before remap: min={} max={}", minVal, maxVal);
+			//
+			//				// remap
+			//				float range = maxVal - minVal;
+			//				if (range < 1e-6f) range = 1e-6f; // avoid divide by zero
+			//
+			//#ifdef _DEBUG
+			//				float newMaxVal = -1.f;
+			//				float newMinVal = 999999999.f;
+			//#endif
+			//
+			//				for (int i = 0; i < width * height * nrComponents; ++i) {
+			//					data[i] = ((data[i] - minVal) / range) * MAX_HDR_VALUE;
+			//
+			//#ifdef _DEBUG
+			//					if (data[i] < newMinVal) {
+			//						newMinVal = data[i];
+			//					}
+			//					if (data[i] > newMaxVal) {
+			//						newMaxVal = data[i];
+			//					}
+			//#endif
+			//				}
+			//
+			//#ifdef _DEBUG
+			//				PN_CORE_TRACE("HDR data range after remap: min={} max={}", newMinVal, newMaxVal);
+			//#endif
+			//			}
+
+			// clamp hdr to prevent super bright spots 
+			{
+				static constexpr float MAX_HDR_VALUE = 65000.f;
+				for (int i = 0; i < width * height * nrComponents; ++i) {
+					//data[i] = std::min(data[i], maxHDRValue); 
+					if (data[i] > MAX_HDR_VALUE) {
+						PN_CORE_TRACE("HDR value too high! Current: {}, Max: {}", data[i], MAX_HDR_VALUE);
+						data[i] = MAX_HDR_VALUE;
+					}
+				}
+			}
+
 			glGenTextures(1, &skybox_tex);
 			glBindTexture(GL_TEXTURE_2D, skybox_tex);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
@@ -146,8 +200,11 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		unsigned int captureFBO, captureRBO;
 		glGenFramebuffers(1, &captureFBO);
@@ -557,11 +614,11 @@ namespace PAIN {
 		glGenFramebuffers(1, &captureFBO);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-//#ifdef PN_PLATFORM_ANDROID
-//		glGenRenderbuffers(1, &captureRBO);
-//		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-//		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-//#endif
+		//#ifdef PN_PLATFORM_ANDROID
+		//		glGenRenderbuffers(1, &captureRBO);
+		//		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		//		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		//#endif
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdf_tex, 0);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

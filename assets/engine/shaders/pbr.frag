@@ -241,7 +241,7 @@ void main() {
             // Diffuse component
             vec3 kD = (1.0 - F) * (1.0 - material.metal);
             vec3 irradiance = texture(irradianceMap, N).rgb;
-            irradiance = irradiance / (irradiance + vec3(1.0));
+            // irradiance = irradiance / (irradiance + vec3(1.0));
             vec3 diffuse = kD * irradiance * material.color;
 
 // #define DEBUG_IBL_DIFFUSE
@@ -255,6 +255,7 @@ void main() {
 
             vec3 prefilteredColor = vec3(0, 0, 0);
 
+#ifdef DEBUG_MIP_INTERPOLATION
             {
                 // somehow flooring the mipLevel, no interpolation fixes aura issue?
                 // !TODO: jspoh figure out why and a proper fix
@@ -262,8 +263,9 @@ void main() {
                 mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
                 prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
             }
+#endif
 
-            // vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+            prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
 
 #ifdef DEBUG_MIP
             {
@@ -272,7 +274,7 @@ void main() {
             }
 #endif
 
-            prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
+            // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
             vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
             vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
@@ -288,6 +290,7 @@ void main() {
         color = material.color;
     }
     
+    // color = color / (color + vec3(1.0)); // Reinhard
     FragColor = vec4(color, 1.0);
 }
 

@@ -29,8 +29,8 @@ void main() {
 
     // outColor = vec4(mix(light, dark, dark_tile_intensity), 1.0);
 
-    const float roughness = 0.1;        // 1 -> rough, 0.1 -> smooth
-    const float metallic = 0.3;         // metal
+    const float roughness = 0.0;        // 1 -> rough, 0.0 -> smooth
+    const float metallic = 0.0;         // metal
 
     gPos = fFragPos;
     gCol = mix(light, dark, dark_tile_intensity);
