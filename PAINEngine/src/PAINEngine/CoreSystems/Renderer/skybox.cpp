@@ -399,16 +399,18 @@ namespace PAIN {
 		glGenTextures(1, &prefilter_map);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
 
+		static constexpr int MIP_WIDTH = 512;
+
 		// Generate mipmaps for different roughness levels
 		for (unsigned int i = 0; i < 6; ++i) {
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
-				128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+				MIP_WIDTH, MIP_WIDTH, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
 
 #ifdef PN_PLATFORM_ANDROID
 		// Allocate storage for ALL mip levels upfront
 		for (unsigned int mip = 0; mip < 5; ++mip) {
-			unsigned int mipSize = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+			unsigned int mipSize = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 			for (unsigned int i = 0; i < 6; ++i) {
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, GL_RGB16F,
 					mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -471,8 +473,8 @@ namespace PAIN {
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
 			// Resize framebuffer according to mip-level size
-			unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
-			unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+			unsigned int mipWidth = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
+			unsigned int mipHeight = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 
 #ifndef PN_PLATFORM_ANDROID
 			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);

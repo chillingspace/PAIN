@@ -252,7 +252,26 @@ void main() {
 
             // Specular component  
             const float MAX_REFLECTION_LOD = 4.0;
-            vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+
+            vec3 prefilteredColor = vec3(0, 0, 0);
+
+            {
+                // somehow flooring the mipLevel, no interpolation fixes aura issue?
+                // !TODO: jspoh figure out why and a proper fix
+                float mipLevel = material.rough * MAX_REFLECTION_LOD;
+                mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
+                prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
+            }
+
+            // vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+
+#ifdef DEBUG_MIP
+            {
+                // debug to see if mip issue
+                prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Force mip 0
+            }
+#endif
+
             prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
             vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
