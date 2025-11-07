@@ -837,27 +837,6 @@ namespace PAIN {
 
 		int postprocess_passes = 0;
 
-		// tone mapping pass
-		{
-			const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
-			const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
-
-			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo));
-			tone_shader->Bind();
-			glCheck(glActiveTexture(GL_TEXTURE0));
-			glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
-			glCheck(tone_shader->SetUniform("tex", 0));
-			glCheck(tone_shader->SetUniform("exposure", GraphicsSettings::get().tone_mapping_exposure));
-			glCheck(tone_shader->SetUniform("toneMapMode", static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
-			glCheck(glBindVertexArray(empty_vao));
-			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-			++postprocess_passes;
-		}
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
-		}
-
 		// bloom pass
 		if (GraphicsSettings::get().bloom) {
 			// save scene_tex to final_texture first
@@ -953,6 +932,28 @@ namespace PAIN {
 				// reset postprocess_passes
 				postprocess_passes = 0;
 			}
+		}
+
+		// tone mapping pass
+		// do after bloom for HDR rendering!
+		{
+			const unsigned int dest_fbo = postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
+			const unsigned int src_tex = postprocess_passes % 2 == 0 ? final_texture : pp_texture;
+
+			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo));
+			tone_shader->Bind();
+			glCheck(glActiveTexture(GL_TEXTURE0));
+			glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+			glCheck(tone_shader->SetUniform("tex", 0));
+			glCheck(tone_shader->SetUniform("exposure", GraphicsSettings::get().tone_mapping_exposure));
+			glCheck(tone_shader->SetUniform("toneMapMode", static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			glCheck(glBindVertexArray(empty_vao));
+			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+			++postprocess_passes;
+		}
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
 		}
 
 
