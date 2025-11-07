@@ -15,106 +15,10 @@
 #endif
 
 bool PAIN::TextRenderer::initialized = false;
-int PAIN::TextRenderer::winWidth = 0;
-int PAIN::TextRenderer::winHeight = 0;
 std::shared_ptr<PAIN::Services> PAIN::TextRenderer::services = nullptr;
 
 namespace PAIN {
 	TextRenderer::TextRenderer() {
-		// initial loading of font glyphs into vram
-		{
-			if (!glGetString(GL_VERSION)) {
-				PN_CORE_ERROR("No OpenGL context when creating TextRenderer!");
-				return;
-			}
-			else {
-				PN_CORE_INFO("TextRenderer ctor OpenGL context ok");
-			}
-
-			FT_Library library;
-			FT_Face face;
-			const std::string path = services->get<Path::Path>()->resolvePath("engine_assets://fonts/OpenSans-Regular.ttf");
-
-			if (FT_Init_FreeType(&library)) {
-				PN_CORE_ERROR("Could not initialize FreeType library");
-			}
-
-#ifdef PN_PLATFORM_ANDROID
-			// On Android, read the font data from assets into memory
-			std::string fontData = ReadFileAndroid(path);
-			if (fontData.empty()) {
-				PN_CORE_ERROR("Could not read font file from Android assets");
-				return;
-			}
-
-			// Load font from memory buffer
-			if (FT_New_Memory_Face(library,
-				reinterpret_cast<const FT_Byte*>(fontData.data()),
-				fontData.size(),
-				0,
-				&face)) {
-				PN_CORE_ERROR("Could not load font from memory");
-				return;
-			}
-
-			// store in member var so that it stays in memory
-			fontDataBuffer = std::move(fontData);
-
-#else
-			if (FT_New_Face(library, path.c_str(), 0, &face)) {
-				PN_CORE_ERROR("Could not load font");
-			}
-#endif
-
-			// Set font size (width=0 means auto-calculate)
-			FT_Set_Pixel_Sizes(face, 0, 48);
-
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-			// load characters
-			for (unsigned char c{}; c < 128; c++) {
-				if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-					PN_CORE_ERROR("Could not load character {}", c);
-				}
-
-				unsigned int char_tex;
-				glGenTextures(1, &char_tex);
-				glBindTexture(GL_TEXTURE_2D, char_tex);
-				glTexImage2D(
-					GL_TEXTURE_2D,
-					0,
-					GL_RED,
-					face->glyph->bitmap.width,
-					face->glyph->bitmap.rows,
-					0,
-					GL_RED,
-					GL_UNSIGNED_BYTE,
-					face->glyph->bitmap.buffer
-				);
-
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-				Character character = {
-					char_tex,
-					{ face->glyph->bitmap.width, face->glyph->bitmap.rows },
-					{ face->glyph->bitmap_left, face->glyph->bitmap_top },
-					static_cast<int>(face->glyph->advance.x)
-				};
-				characters[c] = character;
-			}
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			FT_Done_Face(face);
-			FT_Done_FreeType(library);
-		}
-
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before compiling text shader 1: {}", error);
-		}
-
 
 		// compile and link shader
 		{
@@ -127,7 +31,7 @@ namespace PAIN {
 			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
 			PN_CORE_INFO("Text shader compiled, ID: {}", shader->GetRendererID());
 		}
-		error = glGetError();
+		GLenum error = glGetError();
 		if (error != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error after compiling text shader: {}", error);
 		}
@@ -153,17 +57,13 @@ namespace PAIN {
 	}
 
 	TextRenderer::~TextRenderer() {
-		// cleanup textures
-		for (auto& pair : characters) {
-			glDeleteTextures(1, &pair.second.tex);
-		}
 		// cleanup vao/vbo
 		glDeleteVertexArrays(1, &vao);
 		glDeleteBuffers(1, &vbo);
 
 	}
 
-	void TextRenderer::renderText(const std::string& text, float x, float y, float scale, const glm::vec3& color)
+	void TextRenderer::renderText(std::shared_ptr<Assets::Fonts::FontGlyphAtlas> font, const std::string& text, float x, float y, float scale, const glm::vec3& color)
 	{
 		if (shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("TextRenderer shader not initialized!");
@@ -186,7 +86,7 @@ namespace PAIN {
 		std::string::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++)
 		{
-			Character ch = characters[*c];
+			Assets::Fonts::Character ch = font->glyphs[*c];
 
 			float xpos = x + ch.bearing.x * scale;
 			float ypos = y - (ch.size.y - ch.bearing.y) * scale;

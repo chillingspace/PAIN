@@ -1041,7 +1041,14 @@ namespace PAIN {
 
 			// render text onto screen
 			{
-				TextRenderer::get().renderText("Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
+				//Get font to render
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
+#else	
+				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
+#endif
+				auto font = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path)->getFont();
+				TextRenderer::get().renderText(font, "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
 				TextRenderer::get().debugRenderQuad();
 			}
 			err = glGetError();

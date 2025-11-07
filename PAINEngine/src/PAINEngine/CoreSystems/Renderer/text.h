@@ -20,12 +20,6 @@
 namespace PAIN {
 	class TextRenderer {
 	public:
-		struct Character {
-			unsigned int tex;
-			glm::ivec2 size;
-			glm::ivec2 bearing;		// offset to top left of glyph
-			int advance;    // x offset to next glyph
-		};
 
 	private:
 		TextRenderer();
@@ -34,28 +28,13 @@ namespace PAIN {
 		static bool initialized;
 		static std::shared_ptr<Services> services;
 
-		std::unordered_map<unsigned char, Character> characters;
-
 		unsigned int vao, vbo;
 		std::shared_ptr<Assets::Shader> shader;
-
-		static int winWidth;
-		static int winHeight;
-
-#ifdef PN_PLATFORM_ANDROID
-		// on android, need to keep the font data in memory
-		std::string fontDataBuffer;
-#endif
 	public:
 		// dependency injection
 		static void init(std::shared_ptr<Services> s) {
 			services = s;
 			initialized = true;
-
-			//Set win width and height
-			auto window_service = services->get<Window::Window>();
-			winWidth = window_service->getFrameBuffer().x;
-			winHeight = window_service->getFrameBuffer().y;
 		}
 
 		static TextRenderer& get() {
@@ -67,12 +46,13 @@ namespace PAIN {
 		}
 
 		glm::mat4 projection() {
+			auto win_dim = services->get<Window::Window>()->getFrameBuffer();
 			// this projection gives allows us to work in screen space coordinates
-			static const glm::mat4 proj = glm::ortho(0.0f, winWidth * 1.f, 0.0f, winHeight * 1.f);
+			static const glm::mat4 proj = glm::ortho(0.0f, win_dim.x * 1.f, 0.0f, win_dim.y * 1.f);
 			return proj;
 		}
 
-		void renderText(const std::string& text, float x, float y, float scale, const glm::vec3& color);
+		void renderText(std::shared_ptr<Assets::Fonts::FontGlyphAtlas> font, const std::string& text, float x, float y, float scale, const glm::vec3& color);
 
 		void debugRenderQuad();
 	};

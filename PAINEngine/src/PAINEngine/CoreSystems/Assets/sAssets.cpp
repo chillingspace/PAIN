@@ -72,7 +72,7 @@ namespace PAIN {
 				return asset_loader->ImportModel(virtual_path);
 				});
 
-			//Register Model loader
+			//Register Shader loader
 			asset_loader->RegisterLoader(Type::Shader, [this](std::string const& virtual_path) {
 
 				//Get path service
@@ -106,6 +106,12 @@ namespace PAIN {
 
 				//Else import shader
 				return asset_loader->ImportShader(virtual_vert, virtual_frag);
+				});
+
+			//Register Font loader
+			asset_loader->RegisterLoader(Type::Font, [this](std::string const& virtual_path) {
+
+				return asset_loader->ImportFont(virtual_path);
 				});
 
 			//Import asset registry

@@ -605,5 +605,9 @@ namespace PAIN {
 
             return shader;
         }
+
+        std::shared_ptr<Fonts::FontFace> Loader::ImportFont(std::string const& virtual_path) const {
+            return std::make_shared<Fonts::FontFace>(path_service, virtual_path);
+        }
 	}
 }

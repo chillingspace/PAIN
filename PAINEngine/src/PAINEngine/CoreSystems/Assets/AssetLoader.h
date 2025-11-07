@@ -5,6 +5,7 @@
 
 #include "Types/Texture.h"
 #include "Types/Shader.h"
+#include "Types/Text.h"
 
 #include "AssetData.h"
 
@@ -81,7 +82,7 @@ namespace PAIN {
 			std::shared_ptr<Shader> ImportShader(std::string const& virtual_vert, std::string const& virtual_frag) const;
 
 			//Import Font
-
+			std::shared_ptr<Fonts::FontFace> ImportFont(std::string const& virtual_path) const;
 		};
 	}
 }
