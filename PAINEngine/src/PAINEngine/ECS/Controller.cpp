@@ -39,6 +39,36 @@ namespace PAIN {
             }
         }
 
+        void Controller::onFixedUpdate(AppTiming timing) {
+            //Iterate through all systems for fixed update
+            for (auto& sys : systems) {
+
+                // Check if system is enabled or exists first before continueing
+                if (!sys || !sys->enabled) {
+                    continue;
+                }
+
+                try {
+                    sys->onFixedUpdate(timing, entt_registry); // Call fixed update
+                }
+                catch (const std::exception& e) {
+                    PN_CORE_ERROR("System '{}' threw exception in onFixedUpdate: {}",
+                        sys->getSysName(), e.what());
+
+                    // Disable the problematic system
+                    sys->enabled = false;
+                }
+                catch (...) {
+                    // Catch-all for non-standard exceptions (rare but possible)
+                    PN_CORE_ERROR("System '{}' threw unknown exception in onFixedUpdate!",
+                        sys->getSysName());
+
+                    // Disable the problematic system
+                    sys->enabled = false;
+                }
+            }
+        }
+
 		void Controller::onUpdate(AppTiming timing) {
 			//Iterate through all systems
             for (auto& sys : systems) {

@@ -27,6 +27,7 @@ namespace PAIN {
 
 				virtual std::string getSysName() const = 0;
 				virtual void onUpdate(AppTiming timing, entt::registry& reg) = 0;
+				virtual void onFixedUpdate(AppTiming timing, entt::registry& reg) {} // For proper pausing
 				// Optional override	
 				virtual void onEvent(Event::Event& e) {}  
 		

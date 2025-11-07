@@ -49,7 +49,7 @@ namespace PAIN {
 			void dispatchToLayersReversed(Event::Event& e);
 
 			//Update function
-			void onFixedUpdate(AppTiming timing) override {}
+			void onFixedUpdate(AppTiming timing) override;
 			void onUpdate(AppTiming timing) override;
 
 			void registerAllComponents();
