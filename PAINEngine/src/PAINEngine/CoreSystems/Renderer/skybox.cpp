@@ -464,19 +464,8 @@ namespace PAIN {
 				MIP_WIDTH, MIP_WIDTH, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
 
-#ifdef PN_PLATFORM_ANDROID
-		// Allocate storage for ALL mip levels upfront
-		for (unsigned int mip = 0; mip < 5; ++mip) {
-			unsigned int mipSize = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
-			for (unsigned int i = 0; i < 6; ++i) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, GL_RGB16F,
-					mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
-			}
-		}
-#else
 		// Generate mipmaps for the cubemap
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-#endif
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -516,13 +505,6 @@ namespace PAIN {
 		glGenRenderbuffers(1, &captureRBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
-#ifdef PN_PLATFORM_ANDROID
-		// On Android, create RBO once at max size and never resize
-		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 128, 128); // Use 16-bit depth
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-#endif
-
 
 		const unsigned int maxMipLevels = 5;
 
@@ -533,11 +515,6 @@ namespace PAIN {
 			unsigned int mipWidth = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 			unsigned int mipHeight = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 
-#ifndef PN_PLATFORM_ANDROID
-			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-#endif
 			glViewport(0, 0, mipWidth, mipHeight);
 
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
