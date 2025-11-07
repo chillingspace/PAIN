@@ -66,6 +66,15 @@ namespace PAIN {
 
 			//Get asset
 			template <typename T>
+			std::shared_ptr<T> getAsset(std::filesystem::path const& relative_path) {
+
+				//Find GUID
+				auto id = findGUID(relative_path);
+
+				//Get asset
+				return getAsset<T>(id);
+			}
+			template <typename T>
 			std::shared_ptr<T> getAsset(GUID const& id) {
 
 				//Check if GUID is valid
@@ -84,55 +93,23 @@ namespace PAIN {
 				//Asset template
 				std::shared_ptr<IAsset> asset;
 
-				//Search asset cache
-				auto it = asset_cache.find(id);
-				if (it == asset_cache.end()) {
+				//Check if asset is cachable
+				if (Assets::isAssetCacheable(asset_registry[id]->type)) {
+					//Search asset cache
+					auto it = asset_cache.find(id);
+					if (it == asset_cache.end()) {
 
-					//Cache asset
-					asset = cacheAsset(id);
+						//Cache asset
+						asset = cacheAsset(id);
+					}
+					else {
+						asset = it->second;
+					}
 				}
 				else {
-					asset = it->second;
-				}
-
-				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
-				if (!typed_asset) {
-					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
-				}
-				return typed_asset;
-			}
-
-			template <typename T>
-			std::shared_ptr<T> getAsset(std::filesystem::path const& relative_path) {
-
-				//Find GUID
-				auto id = findGUID(relative_path);
-
-				//Check if GUID is valid
-				if (!id.IsValid()) {
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Invalid GUID.");
-				}
-
-				//Check if asset register has id
-				if (asset_registry.find(id) == asset_registry.end()) {
-
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Asset doesn't exist in registry.");
-				}
-
-				//Asset template
-				std::shared_ptr<IAsset> asset;
-
-				//Search asset cache
-				auto it = asset_cache.find(id);
-				if (it == asset_cache.end()) {
-
-					//Cache asset
-					asset = cacheAsset(id);
-				}
-				else {
-					asset = it->second;
+					//Simply just call on loader without caching
+					auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, asset_registry[id]->shipped_relative_path.string());
+					asset = asset_loader->GetLoader(asset_registry[id]->type)(virtual_path);
 				}
 
 				auto typed_asset = std::dynamic_pointer_cast<T>(asset);

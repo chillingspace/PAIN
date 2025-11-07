@@ -275,7 +275,7 @@ namespace PAIN {
 			}
 
 			//Resolve asset path
-			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative("assets", registry_it->second->shipped_relative_path.string());
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, registry_it->second->shipped_relative_path.string());
 
 			//Load assset through registered loaded
 			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
