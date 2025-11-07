@@ -92,9 +92,7 @@ namespace PAIN {
 							//Throw asset into the game asset folder
 							std::filesystem::copy(file_path, target, std::filesystem::copy_options::overwrite_existing);
 
-							//Sort asset into registry
-							asset_service->registerAsset(target);
-
+							//Push msg
 							msg.push_back(file_path.string());
 						}
 
@@ -1105,12 +1103,11 @@ namespace PAIN {
 					};
 			}
 
-			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, std::function<void()>&& callback) {
+			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback) {
 
 				std::lock_guard<std::mutex> lock(file_event_mutex);
-
-				auto now = std::chrono::steady_clock::now();
-				event_functions[file] = { std::move(callback), now };
+				event_functions[file].callback[event] = std::move(callback);
+				event_functions[file].last_updated = std::chrono::steady_clock::now();
 			}
 
 			void ResourcePanel::onAttach() {
@@ -1168,18 +1165,29 @@ namespace PAIN {
 						}
 					}
 
-					//Return of directories
-					if (file.extension().string() == "") return;
-
 					//Watch for events
 					switch (event) {
 					case filewatch::Event::added: {
 
 						//Push to file event queue
-						pushFileEvent(file, [&, file]() {
+						pushFileEvent(file, event, [&, file]() {
 
 							//Log added event
 							PN_CORE_INFO("Add Event for Path: {}", file.string());
+
+							//Register asset
+							if (std::filesystem::is_directory(file)) {
+
+								//Recursive register all assets in directory
+								for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
+									auto relative = std::filesystem::relative(file, root);
+									asset_service->registerAsset(relative);
+								}
+							}
+							else {
+								auto relative = std::filesystem::relative(file, root);
+								asset_service->registerAsset(relative);
+							}
 
 							});
 
@@ -1188,10 +1196,14 @@ namespace PAIN {
 					case filewatch::Event::removed: {
 
 						//Push to file event queue
-						pushFileEvent(file, [&, file]() {
+						pushFileEvent(file, event, [&, file]() {
 
 							//Log removed event
 							PN_CORE_INFO("Remove Event for Path: {}", file.string());
+
+							//Unregister asset
+							auto relative = std::filesystem::relative(file, root);
+							asset_service->unregisterAsset(relative);
 
 							});
 
@@ -1200,10 +1212,30 @@ namespace PAIN {
 					case filewatch::Event::modified: {
 
 						//Push to file event queue
-						pushFileEvent(file, [&, file]() {
+						pushFileEvent(file, event, [&, file]() {
 
 							//Log modified event
 							PN_CORE_INFO("Modified Event for Path: {}", file.string());
+
+							//Check modified event for directory
+							if (std::filesystem::is_directory(file)) return;
+
+							//Get relative path
+							auto relative = std::filesystem::relative(file, root);
+
+							//Check asset been registered
+							if (!asset_service->checkAssetRegistered(relative)) {
+								asset_service->registerAsset(relative);
+							}
+							else {
+								//Get GUID
+								auto id = asset_service->findGUID(relative);
+
+								//Check if cached
+								if (asset_service->checkAssetCached(id)) {
+									asset_service->recacheAsset(id);
+								}
+							}
 
 							});
 
@@ -1212,10 +1244,24 @@ namespace PAIN {
 					case filewatch::Event::renamed_new: {
 
 						//Push to file event queue
-						pushFileEvent(file, [&, file]() {
+						pushFileEvent(file, event, [&, file]() {
 
 							//Log modified event
 							PN_CORE_INFO("Renamed New Path Event for Path: {}", file.string());
+
+							//Register asset
+							if (std::filesystem::is_directory(file)) {
+
+								//Recursive register all assets in directory
+								for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
+									auto relative = std::filesystem::relative(file, root);
+									asset_service->registerAsset(relative);
+								}
+							}
+							else {
+								auto relative = std::filesystem::relative(file, root);
+								asset_service->registerAsset(relative);
+							}
 
 							});
 
@@ -1224,10 +1270,14 @@ namespace PAIN {
 					case filewatch::Event::renamed_old: {
 
 						//Push to file event queue
-						pushFileEvent(file, [&, file]() {
+						pushFileEvent(file, event, [&, file]() {
 
 							//Log modified event
 							PN_CORE_INFO("Renamed Old Path Event for Path: {}", file.string());
+
+							//Unregister old
+							auto relative = std::filesystem::relative(file, root);
+							asset_service->unregisterAsset(relative);
 
 							});
 
@@ -1253,7 +1303,43 @@ namespace PAIN {
 					auto now = std::chrono::steady_clock::now();
 					for (auto it = event_functions.begin(); it != event_functions.end(); ) {
 						if (now - it->second.last_updated > debounce_time) {
-							file_event_queue.push(std::move(it->second.callback));
+
+							//Final callback
+							std::function<void()> callback;
+
+							//Get all callbacks
+							auto callbacks = it->second.callback;
+
+							// Priority logic
+							if (callbacks[filewatch::Event::renamed_new]) {
+								callback = callbacks[filewatch::Event::renamed_new];
+							}
+							else if (callbacks[filewatch::Event::renamed_old]) {
+								callback = callbacks[filewatch::Event::renamed_old];
+							}
+							else if (callbacks[filewatch::Event::removed] && callbacks[filewatch::Event::added] && callbacks[filewatch::Event::modified]) {
+								callback = callbacks[filewatch::Event::modified];
+							}
+							else if (callbacks[filewatch::Event::removed] && callbacks[filewatch::Event::added]) {
+								callback = nullptr;
+							}
+							else if (callbacks[filewatch::Event::removed]) {
+								callback = callbacks[filewatch::Event::removed];
+							}
+							else if (callbacks[filewatch::Event::added]) {
+								callback = callbacks[filewatch::Event::added];
+							}
+							else if (callbacks[filewatch::Event::modified]) {
+								callback = callbacks[filewatch::Event::modified];
+							}
+							else {
+								callback = nullptr;
+							}
+
+							//Decide which event to push
+							file_event_queue.push(std::move(callback));
+
+							//Erase event
 							it = event_functions.erase(it);
 						}
 						else {

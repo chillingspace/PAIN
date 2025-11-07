@@ -50,8 +50,13 @@ namespace PAIN {
             //Init platform for organizer
 			Platform platform = Platform::Windows;
 
-			//Create unique asset compiler
+			//Create unique asset oprganizer
 			asset_organizer = std::make_unique<Organizer>(path_service->resolvePath(Path::main_assets_alias, ""),
+				path_service->resolvePath(Path::assets_alias, ""),
+				platform, getExecutablePath());
+
+			//Create unique asset compiler
+			asset_compiler = std::make_unique<Compiler>(path_service->resolvePath(Path::main_assets_alias, ""),
 				path_service->resolvePath(Path::assets_alias, ""),
 				platform, getExecutablePath());
 #endif
@@ -170,6 +175,37 @@ namespace PAIN {
 			main_path_to_guid[asset->main_relative_path] = asset->guid;
 		}
 
+		void Manager::unregisterAsset(std::filesystem::path const& relative_path) {
+
+			//Check path if its a directory
+			if (relative_path.extension() == "") {
+
+				//Paths to unregister
+				std::vector<GUID> unregister_paths;
+
+				//Collect all paths to unregister
+				for (const auto& [asset_path, guid] : main_path_to_guid) {
+					std::error_code ec;
+					auto rel = std::filesystem::relative(asset_path, relative_path, ec);
+					if (!rel.empty() && rel.string().find("..") != 0 && ec.value() == 0) {
+						unregister_paths.push_back(guid);
+					}
+				}
+
+				//Unregister each asset
+				for (const auto& id : unregister_paths) {
+					unregisterAsset(id);
+				}
+			}
+			else {
+
+				//Get guid
+				auto id = findGUID(relative_path);
+				unregisterAsset(id);
+			}
+
+		}
+
 		void Manager::unregisterAsset(GUID const& id) {
 
 			//Find cache it and uncache
@@ -270,15 +306,28 @@ namespace PAIN {
 				cache_it = asset_cache.erase(cache_it);
 			}
 		}
-
+#ifdef PN_PLATFORM_WINDOWS
 		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
 			//Uncache asset
 			uncacheAsset(id);
 
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Re process asset and ship
+			auto data = asset_registry[id];
+			Info asset;
+			asset.raw_path = path_service->resolvePath(Path::main_assets_alias, "");
+			asset.raw_path /= data->main_relative_path;
+			asset.name = asset.raw_path.filename().string();
+			asset.relative_folder = data->main_relative_path.parent_path();
+			asset.type = data->type;
+			asset_compiler->processAsset(asset);
+
 			//Cache asset
 			return cacheAsset(id);
 		}
-
+#endif
 		bool Manager::checkAssetCached(GUID const& id) const {
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
@@ -331,48 +380,8 @@ namespace PAIN {
 			//Ensure relative
 			if (relative_from.empty() || relative_to.empty() || from.extension() == Assets::descriptor_ext || to.extension() == Assets::descriptor_ext) return;
 
-			//Vector of old paths
-			std::vector<std::filesystem::path> old_relative;
-
-			//Create recursive directory
-			std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
-			recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
-				for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
-					if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
-						out_vec.push_back(std::filesystem::relative(entry.path(), root));
-					}
-				}
-				};
-
-			//Check if from is a directory
-			if (std::filesystem::is_directory(from)) {
-
-				//Recursive get old relatives
-				recurse(from, old_relative);
-			}
-
 			//Move file
 			if (asset_organizer->moveFile(from, to)) {
-
-				//Check registry operation
-				if (!old_relative.empty() || std::filesystem::is_directory(to)) {
-
-					//Unregister old relative
-					for (auto old : old_relative) {
-						unregisterAsset(findGUID(old));
-					}
-
-					//Register new relative
-					std::vector<std::filesystem::path> new_relative;
-					recurse(to, new_relative);
-					for (auto new_ : new_relative) {
-						registerAsset(new_);
-					}
-				}
-				else {
-					unregisterAsset(findGUID(relative_from));
-					registerAsset(relative_to);
-				}
 			}
 		}
 
@@ -389,37 +398,12 @@ namespace PAIN {
 			//Check if from is a directory
 			if (std::filesystem::is_directory(file_path)) {
 
-				//Vector of old paths
-				std::vector<std::filesystem::path> old_relative;
-
-				//Create recursive directory
-				std::function<void(std::filesystem::path const&, std::vector<std::filesystem::path>&)> recurse;
-				recurse = [root, &recurse](const std::filesystem::path& path, std::vector<std::filesystem::path>& out_vec) {
-					for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
-						if (entry.is_regular_file() && entry.path().extension() != Assets::descriptor_ext) {
-							out_vec.push_back(std::filesystem::relative(entry.path(), root));
-						}
-					}
-					};
-
-				//Recursive get file_paths
-				recurse(file_path, old_relative);
-
 				//File operations to delete all
-				if (std::filesystem::remove_all(file_path)) {
-					if (!old_relative.empty()) {
-						//Unregister old relative
-						for (auto old : old_relative) {
-							unregisterAsset(findGUID(old));
-						}
-					}
-				}
+				std::filesystem::remove_all(file_path);
 			}
 			else {
 				//Remove file
-				if (asset_organizer->removeFile(file_path)) {
-					unregisterAsset(findGUID(relative));
-				}
+				asset_organizer->removeFile(file_path);
 			}
 		}
 
@@ -443,12 +427,6 @@ namespace PAIN {
 
 			//Actually copy the file
 			std::filesystem::copy_file(file_path, destination);
-
-			//Get relative destination
-			std::filesystem::path relative = std::filesystem::relative(destination, root);
-
-			//Register duplicated asset
-			registerAsset(relative);
 		}
 #endif
 #endif

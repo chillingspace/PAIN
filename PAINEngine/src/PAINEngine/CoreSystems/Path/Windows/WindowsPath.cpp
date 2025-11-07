@@ -307,28 +307,10 @@ namespace PAIN {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
             }
 
-            //Initialize last write times for all files in the directory
-            //for (const auto& file : std::filesystem::recursive_directory_iterator(actual_path)) {
-            //    if (file.is_regular_file()) {
-            //        file_write_times[file.path()] = std::filesystem::last_write_time(file);
-            //    }
-            //}
-
             //Add watcher for the directory
             dir_watchers.emplace(actual_path,
                 std::make_unique<filewatch::FileWatch<std::string>>(actual_path.string(),
                     [actual_path, callback, this](std::string const& file, filewatch::Event event) {
-
-                        ////Get file updated write time
-                        //auto w_time = std::filesystem::last_write_time(actual_path / file);
-
-                        ////Invalidate access events ( If prev last write time is the same as new write time )
-                        //if (event == filewatch::Event::modified && w_time == file_write_times[actual_path / file]) {
-                        //    return;
-                        //}
-
-                        ////Update with new write time
-                        //file_write_times[actual_path / file] = w_time;
 
                         //Call callback
                         callback(actual_path / file, event);

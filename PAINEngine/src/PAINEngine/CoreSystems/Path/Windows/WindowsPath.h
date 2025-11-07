@@ -63,9 +63,6 @@ namespace PAIN {
 			//List of watchers
 			std::unordered_map<std::filesystem::path, std::unique_ptr<filewatch::FileWatch<std::string>>> dir_watchers;
 
-			//File write times
-			//std::unordered_map<std::filesystem::path, std::filesystem::file_time_type> file_write_times;
-
 			//Private initialize and destroy
 			void init();
 			void destroy();

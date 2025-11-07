@@ -29,8 +29,13 @@ namespace PAIN {
 			//Asset loader
 			std::unique_ptr<Loader> asset_loader;
 
+#ifdef PN_PLATFORM_WINDOWS
 			//Asset Organizer
 			std::unique_ptr<Organizer> asset_organizer;
+			
+			//Asset compiler
+			std::unique_ptr<Compiler> asset_compiler;
+#endif
 
 			//Log asset registry
 			void logAssetRegistry() const;
@@ -50,6 +55,7 @@ namespace PAIN {
 			void registerAsset(std::shared_ptr<IAsset> asset);
 
 			//Unregister asset
+			void unregisterAsset(std::filesystem::path const& relative_path);
 			void unregisterAsset(GUID const& id);
 
 			//Check asset registered
@@ -138,7 +144,9 @@ namespace PAIN {
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void batchCacheAssets(std::vector<GUID> batch_ids);
 			void uncacheAsset(GUID const& id);
+#ifdef PN_PLATFORM_WINDOWS
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+#endif
 			bool checkAssetCached(GUID const& id) const;
 
 			//Find asset type

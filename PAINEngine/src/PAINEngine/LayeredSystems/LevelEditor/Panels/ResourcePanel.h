@@ -45,7 +45,7 @@ namespace PAIN {
                 // ----------------------------
                 // File Event Queue
                 // ----------------------------
-                void pushFileEvent(std::filesystem::path const& file, std::function<void()>&& callback); //Thread safe insertion for file event queue
+                void pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback); //Thread safe insertion for file event queue
                 void onEvent(Event::Event& event) override;
 
             private:
@@ -108,7 +108,7 @@ namespace PAIN {
                 // File
                 // ----------------------------
                 struct EventEntry {
-                    std::function<void()> callback;
+                    std::unordered_map<filewatch::Event, std::function<void()>> callback;
                     std::chrono::steady_clock::time_point last_updated;
                 };
                 std::queue<std::function<void()>> file_event_queue;
