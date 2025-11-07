@@ -203,6 +203,20 @@ namespace PAIN {
 		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+#ifdef PN_PLATFORM_ANDROID
+		// Pre-allocate all mip levels for Android before generating mipmaps
+		for (unsigned int mip = 1; mip < 10; ++mip) {
+			unsigned int mipSize = static_cast<unsigned int>(512 * std::pow(0.5, mip));
+			if (mipSize < 1) break;
+			for (unsigned int i = 0; i < 6; ++i) {
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, GL_RGB16F,
+					mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
+			}
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
+#endif
+
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -254,6 +268,7 @@ namespace PAIN {
 			PN_CORE_ERROR("Capture Framebuffer not complete!");
 		}
 
+#ifdef _DEBUG
 		// debug
 		{
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
@@ -268,6 +283,7 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+#endif
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, winWidth, winHeight);
@@ -355,31 +371,25 @@ namespace PAIN {
 
 		// Irradiance map is typically smaller (32x32 is enough)
 		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
-				32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
+
+
+		// Generate mipmaps for the cubemap
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		// Setup framebuffer
-		unsigned int captureFBO, captureRBO;
-		glGenFramebuffers(1, &captureFBO);
-		glGenRenderbuffers(1, &captureRBO);
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
+#else
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
+#endif
 
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
-		}
-
-		// Same projection and views as your existing code
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
 			glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -390,12 +400,6 @@ namespace PAIN {
 			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
-#ifdef PN_PLATFORM_ANDROID
-		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
-#else
-		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
-#endif
-
 		// Load irradiance shader
 		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
 
@@ -405,26 +409,45 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		glViewport(0, 0, 32, 32);
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-
 		// debug
 		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 			PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
 		}
+
+		unsigned int captureFBO;
+		glGenFramebuffers(1, &captureFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+		glViewport(0, 0, 32, 32);
+
 
 		// Render to each cubemap face
 		for (unsigned int i = 0; i < 6; ++i) {
 			irradianceShader->SetUniform("view", captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
+			
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete! side: {}", i);
+				GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+				switch (status) {
+				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+				PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+					PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+					case GL_FRAMEBUFFER_UNSUPPORTED:
+					PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
+					default:
+					PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+				}
+			}
+			
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			renderCube();
 		}
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance_map);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
 
 		// debug
 		{
@@ -446,26 +469,32 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
-		glDeleteRenderbuffers(1, &captureRBO);
 
 		PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
 	}
 
+
+
+
+
 	void Skybox::generatePrefilterMap() {
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generatePrefilterMap: {}", err);
+
 		// Create prefiltered cubemap
 		glGenTextures(1, &prefilter_map);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
 
 		static constexpr int MIP_WIDTH = 512;
-
-		// Generate mipmaps for different roughness levels
-		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
-				MIP_WIDTH, MIP_WIDTH, 0, GL_RGB, GL_FLOAT, nullptr);
-		}
-
-		// Generate mipmaps for the cubemap
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		
+		// generate different mipmaps for different roughness
+		// 5 mips, meaning {0, 0.25, 0.5, 0.75, 1.0}
+		//for (unsigned int i = 0; i < 6; ++i) {
+		//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, MIP_WIDTH, MIP_WIDTH, 0, GL_RGB, GL_FLOAT, nullptr);
+		//}
+		static constexpr int maxMipLevels = 5;
+		glTexStorage2D(GL_TEXTURE_CUBE_MAP, maxMipLevels, GL_RGB16F, MIP_WIDTH, MIP_WIDTH);
+		//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -500,22 +529,21 @@ namespace PAIN {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
-		unsigned int captureFBO, captureRBO;
+		unsigned int captureFBO;
 		glGenFramebuffers(1, &captureFBO);
-		glGenRenderbuffers(1, &captureRBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
-
-		const unsigned int maxMipLevels = 5;
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before rendering to mipmap: {}", err);
 
 		// Render for each mip level (each roughness level)
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
 			// Resize framebuffer according to mip-level size
 			unsigned int mipWidth = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
-			unsigned int mipHeight = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 
-			glViewport(0, 0, mipWidth, mipHeight);
+
+
+			glViewport(0, 0, mipWidth, mipWidth);
 
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
 			prefilterShader->SetUniform("roughness", roughness);
@@ -523,8 +551,8 @@ namespace PAIN {
 			for (unsigned int i = 0; i < 6; ++i)
 			{
 				prefilterShader->SetUniform("view", captureViews[i]);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
+
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
 
 				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 					PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete! mip: {}, side: {}", mip, i);
@@ -539,10 +567,14 @@ namespace PAIN {
 					default:
 						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 					}
+					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
 				}
 
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderCube in generatePrefilterMap: {}", err);
 				renderCube();
+				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderCube in generatePrefilterMap: {}", err);
 			}
 		}
 
@@ -570,10 +602,11 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
-		glDeleteRenderbuffers(1, &captureRBO);
 
 		PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
 	}
+
+
 
 	void Skybox::generateBRDFLUT() {
 		// Create BRDF LUT texture
@@ -626,6 +659,9 @@ namespace PAIN {
 
 		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
 	}
+
+
+
 
 	void Skybox::renderQuad() {
 		static unsigned int quadVAO = 0;

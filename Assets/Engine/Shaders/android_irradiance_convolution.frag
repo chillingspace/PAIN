@@ -1,5 +1,5 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 out vec4 FragColor;
 in vec3 WorldPos;
@@ -11,6 +11,14 @@ const float PI = 3.14159265359;
 void main()
 {		
     vec3 N = normalize(WorldPos);
+
+// #define DEBUG
+#ifdef DEBUG
+    // DEBUG: Direct sample without convolution
+    vec3 directSample = texture(environmentMap, N).rgb;
+    FragColor = vec4(directSample, 1.0);
+    return;
+#endif
 
     vec3 irradiance = vec3(0.0);   
     vec3 up    = vec3(0.0, 1.0, 0.0);

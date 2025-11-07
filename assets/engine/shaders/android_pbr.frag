@@ -226,7 +226,7 @@ void main() {
             // IBL
             vec3 N = normalize(normal);
 
-#define DEBUG_IRRADIANCE_MAP
+// #define DEBUG_IRRADIANCE_MAP
 #ifdef DEBUG_IRRADIANCE_MAP
             {
                 vec3 irradiance = texture(irradianceMap, N).rgb;
