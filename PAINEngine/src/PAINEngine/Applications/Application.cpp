@@ -19,10 +19,7 @@
 #include "Core.h"
 
 // Assets
-#include "CoreSystems/Assets/sPath.h"
-#include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Assets/sAssets.h"
-#include "CoreSystems/Assets/sAssetCompiler.h"
 #include "CoreSystems/Path/Path.h"
 
 // Systems

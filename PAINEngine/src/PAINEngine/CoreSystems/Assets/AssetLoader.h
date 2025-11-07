@@ -79,6 +79,9 @@ namespace PAIN {
 
 			//Import shader
 			std::shared_ptr<Shader> ImportShader(std::string const& virtual_vert, std::string const& virtual_frag) const;
+
+			//Import Font
+
 		};
 	}
 }

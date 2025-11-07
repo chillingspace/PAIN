@@ -1,7 +1,6 @@
 #pragma once
 #include "pch.h"
 
-#include "CoreSystems/Assets/sLoader.h"
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "Camera.h"
