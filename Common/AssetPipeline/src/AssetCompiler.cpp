@@ -228,9 +228,6 @@ namespace PAIN {
             //Build data
             desc.hash = fileHashing(asset.raw_path);
 
-            //Dependencies
-            desc.dependencies.clear();
-
             //Metadata (start empty, expandable)
             desc.meta_data = nlohmann::json::object();
 
@@ -271,12 +268,6 @@ namespace PAIN {
                 if (!verifyCompileSettings(asset.type, desc.import_settings)) {
                     desc.import_settings = generateDefaultCompileSettings(desc.type, asset);
                     needs_updating = true;
-                }
-
-                //Dependencies
-                auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
-                for (const auto& dep_str : deps_array) {
-                    desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
                 }
 
                 desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
@@ -327,12 +318,6 @@ namespace PAIN {
                 auto build_data = desc_json["build_data"];
                 desc.hash = build_data.value("hash", std::size_t(0));
 
-                //Dependencies
-                auto deps_array = desc_json.value("dependencies", nlohmann::json::array());
-                for (const auto& dep_str : deps_array) {
-                    desc.dependencies.push_back(GUID(dep_str.get<std::string>()));
-                }
-
                 desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
                 desc.meta_data["source_file"] = desc.meta_data.value("source_file", "");
 
@@ -370,11 +355,6 @@ namespace PAIN {
                 desc_json["build_data"]["hash"] = desc_file.hash;
 
                 //Dependencies and metadata
-                nlohmann::json deps_array = nlohmann::json::array();
-                for (const auto& dep : desc_file.dependencies) {
-                    deps_array.push_back(dep.ToString());
-                }
-                desc_json["dependencies"] = deps_array;
                 desc_json["meta_data"] = desc_file.meta_data;
 
                 std::ofstream file(path, std::ios::out);

@@ -25,6 +25,9 @@ namespace PAIN {
 			std::unordered_map<std::filesystem::path, GUID> shipped_path_to_guid;
 			std::unordered_map<std::filesystem::path, GUID> main_path_to_guid;
 
+			//Asset dependencies
+			std::unordered_map<GUID, std::unordered_set<GUID>> dependencies;
+
 			//Asset loader
 			std::unique_ptr<Loader> asset_loader;
 
