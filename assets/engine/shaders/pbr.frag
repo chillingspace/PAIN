@@ -74,8 +74,8 @@ vec3 schlickFresnel(float lDotH) {
 
 // for ibl. schlickFresnel but with roughness
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-}
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+} 
 
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
@@ -211,6 +211,7 @@ void main() {
             vec3 V = normalize(u_CamPos - fragPos);
             vec3 R = reflect(-V, N);
 
+// #define DEBUG_PREFILTER_MAP
 #ifdef DEBUG_PREFILTER_MAP
             // DEBUG: Show the prefilter map. should look like perfect mirror
             {

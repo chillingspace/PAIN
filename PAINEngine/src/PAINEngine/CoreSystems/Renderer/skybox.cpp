@@ -55,48 +55,66 @@ namespace PAIN {
 		if (data) {
 			PN_CORE_INFO("Loaded HDR image with size: {}x{} and {} components", width, height, nrComponents);
 
-			//			// remap hdr to prevent super bright spots
-			//			{
-			//				static constexpr float MAX_HDR_VALUE = 10000.f;
-			//
-			//				// first, find min and max in the data
-			//				float minVal = std::numeric_limits<float>::max();
-			//				float maxVal = std::numeric_limits<float>::lowest();
-			//
-			//				for (int i = 0; i < width * height * nrComponents; ++i) {
-			//					if (data[i] < minVal) minVal = data[i];
-			//					if (data[i] > maxVal) maxVal = data[i];
-			//				}
-			//
-			//				PN_CORE_TRACE("HDR data range before remap: min={} max={}", minVal, maxVal);
-			//
-			//				// remap
-			//				float range = maxVal - minVal;
-			//				if (range < 1e-6f) range = 1e-6f; // avoid divide by zero
-			//
-			//#ifdef _DEBUG
-			//				float newMaxVal = -1.f;
-			//				float newMinVal = 999999999.f;
-			//#endif
-			//
-			//				for (int i = 0; i < width * height * nrComponents; ++i) {
-			//					data[i] = ((data[i] - minVal) / range) * MAX_HDR_VALUE;
-			//
-			//#ifdef _DEBUG
-			//					if (data[i] < newMinVal) {
-			//						newMinVal = data[i];
-			//					}
-			//					if (data[i] > newMaxVal) {
-			//						newMaxVal = data[i];
-			//					}
-			//#endif
-			//				}
-			//
-			//#ifdef _DEBUG
-			//				PN_CORE_TRACE("HDR data range after remap: min={} max={}", newMinVal, newMaxVal);
-			//#endif
-			//			}
+#define SCALE_HDR_DOWN
+#ifdef SCALE_HDR_DOWN
+			// remap hdr to prevent super bright spots
 
+			// first, find min and max in the data
+			float minVal = std::numeric_limits<float>::max();
+			float maxVal = std::numeric_limits<float>::lowest();
+
+			for (int i = 0; i < width * height * nrComponents; ++i) {
+				if (data[i] < minVal) minVal = data[i];
+				if (data[i] > maxVal) maxVal = data[i];
+			}
+
+			static constexpr float MAX_HDR_VALUE = 50000.f;
+
+			if (maxVal > MAX_HDR_VALUE)
+			{
+
+				// first, find min and max in the data
+				float minVal = std::numeric_limits<float>::max();
+				float maxVal = std::numeric_limits<float>::lowest();
+
+				for (int i = 0; i < width * height * nrComponents; ++i) {
+					if (data[i] < minVal) minVal = data[i];
+					if (data[i] > maxVal) maxVal = data[i];
+				}
+
+				PN_CORE_TRACE("HDR data range before remap: min={} max={}", minVal, maxVal);
+
+				// remap
+				float range = maxVal - minVal;
+				if (range < 1e-6f) range = 1e-6f; // avoid divide by zero
+
+#ifdef _DEBUG
+				float newMaxVal = -1.f;
+				float newMinVal = 999999999.f;
+#endif
+
+				for (int i = 0; i < width * height * nrComponents; ++i) {
+					data[i] = ((data[i] - minVal) / range) * MAX_HDR_VALUE;
+
+#ifdef _DEBUG
+					if (data[i] < newMinVal) {
+						newMinVal = data[i];
+					}
+					if (data[i] > newMaxVal) {
+						newMaxVal = data[i];
+					}
+#endif
+				}
+
+#ifdef _DEBUG
+				PN_CORE_TRACE("HDR data range after remap: min={} max={}", newMinVal, newMaxVal);
+#endif
+			}
+#endif
+
+
+			//#define CLAMP_HDR
+#ifdef CLAMP_HDR
 			// clamp hdr to prevent super bright spots 
 			{
 				static constexpr float MAX_HDR_VALUE = 65000.f;
@@ -108,6 +126,7 @@ namespace PAIN {
 					}
 				}
 			}
+#endif
 
 			glGenTextures(1, &skybox_tex);
 			glBindTexture(GL_TEXTURE_2D, skybox_tex);
@@ -365,31 +384,41 @@ namespace PAIN {
 	}
 
 	void Skybox::generateIrradianceMap() {
+		GLenum err;
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generateIrradianceMap: {}", err);
+
 		// Create irradiance cubemap
 		glGenTextures(1, &irradiance_map);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance_map);
 
 		// Irradiance map is typically smaller (32x32 is enough)
 		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+				32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
-
-
-		// Generate mipmaps for the cubemap
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-#ifdef PN_PLATFORM_ANDROID
-		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
-#else
-		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
-#endif
+		// Setup framebuffer
+		unsigned int captureFBO, captureRBO;
+		glGenFramebuffers(1, &captureFBO);
+		glGenRenderbuffers(1, &captureRBO);
 
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
+		}
+
+		// Same projection and views as your existing code
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
 			glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -400,8 +429,27 @@ namespace PAIN {
 			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\android_irradiance_convolution.vert";
+#else
+		std::filesystem::path irradiance_shader_path = "engine\\shaders\\irradiance_convolution.vert";
+#endif
+
 		// Load irradiance shader
 		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
+
+		// Force complete mipmap chain OR disable mipmaps
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // NO mipmaps
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// debug
+		{
+			// Verify texture is complete
+			GLint textureComplete;
+			glGetTexParameteriv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, &textureComplete);
+			PN_CORE_INFO("Cubemap min filter: {}", textureComplete);
+		}
 
 		irradianceShader->Bind();
 		irradianceShader->SetUniform("environmentMap", 0);
@@ -409,45 +457,48 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+		glViewport(0, 0, 32, 32);
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
 		// debug
 		{
 			PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
+			GLint boundTexture;
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &boundTexture);
+			PN_CORE_INFO("Bound cubemap before irradiance render: {} (expected: {})", boundTexture, cubemap_tex);
+
+			if (boundTexture != (GLint)cubemap_tex) {
+				PN_CORE_ERROR("CUBEMAP NOT BOUND! Rebinding...");
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			}
 		}
-
-		unsigned int captureFBO;
-		glGenFramebuffers(1, &captureFBO);
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-
-		glViewport(0, 0, 32, 32);
-
 
 		// Render to each cubemap face
 		for (unsigned int i = 0; i < 6; ++i) {
 			irradianceShader->SetUniform("view", captureViews[i]);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
-			
+
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete! side: {}", i);
 				GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 				switch (status) {
 				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-				PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+					PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
 				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 					PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
-					case GL_FRAMEBUFFER_UNSUPPORTED:
+				case GL_FRAMEBUFFER_UNSUPPORTED:
 					PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
-					default:
+				default:
 					PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 				}
+				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
 			}
-			
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			renderCube();
 		}
-
-		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance_map);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
 
 		// debug
 		{
@@ -470,6 +521,8 @@ namespace PAIN {
 
 		glDeleteFramebuffers(1, &captureFBO);
 
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
+
 		PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
 	}
 
@@ -486,7 +539,7 @@ namespace PAIN {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
 
 		static constexpr int MIP_WIDTH = 512;
-		
+
 		// generate different mipmaps for different roughness
 		// 5 mips, meaning {0, 0.25, 0.5, 0.75, 1.0}
 		//for (unsigned int i = 0; i < 6; ++i) {
