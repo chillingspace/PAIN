@@ -13,6 +13,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Cache build directory
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+      - name: Run cppcheck static analysis
+        uses: deep5050/cppcheck-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          enable: warning,style,performance,portability
+          std: c++20
+          output_file: ./cppcheck_report.txt
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
@@ -50,6 +64,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Cache build directory
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+      - name: Run cppcheck static analysis
+        uses: deep5050/cppcheck-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          enable: warning,style,performance,portability
+          std: c++20
+          output_file: ./cppcheck_report.txt
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
