@@ -221,15 +221,15 @@ namespace PAIN {
 			{
 
 
-				#ifdef PN_PLATFORM_WINDOWS
-				std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".wav";
-				std::string footstepPath = pathService->resolvePath("game_assets://Audio/SFX/MovingSFX/" + footstepFile);
-				#else
-				std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".ogg";
-				std::string footstepPath = ("file:///android_asset/game/audio/sfx/movingsfx/" + footstepFile);
-				#endif
-				audioManager->loadSound(footstepPath, true, false, false, 1.0f, 15.0f);
-				footstepPlaylist.paths.push_back(footstepPath);
+				//#ifdef PN_PLATFORM_WINDOWS
+				//std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".wav";
+				//std::string footstepPath = pathService->resolvePath("game_assets://Audio/SFX/MovingSFX/" + footstepFile);
+				//#else
+				//std::string footstepFile = "Footstep_Grass_0" + std::to_string(i) + ".ogg";
+				//std::string footstepPath = ("file:///android_asset/game/audio/sfx/movingsfx/" + footstepFile);
+				//#endif
+				//audioManager->loadSound(footstepPath, true, false, false, 1.0f, 15.0f);
+				//footstepPlaylist.paths.push_back(footstepPath);
 			}
 			audioManager->loadPlaylist(footstepPlaylist);
 		}

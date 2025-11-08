@@ -119,6 +119,22 @@ namespace PAIN {
 				return typed_asset;
 			}
 
+			//Get all assets of type
+			template<typename T>
+			std::vector<std::shared_ptr<T>> getAllAssetsOfType(Type const& type) {
+
+				//Declare temp container
+				std::vector<std::shared_ptr<T>> container;
+
+				//Find all assets with type
+				for (auto const& asset : asset_registry) {
+					if (asset.second->type == type) container.push_back(getAsset<T>(asset.first));
+				}
+
+				//Return all assets
+				return container;
+			}
+
 			//Caching of assets
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void batchCacheAssets(std::vector<GUID> batch_ids);
@@ -131,6 +147,7 @@ namespace PAIN {
 			//Find asset type
 			std::shared_ptr<IAsset> getAssetData(GUID const& id) const;
 			std::shared_ptr<IAsset> getAssetData(std::filesystem::path const& relative_path);
+			std::vector <std::shared_ptr<IAsset>> getAllAssetDataOfType(Type const& type);
 
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG

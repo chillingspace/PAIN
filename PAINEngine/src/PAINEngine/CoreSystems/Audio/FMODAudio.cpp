@@ -9,6 +9,8 @@
 #include <fmod.hpp>
 #include <fmod_common.h>
 
+#include "CoreSystems/Assets/sAssets.h"
+
 namespace PAIN {
 	namespace Audio {
 
@@ -28,15 +30,28 @@ namespace PAIN {
 			bool initialized = false;
 
 			// assets
-			struct SoundInfo {
-				FMOD::Sound* sound = nullptr;
-				bool is3D = true;
-				bool looping = false;
-				bool stream = false;
-				float minDistance = 1.0f;
-				float maxDistance = 50.0f;
+			struct FmodSound : public PAIN::Audio::Sound {
+			public:
+				FmodSound(const std::string& path, FMOD::Sound* fmodPtr)
+					: path(path), sound(fmodPtr) {
+				}
+
+				~FmodSound() override {
+					release();
+				}
+				std::string getPath() const override { return path; }
+				FMOD::Sound* getFmodPtr() const { return sound; }
+				void release() override {
+					if (sound) {
+						sound->release();
+						sound = nullptr;
+					}
+				}
+
+			private:
+				std::string path;
+				FMOD::Sound* sound;
 			};
-			std::unordered_map<std::string, SoundInfo> sounds;
 			std::unordered_map<std::string, std::vector<std::string>> playlists;
 
 			// channels
@@ -153,11 +168,54 @@ namespace PAIN {
 			return r == FMOD_OK ? AudioResult::Ok : AudioResult::BackendError;
 		}
 
+		struct UserData {
+			std::shared_ptr<Path::Path> path_service;
+		};
+
+		static UserData* g_fmodUserData = nullptr;
+
+		static FMOD_RESULT F_CALL myOpenCallback(const char* name, unsigned int* filesize, void** handle, void* userData) {
+			//Get global user data
+			auto data = g_fmodUserData;
+			auto stream = data->path_service->createFileStream(name, Path::FileMode::Read);
+			if (!stream || !stream->good()) return FMOD_ERR_FILE_NOTFOUND;
+			*filesize = stream->size();
+			*handle = stream.release();
+			return FMOD_OK;
+		}
+
+		static FMOD_RESULT F_CALL myCloseCallback(void* handle, void* userData) {
+			auto stream = static_cast<Path::IFileStream*>(handle);
+			delete stream; // Or use smart pointer
+			return FMOD_OK;
+		}
+
+		static FMOD_RESULT F_CALL myReadCallback(void* handle, void* buffer, unsigned int sizebytes, unsigned int* bytesread, void* userData) {
+			auto stream = static_cast<Path::IFileStream*>(handle);
+			*bytesread = (unsigned int)stream->read(buffer, sizebytes);
+			if ((*bytesread > 0)) {
+				return FMOD_OK;
+			} 
+			else {
+				return FMOD_ERR_FILE_EOF;
+			}
+			return (*bytesread > 0) ? FMOD_OK : FMOD_ERR_FILE_EOF;
+		}
+
+		static FMOD_RESULT F_CALL mySeekCallback(void* handle, unsigned int pos, void* userData) {
+			auto stream = static_cast<Path::IFileStream*>(handle);
+			stream->seek(pos); // Add your own seek method
+			return FMOD_OK;
+		}
+
 		AudioResult FmodAudio::init() {
 
 #ifdef PN_PLATFORM_ANDROID
 			fmodJNIAttach();
 #endif
+
+			//Init path service
+			path_service = services->get<Path::Path>();
 
 			if (impl_->initialized) return AudioResult::AlreadyInitialized;
 
@@ -185,6 +243,23 @@ namespace PAIN {
 			impl_->ensureGroup("ui");
 
 			impl_->initialized = true;
+
+			//Setup callbacks
+			FMOD_FILE_OPEN_CALLBACK openCB = &myOpenCallback;
+			FMOD_FILE_CLOSE_CALLBACK closeCB = &myCloseCallback;
+			FMOD_FILE_READ_CALLBACK readCB = &myReadCallback;
+			FMOD_FILE_SEEK_CALLBACK seekCB = &mySeekCallback;
+
+			//Set user data
+			g_fmodUserData = new UserData;
+			g_fmodUserData->path_service = path_service;
+
+			//Set up call backs
+			impl_->sys->setFileSystem(
+				openCB, closeCB,
+				readCB, seekCB,
+				nullptr, nullptr,
+				2048);
 			return AudioResult::Ok;
 		}
 
@@ -193,9 +268,14 @@ namespace PAIN {
 
 			stopAll();
 
-			for (auto& kv : impl_->sounds)
-				if (kv.second.sound) kv.second.sound->release();
-			impl_->sounds.clear();
+			//Release all audio first
+			auto asset_service = services->get<Assets::Manager>();
+			auto sounds = asset_service->getAllAssetsOfType<Sound>(Assets::Type::Audio);
+
+			//Release all sounds
+			for (auto const& sound : sounds) {
+				sound->release();
+			}
 
 			for (auto& kv : impl_->groups)
 				if (kv.second.cg) kv.second.cg->release();
@@ -208,6 +288,7 @@ namespace PAIN {
 			}
 			impl_->initialized = false;
 
+			delete g_fmodUserData;
 #ifdef PN_PLATFORM_ANDROID
 			fmodJNIDetach();
 #endif
@@ -228,27 +309,23 @@ namespace PAIN {
 			}
 			for (int id : toErase) impl_->channels.erase(id);
 		}
-
-		AudioResult FmodAudio::loadSound(std::string_view path, bool is3D, bool looping, bool stream, float minDistance, float maxDistance) {
-			if (!impl_->initialized) return AudioResult::NotInitialized;
-			if (path.empty()) return AudioResult::InvalidArg;
-			if (impl_->sounds.count(std::string(path))) return AudioResult::Ok;
+		std::shared_ptr<Sound> FmodAudio::createSound(std::string const& virtual_path, bool is3D, bool looping, bool stream, float minDistance, float maxDistance) {
+			if (!impl_->initialized) throw std::runtime_error("Initialization failed.");
 
 			FMOD_MODE mode = FMOD_DEFAULT;
 			if (is3D)   mode |= FMOD_3D; else mode |= FMOD_2D;
 			if (looping) mode |= FMOD_LOOP_NORMAL; else mode |= FMOD_LOOP_OFF;
-			if (stream)  mode |= FMOD_CREATESTREAM;
+			mode |= FMOD_CREATESTREAM;
 
 			FMOD::Sound* s = nullptr;
-			FMOD_RESULT r = impl_->sys->createSound(std::string(path).c_str(), mode, nullptr, &s);
-			if (r != FMOD_OK) return AudioResult::NotFound;
+			FMOD_RESULT r = impl_->sys->createSound(virtual_path.c_str(), mode, nullptr, &s);
+			if (r != FMOD_OK) throw std::runtime_error("Failed to create sound.");
 
 			if (is3D) {
 				s->set3DMinMaxDistance(minDistance, maxDistance);
 			}
-
-			impl_->sounds.emplace(std::string(path), Impl::SoundInfo{ s, is3D, looping, stream, minDistance, maxDistance });
-			return AudioResult::Ok;
+			auto sound = std::make_shared<FmodAudio::Impl::FmodSound>(virtual_path, s);
+			return sound;
 		}
 
 		AudioResult FmodAudio::loadPlaylist(const PlaylistDesc& desc) {
@@ -257,31 +334,25 @@ namespace PAIN {
 			return AudioResult::Ok;
 		}
 
-		std::optional<AudioChannelId> FmodAudio::play(std::string_view soundPath, const glm::vec3& pos, float volumeDb) {
+		std::optional<AudioChannelId> FmodAudio::play(std::shared_ptr<Sound> sound, const glm::vec3& pos, float volumeDb) {
 			if (!impl_->initialized) return std::nullopt;
 
-			auto it = impl_->sounds.find(std::string(soundPath));
-			if (it == impl_->sounds.end()) {
-				if (loadSound(soundPath, true, false, false, 1.0f, 50.0f) != AudioResult::Ok) {
-					return std::nullopt;
-				}
-				it = impl_->sounds.find(std::string(soundPath));
-			}
+			//Cast fmod audio up
+			std::shared_ptr<FmodAudio::Impl::FmodSound> fmod_sound = std::dynamic_pointer_cast<FmodAudio::Impl::FmodSound>(sound);
 
-			auto& si = it->second;
-
-			si.sound->setMode((si.is3D ? FMOD_3D : FMOD_2D) | (si.looping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF) | (si.stream ? FMOD_CREATESTREAM : FMOD_DEFAULT));
-			if (si.is3D) {
-				si.sound->set3DMinMaxDistance(si.minDistance, si.maxDistance);
+			//Set mode
+			fmod_sound->getFmodPtr()->setMode((fmod_sound->is3D ? FMOD_3D : FMOD_2D) | (fmod_sound->looping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF) | (fmod_sound->stream ? FMOD_CREATESTREAM : FMOD_DEFAULT));
+			if (fmod_sound->is3D) {
+				fmod_sound->getFmodPtr()->set3DMinMaxDistance(fmod_sound->minDistance, fmod_sound->maxDistance);
 			}
 
 			FMOD::Channel* ch = nullptr;
-			FMOD::ChannelGroup* cg = impl_->pickGroup(soundPath);
+			FMOD::ChannelGroup* cg = impl_->pickGroup(fmod_sound->getPath());
 
-			FMOD_RESULT r = impl_->sys->playSound(si.sound, cg, true, &ch);
+			FMOD_RESULT r = impl_->sys->playSound(fmod_sound->getFmodPtr(), cg, true, &ch);
 			if (r != FMOD_OK || !ch) return std::nullopt;
 
-			if (si.is3D) {
+			if (fmod_sound->is3D) {
 				auto fpos = Impl::toF(pos);
 				FMOD_VECTOR vel{ 0,0,0 };
 				ch->set3DAttributes(&fpos, &vel);
@@ -295,19 +366,20 @@ namespace PAIN {
 		}
 
 		std::optional<AudioChannelId> FmodAudio::playRandom(std::string_view playlistName, const glm::vec3& pos, float volumeDb) {
-			auto it = impl_->playlists.find(std::string(playlistName));
-			if (it == impl_->playlists.end() || it->second.empty()) return std::nullopt;
-			std::uniform_int_distribution<size_t> dist(0, it->second.size() - 1);
-			const std::string& pick = it->second[dist(impl_->rng)];
+			//auto it = impl_->playlists.find(std::string(playlistName));
+			//if (it == impl_->playlists.end() || it->second.empty()) return std::nullopt;
+			//std::uniform_int_distribution<size_t> dist(0, it->second.size() - 1);
+			//const std::string& pick = it->second[dist(impl_->rng)];
 
-			// Logging footstep check
-			//PN_CORE_INFO("Playing footstep: {}", pick);
+			//// Logging footstep check
+			////PN_CORE_INFO("Playing footstep: {}", pick);
 
-			return play(pick, pos, volumeDb);
+			//return play(pick, pos, volumeDb);
+			return std::nullopt;
 		}
 
 		AudioResult FmodAudio::stop(AudioChannelId chId) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			it->second.ch->stop();
@@ -324,14 +396,14 @@ namespace PAIN {
 		}
 
 		AudioResult FmodAudio::pauseChannel(AudioChannelId chId) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			return toResult(it->second.ch->setPaused(true));
 		}
 
 		AudioResult FmodAudio::resumeChannel(AudioChannelId chId) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			return toResult(it->second.ch->setPaused(false));
@@ -376,21 +448,21 @@ namespace PAIN {
 		}
 
 		AudioResult FmodAudio::setVolumeDb(AudioChannelId chId, float db) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			return toResult(it->second.ch->setVolume(db2lin(db)));
 		}
 
 		AudioResult FmodAudio::setVolumeLinear(AudioChannelId chId, float v) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			return toResult(it->second.ch->setVolume(clamp01(v)));
 		}
 
 		AudioResult FmodAudio::setPosition(AudioChannelId chId, const glm::vec3& pos) {
-			if (!isValid(chId)) return AudioResult::InvalidArg;
+			if (!chId.isValid()) return AudioResult::InvalidArg;
 			auto it = impl_->channels.find(chId.value);
 			if (it == impl_->channels.end() || !it->second.ch) return AudioResult::NotFound;
 			auto fpos = Impl::toF(pos);

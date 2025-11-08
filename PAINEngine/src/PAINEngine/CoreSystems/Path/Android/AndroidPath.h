@@ -54,7 +54,7 @@ namespace PAIN {
             void flush() override { if (file) fflush(file); }
             void seek(size_t pos) override {
                 if (asset) AAsset_seek(asset, pos, SEEK_SET);
-                if (file) fseek(file, pos, SEEK_SET);
+                if (file) { clearerr(file); fseek(file, pos, SEEK_SET); }
             }
             size_t tell() override {
                 if (asset) return assetSize - AAsset_getRemainingLength(asset);

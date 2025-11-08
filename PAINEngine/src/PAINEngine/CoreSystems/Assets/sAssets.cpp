@@ -3,8 +3,7 @@
 #include "Applications/Application.h"
 #include "sAssets.h"
 
-#define PN_PATH_SERVICE  services->get<Path::Service>()
-#define PN_LOADER_SERVICE  services->get<Loader::Service>()
+#include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -112,6 +111,14 @@ namespace PAIN {
 			asset_loader->RegisterLoader(Type::Font, [this](std::string const& virtual_path) {
 
 				return asset_loader->ImportFont(virtual_path);
+				});
+
+			//Register Audio loader
+			asset_loader->RegisterLoader(Type::Audio, [this](std::string const& virtual_path) {
+
+				//Get audio service
+				auto audio_service = services->get<Audio::Audio>();
+				return audio_service->createSound(virtual_path);
 				});
 
 			//Import asset registry
@@ -370,6 +377,20 @@ namespace PAIN {
 			}
 
 			return std::make_shared<IAsset>(*registry_it->second);
+		}
+
+		std::vector <std::shared_ptr<IAsset>> Manager::getAllAssetDataOfType(Type const& type) {
+
+			//Declare temp container
+			std::vector<std::shared_ptr<IAsset>> container;
+
+			//Find all assets with type
+			for (auto const& asset : asset_registry) {
+				if (asset.second->type == type) container.push_back(getAssetData(asset.first));
+			}
+
+			//Return all assets
+			return container;
 		}
 
 #ifdef PN_PLATFORM_WINDOWS

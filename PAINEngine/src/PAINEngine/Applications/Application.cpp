@@ -103,18 +103,12 @@ namespace PAIN {
 		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
 		addCoreSystem(app_audio);
 
+		//Get sound asset
+		//auto sound = services->get<Assets::Manager>()->getAsset<Audio::Sound>("game/audio/music/Boss_Music.wav");
+		//app_audio->play(sound);
+
 		// dependency injection
 		TextRenderer::init(services);
-		//Audio testing.
-#ifdef PN_PLATFORM_WINDOWS
-		auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
-		PN_CORE_INFO(asset_path);
-		app_audio->loadSound(asset_path, true, false, false);
-		//app_audio->play(asset_path);
-#else
-		app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
-		app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
-#endif
 
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));

@@ -4,6 +4,7 @@
 #define FMOD_AUDIO_HPP
 
 #include "Audio.h"
+#include "CoreSystems/Path/Path.h"
 
 namespace PAIN {
     namespace Audio {
@@ -21,6 +22,9 @@ namespace PAIN {
             void fmodJNIDetach();
 #endif
 
+            //Private path service
+            std::shared_ptr<Path::Path> path_service;
+
         public:
             FmodAudio(void* app);
             ~FmodAudio() override;
@@ -30,10 +34,10 @@ namespace PAIN {
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
 
-            AudioResult loadSound(std::string_view, bool, bool, bool, float, float) override;
+            std::shared_ptr<Sound> createSound(std::string const&, bool, bool, bool, float, float) override;
             AudioResult loadPlaylist(const PlaylistDesc&) override;
 
-            std::optional<AudioChannelId> play(std::string_view, const glm::vec3&, float) override;
+            std::optional<AudioChannelId> play(std::shared_ptr<Sound>, const glm::vec3&, float) override;
             std::optional<AudioChannelId> playRandom(std::string_view, const glm::vec3&, float) override;
 
             AudioResult stop(AudioChannelId) override;
