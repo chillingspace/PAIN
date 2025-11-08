@@ -38,16 +38,15 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-windows-build-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-build-
+            ${{ runner.os }}-windows-build-
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
         run: .\build.bat  
         env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 4
-
+          CMAKE_BUILD_PARALLEL_LEVEL: 6
       - name: Build Debug solution
         run: |
           cd build
@@ -72,8 +71,6 @@ jobs:
           Start-Sleep -Seconds 10
           Stop-Process -Name Game -ErrorAction SilentlyContinue
         shell: pwsh
-
-
   build-android:
     runs-on: windows-latest
     steps:
@@ -82,9 +79,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: build
-          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-android-build-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-build-
+            ${{ runner.os }}-android-build-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -98,6 +95,8 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       - name: Run build.bat first
         run: .\build.bat
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 6
       - name: Build Android app (x86_64)
         working-directory: android
         env:
