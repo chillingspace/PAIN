@@ -193,6 +193,7 @@
 -- end)
 
 
+
 -- -- Test_12 KeyUp KeyDown
 -- registerKeyDown("SPACE", function()
 --     log("SPACE down")
@@ -235,11 +236,17 @@ end)
 -- end, 15.0)
 
 
--- -- Test_17 pause -> no pause event so wont print rn
+-- -- Test_17 pause -> not done
 -- registerPauseHandler(function()
 --     log("[LUA] 11 pause toggled. paused=", isGamePaused())
 -- end)
 
 
-
+-- -- Test_18 get image
+-- local g = getImageID("game/textures/Heart.png")
+-- if g == "" then
+--   log("not found")
+-- else
+--   log("guid = ", g)
+-- end
 

@@ -311,25 +311,25 @@ namespace PAIN {
 #else
         dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
             beginTouchControls(e.getPointerId(), e.getX(), e.getY());
-            return true;
+            return false;
         });
         dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
             updateTouchControls(e.getPointerId(), e.getX(), e.getY());
-            return true;
+            return false;
         });
         dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
             endTouchControls(e.getPointerId());
-            return true;
+            return false;
         });
         dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
             endTouchControls(e.getPointerId());
-            return true;
+            return false;
         });
 
 		dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& e) -> bool {
             m_surfaceWidth = e.getWidth();
             m_surfaceHeight = e.getHeight();
-			return true;
+			return false;
 		});
 
 

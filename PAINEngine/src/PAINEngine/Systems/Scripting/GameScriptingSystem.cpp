@@ -23,131 +23,151 @@
 
 namespace PAIN {
 
-    void GameScriptingSystem::onAttach() {
-        PN_CORE_INFO("[GameScriptingSystem] Attaching...");
+    namespace Scripting {
 
-        // Get required services
-        auto ecs_ptr = services->get<ECS::Controller>();
-        auto meta_ptr = services->get<MetaData::Service>();
-        auto assets_ptr = services->get<Assets::Manager>();
-        //auto audio_ptr = services->get<Audio::Audio>();
-        auto path_ptr = services->get<Path::Path>();
+        void GameScriptingSystem::onAttach() {
+            PN_CORE_INFO("[GameScriptingSystem] Attaching...");
 
-        // Validate all services
-        if (!ecs_ptr || !meta_ptr) {
-            PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
-            return;
-        }
+            auto services_ptr = getServices();
 
-        // Create adapter and pass directly to Lua 
-        auto adapter = std::make_shared<EngineAPIAdapter>(
-            *ecs_ptr,
-            *meta_ptr,
-            assets_ptr.get(),
-           // audio_ptr.get(),
-            path_ptr.get()
-        );
+            // Get required services
+            auto ecs_ptr = services_ptr->get<ECS::Controller>();
+            auto meta_ptr = services_ptr->get<MetaData::Service>();
+            auto assets_ptr = services_ptr->get<Assets::Manager>();
+            //auto audio_ptr = services_ptr->get<Audio::Audio>();
+            auto path_ptr = services_ptr->get<Path::Path>();
 
-        // Initialize Lua with the adapter
+            // Validate all services
+            if (!ecs_ptr || !meta_ptr) {
+                PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
+                return;
+            }
+
+            // Create adapter and pass directly to Lua 
+            auto adapter = std::make_shared<EngineAPIAdapter>(
+                *ecs_ptr,
+                *meta_ptr,
+                assets_ptr.get(),
+                // audio_ptr.get(),
+                path_ptr.get()
+            );
+
+            // Initialize Lua with the adapter
 #ifdef _DEBUG
-        bool shipping = false;
+            bool shipping = false;
 #else
-        bool shipping = true;
+            bool shipping = true;
 #endif
 
-        luaManager_.init(adapter, shipping);
-        PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
-    }
+            luaManager_.init(adapter, shipping);
+            PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
+        }
 
-    void GameScriptingSystem::onDetach() {
-        PN_CORE_INFO("[GameScriptingSystem] Detaching...");
-        luaManager_.onDetach();
-    }
+        void GameScriptingSystem::onDetach() {
+            PN_CORE_INFO("[GameScriptingSystem] Detaching...");
+            luaManager_.onDetach();
+        }
 
-    void GameScriptingSystem::onUpdate(AppTiming timing) {
-        luaManager_.tick(timing.dt);
-        luaManager_.Input_EndFrame();
+        GameScriptingSystem::GameScriptingSystem(std::shared_ptr<Services> svc) : ISystem(svc)
+        {
 
-    }
+        }
 
-    void GameScriptingSystem::onEvent(Event::Event& e) {
-        using namespace Event;
-        Dispatcher d{ e };
+        GameScriptingSystem::~GameScriptingSystem()
+        {
 
-        luaManager_.Input_OnEvent(e); // foward all events to luamanger
+        }
+
+        void GameScriptingSystem::onUpdate(AppTiming timing, entt::registry& reg) {
+            //luaManager_.setRegistry(&reg);
+            luaManager_.tick(timing.dt);
+            luaManager_.Input_EndFrame();
+
+        }
+
+        void GameScriptingSystem::onEvent(Event::Event& e) {
+            //PN_CORE_INFO("[GSS] onEvent hit. type={} category={}", (int)e.getType(), (int)e.getCategoryFlags());
+            using namespace Event;
+            Dispatcher d{ e };
+
+            luaManager_.Input_OnEvent(e); // foward all events to luamanger
 
 #ifdef PN_PLATFORM_WINDOWS
-        d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
-            std::string keyName = getKeyName(ev.getKeyCode());  // trigger Lua key callbacks
-            luaManager_.onKeyDown(keyName);
-            return false;
-            });
-        d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
-            std::string keyName = getKeyName(ev.getKeyCode());
-            luaManager_.onKeyUp(keyName);
-            return false;
-            });
-        d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed&) {
-            luaManager_.onClick();
-            return false;
-            });
-        d.Dispatch<WindowFocused>([&](WindowFocused&) {
-            return false;
-            });
+            d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
+                //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
+                if (auto name = getKeyName(ev.getKeyCode())) {
+                    //PN_CORE_INFO("[GSS] KeyDown -> {}", *name);
+                    luaManager_.onKeyDown(*name);
+                }
+                return false;
+                });
+            d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
+                //PN_CORE_INFO("[GSS] KeyReleased code={}", ev.getKeyCode());
+                if (auto name = getKeyName(ev.getKeyCode())) {
+                    luaManager_.onKeyUp(*name);
+                }
+                return false;
+                });
+            d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed&) {
+                luaManager_.onClick();
+                return false;
+                });
+            d.Dispatch<WindowFocused>([&](WindowFocused&) {
+                return false;
+                });
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
-        d.Dispatch<TouchDown>([&](TouchDown&) {
-            luaManager_.onClick();
-            return false;
-            });
-        d.Dispatch<TouchUp>([&](TouchUp&) {
-            return false;
-            });
-        d.Dispatch<AppPause>([&](AppPause&) {
-            luaManager_.onPauseChanged(true);
-            return false;
-            });
-        d.Dispatch<AppResume>([&](AppResume&) {
-            luaManager_.onPauseChanged(false);
-            return false;
-            });
+            d.Dispatch<TouchDown>([&](TouchDown&) {
+                luaManager_.onClick();
+                return false;
+                });
+            d.Dispatch<TouchUp>([&](TouchUp&) {
+                return false;
+                });
+            d.Dispatch<AppPause>([&](AppPause&) {
+                luaManager_.onPauseChanged(true);
+                return false;
+                });
+            d.Dispatch<AppResume>([&](AppResume&) {
+                luaManager_.onPauseChanged(false);
+                return false;
+                });
 #endif
-    }
+        }
 
-    void GameScriptingSystem::attachScript(int entityId, const std::string& scriptPath) {
-        luaManager_.loadScriptForEntity(entityId, scriptPath, {}, false);
-        PN_CORE_TRACE("[GameScriptingSystem] Script '{}' attached to entity {}",
-            scriptPath, entityId);
-    }
+        void GameScriptingSystem::attachScript(entt::entity entity, const std::string& scriptPath) {
+            int entityId = (int)entt::to_integral(entity);
+            luaManager_.loadScriptForEntity(entity, scriptPath);
+        }
 
-    void GameScriptingSystem::attachScriptWithVars(
-        int entityId,
-        const std::string& scriptPath,
-        const std::vector<ScriptExternalVar>& vars)
-    {
-        luaManager_.loadScriptForEntity(entityId, scriptPath, vars, false);
-    }
+        void GameScriptingSystem::attachScriptWithVars(
+            entt::entity entity,
+            const std::string& scriptPath,
+            const std::vector<ScriptExternalVar>& vars)
+        {
+            luaManager_.loadScriptForEntity(entity, scriptPath, vars, false);
+        }
 
-    void GameScriptingSystem::onCollision(int entityA, int entityB) {
-        luaManager_.onCollision(entityA, entityB);
-    }
+        void GameScriptingSystem::onCollision(entt::entity entityA, entt::entity entityB) {
+            luaManager_.onCollision(entityA, entityB);
+        }
 
-    void GameScriptingSystem::setPathService(PAIN::Path::Path* fs)
-    {
-        luaManager_.setPathService(fs);
-    }
+        void GameScriptingSystem::setPathService(PAIN::Path::Path* fs)
+        {
+            luaManager_.setPathService(fs);
+        }
 
-    bool GameScriptingSystem::loadAllScriptsForEntityFromVDir(int entityId, const std::string& alias,
-                                                              const std::string& relativeRoot, bool recursive,
-                                                              bool runWhenPaused)
-    {
-        return luaManager_.loadAllScriptsForEntityFromVDir(entityId, alias, relativeRoot, recursive, runWhenPaused);
-    }
+        bool GameScriptingSystem::loadAllScriptsForEntityFromVDir(entt::entity entity, const std::string& alias,
+            const std::string& relativeRoot, bool recursive,
+            bool runWhenPaused)
+        {
+            return luaManager_.loadAllScriptsForEntityFromVDir(entity, alias, relativeRoot, recursive, runWhenPaused);
+        }
 
-    std::string GameScriptingSystem::getKeyName(int keyCode) const {
-        
-        switch (keyCode) {
+        std::optional<std::string> GameScriptingSystem::getKeyName(int keyCode) const {
+
+            switch (keyCode) {
 #ifdef PN_PLATFORM_WINDOWS
             case GLFW_KEY_SPACE: return "SPACE";
             case GLFW_KEY_ENTER: return "ENTER";
@@ -162,7 +182,7 @@ namespace PAIN {
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
-            //  raw key codes no glfw for android
+                //  raw key codes no glfw for android
             case 32: return "SPACE";
             case 257: return "ENTER";
 
@@ -174,9 +194,9 @@ namespace PAIN {
 #endif
 
             default: return std::to_string(keyCode);
+            }
         }
     }
-
 }  // namespace PAIN
 
 

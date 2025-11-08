@@ -4,6 +4,8 @@
 #include <optional>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include "Common/AssetTypes/src/AssetData.h"
+#include <entt/entity/entity.hpp>
 
 namespace PAIN { namespace Event { class Event; } }
 
@@ -19,9 +21,9 @@ struct IEngineAPI {
     /* =========================================================================== */
     /*                            Entities / Prefabs                               */
     /* =========================================================================== */
-    virtual int  CreateEntity(std::string layer = "", std::string name = "") = 0;
-    virtual void DeleteEntity(int id) = 0;
-    virtual int  CreatePrefabInstance(std::string prefab,
+    virtual entt::entity  CreateEntity(std::string layer = "", std::string name = "") = 0;
+    virtual void DeleteEntity(entt::entity entityId) = 0;
+    virtual entt::entity  CreatePrefabInstance(std::string prefab,
         std::string layer = "",
         std::string name = "") = 0;
 
@@ -29,41 +31,52 @@ struct IEngineAPI {
     /*                                  Lookup                                     */
     /* =========================================================================== */
     virtual std::optional<int> FindEntity(std::string_view name) = 0;
-    virtual int GetImageID(std::string_view name) = 0;
-    virtual int GetScriptID(std::string_view name) = 0;
-    //virtual int GetAudioID(std::string_view name) = 0;
-    virtual int GetModelID(std::string_view name) = 0;
-    virtual int GetFontID(std::string_view name) = 0;
-    virtual int GetScenesID(std::string_view name) = 0;
-    virtual int GetPrefabsID(std::string_view name) = 0;
-    virtual int GetDataID(std::string_view name) = 0;
-    virtual int GetShaderID(std::string_view name) = 0;
+    //virtual int GetImageID(std::string_view name) = 0;
+    //virtual int GetScriptID(std::string_view name) = 0;
+    ////virtual int GetAudioID(std::string_view name) = 0;
+    //virtual int GetModelID(std::string_view name) = 0;
+    //virtual int GetFontID(std::string_view name) = 0;
+    //virtual int GetScenesID(std::string_view name) = 0;
+    //virtual int GetPrefabsID(std::string_view name) = 0;
+    //virtual int GetDataID(std::string_view name) = 0;
+    //virtual int GetShaderID(std::string_view name) = 0;
+
+    virtual std::string GetAssetGUID(std::string_view name, PAIN::Assets::Type want) = 0;
+
+    virtual std::string GetImageGUID(std::string_view name) = 0;
+    virtual std::string GetScriptGUID(std::string_view name) = 0;
+    virtual std::string GetModelGUID(std::string_view name) = 0;
+    virtual std::string GetFontGUID(std::string_view name) = 0;
+    virtual std::string GetScenesGUID(std::string_view name) = 0;
+    virtual std::string GetPrefabsGUID(std::string_view name) = 0;
+    virtual std::string GetDataGUID(std::string_view name) = 0;
+    virtual std::string GetShaderGUID(std::string_view name) = 0;
 
     /* =========================================================================== */
     /*                     Metadata (name / tags / groups)                         */
     /* =========================================================================== */
-    virtual void SetEntityName(int id, std::string name) = 0;
-    virtual std::optional<std::string> GetEntityName(int id) = 0;
-    virtual void AddTag(int id, std::string tag) = 0;
-    virtual void RemoveTag(int id, std::string tag) = 0;
-    virtual bool HasTag(int id, std::string tag) = 0;
-    virtual void AssignGroup(int id, std::string group) = 0;
-    virtual void UnassignGroup(int id) = 0;
-    virtual std::optional<std::string> GetGroup(int id) = 0;
+    virtual void SetEntityName(entt::entity entityId, std::string name) = 0;
+    virtual std::optional<std::string> GetEntityName(entt::entity entityId) = 0;
+    virtual void AddTag(entt::entity entityId, std::string tag) = 0;
+    virtual void RemoveTag(entt::entity entityId, std::string tag) = 0;
+    virtual bool HasTag(entt::entity entityId, std::string tag) = 0;
+    virtual void AssignGroup(entt::entity entityId, std::string group) = 0;
+    virtual void UnassignGroup(entt::entity entityId) = 0;
+    virtual std::optional<std::string> GetGroup(entt::entity entityId) = 0;
 
     /* =========================================================================== */
     /*                                Transform                                    */
     /* =========================================================================== */
-    virtual glm::vec3 GetPosition(int id) = 0;
-    virtual void SetPosition(int id, glm::vec3 p) = 0;
-    virtual glm::vec3 GetScale(int id) = 0;
-    virtual void SetScale(int id, glm::vec3 s) = 0;
+    virtual glm::vec3 GetPosition(entt::entity entityId) = 0;
+    virtual void SetPosition(entt::entity entityId, glm::vec3 p) = 0;
+    virtual glm::vec3 GetScale(entt::entity entityId) = 0;
+    virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
 
     /* =========================================================================== */
     /*                                  Physics                                    */
     /* =========================================================================== */
-    virtual glm::vec3 GetVelocity(int id) = 0;
-    virtual void SetVelocity(int id, glm::vec3 v) = 0;
+    virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
+    virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
 
     /* =========================================================================== */
     /*                                   Audio                                     */
@@ -121,26 +134,25 @@ struct IEngineAPI {
     virtual glm::vec2 Input_GetMousePos() = 0;
     virtual glm::vec2 Input_GetScrollDelta() = 0;
     virtual bool      Input_IsCursorInWindow() = 0;
-
     virtual void      Input_EndFrame() = 0; // call once per frame to clear edges
     virtual void      Input_OnEvent(PAIN::Event::Event& e) = 0; // feed events into the adapter 
 
     /* =========================================================================== */
     /*                                MeshRenderer                                 */
     /* =========================================================================== */
-    virtual std::optional<uint32_t> GetMeshId(int id) = 0;
-    virtual void SetMeshId(int id, uint32_t meshId) = 0;
+    virtual std::optional<uint32_t> GetMeshId(entt::entity entityId) = 0;
+    virtual void SetMeshId(entt::entity entityId, uint32_t meshId) = 0;
 
     /* =========================================================================== */
     /*                                  Lighting                                   */
     /* =========================================================================== */
-    virtual bool HasLight(int id) = 0;
-    virtual void AddLight(int id) = 0;
-    virtual void RemoveLight(int id) = 0;
-    virtual void SetLightPosition(int id, float x, float y, float z) = 0;
-    virtual void SetLightIntensity(int id, float r, float g, float b) = 0;
-    virtual void SetLightType(int id, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
-    virtual void SetLightForward(int id, float x, float y, float z) = 0;
-    virtual void SetShadowType(int id, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
+    virtual bool HasLight(entt::entity entityId) = 0;
+    virtual void AddLight(entt::entity entityId) = 0;
+    virtual void RemoveLight(entt::entity entityId) = 0;
+    virtual void SetLightPosition(entt::entity entityId, float x, float y, float z) = 0;
+    virtual void SetLightIntensity(entt::entity entityId, float r, float g, float b) = 0;
+    virtual void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
+    virtual void SetLightForward(entt::entity entityId, float x, float y, float z) = 0;
+    virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
 
 };

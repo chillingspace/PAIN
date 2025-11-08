@@ -29,9 +29,9 @@ public:
     /* =========================================================================== */
     /*                            Entities / Prefabs                               */
     /* =========================================================================== */
-    int  CreateEntity(std::string layer = "", std::string name = "") override;
-    void DeleteEntity(int id) override;
-    int  CreatePrefabInstance(std::string prefab,
+    entt::entity  CreateEntity(std::string layer = "", std::string name = "") override;
+    void DeleteEntity(entt::entity entityId) override;
+    entt::entity  CreatePrefabInstance(std::string prefab,
         std::string layer = "",
         std::string name = "") override;
 
@@ -39,41 +39,42 @@ public:
     /*                                  Lookup                                     */
     /* =========================================================================== */
     std::optional<int> FindEntity(std::string_view name) override;
-    int GetImageID(std::string_view) override;
-    int GetScriptID(std::string_view) override;
-    //int GetAudioID(std::string_view) override;
-    int GetModelID(std::string_view name) override;
-    int GetFontID(std::string_view name) override;
-    int GetScenesID(std::string_view name) override;
-    int GetPrefabsID(std::string_view name) override;
-    int GetDataID(std::string_view name) override;
-    int GetShaderID(std::string_view name) override;
+    std::string GetAssetGUID(std::string_view name, PAIN::Assets::Type want) override;
+
+    std::string GetImageGUID(std::string_view name) override;
+    std::string GetScriptGUID(std::string_view name) override;
+    std::string GetModelGUID(std::string_view name) override;
+    std::string GetFontGUID(std::string_view name) override;
+    std::string GetScenesGUID(std::string_view name) override;
+    std::string GetPrefabsGUID(std::string_view name) override;
+    std::string GetDataGUID(std::string_view name) override;
+    std::string GetShaderGUID(std::string_view name) override;
 
     /* =========================================================================== */
     /*                     Metadata (name / tags / groups)                         */
     /* =========================================================================== */
-    void SetEntityName(int id, std::string name) override;
-    std::optional<std::string> GetEntityName(int id) override;
-    void AddTag(int id, std::string tag) override;
-    void RemoveTag(int id, std::string tag) override;
-    bool HasTag(int id, std::string tag) override;
-    void AssignGroup(int id, std::string group) override;
-    void UnassignGroup(int id) override;
-    std::optional<std::string> GetGroup(int id) override;
+    void SetEntityName(entt::entity entityId, std::string name) override; // change this to entt::entity
+    std::optional<std::string> GetEntityName(entt::entity entityId) override;
+    void AddTag(entt::entity entityId, std::string tag) override;
+    void RemoveTag(entt::entity entityId, std::string tag) override;
+    bool HasTag(entt::entity entityId, std::string tag) override;
+    void AssignGroup(entt::entity entityId, std::string group) override;
+    void UnassignGroup(entt::entity entityId) override;
+    std::optional<std::string> GetGroup(entt::entity entityId) override;
 
     /* =========================================================================== */
     /*                                Transform                                    */
     /* =========================================================================== */
-    glm::vec3 GetPosition(int id) override;
-    void SetPosition(int id, glm::vec3 p) override;
-    glm::vec3 GetScale(int id) override;
-    void SetScale(int id, glm::vec3 s) override;
+    glm::vec3 GetPosition(entt::entity entityId) override;
+    void SetPosition(entt::entity entityId, glm::vec3 p) override;
+    glm::vec3 GetScale(entt::entity entityId) override;
+    void SetScale(entt::entity entityId, glm::vec3 s) override;
 
     /* =========================================================================== */
     /*                                  Physics                                    */
     /* =========================================================================== */
-    glm::vec3 GetVelocity(int id) override;
-    void SetVelocity(int id, glm::vec3 v) override;
+    glm::vec3 GetVelocity(entt::entity entityId) override;
+    void SetVelocity(entt::entity entityId, glm::vec3 v) override;
 
     /* =========================================================================== */
     /*                                   Audio                                     */
@@ -139,20 +140,20 @@ public:
     /* =========================================================================== */
     /*                                MeshRenderer                                 */
     /* =========================================================================== */
-    std::optional<uint32_t> GetMeshId(int id) override;
-    void SetMeshId(int id, uint32_t meshId) override;
+    std::optional<uint32_t> GetMeshId(entt::entity entityId) override;
+    void SetMeshId(entt::entity entityId, uint32_t meshId) override;
 
     /* =========================================================================== */
     /*                                  Lighting                                   */
     /* =========================================================================== */
-    bool HasLight(int id) override;
-    void AddLight(int id) override;
-    void RemoveLight(int id) override;
-    void SetLightPosition(int id, float x, float y, float z) override;
-    void SetLightIntensity(int id, float r, float g, float b) override;
-    void SetLightType(int id, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
-    void SetLightForward(int id, float x, float y, float z) override;
-    void SetShadowType(int id, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
+    bool HasLight(entt::entity entityId) override;
+    void AddLight(entt::entity entityId) override;
+    void RemoveLight(entt::entity entityId) override;
+    void SetLightPosition(entt::entity entityId, float x, float y, float z) override;
+    void SetLightIntensity(entt::entity entityId, float r, float g, float b) override;
+    void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
+    void SetLightForward(entt::entity entityId, float x, float y, float z) override;
+    void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
 
 private:
     using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());
@@ -161,21 +162,18 @@ private:
 
 private:
     template <typename T>
-    bool try_get(int id, T*& out) {
-        if (auto opt = ecs_.getEntityComponent<T>(asEntity(id))) { out = &opt->get(); return true; }
+    bool try_get(entt::entity entityId, T*& out) {
+        if (auto opt = ecs_.getEntityComponent<T>(entityId)) { out = &opt->get(); return true; }
         return false;
     }
 
     template <typename T, typename... Args>
-    T& ensure(int id, Args&&... args) {
+    T& ensure(entt::entity entityId, Args&&... args) {
         // create the component if missing, or return existing
-        if (auto opt = ecs_.getEntityComponent<T>(asEntity(id))) return opt->get();
-        ecs_.addEntityComponent<T>(asEntity(id), T{ std::forward<Args>(args)... });
-        return ecs_.getEntityComponent<T>(asEntity(id))->get();
+        if (auto opt = ecs_.getEntityComponent<T>(entityId)) return opt->get();
+        ecs_.addEntityComponent<T>(entityId, T{ std::forward<Args>(args)... });
+        return ecs_.getEntityComponent<T>(entityId)->get();
     }
-
-    int guidToInt(const PAIN::Assets::GUID& id);
-    int getIdIfType(std::string_view name, PAIN::Assets::Type want);
 
 private:
     PAIN::ECS::Controller& ecs_;
@@ -188,12 +186,4 @@ private:
     std::unordered_set<int> mousePressed_, mouseReleased_;
     glm::vec2 mousePos_{ 0.0f }, scrollDelta_{ 0.0f };
     bool cursorIn_{ true };
-
-    // resolve "alias://..." -> real path once; accept raw real paths too
-    std::string resolveMaybeVirtual(const std::string& p) const {
-        if (!fs_) return p;
-        if (p.find("://") != std::string::npos) return fs_->resolvePath(p);
-        return p;
-    }
-
 };

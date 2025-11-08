@@ -5,7 +5,7 @@
 
 extern AAssetManager* g_AssetMgr;
 
-static std::optional<PAIN::Scripting::EngineWiring> gWiring;
+//static std::optional<PAIN::Scripting::EngineWiring> gWiring;
 static LuaManager gLua;
 
 //-----------------------------------------------
@@ -21,13 +21,13 @@ static void RunLuaStateSmokeTest() {
 // Minimal LuaManager test 
 //-----------------------------------------------
 static void RunLuaManagerSmokeTest() {
-    gWiring = PAIN::Scripting::CreateMinimalEngineForAndroid();
+    // gWiring = PAIN::Scripting::CreateMinimalEngineForAndroid();
 
-    //gLua.setPathService(gWiring->fs.get());
-    gLua.init(gWiring->api, /*shipping=*/true);
+    // //gLua.setPathService(gWiring->fs.get());
+    // gLua.init(gWiring->api, /*shipping=*/true);
 
-    gLua.loadScriptForEntity(1, "game/scripts/test_2.lua", {}, true);
-    gLua.tick(0.016f);
+    // gLua.loadScriptForEntity(1, "game/scripts/test_2.lua", {}, true);
+    // gLua.tick(0.016f);
 }
 
 //-----------------------------------------------

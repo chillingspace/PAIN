@@ -6,6 +6,8 @@
 #include <optional>
 #include <queue>
 #include "PAINEngine/CoreSystems/Events/Event.h"
+#include "PAINEngine/ECS/System/ISystem.h"
+#include <entt/entity/entity.hpp>
 
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 
@@ -14,35 +16,31 @@ namespace PAIN { namespace Path { class Path; } }
 
 class LuaManager {
 public:
-    struct LuaFunction { int entityId; sol::protected_function fn; bool runWhenPaused = false; };
-    struct CollisionLuaFunction { int currentEntityId; int collidedEntityId; sol::protected_function fn; bool hasCollided = false; bool runWhenPaused = false; };
+    struct LuaFunction { entt::entity entityId; sol::protected_function fn; bool runWhenPaused = false; };
+    struct CollisionLuaFunction { entt::entity currentEntityId; entt::entity collidedEntityId; sol::protected_function fn; bool hasCollided = false; bool runWhenPaused = false; };
     struct MouseInOutLuaFunction {
         enum class State { MouseIn, MouseOut };
         int entityId; LuaFunction mouseIn; LuaFunction mouseOut; bool runWhenPaused = false; State state = State::MouseOut;
     };
     struct TimeoutCB { sol::protected_function fn; float remaining; };
-    struct CollisionInterest { int entityInterested; int entityToCheck; };
+    struct CollisionInterest { entt::entity entityInterested; entt::entity entityToCheck; };
 
 public:
     void init(std::shared_ptr<IEngineAPI> api, bool shipping);
-    bool loadScriptForEntity(int entityId, const std::string& filePath,
+    bool loadScriptForEntity(entt::entity entityId, const std::string& filePath,
         const std::vector<ScriptExternalVar>& vars = {}, bool runWhenPaused = false);
     
-    // execution order each frame:
-    // 1. Timeouts that are due
-    // 2. Input callbacks (key/mouse/click)
-    // 3. Collision callbacks  
-    // 4. Update callbacks
-    // 5. Delayed operations
-    // 6. Pending scene change
     void tick(double dt);
+    void setPrefabInstantiator(std::function<entt::entity(const std::string& prefab,
+        const std::string& layer,
+        const std::string& name)> fn);
 
     // engine -> lua events
     void onKeyDown(const std::string& name);
     void onKeyUp(const std::string& name);
     void onClick();
     void onMouseInOut();
-    void onCollision(int a, int b);
+    void onCollision(entt::entity a, entt::entity b);
     void onPauseChanged(bool paused);
     const std::vector<CollisionInterest>& getCollisionInterests() const { return collisionInterests_; }
 
@@ -53,7 +51,7 @@ public:
 
     void setPathService(PAIN::Path::Path* fs) { fs_ = fs; }
     bool loadAllScriptsForEntityFromVDir(
-        int entityId,
+        entt::entity entityId,
         const std::string& alias,
         const std::string& relativeRoot,
         bool recursive = true,
@@ -70,7 +68,9 @@ private:
     void bindRegistration();
     void bindEngineAPI();
 
-    bool runFileIntoEnv(const std::string& path, int entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
+    bool runFileIntoEnv(const std::string& path, entt::entity entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
+
+    static entt::entity toEntity(int id);
 
 private:
     struct TimeoutNode {
@@ -91,7 +91,7 @@ private:
     std::unordered_map<std::string, std::vector<LuaFunction>> keyDown_, keyUp_;
     std::vector<LuaFunction> onClick_;
     std::vector<MouseInOutLuaFunction> mouseInOut_;
-    std::unordered_map<int, std::vector<CollisionLuaFunction>> onCollision_;
+    std::unordered_map<entt::entity, std::vector<CollisionLuaFunction>> onCollision_;
     std::vector<CollisionInterest> collisionInterests_;
     std::vector<LuaFunction> pauseHandlers_;
 
@@ -101,7 +101,9 @@ private:
     std::list<std::function<void(void)>> delayedOps_;
     std::optional<std::function<void(void)>> pendingSceneChange_;
 
-    int currentEntity_{ -1 };
+    entt::entity currentEntity_{ entt::null };
     bool currentRunWhenPaused_{ false };
     PAIN::Path::Path* fs_{ nullptr };
+    std::function<entt::entity(const std::string&, const std::string&, const std::string&)> instantiatePrefab_;
+
 };

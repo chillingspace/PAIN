@@ -121,8 +121,8 @@ namespace PAIN {
             registerComponent<MetaData::Group>("Group");
         }
 
-		void Controller::onEvent([[maybe_unused]] Event::Event& e) {
-
+		void Controller::onEvent(Event::Event& e) {
+            dispatchToLayers(e);
 		}
 
         /*****************************************************************//**

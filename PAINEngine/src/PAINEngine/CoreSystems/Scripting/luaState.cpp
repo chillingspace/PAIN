@@ -218,10 +218,6 @@ namespace {
      L_.set_function("log_info", [](const std::string& s) {
          PN_INFO("[Lua] %s\n", s.c_str());
          });
-
-     // Registration hooks
-     // L_.set_function("registerUpdate",  [&](sol::protected_function f){ /* push to queue */ });
-     // L_.set_function("registerOnCollision", [&](sol::protected_function f){ /* store */ });
  }
 
  } // namespace PAIN::Scripting

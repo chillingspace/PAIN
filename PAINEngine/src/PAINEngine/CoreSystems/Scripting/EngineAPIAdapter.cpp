@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cLight.h"
+#include "Common/AssetTypes/src/AssetData.h"
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -30,17 +31,86 @@ using namespace PAIN::Event;
 /* =========================================================================== */
 /*                            Entities / Prefabs                               */
 /* =========================================================================== */
-int EngineAPIAdapter::CreateEntity(std::string /*layer*/, std::string /*name*/) {
-    auto e = ecs_.createEntity(); 
-    return asInt(e);
+entt::entity EngineAPIAdapter::CreateEntity(std::string /*layer*/, std::string /*name*/) {
+    return ecs_.createEntity();
 }
 
-void EngineAPIAdapter::DeleteEntity(int id) { ecs_.destroyEntity(asEntity(id)); }
+void EngineAPIAdapter::DeleteEntity(entt::entity entityId) {
+    ecs_.destroyEntity(entityId);
+}
 
-int EngineAPIAdapter::CreatePrefabInstance(std::string /*prefab*/, std::string /*layer*/, std::string /*name*/) {
+entt::entity EngineAPIAdapter::CreatePrefabInstance(std::string prefab, std::string layer, std::string name) {
     // @TODO: Hook to prefab system 
     // now, just create a plain entity so scripts dont break
-    return CreateEntity();
+    // return CreateEntity();
+
+
+    // validate 
+    if (!assets_ || !fs_) {
+        PN_CORE_ERROR("CreatePrefabInstance: missing asset/fs services");
+        return entt::null;
+    }
+
+    // lookup prefab by name
+    PAIN::Assets::GUID guid = assets_->findByName(prefab);
+    if (!guid.IsValid()) {
+        PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' not found", prefab);
+        return entt::null;
+    }
+
+    auto meta_data = assets_->getAssetData(guid);
+    if (!meta_data) {
+        PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' has no metadata", prefab);
+        return entt::null;
+    }
+
+    // resolve to OS path
+    std::string vpath =
+        fs_->aliasCombineRelative("assets", meta_data->shipped_relative_path.string());
+
+    std::string osPath = fs_->resolvePath(vpath);
+
+
+    // load JSON
+    nlohmann::json j;
+    try {
+        std::ifstream in(osPath);
+        if (!in) {
+            PN_CORE_ERROR("CreatePrefabInstance: cannot open '{}'", osPath);
+            return entt::null;
+        }
+        in >> j;
+    }
+    catch (const std::exception& e) {
+        PN_CORE_ERROR("CreatePrefabInstance: JSON error '{}': {}", osPath, e.what());
+        return entt::null;
+    }
+
+    // create entity 
+    entt::entity e = ecs_.createEntity();
+
+    // meta
+    if (!name.empty())
+        meta_.setEntityName(e, name);
+
+    if (!layer.empty())
+        ecs_.addEntityComponent<PAIN::MetaData::Group>(e, PAIN::MetaData::Group{ layer });
+
+    // deserialize components
+    try {
+        const nlohmann::json* comps = &j;
+        if (j.contains("components") && j["components"].is_object())
+            comps = &j["components"];
+
+        ecs_.loadAllComponentsFromJson(e, *comps);
+    }
+    catch (const std::exception& eex) {
+        PN_CORE_ERROR("CreatePrefabInstance: component hydrate failed: {}", eex.what());
+        ecs_.destroyEntity(e);
+        return entt::null;
+    }
+
+    return e;
 }
 
 /* =========================================================================== */
@@ -51,105 +121,99 @@ std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
     if (!opt) return std::nullopt;
     return asInt(*opt);
 }
-int EngineAPIAdapter::GetImageID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Texture); }
-int EngineAPIAdapter::GetScriptID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Script); }
-//int EngineAPIAdapter::GetAudioID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Audio); }
-int EngineAPIAdapter::GetModelID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Model); }
-int EngineAPIAdapter::GetFontID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Font); }
-int EngineAPIAdapter::GetScenesID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Scenes); }
-int EngineAPIAdapter::GetPrefabsID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Prefabs); }
-int EngineAPIAdapter::GetDataID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Data); }
-int EngineAPIAdapter::GetShaderID(std::string_view name) { return getIdIfType(name, PAIN::Assets::Type::Shader); }
 
-int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
-    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
-    return static_cast<int>(v);
+std::string EngineAPIAdapter::GetAssetGUID(std::string_view name, PAIN::Assets::Type want) {
+    if (!assets_) return {};
+    auto guid = assets_->findByName(std::string{ name });
+    if (!guid.IsValid()) return {};
+    if (assets_->getTypeByGUID(guid) != want) return {};
+    return guid.ToString();
 }
+std::string EngineAPIAdapter::GetImageGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Texture); }
+std::string EngineAPIAdapter::GetScriptGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Script); }
+//std::string EngineAPIAdapter::GetAudioGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Audio); }
+std::string EngineAPIAdapter::GetModelGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Model); }
+std::string EngineAPIAdapter::GetFontGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Font); }
+std::string EngineAPIAdapter::GetScenesGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Scenes); }
+std::string EngineAPIAdapter::GetPrefabsGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Prefabs); }
+std::string EngineAPIAdapter::GetDataGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Data); }
+std::string EngineAPIAdapter::GetShaderGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Shader); }
 
-int EngineAPIAdapter::getIdIfType(std::string_view name, PAIN::Assets::Type want) {
-    if (!assets_) return -1;
-    auto guid = assets_->findByName(std::string{ name }); // look up by name -> GUID 
-    if (!guid.IsValid()) return -1;
-    auto type = assets_->getTypeByGUID(guid); // check type
-    if (type != want) return -1;
-    return guidToInt(guid); //convert GUID to int
-}
+//int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
+//    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
+//    return static_cast<int>(v);
+//}
+
+//int EngineAPIAdapter::getIdIfType(std::string_view name, PAIN::Assets::Type want) {
+//    if (!assets_) return -1;
+//    auto guid = assets_->findByName(std::string{ name }); // look up by name -> GUID 
+//    if (!guid.IsValid()) return -1;
+//    auto type = assets_->getTypeByGUID(guid); // check type
+//    if (type != want) return -1;
+//    return guidToInt(guid); //convert GUID to int
+//}
+
+//void EngineAPIAdapter::SetRegistry(entt::registry* reg)
+//{
+//    currentRegistry_ = reg;
+//}
 
 /* =========================================================================== */
 /*                     Metadata (name / tags / groups)                         */
 /* =========================================================================== */
-std::optional<std::string> EngineAPIAdapter::GetEntityName(int id) {
-    auto s = meta_.getEntityName(asEntity(id));
+std::optional<std::string> EngineAPIAdapter::GetEntityName(entt::entity entityId) {
+    auto s = meta_.getEntityName(entityId);
     if (s.empty()) return std::nullopt;
     return s;
 }
-void EngineAPIAdapter::SetEntityName(int id, std::string name) { meta_.setEntityName(asEntity(id), name); }
-void EngineAPIAdapter::AddTag(int id, std::string tag) { meta_.addTag(asEntity(id), tag); }
-void EngineAPIAdapter::RemoveTag(int id, std::string tag) { meta_.removeTag(asEntity(id), tag); }
-bool EngineAPIAdapter::HasTag(int id, std::string tag) { return meta_.hasTag(asEntity(id), tag); }
-void EngineAPIAdapter::AssignGroup(int id, std::string g) { meta_.assignToGroup(asEntity(id), g); }
-void EngineAPIAdapter::UnassignGroup(int id) { meta_.unassignFromGroup(asEntity(id)); }
-std::optional<std::string> EngineAPIAdapter::GetGroup(int id) { return meta_.getEntityGroup(asEntity(id)); }
+void EngineAPIAdapter::SetEntityName(entt::entity entityId, std::string name) { meta_.setEntityName(entityId, name); }
+void EngineAPIAdapter::AddTag(entt::entity entityId, std::string tag) { meta_.addTag(entityId, tag); }
+void EngineAPIAdapter::RemoveTag(entt::entity entityId, std::string tag) { meta_.removeTag(entityId, tag); }
+bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return meta_.hasTag(entityId, tag); }
+void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
+void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
+std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }
 
 /* =========================================================================== */
 /*                                Transform                                    */
 /* =========================================================================== */
-glm::vec3 EngineAPIAdapter::GetPosition(int id) {
-    auto opt = ecs_.getEntityComponent<PAIN::Transform>(asEntity(id));
-    if (!opt) return { 0,0,0 };
-    const auto& t = opt->get();
-    return { t.position.x, t.position.y, t.position.z };
+glm::vec3 EngineAPIAdapter::GetPosition(entt::entity entityId) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+        return opt->get().position;
+    }
+    return { 0.f, 0.f, 0.f };
 }
 
-void EngineAPIAdapter::SetPosition(int id, glm::vec3 p) {
-    /*auto& t = ensure<PAIN::Transform>(id);     
-    t.position = { p.x, p.y, p.z };*/
-
-    auto opt = ecs_.getEntityComponent<PAIN::Transform>(asEntity(id));
-    if (!opt) {
-        PN_CORE_WARN("SetPosition: Entity {} has no Transform component", id);
-        return;
-    }
-    auto& t = opt->get();
+void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
+    auto& t = ensure<PAIN::Transform>(entityId);
     t.position = { p.x, p.y, p.z };
 }
 
-glm::vec3 EngineAPIAdapter::GetScale(int id) {
-    auto opt = ecs_.getEntityComponent<PAIN::Transform>(asEntity(id));
-    if (!opt) return { 1,1,1 };
-    const auto& t = opt->get();
-    return { t.scale.x, t.scale.y, t.scale.z };
+glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+        return opt->get().scale;
+    }
+    return { 1.f, 1.f, 1.f };
 }
 
-void EngineAPIAdapter::SetScale(int id, glm::vec3 s) {
-    /*auto& t = ensure<PAIN::Transform>(id);     
-    t.scale = { s.x, s.y, s.z };*/
-
-    auto opt = ecs_.getEntityComponent<PAIN::Transform>(asEntity(id));
-    if (!opt) {
-        PN_CORE_WARN("SetScale: Entity {} has no Transform component", id);
-        return;
-    }
-    auto& t = opt->get();
+void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
+    auto& t = ensure<PAIN::Transform>(entityId);
     t.scale = { s.x, s.y, s.z };
 }
 
 /* =========================================================================== */
 /*                                  Physics                                    */
 /* =========================================================================== */
-glm::vec3 EngineAPIAdapter::GetVelocity(int id) {
-    auto opt = ecs_.getEntityComponent<PAIN::Physics::RigidBody3D>(asEntity(id));
-    if (!opt) return { 0,0,0 };
-    const auto& rb = opt->get();
-    return { rb.velocity.x, rb.velocity.y, rb.velocity.z };
+glm::vec3 EngineAPIAdapter::GetVelocity(entt::entity entityId) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::Physics::RigidBody3D>(entityId)) {
+        return opt->get().velocity;
+    }
+    return { 0.f, 0.f, 0.f };
 }
 
-void EngineAPIAdapter::SetVelocity(int id, glm::vec3 v) {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Physics::RigidBody3D>(asEntity(id))) {
-        auto& rb = opt->get();
-        rb.velocity = { v.x, v.y, v.z };
-        // @TODO: also push to Jolt body if needed 
-    }
+void EngineAPIAdapter::SetVelocity(entt::entity entityId, glm::vec3 v) {
+    auto& ph = ensure<PAIN::Physics::RigidBody3D>(entityId);
+    ph.velocity = v;
 }
 
 /* =========================================================================== */
@@ -340,88 +404,88 @@ void EngineAPIAdapter::Input_EndFrame() {
 /* =========================================================================== */
 /*                                MeshRenderer                                 */
 /* =========================================================================== */
-std::optional<uint32_t> EngineAPIAdapter::GetMeshId(int id) { 
+std::optional<uint32_t> EngineAPIAdapter::GetMeshId(entt::entity entityId) {
     PAIN::MeshRenderer* mr = nullptr; 
-    if (!try_get<PAIN::MeshRenderer>(id, mr)) return std::nullopt; 
+    if (!try_get<PAIN::MeshRenderer>(entityId, mr)) return std::nullopt;
     return mr->mesh_id; 
 }
-void EngineAPIAdapter::SetMeshId(int id, uint32_t meshId) { 
-    /*auto& mr = ensure<PAIN::MeshRenderer>(id); 
-    mr.mesh_id = meshId; */
+void EngineAPIAdapter::SetMeshId(entt::entity entityId, uint32_t meshId) {
+    auto& mr = ensure<PAIN::MeshRenderer>(entityId);
+    mr.mesh_id = meshId; 
 
-    PAIN::MeshRenderer* mr = nullptr;
-    if (!try_get<PAIN::MeshRenderer>(id, mr)) {
-        PN_CORE_ERROR("SetMeshId: Entity {} has no MeshRenderer component", id);
+    /*PAIN::MeshRenderer* mr = nullptr;
+    if (!try_get<PAIN::MeshRenderer>(entityId, mr)) {
+        PN_CORE_ERROR("SetMeshId: Entity {} has no MeshRenderer component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    mr->mesh_id = meshId;
+    mr->mesh_id = meshId;*/
 }
 
 /* =========================================================================== */
 /*                                  Lighting                                   */
 /* =========================================================================== */
-bool EngineAPIAdapter::HasLight(int id) { 
+bool EngineAPIAdapter::HasLight(entt::entity entityId) {
     PAIN::Lighting* l = nullptr; 
-    return try_get<PAIN::Lighting>(id, l); 
+    return try_get<PAIN::Lighting>(entityId, l);
 }
-void EngineAPIAdapter::AddLight(int id) { 
-    (void)ensure<PAIN::Lighting>(id); 
+void EngineAPIAdapter::AddLight(entt::entity entityId) {
+    (void)ensure<PAIN::Lighting>(entityId);
 }
-void EngineAPIAdapter::RemoveLight(int id) {
-    ecs_.removeEntityComponent<PAIN::Lighting>(asEntity(id)); 
+void EngineAPIAdapter::RemoveLight(entt::entity entityId) {
+    ecs_.removeEntityComponent<PAIN::Lighting>(entityId);
 }
-void EngineAPIAdapter::SetLightPosition(int id, float x, float y, float z) { 
-    /*auto& l = ensure<PAIN::Lighting>(id); 
-    l.position = { x,y,z }; */
+void EngineAPIAdapter::SetLightPosition(entt::entity entityId, float x, float y, float z) {
+    auto& l = ensure<PAIN::Lighting>(entityId);
+    l.position = { x,y,z }; 
 
-    PAIN::Lighting* l = nullptr;
-    if (!try_get<PAIN::Lighting>(id, l)) {
-        PN_CORE_ERROR("SetLightPosition: Entity {} has no Lighting component", id);
+    /*PAIN::Lighting* l = nullptr;
+    if (!try_get<PAIN::Lighting>(entityId, l)) {
+        PN_CORE_ERROR("SetLightPosition: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    l->position = { x, y, z };
+    l->position = { x, y, z };*/
 }
-void EngineAPIAdapter::SetLightIntensity(int id, float r, float g, float b) { 
-    /*auto& l = ensure<PAIN::Lighting>(id); 
-    l.light_intensity = { r,g,b }; */
+void EngineAPIAdapter::SetLightIntensity(entt::entity entityId, float r, float g, float b) {
+    auto& l = ensure<PAIN::Lighting>(entityId);
+    l.light_intensity = { r,g,b }; 
 
-    PAIN::Lighting* l = nullptr;
-    if (!try_get<PAIN::Lighting>(id, l)) {
-        PN_CORE_ERROR("SetLightIntensity: Entity {} has no Lighting component", id);
+    /*PAIN::Lighting* l = nullptr;
+    if (!try_get<PAIN::Lighting>(entityId, l)) {
+        PN_CORE_ERROR("SetLightIntensity: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    l->light_intensity = { r, g, b };
+    l->light_intensity = { r, g, b };*/
 }
-void EngineAPIAdapter::SetLightType(int id, int ty) { 
-    /*auto& l = ensure<PAIN::Lighting>(id); 
-    l.light_type = static_cast<PAIN::TYPES>(ty); */
+void EngineAPIAdapter::SetLightType(entt::entity entityId, int ty) {
+    auto& l = ensure<PAIN::Lighting>(entityId);
+    l.light_type = static_cast<PAIN::TYPES>(ty); 
 
-    PAIN::Lighting* l = nullptr;
-    if (!try_get<PAIN::Lighting>(id, l)) {
-        PN_CORE_ERROR("SetLightType: Entity {} has no Lighting component", id);
+    /*PAIN::Lighting* l = nullptr;
+    if (!try_get<PAIN::Lighting>(entityId, l)) {
+        PN_CORE_ERROR("SetLightType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    l->light_type = static_cast<PAIN::TYPES>(ty);
+    l->light_type = static_cast<PAIN::TYPES>(ty);*/
 }
-void EngineAPIAdapter::SetLightForward(int id, float x, float y, float z) { 
-    /*auto& l = ensure<PAIN::Lighting>(id); 
-    l.forward = glm::normalize(glm::vec3{ x,y,z }); */
+void EngineAPIAdapter::SetLightForward(entt::entity entityId, float x, float y, float z) {
+    auto& l = ensure<PAIN::Lighting>(entityId);
+    l.forward = glm::normalize(glm::vec3{ x,y,z }); 
 
-    PAIN::Lighting* l = nullptr;
-    if (!try_get<PAIN::Lighting>(id, l)) {
-        PN_CORE_ERROR("SetLightForward: Entity {} has no Lighting component", id);
+    /*PAIN::Lighting* l = nullptr;
+    if (!try_get<PAIN::Lighting>(entityId, l)) {
+        PN_CORE_ERROR("SetLightForward: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    l->forward = glm::normalize(glm::vec3{ x, y, z });
+    l->forward = glm::normalize(glm::vec3{ x, y, z });*/
 }
-void EngineAPIAdapter::SetShadowType(int id, int st) { 
-    /*auto& l = ensure<PAIN::Lighting>(id); 
-    l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st); */
+void EngineAPIAdapter::SetShadowType(entt::entity entityId, int st) {
+    auto& l = ensure<PAIN::Lighting>(entityId);
+    l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st); 
 
-    PAIN::Lighting* l = nullptr;
-    if (!try_get<PAIN::Lighting>(id, l)) {
-        PN_CORE_ERROR("SetShadowType: Entity {} has no Lighting component", id);
+    /*PAIN::Lighting* l = nullptr;
+    if (!try_get<PAIN::Lighting>(entityId, l)) {
+        PN_CORE_ERROR("SetShadowType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
-    l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);
+    l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);*/
 }

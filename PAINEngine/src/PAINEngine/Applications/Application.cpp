@@ -107,13 +107,13 @@ namespace PAIN {
 		TextRenderer::init(services);
 		//Audio testing.
 #ifdef PN_PLATFORM_WINDOWS
-        auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
+		auto asset_path = services->get<Path::Path>()->resolvePath("game_assets://audio/music/Boss_Music.wav");
 		PN_CORE_INFO(asset_path);
 		app_audio->loadSound(asset_path, true, false, false);
-        //app_audio->play(asset_path);
+		//app_audio->play(asset_path);
 #else
-        app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
-        app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
+		app_audio->loadSound("file:///android_asset/game/audio/music/Boss_Music.wav", true, false, false);
+		app_audio->play("file:///android_asset/game/audio/music/Boss_Music.wav");
 #endif
 
 		//Push other core systems into the stack
@@ -125,7 +125,9 @@ namespace PAIN {
 
 		// Physics system cross platform
 		services->get<ECS::Controller>()->registerSystem<Physics::System>();
-		
+
+		services->get<ECS::Controller>()->registerSystem<PAIN::Scripting::GameScriptingSystem>();
+
 #ifdef PN_PLATFORM_WINDOWS	
 		services->get<ECS::Controller>()->registerSystem<AI::System>();
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
@@ -147,8 +149,6 @@ namespace PAIN {
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
-		// game scripting system
-		addCoreSystem<GameScriptingSystem>(std::make_shared<GameScriptingSystem>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -157,68 +157,44 @@ namespace PAIN {
 		addLayerSystem(editor);
 #endif
 
-#ifdef _DEBUG  // THIS BLOCK WAS FOR TESTING LUA
-		PN_CORE_INFO("Testing Lua on Debug");
 
-		auto ecs_ptr = services->get<ECS::Controller>();
-		auto meta_ptr = services->get<MetaData::Service>();
-		auto scripting_ptr = services->get<GameScriptingSystem>();
+		auto spawnPlayerWithScript = [&]() {
+			auto ecs_ptr = services->get<ECS::Controller>();
+			auto meta_ptr = services->get<MetaData::Service>();
 
+			if (!ecs_ptr || !meta_ptr) {
+				PN_CORE_ERROR("Failed to spawn test player - services not available");
+				return;
+			}
 
-		if (ecs_ptr && meta_ptr && scripting_ptr) {
 			auto& ecs = *ecs_ptr;
 			auto& meta = *meta_ptr;
-			auto& scripting = *scripting_ptr;
 
-			// Create test player entity
 			auto player = ecs.createEntity();
 			meta.setEntityName(player, "Player");
-
-			// Add Transform component (minimal for testing)
 			ecs.addEntityComponent<Transform>(player, Transform{});
 
-			// Attach Lua script
-			int entityId = static_cast<int>(entt::to_integral(player));
-			scripting.attachScript(entityId, "game/scripts/PlayerController.lua");
-			PN_CORE_INFO("Test player spawned with entity ID: {}", entityId);
-		} 
-		else {
-			PN_CORE_ERROR("Failed to spawn test player - services not available");
-		}
+			if (auto gameScript = ecs.getSystem<PAIN::Scripting::GameScriptingSystem>()) {
+				gameScript->onAttach();
+				gameScript->attachScript(player, "game/scripts/PlayerController.lua");
+				PN_CORE_INFO("Test player spawned with entity ID: {}", (entt::id_type)entt::to_integral(player));
+			}
+			else {
+				PN_CORE_ERROR("GameScriptingSystem not found in ECS controller!");
+			}
+			};
+
+#ifdef _DEBUG
+		PN_CORE_INFO("Testing Lua on Debug");
 #else
 		PN_CORE_INFO("Testing Lua on Release");
-
-		auto ecs_ptr = services->get<ECS::Controller>();
-		auto meta_ptr = services->get<MetaData::Service>();
-		auto scripting_ptr = services->get<GameScriptingSystem>();
-
-
-		if (ecs_ptr && meta_ptr && scripting_ptr) {
-			auto& ecs = *ecs_ptr;
-			auto& meta = *meta_ptr;
-			auto& scripting = *scripting_ptr;
-
-			// Create test player entity
-			auto player = ecs.createEntity();
-			meta.setEntityName(player, "Player");
-
-			// Add Transform component (minimal for testing)
-			ecs.addEntityComponent<Transform>(player, Transform{});
-
-			// Attach Lua script
-			int entityId = static_cast<int>(entt::to_integral(player));
-			scripting.attachScript(entityId, "game/scripts/PlayerController.lua");
-			PN_CORE_INFO("Test player spawned with entity ID: {}", entityId);
-		}
-		else {
-			PN_CORE_ERROR("Failed to spawn test player - services not available");
-		}
 #endif
+		spawnPlayerWithScript();
 
-		//Mark engine as ready
-		b_app_running = true;
-	}
-
+			//Mark engine as ready
+			b_app_running = true;
+		}
+	
 	void Application::Run() {
 
 	//Set last time
@@ -326,7 +302,7 @@ namespace PAIN {
 
 		//Swap buffer
 		services->get<Window::Window>()->swapBuffers();
-	};
+	}
 }
 
 
