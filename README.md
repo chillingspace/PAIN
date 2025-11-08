@@ -98,20 +98,11 @@ PAIN is a lightweight, performance-focused 3D game engine built from scratch. Th
 # Clone the repository
 git clone https://github.com/chillingspace/PAIN.git
 cd PAIN
-
-# Initialize and update all submodules (REQUIRED)
-git submodule update --init --recursive
-
-# Configure Git to automatically update submodules on pull
-git config submodule.recurse true
 ```
 
 ### Building for Windows
 
 ```bash
-
-# In the directory of the build.bat script, run this command first before running build.bat
-git submodule update --init --recursive
 
 # Run the automated build script
 build.bat
