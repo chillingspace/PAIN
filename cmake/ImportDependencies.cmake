@@ -8,6 +8,7 @@ macro(importDependencies)
       imgui
       GIT_REPOSITORY https://github.com/ocornut/imgui.git
       GIT_TAG v1.91.9-docking
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(imgui)
     
@@ -16,6 +17,7 @@ macro(importDependencies)
       imguizmo
       GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
       GIT_TAG master
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(imguizmo)
 
@@ -25,6 +27,7 @@ macro(importDependencies)
       glm
       GIT_REPOSITORY https://github.com/g-truc/glm.git
       GIT_TAG 1.0.2
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(glm)
 
@@ -33,6 +36,7 @@ macro(importDependencies)
       spdlog
       GIT_REPOSITORY https://github.com/gabime/spdlog.git
       GIT_TAG v1.16.0
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(spdlog)
 
@@ -41,6 +45,7 @@ macro(importDependencies)
       entt
       GIT_REPOSITORY https://github.com/skypjack/entt.git
       GIT_TAG v3.15.0
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(entt)
 
@@ -67,12 +72,13 @@ FetchContent_Declare(
   Jolt
   GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
   GIT_TAG v5.4.0
+  GIT_SHALLOW TRUE
 )
 
 # Use FetchContent to populate (download) but don't call MakeAvailable yet
 FetchContent_GetProperties(Jolt)
 if(NOT jolt_POPULATED)
-    FetchContent_Populate(Jolt)
+    FetchContent_MakeAvailable(Jolt)
     
     # Now add the subdirectory with our configured options
     add_subdirectory("${jolt_SOURCE_DIR}/Build" ${jolt_BINARY_DIR} EXCLUDE_FROM_ALL)
@@ -97,6 +103,7 @@ endif()
       sol2
       GIT_REPOSITORY https://github.com/ThePhD/sol2.git
       GIT_TAG v3.3.1
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(sol2)
 
@@ -110,8 +117,9 @@ endif()
       lua
       GIT_REPOSITORY https://github.com/lua/lua.git
       GIT_TAG v5.4.8
+      GIT_SHALLOW TRUE
     )
-    FetchContent_Populate(lua)
+    FetchContent_MakeAvailable(lua)
 
     # Ensure wrapper is present in fetched dir
     file(COPY "${CMAKE_SOURCE_DIR}/vendor/lua/CMakeLists.txt"
@@ -124,6 +132,7 @@ endif()
       nlohmann_json
       GIT_REPOSITORY https://github.com/nlohmann/json.git
       GIT_TAG v3.12.0
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(nlohmann_json)
 
@@ -132,6 +141,7 @@ endif()
       reflcpp
       GIT_REPOSITORY https://github.com/veselink1/refl-cpp.git
       GIT_TAG v0.12.4
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(reflcpp)
 
@@ -140,6 +150,7 @@ endif()
       assimp
       GIT_REPOSITORY https://github.com/assimp/assimp.git
       GIT_TAG v6.0.2
+      GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(assimp)
 
@@ -148,6 +159,7 @@ endif()
       freetype
       GIT_REPOSITORY https://github.com/freetype/freetype.git
       GIT_TAG VER-2-13-3  # Latest stable release
+      GIT_SHALLOW TRUE
     )
     # Disable FreeType's unnecessary features to speed up build
     set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
@@ -168,6 +180,7 @@ endif()
             glfw
             GIT_REPOSITORY https://github.com/glfw/glfw.git
             GIT_TAG 3.4
+            GIT_SHALLOW TRUE
         )
         set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
         set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -221,6 +234,7 @@ endif()
             cuttlefish
             GIT_REPOSITORY https://github.com/akb825/Cuttlefish.git
             GIT_TAG v2.9.0
+            GIT_SHALLOW TRUE
         )
         FetchContent_MakeAvailable(cuttlefish)
 
@@ -244,6 +258,7 @@ endif()
           astc_encoder
           GIT_REPOSITORY https://github.com/ARM-software/astc-encoder.git
           GIT_TAG 5.3.0
+          GIT_SHALLOW TRUE
         )
         FetchContent_MakeAvailable(astc_encoder)
 
@@ -290,6 +305,7 @@ endif()
           astc_encoder
           GIT_REPOSITORY https://github.com/ARM-software/astc-encoder.git
           GIT_TAG 5.3.0
+          GIT_SHALLOW TRUE
         )
         FetchContent_MakeAvailable(astc_encoder)
 
