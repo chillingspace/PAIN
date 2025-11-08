@@ -18,13 +18,13 @@ namespace PAIN {
                 // Called after creating a new scene (name without ".scn")
                 std::function<void(const std::string& baseName)> onCreate;
                 // Called on "Save Scene As" (new base name)
-                std::function<void(const std::string& baseName)> onSaveAs;
+                std::function<bool(const std::string& baseName)> onSaveAs;
                 // Called on "Save Curr Scene"
-                std::function<void(const std::string& currSceneId)> onSaveCurrent;
+                std::function<bool(const std::string& currSceneId)> onSaveCurrent;
                 // Called before deleting current scene (id with extension or your internal id)
-                std::function<void(const std::string& sceneId)> onDelete;
+                std::function<bool(const std::string& sceneId)> onDelete;
                 // Called when user requests a scene change (id with extension)
-                std::function<void(const std::string& sceneId)> onChange;
+                std::function<bool(const std::string& sceneId)> onChange;
 
                 std::function<void(const std::string& sceneId)> onModifyScene; // for modified scene, but havent changed scene file
                 std::function<void(unsigned i, unsigned j, bool v)> onMaskChanged;
@@ -47,6 +47,10 @@ namespace PAIN {
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }
 
             private:
+                // Error message when loading scene fails
+                bool showSceneLoadError_ = false;
+                std::string loadSceneErrorMsg_;
+
                 // Temporary in-panel “model” 
                 std::string currSceneId_; 
                 struct Layer {

@@ -1,3 +1,14 @@
+/*****************************************************************//**
+ * \file   ReflectionUI.h
+ * \brief  Declaration of reflection UI for imgui
+ *
+ * \author Bryan Soh, 2301238, z.soh@digipen.edu (100%)
+ * \co-author
+ * \date   October 2025
+ * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
+
+
 #pragma once
 #include <refl.hpp>
 #include <imgui.h>

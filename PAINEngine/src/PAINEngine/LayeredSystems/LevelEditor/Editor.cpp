@@ -61,28 +61,34 @@ namespace PAIN {
                     PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
                 }
                 };
-            hooks.onSaveAs = [ser](const std::string& base) {
+            hooks.onSaveAs = [ser](const std::string& base) -> bool {
                 if (!ser->saveSceneAs(base)) {
                     PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
+                    return false;
                 }
+                return true;
                 };
-            hooks.onSaveCurrent = [ser](const std::string& /*currSceneId*/) {
+            hooks.onSaveCurrent = [ser](const std::string& currSceneId) -> bool {
                 if (!ser->saveCurrentScene()) {
                     PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
+                    return false;
                 }
+                return true;
                 };
-            hooks.onDelete = [ser](const std::string& sceneId) {
+            hooks.onDelete = [ser](const std::string& sceneId) -> bool {
                 if (!ser->deleteSceneById(sceneId)) {
                     PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
+                    return false;
                 }
+                return true;
                 };
-            hooks.onChange = [ser](const std::string& sceneId) {
+            hooks.onChange = [ser](const std::string& sceneId) -> bool {
                 if (!ser->loadSceneById(sceneId)) {
                     PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
+                    return false;
                 }
-                else {
-                    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-                }
+                PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
+                return true;
                 };
             hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
             hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {

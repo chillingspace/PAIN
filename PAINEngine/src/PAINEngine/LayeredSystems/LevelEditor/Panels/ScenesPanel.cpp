@@ -230,8 +230,16 @@ namespace PAIN {
                 // Load Scene
                 if (ImGui::Button("Load Scene")) {
                     const std::string id = std::string{ nameBuf_ } + ".scn"; 
-                    if (hooks_.onChange) hooks_.onChange(id);               // -> Service::loadSceneById
-                    currSceneId_ = id;                                      // update panel label
+
+                    bool success = hooks_.onChange ? hooks_.onChange(id) : false; // -> Service::loadSceneById
+                    // Check if load succeeded
+                    if (success) { 
+                        currSceneId_ = id; // update panel label
+                    }
+                    else {
+                        showSceneLoadError_ = true;
+                        loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
+                    }
                 }
 
                 if (!currSceneId_.empty()) {
@@ -292,6 +300,22 @@ namespace PAIN {
                 drawDeleteModal();
                 drawSaveAsModal();
                 drawEditMaskModal();
+
+                // Show the error popup when load scene fails
+                if (showSceneLoadError_) {
+                    ImGui::OpenPopup("Scene Load Error");
+                    showSceneLoadError_ = false;
+                }
+
+                // Render the modal if it's open
+                if (ImGui::BeginPopupModal("Scene Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::TextWrapped("%s", loadSceneErrorMsg_.c_str());
+                    ImGui::Spacing();
+                    if (ImGui::Button("OK", ImVec2(120, 0))) {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
             }
 
         } // namespace Panel
