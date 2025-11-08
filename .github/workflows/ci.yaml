@@ -20,13 +20,11 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             ${{ runner.os }}-build-
+      - name: Install cppcheck
+        run: choco install cppcheck -y
       - name: Run cppcheck static analysis
-        uses: deep5050/cppcheck-action@main
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          enable: warning,style,performance,portability
-          std: c++20
-          output_file: ./cppcheck_report.txt
+        run: |
+          cppcheck --enable=warning,style,performance,portability --std=c++20 --output-file=cppcheck_report.txt . 2> cppcheck_report.txt
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
