@@ -55,6 +55,8 @@ namespace PAIN {
 			JPH::PhysicsSystem* GetPhysicsSystem() const { return jolt_physics.get(); }
 			JPH::BodyInterface& GetBodyInterface() { return jolt_physics->GetBodyInterface(); }
 
+			void updateBodyLayer(JPH::BodyID bodyID, JPH::ObjectLayer newLayer);
+
 		private:
 
 			std::unique_ptr<JPH::PhysicsSystem> jolt_physics;

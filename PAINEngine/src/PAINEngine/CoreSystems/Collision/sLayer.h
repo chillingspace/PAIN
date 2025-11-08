@@ -15,6 +15,17 @@
 #include "pch.h"
 
 // To-do for ben: add proper documentation
+
+// Layer collision rules :
+// NON_MOVING collides with : MOVING, DEBRIS
+//
+// MOVING collides with	    : NON_MOVING, MOVING, SENSOR
+//
+// DEBRIS collides with     : NON_MOVING only
+//
+// SENSOR collides with     : MOVING only
+
+
 namespace PAIN {
 	namespace Layer {
 

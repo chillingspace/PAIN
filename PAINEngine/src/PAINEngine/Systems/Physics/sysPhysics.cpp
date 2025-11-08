@@ -17,7 +17,20 @@ namespace PAIN {
 	
 	// To-do for ben: add proper documentation
 	namespace Physics {
+		// Global pointer to physics system (set during initialization)
+		static System* g_physics_system = nullptr;
 
+		PhysicsLayer& PhysicsLayer::operator=(JPH::ObjectLayer v) {
+			if (value != v) {
+				value = v;
+
+				// Auto-update if body exists
+				if (bodyID_ptr && !bodyID_ptr->IsInvalid() && g_physics_system) {
+					g_physics_system->updateBodyLayer(*bodyID_ptr, value);
+				}
+			}
+			return *this;
+		}
 		// Jolt Physics setup
 		void System::joltSetup()
 		{
@@ -95,6 +108,8 @@ namespace PAIN {
 		{
 			PN_CORE_TRACE("Physics::System constructor");
 
+			g_physics_system = this;
+
 			joltSetup();
 
 			create_floor();
@@ -105,6 +120,9 @@ namespace PAIN {
 		{
 			// Cleanup
 			PN_CORE_TRACE("Physics::System destructor starting");
+
+			// Unregister
+			g_physics_system = nullptr;
 
 			// Clear body interface reference
 			body_interface = nullptr;
@@ -173,6 +191,16 @@ namespace PAIN {
 					transform = view.get<Transform>(entity);
 					rigidBody = view.get<Physics::RigidBody3D>(entity);
 
+					// Check if layer needs updating
+					if (!rigidBody.bodyID.IsInvalid()) {
+						JPH::ObjectLayer current_layer = body_interface.GetObjectLayer(rigidBody.bodyID);
+
+						if (current_layer != rigidBody.layer.value) {
+							// Layer changed in component, update physics body
+							updateBodyLayer(rigidBody.bodyID, rigidBody.layer.value);
+						}
+					}
+
 					// Lock body for reading
 					{
 						// Lock the body for reading
@@ -237,7 +265,7 @@ namespace PAIN {
 								   transform.position.z),
 						rotationQuat,
 						JPH::EMotionType::Dynamic,
-						PAIN::Layer::MOVING
+						rigidBody.layer
 					);
 
 					settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
@@ -285,6 +313,22 @@ namespace PAIN {
 				body_interface->ActivateBody(rigidBody.bodyID);
 				body_interface->AddImpulse(rigidBody.bodyID, JPH::Vec3(0, jumpImpulse, 0));
 			}
+		}
+
+		// Update body layer by removing and re-adding it
+		void System::updateBodyLayer(JPH::BodyID bodyID, JPH::ObjectLayer newLayer) {
+			if (bodyID.IsInvalid() || !body_interface) {
+				return;
+			}
+
+			// Remove the body
+			body_interface->RemoveBody(bodyID);
+
+			// Update its layer
+			body_interface->SetObjectLayer(bodyID, newLayer);
+
+			// Re-add it with the new layer
+			body_interface->AddBody(bodyID, JPH::EActivation::Activate);
 		}
 
 		void System::create_floor()

@@ -235,6 +235,44 @@ inline bool DrawField(const char* label, JPH::BodyID& id) {
 }
 
 
+// ---- JPH::ObjectLayer enum drawer (Physics Layers) ----
+inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
+    const char* names[] = { "NON_MOVING", "MOVING", "DEBRIS", "SENSOR" };
+    const uint16_t values[] = {
+        PAIN::Layer::NON_MOVING,
+        PAIN::Layer::MOVING,
+        PAIN::Layer::DEBRIS,
+        PAIN::Layer::SENSOR
+    };
+
+    int idx = 1;
+    for (int i = 0; i < 4; ++i) {
+        if (layer.value == values[i]) {
+            idx = i;
+            break;
+        }
+    }
+
+    bool changed = false;  // Track change
+
+    if (ImGui::Combo(label, &idx, names, 4)) {
+        layer.value = values[idx];
+        changed = true;  // Mark as changed
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        switch (idx) {
+        case 0: ImGui::Text("Static objects (walls, floor)"); break;
+        case 1: ImGui::Text("Dynamic objects (player, movable items)"); break;
+        case 2: ImGui::Text("Small debris (collides with static only)"); break;
+        case 3: ImGui::Text("Trigger volumes (detects moving objects)"); break;
+        }
+        ImGui::EndTooltip();
+    }
+
+    return changed;  // Return the change state
+}
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
     bool changed = false;
@@ -296,9 +334,6 @@ inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
 
     return changed;
 }
-
-
-
 
 // ---------- Fallback for unknown types ----------
 template <typename T>
