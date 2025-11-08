@@ -5,7 +5,6 @@
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Audio/Audio.h"
-#include "CoreSystems/Audio/AudioManager.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
 
@@ -128,9 +127,6 @@ namespace PAIN {
 		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 		
 #ifdef PN_PLATFORM_WINDOWS	
-		// Physics system not cross platform yet
-		services->get<ECS::Controller>()->registerSystem<Physics::System>();
-
 		services->get<ECS::Controller>()->registerSystem<AI::System>();
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
 		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
@@ -142,14 +138,6 @@ namespace PAIN {
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
 
-
-		// Windows only have paths, andriods have to use AASettmanager
-#ifdef PN_PLATFORM_WINDOWS
-		//addCoreSystem(std::make_shared<Path::Service>());
-		//services->get<Path::Service>()->init("assets/Config.json");
-		//addCoreSystem(std::make_shared<Assets::Service>());
-		//addCoreSystem(std::make_shared<Compiler::Service>());
-#endif
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
 
