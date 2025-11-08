@@ -20,11 +20,13 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             ${{ runner.os }}-build-
-      - name: Install cppcheck
-        run: choco install cppcheck -y
+      - name: Download Cppcheck
+        run: |
+          curl -L -o cppcheck.zip https://github.com/danmar/cppcheck/releases/download/2.14.0/cppcheck-2.14.0-x64.zip
+          tar -xf cppcheck.zip || unzip cppcheck.zip
       - name: Run cppcheck static analysis
         run: |
-          cppcheck --enable=warning,style,performance,portability --std=c++20 --output-file=cppcheck_report.txt . 2> cppcheck_report.txt
+          ./cppcheck-2.14.0-x64/cppcheck --enable=warning,style,performance,portability --std=c++20 --output-file=cppcheck_report.txt . 2> cppcheck_report.txt
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Build Windows (build.bat)
@@ -69,13 +71,13 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
             ${{ runner.os }}-build-
+      - name: Download Cppcheck
+        run: |
+          curl -L -o cppcheck.zip https://github.com/danmar/cppcheck/releases/download/2.14.0/cppcheck-2.14.0-x64.zip
+          tar -xf cppcheck.zip || unzip cppcheck.zip
       - name: Run cppcheck static analysis
-        uses: deep5050/cppcheck-action@main
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          enable: warning,style,performance,portability
-          std: c++20
-          output_file: ./cppcheck_report.txt
+        run: |
+          ./cppcheck-2.14.0-x64/cppcheck --enable=warning,style,performance,portability --std=c++20 --output-file=cppcheck_report.txt . 2> cppcheck_report.txt
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
