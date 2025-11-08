@@ -164,7 +164,20 @@ namespace PAIN {
             return ok;
         }
         bool Service::loadSceneFromFile(const std::string& file_path) {
+            auto path_service = services->get<Path::Path>();
+            std::string virtPath = file_path;
 
+            if (virtPath.size() < 4 || virtPath.rfind(".scn") != virtPath.size() - 4)
+                virtPath += ".scn";
+
+#ifdef PN_PLATFORM_WINDOWS
+            // avoid the assert in WindowsPath::createFileStream
+            const std::string realPath = path_service->resolvePath(virtPath);
+            if (!std::filesystem::exists(realPath)) {
+                PN_CORE_WARN("[Scene] File not found: {}", realPath);
+                return false;
+            }
+#endif
             const auto j = loadJsonFile(file_path);
             if (!j.is_object()) {
                 PN_CORE_WARN("[Scene] expected object root (reflection)");
