@@ -16,7 +16,7 @@
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
     class Scene;
-    class Mesh;
+    namespace Assets { class Model; } // Forward-declare Assets::Model
     struct Transform;
     struct ModelRenderer;
     struct cBoundingVolume;
@@ -42,8 +42,8 @@ public:
 
 private:
     BVH m_bvh;
-    // Parameter types Mesh and AABB should be defined via includes above or pch
-    AABB calculateLocalAABB(const std::shared_ptr<Mesh>& mesh);
+    // Helper to compute AABB from model vertices
+    AABB calculateLocalAABB(const std::shared_ptr<Assets::Model>& model);
 };
 
 } // namespace PAIN
