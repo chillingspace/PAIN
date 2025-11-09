@@ -31,7 +31,6 @@ namespace PAIN {
 			return ref;
 		}
 
-	private:
 		std::string ref;
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -39,5 +38,6 @@ namespace PAIN {
 
 		static constexpr int MAX_VERTICES = 1000000;
 		static constexpr int MAX_INDICES = 1000000;
+	private:
 	};
 }

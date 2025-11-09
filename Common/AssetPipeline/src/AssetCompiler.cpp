@@ -24,7 +24,7 @@ namespace PAIN {
 
         bool Compiler::verifyDirectory(std::filesystem::path const& dest) const {
 
-            //Check if directory exists
+            //Check if directory mesh_id
             if (!std::filesystem::exists(dest)) {
 
                 //Create directory if it doesnt exist
@@ -753,7 +753,7 @@ namespace PAIN {
                 aiString texPath;
 
                 if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
-                    mat.diffuseMap = texPath.C_Str();
+                    mat.diffuse_map_buf = texPath.C_Str();
                 if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS)
                     mat.normalMap = texPath.C_Str();
                 if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS)
@@ -783,9 +783,6 @@ namespace PAIN {
                     mat.emission = glm::length(glm::vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b));
                 if (AI_SUCCESS == material->Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveIntensity))
                     mat.emission *= emissiveIntensity;
-
-                // Ambient occlusion (usually only as texture, not scalar)
-                mat.ao = 1.0f;
 
                 asset.materials.push_back(mat);
             }
@@ -1088,7 +1085,7 @@ namespace PAIN {
                     out.write(str.data(), len);
                     };
 
-                writeStr(mat.diffuseMap);
+                writeStr(mat.diffuse_map_buf);
                 writeStr(mat.normalMap);
                 writeStr(mat.metallicMap);
                 writeStr(mat.roughnessMap);
@@ -1098,7 +1095,6 @@ namespace PAIN {
                 out.write((char*)&mat.baseColor, sizeof(mat.baseColor));
                 out.write((char*)&mat.metallic, sizeof(mat.metallic));
                 out.write((char*)&mat.roughness, sizeof(mat.roughness));
-                out.write((char*)&mat.ao, sizeof(mat.ao));
                 out.write((char*)&mat.emission, sizeof(mat.emission));
             }
 
@@ -1110,7 +1106,7 @@ namespace PAIN {
             //Get shipped path
             auto shipped = asset_info.shipped_path;
 
-            //Check shipped asset exists
+            //Check shipped asset mesh_id
             if (!std::filesystem::exists(shipped))
                 return true;
 
@@ -1136,7 +1132,7 @@ namespace PAIN {
             //Get desc obj
             Descriptor desc_obj;
 
-            //Check if desc exists
+            //Check if desc mesh_id
             if (!std::filesystem::exists(asset_desc_path)) {
                 desc_obj = createDefaultDesc(asset_info, asset_desc_path);
             }

@@ -12,20 +12,19 @@ namespace PAIN {
 	* (Place largest type var (Double) first, then followed by smallest.
 	*****************************************************************************************/
 
-	struct MeshRenderer {
-		//std::shared_ptr<Mesh> mesh;
-		uint32_t mesh_id;
+	struct ModelRenderer {
+		uint32_t mesh_id{};
 	};
 
 #ifdef _DEBUG
 	// UI Registration function
 	inline void RegisterMeshRendererUI(Editor::Panel::ComponentsPanel& panel) {
-		panel.registerCompUIFunc<MeshRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, MeshRenderer& mesh) {
-			ImGui::Text("Mesh Renderer");
+		panel.registerCompUIFunc<ModelRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, ModelRenderer& mesh_id) {
+			ImGui::Text("Model Renderer");
 			ImGui::Separator();
 			
 			unsigned int step = 1;
-			ImGui::InputScalar("Mesh ID", ImGuiDataType_U32, &mesh.mesh_id, &step);
+			ImGui::InputScalar("Mesh ID", ImGuiDataType_U32, &mesh_id, &step);
 
 		});
 
@@ -36,7 +35,7 @@ namespace PAIN {
 }
 
 
-REFL_TYPE(PAIN::MeshRenderer)
+REFL_TYPE(PAIN::ModelRenderer)
 REFL_FIELD(mesh_id)
 REFL_END
 

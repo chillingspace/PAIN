@@ -19,16 +19,18 @@ namespace PAIN {
 		void onUpdate(AppTiming timing) override;
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
-		// Modified to return the created entity's ID
-		entt::entity AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
+		entt::entity AddObject(const Assets::Model& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
 
 		// TO BE MOVEDDDDDDDDDD INTO ASSETS LOADER
 		std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache
+		std::unordered_map <uint32_t, std::shared_ptr<Assets::Model>> modelCache;
 
 		std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
-		uint32_t cacheMesh(const std::string& path);
-		uint32_t getMeshId(const std::string& path);
-		std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
+		//uint32_t cacheMesh(const std::string& path);
+		std::shared_ptr<Assets::Model> cacheModel(const std::string& vpath);
+		uint32_t getModelId(const std::string& path);
+		//std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
+		std::shared_ptr<Assets::Model> getModel(uint32_t model_id);
 
 		Camera* GetActiveCamera();
 

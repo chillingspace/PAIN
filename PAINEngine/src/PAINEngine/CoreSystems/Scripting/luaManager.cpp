@@ -544,9 +544,9 @@ void LuaManager::bindEngineAPI() {
     lua_.set_function("cursorInWindow",   [this] { return api_ && api_->Input_IsCursorInWindow(); });
 
     /* =========================================================================== */
-    /*                                MeshRenderer                                 */
+    /*                                ModelRenderer                                 */
     /* =========================================================================== */
-    lua_.set_function("getMeshId", [this](entt::entity entityId) -> sol::object {
+    lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {
         if (!api_) return sol::make_object(lua_, sol::nil);
         auto m = api_->GetMeshId(entityId);
         return m ? sol::make_object(lua_, static_cast<int>(*m))   

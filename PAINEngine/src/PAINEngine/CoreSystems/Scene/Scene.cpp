@@ -16,6 +16,15 @@
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #endif
 
+namespace {
+	static uint32_t djb2_hash(const std::string& str) {
+		uint32_t hash = 5381;
+		for (char c : str)
+			hash = ((hash << 5) + hash) + (uint8_t)c; /* hash * 33 + c */
+		return hash;
+	}
+}
+
 namespace PAIN {
 	void Scene::onDetach() {}
 
@@ -74,124 +83,44 @@ namespace PAIN {
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
 
-		auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre.obj");
+		//auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
 
-		cacheMesh("");
-		cacheMesh(obj_path);
+		// for .mesh(converted from .obj only)
+		{
+			auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
+			auto ogre_smile_ao_map = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
 
-		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
-		cacheMesh(obj_path);
-		//cacheMesh("game_assets://models/ogre_smile.mesh");
+			std::shared_ptr<Assets::Model> mdl = cacheModel("game_assets://models/ogre_smile.mesh");
 
-		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://models/quad.obj");
-		cacheMesh(quad_path);
+			mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
+			mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+			mdl->materials[0].metallic = 0.f;
+			mdl->materials[0].roughness = 1.f;
 
-		// !TODO: gotta fix mesh ref system. must be able to have both lit and unlit versions of same mesh, same goes for colors/textures
-		auto cube_mesh = getMeshId("");
-		auto ogre_mesh_id = getMeshId("ogre.obj");
-		auto quad_mesh_id = getMeshId("quad.obj");
-		auto smile_ogre_mesh_id = getMeshId("ogre_smile.obj");
+			// logging to check data
+			{
+				PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", mdl->vpath, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
+			}
 
-		auto quad_mesh = getMesh(quad_mesh_id);
-		auto texture_path = services->get<Path::Path>()->resolvePath("engine_assets://textures/sunshine.png");
-		auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
-		quad_mesh->texture_id = texture->gl_texture;
-		//quad_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "sunshine");
-		
-		// Create the audio source object and store its entity ID
-		//audioSourceEntity = AddObject(cube_mesh, "audio_src", { 0.f, 1.f, 0.f }, glm::quat(), { 1.f, 1.f, 1.f });
+			//smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
+			//smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
+			//smile_ogre_mesh->material.useTex = true;
+			//smile_ogre_mesh->material.aoTex = ogre_smile_ao_map->gl_texture;
+			//smile_ogre_mesh->material.useAo = true;
+			//smile_ogre_mesh->material.metal = 0.f;
+			//smile_ogre_mesh->material.rough = 1.f;
 
-		Material texturedMat;
-		texturedMat.useTex = true;
-		texturedMat.tex = quad_mesh->texture_id;
-		texturedMat.color = { 1.f, 0.f, 1.f };
-		texturedMat.alwaysLit = true;
+			//AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		}
 
-		quad_mesh->material = texturedMat;
-
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_diffuse.png");
-		auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_smile.png");
-		auto ogre_smile_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
-
-		auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
-		smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
-		smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
-		smile_ogre_mesh->material.useTex = true;
-		smile_ogre_mesh->material.aoTex = ogre_smile_tex->gl_texture;
-		smile_ogre_mesh->material.useAo = true;
-		smile_ogre_mesh->material.metal = 0.f;
-		smile_ogre_mesh->material.rough = 1.f;
-
-
-		auto ogre_mesh = getMesh(ogre_mesh_id);
-		Material ogreMat;
-		//ogreMat.alwaysLit = true;
-		ogreMat.color = { 1.f, 1.f, 1.f };
-		ogreMat.rough = 1.f;
-		ogreMat.metal = 0.2f;
-
-		// diffuse color texture
-		ogreMat.useTex = true;
-		ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
-		ogreMat.tex = ogre_mesh->texture_id;
-
-		// ao map
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/ogre_ao_rest.png");
-		auto ogre_rest_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("43dea636-43ff-864f-b059-bf1f4999b063"));
-		ogre_mesh->texture_id = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"))->gl_texture;
-		ogreMat.aoTex = ogre_rest_tex->gl_texture;
-		ogreMat.useAo = true;
-
-		ogre_mesh->material = ogreMat;
-
-		// Create the other static objects
-		AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(ogre_mesh_id, "ogre_2", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		AddObject(ogre_mesh_id, "ogre_3", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		//AddObject(smile_ogre_mesh_id, "ogre_far", { 0.f, 1.f, -50.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		
 		// New audio demo test
 		// Add the looping sound to the "screen" entity as a component
-		#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 		auto loopingSoundPath = pathService->resolvePath("game_assets://Audio/Music/Boss_Music.wav");
-		#else
+#else
 		auto loopingSoundPath = ("file:///android_asset/game/audio/music/Boss_Music.ogg");
-		#endif
+#endif
 
-		//audioManager->loadSound(loopingSoundPath, true, true, false, 1.0f, 20.0f); // Still need to load it
-
-		//m_audioSourceEntity = AddObject(quad_mesh_id, "screen", { 0.f, 2.f, 0.f }, { 0.f, 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
-		//ecs->addEntityComponent(m_audioSourceEntity, Audio::AudioSource {
-		//	.soundPath = loopingSoundPath,
-		//	.is3D = true,
-		//	.looping = true,
-		//	.playTrigger = true // Tell the AudioSystem to play this on its first update
-		//});
-
-
-		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/sdcc.obj");
-		cacheMesh(obj_path);
-		auto sdcc_mesh_id = getMeshId("sdcc.obj");
-		auto sdcc_mesh = getMesh(sdcc_mesh_id);
-
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/sdcc_baked_building.png");
-		auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
-		sdcc_mesh->texture_id = sdcc_tex->gl_texture;
-		sdcc_mesh->material.useTex = true;
-		sdcc_mesh->material.tex = sdcc_tex->gl_texture;
-		//AddObject(sdcc_mesh_id, "sdcc", { 0.f, -1.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {30.f, 30.f, 30.f});
-
-		//obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/city.obj");
-		//cacheMesh(obj_path);
-		//auto city_mesh_id = getMeshId("city.obj");
-		//auto city_mesh = getMesh(city_mesh_id);
-
-		//texture_path = services->get<Path::Path>()->resolvePath("game_assets://textures/city.png");
-		//city_mesh->texture_id = TextureManager::get().load(texture_path.c_str(), "city");
-		//city_mesh->material.useTex = true;
-		//city_mesh->material.tex = city_mesh->texture_id;
-		//AddObject(city_mesh_id, "city", { -20.f, 0.f, -10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 100.f, 100.f, 100.f });
 
 
 		if (audioManager)
@@ -258,12 +187,12 @@ namespace PAIN {
 		// Get time scale from ViewportPanel (0.0 when paused, 1.0 when playing)
 		float timeScale = 1.0f;
 		bool isPaused = false;
-	#ifdef _DEBUG
+#ifdef _DEBUG
 		if (auto viewport = services->get<Editor::Panel::ViewportPanel>()) {
 			timeScale = viewport->getTimeScale();
 			isPaused = (timeScale == 0.0f);
 		}
-	#endif
+#endif
 
 		//// Apply time scale to deltaTime for simulation
 		//float scaledDt = timing.dt * timeScale;
@@ -309,13 +238,13 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	entt::entity Scene::AddObject(uint32_t mesh, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	entt::entity Scene::AddObject(const Assets::Model& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-		ecs->addEntityComponent(entity, MeshRenderer{ mesh });
+		ecs->addEntityComponent(entity, ModelRenderer{ djb2_hash(mdl.vpath) });
 
 		return entity;
 	}
@@ -512,13 +441,42 @@ namespace PAIN {
 		return std::make_shared<Mesh>(vertices, indices, path_to_mesh);
 	}
 
-	static uint32_t djb2_hash(const std::string& str) {
-		uint32_t hash = 5381;
-		for (char c : str)
-			hash = ((hash << 5) + hash) + (uint8_t)c; /* hash * 33 + c */
-		return hash;
+	std::shared_ptr<Assets::Model> Scene::cacheModel(const std::string& vpath) {
+		std::filesystem::path fsPath(vpath);
+		std::string filename = fsPath.filename().string();
+
+		PN_CORE_INFO("Loading .mesh: {}", filename);
+
+		// check that model has .mesh extension
+		{
+			static constexpr char sep = '.';
+			auto sep_idx = filename.find(sep);
+			std::string ext{};
+			if (sep_idx != filename.npos) {
+				ext = filename.substr(sep_idx + 1);
+			}
+
+			if (ext != "mesh") {
+				PN_CORE_ERROR("Invalid model format! Expected: .mesh");
+				throw std::exception("");
+			}
+		}
+
+		std::shared_ptr<Assets::Manager> am = services->get<Assets::Manager>();
+		Assets::Loader* ral = am->getRawAssetLoader();
+		auto loader = ral->GetLoader(Assets::Type::Model);
+		const std::shared_ptr<Assets::IAsset> base_mdl = loader(vpath);
+		std::shared_ptr<Assets::Model> mdl = std::dynamic_pointer_cast<Assets::Model>(base_mdl);
+
+		// logging to check data
+		{
+			PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", filename, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
+		}
+
+		return mdl;
 	}
 
+	/*
 	uint32_t Scene::cacheMesh(const std::string& path)
 	{
 		std::filesystem::path fsPath(path);
@@ -528,7 +486,7 @@ namespace PAIN {
 		auto sep_idx = filename.find(sep);
 		std::string ext{};
 		if (sep_idx != filename.npos) {
-			ext = filename.substr(sep_idx+1);
+			ext = filename.substr(sep_idx + 1);
 		}
 
 		unsigned int mesh_id;
@@ -536,7 +494,7 @@ namespace PAIN {
 		if (ext == "mesh") {
 			PN_CORE_INFO("Loading .mesh: {}", filename);
 
-			
+
 
 			std::shared_ptr<Assets::Manager> am = services->get<Assets::Manager>();
 			Assets::Loader* ral = am->getRawAssetLoader();
@@ -562,8 +520,9 @@ namespace PAIN {
 
 		return mesh_id;
 	}
+	*/
 
-	uint32_t Scene::getMeshId(const std::string& file_name)
+	uint32_t Scene::getModelId(const std::string& file_name)
 	{
 		std::filesystem::path fsPath(file_name);
 		std::string filename = fsPath.filename().string();
@@ -572,10 +531,10 @@ namespace PAIN {
 		return mesh_id;
 	}
 
-	std::shared_ptr<Mesh> Scene::getMesh(uint32_t mesh_id)
+	std::shared_ptr<Assets::Model> Scene::getModel(uint32_t mesh_id)
 	{
-		auto it = meshCache.find(mesh_id);
-		if (it != meshCache.end()) {
+		auto it = modelCache.find(mesh_id);
+		if (it != modelCache.end()) {
 			return it->second;
 		}
 

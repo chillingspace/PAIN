@@ -138,7 +138,7 @@ public:
     void Input_OnEvent(PAIN::Event::Event& e) override; // feed events into the adapter
 
     /* =========================================================================== */
-    /*                                MeshRenderer                                 */
+    /*                                ModelRenderer                                 */
     /* =========================================================================== */
     std::optional<uint32_t> GetMeshId(entt::entity entityId) override;
     void SetMeshId(entt::entity entityId, uint32_t meshId) override;

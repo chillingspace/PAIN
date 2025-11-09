@@ -24,9 +24,9 @@ namespace PAIN {
                 registerCompUIFunc<PAIN::Transform>("Transform",
                     [](ComponentsPanel&, PAIN::Transform& as) { DrawWithReflection(as); });
 
-                // ---- MeshRenderer ----
-                registerCompUIFunc<PAIN::MeshRenderer>("MeshRenderer",
-                    [](ComponentsPanel&, PAIN::MeshRenderer& as) { DrawWithReflection(as); });
+                // ---- ModelRenderer ----
+                registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
+                    [](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as); });
 
                 // ---- Light ----
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

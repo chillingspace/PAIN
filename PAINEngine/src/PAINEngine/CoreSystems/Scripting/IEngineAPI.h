@@ -138,7 +138,7 @@ struct IEngineAPI {
     virtual void      Input_OnEvent(PAIN::Event::Event& e) = 0; // feed events into the adapter 
 
     /* =========================================================================== */
-    /*                                MeshRenderer                                 */
+    /*                                ModelRenderer                                 */
     /* =========================================================================== */
     virtual std::optional<uint32_t> GetMeshId(entt::entity entityId) = 0;
     virtual void SetMeshId(entt::entity entityId, uint32_t meshId) = 0;

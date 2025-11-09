@@ -19,7 +19,7 @@ namespace PAIN {
 
         LoaderFunc Loader::GetLoader(Type const& type) const {
             
-            //Check if loader exists
+            //Check if loader mesh_id
             if (!CheckLoader(type)) {
                 throw std::runtime_error("Loader does not exist! Unable to get loader function!");
             }
@@ -453,7 +453,7 @@ namespace PAIN {
                     readMem(str.data(), len);
                     };
 
-                readStr(mat.diffuseMap);
+                readStr(mat.diffuse_map_buf);
                 readStr(mat.normalMap);
                 readStr(mat.metallicMap);
                 readStr(mat.roughnessMap);
@@ -463,9 +463,10 @@ namespace PAIN {
                 readMem(&mat.baseColor, sizeof(mat.baseColor));
                 readMem(&mat.metallic, sizeof(mat.metallic));
                 readMem(&mat.roughness, sizeof(mat.roughness));
-                readMem(&mat.ao, sizeof(mat.ao));
                 readMem(&mat.emission, sizeof(mat.emission));
             }
+
+            asset.vpath = virtual_path;
 
             return std::make_shared<Model>(std::move(asset));
 		}

@@ -209,7 +209,7 @@ namespace PAIN {
 		 */
 		bool create(const std::string& ref) {
 			if (sources.find(ref) != sources.end()) {
-				PN_CORE_ERROR("Light reference {0} already exists", ref);
+				PN_CORE_ERROR("Light reference {0} already mesh_id", ref);
 				return false;
 			}
 			if (sources.size() >= MAX_LIGHT_SOURCES) {

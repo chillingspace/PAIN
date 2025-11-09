@@ -39,7 +39,7 @@ namespace PAIN {
 
         // Gameplay
         Transform,
-        MeshRenderer,
+        ModelRenderer,
         Lighting,
         Physics::RigidBody3D,
         Collision::Collider,
@@ -60,7 +60,7 @@ namespace PAIN {
 
         // Gameplay components
         else if constexpr (std::is_same_v<T, Transform>) return "Transform";
-        else if constexpr (std::is_same_v<T, MeshRenderer>) return "MeshRenderer";
+        else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
         else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collider";

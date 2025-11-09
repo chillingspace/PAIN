@@ -24,7 +24,7 @@ namespace PAIN {
 			if (value != v) {
 				value = v;
 
-				// Auto-update if body exists
+				// Auto-update if body mesh_id
 				if (bodyID_ptr && !bodyID_ptr->IsInvalid() && g_physics_system) {
 					g_physics_system->updateBodyLayer(*bodyID_ptr, value);
 				}

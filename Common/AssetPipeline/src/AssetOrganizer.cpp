@@ -270,7 +270,7 @@ namespace PAIN {
             //Ensure standard structure for game directory
             for (const auto& dir : game_dir) {
 
-                //Ensure raw directory exists
+                //Ensure raw directory mesh_id
                 std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
 
@@ -289,7 +289,7 @@ namespace PAIN {
             //Ensure standard structure for engine directory
             for (const auto& dir : engine_dir) {
 
-                //Ensure raw directory exists
+                //Ensure raw directory mesh_id
                 std::filesystem::path fullPath = assets_root / dir.second;
                 instantiateFolder(fullPath);
 
