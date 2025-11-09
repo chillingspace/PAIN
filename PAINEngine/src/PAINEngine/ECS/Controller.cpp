@@ -12,8 +12,6 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/GLMSerialization.h"
 #include "ECS/Components/AllComponents.h" 
-#include "ECS/Components/cAudioSource.h"
-#include "ECS/Components/cBoundingVolume.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -145,19 +143,16 @@ namespace PAIN {
 
             entt::entity clone = createEntity();
 
-            // Copy all components from source to clone, EnTT doesn't have built-in cloning, so we iterate through storage pools
-
-            // Iterate all registered component types and copy if present
-            for (const auto [type_index, storage] : entt_registry.storage()) {
-                if (storage.contains(copy)) {
-                    // Component mesh_id on source, copy to clone
-                    // Note: This requires components to be copy-constructible
-                    storage.push(clone, storage.value(copy));
+            tuple_for_each<PAIN::AllGameplayComponents>([&](auto type_tag) {
+                using T = std::decay_t<decltype(type_tag)>;
+                if (entt_registry.all_of<T>(copy)) {
+                    entt_registry.emplace_or_replace<T>(clone, entt_registry.get<T>(copy));
                 }
-            }
+                });
 
             return clone;
         }
+
 
         void Controller::destroyEntity(entt::entity entity) {
             if (entt_registry.valid(entity)) {

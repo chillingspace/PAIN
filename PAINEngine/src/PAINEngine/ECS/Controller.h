@@ -80,6 +80,14 @@ namespace PAIN {
 			//Destroy Entity
 			void destroyAllEntities();
 
+			template<typename Tuple, typename F>
+			void tuple_for_each(F&& f)
+			{
+				std::apply([&](auto&&... type_tag) {
+					(f(type_tag), ...);
+					}, Tuple{});
+			}
+
 			/*****************************************************************//**
 			* Component Methods
 			*********************************************************************/
