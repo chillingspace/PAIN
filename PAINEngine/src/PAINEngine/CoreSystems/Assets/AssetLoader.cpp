@@ -318,32 +318,49 @@ namespace PAIN {
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
             auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
-            if (!stream || !stream->good())
+            if (!stream || !stream->good()) {
+                PN_CORE_ERROR("Failed to open model file: {}", virtual_path);
                 throw std::runtime_error("Failed to open model file: " + virtual_path);
+            }
 
             std::vector<uint8_t> data(stream->size());
             size_t read = stream->read(data.data(), data.size());
-            if (read != data.size())
+            if (read != data.size()) {
+                PN_CORE_ERROR("Failed to read full model file: {}", virtual_path);
                 throw std::runtime_error("Failed to read full model file: " + virtual_path);
+            }
 
             Model asset;
             size_t offset = 0;
             auto require = [&](size_t n) {
-                if (offset + n > data.size()) throw std::runtime_error("Unexpected end of model file");
+                if (offset + n > data.size()) { 
+                    PN_CORE_ERROR("Unexpected end of model file");
+                    throw std::runtime_error("Unexpected end of model file"); 
+                }
                 };
             auto readMem = [&](void* dst, size_t n) {
+                if (n == 0) return;
                 require(n); std::memcpy(dst, data.data() + offset, n); offset += n;
                 };
+
+            PN_CORE_TRACE("ImportModel: Before reading bounding box");
 
             // Read bounding box
             readMem(&asset.aabbMin, sizeof(asset.aabbMin));
             readMem(&asset.aabbMax, sizeof(asset.aabbMax));
 
+            PN_CORE_TRACE("ImportModel: Before reading LODs");
+
             // Read LODs
             uint32_t lodCount = 0;
             readMem(&lodCount, sizeof(lodCount));
+            PN_CORE_TRACE("ImportModel: after readMem for LOD");
+            PN_CORE_TRACE("Attempting to allocate {} bytes for `asset`", lodCount);
             asset.lods.resize(lodCount);
+            PN_CORE_TRACE("ImportModel: after reszing asset for LOD");
             readMem(asset.lods.data(), lodCount * sizeof(uint32_t));
+
+            PN_CORE_TRACE("ImportModel: Before reading vertices");
 
             // Vertices/Indices
             uint32_t vtxCount = 0, idxCount = 0;
@@ -353,6 +370,8 @@ namespace PAIN {
             asset.indices.resize(idxCount);
             readMem(asset.vertices.data(), vtxCount * sizeof(Vertex));
             readMem(asset.indices.data(), idxCount * sizeof(uint32_t));
+
+            PN_CORE_TRACE("ImportModel: Before reading submeshes");
 
             // Submeshes
             uint32_t submeshCount = 0;
@@ -435,6 +454,8 @@ namespace PAIN {
                     }
                 }
             }
+
+            PN_CORE_TRACE("ImportModel: Before reading materials");
 
             // Materials
             uint32_t matCount = 0;

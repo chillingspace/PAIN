@@ -493,13 +493,16 @@ namespace PAIN {
 			}
 
 			if (ext != "mesh") {
-				PN_CORE_ERROR("Invalid model format! Expected: .mesh");
-				throw std::exception("");
+				PN_CORE_ERROR("Invalid model format! Expected: .mesh, Given: {}", vpath);
+				throw std::exception();
 			}
 		}
 
 		std::shared_ptr<Assets::Manager> am = services->get<Assets::Manager>();
 		Assets::Loader* ral = am->getRawAssetLoader();
+
+		PN_CORE_TRACE("getRawAssetLoader address: {}", static_cast<const void*>(ral));
+
 		auto loader = ral->GetLoader(Assets::Type::Model);
 		const std::shared_ptr<Assets::IAsset> base_mdl = loader(vpath);
 		std::shared_ptr<Assets::Model> mdl = std::dynamic_pointer_cast<Assets::Model>(base_mdl);
@@ -511,6 +514,8 @@ namespace PAIN {
 		}
 
 		modelCache[djb2_hash(vpath)] = mdl;
+
+		PN_CORE_INFO("{} loaded", filename);
 
 		return mdl;
 	}
