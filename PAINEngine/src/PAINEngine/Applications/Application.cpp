@@ -25,7 +25,6 @@
 #include "Systems/Physics/sysPhysics.h"
 #include "Systems/AI/sysAI.h" 
 #include "Systems/Animation/sysAnimation.h" 
-#include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h"
 #include "Systems/Audio/sysAudio.h"
 #include "Systems/Collision/sBVHSystem.h"
@@ -125,7 +124,6 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS	
 		services->get<ECS::Controller>()->registerSystem<AI::System>();
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
-		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
 		services->get<ECS::Controller>()->registerSystem<Audio::System>();
 #endif

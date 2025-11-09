@@ -52,7 +52,8 @@ namespace PAIN {
                 std::string loadSceneErrorMsg_;
 
                 // Temporary in-panel “model” 
-                std::string currSceneId_; 
+               int selected_scene_index = 0; 
+               std::string currSceneId_;
                 struct Layer {
                     unsigned id;
                     bool visible = true;
@@ -60,6 +61,11 @@ namespace PAIN {
                 std::vector<Layer> layers_;                    
                 std::vector<std::vector<bool>> mask_;         
                 unsigned selectedLayerIdx_ = 0;
+
+                std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
+
 
                 // UI 
                 bool showCreate_ = false;
@@ -70,7 +76,7 @@ namespace PAIN {
 
                 // Hooks for future backend integration 
                 ScenesHooks hooks_;
-                char nameBuf_[64] = "test";  
+                char nameBuf_[64] = "";  
 
             private:
                 // helpers

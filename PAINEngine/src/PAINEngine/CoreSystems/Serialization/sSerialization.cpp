@@ -428,13 +428,14 @@ namespace PAIN {
         bool Service::deleteSceneById(std::string_view sceneId)
         {
             // Normalize to the actual on-disk path (adds .scn if needed)
-            const std::string path = makeVirtualScenePathFromBase(sceneId);
-            PN_CORE_INFO("[Serialization] deleteSceneById trying '{}'", path);
+            const std::string vir_path = makeVirtualScenePathFromBase(sceneId);
+            const std::string full_path = services->get<Path::Path>()->resolvePath(vir_path);
+            PN_CORE_INFO("[Serialization] deleteSceneById trying '{}'", full_path);
 
 #if !defined(PN_PLATFORM_ANDROID)
             // Debug for desktop
-            if (!std::filesystem::exists(path)) {
-                PN_CORE_WARN("[Serialization] deleteSceneById: file does not exist: {}", path);
+            if (!std::filesystem::exists(full_path)) {
+                PN_CORE_WARN("[Serialization] deleteSceneById: file does not exist: {}", full_path);
                 return false;
             }
 #else
@@ -445,21 +446,21 @@ namespace PAIN {
 #endif
 
             std::error_code ec;
-            const bool removed = std::filesystem::remove(path, ec);
+            const bool removed = std::filesystem::remove(full_path, ec);
 
             if (ec) {
-                PN_CORE_ERROR("[Serialization] deleteSceneById: std::filesystem::remove failed for {}: {}", path, ec.message());
+                PN_CORE_ERROR("[Serialization] deleteSceneById: std::filesystem::remove failed for {}: {}", full_path, ec.message());
                 return false;
             }
             if (!removed) {
                 // No error, but nothing was removed (likely didn't exist)
-                PN_CORE_WARN("[Serialization] deleteSceneById: nothing removed for {}", path);
+                PN_CORE_WARN("[Serialization] deleteSceneById: nothing removed for {}", full_path);
                 return false;
             }
 
-            if (curr_scene_file_ == path) curr_scene_file_.clear();
+            if (curr_scene_file_ == full_path) curr_scene_file_.clear();
 
-            PN_CORE_INFO("[Serialization] Deleted scene: {}", path);
+            PN_CORE_INFO("[Serialization] Deleted scene: {}", full_path);
             return true;
         }
 

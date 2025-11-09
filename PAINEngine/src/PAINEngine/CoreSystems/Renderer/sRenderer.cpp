@@ -184,17 +184,14 @@ namespace PAIN {
 		if (debug_mode == 1)
 		{
 			auto& registry = ecs->getRegistry();
-			auto view = registry.view<MetaData::EntityName>();
+			// Iterate over BoundingVolume, not EntityName
+			auto view = registry.view<BoundingVolume>();
 			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
 
 			for (auto entity : view) {
-				auto bounding_vol = ecs->getEntityComponent<BoundingVolume>(entity);
-
-				// Check if entity has comp
-				if (bounding_vol.has_value())
-				{
-					w_renderer->DebugPass(bounding_vol->get().worldAABB.min, bounding_vol->get().worldAABB.max, color, scene);
-				}
+				// Get component directly from the view
+				auto& bounding_vol = view.get<BoundingVolume>(entity);
+				w_renderer->DebugPass(bounding_vol.worldAABB.min, bounding_vol.worldAABB.max, color, scene);
 			}
 		}
 

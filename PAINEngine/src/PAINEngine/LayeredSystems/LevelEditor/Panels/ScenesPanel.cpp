@@ -33,6 +33,121 @@ namespace PAIN {
                 // default window; leave docking/frameless tricks to ToolsPanel only
             }
 
+            std::function<void(std::any const&)> ScenesPanel::createScenePopup(std::string const& popup_id)
+            {
+                return [this, popup_id](std::any const&) {
+                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Create New Scene");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    ImGui::Text("Scene Name:");
+                    ImGui::SameLine();
+                    ImGui::InputText("##SceneName", nameBuf_, IM_ARRAYSIZE(nameBuf_));
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    float button_width = 120.0f;
+                    float spacing = ImGui::GetStyle().ItemSpacing.x;
+                    float total_width = (button_width * 2) + spacing;
+                    float offset = (ImGui::GetContentRegionAvail().x - total_width) * 0.5f;
+                    if (offset > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                    bool create_clicked = ImGui::Button("Create", ImVec2(button_width, 0));
+                    ImGui::SameLine();
+                    bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
+
+                    if (create_clicked) {
+                        if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
+                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                        auto ser = services->get<Serialization::Service>();
+                        ser->setGrid(0);
+                        const auto& doc = ser->doc();
+                        if (doc.layers.empty()) ser->addLayer();
+                        // F
+                        services->get<ECS::Controller>()->destroyAllEntities();
+                        closePopUp(popup_id);
+                    }
+
+                    if (cancel_clicked) {
+                        closePopUp(popup_id);
+                    }
+                };
+            }
+
+            std::function<void(std::any const&)> ScenesPanel::saveSceneAsPopup(std::string const& popup_id)
+            {
+                return [this, popup_id](std::any const&) {
+                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Save Scene As");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    ImGui::Text("New Scene Name:");
+                    ImGui::SameLine();
+                    ImGui::InputText("##SaveSceneName", nameBuf_, IM_ARRAYSIZE(nameBuf_));
+
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("This will create a new scene file with the specified name.");
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    float button_width = 120.0f;
+                    float spacing = ImGui::GetStyle().ItemSpacing.x;
+                    float total_width = (button_width * 2) + spacing;
+                    float offset = (ImGui::GetContentRegionAvail().x - total_width) * 0.5f;
+                    if (offset > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                    bool save_clicked = ImGui::Button("Save As", ImVec2(button_width, 0));
+                    ImGui::SameLine();
+                    bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
+
+                    if (save_clicked) {
+                        if (hooks_.onSaveAs) hooks_.onSaveAs(std::string{ nameBuf_ });
+                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                        closePopUp(popup_id);
+                    }
+                    if (cancel_clicked) {
+                        closePopUp(popup_id);
+                    }
+                    };
+            }
+
+            std::function<void(std::any const&)> ScenesPanel::deleteScenePopup(std::string const& popup_id)
+            {
+                return [this, popup_id](std::any const&) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.2f, 1.0f), "Delete Scene");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    ImGui::TextWrapped("Are you sure you want to delete this scene?");
+                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "This action cannot be undone.");
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    float button_width = 120.0f;
+                    float spacing = ImGui::GetStyle().ItemSpacing.x;
+                    float total_width = (button_width * 2) + spacing;
+                    float offset = (ImGui::GetContentRegionAvail().x - total_width) * 0.5f;
+                    if (offset > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                    bool delete_clicked = ImGui::Button("Delete", ImVec2(button_width, 0));
+                    ImGui::SameLine();
+                    bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
+
+                    if (delete_clicked) {
+                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
+                        currSceneId_.clear();
+                        closePopUp(popup_id);
+                    }
+                    if (cancel_clicked) {
+                        closePopUp(popup_id);
+                    }
+                    };
+            }
+
             void ScenesPanel::ensureAtLeastOneLayer() {
                 if (layers_.empty()) {
                     layers_.push_back(Layer{ 0, true });
@@ -207,6 +322,9 @@ namespace PAIN {
 
             void ScenesPanel::onAttach()
             {
+                registerPopUp("CreateScene", createScenePopup("CreateScene"));
+                registerPopUp("SaveSceneAs", saveSceneAsPopup("SaveSceneAs"));
+                registerPopUp("DeleteScene", deleteScenePopup("DeleteScene"));
             }
 
             // ---------- Main draw ----------
@@ -222,41 +340,58 @@ namespace PAIN {
 
                 ImGui::Text("Scene ID: %s", currSceneId_.empty() ? "(none)" : currSceneId_.c_str());
 
-                ImGui::InputText("Scene name", nameBuf_, IM_ARRAYSIZE(nameBuf_));
-
                 // Create New Scene
-                if (ImGui::Button("Create New Scene")) { 
-                    if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
-                    currSceneId_ = std::string{ nameBuf_ } + ".scn";
-                    ser->setGrid(0);
-                    if (doc.layers.empty()) ser->addLayer();
+                if (ImGui::Button("Create New Scene")) {
+                    openPopUp("CreateScene");
                 }
 
-                // Load Scene
-                if (ImGui::Button("Load Scene")) {
-                    const std::string id = std::string{ nameBuf_ } + ".scn"; 
 
-                    bool success = hooks_.onChange ? hooks_.onChange(id) : false; // -> Service::loadSceneById
-                    // Check if load succeeded
-                    if (success) { 
-                        currSceneId_ = id; // update panel label
+                auto scenes = services->get<Assets::Manager>()->getAllAssetsOfType(Assets::Type::Scenes);
+
+                // Show dropdown of available scenes
+                if (!scenes.empty()) {
+                    std::vector<const char*> scene_names;
+                    for (const auto& scene : scenes) {
+                        if (scene) {
+                            scene_names.push_back(scene.get()->name.c_str()); 
+                        }
+
                     }
-                    else {
-                        showSceneLoadError_ = true;
-                        loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
+
+                    // Combo box for scene selection
+                    if (ImGui::Combo("Select Scene", &selected_scene_index, scene_names.data(), scene_names.size())) {
+                        // Optional: handle selection change if needed
+                    }
+
+                    // Get selected scene ID (or name)
+                    auto& selected_scene = scenes[selected_scene_index]; 
+                    std::string id = selected_scene->name; // Use id or name as required
+
+                    // Button to load the selected scene
+                    if (ImGui::Button("Load Scene")) {
+                        bool success = hooks_.onChange ? hooks_.onChange(id) : false; 
+                        if (success) {
+                            currSceneId_ = id; // update panel label
+                        }
+                        else {
+                            showSceneLoadError_ = true;
+                            loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
+                        }
                     }
                 }
+                else {
+                    ImGui::TextDisabled("No scenes available!");
+                }
+
+                
 
                 if (!currSceneId_.empty()) {
                     ImGui::SameLine();
-                    if (ImGui::Button("Delete Scene")) { 
-                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
-                        currSceneId_.clear();
+                    if (ImGui::Button("Delete Scene")) {
+                        openPopUp("DeleteScene");
                     }
-
-                    if (ImGui::Button("Save Scene As")) { 
-                        if (hooks_.onSaveAs) hooks_.onSaveAs(std::string{ nameBuf_ });
-                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                    if (ImGui::Button("Save Scene As")) {
+                        openPopUp("SaveSceneAs");
                     }
 
                     ImGui::SameLine();
@@ -321,6 +456,8 @@ namespace PAIN {
                     }
                     ImGui::EndPopup();
                 }
+
+                renderPopUps();
             }
 
         } // namespace Panel
