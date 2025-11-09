@@ -458,6 +458,22 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_P", l.projection());
 
 		//mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		glBindVertexArray(geometry_vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Vertex), mdl.vertices.data());
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+
+		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, mdl.vpath);;
+		}
 	}
 
 	void WindowsRenderer::EndShadowPass()
