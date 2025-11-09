@@ -24,7 +24,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniformMatrix4fv(location, 1, GL_FALSE, &m[0][0]);
@@ -34,7 +34,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform4f(location, val.x, val.y, val.z, val.w);
@@ -44,7 +44,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform3f(location, val.x, val.y, val.z);
@@ -54,7 +54,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform2f(location, val.x, val.y);
@@ -64,7 +64,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform3f(location, x, y, z);
@@ -74,7 +74,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform1f(location, val);
@@ -84,7 +84,7 @@ namespace PAIN {
         {
             GLint location = glGetUniformLocation(m_RendererID, name.c_str());
             if (location == -1) {
-                PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
                 return;
             }
             glUniform1i(location, val);
