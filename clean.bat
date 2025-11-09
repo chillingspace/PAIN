@@ -71,8 +71,11 @@ if exist android\app\build (
 
 if exist android\app\.cxx (
     rmdir /s /q android\app\.cxx
-    echo     Removed android\app\.cxx
+    echo  [OK] Removed android\app\.cxx
+)else (
+    echo [SKIP] android\app\.cxx not found
 )
+
 
 REM Optional: Clean FetchContent cache (uncomment if needed)
 REM if exist _deps (
