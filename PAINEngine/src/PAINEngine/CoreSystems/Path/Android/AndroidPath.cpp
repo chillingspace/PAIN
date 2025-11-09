@@ -418,7 +418,7 @@ namespace PAIN {
 			else {
 
 				//Ensure path mesh_id
-				if (!std::filesystem::mesh_id(path)) {
+				if (!std::filesystem::exists(path)) {
 					throw std::runtime_error("File does not exist! Unable to create file stream");
 				}
 
