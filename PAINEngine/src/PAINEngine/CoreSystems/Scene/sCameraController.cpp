@@ -11,31 +11,76 @@ namespace PAIN {
 
 	}
 
+	// ANDROID ONLY
     void sCameraController::beginTouchControls(int pointerId, float x, float y) {
 
-        float screen_center = m_surfaceWidth / 2.f;
-		if (x >= screen_center){
-            if (m_touchLooking) return;
+		auto editor = services->get<Editor::Editor>();
+		float screen_center = 0.f;
+		if (editor->isVisible()) {
+			if (!vp_hovered) return;
 
-            m_touchLooking = true;
-            m_touchPointerId = pointerId;
-            m_touchLastX = x;
-            m_touchLastY = y;
-            mouseButtonDown = true; // reuse existing yaw/pitch code path
-        }
-        if (x < screen_center){
-            if (m_move.active) return;
 
-            m_move.active = true;
-            m_move.id = pointerId;
-            m_move.start_x = x;
-            m_move.start_y = y;
-            m_move.last_x = x;
-            m_move.last_y = y;
-        }
+			float relativeX = x - m_vpPosX;
+			float relativeY = y - m_vpPosY;
+
+			if (relativeX < 0 || relativeX > m_vpWidth ||
+				relativeY < 0 || relativeY > m_vpHeight) {
+				return;  // Touch outside viewport
+			}
+			screen_center = m_vpWidth / 2.f;
+
+
+			if (relativeX >= screen_center) {
+				if (m_touchLooking) return;
+
+				m_touchLooking = true;
+				m_touchPointerId = pointerId;
+				m_touchLastX = x;
+				m_touchLastY = y;
+				mouseButtonDown = true; // reuse existing yaw/pitch code path
+			}
+			if (relativeX < screen_center) {
+				if (m_move.active) return;
+
+				m_move.active = true;
+				m_move.id = pointerId;
+				m_move.start_x = x;
+				m_move.start_y = y;
+				m_move.last_x = x;
+				m_move.last_y = y;
+			}
+
+		}
+		else {
+			screen_center = m_surfaceWidth / 2.f;
+
+
+			if (x >= screen_center) {
+				if (m_touchLooking) return;
+
+				m_touchLooking = true;
+				m_touchPointerId = pointerId;
+				m_touchLastX = x;
+				m_touchLastY = y;
+				mouseButtonDown = true; // reuse existing yaw/pitch code path
+			}
+			if (x < screen_center) {
+				if (m_move.active) return;
+
+				m_move.active = true;
+				m_move.id = pointerId;
+				m_move.start_x = x;
+				m_move.start_y = y;
+				m_move.last_x = x;
+				m_move.last_y = y;
+			}
+
+		}
+
 
     }
 
+	// ANDROID ONLY
     void sCameraController::updateTouchControls(int pointerId, float x, float y) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
             // yOffset = lastY - y so drag up looks up
@@ -77,7 +122,8 @@ namespace PAIN {
         }
 
     }
-
+	
+	// ANDROID ONLY
     void sCameraController::endTouchControls(int pointerId) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
             m_touchLooking = false;
@@ -308,29 +354,31 @@ namespace PAIN {
 			PN_CORE_INFO(e.toString());
 			return false;
 			});
-#else
-        dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
-            beginTouchControls(e.getPointerId(), e.getX(), e.getY());
-            return false;
-        });
-        dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-            updateTouchControls(e.getPointerId(), e.getX(), e.getY());
-            return false;
-        });
-        dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
-            endTouchControls(e.getPointerId());
-            return false;
-        });
-        dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
-            endTouchControls(e.getPointerId());
-            return false;
-        });
 
+#else
 		dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& e) -> bool {
-            m_surfaceWidth = e.getWidth();
-            m_surfaceHeight = e.getHeight();
+			m_surfaceWidth = e.getWidth();
+			m_surfaceHeight = e.getHeight();
 			return false;
-		});
+			});
+
+		dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
+			beginTouchControls(e.getPointerId(), e.getX(), e.getY());
+			return false;
+			});
+		dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
+			updateTouchControls(e.getPointerId(), e.getX(), e.getY());
+			return false;
+			});
+		dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
+			endTouchControls(e.getPointerId());
+			return false;
+			});
+		dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
+			endTouchControls(e.getPointerId());
+			return false;
+			});
+
 
 
 #endif

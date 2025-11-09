@@ -58,7 +58,7 @@ namespace PAIN {
 				glm::mat4 inverseView = glm::inverse(viewMatrix);
 				return glm::vec3(inverseView[3]);
 			}
-
+			
 			glm::vec3 ViewportPanel::screenToWorldRay(ImVec2 mousePos, ImVec2 viewportSize,
 				const glm::mat4& view, const glm::mat4& projection) {
 
@@ -79,7 +79,7 @@ namespace PAIN {
 				return glm::normalize(rayWorld);
 			}
 
-
+			// sphere ray intersect 
 			bool ViewportPanel::rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
 				const glm::vec3& sphereCenter, float sphereRadius,
 				float& distance) {
@@ -108,6 +108,7 @@ namespace PAIN {
 				return true;
 			}
 
+			// AABB ray intersect for picking
 			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
 				const Transform& transform, float& distance) {
 				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
@@ -141,6 +142,7 @@ namespace PAIN {
 				return tMin >= 0.0f;
 			}
 
+			// ImGuizmo picking logic
 			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
 				auto scene = services->get<Scene>();
 				auto camera = scene->GetActiveCamera();
@@ -468,18 +470,28 @@ namespace PAIN {
 					// ========================================
 					// === Camera Controls ===
 					// ========================================
-					if (!isSimulationPaused && wantsInput() && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver()) {
-						ImGuiIO& io = ImGui::GetIO();
-						auto camera = services->get<sCameraController>();
+
+					ImGuiIO& io = ImGui::GetIO();
+					auto camera = services->get<sCameraController>();
 
 
-						if (camera) {
-							
-							#ifdef PN_PLATFORM_WINDOWS
-							bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right) && contentHovered;
-							#else
-							bool rightMouseHeld = contentHovered;
-							#endif 
+					if (camera) {
+
+						#ifdef PN_PLATFORM_WINDOWS
+						bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+
+						#else
+						camera->m_vpHeight = size.y;
+						camera->m_vpWidth = size.x;
+						camera->m_vpPosX = viewportPos.x; 
+						camera->m_vpPosY = viewportPos.y;  
+						camera->vp_hovered = contentHovered;
+
+						bool rightMouseHeld = contentHovered;
+
+						#endif 
+
+						if (!isSimulationPaused && contentHovered && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver()) {
 							if (rightMouseHeld) {
 								camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
 								camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
@@ -530,17 +542,18 @@ namespace PAIN {
 								}
 							}
 						}
-					}
-					else {
-						auto camera = services->get<sCameraController>();
-						if (camera) {
-							camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
-							camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
-							camera->mouseButtonDown = false;
-							camera->xOffset = 0.0f;
-							camera->yOffset = 0.0f;
+						else {
+							auto camera = services->get<sCameraController>();
+							if (camera) {
+								camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
+								camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
+								camera->mouseButtonDown = false;
+								camera->xOffset = 0.0f;
+								camera->yOffset = 0.0f;
+							}
 						}
 					}
+					
 				}
 				ImGui::End();
 			}

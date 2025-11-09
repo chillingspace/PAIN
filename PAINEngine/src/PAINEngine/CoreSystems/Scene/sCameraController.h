@@ -9,6 +9,9 @@
 #include "CoreSystems/Events/Android/TouchEvents.h"
 #include "CoreSystems/Events/Android/OtherEvents.h"
 #include "CoreSystems/Events/Android/SurfaceEvents.h"
+#ifdef _DEBUG
+#include "LayeredSystems/LevelEditor/Editor.h"
+#endif
 
 namespace PAIN {
 
@@ -26,6 +29,12 @@ namespace PAIN {
         void beginTouchControls(int pointerId, float x, float y);
         void updateTouchControls(int pointerId, float x, float y);
         void endTouchControls(int pointerId);
+
+		float m_vpWidth = 0.f;
+		float m_vpHeight = 0.f;
+		float m_vpPosX = 0.f;
+		float m_vpPosY = 0.f;
+		bool vp_hovered = false;
 
 		// Camera Controls
 		bool W_KEYDOWN = false;
@@ -49,10 +58,12 @@ namespace PAIN {
 	private:
 		Camera* camera;
 		std::shared_ptr<Scene> m_Scene;
+
 		bool m_isMuted = false; // For toggling all audio (testing)
 
         float m_surfaceWidth = 0.f;
         float m_surfaceHeight = 0.f;
+
 
         // Mobile Movements
         bool  m_touchLooking = false;
@@ -69,7 +80,7 @@ namespace PAIN {
             float last_y = 0;
         };
         MoveStick m_move;
-        float m_moveRadiusPx=120.f, m_moveDeadzonePx=10.f, m_lookSensitivity=1.0f, m_moveScale=1.0f;
+        float m_moveRadiusPx = 120.f, m_moveDeadzonePx = 10.f, m_lookSensitivity = 1.0f, m_moveScale = 1.0f;
         float m_cachedMoveX = 0.f, m_cachedMoveY = 0.f;
 	};
 }
