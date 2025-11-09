@@ -93,9 +93,6 @@ namespace PAIN {
 		{
 			mdl = cacheModel("game_assets://models/ogre_smile.mesh");
 
-			// temporarily fix vertices to render easily
-			//mdl->vertices = mdl->submeshes[0]
-
 			mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
 			mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
 			mdl->materials[0].metallic = 0.f;
@@ -111,7 +108,21 @@ namespace PAIN {
 			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
 
+		mdl = cacheModel("game_assets://models/ogre.mesh");
+		mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
+		mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+		mdl->materials[0].metallic = 0.f;
+		mdl->materials[0].roughness = 1.f;
+		mdl->materials[0].baseColor = { 1, 0, 1 };
+		AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
+		mdl = getModel(djb2_hash("game_assets://models/ogre.mesh"));
+		mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
+		mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+		mdl->materials[0].metallic = 0.f;
+		mdl->materials[0].roughness = 1.f;
+		mdl->materials[0].baseColor = { 1, 0, 1 };
+		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		/*
 		{
