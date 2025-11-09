@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-#include "pch.h"
+#ifndef ASSETS_SERVICE_HPP
+#define ASSETS_SERVICE_HPP
+
 #include "Applications/AppSystem.h"
 #include "CoreSystems/Path/Path.h"
 
@@ -181,3 +183,5 @@ namespace PAIN {
 
     } // namespace Assets
 } // namespace PAIN
+
+#endif

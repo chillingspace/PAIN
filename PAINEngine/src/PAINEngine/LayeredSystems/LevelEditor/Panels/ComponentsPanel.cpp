@@ -26,7 +26,7 @@ namespace PAIN {
 
                 // ---- ModelRenderer ----
                 registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
-                    [](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as); });
+                    [this](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
                 // ---- Light ----
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

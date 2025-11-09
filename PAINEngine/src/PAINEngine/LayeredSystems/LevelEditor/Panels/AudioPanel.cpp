@@ -71,7 +71,7 @@ namespace PAIN {
 						// Combo box to select sound
 						if (ImGui::Combo("Sound Asset", &selectedSoundIdx, sound_paths.data(), sound_paths.size())) {
 							// When selection changes, update path text box
-							if (selectedSoundIdx >= 0 && selectedSoundIdx < sound_assets.size()) {
+							if (selectedSoundIdx >= 0 && selectedSoundIdx < sound_paths.size()) {
 								selected = asset_service->findGUID(sound_paths[selectedSoundIdx]);
 							}
 						}
