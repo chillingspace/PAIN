@@ -84,13 +84,17 @@ namespace PAIN {
 		auto pathService = services->get<Path::Path>();
 
 		//auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
+		auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
+		auto ogre_smile_ao_map = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
+
 
 		// for .mesh(converted from .obj only)
+		std::shared_ptr<Assets::Model> mdl;
 		{
-			auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
-			auto ogre_smile_ao_map = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
+			mdl = cacheModel("game_assets://models/ogre_smile.mesh");
 
-			std::shared_ptr<Assets::Model> mdl = cacheModel("game_assets://models/ogre_smile.mesh");
+			// temporarily fix vertices to render easily
+			//mdl->vertices = mdl->submeshes[0]
 
 			mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
 			mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
@@ -105,14 +109,20 @@ namespace PAIN {
 			}
 
 			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		}
 
-			//smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
-			//smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
-			//smile_ogre_mesh->material.useTex = true;
-			//smile_ogre_mesh->material.aoTex = ogre_smile_ao_map->gl_texture;
-			//smile_ogre_mesh->material.useAo = true;
-			//smile_ogre_mesh->material.metal = 0.f;
-			//smile_ogre_mesh->material.rough = 1.f;
+		{
+			auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
+			auto smile_ogre_mesh_id = cacheMesh(obj_path);
+			auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
+
+			smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
+			smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
+			smile_ogre_mesh->material.useTex = true;
+			smile_ogre_mesh->material.aoTex = ogre_smile_ao_map->gl_texture;
+			smile_ogre_mesh->material.useAo = true;
+			smile_ogre_mesh->material.metal = 0.f;
+			smile_ogre_mesh->material.rough = 1.f;
 
 			//AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
@@ -483,51 +493,17 @@ namespace PAIN {
 		return mdl;
 	}
 
-	/*
 	uint32_t Scene::cacheMesh(const std::string& path)
 	{
 		std::filesystem::path fsPath(path);
 		std::string filename = fsPath.filename().string();
 
-		static constexpr char sep = '.';
-		auto sep_idx = filename.find(sep);
-		std::string ext{};
-		if (sep_idx != filename.npos) {
-			ext = filename.substr(sep_idx + 1);
-		}
-
-		unsigned int mesh_id;
-
-		if (ext == "mesh") {
-			PN_CORE_INFO("Loading .mesh: {}", filename);
-
-
-
-			std::shared_ptr<Assets::Manager> am = services->get<Assets::Manager>();
-			Assets::Loader* ral = am->getRawAssetLoader();
-			auto loader = ral->GetLoader(Assets::Type::Model);
-			const std::shared_ptr<Assets::IAsset> base_mdl = loader(path);
-			std::shared_ptr<Assets::Model> mdl = std::dynamic_pointer_cast<Assets::Model>(base_mdl);
-
-			// logging to check data
-			{
-				PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", filename, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
-			}
-
-			auto mesh = loadMesh(path);
-			mesh_id = djb2_hash(filename);
-			meshCache[mesh_id] = mesh;
-		}
-		else {
-			auto mesh = loadMesh(path);
-			mesh_id = djb2_hash(filename);
-			meshCache[mesh_id] = mesh;
-		}
-
+		auto mesh = loadMesh(path);
+		uint32_t mesh_id = djb2_hash(filename);
+		meshCache[mesh_id] = mesh;
 
 		return mesh_id;
 	}
-	*/
 
 	uint32_t Scene::getModelId(const std::string& file_name)
 	{
@@ -542,6 +518,17 @@ namespace PAIN {
 	{
 		auto it = modelCache.find(mesh_id);
 		if (it != modelCache.end()) {
+			return it->second;
+		}
+
+		PN_CORE_ERROR("UNABLE TO FIND MESH");
+		return nullptr;
+	}
+
+	std::shared_ptr<Mesh> Scene::getMesh(uint32_t mesh_id)
+	{
+		auto it = meshCache.find(mesh_id);
+		if (it != meshCache.end()) {
 			return it->second;
 		}
 

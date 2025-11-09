@@ -26,10 +26,10 @@ namespace PAIN {
 		std::unordered_map <uint32_t, std::shared_ptr<Assets::Model>> modelCache;
 
 		std::shared_ptr<Mesh> loadMesh(const std::string& path_to_mesh);
-		//uint32_t cacheMesh(const std::string& path);
+		uint32_t cacheMesh(const std::string& path);
 		std::shared_ptr<Assets::Model> cacheModel(const std::string& vpath);
 		uint32_t getModelId(const std::string& path);
-		//std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
+		std::shared_ptr<Mesh> getMesh(uint32_t mesh_id);
 		std::shared_ptr<Assets::Model> getModel(uint32_t model_id);
 
 		Camera* GetActiveCamera();
