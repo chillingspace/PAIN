@@ -15,6 +15,8 @@
 #include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/Components/cTransform.h"
 
+#include "AssetData.h"
+
 namespace PAIN {
     namespace Serialization {
 
@@ -161,12 +163,20 @@ namespace PAIN {
                 return name_to_string_impl(cs, 0);
             }
 
+
             // Forward decls
             template <typename T>
             nlohmann::json to_json_value(const T& v);
 
             template <typename T>
             void from_json_value(T& out, const nlohmann::json& j);
+
+            inline nlohmann::json to_json_value(const PAIN::Assets::GUID& v) {
+                return v.ToString();
+            }
+            inline void from_json_value(PAIN::Assets::GUID& out, const nlohmann::json& j) {
+                out = PAIN::Assets::GUID(j.get<std::string>());
+            }
 
             // ---------- detect reflectable ----------
             template <typename T>

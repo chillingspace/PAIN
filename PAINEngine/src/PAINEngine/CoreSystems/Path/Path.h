@@ -1,9 +1,10 @@
 #pragma once
 
-#include "AssetData.h"
-
 #ifndef PATH_HPP
 #define PATH_HPP
+
+#include "AssetData.h"
+#include "Utility/Log.h"
 
 namespace PAIN {
 	namespace Path {
