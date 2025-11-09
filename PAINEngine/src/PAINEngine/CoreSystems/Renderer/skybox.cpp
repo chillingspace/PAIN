@@ -69,6 +69,7 @@ namespace PAIN {
 			}
 
 			static constexpr float MAX_HDR_VALUE = 50000.f;
+			PN_CORE_INFO("Max skybox HDR value: {}", maxVal);
 
 			if (maxVal > MAX_HDR_VALUE)
 			{
