@@ -3,6 +3,9 @@
 #ifndef EDITOR_ATTRIBUTES_HPP
 #define EDITOR_ATTRIBUTES_HPP 
 
+#undef max
+#undef min
+
 #include "refl.hpp"
 #include "CoreSystems/Assets/sAssets.h"
 

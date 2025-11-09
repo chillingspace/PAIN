@@ -337,6 +337,9 @@ namespace PAIN {
 		std::optional<AudioChannelId> FmodAudio::play(std::shared_ptr<Sound> sound, const glm::vec3& pos, float volumeDb) {
 			if (!impl_->initialized) return std::nullopt;
 
+			//Check if sound is valid
+			if(! sound)return std::nullopt;
+
 			//Cast fmod audio up
 			std::shared_ptr<FmodAudio::Impl::FmodSound> fmod_sound = std::dynamic_pointer_cast<FmodAudio::Impl::FmodSound>(sound);
 

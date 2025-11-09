@@ -181,6 +181,14 @@ namespace PAIN {
                     tex->format = TextureFormat::BC7;
                     tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
                 }
+                else if (dxgiFormat == 95) { // DXGI_FORMAT_BC6H_UF16
+                    tex->format = TextureFormat::BC6H;
+                    tex->glTexFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB;
+                }
+                else if (dxgiFormat == 96) { // DXGI_FORMAT_BC6H_SF16
+                    tex->format = TextureFormat::BC6H;
+                    tex->glTexFormat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB;
+                }
                 else {
                     throw std::runtime_error("Unsupported DXGI format: " + std::to_string(dxgiFormat));
                 }

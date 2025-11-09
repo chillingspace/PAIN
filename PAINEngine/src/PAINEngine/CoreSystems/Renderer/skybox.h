@@ -55,7 +55,7 @@ namespace PAIN {
 			return instance;
 		}
 
-		void init(const std::shared_ptr<Services>& services, const std::string& skybox_path);
+		void init(const std::shared_ptr<Services>& services, const std::filesystem::path& skybox_path);
 
 		unsigned int getSkyboxTex() const {
 			return skybox_tex;

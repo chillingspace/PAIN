@@ -311,7 +311,7 @@ namespace PAIN {
 		glDeleteTextures(1, &skybox_tex); // delete the original HDR
 	}
 
-	void Skybox::init(const std::shared_ptr<Services>& s, const std::string& skybox_path) {
+	void Skybox::init(const std::shared_ptr<Services>& s, const std::filesystem::path& skybox_path) {
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before Skybox init: {}", err);
@@ -336,7 +336,8 @@ namespace PAIN {
 			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader->GetRendererID());
 		}
 
-		loadHdr(skybox_path);
+		skybox_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path)->gl_texture;
+		//loadHdr(skybox_path);
 		convertEquirectangularToCubemap();
 
 		// generate IBL textures

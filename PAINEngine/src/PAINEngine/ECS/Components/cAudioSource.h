@@ -7,6 +7,7 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "GLMSerialization.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+#include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 namespace PAIN {
     namespace Audio {
@@ -21,7 +22,8 @@ namespace PAIN {
         // Component to attach to an entity to make it play sound
         struct AudioSource {
             // --- CONFIGURATION (Set in Editor) ---
-            std::string soundPath;
+            std::vector<std::string> audio_paths_storage;
+            Assets::GUID selected_audio;
             bool is3D = true;
             bool looping = false;
             float volumeDb = 0.0f;
@@ -52,7 +54,10 @@ namespace PAIN {
 
 // --- REFLECTION ---
 REFL_TYPE(PAIN::Audio::AudioSource)
-    REFL_FIELD(soundPath)     // Serialized
+REFL_FIELD(selected_audio,
+    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Audio),
+    PAIN::Editor::Attributes::DisplayName("Audio Asset"),
+    PAIN::Editor::Attributes::Tooltip("Select a Audio asset"))
     REFL_FIELD(is3D)          // Serialized
     REFL_FIELD(looping)       // Serialized
     REFL_FIELD(volumeDb)      // Serialized

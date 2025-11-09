@@ -259,8 +259,14 @@ namespace PAIN {
 		// font
 		TextRenderer::get();
 
+#ifdef PN_PLATFORM_WINDOWS
+		std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
+#else
+		std::filesystem::path sb_path = "engine\\textures\\skybox2.hdr";
+#endif
+
 		// skybox
-		Skybox::get().init(services, services->get<Path::Path>()->resolvePath("engine_assets://textures/skybox2.hdr"));
+		Skybox::get().init(services, sb_path);
 
 		// Test load prefab
 		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("sdcc.prefab");

@@ -16,7 +16,7 @@ namespace PAIN {
 
         //Texture format
         enum class TextureFormat {
-            UNKNOWN, BC7, ASTC, // add more as needed
+            UNKNOWN, BC6H, BC7, ASTC, // add more as needed
         };
 
         //Texture class
