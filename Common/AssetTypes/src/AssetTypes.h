@@ -148,7 +148,7 @@ namespace PAIN {
         struct Model : public IAsset {
             std::string vpath{};
 
-            std::vector<Vertex> vertices;           // what is this for? num vertices incorrect at least for submeshes
+            std::vector<Vertex> vertices;
             std::vector<unsigned int> indices;
             std::vector<Submesh> submeshes;
             std::vector<Bone> skeleton;
