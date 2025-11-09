@@ -29,66 +29,66 @@ namespace PAIN {
                 audioService->setListener(camera->pos, { 0,0,0 }, camera->forward, camera->up);
             }
 
-            // 2. Iterate all entities with AudioSource and Transform
-            auto view = registry.view<AudioSource, Transform>();
-            for (auto entity : view)
-            {
-                auto& audioSrc = view.get<AudioSource>(entity);
-                auto& transform = view.get<Transform>(entity);
+     //       // 2. Iterate all entities with AudioSource and Transform
+     //       auto view = registry.view<AudioSource, Transform>();
+     //       for (auto entity : view)
+     //       {
+     //           auto& audioSrc = view.get<AudioSource>(entity);
+     //           auto& transform = view.get<Transform>(entity);
 
-                static std::unordered_set<entt::entity> initialized;
-                if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
-                    audioSrc.playTrigger = true;
-                    initialized.insert(entity);
-                }
+     //           static std::unordered_set<entt::entity> initialized;
+     //           if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
+     //               audioSrc.playTrigger = true;
+     //               initialized.insert(entity);
+     //           }
 
-                // 3. Handle Play/Stop Triggers
-                if (audioSrc.playTrigger)
-                {
-                    // If already playing, stop it first
-                    if (isValid(audioSrc.channelId)) {
-                        audioService->stop(audioSrc.channelId);
-                    }
+     //           // 3. Handle Play/Stop Triggers
+     //           if (audioSrc.playTrigger)
+     //           {
+     //               // If already playing, stop it first
+     //               if (isValid(audioSrc.channelId)) {
+     //                   audioService->stop(audioSrc.channelId);
+     //               }
 
-					// Resolve the sound path
-                    std::string resolvedPath = pathService->resolvePath(audioSrc.soundPath);
+					//// Resolve the sound path
+     //               std::string resolvedPath = pathService->resolvePath(audioSrc.soundPath);
 
-                    // Play the sound
-                    auto channelOpt = audioService->play(
-                        resolvedPath,
-                        transform.position,
-                        audioSrc.volumeDb
-                    );
+     //               // Play the sound
+     //               auto channelOpt = audioService->play(
+     //                   resolvedPath,
+     //                   transform.position,
+     //                   audioSrc.volumeDb
+     //               );
 
-                    if (channelOpt.has_value()) {
-                        audioSrc.channelId = channelOpt.value();
-                        audioSrc.state = AudioState::Playing;
-                    } else {
-                        PN_CORE_WARN("Failed to play sound: {}", audioSrc.soundPath);
-                        audioSrc.state = AudioState::Stopped;
-                    }
-                    audioSrc.playTrigger = false;
-                    audioSrc.stopTrigger = false;
-                }
-                else if (audioSrc.stopTrigger)
-                {
-                    if (isValid(audioSrc.channelId)) {
-                        audioService->stop(audioSrc.channelId);
-                    }
-                    audioSrc.channelId = { -1 };
-                    audioSrc.state = AudioState::Stopped;
-                    audioSrc.stopTrigger = false;
-                }
+     //               if (channelOpt.has_value()) {
+     //                   audioSrc.channelId = channelOpt.value();
+     //                   audioSrc.state = AudioState::Playing;
+     //               } else {
+     //                   PN_CORE_WARN("Failed to play sound: {}", audioSrc.soundPath);
+     //                   audioSrc.state = AudioState::Stopped;
+     //               }
+     //               audioSrc.playTrigger = false;
+     //               audioSrc.stopTrigger = false;
+     //           }
+     //           else if (audioSrc.stopTrigger)
+     //           {
+     //               if (isValid(audioSrc.channelId)) {
+     //                   audioService->stop(audioSrc.channelId);
+     //               }
+     //               audioSrc.channelId = { -1 };
+     //               audioSrc.state = AudioState::Stopped;
+     //               audioSrc.stopTrigger = false;
+     //           }
 
-                // 4. Update 3D position for active, 3D sounds
-                if (audioSrc.state == AudioState::Playing && audioSrc.is3D && isValid(audioSrc.channelId))
-                {
-                    audioService->setPosition(audioSrc.channelId, transform.position);
-                }
+     //           // 4. Update 3D position for active, 3D sounds
+     //           if (audioSrc.state == AudioState::Playing && audioSrc.is3D && isValid(audioSrc.channelId))
+     //           {
+     //               audioService->setPosition(audioSrc.channelId, transform.position);
+     //           }
 
-                // 5. (Future) Check if channel stopped playing
-                // ...
-            }
+     //           // 5. (Future) Check if channel stopped playing
+     //           // ...
+     //       }
         }
 
         void System::onEvent(Event::Event& e)

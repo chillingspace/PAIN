@@ -18,7 +18,7 @@ namespace PAIN {
     class Scene;
     class Mesh;
     struct Transform;
-    struct MeshRenderer;
+    struct ModelRenderer;
     struct cBoundingVolume;
     namespace MetaData { struct EditorVisible; }
 } // namespace PAIN

@@ -113,21 +113,25 @@ namespace PAIN {
 
         // Material (PBR support)
         struct Material {
-            std::string name;
-            std::string diffuseMap;
-            std::string normalMap;
-            std::string metallicMap;
-            std::string roughnessMap;
-            std::string aoMap;
-            std::string emissionMap;
-            std::string bumpMap;
-			std::string heightMap;
-            glm::vec3 baseColor;
-            float metallic;
-            float roughness;
-            float ao;
-            float emission;
+            std::string name{};
+            std::string diffuse_map_buf{};
+            std::string normalMap{};
+            std::string metallicMap{};
+            std::string roughnessMap{};
+            std::string aoMap{};
+            std::string emissionMap{};
+            std::string bumpMap{};
+            std::string heightMap{};
+            glm::vec3 baseColor{1.f, 0.f, 1.f};
+            float metallic{0.1f};
+            float roughness{0.1f};
+            float emission{};
             // Additional: transparency, alpha mode, etc.
+
+            // opengl textures
+            unsigned int gl_diffuse_tex{};
+            unsigned int gl_ao_tex{};
+            unsigned int gl_emissive_tex{};
         };
 
         // Submesh: supports multi-material, LODs
@@ -142,6 +146,8 @@ namespace PAIN {
 
         // Model class - full AAA-ready object
         struct Model : public IAsset {
+            std::string vpath{};
+
             std::vector<Vertex> vertices;
             std::vector<unsigned int> indices;
             std::vector<Submesh> submeshes;

@@ -144,7 +144,7 @@ namespace PAIN {
             m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
 #endif
 
-            // Check if user's ini file exists; if not, copy default from config folder
+            // Check if user's ini file mesh_id; if not, copy default from config folder
             if (!std::filesystem::exists(m_imgui_ini_path)) {
 #ifdef PN_PLATFORM_WINDOWS
                 auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");

@@ -5,12 +5,16 @@
 
 #include "Applications/AppSystem.h"
 
+#include "AssetTypes.h"
+
 namespace PAIN {
     namespace Audio {
 
-        struct AudioChannelId { int value = -1; };
-        inline bool operator==(AudioChannelId a, AudioChannelId b) { return a.value == b.value; }
-        inline bool isValid(AudioChannelId ch) { return ch.value >= 0; }
+        struct AudioChannelId {
+            int value = -1;
+            bool isValid() const { return value >= 0; }
+            friend bool operator==(const AudioChannelId& a, const AudioChannelId& b) { return a.value == b.value; }
+        };
 
         enum class AudioResult {
             Ok,
@@ -26,6 +30,18 @@ namespace PAIN {
             std::vector<std::string> paths;
         };
 
+        struct Sound : public Assets::IAsset {
+            virtual ~Sound() = default;
+            virtual std::string getPath() const = 0;
+            virtual void release() = 0;
+
+            bool is3D = true;
+            bool looping = false;
+            bool stream = false;
+            float minDistance = 1.0f;
+            float maxDistance = 50.0f;
+        };
+
         class Audio : public AppSystem {
         private:
 
@@ -37,13 +53,17 @@ namespace PAIN {
             virtual void shutdown() = 0;
 
             // assets
-            virtual AudioResult loadSound(std::string_view path,
-                bool is3D = true, bool looping = false, bool stream = false,
-                float minDistance = 1.0f, float maxDistance = 50.0f) = 0;
+            virtual std::shared_ptr<Sound> createSound(
+                std::string const& virtual_path,
+                bool is3D = true,
+                bool looping = false,
+                bool stream = false,
+                float minDistance = 1.0f,
+                float maxDistance = 50.0f) = 0;
             virtual AudioResult loadPlaylist(const PlaylistDesc& desc) = 0;
 
             // playback
-            virtual std::optional<AudioChannelId> play(std::string_view soundPath,
+            virtual std::optional<AudioChannelId> play(std::shared_ptr<Sound> sound,
                 const glm::vec3& pos = { 0,0,0 },
                 float volumeDb = 0.0f) = 0;
             virtual std::optional<AudioChannelId> playRandom(std::string_view playlistName,

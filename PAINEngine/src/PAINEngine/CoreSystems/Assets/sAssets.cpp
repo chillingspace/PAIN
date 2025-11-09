@@ -3,8 +3,7 @@
 #include "Applications/Application.h"
 #include "sAssets.h"
 
-#define PN_PATH_SERVICE  services->get<Path::Service>()
-#define PN_LOADER_SERVICE  services->get<Loader::Service>()
+#include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -114,6 +113,14 @@ namespace PAIN {
 				return asset_loader->ImportFont(virtual_path);
 				});
 
+			//Register Audio loader
+			asset_loader->RegisterLoader(Type::Audio, [this](std::string const& virtual_path) {
+
+				//Get audio service
+				auto audio_service = services->get<Audio::Audio>();
+				return audio_service->createSound(virtual_path);
+				});
+
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
@@ -142,6 +149,10 @@ namespace PAIN {
 		{
 			auto meta = getAssetData(id);  
 			return meta ? meta->type : Type::Other; 
+		}
+
+		Loader* Manager::getRawAssetLoader() {
+			return asset_loader.get();
 		}
 		
 #ifdef PN_PLATFORM_WINDOWS
@@ -372,6 +383,20 @@ namespace PAIN {
 			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
+		std::vector <std::shared_ptr<IAsset>> Manager::getAllAssetDataOfType(Type const& type) {
+
+			//Declare temp container
+			std::vector<std::shared_ptr<IAsset>> container;
+
+			//Find all assets with type
+			for (auto const& asset : asset_registry) {
+				if (asset.second->type == type) container.push_back(getAssetData(asset.first));
+			}
+
+			//Return all assets
+			return container;
+		}
+
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 		void Manager::moveFile(std::filesystem::path const& from, std::filesystem::path const& to) {
@@ -422,7 +447,7 @@ namespace PAIN {
 			std::filesystem::path destination = file_path.parent_path() /
 				(file_path.stem().string() + " - Copy" + file_path.extension().string());
 
-			//If the duplicate exists, append a number
+			//If the duplicate mesh_id, append a number
 			int i = 2;
 			while (std::filesystem::exists(destination)) {
 				destination = file_path.parent_path() /

@@ -402,20 +402,20 @@ void EngineAPIAdapter::Input_EndFrame() {
 }
 
 /* =========================================================================== */
-/*                                MeshRenderer                                 */
+/*                                ModelRenderer                                 */
 /* =========================================================================== */
 std::optional<uint32_t> EngineAPIAdapter::GetMeshId(entt::entity entityId) {
-    PAIN::MeshRenderer* mr = nullptr; 
-    if (!try_get<PAIN::MeshRenderer>(entityId, mr)) return std::nullopt;
+    PAIN::ModelRenderer* mr = nullptr; 
+    if (!try_get<PAIN::ModelRenderer>(entityId, mr)) return std::nullopt;
     return mr->mesh_id; 
 }
 void EngineAPIAdapter::SetMeshId(entt::entity entityId, uint32_t meshId) {
-    auto& mr = ensure<PAIN::MeshRenderer>(entityId);
+    auto& mr = ensure<PAIN::ModelRenderer>(entityId);
     mr.mesh_id = meshId; 
 
-    /*PAIN::MeshRenderer* mr = nullptr;
-    if (!try_get<PAIN::MeshRenderer>(entityId, mr)) {
-        PN_CORE_ERROR("SetMeshId: Entity {} has no MeshRenderer component", static_cast<entt::id_type>(entt::to_integral(entityId)));
+    /*PAIN::ModelRenderer* mr = nullptr;
+    if (!try_get<PAIN::ModelRenderer>(entityId, mr)) {
+        PN_CORE_ERROR("SetMeshId: Entity {} has no ModelRenderer component", static_cast<entt::id_type>(entt::to_integral(entityId)));
         return;
     }
     mr->mesh_id = meshId;*/

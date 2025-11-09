@@ -43,7 +43,7 @@ namespace PAIN {
             //Iterate through all systems for fixed update
             for (auto& sys : systems) {
 
-                // Check if system is enabled or exists first before continueing
+                // Check if system is enabled or mesh_id first before continueing
                 if (!sys || !sys->enabled) {
                     continue;
                 }
@@ -73,7 +73,7 @@ namespace PAIN {
 			//Iterate through all systems
             for (auto& sys : systems) {
 
-                // Check if system is enabled or exists first before continueing
+                // Check if system is enabled or mesh_id first before continueing
                 if (!sys || !sys->enabled) {
                     continue;
                 }
@@ -103,7 +103,7 @@ namespace PAIN {
         {
             // Core components
             registerComponent<Transform>("Transform");
-            registerComponent<MeshRenderer>("MeshRenderer");
+            registerComponent<ModelRenderer>("ModelRenderer");
             registerComponent<Lighting>("Lighting");
             registerComponent<Hierarchy>("Hierarchy");
             //registerComponent<Camera>("Camera");
@@ -150,7 +150,7 @@ namespace PAIN {
             // Iterate all registered component types and copy if present
             for (const auto [type_index, storage] : entt_registry.storage()) {
                 if (storage.contains(copy)) {
-                    // Component exists on source, copy to clone
+                    // Component mesh_id on source, copy to clone
                     // Note: This requires components to be copy-constructible
                     storage.push(clone, storage.value(copy));
                 }

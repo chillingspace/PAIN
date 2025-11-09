@@ -40,7 +40,7 @@ namespace PAIN {
 				return file ? size : 0;
 			}
 			void flush() override { file.flush(); }
-			void seek(size_t pos) override { file.seekg(pos, std::ios::beg); file.seekp(pos, std::ios::beg); }
+			void seek(size_t pos) override { file.clear(); file.seekg(pos, std::ios::beg); file.seekp(pos, std::ios::beg); }
 			size_t tell() override { return static_cast<size_t>(file.tellg()); }
 			bool eof() const override { return file.eof(); }
 			size_t size() const override { return fileSize; }

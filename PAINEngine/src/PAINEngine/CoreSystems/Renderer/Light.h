@@ -92,7 +92,7 @@ namespace PAIN {
 #else
 		float near_plane{ 1.f };
 #endif
-		float far_plane{ 150.f };		// furthest distance light can see(for shadows)
+		float far_plane{ 30.f };		// furthest distance light can see(for shadows)
 
 		// not required for point lights
 		glm::vec3 forward{0 , -1, 0};	// looking down by default
@@ -209,7 +209,7 @@ namespace PAIN {
 		 */
 		bool create(const std::string& ref) {
 			if (sources.find(ref) != sources.end()) {
-				PN_CORE_ERROR("Light reference {0} already exists", ref);
+				PN_CORE_ERROR("Light reference {0} already mesh_id", ref);
 				return false;
 			}
 			if (sources.size() >= MAX_LIGHT_SOURCES) {
