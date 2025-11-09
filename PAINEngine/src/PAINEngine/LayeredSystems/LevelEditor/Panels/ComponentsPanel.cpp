@@ -34,7 +34,7 @@ namespace PAIN {
 
                 // ---- AudioSource ----
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
-                    [](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as); });
+                    [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
                 // ---- BoundingVolume ----
                 registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
