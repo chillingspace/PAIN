@@ -232,20 +232,45 @@ namespace PAIN {
                     if (doc.layers.empty()) ser->addLayer();
                 }
 
-                // Load Scene
-                if (ImGui::Button("Load Scene")) {
-                    const std::string id = std::string{ nameBuf_ } + ".scn"; 
 
-                    bool success = hooks_.onChange ? hooks_.onChange(id) : false; // -> Service::loadSceneById
-                    // Check if load succeeded
-                    if (success) { 
-                        currSceneId_ = id; // update panel label
+                auto scenes = services->get<Assets::Manager>()->getAllAssetsOfType(Assets::Type::Scenes);
+
+                // Show dropdown of available scenes
+                if (!scenes.empty()) {
+                    std::vector<const char*> scene_names;
+                    for (const auto& scene : scenes) {
+                        if (scene) {
+                            scene_names.push_back(scene.get()->name.c_str()); 
+                        }
+
                     }
-                    else {
-                        showSceneLoadError_ = true;
-                        loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
+
+                    // Combo box for scene selection
+                    if (ImGui::Combo("Select Scene", &selected_scene_index, scene_names.data(), scene_names.size())) {
+                        // Optional: handle selection change if needed
+                    }
+
+                    // Get selected scene ID (or name)
+                    auto& selected_scene = scenes[selected_scene_index]; 
+                    std::string id = selected_scene->name; // Use id or name as required
+
+                    // Button to load the selected scene
+                    if (ImGui::Button("Load Scene")) {
+                        bool success = hooks_.onChange ? hooks_.onChange(id) : false; 
+                        if (success) {
+                            currSceneId_ = id; // update panel label
+                        }
+                        else {
+                            showSceneLoadError_ = true;
+                            loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
+                        }
                     }
                 }
+                else {
+                    ImGui::TextDisabled("No scenes available!");
+                }
+
+                
 
                 if (!currSceneId_.empty()) {
                     ImGui::SameLine();

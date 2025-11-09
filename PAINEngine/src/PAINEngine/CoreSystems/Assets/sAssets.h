@@ -144,6 +144,20 @@ namespace PAIN {
 				return container;
 			}
 
+			// Assuming AssetBase is the base class for all assets
+			std::vector<std::shared_ptr<IAsset>> getAllAssetsOfType(Type const& type) {
+				std::vector<std::shared_ptr<IAsset>> container;
+
+				for (auto const& asset : asset_registry) {
+					if (asset.second->type == type) {
+						container.push_back(asset.second); // Directly use shared_ptr to the base asset
+					}
+				}
+
+				return container;
+			}
+
+
 			//Caching of assets
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void batchCacheAssets(std::vector<GUID> batch_ids);

@@ -52,7 +52,8 @@ namespace PAIN {
                 std::string loadSceneErrorMsg_;
 
                 // Temporary in-panel “model” 
-                std::string currSceneId_; 
+               int selected_scene_index = 0; 
+               std::string currSceneId_;
                 struct Layer {
                     unsigned id;
                     bool visible = true;

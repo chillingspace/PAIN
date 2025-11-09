@@ -8,7 +8,6 @@
  * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
-
 #pragma once
 
 #ifndef REFELCTION_UI_HPP
@@ -359,8 +358,8 @@ inline bool DrawField(const char* label, T&) {
     return false;
 }
 
+#ifdef DEBUG
 // ---------- Asset Selector ----------
-
 inline bool DrawAssetSelectorField(
     const char* label,
     PAIN::Assets::GUID& guid,
@@ -463,6 +462,7 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
         });
     return changed;
 }
+#endif
 
 
 //template <typename T>
@@ -481,8 +481,7 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
 //
 //    return changed;
 //}
-
-#ifdef _DEBUG
+#ifdef DEBUG
 namespace PAIN {
     namespace Editor {
         namespace Panel {
