@@ -343,17 +343,24 @@ namespace PAIN {
                 require(n); std::memcpy(dst, data.data() + offset, n); offset += n;
                 };
 
+            PN_CORE_INFO("File size: {} bytes", data.size());
+
             PN_CORE_TRACE("ImportModel: Before reading bounding box");
 
             // Read bounding box
+            PN_CORE_TRACE("sizeof(glm::vec3) = {}", sizeof(glm::vec3));
+            PN_CORE_TRACE("Offset before AABB: {}", offset);
             readMem(&asset.aabbMin, sizeof(asset.aabbMin));
+            PN_CORE_TRACE("Offset after aabbMin: {}", offset);
             readMem(&asset.aabbMax, sizeof(asset.aabbMax));
+            PN_CORE_TRACE("Offset after aabbMax: {}", offset);
 
             PN_CORE_TRACE("ImportModel: Before reading LODs");
 
             // Read LODs
             uint32_t lodCount = 0;
             readMem(&lodCount, sizeof(lodCount));
+            PN_CORE_TRACE("lodCount = {} at offset {}", lodCount, offset - 4);
             PN_CORE_TRACE("ImportModel: after readMem for LOD");
             PN_CORE_TRACE("Attempting to allocate {} bytes for `asset`", lodCount);
             asset.lods.resize(lodCount);
