@@ -125,7 +125,6 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS	
 		services->get<ECS::Controller>()->registerSystem<AI::System>();
 		services->get<ECS::Controller>()->registerSystem<Animation::System>();
-		services->get<ECS::Controller>()->registerSystem<Scripting::System>();
 		services->get<ECS::Controller>()->registerSystem<Logic::System>();
 		services->get<ECS::Controller>()->registerSystem<Audio::System>();
 #endif
