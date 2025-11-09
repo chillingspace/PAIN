@@ -34,8 +34,8 @@ namespace PAIN {
             auto view = registry.view<AudioSource, Transform>();
             for (auto [entity, audioSrc, transform] : view.each())
             {
-                auto& audioSrc = view.get<AudioSource>(entity);
-                auto& transform = view.get<Transform>(entity);
+                //auto& audioSrc = view.get<AudioSource>(entity);
+                //auto& transform = view.get<Transform>(entity);
 
                 static std::unordered_set<entt::entity> initialized;
                 if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
