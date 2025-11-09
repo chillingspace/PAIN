@@ -263,6 +263,7 @@ namespace PAIN {
             return baseName + ".scn";
         }
 
+#ifdef PN_PLATFORM_WINDOWS
         std::string Service::OpenSceneFileDialog(HWND ownerWindow)
         {
             OPENFILENAME ofn;       // common dialog box structure
@@ -276,11 +277,8 @@ namespace PAIN {
 
             auto path_service = services->get<Path::Path>();
 
-#ifdef PN_PLATFORM_WINDOWS
             std::string initialDirStr = path_service->resolvePath("main_game_assets://scenes");
-#elif PN_PLATFORM_ANDROID
-            std::string initialDirStr = path_service->resolvePath("game_assets://scenes");
-#endif
+            //std::string initialDirStr = path_service->resolvePath("game_assets://scenes");
             ofn.lpstrInitialDir = initialDirStr.c_str();
             ofn.lpstrFilter = "Scene Files (*.scn)\0*.scn\0All Files (*.*)\0*.*\0";
             ofn.nFilterIndex = 1;
@@ -292,7 +290,7 @@ namespace PAIN {
             }
             return {};
         }
-
+#endif
 
         std::string Service::makeVirtualScenePathFromBase(std::string_view base)
         {

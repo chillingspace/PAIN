@@ -106,11 +106,15 @@ namespace PAIN {
                     if (ImGui::BeginMenu("File")) {
                         if (ImGui::MenuItem("New Scene", "Ctrl+N")) { openPopUp("New Scene"); }
                         if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
+
+#ifdef PN_PLATFORM_WINDOWS
                             std::string path = PN_SERI_SERVICE->OpenSceneFileDialog();
                             if (!path.empty()) {
                                 std::string id = PN_SERI_SERVICE->getSceneId(path);
                                 PN_SERI_SERVICE->loadSceneById(id);
                             }
+#endif
+
                         }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Save", "Ctrl+S")) { PN_SERI_SERVICE->saveCurrentScene(); }
@@ -145,10 +149,10 @@ namespace PAIN {
                                 entt::entity entity = ecs->createEntity();
                                 ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
                                 ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-                                ecs->addEntityComponent(entity, Hierarchy{});
-                                if (scene) {
-                                    ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
-                                }
+                                //ecs->addEntityComponent(entity, Hierarchy{});
+                                //if (scene) {
+                                //    ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
+                                //}
                                 };
 
                             create.undo_action = [&, shared_id]() {

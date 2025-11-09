@@ -86,7 +86,9 @@ namespace PAIN {
             std::string getCurrSceneId() const;
             std::string getSceneId(std::string file_path) const;
 
+#ifdef PN_PLATFORM_WINDOWS
             std::string OpenSceneFileDialog(HWND ownerWindow = nullptr);
+#endif
             std::string makeVirtualScenePathFromBase(std::string_view base); 
                 
             /***********************************
