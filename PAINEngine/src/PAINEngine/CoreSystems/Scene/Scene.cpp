@@ -96,11 +96,15 @@ namespace PAIN {
 			mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
 			mdl->materials[0].metallic = 0.f;
 			mdl->materials[0].roughness = 1.f;
+			mdl->materials[0].baseColor = { 1, 0, 1 };
 
 			// logging to check data
 			{
 				PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", mdl->vpath, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
+				PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
 			}
+
+			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 			//smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
 			//smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
@@ -238,13 +242,13 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	entt::entity Scene::AddObject(const Assets::Model& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	entt::entity Scene::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-		ecs->addEntityComponent(entity, ModelRenderer{ djb2_hash(mdl.vpath) });
+		ecs->addEntityComponent(entity, ModelRenderer{ djb2_hash(mdl->vpath) });
 
 		return entity;
 	}
@@ -471,7 +475,10 @@ namespace PAIN {
 		// logging to check data
 		{
 			PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", filename, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
+			PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
 		}
+
+		modelCache[djb2_hash(vpath)] = mdl;
 
 		return mdl;
 	}

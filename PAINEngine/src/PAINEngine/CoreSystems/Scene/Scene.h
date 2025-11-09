@@ -19,7 +19,7 @@ namespace PAIN {
 		void onUpdate(AppTiming timing) override;
 		void onEvent([[maybe_unused]] Event::Event& e) override;
 
-		entt::entity AddObject(const Assets::Model& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
+		entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale);
 
 		// TO BE MOVEDDDDDDDDDD INTO ASSETS LOADER
 		std::unordered_map<uint32_t, std::shared_ptr<Mesh>> meshCache; // Mesh cache
