@@ -25,7 +25,6 @@
 #include "Systems/Physics/sysPhysics.h"
 #include "Systems/AI/sysAI.h" 
 #include "Systems/Animation/sysAnimation.h" 
-#include "Systems/Scripting/sysScripting.h" 
 #include "Systems/Logic/sysLogic.h"
 #include "Systems/Audio/sysAudio.h"
 #include "Systems/Collision/sBVHSystem.h"

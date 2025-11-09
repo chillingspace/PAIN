@@ -358,7 +358,7 @@ inline bool DrawField(const char* label, T&) {
     return false;
 }
 
-#ifdef DEBUG
+#ifdef _DEBUG
 // ---------- Asset Selector ----------
 inline bool DrawAssetSelectorField(
     const char* label,
@@ -481,7 +481,7 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
 //
 //    return changed;
 //}
-#ifdef DEBUG
+#ifdef _DEBUG
 namespace PAIN {
     namespace Editor {
         namespace Panel {
