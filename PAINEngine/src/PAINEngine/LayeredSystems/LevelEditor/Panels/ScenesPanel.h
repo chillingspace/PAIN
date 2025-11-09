@@ -62,6 +62,11 @@ namespace PAIN {
                 std::vector<std::vector<bool>> mask_;         
                 unsigned selectedLayerIdx_ = 0;
 
+                std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
+                std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
+
+
                 // UI 
                 bool showCreate_ = false;
                 bool showDelete_ = false;
@@ -71,7 +76,7 @@ namespace PAIN {
 
                 // Hooks for future backend integration 
                 ScenesHooks hooks_;
-                char nameBuf_[64] = "test";  
+                char nameBuf_[64] = "";  
 
             private:
                 // helpers
