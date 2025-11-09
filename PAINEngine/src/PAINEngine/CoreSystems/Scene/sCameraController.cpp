@@ -10,7 +10,7 @@ namespace PAIN {
 		m_Scene = services->get<Scene>();
 
 	}
-
+#ifdef _DEBUG
 	// ANDROID ONLY
     void sCameraController::beginTouchControls(int pointerId, float x, float y) {
 
@@ -136,6 +136,8 @@ namespace PAIN {
             m_cachedMoveY = 0.f;
         }
     }
+
+#endif
 	void sCameraController::onUpdate(AppTiming timing)
 	{
 		const float dt = timing.dt;
