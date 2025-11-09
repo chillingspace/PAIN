@@ -346,7 +346,15 @@ namespace PAIN {
                 }
 
 
-                auto scenes = services->get<Assets::Manager>()->getAllAssetsOfType(Assets::Type::Scenes);
+                std::shared_ptr<Assets::Manager> asset_service = nullptr;
+
+                // Prevent null stuff to happen
+                if(services->get<Assets::Manager>()) {
+                    asset_service = services->get<Assets::Manager>();
+                }
+
+
+                auto scenes = asset_service->getAllAssetDataOfType(Assets::Type::Scenes);
 
                 // Show dropdown of available scenes
                 if (!scenes.empty()) {
@@ -361,6 +369,10 @@ namespace PAIN {
                     // Combo box for scene selection
                     if (ImGui::Combo("Select Scene", &selected_scene_index, scene_names.data(), scene_names.size())) {
                         // Optional: handle selection change if needed
+                        // When selection changes, update path text box
+                        if (selected_scene_index >= 0 && selected_scene_index < scene_names.size()) {
+                            selected = asset_service->findGUID(scene_names[selected_scene_index]);
+                        }
                     }
 
                     // Get selected scene ID (or name)
