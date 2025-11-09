@@ -125,7 +125,7 @@ namespace PAIN {
 		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		// gltf testing
-#define GLTF
+//#define GLTF
 #ifdef GLTF
 		{
 			mdl = cacheModel("game_assets://models/930/930.mesh");
