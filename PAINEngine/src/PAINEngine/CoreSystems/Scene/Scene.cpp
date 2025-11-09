@@ -139,6 +139,14 @@ namespace PAIN {
 		mdl->materials[0].baseColor = { 0, 1, 0 };
 		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 
+		mdl = cacheModel("game_assets://models/CrumpledDevelopable.mesh");
+		mdl->materials[0].metallic = 0.f;
+		mdl->materials[0].roughness = 1.f;
+		mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+		AddObject(mdl, "cd", { 5.f, 1.f, 10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
+
+
+
 		// gltf testing
 //#define GLTF_TEST
 #ifdef GLTF_TEST
