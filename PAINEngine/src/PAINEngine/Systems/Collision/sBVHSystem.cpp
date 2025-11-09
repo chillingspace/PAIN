@@ -86,7 +86,7 @@ namespace PAIN {
              if (!bvComponent) {
                  auto* modelRenderer = registry.try_get<ModelRenderer>(entity);
                  if (modelRenderer) { // Check if ModelRenderer mesh_id
-                     auto mesh = sceneService->getModel(modelRenderer->mesh_id); // Get mesh from scene cache
+                     auto mesh = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->selected_model);
                      if (mesh) { // Check if mesh was found
                         // Add cBoundingVolume component to the entity
                         bvComponent = &registry.emplace<BoundingVolume>(entity);

@@ -13,26 +13,15 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct ModelRenderer {
-		uint32_t mesh_id{};
 		std::vector<std::string> model_paths_storage;
 		Assets::GUID selected_model;
+		ModelRenderer() = default;
+		ModelRenderer(Assets::GUID const& id) : selected_model{ id } {}
 	};
-
-#ifdef _DEBUG
-	// UI Registration function
-	inline void RegisterMeshRendererUI(Editor::Panel::ComponentsPanel& panel) {
-		panel.registerCompUIFunc<ModelRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, ModelRenderer& mesh) {
-		});
-
-	}
-
-#endif
-
 }
 
 
 REFL_TYPE(PAIN::ModelRenderer)
-REFL_FIELD(mesh_id, PAIN::Editor::Attributes::ReadOnly())
 REFL_FIELD(selected_model,
 	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
 	PAIN::Editor::Attributes::DisplayName("Model Asset"),

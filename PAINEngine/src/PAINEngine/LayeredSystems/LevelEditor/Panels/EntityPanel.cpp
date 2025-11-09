@@ -64,7 +64,9 @@ namespace PAIN {
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, Hierarchy{});
                             if (scene) {
-                                ecs->addEntityComponent(entity, ModelRenderer{ scene->getModelId("") });
+                                //Get first model GUID to init
+                                auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
                             }
                             };
 

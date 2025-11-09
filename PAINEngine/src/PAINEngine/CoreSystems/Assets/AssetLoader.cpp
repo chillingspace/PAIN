@@ -317,6 +317,12 @@ namespace PAIN {
         }
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
+
+            //Check if virtual path has valid extension
+            if (std::filesystem::path(path_service->resolvePath(virtual_path)).extension() != ".mesh") {
+                throw std::runtime_error("Invalid file type: " + virtual_path);
+            }
+
             auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
             if (!stream || !stream->good()) {
                 PN_CORE_ERROR("Failed to open model file: {}", virtual_path);
