@@ -58,7 +58,7 @@ namespace PAIN {
 			LightSources::get().create("world");
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
-			lc.forward = glm::normalize(glm::vec3{ -0.5, -1, -0.2 });
+			lc.forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 			//lc.position = -lc.forward * 10.f;					// follows camera
 			lc.L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
 			lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
@@ -229,7 +229,7 @@ namespace PAIN {
 		TextRenderer::get();
 
 		// skybox
-		Skybox::get().init(services, services->get<Path::Path>()->resolvePath("engine_assets://textures/night_skybox.hdr"));
+		Skybox::get().init(services, services->get<Path::Path>()->resolvePath("engine_assets://textures/skybox2.hdr"));
 
 		// Test load prefab
 		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("sdcc.prefab");

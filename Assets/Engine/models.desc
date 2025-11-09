@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "models",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "749b9955-0146-424c-9000-5a36b6ff0dea",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\models"
+  }
+}
