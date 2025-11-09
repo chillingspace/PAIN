@@ -70,7 +70,7 @@ namespace PAIN {
 		LightSources::get().create("a");
 		auto ola = LightSources::get().get("a");
 		Light& la = ola.value();
-		la.position = glm::vec3(0.f, 1.f, -8.f);
+		la.position = glm::vec3(10.f, 1.f, -8.f);
 		la.L_intensity = glm::vec3(2.f);
 
 		//LightSources::get().create("b");
@@ -83,7 +83,6 @@ namespace PAIN {
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
 
-		//auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
 		auto ogre_diffuse_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
 		auto ogre_smile_ao_map = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
 
@@ -123,6 +122,22 @@ namespace PAIN {
 		mdl->materials[0].roughness = 1.f;
 		mdl->materials[0].baseColor = { 1, 0, 1 };
 		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+
+		auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
+		mdl = cacheModel("game_assets://models/sdcc.mesh");
+		mdl->materials[0].gl_diffuse_tex = sdcc_tex->gl_texture;
+		mdl->materials[0].metallic = 1.f;
+		mdl->materials[0].roughness = 0.f;
+		mdl->materials[0].baseColor = { 1, 0, 1 };
+		AddObject(mdl, "sdcc", {5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {3.f, 3.f, 3.f});
+
+		auto city_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("29fe999b-d257-bf41-879d-6d7578d43734"));
+		mdl = cacheModel("game_assets://models/city.mesh");
+		mdl->materials[0].gl_diffuse_tex = city_tex->gl_texture;
+		mdl->materials[0].metallic = 0.f;
+		mdl->materials[0].roughness = 1.f;
+		mdl->materials[0].baseColor = { 0, 1, 0 };
+		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 
 		// gltf testing
 //#define GLTF_TEST

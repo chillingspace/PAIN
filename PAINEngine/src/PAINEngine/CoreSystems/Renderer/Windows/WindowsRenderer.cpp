@@ -462,7 +462,7 @@ namespace PAIN {
 		glBindVertexArray(geometry_vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Vertex), mdl.vertices.data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
@@ -564,8 +564,16 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.use_ao", 1.f);
 			}
 			else {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, 0);
 				geometry_shader->SetUniform("material.use_ao", 0.f);
 			}
+		}
+		else {
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE7);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		//mdl.Draw(geometry_vao, geometry_vbo, geometry_ebo);
