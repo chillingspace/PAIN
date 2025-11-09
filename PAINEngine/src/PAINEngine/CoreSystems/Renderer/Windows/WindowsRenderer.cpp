@@ -336,7 +336,7 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &geometry_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &geometry_ebo);
@@ -344,15 +344,15 @@ namespace PAIN {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
 			glEnableVertexAttribArray(0);
 
 			// Normal attribute, layout(location = 1)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
 			glEnableVertexAttribArray(1);
 
 			// texcoords attribute, layout(location = 2)
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
 
 			// Unbind VAO
@@ -555,7 +555,7 @@ namespace PAIN {
 
 		glBindVertexArray(geometry_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Vertex), mdl.vertices.data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
