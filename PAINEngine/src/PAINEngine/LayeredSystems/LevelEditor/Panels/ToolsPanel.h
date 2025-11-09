@@ -14,6 +14,11 @@ namespace PAIN {
 
 			class Tools : public IPanel {
 			private:
+
+				//popup
+				std::function<void(std::any const&)> createNewScenePopUp(std::string const& popup_id);
+				std::function<void(std::any const&)> saveAsPopUp(std::string const& popup_id);
+
 			public:
 				Tools();
 				~Tools() override = default;

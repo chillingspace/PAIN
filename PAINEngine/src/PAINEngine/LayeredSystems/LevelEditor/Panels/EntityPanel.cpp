@@ -259,8 +259,7 @@ namespace PAIN {
                 }
 
                 // Detect scene changes
-                bool sceneChanged = ser && ser->consumeSceneChanged();
-                if (sceneChanged) {
+                if (ser->consumeSceneChanged()) {
                     selected_entity = entt::null;
                     selectedEntityIndex = -1;
                     editor_entities.clear();
@@ -764,7 +763,7 @@ namespace PAIN {
                     prefab_name = base_name + " (" + std::to_string(counter++) + ")";
                     test_path = seri_service->resolvePrefabPath(prefab_name);
                 }
-
+                
                 return prefab_name;
             }
 

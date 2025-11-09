@@ -83,6 +83,10 @@ namespace PAIN {
             bool loadSceneFromFile(const std::string& file_path);
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
+            std::string getCurrSceneId() const;
+            std::string getSceneId(std::string file_path) const;
+
+            std::string OpenSceneFileDialog(HWND ownerWindow = nullptr);
             std::string makeVirtualScenePathFromBase(std::string_view base); 
                 
             /***********************************

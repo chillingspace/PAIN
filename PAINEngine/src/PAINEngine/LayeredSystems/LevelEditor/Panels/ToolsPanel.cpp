@@ -3,10 +3,18 @@
 
 
 #ifdef _DEBUG
+#include "ECS/sMetaData.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
+
+#define PN_ECS_SERVICE services->get<ECS::Controller>()
+#define PN_METADATA_SERVICE services->get<MetaData::Service>()
+#define PN_SERI_SERVICE services->get<Serialization::Service>()
+#define PN_PATH_SERVICE services->get<Path::Path>()
+
 			Tools::Tools() {
 
 				//Set panel name
@@ -18,6 +26,9 @@ namespace PAIN {
                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
                     ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
                     ImGuiWindowFlags_MenuBar;
+
+                registerPopUp("New Scene", createNewScenePopUp("New Scene"));
+                registerPopUp("Save As...", saveAsPopUp("Save As..."));
 			}
             
 			void Tools::nextWindowSettings() {
@@ -28,6 +39,62 @@ namespace PAIN {
 				ImGui::SetNextWindowViewport(vp->ID);
 			}
 
+            std::function<void(std::any const&)> Tools::createNewScenePopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+
+                    static char scene_name[128] = "";
+
+                    ImGui::Text("Enter a new name for the scene:");
+                    if (ImGui::InputText("##Scene Name", scene_name, sizeof(scene_name))) {
+                    }
+
+                    if (strlen(scene_name) > 0 && (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+
+                        PN_SERI_SERVICE->saveSceneAs(scene_name);
+                        PN_SERI_SERVICE->markSceneChanged();
+
+                        scene_name[0] = '\0';
+                        closePopUp(popup_id);
+                    }
+
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+                        scene_name[0] = '\0';
+                        closePopUp(popup_id);
+                    }
+
+                    };
+            }
+
+            std::function<void(std::any const&)> Tools::saveAsPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+
+                    static char scene_name[128] = "";
+
+                    ImGui::Text("Enter a name for the new scene:");
+                    if (ImGui::InputText("##Scene Name", scene_name, sizeof(scene_name))) {
+                    }
+
+                    if (strlen(scene_name) > 0 && (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+
+                        PN_SERI_SERVICE->createNewScene(scene_name);
+
+                        const std::string id = std::string{ scene_name } + ".scn";
+                        PN_SERI_SERVICE->loadSceneById(id);
+
+                        scene_name[0] = '\0';
+                        closePopUp(popup_id);
+                    }
+
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+                        scene_name[0] = '\0';
+                        closePopUp(popup_id);
+                    }
+
+                    };
+            }
+
             void Tools::onAttach()
             {
             }
@@ -37,11 +104,17 @@ namespace PAIN {
                 if (ImGui::BeginMenuBar())
                 {
                     if (ImGui::BeginMenu("File")) {
-                        if (ImGui::MenuItem("New Scene", "Ctrl+N")) {/*TODO*/ }
-                        if (ImGui::MenuItem("Open...", "Ctrl+O")) {/*TODO*/ }
+                        if (ImGui::MenuItem("New Scene", "Ctrl+N")) { openPopUp("New Scene"); }
+                        if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
+                            std::string path = PN_SERI_SERVICE->OpenSceneFileDialog();
+                            if (!path.empty()) {
+                                std::string id = PN_SERI_SERVICE->getSceneId(path);
+                                PN_SERI_SERVICE->loadSceneById(id);
+                            }
+                        }
                         ImGui::Separator();
-                        if (ImGui::MenuItem("Save", "Ctrl+S")) {/*TODO*/ }
-                        if (ImGui::MenuItem("Save As...")) {/*TODO*/ }
+                        if (ImGui::MenuItem("Save", "Ctrl+S")) { PN_SERI_SERVICE->saveCurrentScene(); }
+                        if (ImGui::MenuItem("Save As...")) { openPopUp("Save As..."); }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Exit")) {/*TODO*/ }
                         ImGui::EndMenu();
@@ -57,14 +130,35 @@ namespace PAIN {
                     
                     if (ImGui::BeginMenu("GameObject")) { 
                         if (ImGui::MenuItem("Create Empty")){
-                            PN_CORE_INFO("Added new obj");
-                            //auto m_scene = services->get<Scene>();
-                            //size_t i = m_scene->GetObjects().size();
-                            //glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f * i));
 
-                            //if (m_scene) {
-                            //    m_scene->AddObject(Mesh::LoadObj(), transform);
-                            //}
+                            Action create;
+                            std::shared_ptr<std::string> shared_id = std::make_shared<std::string>("Empty");
+
+                            create.do_action = [&, shared_id]() {
+                                auto ecs = services->get<ECS::Controller>();
+                                auto scene = services->get<Scene>();
+
+                                glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
+                                glm::quat rot = { 1.f, 0.f, 0.f, 0.f };
+                                glm::vec3 scale = { 1.f, 1.f, 1.f };
+
+                                entt::entity entity = ecs->createEntity();
+                                ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
+                                ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+                                ecs->addEntityComponent(entity, Hierarchy{});
+                                if (scene) {
+                                    ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
+                                }
+                                };
+
+                            create.undo_action = [&, shared_id]() {
+                                auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
+                                if (entity.has_value()) {
+                                    PN_ECS_SERVICE->destroyEntity(entity.value());
+                                }
+                                };
+
+                            command_manager->executeAction(std::move(create));
                         }
 
                         ImGui::EndMenu(); 
@@ -106,6 +200,8 @@ namespace PAIN {
                 //    if (ImGui::Button("Stop")) {
                 //    }
                 //}
+
+                renderPopUps();
 
                 ImGui::EndChild();
 			}
