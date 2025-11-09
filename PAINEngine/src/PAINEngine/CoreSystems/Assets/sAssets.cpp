@@ -150,6 +150,10 @@ namespace PAIN {
 			auto meta = getAssetData(id);  
 			return meta ? meta->type : Type::Other; 
 		}
+
+		Loader* Manager::getRawAssetLoader() {
+			return asset_loader.get();
+		}
 		
 #ifdef PN_PLATFORM_WINDOWS
 		void Manager::registerAsset(std::filesystem::path const& relative_path) {
@@ -443,7 +447,7 @@ namespace PAIN {
 			std::filesystem::path destination = file_path.parent_path() /
 				(file_path.stem().string() + " - Copy" + file_path.extension().string());
 
-			//If the duplicate exists, append a number
+			//If the duplicate mesh_id, append a number
 			int i = 2;
 			while (std::filesystem::exists(destination)) {
 				destination = file_path.parent_path() /

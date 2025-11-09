@@ -196,7 +196,7 @@ namespace PAIN {
 				}
 			}
 
-			// Alternative name for consistency (checks component exists)
+			// Alternative name for consistency (checks component mesh_id)
 			template<typename T>
 			bool checkEntityComponent(entt::entity entity) const {
 				return entt_registry.all_of<T>(entity);

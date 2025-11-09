@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "scripts",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "2d0576f1-79bb-5449-9a8e-2697494d709b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\scripts"
+  }
+}

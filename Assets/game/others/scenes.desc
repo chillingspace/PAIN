@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "scenes",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "cdfbc940-17ab-f049-9099-d3688b934566",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\scenes"
+  }
+}

@@ -42,19 +42,19 @@ if exist bin-int (
     echo [SKIP] bin-int/ not found
 )
 
-REM Clean Android build cache
-if exist android\app\.cxx (
-    rmdir /s /q android\app\.cxx
-    echo [OK] Removed android\app\.cxx
+REM Clean Android cache
+if exist android\.idea (
+    rmdir /s /q android\.idea
+    echo [OK] android\.idea
 ) else (
-    echo [SKIP] android\app\.cxx not found
+    echo [SKIP] android\.idea not found
 )
 
-if exist android\.gradle (
-    rmdir /s /q android\.gradle
-    echo [OK] Removed android\.gradle
+if exist android\app\build (
+    rmdir /s /q android\app\build
+    echo [OK] Removed android\app\build
 ) else (
-    echo [SKIP] android\.gradle not found
+    echo [SKIP] android\app\build not found
 )
 
 REM Optional: Clean FetchContent cache (uncomment if needed)

@@ -100,7 +100,7 @@
 //    void Input_EndFrame() override {}
 //    void Input_OnEvent(PAIN::Event::Event&) override {}
 //
-//    // ===== MeshRenderer =====
+//    // ===== ModelRenderer =====
 //    std::optional<uint32_t> GetMeshId(int id) override { return ents_[id].meshId; }
 //    void SetMeshId(int id, uint32_t m) override { ents_[id].meshId = m; }
 //

@@ -64,7 +64,7 @@ namespace PAIN {
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, Hierarchy{});
                             if (scene) {
-                                ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
+                                ecs->addEntityComponent(entity, ModelRenderer{ scene->getModelId("") });
                             }
                             };
 

@@ -22,6 +22,7 @@ namespace PAIN {
         PN_CORE_INFO("BVH System Initialized.");
     }
 
+    // !TODO: MESH FIX
     // Implementation for calculating local AABB from mesh vertices
     AABB sBVHSystem::calculateLocalAABB(const std::shared_ptr<Mesh>& mesh) {
         AABB localAABB; // Initializes with max/lowest bounds
@@ -81,23 +82,25 @@ namespace PAIN {
              auto& transform = view.get<Transform>(entity); // Get transform component
              BoundingVolume* bvComponent = registry.try_get<BoundingVolume>(entity); // Try to get existing BV component
 
-             // If no BV component, try to create one from MeshRenderer
+             // If no BV component, try to create one from ModelRenderer
              if (!bvComponent) {
-                 auto* meshRenderer = registry.try_get<MeshRenderer>(entity);
-                 if (meshRenderer) { // Check if MeshRenderer exists
-                     auto mesh = sceneService->getMesh(meshRenderer->mesh_id); // Get mesh from scene cache
+                 auto* modelRenderer = registry.try_get<ModelRenderer>(entity);
+                 if (modelRenderer) { // Check if ModelRenderer mesh_id
+                     auto mesh = sceneService->getModel(modelRenderer->mesh_id); // Get mesh from scene cache
                      if (mesh) { // Check if mesh was found
                         // Add cBoundingVolume component to the entity
                         bvComponent = &registry.emplace<BoundingVolume>(entity);
                         // Calculate local AABB from the mesh
-                        bvComponent->localAABB = calculateLocalAABB(mesh);
+                        //bvComponent->localAABB = calculateLocalAABB(mesh);
+                        bvComponent->localAABB.min = mesh->aabbMin;
+                        bvComponent->localAABB.max = mesh->aabbMax;
                         bvComponent->needsUpdate = true; // Mark for world AABB update
                      } else {
-                         // Mesh ID exists but mesh not loaded/cached, skip entity
+                         // Mesh ID mesh_id but mesh not loaded/cached, skip entity
                          continue;
                      }
                  } else {
-                     // Entity has transform but no BV or MeshRenderer, skip it
+                     // Entity has transform but no BV or ModelRenderer, skip it
                      continue;
                  }
              }

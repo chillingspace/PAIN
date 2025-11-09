@@ -199,7 +199,7 @@ namespace PAIN {
 
 			// Prevent duplicate alias registration.
 			if (virtual_paths.find(alias) != virtual_paths.end()) {
-				PN_CORE_WARN("Alias: {} already exists. Invalid registering of path.", alias);
+				PN_CORE_WARN("Alias: {} already mesh_id. Invalid registering of path.", alias);
 				return;
 			}
 
@@ -219,7 +219,7 @@ namespace PAIN {
 
 			auto it = virtual_paths.find(alias);
 			if (it == virtual_paths.end()) {
-				PN_CORE_WARN("Alias: {} does not exists. Invalid updating of path.", alias);
+				PN_CORE_WARN("Alias: {} does not mesh_id. Invalid updating of path.", alias);
 				return;
 			}
 
@@ -417,7 +417,7 @@ namespace PAIN {
 			}
 			else {
 
-				//Ensure path exists
+				//Ensure path mesh_id
 				if (!std::filesystem::exists(path)) {
 					throw std::runtime_error("File does not exist! Unable to create file stream");
 				}

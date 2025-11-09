@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "shaders",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "6e4b6b38-5e1b-c444-a415-619d55c70978",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\others\\shaders"
+  }
+}
