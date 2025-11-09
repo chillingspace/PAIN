@@ -336,7 +336,7 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &geometry_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &geometry_ebo);
@@ -344,15 +344,15 @@ namespace PAIN {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
 			glEnableVertexAttribArray(0);
 
 			// Normal attribute, layout(location = 1)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
 			glEnableVertexAttribArray(1);
 
 			// texcoords attribute, layout(location = 2)
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
 
 			// Unbind VAO
@@ -447,9 +447,9 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawShadows(Mesh* mesh, const glm::mat4& M, const Light& l)
+	void WindowsRenderer::DrawShadows(const Assets::Model& mdl, const glm::mat4& M, const Light& l)
 	{
-		if (!mesh || !shadow_shader) return;
+		if (!shadow_shader) return;
 
 		shadow_shader->Bind();
 
@@ -457,7 +457,23 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+		//mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		glBindVertexArray(geometry_vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Vertex), mdl.vertices.data());
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+
+		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, mdl.vpath);;
+		}
 	}
 
 	void WindowsRenderer::EndShadowPass()
@@ -518,31 +534,32 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, Mesh* mesh, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, const Assets::Model& mdl, const glm::mat4& M)
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
 		}
 
-		if (!mesh || !geometry_shader) return;
+		if (!geometry_shader) return;
 
 		geometry_shader->SetUniform("u_M", M);
 
-		geometry_shader->SetUniform("material.rough", mesh->material.rough);
-		geometry_shader->SetUniform("material.metal", mesh->material.metal);
-		geometry_shader->SetUniform("material.color", mesh->material.color);
-		geometry_shader->SetUniform("material.useTex", mesh->material.useTex ? 1.f : 0.f);
-		geometry_shader->SetUniform("material.alwaysLit", mesh->material.alwaysLit ? 1.f : 0.f);
+		geometry_shader->SetUniform("material.rough", mdl.materials[0].roughness);
+		geometry_shader->SetUniform("material.metal", mdl.materials[0].metallic);
+		geometry_shader->SetUniform("material.color", mdl.materials[0].baseColor);
+		geometry_shader->SetUniform("material.useTex", mdl.materials[0].gl_diffuse_tex ? 1.f : 0.f);
+		geometry_shader->SetUniform("material.alwaysLit", mdl.materials[0].gl_emissive_tex ? 1.f : 0.f);
+		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
-		if (mesh->material.useTex) {
+		if (mdl.materials[0].gl_diffuse_tex) {
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mesh->material.tex);
+			glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_diffuse_tex);
 			geometry_shader->SetUniform("material.tex", 6);
 
-			if (GraphicsSettings::get().ao && mesh->material.useAo) {
+			if (GraphicsSettings::get().ao && mdl.materials[0].gl_ao_tex) {
 				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, mesh->material.aoTex);
+				glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_ao_tex);
 				geometry_shader->SetUniform("material.ao_map", 7);
 				geometry_shader->SetUniform("material.use_ao", 1.f);
 			}
@@ -551,7 +568,17 @@ namespace PAIN {
 			}
 		}
 
-		mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
+		//mdl.Draw(geometry_vao, geometry_vbo, geometry_ebo);
+
+		glBindVertexArray(geometry_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+
+		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -564,11 +591,11 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void WindowsRenderer::ReflectionPass(const std::shared_ptr<Mesh>& m)
+	void WindowsRenderer::ReflectionPass(const Assets::Model& m)
 	{
-		if (m->material.reflection_type == m->material.REFLECTION_TYPES::NONE) {
-			return;
-		}
+		//if (m.materials[0].reflection_type == m.materials[0].REFLECTION_TYPES::NONE) {
+		//	return;
+		//}
 
 
 	}

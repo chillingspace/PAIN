@@ -129,7 +129,7 @@ namespace PAIN {
 
         void WindowsPath::registerVirtualPath(const std::string& alias, const std::string& path, bool create_new) {
 
-            //check if path actually exists
+            //check if path actually mesh_id
             if (!std::filesystem::exists(path)) {
 
                 //Create new path
@@ -142,9 +142,9 @@ namespace PAIN {
                 }
             }
 
-            //check if path actually exists
+            //check if path actually mesh_id
             if (virtual_paths.find(alias) != virtual_paths.end()) {
-                PN_CORE_WARN("Alias: {} already exists. Invalid registering of path.", alias);
+                PN_CORE_WARN("Alias: {} already mesh_id. Invalid registering of path.", alias);
                 return;
             }
 
@@ -154,16 +154,16 @@ namespace PAIN {
         }
 
         void WindowsPath::updateVirtualPath(const std::string& alias, const std::string& path) {
-            //check if path actually exists
+            //check if path actually mesh_id
             if (!std::filesystem::exists(path)) {
                 PN_CORE_WARN("Path: {} does not exist. Invalid registering of path.", path);
                 return;
             }
 
-            //check if path actually exists
+            //check if path actually mesh_id
             auto it = virtual_paths.find(alias);
             if (it == virtual_paths.end()) {
-                PN_CORE_WARN("Alias: {} does not exists. Invalid registering of path.", alias);
+                PN_CORE_WARN("Alias: {} does not mesh_id. Invalid registering of path.", alias);
                 return;
             }
 
@@ -207,7 +207,7 @@ namespace PAIN {
             //Get actual path
             auto actual_path = resolvePath(virtualPath);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path);
             }
@@ -231,7 +231,7 @@ namespace PAIN {
             //Get actual path
             auto actual_path = resolvePath(virtualPath);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path);
             }
@@ -302,7 +302,7 @@ namespace PAIN {
             //Get actual path
             std::filesystem::path actual_path = resolvePath(virtual_path);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
             }
@@ -325,7 +325,7 @@ namespace PAIN {
             //Get actual path
             std::filesystem::path actual_path = resolvePath(virtual_path);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
             }
@@ -363,7 +363,7 @@ namespace PAIN {
             //Get actual path
             std::filesystem::path actual_path = resolvePath(virtual_path);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
             }
@@ -382,7 +382,7 @@ namespace PAIN {
             //Get actual path
             std::filesystem::path actual_path = resolvePath(virtual_path);
 
-            //Check if path exists
+            //Check if path mesh_id
             if (!std::filesystem::exists(actual_path) || !std::filesystem::is_directory(actual_path)) {
                 throw std::runtime_error("Path does not exist or is not a directory: " + actual_path.string());
             }

@@ -65,18 +65,18 @@ namespace PAIN {
 
 				auto transform = ecs->getEntityComponent<Transform>(e);
 
-				auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
+				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
-				glm::mat4 model;
+				glm::mat4 model_xform;
 				if (transform.has_value())
 				{
-					model = transform.value().get().getMatrix();
+					model_xform = transform.value().get().getMatrix();
 				}
 
-				if (mesh.has_value())
+				if (mdl.has_value())
 				{
-					auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
-					w_renderer->DrawShadows(mesh_ptr.get(), model, l); // uses shadow_shader
+					auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
 
 				}
 
@@ -104,16 +104,16 @@ namespace PAIN {
 		for (auto e : view) {
 
   			auto transform = ecs->getEntityComponent<Transform>(e);
-			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
-			glm::mat4 model;
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model = transform.value().get().getMatrix();
+				model_xform = transform.value().get().getMatrix();
 			}
-			if (mesh.has_value())
+			if (mdl.has_value())
 			{
-				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
-				w_renderer->DrawGeometry(m_Scene, mesh_ptr.get(), model);
+				auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
 			}
 
 		}
@@ -137,16 +137,16 @@ namespace PAIN {
 		for (auto e : view) {
 
 			auto transform = ecs->getEntityComponent<Transform>(e);
-			auto mesh = ecs->getEntityComponent<MeshRenderer>(e);
-			glm::mat4 model;
+			auto mesh = ecs->getEntityComponent<ModelRenderer>(e);
+			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model = transform.value().get().getMatrix();
+				model_xform = transform.value().get().getMatrix();
 			}
 			if (mesh.has_value())
 			{
-				auto mesh_ptr = scene->getMesh(mesh->get().mesh_id);
-				w_renderer->ReflectionPass(mesh_ptr);
+				auto mesh_ptr = scene->getModel(mesh->get().mesh_id);
+				w_renderer->ReflectionPass(*mesh_ptr);
 			}
 
 		}
