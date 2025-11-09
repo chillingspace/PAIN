@@ -405,13 +405,14 @@ void EngineAPIAdapter::Input_EndFrame() {
 /*                                ModelRenderer                                 */
 /* =========================================================================== */
 std::optional<uint32_t> EngineAPIAdapter::GetMeshId(entt::entity entityId) {
-    PAIN::ModelRenderer* mr = nullptr; 
-    if (!try_get<PAIN::ModelRenderer>(entityId, mr)) return std::nullopt;
-    return mr->mesh_id; 
+    //PAIN::ModelRenderer* mr = nullptr; 
+    //if (!try_get<PAIN::ModelRenderer>(entityId, mr)) return std::nullopt;
+    //return mr->mesh_id; 
+    return std::nullopt;
 }
 void EngineAPIAdapter::SetMeshId(entt::entity entityId, uint32_t meshId) {
-    auto& mr = ensure<PAIN::ModelRenderer>(entityId);
-    mr.mesh_id = meshId; 
+    //auto& mr = ensure<PAIN::ModelRenderer>(entityId);
+    //mr.mesh_id = meshId; 
 
     /*PAIN::ModelRenderer* mr = nullptr;
     if (!try_get<PAIN::ModelRenderer>(entityId, mr)) {

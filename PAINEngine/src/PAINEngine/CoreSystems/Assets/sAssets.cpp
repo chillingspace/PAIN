@@ -291,6 +291,13 @@ namespace PAIN {
 			//Load assset through registered loaded
 			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
 
+			//Init asset registry var
+			asset->guid = registry_it->second->guid;
+			asset->main_relative_path = registry_it->second->main_relative_path;
+			asset->shipped_relative_path = registry_it->second->shipped_relative_path;
+			asset->name = registry_it->second->name;
+			asset->type = registry_it->second->type;
+
 			//Insert loaded asset into asset cache
 			asset_cache.emplace(id, asset);
 

@@ -112,6 +112,13 @@ namespace PAIN {
 					//Simply just call on loader without caching
 					auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, asset_registry[id]->shipped_relative_path.string());
 					asset = asset_loader->GetLoader(asset_registry[id]->type)(virtual_path);
+
+					//Init asset registry var
+					asset->guid = asset_registry[id]->guid;
+					asset->main_relative_path = asset_registry[id]->main_relative_path;
+					asset->shipped_relative_path = asset_registry[id]->shipped_relative_path;
+					asset->name = asset_registry[id]->name;
+					asset->type = asset_registry[id]->type;
 				}
 
 				auto typed_asset = std::dynamic_pointer_cast<T>(asset);

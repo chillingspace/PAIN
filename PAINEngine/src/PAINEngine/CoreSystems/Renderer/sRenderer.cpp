@@ -75,7 +75,8 @@ namespace PAIN {
 
 				if (mdl.has_value())
 				{
-					auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+					//Get model asset
+					auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
 					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
 
 				}
@@ -112,7 +113,7 @@ namespace PAIN {
 			}
 			if (mdl.has_value())
 			{
-				auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
 				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
 			}
 
@@ -137,16 +138,16 @@ namespace PAIN {
 		for (auto e : view) {
 
 			auto transform = ecs->getEntityComponent<Transform>(e);
-			auto mesh = ecs->getEntityComponent<ModelRenderer>(e);
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
 				model_xform = transform.value().get().getMatrix();
 			}
-			if (mesh.has_value())
+			if (mdl.has_value())
 			{
-				auto mesh_ptr = scene->getModel(mesh->get().mesh_id);
-				w_renderer->ReflectionPass(*mesh_ptr);
+				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
+				w_renderer->ReflectionPass(*mdl_ptr);
 			}
 
 		}

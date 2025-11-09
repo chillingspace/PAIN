@@ -64,7 +64,9 @@ namespace PAIN {
                             ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
                             ecs->addEntityComponent(entity, Hierarchy{});
                             if (scene) {
-                                ecs->addEntityComponent(entity, ModelRenderer{ scene->getModelId("") });
+                                //Get first model GUID to init
+                                auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
                             }
                             };
 
@@ -259,8 +261,7 @@ namespace PAIN {
                 }
 
                 // Detect scene changes
-                bool sceneChanged = ser && ser->consumeSceneChanged();
-                if (sceneChanged) {
+                if (ser->consumeSceneChanged()) {
                     selected_entity = entt::null;
                     selectedEntityIndex = -1;
                     editor_entities.clear();
@@ -764,7 +765,7 @@ namespace PAIN {
                     prefab_name = base_name + " (" + std::to_string(counter++) + ")";
                     test_path = seri_service->resolvePrefabPath(prefab_name);
                 }
-
+                
                 return prefab_name;
             }
 
