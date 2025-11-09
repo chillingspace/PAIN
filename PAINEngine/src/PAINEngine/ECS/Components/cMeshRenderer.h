@@ -3,7 +3,7 @@
 #include "pch.h"
 // Somehow, if i dont include this, refl macro cannot be foundl, even tho is in pch...
 #include "refl.hpp"
-#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+#include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 namespace PAIN {
 
@@ -13,29 +13,18 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct ModelRenderer {
-		uint32_t mesh_id{};
+		std::vector<std::string> model_paths_storage;
+		Assets::GUID selected_model;
+		ModelRenderer() = default;
+		ModelRenderer(Assets::GUID const& id) : selected_model{ id } {}
 	};
-
-#ifdef _DEBUG
-	// UI Registration function
-	inline void RegisterMeshRendererUI(Editor::Panel::ComponentsPanel& panel) {
-		panel.registerCompUIFunc<ModelRenderer>([](Editor::Panel::ComponentsPanel& comp_panel, ModelRenderer& mesh_id) {
-			ImGui::Text("Model Renderer");
-			ImGui::Separator();
-			
-			unsigned int step = 1;
-			ImGui::InputScalar("Mesh ID", ImGuiDataType_U32, &mesh_id, &step);
-
-		});
-
-	}
-
-#endif
-
 }
 
 
 REFL_TYPE(PAIN::ModelRenderer)
-REFL_FIELD(mesh_id)
+REFL_FIELD(selected_model,
+	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
+	PAIN::Editor::Attributes::DisplayName("Model Asset"),
+	PAIN::Editor::Attributes::Tooltip("Select a 3D model asset"))
 REFL_END
 

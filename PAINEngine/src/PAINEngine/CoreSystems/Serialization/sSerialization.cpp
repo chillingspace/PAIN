@@ -233,6 +233,65 @@ namespace PAIN {
             return true;
         }
 
+        std::string Service::getCurrSceneId() const
+        {
+            // Find the last '/' in the path to get the base filename
+            size_t lastSlash = curr_scene_file_.find_last_of('/');
+            std::string baseName = (lastSlash != std::string::npos) ? curr_scene_file_.substr(lastSlash + 1) : curr_scene_file_;
+
+            // Remove ".scn" extension if present
+            size_t scnPos = baseName.rfind(".scn");
+            if (scnPos != std::string::npos && scnPos == baseName.size() - 4) {
+                baseName.erase(scnPos, 4);
+            }
+
+            // Additional sanitize if needed
+            return baseName;
+        }
+
+        std::string Service::getSceneId(std::string file_path) const
+        {
+            size_t lastSlash = file_path.find_last_of("/\\");
+            std::string baseName = (lastSlash != std::string::npos) ? file_path.substr(lastSlash + 1) : file_path;
+
+            // Remove file extension ".scn" if present
+            size_t extPos = baseName.rfind(".scn");
+            if (extPos != std::string::npos && extPos == baseName.size() - 4) {
+                baseName.erase(extPos, 4);
+            }
+
+            return baseName + ".scn";
+        }
+
+#ifdef PN_PLATFORM_WINDOWS
+        std::string Service::OpenSceneFileDialog(HWND ownerWindow)
+        {
+            OPENFILENAME ofn;       // common dialog box structure
+            char szFile[260] = { 0 }; // buffer for file name
+
+            ZeroMemory(&ofn, sizeof(ofn));
+            ofn.lStructSize = sizeof(ofn);
+            ofn.hwndOwner = ownerWindow;
+            ofn.lpstrFile = szFile;
+            ofn.nMaxFile = sizeof(szFile);
+
+            auto path_service = services->get<Path::Path>();
+
+            std::string initialDirStr = path_service->resolvePath("main_game_assets://scenes");
+            //std::string initialDirStr = path_service->resolvePath("game_assets://scenes");
+            ofn.lpstrInitialDir = initialDirStr.c_str();
+            ofn.lpstrFilter = "Scene Files (*.scn)\0*.scn\0All Files (*.*)\0*.*\0";
+            ofn.nFilterIndex = 1;
+
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+            if (GetOpenFileName(&ofn)) {
+                return std::string(ofn.lpstrFile);
+            }
+            return {};
+        }
+#endif
+
         std::string Service::makeVirtualScenePathFromBase(std::string_view base)
         {
             std::string b = sanitize_base(std::string(base));

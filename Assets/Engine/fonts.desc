@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "fonts",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "35f64770-e339-604f-b93b-bdb1b87d615d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\fonts"
+  }
+}

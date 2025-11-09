@@ -662,6 +662,11 @@ namespace PAIN {
 
 
 	void Skybox::generateBRDFLUT() {
+		PN_CORE_INFO("Generating BRDFLUT..");
+
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generateBRDFLUT: {}", err);
+
 		// Create BRDF LUT texture
 		glGenTextures(1, &brdf_tex);
 		glBindTexture(GL_TEXTURE_2D, brdf_tex);
@@ -672,8 +677,10 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generating texture: {}", err);
+
 		// Setup framebuffer
-		unsigned int captureFBO, captureRBO;
+		unsigned int captureFBO;
 		glGenFramebuffers(1, &captureFBO);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -687,6 +694,8 @@ namespace PAIN {
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			PN_CORE_ERROR("CaptureFBO in generateBRDFLUT not complete!");
 		}
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generating fbo: {}", err);
 
 #ifdef PN_PLATFORM_ANDROID
 		std::filesystem::path brdf_shader_path = "engine\\shaders\\android_brdf.vert";
@@ -702,15 +711,20 @@ namespace PAIN {
 		brdfShader->Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
+
 		renderQuad(); // Render a fullscreen quad (see below)
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, winWidth, winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
-		glDeleteRenderbuffers(1, &captureRBO);
+		//glDeleteRenderbuffers(1, &captureRBO);
 
 		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
 	}
 
 

@@ -15,6 +15,8 @@
 #include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/Components/cTransform.h"
 
+#include "AssetData.h"
+
 namespace PAIN {
     namespace Serialization {
 
@@ -83,6 +85,12 @@ namespace PAIN {
             bool loadSceneFromFile(const std::string& file_path);
 
             const std::string& getCurrSceneFile() const { return curr_scene_file_; }
+            std::string getCurrSceneId() const;
+            std::string getSceneId(std::string file_path) const;
+
+#ifdef PN_PLATFORM_WINDOWS
+            std::string OpenSceneFileDialog(HWND ownerWindow = nullptr);
+#endif
             std::string makeVirtualScenePathFromBase(std::string_view base); 
                 
             /***********************************
@@ -161,12 +169,20 @@ namespace PAIN {
                 return name_to_string_impl(cs, 0);
             }
 
+
             // Forward decls
             template <typename T>
             nlohmann::json to_json_value(const T& v);
 
             template <typename T>
             void from_json_value(T& out, const nlohmann::json& j);
+
+            inline nlohmann::json to_json_value(const PAIN::Assets::GUID& v) {
+                return v.ToString();
+            }
+            inline void from_json_value(PAIN::Assets::GUID& out, const nlohmann::json& j) {
+                out = PAIN::Assets::GUID(j.get<std::string>());
+            }
 
             // ---------- detect reflectable ----------
             template <typename T>

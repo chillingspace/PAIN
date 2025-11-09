@@ -10,6 +10,10 @@
 
 
 #pragma once
+
+#ifndef REFELCTION_UI_HPP
+#define REFELCTION_UI_HPP
+
 #include <refl.hpp>
 #include <imgui.h>
 #include "pch.h"
@@ -25,6 +29,8 @@
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
+
+#include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 
 // Mark fields as read-only in the reflected UI
@@ -353,9 +359,44 @@ inline bool DrawField(const char* label, T&) {
     return false;
 }
 
+// ---------- Asset Selector ----------
+
+inline bool DrawAssetSelectorField(
+    const char* label,
+    PAIN::Assets::GUID& guid,
+    const PAIN::Editor::Attributes::AssetSelector& attr,
+    PAIN::Editor::Panel::ComponentsPanel& panel,
+    bool readonly = false
+) {
+    bool changed = false;
+    auto asset_service = panel.services->get<PAIN::Assets::Manager>();
+    auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+    std::vector<std::string> asset_names;
+    std::vector<const char*> asset_names_cstr;
+    int selected_idx = -1;
+
+    for (auto const& asset : assets) {
+        asset_names.push_back(asset->shipped_relative_path.string());
+        asset_names_cstr.push_back(asset_names.back().c_str());
+        if (guid.IsValid() && asset->guid == guid) selected_idx = asset_names.size() - 1;
+    }
+
+    if (readonly) ImGui::BeginDisabled();
+
+    if (ImGui::Combo(label, &selected_idx, asset_names_cstr.data(), (int)asset_names_cstr.size())) {
+        if (selected_idx >= 0 && selected_idx < (int)assets.size()) {
+            guid = assets[selected_idx]->guid;
+            changed = true;
+        }
+    }
+
+    if (readonly) ImGui::EndDisabled();
+    return changed;
+}
+
 // ---------- Reflection driver ----------
  template <typename T>
-bool DrawWithReflection(T& obj) {
+bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
     bool changed = false;
 
     constexpr auto type = refl::reflect<T>();
@@ -364,14 +405,57 @@ bool DrawWithReflection(T& obj) {
             auto& field = m(obj);
             ImGui::PushID(m.name.c_str());
 
-            // If the field has ReadOnlyTag, grey it out
-            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)) {
-                ImGui::BeginDisabled(true);
-                changed |= DrawField(m.name.c_str(), field);
-                ImGui::EndDisabled();
+            // ------- Check for DisplayName -------
+            const char* display_name = m.name.c_str();
+            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::DisplayName>(m)) {
+                display_name = refl::descriptor::get_attribute<PAIN::Editor::Attributes::DisplayName>(m).name;
             }
+
+            // ------- Tooltip -------
+            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Tooltip>(m)) {
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("%s", refl::descriptor::get_attribute<PAIN::Editor::Attributes::Tooltip>(m).text);
+                }
+            }
+
+            // ------- ReadOnly -------
+            bool readonly = false;
+            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)
+                || refl::descriptor::has_attribute<PAIN::Editor::Attributes::ReadOnly>(m)) {
+                readonly = true;
+            }
+
+            // ------- AssetSelector / Custom Draw -------
+            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::AssetSelector>(m)) {
+                // The field must be Asset GUID, or something compatible
+                if (panel) {
+                    auto attr = refl::descriptor::get_attribute<PAIN::Editor::Attributes::AssetSelector>(m);
+                    // Replace with your asset dropdown renderer
+                    changed |= DrawAssetSelectorField(display_name, field, attr, *panel, readonly);
+                }
+            }
+            // ------- Range, Dropdown, etc. -------
+            else if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Range>(m)) {
+                auto attr = refl::descriptor::get_attribute<PAIN::Editor::Attributes::Range>(m);
+                if (!readonly) {
+                    changed |= ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
+                }
+                else {
+                    ImGui::BeginDisabled();
+                    ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
+                    ImGui::EndDisabled();
+                }
+            }
+            // ------- Default Drawing Logic -------
             else {
-                changed |= DrawField(m.name.c_str(), field);
+                if (!readonly) {
+                    changed |= DrawField(display_name, field);
+                }
+                else {
+                    ImGui::BeginDisabled();
+                    changed |= DrawField(display_name, field);
+                    ImGui::EndDisabled();
+                }
             }
 
             ImGui::PopID();
@@ -431,4 +515,5 @@ namespace PAIN {
         }
     }
 }
+#endif
 #endif

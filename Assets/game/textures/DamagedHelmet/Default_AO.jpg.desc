@@ -1,0 +1,21 @@
+{
+  "asset_info": {
+    "name": "Default_AO.jpg",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1302638730020051839
+  },
+  "descriptor_version": 1,
+  "guid": "a1252741-5857-cb46-b30b-f3ff938bf9b8",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "srgb": true,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\damagedhelmet\\Default_AO.jpg"
+  }
+}

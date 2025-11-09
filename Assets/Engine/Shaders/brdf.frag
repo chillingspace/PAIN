@@ -1,8 +1,10 @@
 #version 330 core
+
 out vec2 FragColor;
 in vec2 TexCoords;
 
 const float PI = 3.14159265359;
+
 
 float RadicalInverse_VdC(uint bits) 
 {
@@ -105,4 +107,5 @@ void main()
 {
     vec2 integratedBRDF = IntegrateBRDF(TexCoords.x, TexCoords.y);
     FragColor = integratedBRDF;
+    // FragColor = vec4(1,0,1,1);
 }

@@ -52,6 +52,8 @@ namespace PAIN {
 
 				void renderEntityComponents(entt::entity entity);
 
+				//Expose services
+				std::shared_ptr<Services> services;
 
 			private:
 				std::string comp_string_ref;

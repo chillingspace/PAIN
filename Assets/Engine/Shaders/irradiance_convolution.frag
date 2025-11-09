@@ -66,6 +66,8 @@ void main()
             }
 
             irradiance += texture(environmentMap, sampleVec).rgb * cos(theta) * sin(theta);
+            nrSamples += cos(theta) * sin(theta);
+
             nrSamples++;
         }
     }

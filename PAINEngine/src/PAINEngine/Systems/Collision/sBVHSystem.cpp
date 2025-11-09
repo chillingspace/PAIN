@@ -1,16 +1,17 @@
 ﻿#include "pch.h" // Must be first
 
 // Include own header
-#include "Systems/Collision/sBVHSystem.h" // Adjust path if needed
+#include "Systems/Collision/sBVHSystem.h"
 
 // Include necessary headers for implementation details
 #include "ECS/Controller.h"
-#include "ECS/Components/cTransform.h"      // Include full definition
+#include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cMetadata.h"
-#include "CoreSystems/Renderer/Mesh.h"
+#include "CoreSystems/Assets/sAssets.h" // For Assets::Model and Assets::Vertex
 #include "CoreSystems/Scene/Scene.h"
+#include <limits> // For std::numeric_limits
 
 // Ensure code is within the namespace
 namespace PAIN {
@@ -22,22 +23,20 @@ namespace PAIN {
         PN_CORE_INFO("BVH System Initialized.");
     }
 
-    // !TODO: MESH FIX
-    // Implementation for calculating local AABB from mesh vertices
-    AABB sBVHSystem::calculateLocalAABB(const std::shared_ptr<Mesh>& mesh) {
+    // AABB calculation, using Assets::Model
+    AABB sBVHSystem::calculateLocalAABB(const std::shared_ptr<Assets::Model>& model) {
         AABB localAABB; // Initializes with max/lowest bounds
-        if (!mesh) {
-            PN_CORE_WARN("Attempted to calculate AABB for a null mesh. Using default small box.");
+        if (!model) {
+            PN_CORE_WARN("Attempted to calculate AABB for a null model. Using default small box.");
             localAABB.min = glm::vec3(-0.01f);
             localAABB.max = glm::vec3(0.01f);
             return localAABB;
         }
 
-        // --- THIS BLOCK IS NOW CORRECT ---
-        // Access vertices using the getter method added to Mesh.h
-        const std::vector<Vertex>& vertices = mesh->getVertices();
+        // Explicitly use PAIN::Assets::Vertex, which is the type in model->vertices
+        const std::vector<PAIN::Assets::Vertex>& vertices = model->vertices;
         if (vertices.empty()) {
-             PN_CORE_WARN("Mesh has no vertices. Using default small box.");
+             PN_CORE_WARN("Model has no vertices. Using default small box.");
              localAABB.min = glm::vec3(-0.01f);
              localAABB.max = glm::vec3(0.01f);
              return localAABB;
@@ -54,7 +53,6 @@ namespace PAIN {
          if (extents.x < minExtent) { localAABB.min.x -= minExtent; localAABB.max.x += minExtent; }
          if (extents.y < minExtent) { localAABB.min.y -= minExtent; localAABB.max.y += minExtent; }
          if (extents.z < minExtent) { localAABB.min.z -= minExtent; localAABB.max.z += minExtent; }
-        // --- END OF CORRECTION ---
 
         return localAABB;
     }
@@ -76,7 +74,7 @@ namespace PAIN {
         bvhItems.reserve(registry.storage<Transform>().size());
 
         // Create a view for entities having a Transform component
-        auto view = registry.view<Transform>(/*entt::exclude<MetaData::EditorVisible>*/);
+        auto view = registry.view<Transform>();
 
         for (auto entity : view) {
              auto& transform = view.get<Transform>(entity); // Get transform component
@@ -86,14 +84,14 @@ namespace PAIN {
              if (!bvComponent) {
                  auto* modelRenderer = registry.try_get<ModelRenderer>(entity);
                  if (modelRenderer) { // Check if ModelRenderer mesh_id
-                     auto mesh = sceneService->getModel(modelRenderer->mesh_id); // Get mesh from scene cache
-                     if (mesh) { // Check if mesh was found
+                     auto model = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->selected_model);
+                     if (model) { // Check if model was found
                         // Add cBoundingVolume component to the entity
                         bvComponent = &registry.emplace<BoundingVolume>(entity);
-                        // Calculate local AABB from the mesh
-                        //bvComponent->localAABB = calculateLocalAABB(mesh);
-                        bvComponent->localAABB.min = mesh->aabbMin;
-                        bvComponent->localAABB.max = mesh->aabbMax;
+                        
+                        // Calculate local AABB from the model's vertices
+                        bvComponent->localAABB = calculateLocalAABB(model);
+                        
                         bvComponent->needsUpdate = true; // Mark for world AABB update
                      } else {
                          // Mesh ID mesh_id but mesh not loaded/cached, skip entity
@@ -155,7 +153,7 @@ namespace PAIN {
          }
     } // End of onUpdate
 
-    // Implementation for event handling (currently empty)
+    // Implementation for event handling
     void sBVHSystem::onEvent(Event::Event& e)
     {
         // Placeholder for event responses

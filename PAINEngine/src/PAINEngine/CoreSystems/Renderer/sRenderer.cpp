@@ -75,7 +75,8 @@ namespace PAIN {
 
 				if (mdl.has_value())
 				{
-					auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+					//Get model asset
+					auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
 					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
 
 				}
@@ -112,7 +113,7 @@ namespace PAIN {
 			}
 			if (mdl.has_value())
 			{
-				auto mdl_ptr = scene->getModel(mdl->get().mesh_id);
+				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
 				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
 			}
 
@@ -137,16 +138,16 @@ namespace PAIN {
 		for (auto e : view) {
 
 			auto transform = ecs->getEntityComponent<Transform>(e);
-			auto mesh = ecs->getEntityComponent<ModelRenderer>(e);
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
 				model_xform = transform.value().get().getMatrix();
 			}
-			if (mesh.has_value())
+			if (mdl.has_value())
 			{
-				auto mesh_ptr = scene->getModel(mesh->get().mesh_id);
-				w_renderer->ReflectionPass(*mesh_ptr);
+				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
+				w_renderer->ReflectionPass(*mdl_ptr);
 			}
 
 		}
@@ -183,17 +184,14 @@ namespace PAIN {
 		if (debug_mode == 1)
 		{
 			auto& registry = ecs->getRegistry();
-			auto view = registry.view<MetaData::EntityName>();
+			// Iterate over BoundingVolume, not EntityName
+			auto view = registry.view<BoundingVolume>();
 			glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
 
 			for (auto entity : view) {
-				auto bounding_vol = ecs->getEntityComponent<BoundingVolume>(entity);
-
-				// Check if entity has comp
-				if (bounding_vol.has_value())
-				{
-					w_renderer->DebugPass(bounding_vol->get().worldAABB.min, bounding_vol->get().worldAABB.max, color, scene);
-				}
+				// Get component directly from the view
+				auto& bounding_vol = view.get<BoundingVolume>(entity);
+				w_renderer->DebugPass(bounding_vol.worldAABB.min, bounding_vol.worldAABB.max, color, scene);
 			}
 		}
 

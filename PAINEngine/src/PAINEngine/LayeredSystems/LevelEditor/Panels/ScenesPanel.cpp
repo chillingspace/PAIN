@@ -215,6 +215,11 @@ namespace PAIN {
                 const auto& doc = ser->doc(); // read for drawing
 
                 // Title & dock are handled by IPanel
+                if (ser->consumeSceneChanged()) {
+                    currSceneId_ = ser->getCurrSceneId();
+                    ser->markSceneChanged();
+                }
+
                 ImGui::Text("Scene ID: %s", currSceneId_.empty() ? "(none)" : currSceneId_.c_str());
 
                 ImGui::InputText("Scene name", nameBuf_, IM_ARRAYSIZE(nameBuf_));
