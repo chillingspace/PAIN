@@ -20,7 +20,7 @@ void main() {
     const vec3 light = vec3(0.5);
 
     const float roughness = 0.0;        // 1 -> rough, 0.1 -> smooth
-    const float metallic = 0.0;         // metal
+    const float metallic = 1.0;         // metal
 
     gPos = fFragPos;
     gCol = mix(light, dark, dark_tile_intensity);
