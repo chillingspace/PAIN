@@ -50,11 +50,6 @@ if exist android\.idea (
     echo [SKIP] android\.idea not found
 )
 
-if exist android\app\.cxx (
-    rmdir /s /q android\app\.cxx
-    echo     Removed android\app\.cxx
-)
-
 if exist android\.gradle (
     rmdir /s /q android\.gradle
     echo [OK] android\.gradle
