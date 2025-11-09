@@ -62,6 +62,8 @@ namespace PAIN {
                 std::vector<std::vector<bool>> mask_;         
                 unsigned selectedLayerIdx_ = 0;
 
+                Assets::GUID selected;
+
                 std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
                 std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
