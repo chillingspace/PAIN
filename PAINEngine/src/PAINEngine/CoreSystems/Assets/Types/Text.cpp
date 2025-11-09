@@ -21,7 +21,7 @@ namespace PAIN {
                 }
 
                 FT_Library library;
-                FT_Face face;
+                FT_Face face = nullptr;
 
                 if (FT_Init_FreeType(&library)) {
                     PN_CORE_ERROR("Could not initialize FreeType library");
