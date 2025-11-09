@@ -52,7 +52,7 @@ namespace PAIN {
 		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
 
 		//GraphicsSettings::get().daytime = false;
-		GraphicsSettings::get().ibl = false;
+		//GraphicsSettings::get().ibl = false;
 
 		if (GraphicsSettings::get().daytime) {
 			LightSources::get().create("world");
@@ -111,6 +111,9 @@ namespace PAIN {
 			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
 
+
+
+		/*
 		{
 			auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
 			auto smile_ogre_mesh_id = cacheMesh(obj_path);
@@ -126,6 +129,7 @@ namespace PAIN {
 
 			//AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 		}
+		*/
 
 		// New audio demo test
 		// Add the looping sound to the "screen" entity as a component
