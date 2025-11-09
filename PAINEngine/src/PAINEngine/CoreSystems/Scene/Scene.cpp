@@ -81,6 +81,7 @@ namespace PAIN {
 
 		obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
 		cacheMesh(obj_path);
+		//cacheMesh("game_assets://models/ogre_smile.mesh");
 
 		auto quad_path = services->get<Path::Path>()->resolvePath("engine_assets://models/quad.obj");
 		cacheMesh(quad_path);
@@ -523,9 +524,41 @@ namespace PAIN {
 		std::filesystem::path fsPath(path);
 		std::string filename = fsPath.filename().string();
 
-		auto mesh = loadMesh(path);
-		uint32_t mesh_id = djb2_hash(filename);
-		meshCache[mesh_id] = mesh;
+		static constexpr char sep = '.';
+		auto sep_idx = filename.find(sep);
+		std::string ext{};
+		if (sep_idx != filename.npos) {
+			ext = filename.substr(sep_idx+1);
+		}
+
+		unsigned int mesh_id;
+
+		if (ext == "mesh") {
+			PN_CORE_INFO("Loading .mesh: {}", filename);
+
+			
+
+			std::shared_ptr<Assets::Manager> am = services->get<Assets::Manager>();
+			Assets::Loader* ral = am->getRawAssetLoader();
+			auto loader = ral->GetLoader(Assets::Type::Model);
+			const std::shared_ptr<Assets::IAsset> base_mdl = loader(path);
+			std::shared_ptr<Assets::Model> mdl = std::dynamic_pointer_cast<Assets::Model>(base_mdl);
+
+			// logging to check data
+			{
+				PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", filename, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
+			}
+
+			auto mesh = loadMesh(path);
+			mesh_id = djb2_hash(filename);
+			meshCache[mesh_id] = mesh;
+		}
+		else {
+			auto mesh = loadMesh(path);
+			mesh_id = djb2_hash(filename);
+			meshCache[mesh_id] = mesh;
+		}
+
 
 		return mesh_id;
 	}

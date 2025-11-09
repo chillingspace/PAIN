@@ -113,20 +113,20 @@ namespace PAIN {
 
         // Material (PBR support)
         struct Material {
-            std::string name;
-            std::string diffuseMap;
-            std::string normalMap;
-            std::string metallicMap;
-            std::string roughnessMap;
-            std::string aoMap;
-            std::string emissionMap;
-            std::string bumpMap;
-			std::string heightMap;
-            glm::vec3 baseColor;
-            float metallic;
-            float roughness;
-            float ao;
-            float emission;
+            std::string name{};
+            std::string diffuseMap{};
+            std::string normalMap{};
+            std::string metallicMap{};
+            std::string roughnessMap{};
+            std::string aoMap{};
+            std::string emissionMap{};
+            std::string bumpMap{};
+            std::string heightMap{};
+            glm::vec3 baseColor{};
+            float metallic{};
+            float roughness{};
+            float ao{};
+            float emission{};
             // Additional: transparency, alpha mode, etc.
         };
 

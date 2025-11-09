@@ -150,6 +150,10 @@ namespace PAIN {
 			auto meta = getAssetData(id);  
 			return meta ? meta->type : Type::Other; 
 		}
+
+		Loader* Manager::getRawAssetLoader() {
+			return asset_loader.get();
+		}
 		
 #ifdef PN_PLATFORM_WINDOWS
 		void Manager::registerAsset(std::filesystem::path const& relative_path) {
