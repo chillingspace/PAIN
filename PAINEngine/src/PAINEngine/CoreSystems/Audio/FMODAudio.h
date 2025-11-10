@@ -34,10 +34,10 @@ namespace PAIN {
             void onFixedUpdate(AppTiming timing) override {}
             void onUpdate(AppTiming timing) override;
 
-            std::shared_ptr<Sound> createSound(std::string const&, bool, bool, bool, float, float) override;
+            std::shared_ptr<Sound> createSound(std::string const&) override;
             AudioResult loadPlaylist(const PlaylistDesc&) override;
 
-            std::optional<AudioChannelId> play(std::shared_ptr<Sound>, const glm::vec3&, float) override;
+            std::optional<AudioChannelId> play(std::shared_ptr<Sound> sound, std::string const& group, float vol, float pitch, bool looping, bool is3D, const glm::vec3& pos, float min_dist, float max_dist) override;
             std::optional<AudioChannelId> playRandom(std::string_view, const glm::vec3&, float) override;
 
             AudioResult stop(AudioChannelId) override;

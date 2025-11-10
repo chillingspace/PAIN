@@ -13,6 +13,20 @@ namespace PAIN {
     namespace Editor {
         namespace Panel {
 
+            //Global files and directories for payload
+            struct Dir {
+                std::filesystem::path path;
+                ImTextureID icon;
+                std::string file_name;
+            };
+            struct File {
+                std::filesystem::path path;
+                Assets::GUID id;
+                Assets::Type type;
+                ImTextureID icon;
+                std::string file_name;
+            };
+
             class ResourcePanel : public IPanel {
             public:
 
@@ -59,18 +73,6 @@ namespace PAIN {
                 // ----------------------------
                 // File & Directory
                 // ----------------------------
-                struct Dir {
-                    std::filesystem::path path;
-                    ImTextureID icon;
-                    std::string file_name;
-                };
-                struct File {
-                    std::filesystem::path path;
-                    Assets::GUID id;
-                    Assets::Type type;
-                    ImTextureID icon;
-                    std::string file_name;
-                };
                 std::vector<Dir> directories; //Directories
                 std::vector<File> files; //Files
 

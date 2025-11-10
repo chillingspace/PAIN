@@ -312,6 +312,21 @@ namespace PAIN {
             throw std::runtime_error("Could not find project root containing Assets/ directory");
         }
 
+        static bool isMusic(std::filesystem::path const& path) {
+
+            auto audio_exts = getAllExtensions()[Type::Audio];
+            if (audio_exts.find(path.extension().string()) == audio_exts.end()) {
+                std::cout << "Invalid audio type" << std::endl;
+                return false;
+            }
+
+            if (path.string().find("/music/") != std::string::npos) return true;
+
+            uintmax_t fileSize = std::filesystem::file_size(path);
+            constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024;
+            return fileSize > MUSIC_FILESIZE_THRESHOLD;
+        }
+
         //Asset info
         struct Info {
 

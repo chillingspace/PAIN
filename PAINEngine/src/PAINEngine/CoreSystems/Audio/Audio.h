@@ -29,17 +29,22 @@ namespace PAIN {
             std::string name;
             std::vector<std::string> paths;
         };
+        
+        //Sound defaults
+        const float MIN_DISTANCE_3D = 1.0f;
+        const float MAX_DISTANCE_3D = 50.0f;
+
+        //Fix group names
+        const std::vector<std::string> group_names {
+            "music", "sfx", "ui"
+        };
 
         struct Sound : public Assets::IAsset {
             virtual ~Sound() = default;
             virtual std::string getPath() const = 0;
             virtual void release() = 0;
 
-            bool is3D = true;
-            bool looping = false;
             bool stream = false;
-            float minDistance = 1.0f;
-            float maxDistance = 50.0f;
         };
 
         class Audio : public AppSystem {
@@ -53,19 +58,11 @@ namespace PAIN {
             virtual void shutdown() = 0;
 
             // assets
-            virtual std::shared_ptr<Sound> createSound(
-                std::string const& virtual_path,
-                bool is3D = true,
-                bool looping = false,
-                bool stream = false,
-                float minDistance = 1.0f,
-                float maxDistance = 50.0f) = 0;
+            virtual std::shared_ptr<Sound> createSound(std::string const& virtual_path) = 0;
             virtual AudioResult loadPlaylist(const PlaylistDesc& desc) = 0;
 
             // playback
-            virtual std::optional<AudioChannelId> play(std::shared_ptr<Sound> sound,
-                const glm::vec3& pos = { 0,0,0 },
-                float volumeDb = 0.0f) = 0;
+            virtual std::optional<AudioChannelId> play(std::shared_ptr<Sound> sound, std::string const& group = "", float vol = 0.0f, float pitch = 0.0f, bool looping = false, bool is3D = false, const glm::vec3& pos = glm::vec3(0), float min_dist = MIN_DISTANCE_3D, float max_dist = MAX_DISTANCE_3D) = 0;
             virtual std::optional<AudioChannelId> playRandom(std::string_view playlistName,
                 const glm::vec3& pos = { 0,0,0 },
                 float volumeDb = 0.0f) = 0;

@@ -56,8 +56,11 @@ namespace PAIN {
                         // Play the sound
                         auto channelOpt = audioService->play(
                             asset_service->getAsset<Sound>(audioSrc.selected_audio),
-                            transform.position,
-                            audioSrc.volumeDb
+                            audioSrc.group_name,
+                            audioSrc.volumeDb,
+                            audioSrc.pitchDb,
+                            audioSrc.looping,
+                            audioSrc.is3D
                         );
                         if (channelOpt.has_value()) {
                             audioSrc.channelId = channelOpt.value();

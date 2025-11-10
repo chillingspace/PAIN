@@ -340,6 +340,17 @@ namespace PAIN {
                         // Get component pointer (type-erased)
                         void* comp_ptr = ecs->getComponentPtrByName(entity, comp_name);
 
+                        //Start drag-and-drop source
+                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+
+                            //Set drag payload with asset name
+                            ImGui::SetDragDropPayload(std::string(comp_name + "_COMP").c_str(), &comp_ptr, sizeof(comp_ptr));
+
+                            //Render the icon or name at the cursor during dragging
+                            ImGui::Text("%s", comp_name.c_str());
+                            ImGui::EndDragDropSource();
+                        }
+
                         // Render component-specific UI
                         if (comps_ui.find(comp_name) != comps_ui.end() && comp_ptr) {
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));

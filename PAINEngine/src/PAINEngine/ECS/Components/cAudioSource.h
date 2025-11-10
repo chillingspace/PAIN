@@ -24,11 +24,14 @@ namespace PAIN {
             // --- CONFIGURATION (Set in Editor) ---
             std::vector<std::string> audio_paths_storage;
             Assets::GUID selected_audio;
+            std::string group_name;
             bool is3D = true;
             bool looping = false;
             float volumeDb = 0.0f;
+            float pitchDb = 0.0f;
             float minDistance = 1.0f;
             float maxDistance = 50.0f;
+            glm::vec3 pos = glm::vec3(0);
 
             // --- STATE (Managed by AudioSystem) ---
             AudioState state = AudioState::Stopped;
@@ -58,11 +61,14 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Audio),
     PAIN::Editor::Attributes::DisplayName("Audio Asset"),
     PAIN::Editor::Attributes::Tooltip("Select a Audio asset"))
+    REFL_FIELD(group_name)
     REFL_FIELD(is3D)          // Serialized
     REFL_FIELD(looping)       // Serialized
     REFL_FIELD(volumeDb)      // Serialized
+    REFL_FIELD(pitchDb)      // Serialized
     REFL_FIELD(minDistance)   // Serialized
     REFL_FIELD(maxDistance)   // Serialized
+    REFL_FIELD(pos)   // Serialized
     REFL_FIELD(playOnStart)   // Serialized (will save as "playOnStart")
     //
     // Intentionally NOT reflecting the runtime fields:

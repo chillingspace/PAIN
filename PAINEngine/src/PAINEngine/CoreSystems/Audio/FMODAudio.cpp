@@ -112,17 +112,15 @@ namespace PAIN {
 				std::transform(path_lower.begin(), path_lower.end(), path_lower.begin(),
 					[](unsigned char c) { return std::tolower(c); });
 
-				if (path_lower.find("music") != std::string::npos) {
-					return groups["music"].cg;
-				}
-				if (path_lower.find("sfx") != std::string::npos) {
-					return groups["sfx"].cg;
-				}
-				if (path_lower.find("ui") != std::string::npos) {
-					return groups["ui"].cg;
+				//Fing group
+				for (auto const& group : groups) {
+					if (path_lower.find(group.first) != std::string::npos) {
+						return group.second.cg;
+					}
 				}
 
-				return groups["master"].cg; // Fallback to master
+				//Fall back to master
+				return groups["master"].cg;
 			}
 		};
 
@@ -238,9 +236,11 @@ namespace PAIN {
 			impl_->groups.emplace("master", masterGroupWrapper);
 
 			// Create other groups (which will now be correctly parented to the real master)
-			impl_->ensureGroup("music");
-			impl_->ensureGroup("sfx");
-			impl_->ensureGroup("ui");
+			for (auto group : group_names) {
+				std::transform(group.begin(), group.end(), group.begin(),
+					[](unsigned char c) { return std::tolower(c); });
+				impl_->ensureGroup(group.c_str());
+			}
 
 			impl_->initialized = true;
 
@@ -309,22 +309,32 @@ namespace PAIN {
 			}
 			for (int id : toErase) impl_->channels.erase(id);
 		}
-		std::shared_ptr<Sound> FmodAudio::createSound(std::string const& virtual_path, bool is3D, bool looping, bool stream, float minDistance, float maxDistance) {
+
+		std::shared_ptr<Sound> FmodAudio::createSound(std::string const& virtual_path) {
 			if (!impl_->initialized) throw std::runtime_error("Initialization failed.");
 
+			//Create sound options
+			auto is_music = Assets::isMusic(path_service->resolvePath(virtual_path));
 			FMOD_MODE mode = FMOD_DEFAULT;
-			if (is3D)   mode |= FMOD_3D; else mode |= FMOD_2D;
-			if (looping) mode |= FMOD_LOOP_NORMAL; else mode |= FMOD_LOOP_OFF;
-			mode |= FMOD_CREATESTREAM;
+			if (is_music) {
+				mode |= FMOD_2D;
+				mode |= FMOD_CREATESTREAM;
+				mode |= FMOD_LOOP_NORMAL;
+			}
+			else {
+				mode |= FMOD_3D;
+				mode |= FMOD_LOOP_OFF;
+			}
 
 			FMOD::Sound* s = nullptr;
 			FMOD_RESULT r = impl_->sys->createSound(virtual_path.c_str(), mode, nullptr, &s);
 			if (r != FMOD_OK) throw std::runtime_error("Failed to create sound.");
 
-			if (is3D) {
-				s->set3DMinMaxDistance(minDistance, maxDistance);
+			if (mode & FMOD_3D) {
+				s->set3DMinMaxDistance(MIN_DISTANCE_3D, MAX_DISTANCE_3D);
 			}
 			auto sound = std::make_shared<FmodAudio::Impl::FmodSound>(virtual_path, s);
+			sound->stream = is_music ? true : false;
 			return sound;
 		}
 
@@ -334,35 +344,52 @@ namespace PAIN {
 			return AudioResult::Ok;
 		}
 
-		std::optional<AudioChannelId> FmodAudio::play(std::shared_ptr<Sound> sound, const glm::vec3& pos, float volumeDb) {
+		std::optional<AudioChannelId> FmodAudio::play(std::shared_ptr<Sound> sound, std::string const& group, float vol, float pitch, bool looping, bool is3D, const glm::vec3& pos, float min_dist, float max_dist) {
 			if (!impl_->initialized) return std::nullopt;
 
 			//Check if sound is valid
-			if(! sound)return std::nullopt;
+			if(!sound) return std::nullopt;
 
 			//Cast fmod audio up
 			std::shared_ptr<FmodAudio::Impl::FmodSound> fmod_sound = std::dynamic_pointer_cast<FmodAudio::Impl::FmodSound>(sound);
 
+			//Check for valid cast
+			if(!fmod_sound) return std::nullopt;
+
 			//Set mode
-			fmod_sound->getFmodPtr()->setMode((fmod_sound->is3D ? FMOD_3D : FMOD_2D) | (fmod_sound->looping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF) | (fmod_sound->stream ? FMOD_CREATESTREAM : FMOD_DEFAULT));
-			if (fmod_sound->is3D) {
-				fmod_sound->getFmodPtr()->set3DMinMaxDistance(fmod_sound->minDistance, fmod_sound->maxDistance);
+			fmod_sound->getFmodPtr()->setMode((is3D ? FMOD_3D : FMOD_2D) | (looping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF) | (fmod_sound->stream ? FMOD_CREATESTREAM : FMOD_DEFAULT));
+			if (is3D) {
+				fmod_sound->getFmodPtr()->set3DMinMaxDistance(min_dist, max_dist);
 			}
 
+			//Pick group &  channel
 			FMOD::Channel* ch = nullptr;
-			FMOD::ChannelGroup* cg = impl_->pickGroup(fmod_sound->getPath());
+			FMOD::ChannelGroup* cg;
 
+			//Check if valid group has been provided
+			auto g_it = impl_->groups.find(group);
+			if (g_it != impl_->groups.end()) {
+				cg = g_it->second.cg;
+			}
+			else {
+				cg = impl_->pickGroup(fmod_sound->getPath());
+			}
+
+			//Play sound
 			FMOD_RESULT r = impl_->sys->playSound(fmod_sound->getFmodPtr(), cg, true, &ch);
 			if (r != FMOD_OK || !ch) return std::nullopt;
 
-			if (fmod_sound->is3D) {
+			//Set 3D attributes
+			if (is3D) {
 				auto fpos = Impl::toF(pos);
 				FMOD_VECTOR vel{ 0,0,0 };
 				ch->set3DAttributes(&fpos, &vel);
 			}
-			ch->setVolume(db2lin(volumeDb));
+			ch->setVolume(db2lin(vol));
+			ch->setPitch(db2lin(pitch));
 			ch->setPaused(false);
 
+			//Get new channel
 			int id = impl_->nextId++;
 			impl_->channels.emplace(id, Impl::Chan{ ch });
 			return AudioChannelId{ id };

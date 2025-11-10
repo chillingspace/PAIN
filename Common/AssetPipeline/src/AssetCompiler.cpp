@@ -89,18 +89,16 @@ namespace PAIN {
                 settings["extension"] = ".ogg";
                 settings["quality"] = 0.8;
 
-                bool isMusic = false;
+                bool is_music = false;
 
                 //For determining if its music
                 if (std::filesystem::exists(asset.raw_path)) {
-                    uintmax_t fileSize = std::filesystem::file_size(asset.raw_path);
-                    constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024; // 1MB
-                    isMusic = fileSize > MUSIC_FILESIZE_THRESHOLD;
+                    is_music = isMusic(asset.raw_path);
                 }
-               isMusic = (isMusic || asset.raw_path.string().find("music") != std::string::npos ||
+                is_music = (is_music || asset.raw_path.string().find("music") != std::string::npos ||
                     asset.raw_path.string().find("bgm") != std::string::npos);
 
-                if (isMusic) {
+                if (is_music) {
                     settings["loop"] = true;
                 }
                 else {
