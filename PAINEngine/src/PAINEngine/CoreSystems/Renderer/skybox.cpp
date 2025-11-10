@@ -18,131 +18,11 @@
 
 #include "CoreSystems/Windows/Window.h"
 
-#ifndef STB_IMAGE_IMPLEMENTATION
-#ifdef PN_PLATFORM_ANDROID
-#define STB_IMAGE_IMPLEMENTATION
-#endif
-#endif
-#include "stb_image.h"
-
 namespace PAIN {
 	Skybox::Skybox() {
 	}
 
 	Skybox::~Skybox() {
-	}
-
-	void Skybox::loadHdr(const std::string& path) {
-		PN_CORE_INFO("Loading skybox {}", path);
-
-		stbi_set_flip_vertically_on_load(true);
-		int width, height, nrComponents;
-#ifdef PN_PLATFORM_ANDROID
-		std::string fileData = ReadFileAndroid(path);
-		if (fileData.empty()) {
-			PN_CORE_ERROR("Failed to load HDR asset: {}", path);
-			return;
-		}
-
-		float* data = stbi_loadf_from_memory(
-			reinterpret_cast<const unsigned char*>(fileData.data()),
-			fileData.size(),
-			&width, &height, &nrComponents, 0
-		);
-#else
-		float* data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
-#endif
-		if (data) {
-			PN_CORE_INFO("Loaded HDR image with size: {}x{} and {} components", width, height, nrComponents);
-
-#define SCALE_HDR_DOWN
-#ifdef SCALE_HDR_DOWN
-			// remap hdr to prevent super bright spots
-
-			// first, find min and max in the data
-			float minVal = std::numeric_limits<float>::max();
-			float maxVal = std::numeric_limits<float>::lowest();
-
-			for (int i = 0; i < width * height * nrComponents; ++i) {
-				if (data[i] < minVal) minVal = data[i];
-				if (data[i] > maxVal) maxVal = data[i];
-			}
-
-			static constexpr float MAX_HDR_VALUE = 50000.f;
-			PN_CORE_INFO("Max skybox HDR value: {}", maxVal);
-
-			if (maxVal > MAX_HDR_VALUE)
-			{
-
-				// first, find min and max in the data
-				float minVal = std::numeric_limits<float>::max();
-				float maxVal = std::numeric_limits<float>::lowest();
-
-				for (int i = 0; i < width * height * nrComponents; ++i) {
-					if (data[i] < minVal) minVal = data[i];
-					if (data[i] > maxVal) maxVal = data[i];
-				}
-
-				PN_CORE_TRACE("HDR data range before remap: min={} max={}", minVal, maxVal);
-
-				// remap
-				float range = maxVal - minVal;
-				if (range < 1e-6f) range = 1e-6f; // avoid divide by zero
-
-#ifdef _DEBUG
-				float newMaxVal = -1.f;
-				float newMinVal = 999999999.f;
-#endif
-
-				for (int i = 0; i < width * height * nrComponents; ++i) {
-					data[i] = ((data[i] - minVal) / range) * MAX_HDR_VALUE;
-
-#ifdef _DEBUG
-					if (data[i] < newMinVal) {
-						newMinVal = data[i];
-					}
-					if (data[i] > newMaxVal) {
-						newMaxVal = data[i];
-					}
-#endif
-				}
-
-#ifdef _DEBUG
-				PN_CORE_TRACE("HDR data range after remap: min={} max={}", newMinVal, newMaxVal);
-#endif
-			}
-#endif
-
-
-			//#define CLAMP_HDR
-#ifdef CLAMP_HDR
-			// clamp hdr to prevent super bright spots 
-			{
-				static constexpr float MAX_HDR_VALUE = 65000.f;
-				for (int i = 0; i < width * height * nrComponents; ++i) {
-					//data[i] = std::min(data[i], maxHDRValue); 
-					if (data[i] > MAX_HDR_VALUE) {
-						PN_CORE_TRACE("HDR value too high! Current: {}, Max: {}", data[i], MAX_HDR_VALUE);
-						data[i] = MAX_HDR_VALUE;
-					}
-				}
-			}
-#endif
-
-			glGenTextures(1, &skybox_tex);
-			glBindTexture(GL_TEXTURE_2D, skybox_tex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			stbi_image_free(data);
-		}
-		else {
-			PN_CORE_ERROR("Failed to load HDR image at path: {}", path);
-		}
 	}
 
 	void Skybox::renderCube() {
@@ -309,7 +189,7 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
-		glDeleteTextures(1, &skybox_tex); // delete the original HDR
+		//glDeleteTextures(1, &skybox_tex); // delete the original HDR
 	}
 
 	void Skybox::init(const std::shared_ptr<Services>& s, const std::filesystem::path& skybox_path) {
@@ -338,7 +218,6 @@ namespace PAIN {
 		}
 
 		skybox_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path)->gl_texture;
-		//loadHdr(skybox_path);
 		convertEquirectangularToCubemap();
 
 		// generate IBL textures

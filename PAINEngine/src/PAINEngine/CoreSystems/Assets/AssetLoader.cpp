@@ -101,7 +101,7 @@ namespace PAIN {
                 throw std::runtime_error("Failed to read all KTX data: " + virtual_path);
             stream = nullptr;
 
-            // LOAD KTX FILE
+            //KTX loader
             ktxTexture* kTexture = nullptr;
             KTX_error_code result = ktxTexture_CreateFromMemory(
                 data.data(),
@@ -113,12 +113,19 @@ namespace PAIN {
             if (result != KTX_SUCCESS || !kTexture)
                 throw std::runtime_error("Failed to parse KTX from memory: " + virtual_path);
 
-            // Basic metadata
+            //Basic metadata
             tex->width = static_cast<int>(kTexture->baseWidth);
             tex->height = static_cast<int>(kTexture->baseHeight);
             tex->mips = kTexture->numLevels ? static_cast<int>(kTexture->numLevels) : 1;
+            int numFaces = kTexture->numFaces ? kTexture->numFaces : 1;
+            
+            //Set format
+            tex->format = TextureFormat::ASTC;
 
-            // Detect if KTX1 or KTX2 (see ktx.h for class ids)
+            //Check if is a cubemap
+            tex->is_cube_map = (numFaces == 6);
+
+            //Detect if KTX1 or KTX2 (see ktx.h for class ids)
             if (kTexture->classId == ktxTexture1_c) {
                 tex->glTexFormat = reinterpret_cast<ktxTexture1*>(kTexture)->glInternalformat;
             }
@@ -126,30 +133,28 @@ namespace PAIN {
                 throw std::runtime_error("Unknown KTX texture class!");
             }
 
-            // Query and assign a suitable format enum for your engine (expand if you support more than ASTC)
-            tex->format = TextureFormat::ASTC;
-
             tex->mipOffsets.clear();
             tex->data.clear();
 
-            // Robust mipmap and data extraction
-            for (uint32_t level = 0; level < static_cast<uint32_t>(tex->mips); ++level) {
-                ktx_size_t imageOffset = 0;
-                KTX_error_code ofsResult = ktxTexture_GetImageOffset(
-                    kTexture, level, /*layer*/0, /*faceSlice*/0, &imageOffset);
-                if (ofsResult != KTX_SUCCESS)
-                    throw std::runtime_error("Failed to get image offset for mip " + std::to_string(level));
+            //Iterate through mips
+            for (uint32_t face = 0; face < numFaces; ++face) {
+                for (uint32_t mip = 0; mip < static_cast<uint32_t>(tex->mips); ++mip) {
+                    ktx_size_t imageOffset = 0;
+                    KTX_error_code ofsResult = ktxTexture_GetImageOffset(
+                        kTexture, mip, 0, face, &imageOffset);
 
-                ktx_size_t mipSize = ktxTexture_GetImageSize(kTexture, level);
-                if (mipSize == 0)
-                    throw std::runtime_error("No data for KTX mip level " + std::to_string(level));
+                    if (ofsResult != KTX_SUCCESS)
+                        throw std::runtime_error("Failed to get image offset for mip " + std::to_string(mip) + ", face " + std::to_string(face));
 
-                // Store data offset
-                tex->mipOffsets.push_back(tex->data.size());
+                    ktx_size_t mipSize = ktxTexture_GetImageSize(kTexture, mip);
+                    if (mipSize == 0)
+                        throw std::runtime_error("No data for KTX mip level " + std::to_string(mip) + " face " + std::to_string(face));
 
-                // Copy block data
-                const uint8_t* mipData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture)) + imageOffset;
-                tex->data.insert(tex->data.end(), mipData, mipData + mipSize);
+                    tex->mipOffsets.push_back(tex->data.size());
+
+                    const uint8_t* mipData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture)) + imageOffset;
+                    tex->data.insert(tex->data.end(), mipData, mipData + mipSize);
+                }
             }
 
             ktxTexture_Destroy(kTexture);
@@ -218,24 +223,28 @@ namespace PAIN {
             tex->data.clear();
             tex->mipOffsets.clear();
 
-            int mipW = tex->width;
-            int mipH = tex->height;
-            for (uint32_t mip = 0; mip < mipMapCount; ++mip) {
-                int blocks_w = (mipW + 3) / 4;
-                int blocks_h = (mipH + 3) / 4;
-                size_t mipSize = blocks_w * blocks_h * 16;
+            uint32_t dwCaps2 = header[28];
+            tex->is_cube_map = (dwCaps2 & 0x200) != 0;
+            int faces = tex->is_cube_map ? 6 : 1;
+            for (int face = 0; face < faces; ++face) {
+                int mipW = tex->width;
+                int mipH = tex->height;
+                for (uint32_t mip = 0; mip < mipMapCount; ++mip) {
+                    int blocks_w = (mipW + 3) / 4;
+                    int blocks_h = (mipH + 3) / 4;
+                    size_t mipSize = blocks_w * blocks_h * 16; // 16 bytes/block for BC7/BC6H
+                    if (data.size() < offset + mipSize)
+                        throw std::runtime_error("DDS too small for mip " + std::to_string(mip) + ", face " + std::to_string(face));
 
-                tex->mipOffsets.push_back(tex->data.size());
-                size_t currentOffset = tex->data.size();
-                if (data.size() < offset + mipSize)
-                    throw std::runtime_error("DDS file too small for mipmap level " + std::to_string(mip));
+                    tex->mipOffsets.push_back(tex->data.size());
+                    size_t currentOffset = tex->data.size();
+                    tex->data.resize(tex->data.size() + mipSize);
+                    std::memcpy(tex->data.data() + currentOffset, data.data() + offset, mipSize);
 
-                tex->data.resize(tex->data.size() + mipSize);
-                std::memcpy(tex->data.data() + currentOffset, data.data() + offset, mipSize);
-
-                offset += mipSize;
-                mipW = std::max(1, mipW / 2);
-                mipH = std::max(1, mipH / 2);
+                    offset += mipSize;
+                    mipW = std::max(1, mipW / 2);
+                    mipH = std::max(1, mipH / 2);
+                }
             }
 
             stream = nullptr;
@@ -249,111 +258,102 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
             extractKTX(virtual_path, tex);
-
-            glGenTextures(1, &tex->gl_texture);
-            glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            GLfloat maxAniso = 1.0f;
-            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-
-            int mipW = tex->width;
-            int mipH = tex->height;
-
-            // **Mipmap upload loop (industry standard, matches KTX content)**
-            for (int mip = 0; mip < tex->mips; ++mip) {
-                size_t mipSize = 0;
-                if (mip + 1 < tex->mipOffsets.size())
-                    mipSize = tex->mipOffsets[mip + 1] - tex->mipOffsets[mip];
-                else
-                    mipSize = tex->data.size() - tex->mipOffsets[mip];
-
-                glCompressedTexImage2D(
-                    GL_TEXTURE_2D,
-                    mip,
-                    tex->glTexFormat,
-                    mipW,
-                    mipH,
-                    0,
-                    mipSize,
-                    tex->data.data() + tex->mipOffsets[mip]
-                );
-
-                GLenum err = glGetError();
-                if (err != GL_NO_ERROR) {
-                    throw std::runtime_error("OpenGL error uploading KTX mip " +
-                        std::to_string(mip) + ": 0x" + std::to_string(err));
-                }
-
-                mipW = std::max(1, mipW / 2);
-                mipH = std::max(1, mipH / 2);
-            }
-
-            glBindTexture(GL_TEXTURE_2D, 0);
 #else
-            // Extract DDS (Windows, etc.)
             extractDDS(virtual_path, tex);
+#endif
 
+            //Generate textures
             glGenTextures(1, &tex->gl_texture);
-            glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            if (tex->is_cube_map) {
+                glBindTexture(GL_TEXTURE_CUBE_MAP, tex->gl_texture);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            GLfloat maxAniso = 1.0f;
-            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+                GLfloat maxAniso = 1.0f;
+                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+                glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
 
-            int mipW = tex->width;
-            int mipH = tex->height;
+                size_t offset = 0;
+                for (int face = 0; face < 6; ++face) {
+                    int mipW = tex->width, mipH = tex->height;
+                    for (uint32_t mip = 0; mip < tex->mips; ++mip) {
+                        int blocks_w = (mipW + 3) / 4;
+                        int blocks_h = (mipH + 3) / 4;
+                        size_t mipSize = blocks_w * blocks_h * 16;
+                        if (offset + mipSize > tex->data.size()) {
+                            std::cerr << "Upload would overflow data at face " << face << " mip " << mip << "\n";
+                            throw std::runtime_error("Upload would overflow data");
+                        }
+                        glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mip, tex->glTexFormat,
+                            mipW, mipH, 0, mipSize, &tex->data[offset]);
 
-            for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                int blocks_w = (mipW + 3) / 4;
-                int blocks_h = (mipH + 3) / 4;
-                size_t mipSize = blocks_w * blocks_h * 16;
-                size_t offset = tex->mipOffsets[mip];
+                        GLenum err = glGetError();
+                        if (err != GL_NO_ERROR) {
+                            throw std::runtime_error("OpenGL error uploading mip " +
+                                std::to_string(mip) + ": 0x" +
+                                std::to_string(err));
+                        }
 
-                glCompressedTexImage2D(
-                    GL_TEXTURE_2D,
-                    mip,
-                    tex->glTexFormat,
-                    mipW,
-                    mipH,
-                    0,
-                    mipSize,
-                    tex->data.data() + offset
-                );
+                        offset += mipSize;
+                        mipW = std::max(1, mipW / 2);
+                        mipH = std::max(1, mipH / 2);
+                    }
+                }
+                glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            }
+            else {
+                glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-                if (glfwGetCurrentContext() == nullptr) {
-                    PN_CORE_ERROR("No current OpenGL context - cannot upload texture!");
-                    throw std::runtime_error("No current OpenGL context.");
+                GLfloat maxAniso = 1.0f;
+                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+
+                int mipW = tex->width;
+                int mipH = tex->height;
+
+                for (uint32_t mip = 0; mip < tex->mips; ++mip) {
+                    int blocks_w = (mipW + 3) / 4;
+                    int blocks_h = (mipH + 3) / 4;
+                    size_t mipSize = blocks_w * blocks_h * 16;
+                    size_t offset = tex->mipOffsets[mip];
+
+                    glCompressedTexImage2D(
+                        GL_TEXTURE_2D,
+                        mip,
+                        tex->glTexFormat,
+                        mipW,
+                        mipH,
+                        0,
+                        mipSize,
+                        tex->data.data() + offset
+                    );
+
+                    GLenum err = glGetError();
+                    if (err != GL_NO_ERROR) {
+                        throw std::runtime_error("OpenGL error uploading mip " +
+                            std::to_string(mip) + ": 0x" +
+                            std::to_string(err));
+                    }
+
+                    mipW = std::max(1, mipW / 2);
+                    mipH = std::max(1, mipH / 2);
                 }
 
-                GLenum err = glGetError();
-                if (err != GL_NO_ERROR) {
-                    throw std::runtime_error("OpenGL error uploading mip " +
-                        std::to_string(mip) + ": 0x" +
-                        std::to_string(err));
-                }
-
-                mipW = std::max(1, mipW / 2);
-                mipH = std::max(1, mipH / 2);
+                glBindTexture(GL_TEXTURE_2D, 0);
             }
 
-            glBindTexture(GL_TEXTURE_2D, 0);
-#endif
-            glBindTexture(GL_TEXTURE_2D, 0);
             return tex;
         }
 

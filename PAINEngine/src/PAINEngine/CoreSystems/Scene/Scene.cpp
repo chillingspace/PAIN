@@ -260,9 +260,9 @@ namespace PAIN {
 		TextRenderer::get();
 
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
+		std::filesystem::path sb_path = "engine/textures/skybox.hdr";
 #else
-		std::filesystem::path sb_path = "engine\\textures\\skybox2.hdr";
+		std::filesystem::path sb_path = "engine\\textures\\skybox.hdr";
 #endif
 
 		// skybox

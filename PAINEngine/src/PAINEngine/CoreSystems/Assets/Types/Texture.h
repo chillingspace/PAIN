@@ -31,7 +31,7 @@ namespace PAIN {
             TextureFormat format = TextureFormat::BC7;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
 #endif
-
+            bool is_cube_map = false;
             std::vector<uint8_t> data;
             GLuint gl_texture = 0;
 

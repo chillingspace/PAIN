@@ -23,7 +23,6 @@ namespace PAIN {
 		unsigned int skybox_tex;
 		unsigned int cubemap_tex;
 
-		void loadHdr(const std::string& path);
 		void convertEquirectangularToCubemap();
 		void renderCube();
 

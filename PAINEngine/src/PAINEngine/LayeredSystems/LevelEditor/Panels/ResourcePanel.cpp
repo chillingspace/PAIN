@@ -391,15 +391,21 @@ namespace PAIN {
 
 				//Check if icon path valid
 				if (asset_service->checkAssetRegistered(icon_path)) {
-					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(icon_path)->gl_texture);
+
+					//Get texture
+					auto texture = asset_service->getAsset<Assets::Texture>(icon_path);
+
+					//Check and ensure texture is not a cubemap
+					if (!texture->is_cube_map) {
+						return static_cast<ImTextureID>(texture->gl_texture);
+					}
+				}
+
+				if (asset_service->checkAssetRegistered(def_icon_path)) {
+					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
 				}
 				else {
-					if (asset_service->checkAssetRegistered(def_icon_path)) {
-						return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
-					}
-					else {
-						return ImTextureID(0);
-					}
+					return ImTextureID(0);
 				}
 			}
 
