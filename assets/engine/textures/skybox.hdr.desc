@@ -11,9 +11,8 @@
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
-    "max_size": 1024,
-    "srgb": true,
-    "window_compression": "BC7"
+    "max_size": 2048,
+    "window_compression": "BC6H"
   },
   "meta_data": {
     "source_file": "engine\\textures\\skybox.hdr"

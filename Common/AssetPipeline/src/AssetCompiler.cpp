@@ -76,11 +76,11 @@ namespace PAIN {
 
             switch (type) {
             case Type::Texture: {
-                settings["window_compression"] = "BC7";
+                bool higher_quality = asset.raw_path.extension() == ".hdr" || asset.raw_path.extension() == ".exr" ? true : false;
+                settings["window_compression"] = higher_quality ? "BC6H" : "BC7";
                 settings["android_compression"] = "ASTC_4x4";
                 settings["generate_mipmaps"] = true;
-                settings["max_size"] = 1024;
-                settings["srgb"] = true;
+                settings["max_size"] = higher_quality ? 2048 : 1024;
                 break;
             }
             case Type::Audio: {
@@ -154,8 +154,7 @@ namespace PAIN {
                     checker =   (settings.contains("window_compression") &&
                                 settings.contains("android_compression") &&
                                 settings.contains("generate_mipmaps") &&
-                                settings.contains("max_size") &&
-                                settings.contains("srgb"));
+                                settings.contains("max_size"));
                     break;
 
                 case Type::Audio:
@@ -826,7 +825,7 @@ namespace PAIN {
             const std::string& output_path, const std::string& format,
             const nlohmann::json& settings) const {
             try {
-                // Output temp file in float format (hdr/exr)
+                // Output temp file in float format (png)
                 std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".png";
                 if (!stbi_write_png(temp_input.c_str(), width, height, channels, pixels, width * channels)) {
                     std::cout << "Failed to write temporary file (" << temp_input << ")" << std::endl;
@@ -867,16 +866,16 @@ namespace PAIN {
                 std::filesystem::remove(temp_input);
 
                 if (result == 0) {
-                    std::cout << "Cuttlefish Texture compression successful." << std::endl;
+                    std::cout << "Cuttlefish PNG Texture compression successful." << std::endl;
                 }
                 else {
-                    std::cout << "Cuttlefish Texture compression failed with code: " << result << std::endl;
+                    std::cout << "Cuttlefish PNG Texture compression failed with code: " << result << std::endl;
                 }
 
                 return result == 0;
             }
             catch (const std::exception& e) {
-                std::cout << "Cuttlefish Texture compression failed: " << e.what() << std::endl;
+                std::cout << "Cuttlefish PNG Texture compression failed: " << e.what() << std::endl;
                 return false;
             }
         }
@@ -885,9 +884,7 @@ namespace PAIN {
             const std::string& output_path, const std::string& format,
             const nlohmann::json& settings) const {
             try {
-                std::string cuttlefish_exe = GetCuttlefishExecutable();
-
-                // Output temp file in float format (hdr/exr)
+                // Output temp file in float format (hdr)
                 std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".hdr";
                 if (!stbi_write_hdr(temp_input.c_str(), width, height, channels, pixels)) {
                     std::cout << "Failed to write temporary file (" << temp_input << ")" << std::endl;
@@ -896,25 +893,27 @@ namespace PAIN {
 
                 std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
 
-                // WINDOWS SYSTEM() REQUIRES SPECIAL QUOTING [web:1061]
+                //Command line
                 std::stringstream cmd;
 
-                // Method: Wrap ENTIRE command in outer quotes for Windows system()
+                //Get cuttlefish exe
+                std::string cuttlefish_exe = GetCuttlefishExecutable();
+
+                //Call cuttlefish executable
                 cmd << "\"";  // Start outer quotes
-                cmd << "\"" << cuttlefish_exe << "\"";  // Quoted executable
+                cmd << "\"" << cuttlefish_exe << "\"";
                 cmd << " -i \"" << temp_input << "\"";
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
                 cmd << " -o \"" << output_path << "\"";
-                cmd << " --file-format dds";
                 cmd << " --create-dir";
 
-                if (settings.value("generate_mipmaps", false)) {
+                if (settings.value("generate_mipmaps", true)) {
                     cmd << " -m";
                 }
 
-                cmd << "\"";  // End outer quotes
+                cmd << "\"";
 
                 std::string final_command = cmd.str();
                 std::cout << "Running: " << final_command << std::endl;
@@ -925,32 +924,18 @@ namespace PAIN {
                 std::filesystem::remove(temp_input);
 
                 if (result == 0) {
-                    std::cout << "DDS compression successful" << std::endl;
+                    std::cout << "Cuttlefish HDR compression successful" << std::endl;
                 }
                 else {
-                    std::cout << "DDS compression failed with code: " << result << std::endl;
+                    std::cout << "Cuttlefish HDR compression failed with code: " << result << std::endl;
                 }
 
                 return result == 0;
             }
             catch (const std::exception& e) {
-                std::cout << "Cuttlefish DDS compression failed: " << e.what() << std::endl;
+                std::cout << "Cuttlefish HDR compression failed: " << e.what() << std::endl;
                 return false;
             }
-        }
-
-        std::string Compiler::ConvertToASTCBlockSize(const std::string& format) const {
-            // Convert format like "ASTC_4x4" to "4x4" for astcenc
-            if (format.find("ASTC_") == 0) {
-                return format.substr(5); // Remove "ASTC_" prefix
-            }
-
-            // Default mappings
-            if (format == "ASTC_4x4") return "4x4";
-            if (format == "ASTC_6x6") return "6x6";
-            if (format == "ASTC_8x8") return "8x8";
-
-            return "4x4"; // Default fallback
         }
 
         std::string Compiler::GetFFMPEGExecutable() const {
