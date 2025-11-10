@@ -41,7 +41,7 @@ namespace PAIN {
 		private:
 
 			//Extract ASTC
-			void extractASTC(std::string const& virtual_path, std::shared_ptr<Texture> tex) const;
+			void extractKTX(std::string const& virtual_path, std::shared_ptr<Texture> tex) const;
 #else
 			//Texture data extractor
 			void extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const;

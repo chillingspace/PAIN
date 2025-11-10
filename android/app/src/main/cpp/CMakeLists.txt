@@ -55,7 +55,6 @@ if(ANDROID)
             log
             EGL
             GLESv3
-            astc_encoder::lib
     )
 
     target_link_options(GameCore PRIVATE

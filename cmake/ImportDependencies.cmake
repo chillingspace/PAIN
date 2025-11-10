@@ -248,30 +248,6 @@ endif()
                 COMMENT "Copying cuttlefish.exe, .pdb, .dll and all other files to asset tools output directory")
         endif()
 
-        # ASTC Encoder ( Exe )
-        set(ASTCENC_CLI ON CACHE BOOL "" FORCE)
-        set(ASTCENC_ISA_AVX2 ON CACHE BOOL "" FORCE)
-        set(ASTCENC_ISA_SSE2 OFF CACHE BOOL "" FORCE)
-        set(ASTCENC_ISA_NEON OFF CACHE BOOL "" FORCE)
-        set(ASTCENC_ISA_NATIVE OFF CACHE BOOL "" FORCE)
-        FetchContent_Declare(
-          astc_encoder
-          GIT_REPOSITORY https://github.com/ARM-software/astc-encoder.git
-          GIT_TAG 5.3.0
-          GIT_SHALLOW TRUE
-        )
-        FetchContent_MakeAvailable(astc_encoder)
-
-        if(TARGET astcenc-avx2)
-            message(STATUS "astcenc post build command added")
-            add_custom_target(copy_astcenc_bin ALL
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                $<TARGET_FILE_DIR:astcenc-avx2>
-                ${ASSETS_TOOLS_OUTPUT_DIR}/astc
-                DEPENDS astcenc-avx2
-                COMMENT "Copying astcenc-avx.exe, .pdb, .dll and all other files to asset tools output directory")
-        endif()
-
         # Copy FFMPEG
         add_custom_target(copy_ffmpeg_bin ALL
             COMMAND ${CMAKE_COMMAND} -E copy
@@ -283,41 +259,13 @@ endif()
     # Android only
     if(ANDROID)
 
-        # ASTC Encoder ( Static Lib )
-
-        # Set ASTCENC build flags for Android ARM
-        if(ANDROID_ABI STREQUAL "armeabi-v7a" OR ANDROID_ABI STREQUAL "arm64-v8a")
-            set(ASTCENC_ISA_NEON ON CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_AVX2 OFF CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_NATIVE OFF CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_SSE2 OFF CACHE BOOL "" FORCE)
-        elseif(ANDROID_ABI STREQUAL "x86_64" OR ANDROID_ABI STREQUAL "x86")
-            set(ASTCENC_ISA_NEON OFF CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_AVX2 ON CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_NATIVE OFF CACHE BOOL "" FORCE)
-            set(ASTCENC_ISA_SSE2 OFF CACHE BOOL "" FORCE)
-        endif()
-
-        set(ASTCENC_DECOMPRESSOR ON CACHE BOOL "" FORCE)
-        set(ASTCENC_CLI OFF CACHE BOOL "" FORCE)
 
         FetchContent_Declare(
-          astc_encoder
-          GIT_REPOSITORY https://github.com/ARM-software/astc-encoder.git
-          GIT_TAG 5.3.0
-          GIT_SHALLOW TRUE
+            ktx
+            GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
+            GIT_TAG        v4.4.2
         )
-        FetchContent_MakeAvailable(astc_encoder)
-
-        if(TARGET astcdec-neon-static)
-            add_library(astc_encoder::lib ALIAS astcdec-neon-static)
-            message(STATUS "libastcenc-neon-static added as astc_encoder::lib")
-        elseif(TARGET astcdec-avx2-static)
-            add_library(astc_encoder::lib ALIAS astcdec-avx2-static)
-            message(STATUS "libastcenc-avx2-static added as astc_encoder::lib")
-        else()
-            message(FATAL_ERROR "No astcenc static library target found! Check ISA settings and that FetchContent_MakeAvailable completed successfully.")
-        endif()
+        FetchContent_MakeAvailable(ktx)
     endif()
 
 endmacro()

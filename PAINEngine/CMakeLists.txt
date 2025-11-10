@@ -80,7 +80,7 @@ if (WIN32 AND NOT ANDROID)
     target_link_libraries(PAINEngine PUBLIC OpenGL::GL glfw GLEW::GLEW imgui::imgui)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_WINDOWS GLEW_STATIC GLM_ENABLE_EXPERIMENTAL)
 else()
-    target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue)
+    target_link_libraries(PAINEngine PUBLIC EGL GLESv3 android log native_app_glue ktx)
     target_compile_definitions(PAINEngine PUBLIC PN_PLATFORM_ANDROID GLM_ENABLE_EXPERIMENTAL IMGUI_IMPL_OPENGL_ES3=1)
 endif()
 

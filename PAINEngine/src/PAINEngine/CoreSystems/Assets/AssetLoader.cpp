@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "AssetLoader.h"
 
+#ifdef PN_PLATFORM_ANDROID
+#include <ktx.h>
+#endif
+
 #undef max
 #undef min
 
@@ -86,56 +90,69 @@ namespace PAIN {
         }
 
 #ifdef PN_PLATFORM_ANDROID
-        void Loader::extractASTC(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
-            // Open with custom file stream
+        void Loader::extractKTX(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
             auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
             if (!stream || !stream->good())
-                throw std::runtime_error("Failed to open ASTC file: " + virtual_path);
+                throw std::runtime_error("Failed to open KTX file: " + virtual_path);
 
             std::vector<uint8_t> data(stream->size());
             size_t read = stream->read(data.data(), data.size());
             if (read != data.size())
-                throw std::runtime_error("Failed to read full ASTC file: " + virtual_path);
-
-            if (data.size() < 16) throw std::runtime_error("ASTC header too small.");
-            const uint8_t* header = data.data();
-
-            if (header[0] != 0x13 || header[1] != 0xAB || header[2] != 0xA1 || header[3] != 0x5C)
-                throw std::runtime_error("Not an ASTC file!");
-
-            uint8_t blockDimX = header[4], blockDimY = header[5], blockDimZ = header[6];
-            if (blockDimZ != 1)
-                throw std::runtime_error("Only 2D ASTC textures are supported");
-
-            uint32_t width = header[7] | (header[8] << 8) | (header[9] << 16);
-            uint32_t height = header[10] | (header[11] << 8) | (header[12] << 16);
-            tex->width = width;
-            tex->height = height;
-            tex->mips = 1;
-
-            // OpenGL format mapping
-            GLenum astcFormat = 0;
-            if (blockDimX == 4 && blockDimY == 4) astcFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
-            else if (blockDimX == 5 && blockDimY == 4) astcFormat = GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
-            else if (blockDimX == 5 && blockDimY == 5) astcFormat = GL_COMPRESSED_RGBA_ASTC_5x5_KHR;
-            else if (blockDimX == 6 && blockDimY == 5) astcFormat = GL_COMPRESSED_RGBA_ASTC_6x5_KHR;
-            else if (blockDimX == 6 && blockDimY == 6) astcFormat = GL_COMPRESSED_RGBA_ASTC_6x6_KHR;
-            else if (blockDimX == 8 && blockDimY == 5) astcFormat = GL_COMPRESSED_RGBA_ASTC_8x5_KHR;
-            else if (blockDimX == 8 && blockDimY == 6) astcFormat = GL_COMPRESSED_RGBA_ASTC_8x6_KHR;
-            else if (blockDimX == 8 && blockDimY == 8) astcFormat = GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
-            else if (blockDimX == 10 && blockDimY == 5) astcFormat = GL_COMPRESSED_RGBA_ASTC_10x5_KHR;
-            else if (blockDimX == 10 && blockDimY == 6) astcFormat = GL_COMPRESSED_RGBA_ASTC_10x6_KHR;
-            else if (blockDimX == 10 && blockDimY == 8) astcFormat = GL_COMPRESSED_RGBA_ASTC_10x8_KHR;
-            else if (blockDimX == 10 && blockDimY == 10) astcFormat = GL_COMPRESSED_RGBA_ASTC_10x10_KHR;
-            else if (blockDimX == 12 && blockDimY == 10) astcFormat = GL_COMPRESSED_RGBA_ASTC_12x10_KHR;
-            else if (blockDimX == 12 && blockDimY == 12) astcFormat = GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
-            else throw std::runtime_error("Unsupported ASTC block size: " + std::to_string(blockDimX) + "x" + std::to_string(blockDimY));
-
-            tex->format = TextureFormat::ASTC;
-            tex->glTexFormat = astcFormat;
-            tex->data.assign(data.begin() + 16, data.end()); // Only texture data
-
+                throw std::runtime_error("Failed to read all KTX data: " + virtual_path);
             stream = nullptr;
+
+            // LOAD KTX FILE
+            ktxTexture* kTexture = nullptr;
+            KTX_error_code result = ktxTexture_CreateFromMemory(
+                data.data(),
+                data.size(),
+                KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
+                &kTexture
+            );
+
+            if (result != KTX_SUCCESS || !kTexture)
+                throw std::runtime_error("Failed to parse KTX from memory: " + virtual_path);
+
+            // Basic metadata
+            tex->width = static_cast<int>(kTexture->baseWidth);
+            tex->height = static_cast<int>(kTexture->baseHeight);
+            tex->mips = kTexture->numLevels ? static_cast<int>(kTexture->numLevels) : 1;
+
+            // Detect if KTX1 or KTX2 (see ktx.h for class ids)
+            if (kTexture->classId == ktxTexture1_c) {
+                tex->glTexFormat = reinterpret_cast<ktxTexture1*>(kTexture)->glInternalformat;
+            }
+            else {
+                throw std::runtime_error("Unknown KTX texture class!");
+            }
+
+            // Query and assign a suitable format enum for your engine (expand if you support more than ASTC)
+            tex->format = TextureFormat::ASTC;
+
+            tex->mipOffsets.clear();
+            tex->data.clear();
+
+            // Robust mipmap and data extraction
+            for (uint32_t level = 0; level < static_cast<uint32_t>(tex->mips); ++level) {
+                ktx_size_t imageOffset = 0;
+                KTX_error_code ofsResult = ktxTexture_GetImageOffset(
+                    kTexture, level, /*layer*/0, /*faceSlice*/0, &imageOffset);
+                if (ofsResult != KTX_SUCCESS)
+                    throw std::runtime_error("Failed to get image offset for mip " + std::to_string(level));
+
+                ktx_size_t mipSize = ktxTexture_GetImageSize(kTexture, level);
+                if (mipSize == 0)
+                    throw std::runtime_error("No data for KTX mip level " + std::to_string(level));
+
+                // Store data offset
+                tex->mipOffsets.push_back(tex->data.size());
+
+                // Copy block data
+                const uint8_t* mipData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture)) + imageOffset;
+                tex->data.insert(tex->data.end(), mipData, mipData + mipSize);
+            }
+
+            ktxTexture_Destroy(kTexture);
         }
 #else
         void Loader::extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
@@ -231,7 +248,7 @@ namespace PAIN {
             auto tex = std::make_shared<Texture>();
 
 #ifdef PN_PLATFORM_ANDROID
-            extractASTC(virtual_path, tex);
+            extractKTX(virtual_path, tex);
 
             glGenTextures(1, &tex->gl_texture);
             glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
@@ -247,22 +264,36 @@ namespace PAIN {
             glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
 
-            // Use blockDimX/Y from extracted tex data
-            uint8_t blockDimX = 4, blockDimY = 4;
-            if (!tex->data.empty() && tex->width && tex->height) {
-                // Redundant, since extractASTC already checks, but could parse again if needed from header[4,5]
-                blockDimX = 4; // Set to correct value if you pass it through
-                blockDimY = 4;
-            }
-            GLsizei blockW = (tex->width + blockDimX - 1) / blockDimX;
-            GLsizei blockH = (tex->height + blockDimY - 1) / blockDimY;
-            GLsizei imageSize = blockW * blockH * 16;
+            int mipW = tex->width;
+            int mipH = tex->height;
 
-            glCompressedTexImage2D(GL_TEXTURE_2D, 0, tex->glTexFormat, tex->width, tex->height, 0, imageSize, tex->data.data());
+            // **Mipmap upload loop (industry standard, matches KTX content)**
+            for (int mip = 0; mip < tex->mips; ++mip) {
+                size_t mipSize = 0;
+                if (mip + 1 < tex->mipOffsets.size())
+                    mipSize = tex->mipOffsets[mip + 1] - tex->mipOffsets[mip];
+                else
+                    mipSize = tex->data.size() - tex->mipOffsets[mip];
 
-            GLenum err = glGetError();
-            if (err != GL_NO_ERROR) {
-                throw std::runtime_error("OpenGL error uploading ASTC texture.");
+                glCompressedTexImage2D(
+                    GL_TEXTURE_2D,
+                    mip,
+                    tex->glTexFormat,
+                    mipW,
+                    mipH,
+                    0,
+                    mipSize,
+                    tex->data.data() + tex->mipOffsets[mip]
+                );
+
+                GLenum err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    throw std::runtime_error("OpenGL error uploading KTX mip " +
+                        std::to_string(mip) + ": 0x" + std::to_string(err));
+                }
+
+                mipW = std::max(1, mipW / 2);
+                mipH = std::max(1, mipH / 2);
             }
 
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -319,6 +350,8 @@ namespace PAIN {
                 mipW = std::max(1, mipW / 2);
                 mipH = std::max(1, mipH / 2);
             }
+
+            glBindTexture(GL_TEXTURE_2D, 0);
 #endif
             glBindTexture(GL_TEXTURE_2D, 0);
             return tex;

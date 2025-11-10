@@ -53,10 +53,10 @@ namespace PAIN {
 			void compileAudio(Descriptor& desc_file, Info& asset_info) const;
 			void compileModel(Descriptor& desc_file, Info& asset_info) const;
 			std::string GetCuttlefishExecutable() const;
-			bool CompressTextureDDS(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
-			std::string GetASTCEncoderExecutable() const;
+			bool CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+			bool CuttlefishCompressor(float* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+
 			std::string ConvertToASTCBlockSize(const std::string& format) const;
-			bool CompressTextureASTC(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetFFMPEGExecutable() const;
 			void ExportModel(const Model& asset, const std::filesystem::path& out_path) const;
 

@@ -407,7 +407,7 @@ namespace PAIN {
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
             case Platform::Android:
-                output_extension = ".astc";
+                output_extension = ".ktx";
                 compression_format = desc_file.import_settings.value("compression", "ASTC_4x4");
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
@@ -480,13 +480,13 @@ namespace PAIN {
 
             if (platform == Platform::Windows) {
                 //Use Cuttlefish for DDS/BC7 compression
-                compression_success = CompressTextureDDS(raw_pixels, width, height, 4,
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
             }
             else if (platform == Platform::Android) {
                 //Use astc encoder for ASTC compression
-                compression_success = CompressTextureASTC(raw_pixels, width, height, 4,
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
             }
@@ -822,16 +822,75 @@ namespace PAIN {
             return "cuttlefish.exe"; // Fallback
         }
 
-        bool Compiler::CompressTextureDDS(unsigned char* pixels, int width, int height, int channels,
+        bool Compiler::CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels,
+            const std::string& output_path, const std::string& format,
+            const nlohmann::json& settings) const {
+            try {
+                // Output temp file in float format (hdr/exr)
+                std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".png";
+                if (!stbi_write_png(temp_input.c_str(), width, height, channels, pixels, width * channels)) {
+                    std::cout << "Failed to write temporary file (" << temp_input << ")" << std::endl;
+                    return false;
+                }
+
+                //Create directory if not already created
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
+
+                //Command line
+                std::stringstream cmd;
+
+                //Get cuttlefish exe
+                std::string cuttlefish_exe = GetCuttlefishExecutable();
+
+                //Call cuttlefish executable
+                cmd << "\"";  // Start outer quotes
+                cmd << "\"" << cuttlefish_exe << "\"";
+                cmd << " -i \"" << temp_input << "\"";
+                cmd << " -f " << format;
+                cmd << " -Q " << settings.value("quality", "normal");
+                cmd << " -s rgba";
+                cmd << " -o \"" << output_path << "\"";
+                cmd << " --create-dir";
+
+                if (settings.value("generate_mipmaps", true)) {
+                    cmd << " -m";
+                }
+
+                cmd << "\"";
+
+                std::string final_command = cmd.str();
+                std::cout << "Running: " << final_command << std::endl;
+
+                int result = system(final_command.c_str());
+
+                // Clean up temp file
+                std::filesystem::remove(temp_input);
+
+                if (result == 0) {
+                    std::cout << "Cuttlefish Texture compression successful." << std::endl;
+                }
+                else {
+                    std::cout << "Cuttlefish Texture compression failed with code: " << result << std::endl;
+                }
+
+                return result == 0;
+            }
+            catch (const std::exception& e) {
+                std::cout << "Cuttlefish Texture compression failed: " << e.what() << std::endl;
+                return false;
+            }
+        }
+
+        bool Compiler::CuttlefishCompressor(float* pixels, int width, int height, int channels,
             const std::string& output_path, const std::string& format,
             const nlohmann::json& settings) const {
             try {
                 std::string cuttlefish_exe = GetCuttlefishExecutable();
 
-                // Create temporary PNG file (easier for cuttlefish to handle)
-                std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".png";
-                if (!stbi_write_png(temp_input.c_str(), width, height, 4, pixels, width * 4)) {
-                    std::cout << "Failed to write temporary PNG" << std::endl;
+                // Output temp file in float format (hdr/exr)
+                std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".hdr";
+                if (!stbi_write_hdr(temp_input.c_str(), width, height, channels, pixels)) {
+                    std::cout << "Failed to write temporary file (" << temp_input << ")" << std::endl;
                     return false;
                 }
 
@@ -846,12 +905,12 @@ namespace PAIN {
                 cmd << " -i \"" << temp_input << "\"";
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
-                cmd << " -s rgba";
+                cmd << " -s rgbx";
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --file-format dds";
                 cmd << " --create-dir";
 
-                if (settings.value("generate_mipmaps", true)) {
+                if (settings.value("generate_mipmaps", false)) {
                     cmd << " -m";
                 }
 
@@ -880,27 +939,6 @@ namespace PAIN {
             }
         }
 
-        std::string Compiler::GetASTCEncoderExecutable() const {
-
-            //Locate all possible astcenc executables
-            std::vector<std::filesystem::path> possible_paths = {
-                exec_path / "astc/astcenc-avx2.exe",
-                exec_path / "astc/astcenc-neon.exe",
-                exec_path / "astc/astcenc-native.exe",
-                exec_path / "astc/astcenc-sse2.exe"
-            };
-
-            for (const auto& path : possible_paths) {
-                if (std::filesystem::exists(path)) {
-                    std::cout << "Found ASTC encoder: " << path << std::endl;
-                    return path.string();
-                }
-            }
-
-            std::cout << "WARNING: astcenc executable not found!" << std::endl;
-            return "astcenc-avx2.exe"; // Fallback
-        }
-
         std::string Compiler::ConvertToASTCBlockSize(const std::string& format) const {
             // Convert format like "ASTC_4x4" to "4x4" for astcenc
             if (format.find("ASTC_") == 0) {
@@ -913,60 +951,6 @@ namespace PAIN {
             if (format == "ASTC_8x8") return "8x8";
 
             return "4x4"; // Default fallback
-        }
-
-        bool Compiler::CompressTextureASTC(unsigned char* pixels, int width, int height, int channels,
-            const std::string& output_path, const std::string& format,
-            const nlohmann::json& settings) const {
-            try {
-                // Get astcenc executable (ARM's ASTC Encoder)
-                std::string astcenc_exe = GetASTCEncoderExecutable();
-
-                // Create temporary PNG input (astcenc works best with standard image formats)
-                std::string temp_input = "temp_astc_" + std::to_string(getCurrentTimeStamp()) + ".png";
-                if (!stbi_write_png(temp_input.c_str(), width, height, 4, pixels, width * 4)) {
-                    std::cout << "Failed to write temporary PNG for ASTC" << std::endl;
-                    return false;
-                }
-
-                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
-
-                // Build astcenc command with proper syntax
-                std::stringstream cmd;
-
-                // Windows system() double-quote wrapping
-                cmd << "\"";  // Start outer quotes for Windows
-                cmd << "\"" << astcenc_exe << "\"";  // Quoted executable path
-
-                // astcenc syntax: astcenc -cl input.png output.astc block_size quality
-                cmd << " -cl";  // Compress LDR (Low Dynamic Range)
-                cmd << " \"" << temp_input << "\"";  // Input file
-                cmd << " \"" + output_path + "\"";   // Output file
-                cmd << " " << ConvertToASTCBlockSize(format);  // Block size (e.g., "4x4")
-                cmd << " -" << settings.value("quality", "medium");  // Quality: -fastest, -fast, -medium, -thorough, -exhaustive
-                cmd << "\"";  // End outer quotes for Windows
-
-                std::string final_command = cmd.str();
-                std::cout << "Running ASTC: " << final_command << std::endl;
-
-                int result = system(final_command.c_str());
-
-                // Clean up temp file
-                std::filesystem::remove(temp_input);
-
-                if (result == 0) {
-                    std::cout << "ASTC compression successful" << std::endl;
-                }
-                else {
-                    std::cout << "ASTC compression failed with code: " << result << std::endl;
-                }
-
-                return result == 0;
-            }
-            catch (const std::exception& e) {
-                std::cout << "ASTC compression failed: " << e.what() << std::endl;
-                return false;
-            }
         }
 
         std::string Compiler::GetFFMPEGExecutable() const {
