@@ -85,9 +85,17 @@ namespace PAIN {
                 const glm::vec3& fwd,
                 const glm::vec3& up) = 0;
 
+            virtual std::vector<std::string> getAllGroups() = 0;
+
             // groups (built-in: "master","music","sfx","ui")
+            virtual float getGroupVolumeDb(const char* group) = 0;
             virtual AudioResult setGroupVolumeDb(const char* group, float db) = 0;
             virtual AudioResult fadeGroupToDb(const char* group, float targetDb, float seconds) = 0;
+            virtual bool checkGroupIsPlaying(const char* group) = 0;
+            virtual bool checkGroupPaused(const char* group) = 0;
+            virtual void pauseGroup(const char* group) = 0;
+            virtual void stopGroup(const char* group) = 0;
+            virtual void resumeGroup(const char* group) = 0;
 
             //Functions from app system interface
             void onAttach() override { init(); }

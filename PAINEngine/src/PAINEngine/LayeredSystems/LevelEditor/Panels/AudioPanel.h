@@ -31,6 +31,16 @@ namespace PAIN {
 				AudioSource audio_comp;
 				AudioSource* audio_ptr = nullptr;
 
+				//Selected group index
+				std::vector<std::string> group_paths_storage;
+				int selected_group_index = 0;
+				int selected_audio_group_index = -1;
+				std::vector<const char*> group_paths;
+
+				//Selected group
+				std::string selected_group = "";
+				float group_vol = 0.0f;
+
 				//Internal accept payload
 				void acceptPayload();
 

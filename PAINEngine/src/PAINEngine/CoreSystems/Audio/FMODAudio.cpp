@@ -509,6 +509,20 @@ namespace PAIN {
 			impl_->sys->set3DListenerAttributes(0, &fpos, &fvel, &ffwd, &fup);
 		}
 
+		std::vector<std::string> FmodAudio::getAllGroups() {
+			std::vector<std::string> temp;
+			for (auto const& group : impl_->groups) {
+				temp.push_back(group.first);
+			}
+			return temp;
+		}
+
+		float FmodAudio::getGroupVolumeDb(const char* group) {
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return 0.0f;
+			auto& g = impl_->groups[group];
+			return g.currentDb;
+		}
+		
 		AudioResult FmodAudio::setGroupVolumeDb(const char* group, float db) {
 			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return r;
 			auto& g = impl_->groups[group];
@@ -526,6 +540,40 @@ namespace PAIN {
 			float dur = std::max(0.001f, (float)seconds);
 			g.velDbPerSec = (g.targetDb - g.currentDb) / dur;
 			return AudioResult::Ok;
+		}
+
+		bool FmodAudio::checkGroupIsPlaying(const char* group) {
+			bool is_playing = false;
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return is_playing;
+			auto& g = impl_->groups[group];
+			if (g.cg) g.cg->isPlaying(&is_playing);
+			return is_playing;
+		}
+
+		bool FmodAudio::checkGroupPaused(const char* group) {
+			bool paused = false;
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return paused;
+			auto& g = impl_->groups[group];
+			if (g.cg) g.cg->getPaused(&paused);
+			return paused;
+		}
+
+		void FmodAudio::pauseGroup(const char* group) {
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return;
+			auto& g = impl_->groups[group];
+			if (g.cg) g.cg->setPaused(true);
+		}
+
+		void FmodAudio::resumeGroup(const char* group) {
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return;
+			auto& g = impl_->groups[group];
+			if (g.cg) g.cg->setPaused(false);
+		}
+
+		void FmodAudio::stopGroup(const char* group) {
+			if (auto r = impl_->ensureGroup(group); r != AudioResult::Ok) return;
+			auto& g = impl_->groups[group];
+			if (g.cg) g.cg->stop();
 		}
 
 		void FmodAudio::onAppPause() {
