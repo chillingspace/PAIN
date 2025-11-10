@@ -8,7 +8,9 @@ list(FILTER LUA_SRC EXCLUDE REGEX ".*/lua\\.c$")
 list(FILTER LUA_SRC EXCLUDE REGEX ".*/onelua\\.c$")
 
 # On Android, build a static library with appropriate properties
-add_library(lua STATIC ${LUA_SRC})
+if(NOT TARGET lua)
+    add_library(lua STATIC ${LUA_SRC})
+endif()
 target_include_directories(lua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(ANDROID)
@@ -17,4 +19,6 @@ endif()
 
 set_target_properties(lua PROPERTIES OUTPUT_NAME "lua")
 
-add_library(lua::lua ALIAS lua)
+if(NOT TARGET lua::lua)
+    add_library(lua::lua ALIAS lua)
+endif()
