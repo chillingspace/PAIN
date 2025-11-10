@@ -395,6 +395,9 @@ namespace PAIN {
 
         void Compiler::compileTexture(Descriptor& desc_file, Info& asset_info) const {
 
+            //Boolean for compression in higher quality
+            bool higher_quality = asset_info.raw_path.extension() == ".hdr" || asset_info.raw_path.extension() == ".exr" ? true : false;
+
             //Determine output format and shipped path
             std::string output_extension;
             std::string compression_format;
@@ -402,12 +405,12 @@ namespace PAIN {
             switch (platform) {
             case Platform::Windows:
                 output_extension = ".dds";
-                compression_format = desc_file.import_settings.value("compression", "BC7");
+                compression_format = desc_file.import_settings.value("window_compression", higher_quality ? "BC6H" : "BC7");
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
             case Platform::Android:
                 output_extension = ".ktx";
-                compression_format = desc_file.import_settings.value("compression", "ASTC_4x4");
+                compression_format = desc_file.import_settings.value("android_compression", "ASTC_4x4");
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
             default:
@@ -418,80 +421,111 @@ namespace PAIN {
             //Check if recompilation is needed
             if (!needsRecompilation(asset_info, desc_file)) return;
 
-            //Load texture data using STB
-            if (asset_info.raw_path.extension() == ".hdr") {
-                stbi_set_flip_vertically_on_load(true);
-            }
-            else {
-                stbi_set_flip_vertically_on_load(false);
-            }
+            //STB flag for not flipping texture
+            stbi_set_flip_vertically_on_load(false);
             int width, height, channels;
-            unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
-                &width, &height, &channels, STBI_rgb_alpha);
-
-            if (!raw_pixels) {
-                std::cout << "ERROR: Failed to load texture: " << asset_info.raw_path
-                    << " - " << stbi_failure_reason() << std::endl;
-                return;
-            }
-
-            std::cout << "Loaded texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
-
-            //Apply import settings (resize if needed)
-            int target_width = width;
-            int target_height = height;
-            int max_size = desc_file.import_settings.value("max_size", 2048);
-
-            if (width > max_size || height > max_size) {
-                float scale = static_cast<float>(max_size) / std::max(width, height);
-                int target_width = static_cast<int>(width * scale);
-                int target_height = static_cast<int>(height * scale);
-
-                //Resize using STB
-                unsigned char* resized_pixels = (unsigned char*)malloc(target_width * target_height * 4);
-
-                // NEW API: stbir_resize (not stbir_resize_uint8)
-                if (stbir_resize(raw_pixels, width, height, 0,           // input
-                    resized_pixels, target_width, target_height, 0, // output  
-                    STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT)) { 
-
-                    stbi_image_free(raw_pixels);
-                    raw_pixels = resized_pixels;
-                    width = target_width;
-                    height = target_height;
-                    std::cout << "Resized texture to: " << width << "x" << height << std::endl;
-                }
-                else {
-                    std::cout << "ERROR: STB resize failed!" << std::endl;
-                    free(resized_pixels);
-                }
-            }
-
-            //Verify output directory
-            if (!verifyDirectory(asset_info.shipped_path)) {
-                std::cout << "ERROR: Failed to create output directory: " << asset_info.shipped_path.parent_path() << std::endl;
-                stbi_image_free(raw_pixels);
-                return;
-            }
-
-            //Compress assets
             bool compression_success = false;
 
-            if (platform == Platform::Windows) {
-                //Use Cuttlefish for DDS/BC7 compression
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
-                    asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
-            }
-            else if (platform == Platform::Android) {
-                //Use astc encoder for ASTC compression
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
-                    asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
-            }
+            if (higher_quality) {
 
-            //Clean up
-            stbi_image_free(raw_pixels);
+                //Load image as float for higher quality textures
+                float* raw_pixels = stbi_loadf(asset_info.raw_path.string().c_str(),
+                    &width, &height, &channels, 0);
+                if (!raw_pixels) {
+                    std::cout << "ERROR: Failed to load HDR image: " << asset_info.raw_path
+                        << " - " << stbi_failure_reason() << std::endl;
+                    return;
+                }
+                std::cout << "Loaded HDR texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
+
+                //Resize HDR
+                int target_width = width, target_height = height;
+                int max_size = desc_file.import_settings.value("max_size", 2048);
+                float* resized_pixels = nullptr;
+
+                if (width > max_size || height > max_size) {
+                    float scale = static_cast<float>(max_size) / std::max(width, height);
+                    target_width = static_cast<int>(width * scale);
+                    target_height = static_cast<int>(height * scale);
+                    resized_pixels = (float*)malloc(target_width * target_height * channels * sizeof(float));
+                    
+                    //Resize float
+                    stbir_pixel_layout layout = (channels == 3) ? STBIR_RGB : STBIR_RGBA;
+                    if (stbir_resize_float_linear(raw_pixels, width, height, 0,
+                        resized_pixels, target_width, target_height, 0,
+                        layout)) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = resized_pixels;
+                        width = target_width; height = target_height;
+                        std::cout << "Resized HDR to: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: HDR resize failed!" << std::endl;
+                        free(resized_pixels);
+                    }
+                }
+
+                if (!verifyDirectory(asset_info.shipped_path)) {
+                    std::cout << "ERROR: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
+                    stbi_image_free(raw_pixels);
+                    return;
+                }
+
+                //Compress texture
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, channels,
+                    asset_info.shipped_path.string(),
+                    compression_format, desc_file.import_settings);
+
+                //Free loaded image
+                stbi_image_free(raw_pixels);
+            }
+            else {
+                //Load image as png for ldr
+                unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
+                    &width, &height, &channels, STBI_rgb_alpha);
+                if (!raw_pixels) {
+                    std::cout << "ERROR: Failed to load texture: " << asset_info.raw_path
+                        << " - " << stbi_failure_reason() << std::endl;
+                    return;
+                }
+                std::cout << "Loaded texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
+
+                //Resize png
+                int target_width = width, target_height = height;
+                int max_size = desc_file.import_settings.value("max_size", 2048);
+                if (width > max_size || height > max_size) {
+                    float scale = static_cast<float>(max_size) / std::max(width, height);
+                    target_width = static_cast<int>(width * scale);
+                    target_height = static_cast<int>(height * scale);
+                    unsigned char* resized_pixels = (unsigned char*)malloc(target_width * target_height * 4);
+                    if (stbir_resize(raw_pixels, width, height, 0,
+                        resized_pixels, target_width, target_height, 0,
+                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT)) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = resized_pixels;
+                        width = target_width; height = target_height;
+                        std::cout << "Resized texture to: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: STB resize failed!" << std::endl;
+                        free(resized_pixels);
+                    }
+                }
+
+                if (!verifyDirectory(asset_info.shipped_path)) {
+                    std::cout << "ERROR: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
+                    stbi_image_free(raw_pixels);
+                    return;
+                }
+
+                //Compress asset
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
+                    asset_info.shipped_path.string(),
+                    compression_format, desc_file.import_settings);
+
+                //Free loaded image
+                stbi_image_free(raw_pixels);
+            }
 
             //Verify output
             if (compression_success && std::filesystem::exists(asset_info.shipped_path)) {

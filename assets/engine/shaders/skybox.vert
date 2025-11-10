@@ -7,7 +7,7 @@ uniform mat4 projection;
 uniform mat4 view;
 
 void main() {
-    TexCoords = aPos;
+    TexCoords = vec3(aPos.x, -aPos.y, aPos.z);
     vec4 pos = projection * view * vec4(aPos, 1.0);
     gl_Position = pos.xyww;  // makes skybox always at far plane
 }
