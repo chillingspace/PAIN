@@ -231,7 +231,7 @@ namespace PAIN {
             }
         }
 
-        Organizer::Organizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path) : assets_root{ input_path }, output_dir{ output_path }, exec_path { exec_path } {
+        Organizer::Organizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path) : assets_root{ input_path }, output_dir{ output_path }, exec_path{ exec_path } {
 
             //Set desc extensions
             desc_ext = Assets::descriptor_ext;
@@ -360,13 +360,27 @@ namespace PAIN {
                 //Temp skip config.json
                 if (file.filename() == "Config.json") return;
 
-				// skip .bin files that are dependencies of .gltf files
-				// .bin files aren't models themselves, but are required by .gltf files
-                if (file.extension() == ".bin") {
-                    // Only skip if there's a corresponding .gltf file
-                    std::filesystem::path gltf_file = file.parent_path() / (file.stem().string() + ".gltf");
-                    if (std::filesystem::exists(gltf_file)) {
-                        return; // Skip this .bin, it's a GLTF dependency
+                static constexpr std::array<const char*, 4> ACCEPTED_GLTF_NEIGHBOURS = {
+                    ".bin",
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                };
+
+                // skip .bin files that are dependencies of .gltf files
+                // .bin files aren't models themselves, but are required by .gltf files
+                if (std::find(ACCEPTED_GLTF_NEIGHBOURS.begin(), ACCEPTED_GLTF_NEIGHBOURS.end(), file.extension()) != ACCEPTED_GLTF_NEIGHBOURS.end()) {
+                    // Check if ANY .gltf file exists in the same directory
+                    bool has_gltf_neighbor = false;
+                    for (const auto& entry : std::filesystem::directory_iterator(file.parent_path())) {
+                        if (entry.path().extension() == ".gltf") {
+                            has_gltf_neighbor = true;
+                            break;
+                        }
+                    }
+
+                    if (has_gltf_neighbor) {
+                        return; // Skip this, it's likely a GLTF dependency
                     }
                 }
 
@@ -374,7 +388,7 @@ namespace PAIN {
                 if (file.extension() == desc_ext) {
 
                     //Flag desc for deletion
-                    if(!std::filesystem::exists(file.parent_path()/file.stem())) deleteFile(file);
+                    if (!std::filesystem::exists(file.parent_path() / file.stem())) deleteFile(file);
                     return;
                 }
 
@@ -383,8 +397,8 @@ namespace PAIN {
 
                 //Inser asset into assets
                 assets.push_back(asset_interface);
-            },
-            [](std::filesystem::path) {});
+                },
+                [](std::filesystem::path) {});
 
             //Craft asset registry
             ExportAssetRegistry();
