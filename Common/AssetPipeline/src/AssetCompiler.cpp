@@ -796,6 +796,8 @@ namespace PAIN {
                     mat.metallicMap = texPath.C_Str();
                 if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == AI_SUCCESS)
                     mat.roughnessMap = texPath.C_Str();
+                if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS)
+                    mat.aoMap = texPath.C_Str();
 
                 // Base (albedo) color
                 aiColor3D baseColor(1, 1, 1);
