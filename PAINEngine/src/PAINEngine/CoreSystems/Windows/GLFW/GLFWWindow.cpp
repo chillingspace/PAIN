@@ -49,7 +49,7 @@ namespace PAIN {
 			glfwWindowHint(GLFW_DEPTH_BITS, 24);
 			glfwWindowHint(GLFW_RED_BITS, 8); glfwWindowHint(GLFW_GREEN_BITS, 8);
 			glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
-			glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // window dimensions are static
+			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // window dimensions are static
 
 			//Create window
 			ptr_window = glfwCreateWindow(static_cast<int>(frame_buffer.x), static_cast<int>(frame_buffer.y), package.title.c_str(), nullptr, nullptr);
