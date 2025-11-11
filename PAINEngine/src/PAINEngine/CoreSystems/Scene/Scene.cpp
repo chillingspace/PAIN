@@ -165,16 +165,16 @@ namespace PAIN {
 		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path crumpled_path = "game/models/CrumpledDevelopable.mesh";
+		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
 #else	
-		std::filesystem::path crumpled_path = "game\\models\\CrumpledDevelopable.mesh";
+		std::filesystem::path crumpled_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
 #endif
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(crumpled_path);
 		mdl->materials[0].metallic = 0.f;
 		mdl->materials[0].roughness = 1.f;
 		mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-		AddObject(mdl, "cd", { 5.f, 1.f, 10.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
+		AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 
 
 

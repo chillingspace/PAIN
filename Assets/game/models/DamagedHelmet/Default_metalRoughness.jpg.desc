@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Default_albedo.jpg",
+    "name": "Default_metalRoughness.jpg",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 2612598819554867816
+    "hash": 1671775526357829783
   },
   "descriptor_version": 1,
-  "guid": "b0ff88c0-1025-204c-90c3-a13e88d95735",
+  "guid": "3d877464-9e2f-9b43-8d34-e84f1602469f",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\damagedhelmet\\Default_albedo.jpg"
+    "source_file": "game\\textures\\Default_metalRoughness.jpg"
   }
 }

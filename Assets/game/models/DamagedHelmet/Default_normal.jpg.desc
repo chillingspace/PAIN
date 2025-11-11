@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Default_metalRoughness.jpg",
+    "name": "Default_normal.jpg",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 1671775526357829783
+    "hash": 17988111696846586907
   },
   "descriptor_version": 1,
-  "guid": "3d877464-9e2f-9b43-8d34-e84f1602469f",
+  "guid": "36dca42d-85e0-7c49-82ba-174115421759",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\damagedhelmet\\Default_metalRoughness.jpg"
+    "source_file": "game\\textures\\Default_normal.jpg"
   }
 }

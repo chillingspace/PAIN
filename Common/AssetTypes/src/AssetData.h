@@ -63,7 +63,7 @@ namespace PAIN {
         //Asset types
         enum class Type {
             Texture,    // .png, .jpg, .jpeg, .hdr, .tex
-            Model,      // .obj, .gltf,
+            Model,      // .obj, .gltf, .png, .jpg, .jpeg
             Audio,      // .wav, .mp3, .ogg
             Script,     // .lua
             Data,       // .json
@@ -129,7 +129,7 @@ namespace PAIN {
 
             //Set up extensions for asset types
             temp[Type::Texture] = { ".png", ".jpg", ".jpeg", ".hdr", ".tex" };
-            temp[Type::Model] = { ".obj", ".gltf" };
+            temp[Type::Model] = { ".obj", ".gltf", ".png", ".jpg", "jpeg" };
             temp[Type::Audio] = { ".wav", ".mp3", ".ogg" };
             temp[Type::Script] = { ".lua" };
             temp[Type::Data] = { ".json" };
