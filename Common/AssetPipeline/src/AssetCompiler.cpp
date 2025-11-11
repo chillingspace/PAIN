@@ -789,7 +789,7 @@ namespace PAIN {
                 aiString texPath;
 
                 if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
-                    mat.diffuseMap = texPath.C_Str();
+                    mat.diffuse_map_buf = texPath.C_Str();
                 if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS)
                     mat.normalMap = texPath.C_Str();
                 if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS)
@@ -1093,7 +1093,7 @@ namespace PAIN {
                     out.write(str.data(), len);
                     };
 
-                writeStr(mat.diffuseMap);
+                writeStr(mat.diffuse_map_buf);
                 writeStr(mat.normalMap);
                 writeStr(mat.metallicMap);
                 writeStr(mat.roughnessMap);

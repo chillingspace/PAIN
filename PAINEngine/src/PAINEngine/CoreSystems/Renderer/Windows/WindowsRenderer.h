@@ -19,66 +19,20 @@
 #include "../Mesh.h"
 
 #include "../Light.h"
+#include "../Material.h"
 
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/Camera.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
 
-#include "AssetTypes.h"
+namespace PAIN {
+	extern Material material;
+};
 
 namespace PAIN {
 
 	class WindowsRenderer {
-	public:
-
-		static loadTex(const char* file_path, const std::string& ref) {
-			int width, height, num_channels;
-			unsigned char* data = _getTextureData(file_path, width, height, num_channels);
-			if (!data) {
-				return 0;
-			}
-			unsigned int texture_id;
-
-			glGenTextures(1, &texture_id);
-			glBindTexture(GL_TEXTURE_2D, texture_id);
-
-			// tex params
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-			unsigned int internal_format, data_format;
-			switch (num_channels) {
-			case 3:
-				internal_format = GL_RGB8;
-				data_format = GL_RGB;
-				break;
-			case 4:
-				internal_format = GL_RGBA8;
-				data_format = GL_RGBA;
-				break;
-			default:
-				PN_CORE_ERROR("Unsupported number of channels: {}", num_channels);
-				stbi_image_free(data);
-				return 0;
-			}
-
-			// store texture in vram
-			glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, GL_UNSIGNED_BYTE, data);
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			stbi_image_free(data);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			texture_map[ref] = texture_id;
-
-			return texture_id;
-		}
-
 
 	public:
 		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
