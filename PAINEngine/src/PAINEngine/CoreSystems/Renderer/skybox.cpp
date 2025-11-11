@@ -186,7 +186,7 @@ namespace PAIN {
 #endif
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, winWidth, winHeight);
+		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
 		//glDeleteTextures(1, &skybox_tex); // delete the original HDR
@@ -202,8 +202,8 @@ namespace PAIN {
 
 		//Set win width and height
 		auto window_service = services->get<Window::Window>();
-		winWidth = window_service->getFrameBuffer().x;
-		winHeight = window_service->getFrameBuffer().y;
+		WindowsRenderer::winWidth = window_service->getFrameBuffer().x;
+		WindowsRenderer::winHeight = window_service->getFrameBuffer().y;
 
 		// compile and link shader
 		{
@@ -398,7 +398,7 @@ namespace PAIN {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, winWidth, winHeight);
+		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
 
@@ -533,7 +533,7 @@ namespace PAIN {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, winWidth, winHeight);
+		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
 
@@ -599,7 +599,7 @@ namespace PAIN {
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, winWidth, winHeight);
+		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 		glDeleteFramebuffers(1, &captureFBO);
 		//glDeleteRenderbuffers(1, &captureRBO);

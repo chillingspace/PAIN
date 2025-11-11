@@ -12,6 +12,7 @@
 #include "Applications/AppSystem.h"
 
 #include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 
 
 namespace PAIN {
@@ -31,8 +32,8 @@ namespace PAIN {
 
 		std::shared_ptr<Services> services;
 
-		int winWidth = 0;
-		int winHeight = 0;
+		//int winWidth = 0;
+		//int winHeight = 0;
 	private:
 		// for image based lighting
 

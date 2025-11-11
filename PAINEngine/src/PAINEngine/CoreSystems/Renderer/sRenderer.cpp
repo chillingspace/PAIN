@@ -12,6 +12,8 @@
 #include "ECS/Controller.h"
 #include "ECS/Components/cBoundingVolume.h"
 
+#include "CoreSystems/Windows/GLFW/GLFWWindow.h"
+
 //For imgui viewport
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -342,5 +344,14 @@ namespace PAIN {
 	}
 
 
-	void sRenderer::onEvent(Event::Event& e) {}
+	void sRenderer::onEvent(Event::Event& e) {
+		if (e.getType() == Event::Type::WindowResize) {
+			//PN_CORE_INFO("window resized");
+
+			//glfwGetWindowSize(Window::GLFW_Window::getWindow(), &WindowsRenderer::winWidth, &WindowsRenderer::winHeight);
+
+			w_renderer->Cleanup();
+			w_renderer->Init(services);
+		}
+	}
 }

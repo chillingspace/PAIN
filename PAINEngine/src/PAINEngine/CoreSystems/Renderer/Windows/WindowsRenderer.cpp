@@ -489,6 +489,8 @@ namespace PAIN {
 
 	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
 	{
+		PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
+
 		glViewport(0, 0, winWidth, winHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -14,6 +14,7 @@ namespace PAIN {
 		class GLFW_Window : public Window {
 		private:
 			//Window
+			//inline static GLFWwindow* ptr_window;
 			GLFWwindow* ptr_window;
 
 			//Window buffer size
@@ -36,6 +37,10 @@ namespace PAIN {
 			static void dropfile_cb([[maybe_unused]] GLFWwindow* window, int count, const char** paths);
 
 		public:
+
+			//static GLFWwindow* getWindow() {
+			//	return ptr_window;
+			//}
 
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
