@@ -234,6 +234,7 @@ endif()
             cuttlefish
             GIT_REPOSITORY https://github.com/akb825/Cuttlefish.git
             GIT_TAG v2.9.0
+            GIT_SUBMODULES "."
             GIT_SHALLOW TRUE
         )
         FetchContent_MakeAvailable(cuttlefish)
