@@ -12,6 +12,8 @@
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
 
+#include "CoreSystems/Renderer/Material.h"
+
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #endif
@@ -164,19 +166,22 @@ namespace PAIN {
 		mdl->materials[0].baseColor = { 0, 1, 0 };
 		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 
+		std::filesystem::path path;
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
+		path = "game/models/damagedhelmet/";
+		std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
 #else	
-		std::filesystem::path crumpled_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
+		path = "game\\models\\damagedhelmet\\";
+		std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
 #endif
 		//Get model
-		mdl = asset_manager->getAsset<Assets::Model>(crumpled_path);
+		mdl = asset_manager->getAsset<Assets::Model>(dm_path);
 		mdl->materials[0].metallic = 0.f;
 		mdl->materials[0].roughness = 1.f;
 		mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+		mdl->materials[0].init(services, path);
+		InitMaterial(services, mdl->materials[0], path);
 		AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
-
-
 
 		// gltf testing
 //#define GLTF_TEST

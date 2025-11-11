@@ -528,7 +528,7 @@ namespace PAIN {
                     readMem(str.data(), len);
                     };
 
-                readStr(mat.diffuse_map_buf);
+                readStr(mat.diffuseMap);
                 readStr(mat.normalMap);
                 readStr(mat.metallicMap);
                 readStr(mat.roughnessMap);

@@ -41,6 +41,7 @@ namespace PAIN {
 		ImTextureID getFramebufferTexture() const {
 			return w_renderer->getFinalTexture();
 		}
+
 		int getFramebufferWidth() const { return services->get<Window::Window>()->getFrameBuffer().x; }
 		int getFramebufferHeight() const { return services->get<Window::Window>()->getFrameBuffer().y; }
 

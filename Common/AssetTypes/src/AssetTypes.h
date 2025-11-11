@@ -114,7 +114,7 @@ namespace PAIN {
         // Material (PBR support)
         struct Material {
             std::string name{};
-            std::string diffuse_map_buf{};
+            std::string diffuseMap{};
             std::string normalMap{};
             std::string metallicMap{};
             std::string roughnessMap{};
@@ -130,8 +130,13 @@ namespace PAIN {
 
             // opengl textures
             unsigned int gl_diffuse_tex{};
+            unsigned int gl_normal_map{};
             unsigned int gl_ao_tex{};
+            unsigned int gl_metallic_map{};
+            unsigned int gl_roughness_map{};
             unsigned int gl_emissive_tex{};
+
+            //void init(std::shared_ptr<Services> services, const std::string& base_path);
         };
 
         // Submesh: supports multi-material, LODs
