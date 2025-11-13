@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "prototype.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 2834304089154434304
+  },
+  "descriptor_version": 1,
+  "guid": "959ecdc5-6e09-e544-a0ef-f34312f7ab39",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\prototype.scn"
+  }
+}

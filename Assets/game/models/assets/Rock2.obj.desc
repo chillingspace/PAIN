@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Rock2.obj",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 14237791677361112977
+  },
+  "descriptor_version": 1,
+  "guid": "9333cc6b-f38d-d94a-8350-ae0e2be91c4c",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": true,
+    "import_skeleton": true,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\assets\\Rock2.obj"
+  }
+}

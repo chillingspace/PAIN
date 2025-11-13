@@ -1,0 +1,84 @@
+{
+    "active_cam_id": "",
+    "dirty": false,
+    "ecs": {
+        "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 0,
+                            "localAABB": {
+                                "max": [
+                                    0.49837300181388855,
+                                    0.7077509760856628,
+                                    1.302780032157898
+                                ],
+                                "min": [
+                                    -0.2137649953365326,
+                                    0.028404299169778824,
+                                    -1.2722200155258179
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.49837300181388855,
+                                    0.7077509760856628,
+                                    1.302780032157898
+                                ],
+                                "min": [
+                                    -0.2137649953365326,
+                                    0.028404299169778824,
+                                    -1.2722200155258179
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "player"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "063dd5ad-0b73-5a43-865b-9f2d328749c9"
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "player"
+                }
+            }
+        ]
+    },
+    "grid_id": 0,
+    "layers": [],
+    "mask_matrix": [],
+    "meta_tags": [],
+    "metadata_service": {
+        "groups": null,
+        "registered_tags": [
+            "Enemy",
+            "Environment",
+            "Player",
+            "Untagged"
+        ]
+    }
+}
