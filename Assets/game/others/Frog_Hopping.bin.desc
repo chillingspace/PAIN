@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Frog_Hopping.bin",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 5242027255725033453
+  },
+  "descriptor_version": 1,
+  "guid": "efaeb148-7d31-7f43-bd7e-e2fed64f3968",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Frog_Hopping.bin"
+  }
+}
