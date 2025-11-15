@@ -255,6 +255,31 @@ namespace PAIN {
                     ImGui::EndPopup();
                 }
             }
+            else if (showCloseNoScenePopup) {
+                ImGui::OpenPopup("Scene Not Saved!");
+                if (ImGui::BeginPopupModal("Scene Not Saved!", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    auto ser = services->get<Serialization::Service>();
+                    auto win = services->get<Window::Window>();
+                    ImGui::Text("You have created a new scene but no scene file exists yet. Would you like to create the scene file now?");
+                    if (ImGui::Button("Save scene as (HAVEN'T IMPLEMENTED SAVE SCENE AS)")) {
+
+                        showCloseNoScenePopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Exit Without Saving")) {
+                        win->safeShutdown();
+                        showCloseNoScenePopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+                        showCloseNoScenePopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
+            }
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -350,18 +375,30 @@ namespace PAIN {
             // Handle closing of application in editor
             Event::Dispatcher dispatcher(event);
 
+            #ifdef PN_PLATFORM_WINDOWS
             dispatcher.Dispatch<Event::WindowClosed>([&](Event::WindowClosed& e) -> bool {
                 auto ser = services->get<PAIN::Serialization::Service>();
+
+                editor_visible = true;
+
+                // Is modified scene doesnt work currently
                 if (ser->getIsModifiedScene()) {
                     showCloseConfirmPopup = true;
                     return true; // handled
                 }
+                else if (ser->getIsCurSceneEmpty()) {
+                    showCloseNoScenePopup = true;
+                    return true;
+                }
 
                 showCloseConfirmPopup = true;
-                return true;
-                
 
+                auto win = services->get<Window::Window>();
+                win->safeShutdown();
+                return true;
+               
             });
+            #endif
 
             //Pass down events to platform for handling
             platform->handleEvents(event);

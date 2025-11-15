@@ -392,6 +392,10 @@ namespace PAIN {
         glm::uvec2 Android_Window::getFrameBuffer() const {
             return frame_buffer;
         }
+
+        void Android_Window::safeShutdown() {
+
+        }
 	}
 }
 

@@ -83,6 +83,7 @@ namespace PAIN {
             int editor_debug_mode = 0; // (0=Off, 1=BV, 2=BVH)
 
             bool showCloseConfirmPopup = false;
+            bool showCloseNoScenePopup = false;
         };
     }
 } 
