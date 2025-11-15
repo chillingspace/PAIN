@@ -11,13 +11,13 @@
 #include "Panels/ComponentsPanel.h"
 #include "Panels/ResourcePanel.h"
 #include "Panels/ViewportPanel.h"
-#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
 
-#include "PAINEngine/CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Path/Path.h"
-#include "PAINEngine/ECS/Controller.h"
+#include "ECS/Controller.h"
 
 #define PN_CORE_ASSERT(cond, msg) \
     do { if (!(cond)) { PN_CORE_ERROR(msg); assert(cond); } } while(0)
@@ -172,11 +172,11 @@ namespace PAIN {
         }
 
         void Editor::onDetach() {
-            auto ser = services->get<PAIN::Serialization::Service>();
-            if (ser) {
-                PN_CORE_INFO("[Editor] Requesting save on detach");
-                ser->saveCurrentScene();
-            }
+            //auto ser = services->get<PAIN::Serialization::Service>();
+            //if (ser) {
+            //    PN_CORE_INFO("[Editor] Requesting save on detach");
+            //    ser->saveCurrentScene();
+            //}
 
             // Once set from io.inifilename, do not have to call the write io again
 
@@ -226,6 +226,34 @@ namespace PAIN {
                 if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
                 else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
                 else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+            }
+
+            // Handle closing of application
+            if (showCloseConfirmPopup) {
+                ImGui::OpenPopup("Close Confirmation");
+                if (ImGui::BeginPopupModal("Close Confirmation", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    auto ser = services->get<Serialization::Service>();
+                    auto win = services->get<Window::Window>();
+                    ImGui::Text("You have unsaved changes. Save before exit?");
+                    if (ImGui::Button("Save and Exit")) {
+                        ser->saveCurrentScene();
+                        win->safeShutdown();
+                        showCloseConfirmPopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Exit Without Saving")) {
+                        win->safeShutdown();
+                        showCloseConfirmPopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+                        showCloseConfirmPopup = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
             }
 #endif
 
@@ -319,6 +347,21 @@ namespace PAIN {
         }
 
         void Editor::onEvent(Event::Event& event) {
+            // Handle closing of application in editor
+            Event::Dispatcher dispatcher(event);
+
+            dispatcher.Dispatch<Event::WindowClosed>([&](Event::WindowClosed& e) -> bool {
+                auto ser = services->get<PAIN::Serialization::Service>();
+                if (ser->getIsModifiedScene()) {
+                    showCloseConfirmPopup = true;
+                    return true; // handled
+                }
+
+                showCloseConfirmPopup = true;
+                return true;
+                
+
+            });
 
             //Pass down events to platform for handling
             platform->handleEvents(event);

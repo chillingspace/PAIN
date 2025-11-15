@@ -61,6 +61,8 @@ namespace PAIN {
 			//Get window height and width
 			virtual glm::uvec2 getFrameBuffer() const = 0;
 
+			virtual void safeShutdown() = 0;
+
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
 		};

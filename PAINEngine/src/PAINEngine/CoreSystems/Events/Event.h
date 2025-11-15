@@ -42,7 +42,7 @@ namespace PAIN {
 		//Window Event Types
 		enum class Type {
 			None = 0,
-			WindowResize, WindowFocus, WindowMove,
+			WindowResize, WindowFocus, WindowMove, WindowClosed,
 			KeyTrigger, KeyPress, KeyRelease, KeyRepeat,
 			MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, CursorEnter,
 			FileDrop, EntitiesChange

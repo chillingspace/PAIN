@@ -70,6 +70,7 @@ namespace PAIN {
             void onAppResume() override {}
             void onEvent(Event::Event& e) override {}
             void modifyScene() { isModifiedScene = true; }
+            bool getIsModifiedScene() { return isModifiedScene; }
 
             // Tell listeners (like the EntityPanel) that the scene graph changed.
             void markSceneChanged();

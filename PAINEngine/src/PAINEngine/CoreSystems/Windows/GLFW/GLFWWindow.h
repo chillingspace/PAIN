@@ -24,6 +24,7 @@ namespace PAIN {
 			void init(Package const& package);
 			void shutdown();
 
+
 			//Callbacks
 			static void fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height);
 			static void windowfocus_cb([[maybe_unused]] GLFWwindow* window, int focused);
@@ -65,6 +66,8 @@ namespace PAIN {
 			void swapBuffers() override;
 
 			glm::uvec2 getFrameBuffer() const override;
+
+			void safeShutdown() override;
 		};
 	}
 }

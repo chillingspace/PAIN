@@ -113,9 +113,10 @@ namespace PAIN {
 		void GLFW_Window::windowclose_cb([[maybe_unused]] GLFWwindow* window) {
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-
+		
+			app->pushEventQueue(std::make_shared<Event::WindowClosed>());
 			//Stop application
-			app->terminate();
+			//app->terminate();
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
@@ -295,6 +296,30 @@ namespace PAIN {
 		glm::uvec2 GLFW_Window::getFrameBuffer() const {
 			return frame_buffer;
 		}
+
+		void GLFW_Window::safeShutdown()
+		{
+
+			if (!ptr_window) return;
+
+			// Fetch your Application instance stored in GLFW user pointer
+			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(ptr_window));
+			if (app) {
+				// Call terminate() on your app, which should handle cleanup and quitting properly
+				app->terminate();
+			}
+			else {
+				// Fallback: if app pointer missing, fallback to destroying window directly
+				if (b_active) {
+					glfwDestroyWindow(ptr_window);
+					glfwTerminate();
+					b_active = false;
+				}
+			}
+
+
+		}
+
 	}
 }
 
