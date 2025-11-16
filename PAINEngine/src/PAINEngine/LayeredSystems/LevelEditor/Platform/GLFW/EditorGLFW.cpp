@@ -214,7 +214,7 @@ namespace PAIN {
                 io.DisplaySize.x = static_cast<float>(e.getFrameBuffer().x);
                 io.DisplaySize.y = static_cast<float>(e.getFrameBuffer().y);
                 return false;
-                });
+                });   
         }
 	}
 }

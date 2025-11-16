@@ -71,6 +71,9 @@ namespace PAIN {
             void onEvent(Event::Event& e) override {}
             void modifyScene() { isModifiedScene = true; }
 
+            bool getIsModifiedScene() { return isModifiedScene; }
+            bool getIsCurSceneEmpty() { return curr_scene_file_.empty(); }
+
             // Tell listeners (like the EntityPanel) that the scene graph changed.
             void markSceneChanged();
             // Returns true the first time after a change, then clears the flag.

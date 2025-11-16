@@ -86,6 +86,8 @@ namespace PAIN {
 			void swapBuffers() override;
 
 			glm::uvec2 getFrameBuffer() const override;
+
+			void safeShutdown() override;
 		};
 	}
 }

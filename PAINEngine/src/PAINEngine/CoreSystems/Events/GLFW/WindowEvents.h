@@ -70,6 +70,24 @@ namespace PAIN {
 			EVENT_CLASS_TYPE(WindowMove);
 			EVENT_CLASS_CATEGORY(Category::Application)
 		};
+
+		class WindowClosed : public Event {
+		private:
+		public:
+
+			WindowClosed() {}
+
+			std::string toString() override {
+				std::stringstream ss;
+				ss << "Window Closed";
+				return ss.str();
+			}
+
+
+			//Register Event
+			EVENT_CLASS_TYPE(WindowClosed);
+			EVENT_CLASS_CATEGORY(Category::Application)
+		};
 	}
 }
 

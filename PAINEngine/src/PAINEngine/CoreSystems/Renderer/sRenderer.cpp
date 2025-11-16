@@ -345,6 +345,7 @@ namespace PAIN {
 
 
 	void sRenderer::onEvent(Event::Event& e) {
+#ifdef PN_PLATFORM_WINDOWS
 		if (e.getType() == Event::Type::WindowResize) {
 			//PN_CORE_INFO("window resized");
 
@@ -353,5 +354,7 @@ namespace PAIN {
 			w_renderer->Cleanup();
 			w_renderer->Init(services);
 		}
+#endif
 	}
+
 }
