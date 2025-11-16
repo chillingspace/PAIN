@@ -3,6 +3,7 @@
 #include "PAINEngine/CoreSystems/Scripting/EngineAPIAdapter.h"
 #include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/sMetaData.h"
+#include "PAINEngine/ECS/Components/cScript.h"
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
 #include "PAINEngine/CoreSystems/Path/Path.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
@@ -26,41 +27,7 @@ namespace PAIN {
     namespace Scripting {
 
         void GameScriptingSystem::onAttach() {
-            PN_CORE_INFO("[GameScriptingSystem] Attaching...");
-
-            auto services_ptr = getServices();
-
-            // Get required services
-            auto ecs_ptr = services_ptr->get<ECS::Controller>();
-            auto meta_ptr = services_ptr->get<MetaData::Service>();
-            auto assets_ptr = services_ptr->get<Assets::Manager>();
-            //auto audio_ptr = services_ptr->get<Audio::Audio>();
-            auto path_ptr = services_ptr->get<Path::Path>();
-
-            // Validate all services
-            if (!ecs_ptr || !meta_ptr) {
-                PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
-                return;
-            }
-
-            // Create adapter and pass directly to Lua 
-            auto adapter = std::make_shared<EngineAPIAdapter>(
-                *ecs_ptr,
-                *meta_ptr,
-                assets_ptr.get(),
-                // audio_ptr.get(),
-                path_ptr.get()
-            );
-
-            // Initialize Lua with the adapter
-#ifdef _DEBUG
-            bool shipping = false;
-#else
-            bool shipping = true;
-#endif
-
-            luaManager_.init(adapter, shipping);
-            PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
+            ensureInit();
         }
 
         void GameScriptingSystem::onDetach() {
@@ -79,6 +46,34 @@ namespace PAIN {
         }
 
         void GameScriptingSystem::onUpdate(AppTiming timing, entt::registry& reg) {
+            ensureInit();
+            if (!init_) return;
+
+            auto services_ptr = getServices();
+            auto assets = services_ptr->get<Assets::Manager>();
+            auto fs = services_ptr->get<Path::Path>();
+
+            auto view = reg.view<PAIN::Script>();
+
+            for (auto e : view) {
+                auto& sc = view.get<PAIN::Script>(e);
+
+                if (sc.loaded || !sc.enabled) continue;
+                if (!assets || !fs) continue;
+                if (!sc.script_asset.IsValid()) continue;
+
+                // look up asset metadata
+                auto meta = assets->getAssetData(sc.script_asset);
+                if (!meta) continue;
+                std::string vpath =
+                    fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
+
+                std::string realPath = fs->resolvePath(vpath);
+                attachScript(e, realPath);
+                sc.loaded = true;
+            }
+
+
             //luaManager_.setRegistry(&reg);
             luaManager_.tick(timing.dt);
             luaManager_.Input_EndFrame();
@@ -86,6 +81,9 @@ namespace PAIN {
         }
 
         void GameScriptingSystem::onEvent(Event::Event& e) {
+            ensureInit();
+            if (!init_) return;
+
             //PN_CORE_INFO("[GSS] onEvent hit. type={} category={}", (int)e.getType(), (int)e.getCategoryFlags());
             using namespace Event;
             Dispatcher d{ e };
@@ -150,6 +148,7 @@ namespace PAIN {
         }
 
         void GameScriptingSystem::onCollision(entt::entity entityA, entt::entity entityB) {
+            //PN_CORE_INFO("[Script] onCollision forwarded to LuaManager (a={} b={})", (uint32_t)entityA, (uint32_t)entityB);
             luaManager_.onCollision(entityA, entityB);
         }
 
@@ -196,6 +195,42 @@ namespace PAIN {
             default: return std::to_string(keyCode);
             }
         }
+
+        void GameScriptingSystem::ensureInit()
+        {
+            if (init_) return;
+            init_ = true;
+
+            PN_CORE_INFO("[GameScriptingSystem] Attaching...");
+
+            auto services_ptr = getServices();
+            auto ecs_ptr = services_ptr->get<ECS::Controller>();
+            auto meta_ptr = services_ptr->get<MetaData::Service>();
+            auto assets_ptr = services_ptr->get<Assets::Manager>();
+            auto path_ptr = services_ptr->get<Path::Path>();
+
+            if (!ecs_ptr || !meta_ptr) {
+                PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
+                return;
+            }
+
+            auto adapter = std::make_shared<EngineAPIAdapter>(
+                *ecs_ptr,
+                *meta_ptr,
+                assets_ptr.get(),
+                path_ptr.get()
+            );
+
+#ifdef _DEBUG
+            bool shipping = false;
+#else
+            bool shipping = true;
+#endif
+
+            luaManager_.init(adapter, shipping);
+            PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
+        }
+
     }
 }  // namespace PAIN
 

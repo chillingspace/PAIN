@@ -23,7 +23,11 @@ public:
         //PAIN::Audio::Audio* audio,
         PAIN::Path::Path* fs)
         : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
-        fs_(fs) {
+        fs_(fs) 
+    {
+        //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
+        //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);
+
     }
 
     /* =========================================================================== */

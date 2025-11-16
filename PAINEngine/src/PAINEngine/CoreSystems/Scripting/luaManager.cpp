@@ -65,7 +65,13 @@ namespace {
         //PN_INFO("Attempting to read file: {}", path);
 
         std::string normalizedPath = path;
-        if (normalizedPath.find("assets/") != 0 && normalizedPath.find("assets\\") != 0) {
+        bool isAbsoluteWin = normalizedPath.size() > 1 && normalizedPath[1] == ':'; 
+        bool isAbsoluteUnix = !normalizedPath.empty() &&
+            (normalizedPath[0] == '/' || normalizedPath[0] == '\\'); 
+
+        if (!isAbsoluteWin && !isAbsoluteUnix &&
+            normalizedPath.rfind("assets/", 0) != 0 &&
+            normalizedPath.rfind("assets\\", 0) != 0) {
             normalizedPath = "assets/" + path;
         }
 
@@ -300,10 +306,30 @@ void LuaManager::bindRegistration() {
         onClick_.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
         };
 
-    lua_["registerOnCollision"] = [this](sol::protected_function fn, entt::entity entityToCheck) {
-        onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false, currentRunWhenPaused_ });
-        collisionInterests_.push_back({ currentEntity_, entityToCheck });
-        };
+    lua_["registerOnCollision"] = [this](sol::protected_function fn, sol::object t) {
+        /*onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false, currentRunWhenPaused_ });
+        collisionInterests_.push_back({ currentEntity_, entityToCheck });*/
+
+        // target: nil => listen to any; number => entt entity id
+        entt::entity target = entt::null;
+
+        if (t.valid()) {
+            if (t.get_type() == sol::type::number) {
+                uint32_t id = t.as<uint32_t>();
+                target = static_cast<entt::entity>(id);
+            }
+            else if (t.get_type() != sol::type::nil) {
+                PN_CORE_WARN("[Lua] registerOnCollision: expected entity id or nil, got {}", (int)t.get_type());
+            }
+        }
+
+        PN_CORE_INFO("[Lua] registerOnCollision: self={} target={}", (uint32_t)currentEntity_, (uint32_t)target);
+
+        // store under the registering entity (self), target is used only as a filter
+        onCollision_[currentEntity_].push_back(
+            { currentEntity_, target, std::move(fn), /*once*/ false, currentRunWhenPaused_ }
+        );
+    };
 
     lua_["registerPauseHandler"] = [this](sol::protected_function fn) {
         pauseHandlers_.push_back({ currentEntity_, fn, /*runWhenPaused*/ true });
@@ -724,22 +750,38 @@ void LuaManager::onMouseInOut() {
 }
 
 void LuaManager::onCollision(entt::entity a, entt::entity b) {
-    // Look up callbacks registered on entity 'a'
-    if (auto it = onCollision_.find(a); it != onCollision_.end()) {
-        for (const auto& cb : it->second) {
-            if (cb.collidedEntityId == b || cb.collidedEntityId == entt::null) {
-                collisionQueue_.push_back(cb);
+    //// Look up callbacks registered on entity 'a'
+    //if (auto it = onCollision_.find(a); it != onCollision_.end()) {
+    //    for (const auto& cb : it->second) {
+    //        if (cb.collidedEntityId == b || cb.collidedEntityId == entt::null) {
+    //            collisionQueue_.push_back(cb);
+    //        }
+    //    }
+    //}
+    //// also check callbacks registered on entity 'b' 
+    //if (auto it = onCollision_.find(b); it != onCollision_.end()) {
+    //    for (const auto& cb : it->second) {
+    //        if (cb.collidedEntityId == a || cb.collidedEntityId == entt::null) {
+    //            collisionQueue_.push_back(cb);
+    //        }
+    //    }
+    //}
+
+    auto deliver = [&](entt::entity self, entt::entity other) {
+        auto it = onCollision_.find(self);
+        if (it == onCollision_.end()) return;
+        //PN_CORE_INFO("[Lua] onCollision deliver: self={} other={} handlers={}", (uint32_t)self, (uint32_t)other, (int)it->second.size());
+
+        for (auto& h : it->second) {
+            if (h.collidedEntityId == entt::null || h.collidedEntityId == other) {
+                sol::protected_function_result r = h.fn(self, other);
+                if (!r.valid()) { sol::error e = r; logError("onCollision", e); }
             }
         }
-    }
-    // also check callbacks registered on entity 'b' 
-    if (auto it = onCollision_.find(b); it != onCollision_.end()) {
-        for (const auto& cb : it->second) {
-            if (cb.collidedEntityId == a || cb.collidedEntityId == entt::null) {
-                collisionQueue_.push_back(cb);
-            }
-        }
-    }
+        };
+
+    deliver(a, b); // handlers registered by 'a'
+    deliver(b, a); // handlers registered by 'b'
 }
 
 void LuaManager::onPauseChanged(bool paused) {

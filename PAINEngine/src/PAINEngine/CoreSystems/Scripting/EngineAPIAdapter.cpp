@@ -7,7 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cLight.h"
+#include "ECS/Components/cMetadata.h"
 #include "Common/AssetTypes/src/AssetData.h"
+#include "Systems/Physics/sysPhysics.h"
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -117,9 +119,28 @@ entt::entity EngineAPIAdapter::CreatePrefabInstance(std::string prefab, std::str
 /*                                  Lookup                                     */
 /* =========================================================================== */
 std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
-    auto opt = meta_.getEntityByName(std::string{ name });   // name lookup in Meta service
-    if (!opt) return std::nullopt;
-    return asInt(*opt);
+    // 1) Fast path: use the meta index
+    if (auto opt = meta_.getEntityByName(std::string{ name })) {
+        return asInt(*opt);
+    }
+
+    // 2) Fallback: scan the registry for MetaData::EntityName
+    auto& reg = ecs_.getRegistry();
+    PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}",
+        (void*)&reg,
+        reg.view<PAIN::MetaData::EntityName>().size());
+    auto view = reg.view<PAIN::MetaData::EntityName>();
+    for (auto e : view) {
+        const auto& n = view.get<PAIN::MetaData::EntityName>(e).name;
+        if (n == name) {
+            // seed the meta index so future lookups are O(1)
+            meta_.setEntityName(e, std::string{ name });
+            return asInt(e);
+        }
+        PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::MetaData::EntityName>(e).name);
+    }
+
+    return std::nullopt;
 }
 
 std::string EngineAPIAdapter::GetAssetGUID(std::string_view name, PAIN::Assets::Type want) {
@@ -185,8 +206,21 @@ glm::vec3 EngineAPIAdapter::GetPosition(entt::entity entityId) {
 }
 
 void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
-    auto& t = ensure<PAIN::Transform>(entityId);
-    t.position = { p.x, p.y, p.z };
+    /*auto& t = ensure<PAIN::Transform>(entityId);
+    t.position = { p.x, p.y, p.z };*/
+
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+
+    auto& t = reg.get<PAIN::Transform>(entityId);
+    t.position = p;
+
+    if (reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
+        auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            phys->teleportBodyToTransform(entityId, t, rb);
+        }
+    }
 }
 
 glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
@@ -382,9 +416,7 @@ void EngineAPIAdapter::Input_OnEvent(Event& e)
 }
 
 bool EngineAPIAdapter::Input_IsKeyDown(int key) { return keysDown_.count(key) != 0; }
-bool EngineAPIAdapter::Input_WasKeyPressed(int key) { 
-    return keysPressed_.count(key) != 0; 
-}
+bool EngineAPIAdapter::Input_WasKeyPressed(int key) { return keysPressed_.count(key) != 0; }
 bool EngineAPIAdapter::Input_WasKeyReleased(int key) { return keysReleased_.count(key) != 0; }
 bool EngineAPIAdapter::Input_IsMouseDown(int btn) { return mouseDown_.count(btn) != 0; }
 bool EngineAPIAdapter::Input_WasMousePressed(int btn) { return mousePressed_.count(btn) != 0; }

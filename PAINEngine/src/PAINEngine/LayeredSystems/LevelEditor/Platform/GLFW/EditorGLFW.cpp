@@ -172,19 +172,19 @@ namespace PAIN {
             Event::Dispatcher dispatcher(event);
             dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-                return true;
+                return false;
                 });
             dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-                return true;
+                return false;
                 });
             dispatcher.Dispatch<Event::KeyRepeated>([&](Event::KeyRepeated& e) -> bool {
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), true);
-                return true;
+                return false;
                 });
             dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
                 io.AddKeyEvent(static_cast<ImGuiKey>(imguiKeyMapping(e.getKeyCode())), false);
-                return true;
+                return false;
                 });
         }
 
@@ -192,11 +192,11 @@ namespace PAIN {
             Event::Dispatcher dispatcher(event);
             dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
                 io.AddMouseButtonEvent(e.getBtnCode(), true);
-                return true;
+                return false;
                 });
             dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
                 io.AddMouseButtonEvent(e.getBtnCode(), false);
-                return true;
+                return false;
                 });
             dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
                 io.AddMousePosEvent(e.getWindowPos().x, e.getWindowPos().y);

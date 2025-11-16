@@ -22,6 +22,24 @@
 #include "Systems/Physics/sysPhysics.h"
 
 namespace PAIN {
+
+	// helper so viewport wont need to know jolt details
+	static void SyncBodyToTransform(
+		entt::entity e,
+		ECS::Controller* ecs,
+		const Transform& t,
+		bool dragging // true while gizmo is moving, false on release
+	) {
+		if (!ecs) return;
+		auto& reg = ecs->getRegistry();
+		if (!reg.all_of<Physics::RigidBody3D>(e)) return;
+
+		auto& rb = reg.get<Physics::RigidBody3D>(e);
+		if (auto phys = ecs->getSystem<Physics::System>()) {
+			phys->teleportBodyToTransform(e, t, rb);
+		}
+	}
+
 	namespace Editor {
 		namespace Panel {
 
@@ -360,6 +378,8 @@ namespace PAIN {
 											transform.rotation = cachedRotation;
 											transform.scale = cachedScale;
 
+											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
+
 											// If object has RigidBody3D, it is a physics object, disable physics temporarily
 											if (rbOpt.has_value()) {
 												auto& rb = rbOpt.value().get();
@@ -382,6 +402,8 @@ namespace PAIN {
 											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));							
 											transform.position = cachedPosition;
 											transform.scale = cachedScale;
+
+											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
 
 											if (rbOpt.has_value()) {
 												auto& rb = rbOpt.value().get();

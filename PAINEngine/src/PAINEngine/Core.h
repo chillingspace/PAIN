@@ -8,3 +8,4 @@
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cLight.h"
+#include "ECS/Components/cScript.h"

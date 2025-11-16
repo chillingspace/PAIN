@@ -19,6 +19,7 @@
 #include "cMetadata.h"
 #include "cAudioSource.h"
 #include "cBoundingVolume.h"
+#include "cScript.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
@@ -45,7 +46,8 @@ namespace PAIN {
         Collision::Collider,
         Joint,
         BoundingVolume,
-        Audio::AudioSource
+        Audio::AudioSource,
+        Script
     >;
 
     template<typename T>
@@ -67,6 +69,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, Joint>) return "Joint";
         else if constexpr (std::is_same_v<T, BoundingVolume>) return "BoundingVolume";
         else if constexpr (std::is_same_v<T, Audio::AudioSource>) return "AudioSource";
+        else if constexpr (std::is_same_v<T, Script>) return "Script";
         else return "Unknown";
     }
 }
