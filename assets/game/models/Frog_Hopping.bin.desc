@@ -10,6 +10,6 @@
   "guid": "efaeb148-7d31-7f43-bd7e-e2fed64f3968",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\others\\Frog_Hopping.bin"
+    "source_file": "game\\models\\Frog_Hopping.bin"
   }
 }

@@ -89,6 +89,9 @@ namespace PAIN {
 							//Target directory ( main game asset folder )
 							auto target = path_service->resolvePath(Path::main_assets_alias, file_path.filename().string());
 
+							//SKip
+							if (file_path == target) continue;
+
 							//Throw asset into the game asset folder
 							std::filesystem::copy(file_path, target, std::filesystem::copy_options::overwrite_existing);
 
@@ -1186,7 +1189,7 @@ namespace PAIN {
 
 								//Recursive register all assets in directory
 								for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
-									auto relative = std::filesystem::relative(file, root);
+									auto relative = std::filesystem::relative(entry.path(), root);
 									asset_service->registerAsset(relative);
 								}
 							}
@@ -1368,6 +1371,9 @@ namespace PAIN {
 						}
 						catch (std::exception const&) {
 							PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+
+							//Pop from queue
+							file_event_queue.pop();
 						}
 					}
 				}

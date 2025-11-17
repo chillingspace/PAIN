@@ -69,6 +69,9 @@ namespace PAIN {
 
             //Export asset registry
             void ExportAssetRegistry();
+
+            //Identify model texture
+            bool handleModelTexture(Info& asset, std::filesystem::path const& dir_path) const;
         public:
             Organizer(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path);
             ~Organizer() = default;
@@ -89,7 +92,7 @@ namespace PAIN {
             bool removeFile(std::filesystem::path const& file_path) const;
 
             //Organize and process asset
-            IAsset organizeAndProcessAsset(std::filesystem::path const& file_path) const;
+            std::optional<std::vector<IAsset>> organizeAndProcessAsset(std::filesystem::path const& file_path) const;
 
             //core functions
             void scanAssetDirectories();

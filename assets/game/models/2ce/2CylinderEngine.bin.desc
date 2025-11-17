@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Frog_Hopping.gltf",
+    "name": "2CylinderEngine.bin",
     "type": "Model"
   },
   "build_data": {
-    "hash": 9706715087332754256
+    "hash": 2071776720465582438
   },
   "descriptor_version": 1,
-  "guid": "81117530-de12-7b4c-a0e5-6ebc94459e26",
+  "guid": "6caba44c-ed93-b941-964d-f33d5f45f553",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Hopping.gltf"
+    "source_file": "game\\models\\2ce\\2CylinderEngine.bin"
   }
 }

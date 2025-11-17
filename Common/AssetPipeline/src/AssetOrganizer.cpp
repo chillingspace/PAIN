@@ -109,6 +109,81 @@ namespace PAIN {
             return false;
         }
 
+        bool Organizer::handleModelTexture(Info& asset, std::filesystem::path const& dir_path) const {
+
+            //Early escape
+            if(asset.type != Assets::Type::Model && asset.type != Assets::Type::Texture) return false;
+
+            //Check if asset is a texture
+            if (asset.type == Assets::Type::Texture) {
+
+                //Get engine and game model folders
+                auto engine_model_folder = getAllEngineFolders()[Assets::Type::Model];
+                auto game_model_folder = getAllGameFolders()[Assets::Type::Model];
+
+                //Check if asset is present within a model folder
+                if (isPathPartOfRoot(asset.relative_folder, engine_model_folder) || isPathPartOfRoot(asset.relative_folder, game_model_folder)) return true;
+
+                //Check if asset is nested within a model folder
+                std::filesystem::path currentPath = asset.raw_path.parent_path();
+
+                //If found a model asset
+                while (currentPath != assets_root) {
+                    //Recursively search for model asset
+                    for (auto const& entry : std::filesystem::directory_iterator(currentPath)) {
+                        if (getAssetType(entry) == Assets::Type::Model) return true;
+                    }
+                    currentPath = currentPath.parent_path();
+                }
+
+                //Model not found, rogue texture return false
+                return false;
+            }
+
+            //Check if asset is a model
+            if (asset.type == Assets::Type::Model) {
+
+                //Ensure that file isnt of type .bin
+                if (asset.raw_path.extension() == ".bin") return true;
+
+                //Get engine dir
+                auto dir_path = game_dir.at(asset.type);
+
+                //Get engine and game model folders
+                auto engine_model_folder = getAllEngineFolders();
+                auto game_model_folder = getAllGameFolders();
+
+                //Check if relative folder is any of the main folders
+                for (auto const& folder : getAllGameFolders()) {
+                    if (asset.relative_folder == folder.second) return false;
+                }
+                for (auto const& folder : getAllEngineFolders()) {
+                    if (asset.relative_folder == folder.second) return false;
+                }
+
+                //Move the entire folder
+                auto target = assets_root / dir_path / asset.raw_path.parent_path().filename();
+
+                //Reposition entire folder
+                repositionFile(asset.raw_path.parent_path(), target);
+
+                //Find model path for compilation
+                for (auto const& entry : std::filesystem::recursive_directory_iterator(target)) {
+                    if (entry.path().extension() != ".bin" && getAssetType(entry.path()) == Assets::Type::Model) {
+                        //Update asset details
+                        asset.raw_path = entry.path();
+                        asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
+                        break;
+                    }
+                }
+
+                return true;
+            }
+
+            //Final check return false
+            return false;
+        }
+
         void Organizer::enforceGameAssetLocation(Info& asset) const {
 
             //Check if game dir has asset type
@@ -120,11 +195,14 @@ namespace PAIN {
                 //Check if asset is in the right directory
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
-                    //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    if (!handleModelTexture(asset, dir_path)) {
 
-                    //Reposition asset into the right directory
-                    moveFile(asset, target);
+                        //Get target path
+                        auto target = assets_root / dir_path / asset.name;
+
+                        //Reposition asset into the right directory
+                        moveFile(asset, target);
+                    }
                 }
             }
             else {
@@ -134,11 +212,14 @@ namespace PAIN {
                 //Check if asset is in the right directory
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
-                    //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    if (!handleModelTexture(asset, dir_path)) {
 
-                    //Reposition asset into the right directory
-                    moveFile(asset, target);
+                        //Get target path
+                        auto target = assets_root / dir_path / asset.name;
+
+                        //Reposition asset into the right directory
+                        moveFile(asset, target);
+                    }
                 }
             }
         }
@@ -154,11 +235,14 @@ namespace PAIN {
                 //Check if asset is in the right directory
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
-                    //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    if (!handleModelTexture(asset, dir_path)) {
 
-                    //Reposition asset into the right directory
-                    moveFile(asset, target);
+                        //Get target path
+                        auto target = assets_root / dir_path / asset.name;
+
+                        //Reposition asset into the right directory
+                        moveFile(asset, target);
+                    }
                 }
             }
             else {
@@ -169,11 +253,14 @@ namespace PAIN {
                 //Check if asset is in the right directory
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
-                    //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    if (!handleModelTexture(asset, dir_path)) {
 
-                    //Reposition asset into the right directory
-                    moveFile(asset, target);
+                        //Get target path
+                        auto target = assets_root / dir_path / asset.name;
+
+                        //Reposition asset into the right directory
+                        moveFile(asset, target);
+                    }
                 }
             }
         }
@@ -306,45 +393,79 @@ namespace PAIN {
             }
         }
 
-        IAsset Organizer::organizeAndProcessAsset(std::filesystem::path const& file_path) const {
-            //create asset info
-            Info asset;
-            asset.raw_path = file_path;
-            asset.name = asset.raw_path.filename().string();
-            asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
-            asset.type = getAssetType(asset.raw_path);
+        std::optional<std::vector<IAsset>> Organizer::organizeAndProcessAsset(std::filesystem::path const& file_path) const {
 
-            //Check if asset is in engine or game
-            if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
+            //Return if not a valid file
+            if (!std::filesystem::exists(file_path)) return std::nullopt;
 
-                //Enforce asset location
-                enforceGameAssetLocation(asset);
-            }
-            else if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
+            //Lamda function
+            auto organize_and_process = [&](std::filesystem::path const& file_path)->std::optional<IAsset> {
+                //create asset info
+                Info asset;
+                asset.raw_path = file_path;
+                asset.name = asset.raw_path.filename().string();
+                asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
+                asset.type = getAssetType(asset.raw_path);
 
-                //Enforce asset location
-                enforceEngineAssetLocation(asset);
+                //Check if asset is in engine or game
+                if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
+
+                    //Enforce asset location
+                    enforceGameAssetLocation(asset);
+                }
+                else if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
+
+                    //Enforce asset location
+                    enforceEngineAssetLocation(asset);
+                }
+                else {
+                    //Enforce asset location into game folder
+                    enforceGameAssetLocation(asset);
+                }
+
+                //SKip bin files
+                if (asset.raw_path.extension() == ".bin") return std::nullopt;
+
+                //Update asset relative path
+                asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
+
+                //Compile asset
+                compiler->processAsset(asset);
+
+                //Craft asset interface
+                IAsset asset_interface;
+                asset_interface.guid = asset.guid;
+                asset_interface.name = asset.shipped_path.filename().string();
+                asset_interface.type = asset.type;
+                asset_interface.main_relative_path = asset.relative_path;
+                asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
+
+                return asset_interface;
+                };
+
+            //Check if directory
+            if (std::filesystem::is_directory(file_path)) {
+
+                //Empty vec
+                std::vector<IAsset> vec;
+
+                //Recursive iterate
+                for (auto const& entry : std::filesystem::recursive_directory_iterator(file_path)) {
+                    auto asset = organize_and_process(file_path);
+                    if (asset.has_value()) vec.push_back(asset.value());
+                }
+
+                if(!vec.empty()) return vec;
             }
             else {
-                //Enforce asset location into game folder
-                enforceGameAssetLocation(asset);
+                auto asset = organize_and_process(file_path);
+                if (asset.has_value()) {
+                    std::vector<IAsset> vec = { asset.value() };
+                    return vec;
+                }
             }
 
-            //Update asset relative path
-            asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
-
-            //Compile asset
-            compiler->processAsset(asset);
-
-            //Craft asset interface
-            IAsset asset_interface;
-            asset_interface.guid = asset.guid;
-            asset_interface.name = asset.shipped_path.filename().string();
-            asset_interface.type = asset.type;
-            asset_interface.main_relative_path = asset.relative_path;
-            asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
-
-            return asset_interface;
+            return std::nullopt;
         }
 
         void Organizer::scanAssetDirectories() {
@@ -360,30 +481,6 @@ namespace PAIN {
                 //Temp skip config.json
                 if (file.filename() == "Config.json") return;
 
-                static constexpr std::array<const char*, 4> ACCEPTED_GLTF_NEIGHBOURS = {
-                    ".bin",
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                };
-
-                // skip .bin files that are dependencies of .gltf files
-                // .bin files aren't models themselves, but are required by .gltf files
-                if (std::find(ACCEPTED_GLTF_NEIGHBOURS.begin(), ACCEPTED_GLTF_NEIGHBOURS.end(), file.extension()) != ACCEPTED_GLTF_NEIGHBOURS.end()) {
-                    // Check if ANY .gltf file exists in the same directory
-                    bool has_gltf_neighbor = false;
-                    for (const auto& entry : std::filesystem::directory_iterator(file.parent_path())) {
-                        if (entry.path().extension() == ".gltf") {
-                            has_gltf_neighbor = true;
-                            break;
-                        }
-                    }
-
-                    if (has_gltf_neighbor) {
-                        return; // Skip this, it's likely a GLTF dependency
-                    }
-                }
-
                 //Check if asset is a desc file, locate raw asset in same directory
                 if (file.extension() == desc_ext) {
 
@@ -393,10 +490,16 @@ namespace PAIN {
                 }
 
                 //Organize and process asset
-                auto asset_interface = organizeAndProcessAsset(file);
+                auto asset_vec = organizeAndProcessAsset(file);
 
-                //Inser asset into assets
-                assets.push_back(asset_interface);
+                //Insert asset into assets
+                if (asset_vec.has_value()) {
+                    
+                    //Iterate through all values
+                    for (auto const& i_asset : asset_vec.value()) {
+                        assets.push_back(i_asset);
+                    }
+                }
                 },
                 [](std::filesystem::path) {});
 

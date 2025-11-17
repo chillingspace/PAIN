@@ -164,17 +164,24 @@ namespace PAIN {
 			if (checkAssetRegistered(findGUID(relative_path))) return;
 
 			//Process asset
-			auto asset = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
+			auto asset_vec = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
 
-			//Check to ensure that GUID is valid
-			if (!asset.guid.IsValid()) return;
+			//Check to ensure asset vec has value
+			if (!asset_vec.has_value()) return;
 
-			//Get asset registry data
-			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
+			//Iterate through all assets
+			for (auto const& i_asset : asset_vec.value()) {
 
-			//Register paths to guid
-			shipped_path_to_guid[asset.shipped_relative_path] = asset.guid;
-			main_path_to_guid[asset.main_relative_path] = asset.guid;
+				//Check for valid guid
+				if (!i_asset.guid.IsValid()) return;
+
+				//Get asset registry data
+				asset_registry[i_asset.guid] = std::make_shared<IAsset>(i_asset);
+
+				//Register paths to guid
+				shipped_path_to_guid[i_asset.shipped_relative_path] = i_asset.guid;
+				main_path_to_guid[i_asset.main_relative_path] = i_asset.guid;
+			}
 		}
 #endif
 
