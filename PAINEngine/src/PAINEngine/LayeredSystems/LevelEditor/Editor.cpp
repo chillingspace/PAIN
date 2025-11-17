@@ -317,12 +317,12 @@ namespace PAIN {
         }
 
         void Editor::onEvent(Event::Event& event) {
-    
+#ifdef PN_PLATFORM_WINDOWS
             // If window closed event triggered set editor to visible
             if (event.getType() == Event::Type::WindowClosed) {
                 editor_visible = true;
             }
-
+#endif
             //Pass down events to platform for handling
             platform->handleEvents(event);
 

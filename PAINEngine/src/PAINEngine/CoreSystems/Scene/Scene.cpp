@@ -36,15 +36,11 @@ namespace PAIN {
 		float height_ratio{ 9.f };
 		camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
 
-		// Init light sources
+		// Init light sources (REQUIRED TO FUNCTION)
 		LightSources::get().create("cam");
 		auto olcam = LightSources::get().get("cam");
 		Light& lcam = olcam.value();
 		lcam.L_intensity = glm::vec3(0.01f);
-		//lcam.setShadowType(Light::SHADOW_TYPES::MAPPED);
-
-		//GraphicsSettings::get().daytime = false;
-		//GraphicsSettings::get().ibl = false;
 
 		if (GraphicsSettings::get().daytime) {
 			LightSources::get().create("world");
@@ -59,11 +55,6 @@ namespace PAIN {
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 
-		LightSources::get().create("a");
-		auto ola = LightSources::get().get("a");
-		Light& la = ola.value();
-		la.position = glm::vec3(10.f, 1.f, -8.f);
-		la.L_intensity = glm::vec3(2.f);
 
 		//LightSources::get().create("b");
 		//auto olb = LightSources::get().get("b");

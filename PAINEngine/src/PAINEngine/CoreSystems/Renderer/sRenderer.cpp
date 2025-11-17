@@ -42,6 +42,8 @@ namespace PAIN {
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after sRenderer attach: {}", err);
 		}
+
+
 	}
 
 	void sRenderer::shadowPass()
@@ -157,6 +159,55 @@ namespace PAIN {
 
 	void sRenderer::lightingPass()
 	{
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<MetaData::EntityName>();
+
+		// Cache to track which lights are still active this frame
+		std::unordered_set<std::string> activeLightNames;
+
+
+		for (auto entity : view) {
+			auto light_comp = ecs->getEntityComponent<Lighting>(entity);
+			auto trans_comp = ecs->getEntityComponent<Transform>(entity);
+
+			if (!light_comp.has_value() || !trans_comp.has_value())
+				continue;
+
+			std::string lightName = "light_" + std::to_string((uint32_t)entity);
+			activeLightNames.insert(lightName);
+
+			// Create light if new
+			if (!LightSources::get().get(lightName)) {
+				LightSources::get().create(lightName);
+			}
+
+			if (auto lightOpt = LightSources::get().get(lightName)) {
+				Light& light = lightOpt.value();
+				light.position = trans_comp->get().position + light_comp->get().offset;
+				light.L_intensity = light_comp->get().light_intensity;
+				light.type = static_cast<Light::TYPES>(light_comp->get().light_type);
+				light.setShadowType(static_cast<Light::SHADOW_TYPES>(light_comp->get().shadow_type));
+			}
+
+		}
+
+		// Remove lights no longer active
+		for (auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+
+			std::string const& name = key;
+			Light& light = lightRef.get();
+
+			// Skip the special lights "cam" and "world"
+			if (name == "cam" || name == "world") {
+				continue;
+			}
+
+			if (activeLightNames.find(name) == activeLightNames.end()) {
+				LightSources::get().destroy(name);
+			}
+		}
+
 		auto scene = services->get<Scene>();
 		w_renderer->LightingPass(scene, LightSources::get());
 

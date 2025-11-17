@@ -226,6 +226,17 @@ namespace PAIN {
 			}
 		}
 
+		void destroyAll() {
+			for (auto it = sources.begin(); it != sources.end(); ) {
+				if (it->first != "cam" && it->first != "world") {
+					it = sources.erase(it); // erase returns the next iterator
+				}
+				else {
+					++it;
+				}
+			}
+		}
+
 		/**
 		 * get light object using ref.
 		 *
@@ -259,6 +270,17 @@ namespace PAIN {
 
 			for (const auto [k, v] : sources) {
 				out.push_back(std::ref(v));
+			}
+
+			return out;
+		}
+
+		std::vector<std::pair<const std::string&, std::reference_wrapper<Light>>> getAllWithKeys() {
+			std::vector<std::pair<const std::string&, std::reference_wrapper<Light>>> out;
+			out.reserve(sources.size());
+
+			for (auto& [k, v] : sources) {
+				out.emplace_back(k, std::ref(v));
 			}
 
 			return out;

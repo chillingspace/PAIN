@@ -513,7 +513,7 @@ void EngineAPIAdapter::RemoveLight(entt::entity entityId) {
 }
 void EngineAPIAdapter::SetLightPosition(entt::entity entityId, float x, float y, float z) {
     auto& l = ensure<PAIN::Lighting>(entityId);
-    l.position = { x,y,z }; 
+    l.offset = { x,y,z };
 
     /*PAIN::Lighting* l = nullptr;
     if (!try_get<PAIN::Lighting>(entityId, l)) {
