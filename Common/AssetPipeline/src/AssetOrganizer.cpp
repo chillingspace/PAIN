@@ -396,7 +396,7 @@ namespace PAIN {
         std::optional<std::vector<IAsset>> Organizer::organizeAndProcessAsset(std::filesystem::path const& file_path) const {
 
             //Return if not a valid file
-            if (!std::filesystem::exists(file_path)) return std::nullopt;
+            if (!std::filesystem::exists(file_path) || file_path.extension() == desc_ext) return std::nullopt;
 
             //Lamda function
             auto organize_and_process = [&](std::filesystem::path const& file_path)->std::optional<IAsset> {
@@ -423,8 +423,8 @@ namespace PAIN {
                     enforceGameAssetLocation(asset);
                 }
 
-                //SKip bin files
-                if (asset.raw_path.extension() == ".bin") return std::nullopt;
+                //Skip bin files
+                if (asset.raw_path.extension() == ".bin" || asset.raw_path.extension() == desc_ext) return std::nullopt;
 
                 //Update asset relative path
                 asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);

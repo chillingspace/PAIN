@@ -1189,6 +1189,7 @@ namespace PAIN {
 
 								//Recursive register all assets in directory
 								for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
+									if (entry.path().extension() == Assets::descriptor_ext) continue;
 									auto relative = std::filesystem::relative(entry.path(), root);
 									asset_service->registerAsset(relative);
 								}
@@ -1234,7 +1235,20 @@ namespace PAIN {
 
 							//Check asset been registered
 							if (!asset_service->checkAssetRegistered(relative)) {
-								asset_service->registerAsset(relative);
+								//Register asset
+								if (std::filesystem::is_directory(file)) {
+
+									//Recursive register all assets in directory
+									for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
+										if (entry.path().extension() == Assets::descriptor_ext) continue;
+										auto relative = std::filesystem::relative(entry.path(), root);
+										asset_service->registerAsset(relative);
+									}
+								}
+								else {
+									auto relative = std::filesystem::relative(file, root);
+									asset_service->registerAsset(relative);
+								}
 							}
 							else {
 								//Get GUID
