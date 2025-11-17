@@ -1,0 +1,419 @@
+{
+    "active_cam_id": "",
+    "dirty": false,
+    "ecs": {
+        "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 7,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    1.5271880626678467,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    0.33994901180267334,
+                                    -0.39153599739074707
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_smile"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "0c2ba523-5de4-cc4b-a43e-806d24489ebb"
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_smile"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 4,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.4720239639282227,
+                                    1.5271880626678467,
+                                    1.654054880142212
+                                ],
+                                "min": [
+                                    -2.5279760360717773,
+                                    0.33994901180267334,
+                                    0.4713488817214966
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_left"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
+                        },
+                        "Transform": {
+                            "position": [
+                                -2.0,
+                                1.0,
+                                0.8628848791122437
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_left"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 9,
+                            "localAABB": {
+                                "max": [
+                                    0.5279759764671326,
+                                    0.5271880030632019,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    -0.5279759764671326,
+                                    -0.6600509881973267,
+                                    -0.39153599739074707
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    2.5279760360717773,
+                                    1.5271880626678467,
+                                    0.7911700010299683
+                                ],
+                                "min": [
+                                    1.4720239639282227,
+                                    0.33994901180267334,
+                                    -0.39153599739074707
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ogre_right"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
+                        },
+                        "Transform": {
+                            "position": [
+                                2.0,
+                                1.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "ogre_right"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 10,
+                            "localAABB": {
+                                "max": [
+                                    0.49837300181388855,
+                                    0.7077509760856628,
+                                    1.302780032157898
+                                ],
+                                "min": [
+                                    -0.2137649953365326,
+                                    0.028404299169778824,
+                                    -1.2722200155258179
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    8.816659927368164,
+                                    2.1232528686523438,
+                                    -1.5048809051513672
+                                ],
+                                "min": [
+                                    1.0916602611541748,
+                                    0.08521290123462677,
+                                    -3.6412951946258545
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "sdcc"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "063dd5ad-0b73-5a43-865b-9f2d328749c9"
+                        },
+                        "Transform": {
+                            "position": [
+                                5.0,
+                                0.0,
+                                -3.0
+                            ],
+                            "rotation": [
+                                -0.0,
+                                -0.7071067690849304,
+                                -0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                3.0,
+                                3.0,
+                                3.0
+                            ]
+                        }
+                    },
+                    "Name": "sdcc"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 2,
+                            "localAABB": {
+                                "max": [
+                                    1.3155499696731567,
+                                    0.4738200008869171,
+                                    0.04597200080752373
+                                ],
+                                "min": [
+                                    -0.08409979939460754,
+                                    -0.0011475799838081002,
+                                    -1.2046400308609009
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -4.386080265045166,
+                                    1.4214600324630737,
+                                    -1.0533504486083984
+                                ],
+                                "min": [
+                                    -8.13791561126709,
+                                    -0.0034427400678396225,
+                                    -5.2522993087768555
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "city"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "df7c9ed7-0f4f-a646-974c-3ece974cf161"
+                        },
+                        "Transform": {
+                            "position": [
+                                -8.0,
+                                0.0,
+                                -5.0
+                            ],
+                            "rotation": [
+                                -0.0,
+                                -0.7071067690849304,
+                                -0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                3.0,
+                                3.0,
+                                3.0
+                            ]
+                        }
+                    },
+                    "Name": "city"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "e51b7e41-e344-3048-9c3e-edb08fad3fa6",
+                            "volumeDb": 0.0
+                        },
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 5,
+                            "localAABB": {
+                                "max": [
+                                    0.9424954056739807,
+                                    0.8128451108932495,
+                                    0.900973916053772
+                                ],
+                                "min": [
+                                    -0.9474585652351379,
+                                    -1.18715500831604,
+                                    -0.9009949564933777
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.9424954056739807,
+                                    2.4009947776794434,
+                                    3.0734846591949463
+                                ],
+                                "min": [
+                                    -0.9474585652351379,
+                                    0.599026083946228,
+                                    1.0734847784042358
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "dm"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "selected_model": "5b56b753-ec3a-0f47-a329-5c898f7b58a2"
+                        },
+                        "Script": {
+                            "enabled": true,
+                            "script_asset": "e3c50a66-69d0-534d-84eb-9171cf379d8d"
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                1.5,
+                                2.2606396675109863
+                            ],
+                            "rotation": [
+                                0.7071067690849304,
+                                0.0,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "dm"
+                }
+            }
+        ]
+    },
+    "grid_id": 0,
+    "layers": [],
+    "mask_matrix": [],
+    "meta_tags": [],
+    "metadata_service": {
+        "groups": null,
+        "registered_tags": [
+            "Enemy",
+            "Environment",
+            "Player",
+            "Untagged"
+        ]
+    }
+}
