@@ -150,38 +150,11 @@ namespace PAIN {
 #endif
 
 
-		auto spawnPlayerWithScript = [&]() {
-			auto ecs_ptr = services->get<ECS::Controller>();
-			auto meta_ptr = services->get<MetaData::Service>();
-
-			if (!ecs_ptr || !meta_ptr) {
-				PN_CORE_ERROR("Failed to spawn test player - services not available");
-				return;
-			}
-
-			auto& ecs = *ecs_ptr;
-			auto& meta = *meta_ptr;
-
-			auto player = ecs.createEntity();
-			meta.setEntityName(player, "Player");
-			ecs.addEntityComponent<Transform>(player, Transform{});
-
-			if (auto gameScript = ecs.getSystem<PAIN::Scripting::GameScriptingSystem>()) {
-				gameScript->onAttach();
-				gameScript->attachScript(player, "game/scripts/PlayerController.lua");
-				PN_CORE_INFO("Test player spawned with entity ID: {}", (entt::id_type)entt::to_integral(player));
-			}
-			else {
-				PN_CORE_ERROR("GameScriptingSystem not found in ECS controller!");
-			}
-			};
-
 #ifdef _DEBUG
 		PN_CORE_INFO("Testing Lua on Debug");
 #else
 		PN_CORE_INFO("Testing Lua on Release");
 #endif
-		spawnPlayerWithScript();
 
 			//Mark engine as ready
 			b_app_running = true;

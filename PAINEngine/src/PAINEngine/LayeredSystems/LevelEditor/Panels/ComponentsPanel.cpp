@@ -52,6 +52,10 @@ namespace PAIN {
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
                 //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
 
+                 // ---- Script ----
+                registerCompUIFunc<PAIN::Script>("Script",
+                    [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
+
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
 

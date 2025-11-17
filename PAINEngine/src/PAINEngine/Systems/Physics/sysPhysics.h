@@ -57,7 +57,10 @@ namespace PAIN {
 
 			void updateBodyLayer(JPH::BodyID bodyID, JPH::ObjectLayer newLayer);
 
+			void teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb);
+
 		private:
+			struct LuaContactListener; // fwd decl for jolt lua bridge
 
 			std::unique_ptr<JPH::PhysicsSystem> jolt_physics;
 
@@ -97,8 +100,12 @@ namespace PAIN {
 
 			const i32 collision_steps;
 
+			std::unique_ptr<LuaContactListener> contact_listener;
+
 			// Jolt init setup
 			void joltSetup();
+
+			void notifyContact(const JPH::Body& b1, const JPH::Body& b2);
 		};
 
 	} // Physics

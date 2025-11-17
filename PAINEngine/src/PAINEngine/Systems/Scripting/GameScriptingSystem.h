@@ -40,6 +40,8 @@ namespace PAIN {
         private:
             LuaManager luaManager_;
             std::optional<std::string> getKeyName(int keyCode) const;
+            bool init_ = false;
+            void ensureInit();
         };
     }
 

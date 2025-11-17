@@ -2,6 +2,7 @@
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Controller.h"
+#include "ECS/sMetaData.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cMeshRenderer.h"
@@ -273,10 +274,14 @@ namespace PAIN {
 	entt::entity Scene::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
 	{
 		auto ecs = services->get<ECS::Controller>();
+		auto meta = services->get<MetaData::Service>();
+
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
+
+		if (meta) meta->setEntityName(entity, name);
 
 		return entity;
 	}

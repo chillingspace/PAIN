@@ -129,7 +129,7 @@ namespace PAIN {
 
             //Set up extensions for asset types
             temp[Type::Texture] = { ".png", ".jpg", ".jpeg", ".hdr", ".tex" };
-            temp[Type::Model] = { ".obj", ".gltf" };
+            temp[Type::Model] = { ".obj", ".gltf", ".bin" };
             temp[Type::Audio] = { ".wav", ".mp3", ".ogg" };
             temp[Type::Script] = { ".lua" };
             temp[Type::Data] = { ".json" };

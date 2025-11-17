@@ -32,9 +32,9 @@
 
 -- -- Test_03 finding entities 
 -- registerUpdate(function(dt)
---     local found = findEntity("Player") -- entity Player created in application.cpp init -> meta.setEntityName(player, "Player");
+--     local found = findEntity("ogre_left") 
 --     if found then
---         log("found Player:", found)
+--         log("found entity:", found)
 --     end
 -- end)
 
@@ -204,13 +204,13 @@
 -- end)
 
 
--- Test_13 mouse 
-registerUpdate(function(dt)
-    if isMouseDown(0) then
-        local p = mousePos()
-        log("[LUA] mouse:", p.x, p.y)
-    end
-end)
+-- -- Test_13 mouse 
+-- registerUpdate(function(dt)
+--     if isMouseDown(0) then
+--         local p = mousePos()
+--         log("[LUA] mouse:", p.x, p.y)
+--     end
+-- end)
 
 
 -- -- Test_14 mouse scroll
@@ -250,3 +250,35 @@ end)
 --   log("guid = ", g)
 -- end
 
+
+-- -- Test_19 play sound
+registerUpdate(function(dt)
+    if wasKeyPressed(257) then -- enter
+        log("[AudioTest] ENTER pressed, playing sound")
+        base.audioPlay(entityId)
+    end
+end)
+
+
+
+------------------------------------------------
+-- local ogre_right = findEntity("ogre_right")
+-- local ogre_left  = findEntity("ogre_left")
+
+-- print("[Lua] ogre_right =", ogre_right)
+-- print("[Lua] ogre_left  =", ogre_left)
+
+-- -- setPosition(ogre_right, 0, 0, 0)
+-- -- setPosition(ogre_left, 0, 0, 0)
+
+-- registerOnCollision(function(self, other) print("filtered", self, other) end, ogre_left)
+-- -- registerOnCollision(function(self, other) print("any", self, other) end, nil)
+
+
+-- -- -- engine exposes getEntityByName("Player")
+-- -- local player = getEntityByName and getEntityByName("Player") or 0
+
+-- -- registerOnCollision(function(self, other)
+-- --   print("[Lua] HIT Player only:", self, other)
+-- -- end, player)
+------------------------------------------------

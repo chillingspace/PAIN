@@ -110,6 +110,7 @@ namespace PAIN {
             registerComponent<Joint>("Joint");
             registerComponent<BoundingVolume>("BoundingVolume");
             registerComponent<Audio::AudioSource>("AudioSource");
+            registerComponent<Script>("Script");
 
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");

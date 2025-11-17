@@ -587,6 +587,9 @@ namespace PAIN {
 
         void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
 
+            //Skip .bin files
+            if (asset_info.raw_path.extension() == ".bin") return;
+
             // Set output extension
             std::string out_ext = desc_file.import_settings.value("extension", ".mesh");
             asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);

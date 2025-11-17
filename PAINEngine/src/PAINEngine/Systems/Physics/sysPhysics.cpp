@@ -10,6 +10,8 @@
 
 #include "pch.h"
 #include "sysPhysics.h"
+#include "ECS/Controller.h"
+#include "Systems/Scripting/GameScriptingSystem.h"
 
 static constexpr float PI = 3.14159265358979323846f;
 
@@ -31,6 +33,30 @@ namespace PAIN {
 			}
 			return *this;
 		}
+
+		// jolt lua bridge
+		struct System::LuaContactListener : public JPH::ContactListener {
+			System * owner{};
+			explicit LuaContactListener(System * s) : owner{ s } {}
+			
+			void OnContactAdded(const JPH::Body& b1,
+								const JPH::Body& b2,
+								const JPH::ContactManifold&,
+								JPH::ContactSettings&) override
+			{
+				if (owner) owner->notifyContact(b1, b2);
+			}
+			
+			// forward persisted contacts for continuous events
+			void OnContactPersisted(const JPH::Body & b1,
+									const JPH::Body & b2,
+									const JPH::ContactManifold&,
+									JPH::ContactSettings&) override {
+				if (owner) owner->notifyContact(b1, b2);
+			}
+			
+		};
+
 		// Jolt Physics setup
 		void System::joltSetup()
 		{
@@ -97,6 +123,36 @@ namespace PAIN {
 
 			// Get body interface
 			body_interface = &jolt_physics->GetBodyInterface();
+
+			// install contact listener so can notify lua on collisions
+			contact_listener = std::make_unique<LuaContactListener>(this);
+			jolt_physics->SetContactListener(contact_listener.get());
+		}
+
+		void System::notifyContact(const JPH::Body& b1, const JPH::Body& b2) // convert a physics body pair to entt::entity and call Lua
+		{
+			entt::entity a = static_cast<entt::entity>(static_cast<uint32_t>(b1.GetUserData()));
+			entt::entity b = static_cast<entt::entity>(static_cast<uint32_t>(b2.GetUserData()));
+			//PN_CORE_WARN("[PHYSICS] Contact b1={}, b2={}", (uint32_t)a, (uint32_t)b);
+			if (a == entt::null || b == entt::null) return;
+
+			if (auto svc = services.lock()) { // tell lua
+				if (auto ecs = svc->get<ECS::Controller>()) {
+					if (auto gs = ecs->getSystem<PAIN::Scripting::GameScriptingSystem>()) {
+						gs->onCollision(a, b);   // forwards to luamanager that registered handlers
+					}
+					else {
+						PN_CORE_WARN("[PHYSICS] No GameScriptingSystem in ECS; skipping Lua dispatch");
+					}
+				}
+				else {
+					PN_CORE_WARN("[PHYSICS] No ECS::Controller in services; skipping Lua dispatch");
+				}
+			}
+			else {
+				PN_CORE_WARN("[PHYSICS] Services expired in notifyContact; skipping Lua dispatch");
+			}
+
 		}
 
 		System::System(std::shared_ptr<Services> svc) : ISystem(svc), 
@@ -268,6 +324,9 @@ namespace PAIN {
 						rigidBody.layer
 					);
 
+					// tag body with owning entt::entity so contact listener can map back
+					settings.mUserData = static_cast<uint64_t>(static_cast<uint32_t>(entity));
+
 					settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
 					settings.mMassPropertiesOverride.mMass = 10.0f; // any positive number
 					settings.mMassPropertiesOverride.mInertia = JPH::Mat44::sScale(1.0f); // placeholder inertia tensor
@@ -329,6 +388,23 @@ namespace PAIN {
 
 			// Re-add it with the new layer
 			body_interface->AddBody(bodyID, JPH::EActivation::Activate);
+		}
+
+		void System::teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb)
+		{
+			if (!body_interface || rb.bodyID.IsInvalid()) return;
+
+			JPH::Quat q(tr.rotation.x, tr.rotation.y, tr.rotation.z, tr.rotation.w);
+			body_interface->ActivateBody(rb.bodyID);
+			body_interface->SetPositionAndRotation(
+				rb.bodyID,
+				JPH::RVec3(tr.position.x, tr.position.y, tr.position.z),
+				q,
+				JPH::EActivation::Activate
+			);
+			// optional: stop any residual motion
+			body_interface->SetLinearVelocity(rb.bodyID, JPH::Vec3::sZero());
+			body_interface->SetAngularVelocity(rb.bodyID, JPH::Vec3::sZero());
 		}
 
 		void System::create_floor()
