@@ -104,6 +104,12 @@ public:
     //bool  Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) override;
     //bool  Audio_SetMuteAll(bool mute) override;
 
+    void Audio_Play(entt::entity entityId) override;
+    void Audio_Stop(entt::entity entityId) override;
+    void Audio_SetVolumeDb(entt::entity entityId, float db) override;
+    void Audio_SetGroup(entt::entity entityId, std::string group) override;
+    void Audio_SetLooping(entt::entity entityId, bool looping) override;
+
     /* =========================================================================== */
     /*                           Scene / System state                              */
     /* =========================================================================== */

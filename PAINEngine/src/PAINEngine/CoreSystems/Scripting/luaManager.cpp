@@ -532,6 +532,32 @@ void LuaManager::bindEngineAPI() {
     //lua_.set_function("audioSetGroupVolumeDb", [this](std::string group, float db) { return api_ && api_->Audio_SetGroupVolumeDb(group, db); });
     //lua_.set_function("audioFadeGroupToDb", [this](std::string group, float targetDb, float seconds) { return api_ && api_->Audio_FadeGroupToDb(group, targetDb, seconds); });
 
+    lua_.set_function("audioPlay", [this](entt::entity entityId) {
+        if (!api_) return;
+        api_->Audio_Play(entityId);
+        });
+
+    lua_.set_function("audioStop", [this](entt::entity entityId) {
+        if (!api_) return;
+        api_->Audio_Stop(entityId);
+        });
+
+    lua_.set_function("audioSetVolumeDb", [this](entt::entity entityId, float db) {
+        if (!api_) return;
+        api_->Audio_SetVolumeDb(entityId, db);
+        });
+
+    lua_.set_function("audioSetGroup", [this](entt::entity entityId, std::string group) {
+        if (!api_) return;
+        api_->Audio_SetGroup(entityId, std::move(group));
+        });
+
+    lua_.set_function("audioSetLooping", [this](entt::entity entityId, bool looping) {
+        if (!api_) return;
+        api_->Audio_SetLooping(entityId, looping);
+        });
+
+
     /* =========================================================================== */
     /*                           Scene / System state                              */
     /* =========================================================================== */

@@ -282,6 +282,50 @@ void EngineAPIAdapter::SetVelocity(entt::entity entityId, glm::vec3 v) {
 //bool EngineAPIAdapter::Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) { return audio_ && audio_->fadeGroupToDb(group.c_str(), targetDb, seconds) == AudioResult::Ok; }
 //bool EngineAPIAdapter::Audio_SetMuteAll(bool mute) { return audio_ && audio_->setMuteAll(mute) == AudioResult::Ok; }
 
+void EngineAPIAdapter::Audio_Play(entt::entity entityId)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    auto& src = reg.get<PAIN::Audio::AudioSource>(entityId);
+    src.playTrigger = true;  // tells audiosys to start
+    src.stopTrigger = false;
+}
+
+void EngineAPIAdapter::Audio_Stop(entt::entity entityId)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    auto& src = reg.get<PAIN::Audio::AudioSource>(entityId);
+    src.stopTrigger = true;
+    src.playTrigger = false;
+}
+
+void EngineAPIAdapter::Audio_SetVolumeDb(entt::entity entityId, float db)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).volumeDb = db;
+}
+
+void EngineAPIAdapter::Audio_SetGroup(entt::entity entityId, std::string group)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).group_name = std::move(group);
+}
+
+void EngineAPIAdapter::Audio_SetLooping(entt::entity entityId, bool looping)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).looping = looping;
+}
+
 /* =========================================================================== */
 /*                           Scene / System state                              */
 /* =========================================================================== */
