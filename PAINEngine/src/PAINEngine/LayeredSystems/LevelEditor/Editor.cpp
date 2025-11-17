@@ -228,58 +228,6 @@ namespace PAIN {
                 else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
             }
 
-            // Handle closing of application
-            if (showCloseConfirmPopup) {
-                ImGui::OpenPopup("Close Confirmation");
-                if (ImGui::BeginPopupModal("Close Confirmation", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    auto ser = services->get<Serialization::Service>();
-                    auto win = services->get<Window::Window>();
-                    ImGui::Text("You have unsaved changes. Save before exit?");
-                    if (ImGui::Button("Save and Exit")) {
-                        ser->saveCurrentScene();
-                        win->safeShutdown();
-                        showCloseConfirmPopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Exit Without Saving")) {
-                        win->safeShutdown();
-                        showCloseConfirmPopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Cancel")) {
-                        showCloseConfirmPopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                }
-            }
-            else if (showCloseNoScenePopup) {
-                ImGui::OpenPopup("Scene Not Saved!");
-                if (ImGui::BeginPopupModal("Scene Not Saved!", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    auto ser = services->get<Serialization::Service>();
-                    auto win = services->get<Window::Window>();
-                    ImGui::Text("You have created a new scene but no scene file exists yet. Would you like to create the scene file now?");
-                    if (ImGui::Button("Save scene as (HAVEN'T IMPLEMENTED SAVE SCENE AS)")) {
-
-                        showCloseNoScenePopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Exit Without Saving")) {
-                        win->safeShutdown();
-                        showCloseNoScenePopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Cancel")) {
-                        showCloseNoScenePopup = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                }
-            }
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -354,9 +302,6 @@ namespace PAIN {
                     panel->drawWindow(timing);
                     });
 
-
-                static bool show_demo = false; // can toggle to true if want demo
-                if (show_demo) ImGui::ShowDemoWindow(&show_demo);
             }
 
             platform->endFrame();
@@ -372,33 +317,11 @@ namespace PAIN {
         }
 
         void Editor::onEvent(Event::Event& event) {
-            // Handle closing of application in editor
-            Event::Dispatcher dispatcher(event);
-
-            #ifdef PN_PLATFORM_WINDOWS
-            dispatcher.Dispatch<Event::WindowClosed>([&](Event::WindowClosed& e) -> bool {
-                auto ser = services->get<PAIN::Serialization::Service>();
-
+    
+            // If window closed event triggered set editor to visible
+            if (event.getType() == Event::Type::WindowClosed) {
                 editor_visible = true;
-
-                // Is modified scene doesnt work currently
-                if (ser->getIsModifiedScene()) {
-                    showCloseConfirmPopup = true;
-                    return true; // handled
-                }
-                else if (ser->getIsCurSceneEmpty()) {
-                    showCloseNoScenePopup = true;
-                    return true;
-                }
-
-                showCloseConfirmPopup = true;
-
-                auto win = services->get<Window::Window>();
-                win->safeShutdown();
-                return true;
-               
-            });
-            #endif
+            }
 
             //Pass down events to platform for handling
             platform->handleEvents(event);

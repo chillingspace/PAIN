@@ -119,6 +119,9 @@ namespace PAIN {
 				//Close popup
 				void closePopUp(std::string const& popup_id);
 
+				//Close all popups
+				void closeAllPopUps();
+
 				//Render popup
 				void renderPopUps();
 

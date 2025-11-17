@@ -220,6 +220,12 @@ namespace PAIN {
 			return true;
 		}
 
+		void destroy(const std::string& ref) {
+			if (sources.find(ref) != sources.end()) {
+				sources.erase(ref);
+			}
+		}
+
 		/**
 		 * get light object using ref.
 		 *

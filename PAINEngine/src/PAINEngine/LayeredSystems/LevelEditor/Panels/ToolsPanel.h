@@ -6,7 +6,9 @@
 
 #include "Panels.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -18,6 +20,9 @@ namespace PAIN {
 				//popup
 				std::function<void(std::any const&)> createNewScenePopUp(std::string const& popup_id);
 				std::function<void(std::any const&)> saveAsPopUp(std::string const& popup_id);
+				std::function<void(std::any const&)> settingsPopUp(std::string const& popup_id);
+				std::function<void(std::any const&)> unsavedChangesPopUp(std::string const& popup_id);
+				std::function<void(std::any const&)> unsavedScenePopUp(std::string const& popup_id);
 
 			public:
 				Tools();
@@ -29,6 +34,8 @@ namespace PAIN {
 				void onAttach() override;
 
 				void onUpdate(AppTiming timing) override;
+
+				void onEvent(Event::Event& event) override;
 			};
 		}
 	}

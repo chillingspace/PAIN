@@ -6,7 +6,6 @@
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
-#include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Scene/Scene.h"
 
 //Panels headers
