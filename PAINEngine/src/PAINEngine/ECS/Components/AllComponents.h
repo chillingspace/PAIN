@@ -20,6 +20,7 @@
 #include "cAudioSource.h"
 #include "cBoundingVolume.h"
 #include "cScript.h"
+#include "cAI.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)

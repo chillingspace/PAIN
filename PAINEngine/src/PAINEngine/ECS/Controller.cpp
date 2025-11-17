@@ -112,6 +112,11 @@ namespace PAIN {
             registerComponent<Audio::AudioSource>("AudioSource");
             registerComponent<Script>("Script");
 
+            // AI Components
+            registerComponent<AI::Blackboard>("AIBlackboard");
+            registerComponent<AI::Controller>("AIController");
+            registerComponent<AI::Sensors>("AISensors");
+
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");
             registerComponent<MetaData::Tag>("Tag");

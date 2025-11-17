@@ -18,6 +18,10 @@
 
 namespace PAIN {
 
+	class Services; 
+	namespace Physics { class System; }
+	class IEngineAPI;
+
 	namespace AI {
 
 		class System : public ECS::System::ISystem
