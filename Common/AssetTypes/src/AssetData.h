@@ -71,6 +71,7 @@ namespace PAIN {
             Scenes,
             Font,
             Prefabs, // .prefab
+            Material,
             Other
         };
 
@@ -86,6 +87,7 @@ namespace PAIN {
             temp[Type::Scenes] = "Scenes";
             temp[Type::Font] = "Font";
             temp[Type::Prefabs] = "Prefabs";
+            temp[Type::Material] = "Materials";
             temp[Type::Other] = "Other";
 
             return temp;
@@ -136,6 +138,7 @@ namespace PAIN {
             temp[Type::Shader] = { ".vert", ".frag" };
             temp[Type::Scenes] = { ".scn" };
             temp[Type::Prefabs] = { ".prefab" };
+            temp[Type::Material] = { ".material" };
             temp[Type::Font] = { ".ttf" };
 
             return temp;
@@ -157,6 +160,7 @@ namespace PAIN {
             temp[Type::Data] = game_assets_folder / "data";
             temp[Type::Scenes] = game_assets_folder / "scenes";
             temp[Type::Prefabs] = game_assets_folder / "prefabs";
+            temp[Type::Material] = game_assets_folder / "materials";
             temp[Type::Other] = game_assets_folder / "others";
 
             return temp;
@@ -171,6 +175,7 @@ namespace PAIN {
             temp[Type::Data] = engine_assets_folder / "data";
             temp[Type::Shader] = engine_assets_folder / "shaders";
             temp[Type::Font] = engine_assets_folder / "fonts";
+            temp[Type::Material] = game_assets_folder / "materials";
             temp[Type::Other] = engine_assets_folder / "others";
 
             return temp;
