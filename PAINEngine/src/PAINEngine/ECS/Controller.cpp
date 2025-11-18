@@ -116,6 +116,9 @@ namespace PAIN {
             registerComponent<AI::Blackboard>("AIBlackboard");
             registerComponent<AI::Controller>("AIController");
             registerComponent<AI::Sensors>("AISensors");
+            registerComponent<AI::NavAgent>("AINavAgent");
+            registerComponent<AI::Steering>("AISteering");
+            registerComponent<AI::CommandQueue>("AICommandQueue");
 
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");

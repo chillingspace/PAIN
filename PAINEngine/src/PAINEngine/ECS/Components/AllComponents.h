@@ -48,7 +48,15 @@ namespace PAIN {
         Joint,
         BoundingVolume,
         Audio::AudioSource,
-        Script
+        Script,
+
+        // AI
+        //AI::Blackboard,
+        AI::Controller,
+        AI::Sensors
+        //AI::NavAgent,
+        //AI::Steering,
+        //AI::CommandQueue
     >;
 
     template<typename T>
@@ -71,6 +79,13 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, BoundingVolume>) return "BoundingVolume";
         else if constexpr (std::is_same_v<T, Audio::AudioSource>) return "AudioSource";
         else if constexpr (std::is_same_v<T, Script>) return "Script";
+
+        // AI components
+        //else if constexpr (std::is_same_v<T, AI::Blackboard>) return "AIBlackboard";
+        else if constexpr (std::is_same_v<T, AI::Controller>) return "AIController";
+        else if constexpr (std::is_same_v<T, AI::Sensors>) return "AISensors";
+        
+
         else return "Unknown";
     }
 }

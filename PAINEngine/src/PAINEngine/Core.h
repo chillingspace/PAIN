@@ -9,3 +9,5 @@
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cScript.h"
+#include "ECS/Components/cAudioSource.h"
+#include "ECS/Components/cAI.h"

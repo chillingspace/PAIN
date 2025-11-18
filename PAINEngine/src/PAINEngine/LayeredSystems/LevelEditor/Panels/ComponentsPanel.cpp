@@ -4,7 +4,6 @@
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
-#include "ECS/Components/cAudioSource.h"
 
 #ifdef _DEBUG
 
@@ -54,7 +53,14 @@ namespace PAIN {
 
                  // ---- Script ----
                 registerCompUIFunc<PAIN::Script>("Script",
-                    [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
+                    [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });                 
+                
+                // ---- AI ----
+                registerCompUIFunc<PAIN::AI::Controller>("AIController",
+                    [](ComponentsPanel&, PAIN::AI::Controller& rb) { DrawWithReflection(rb); });
+                
+                registerCompUIFunc<PAIN::AI::Sensors>("AISensors",
+                    [](ComponentsPanel&, PAIN::AI::Sensors& rb) { DrawWithReflection(rb); });
 
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
