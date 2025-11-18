@@ -78,8 +78,8 @@ namespace PAIN {
                 PN_CORE_INFO("Save file: {}", file_path);
                 return true;
             }
-            catch (...) {
-                PN_CORE_ERROR("Exception when saving JSON: {}", file_path);
+            catch (const std::exception& e) {
+                PN_CORE_ERROR("Exception when saving JSON: {} | Reason: {}", file_path, e.what());
                 return false;
             }
         }
@@ -371,13 +371,12 @@ namespace PAIN {
             // If do not have the .prefab extension, add it in
             if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
 
-#ifdef PN_PLATFORM_WINDOWS
-            // Windows file path
-            return path_service->resolvePath("main_game_assets://prefabs/" + prefab_with_ext);
-#elif PN_PLATFORM_ANDROID
-            // Andriod file path
-            return path_service->resolvePath("game_assets://prefabs/" + prefab_with_ext);
-#endif
+            #ifdef PN_PLATFORM_WINDOWS
+                        // Windows file path
+                        return "main_game_assets://prefabs/" + prefab_with_ext;
+            #elif PN_PLATFORM_ANDROID
+                        return "game_assets://prefabs/" + prefab_with_ext;
+            #endif
         }
 
         bool Service::createNewScene(std::string_view baseName)
