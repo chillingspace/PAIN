@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_plastics.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14843213988786705184
+  },
+  "descriptor_version": 1,
+  "guid": "c843fe05-c479-5649-87c2-1acd911e62b6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_plastics.material"
+  }
+}

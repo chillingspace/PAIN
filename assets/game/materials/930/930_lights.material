@@ -1,0 +1,26 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 1.0,
+        "roughness": 0.17581361532211304
+    },
+    "textures": {
+        "albedo": "game\\textures\\930\\textures/930_lights_baseColor.png",
+        "metallic": "game\\textures\\930\\textures/930_lights_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures/930_lights_normal.png",
+        "roughness": "game\\textures\\930\\textures/930_lights_metallicRoughness.png"
+    }
+}

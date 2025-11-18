@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_rim.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13264541125015611623
+  },
+  "descriptor_version": 1,
+  "guid": "2ded95f0-b919-c640-89e0-fc3a2c17a6db",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_rim.material"
+  }
+}

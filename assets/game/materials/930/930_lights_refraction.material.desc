@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_lights_refraction.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17532362856889745275
+  },
+  "descriptor_version": 1,
+  "guid": "bf2edb34-b988-ed4b-bcc1-56093e4611e4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_lights_refraction.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "paint.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 10929551633637778561
+  },
+  "descriptor_version": 1,
+  "guid": "de09e11b-2544-0445-87a4-68be33b4a7b7",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\paint.material"
+  }
+}

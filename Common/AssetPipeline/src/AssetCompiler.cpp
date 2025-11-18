@@ -793,6 +793,8 @@ namespace PAIN {
                 aiMaterial* material = scene->mMaterials[m];
                 Material mat;
                 mat.name = material->GetName().C_Str();
+                static int def_name_count = 0;
+                mat.name = mat.name.empty() ? "UnamedMaterial_" + std::to_string(def_name_count++) : mat.name;
 
                 //Identify the nested folder
                 std::filesystem::path relative_path;

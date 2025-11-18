@@ -1,0 +1,23 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            0.0006647215341217816,
+            0.0006647215341217816,
+            0.0006647215341217816
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\930\\textures/material_0_baseColor.png"
+    }
+}
