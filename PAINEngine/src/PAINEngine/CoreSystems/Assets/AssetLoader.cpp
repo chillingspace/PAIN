@@ -697,12 +697,12 @@ namespace PAIN {
                 std::string jsonString(data.begin(), data.end());
                 nlohmann::json j = nlohmann::json::parse(jsonString);
 
-                auto* material = new Material();
+                Material material;
 
                 if (j.contains("asset")) {
-                    material->guid = Assets::GUID(j["asset"]["guid"]);
-                    material->name = j["asset"]["name"];
-                    material->type = Assets::Type::Material;
+                    material.guid = Assets::GUID(j["asset"]["guid"]);
+                    material.name = j["asset"]["name"];
+                    material.type = Assets::Type::Material;
                 }
 
                 auto LoadTexture = [&](const char* key, std::filesystem::path& path) {
@@ -712,35 +712,35 @@ namespace PAIN {
                     };
 
                 // PBR
-                LoadTexture("albedo", material->albedoTexturePath);
-                LoadTexture("normal", material->normalTexturePath);
-                LoadTexture("metallic", material->metallicTexturePath);
-                LoadTexture("roughness", material->roughnessTexturePath);
-                LoadTexture("ao", material->aoTexturePath);
-                LoadTexture("emissive", material->emissiveTexturePath);
-                LoadTexture("height", material->heightTexturePath);
-                LoadTexture("opacity", material->opacityTexturePath);
+                LoadTexture("albedo", material.albedoTexturePath);
+                LoadTexture("normal", material.normalTexturePath);
+                LoadTexture("metallic", material.metallicTexturePath);
+                LoadTexture("roughness", material.roughnessTexturePath);
+                LoadTexture("ao", material.aoTexturePath);
+                LoadTexture("emissive", material.emissiveTexturePath);
+                LoadTexture("height", material.heightTexturePath);
+                LoadTexture("opacity", material.opacityTexturePath);
 
                 // Advanced
-                LoadTexture("sheen", material->sheenTexturePath);
-                LoadTexture("clearCoat", material->clearCoatTexturePath);
-                LoadTexture("transmission", material->transmissionTexturePath);
+                LoadTexture("sheen", material.sheenTexturePath);
+                LoadTexture("clearCoat", material.clearCoatTexturePath);
+                LoadTexture("transmission", material.transmissionTexturePath);
 
                 // Legacy
-                LoadTexture("specular", material->specularTexturePath);
-                LoadTexture("glossiness", material->glossinessTexturePath);
-                LoadTexture("ambient", material->ambientTexturePath);
+                LoadTexture("specular", material.specularTexturePath);
+                LoadTexture("glossiness", material.glossinessTexturePath);
+                LoadTexture("ambient", material.ambientTexturePath);
 
                 // Special
-                LoadTexture("lightmap", material->lightmapTexturePath);
-                LoadTexture("reflection", material->reflectionTexturePath);
-                LoadTexture("displacement", material->displacementTexturePath);
+                LoadTexture("lightmap", material.lightmapTexturePath);
+                LoadTexture("reflection", material.reflectionTexturePath);
+                LoadTexture("displacement", material.displacementTexturePath);
 
                 if (j.contains("properties")) {
                     auto& props = j["properties"];
 
                     if (props.contains("baseColor")) {
-                        material->baseColor = glm::vec3(
+                        material.baseColor = glm::vec3(
                             props["baseColor"][0],
                             props["baseColor"][1],
                             props["baseColor"][2]
@@ -748,15 +748,15 @@ namespace PAIN {
                     }
 
                     if (props.contains("metallic")) {
-                        material->metallic = props["metallic"];
+                        material.metallic = props["metallic"];
                     }
 
                     if (props.contains("roughness")) {
-                        material->roughness = props["roughness"];
+                        material.roughness = props["roughness"];
                     }
 
                     if (props.contains("emissive")) {
-                        material->emissive = glm::vec3(
+                        material.emissive = glm::vec3(
                             props["emissive"][0],
                             props["emissive"][1],
                             props["emissive"][2]
@@ -765,8 +765,8 @@ namespace PAIN {
                 }
 
                 if (j.contains("flags")) {
-                    material->isTransparent = j["flags"]["transparent"];
-                    material->doubleSided = j["flags"]["doubleSided"];
+                    material.isTransparent = j["flags"]["transparent"];
+                    material.doubleSided = j["flags"]["doubleSided"];
                 }
 
                 PN_CORE_INFO("Material loaded: {}", virtual_path);

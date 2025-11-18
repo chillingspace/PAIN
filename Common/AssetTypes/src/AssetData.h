@@ -108,7 +108,7 @@ namespace PAIN {
         }
 
         static bool isAssetCacheable(Type const& type) {
-            if (type == Type::Texture || type == Type::Audio || type == Type::Model || type == Type::Shader || type == Type::Font || type == Type::Script) return true;
+            if (type == Type::Texture || type == Type::Audio || type == Type::Model || type == Type::Shader || type == Type::Font || type == Type::Script || type == Type::Material) return true;
             return false;
         }
 

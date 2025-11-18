@@ -7,102 +7,106 @@
 
 namespace PAIN {
 
-	/******************************************************************************************
-	* Note: When creating components, try to stack them properly to properly optimise memory
-	* (Place largest type var (Double) first, then followed by smallest.
-	*****************************************************************************************/
-
     //Material instance
     struct MaterialInstance {
+        //material GUID
+        Assets::GUID materialGUID;
 
-        //Read only
-        std::shared_ptr<const Assets::Material> material_asset;
+        // GPU texture handles (uploaded once, reused)
+        unsigned int albedoTexture = 0;
+        unsigned int normalTexture = 0;
+        unsigned int metallicTexture = 0;
+        unsigned int roughnessTexture = 0;
+        unsigned int aoTexture = 0;
+        unsigned int emissiveTexture = 0;
+        unsigned int heightTexture = 0;
+        unsigned int opacityTexture = 0;
 
-        //Texture paths
-        uint32_t albedoTexture = 0;
-        uint32_t normalTexture = 0;
-        uint32_t metallicTexture = 0;
-        uint32_t roughnessTexture = 0;
-        uint32_t aoTexture = 0;
-        uint32_t emissiveTexture = 0;
+        // ADVANCED PBR TEXTURES (Optional)
+        //unsigned int sheenTexture = 0;
+        //unsigned int clearCoatTexture = 0;
+        //unsigned int transmissionTexture = 0;
 
-        //Color overrides
+        //// LEGACY TEXTURES (For older formats)
+        //unsigned int specularTexture = 0;
+        //unsigned int glossinessTexture = 0; 
+        //unsigned int ambientTexture = 0;
+
+        //// SPECIAL TEXTURES
+        //unsigned int lightmapTexture = 0;
+        //unsigned int reflectionTexture = 0;
+        //unsigned int displacementTexture = 0;
+
+        // Per-instance overrides
         glm::vec3 baseColorOverride{ -1.0f };
         float metallicOverride = -1.0f;
         float roughnessOverride = -1.0f;
         glm::vec3 emissiveOverride{ -1.0f };
+
+        bool useOverrides = false;
     };
 
-    struct ModelInstance {
+    struct ModelRenderer {
+        // Asset reference
+        Assets::GUID modelGUID;
 
-        //Storage for selector
-        std::vector<std::string> model_paths_storage;
-        std::vector<std::string> materials_path_storage;
+        // Per-instance materials (one per submesh)
+        std::vector<MaterialInstance> materials;
 
-        //Read only
-        std::shared_ptr<const Assets::Model> model_asset;
-
-        //Materials list
-        std::vector<MaterialInstance*> materials;
-
-        int currentAnimationIndex = -1;  // Which animation is playing
-        float animationTime = 0.0f;      // Current time in animation
-        bool isPlaying = false;          // Is animation playing?
-        bool loopAnimation = true;       // Loop animation?
-        float playbackSpeed = 1.0f;      // Animation speed multiplier
-
-        // Bone transforms (if animated)
+        // Animation state
+        int currentAnimationIndex = -1;
+        float animationTime = 0.0f;
+        bool isPlaying = false;
+        bool loopAnimation = true;
+        float playbackSpeed = 1.0f;
         std::vector<glm::mat4> boneTransforms;
-
-        // Morph target weights (if using blend shapes)
         std::vector<float> morphWeights;
 
+        // Rendering state
         bool visible = true;
         bool castShadows = true;
         bool receiveShadows = true;
         uint32_t renderLayer = 0;
+        int currentLOD = 0;
 
-        int currentLOD = 0;  // Current LOD level
+        // GPU handles (uploaded once, stored here)
+        uint32_t vaoHandle = 0;
+        uint32_t vboHandle = 0;
+        uint32_t iboHandle = 0;
 
-        bool IsAnimated() const {
-            return !boneTransforms.empty();
+        // Cached asset pointer (DO NOT SERIALIZE)
+        mutable std::shared_ptr<const Assets::Model> cachedModelAsset;
+
+        // Constructors
+        ModelRenderer() = default;
+        explicit ModelRenderer(const Assets::GUID& guid) : modelGUID(guid) {}
+        ~ModelRenderer() {
+            cleanup();
         }
 
-        bool HasMaterials() const {
-            return !materials.empty();
+        // Helper methods
+        bool IsGPUReady() const { return vaoHandle != 0; }
+
+        MaterialInstance* GetMaterial(size_t index) {
+            return (index < materials.size()) ? &materials[index] : nullptr;
         }
 
-        MaterialInstance* GetMaterial(size_t index) const {
-            if (index < materials.size()) {
-                return materials[index];
-            }
-            return nullptr;
-        }
-
-        void SetVisible(bool isVisible) {
-            visible = isVisible;
-        }
-
-        void PlayAnimation(int animIndex, bool loop = true) {
-            if (animIndex >= 0 && animIndex < model_asset->animations.size()) {
-                currentAnimationIndex = animIndex;
-                animationTime = 0.0f;
-                isPlaying = true;
-                loopAnimation = loop;
-            }
-        }
-
-        void StopAnimation() {
-            isPlaying = false;
+        void PlayAnimation(int animIndex, bool loop = true, float speed = 1.0f) {
+            currentAnimationIndex = animIndex;
             animationTime = 0.0f;
+            isPlaying = true;
+            loopAnimation = loop;
+            playbackSpeed = speed;
         }
 
-        void UpdateAnimation(float deltaTime) {
-            if (!isPlaying || currentAnimationIndex < 0) return;
+        void UpdateAnimation(float deltaTime, const Assets::Model* modelAsset) {
+            if (!isPlaying || currentAnimationIndex < 0 || !modelAsset) return;
 
+            if (currentAnimationIndex >= modelAsset->animations.size()) return;
+
+            const auto& anim = modelAsset->animations[currentAnimationIndex];
             animationTime += deltaTime * playbackSpeed;
 
-            const auto& anim = model_asset->animations[currentAnimationIndex];
             if (animationTime >= anim.duration) {
                 if (loopAnimation) {
                     animationTime = fmod(animationTime, anim.duration);
@@ -113,21 +117,42 @@ namespace PAIN {
                 }
             }
         }
-    };
 
-	struct ModelRenderer {
-		std::vector<std::string> model_paths_storage;
-		Assets::GUID selected_model;
-		ModelRenderer() = default;
-		ModelRenderer(Assets::GUID const& id) : selected_model{ id } {}
-	};
+        void cleanup() {
+            if (vaoHandle != 0) {
+                glDeleteVertexArrays(1, &vaoHandle);
+                vaoHandle = 0;
+            }
+            if (vboHandle != 0) {
+                glDeleteBuffers(1, &vboHandle);
+                vboHandle = 0;
+            }
+            if (iboHandle != 0) {
+                glDeleteBuffers(1, &iboHandle);
+                iboHandle = 0;
+            }
+        }
+    };
 }
 
+// ============================================
+// REFLECTION (Editor Integration)
+// ============================================
+//REFL_TYPE(PAIN::MaterialInstance)
+//REFL_FIELD(materialGUID)
+//REFL_FIELD(baseColorOverride)
+//REFL_FIELD(metallicOverride)
+//REFL_FIELD(roughnessOverride)
+//REFL_FIELD(emissiveOverride)
+//REFL_FIELD(useOverrides)
+//REFL_END
 
 REFL_TYPE(PAIN::ModelRenderer)
-REFL_FIELD(selected_model,
-	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
-	PAIN::Editor::Attributes::DisplayName("Model Asset"),
-	PAIN::Editor::Attributes::Tooltip("Select a 3D model asset"))
+REFL_FIELD(modelGUID,
+PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
+//REFL_FIELD(materials)
+//REFL_FIELD(visible)
+//REFL_FIELD(castShadows)
+//REFL_FIELD(receiveShadows)
 REFL_END
 

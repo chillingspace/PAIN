@@ -1025,7 +1025,9 @@ namespace PAIN {
                 processAsset(mat_asset);
 
                 //Export material
-                asset.materials.push_back(material_folder / relative_path / mat.name);
+                std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
+                relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
+                asset.materials.push_back(relative_mat_path.lexically_normal());
             }
 
             //Export model

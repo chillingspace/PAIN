@@ -111,29 +111,6 @@ namespace PAIN {
             bool isAdditive; // For blending, layering
         };
 
-        //// Material (PBR support)
-        //struct Material {
-        //    std::string name{};
-        //    std::string diffuse_map_buf{};
-        //    std::string normalMap{};
-        //    std::string metallicMap{};
-        //    std::string roughnessMap{};
-        //    std::string aoMap{};
-        //    std::string emissionMap{};
-        //    std::string bumpMap{};
-        //    std::string heightMap{};
-        //    glm::vec3 baseColor{1.f, 0.f, 1.f};
-        //    float metallic{0.1f};
-        //    float roughness{0.1f};
-        //    float emission{};
-        //    // Additional: transparency, alpha mode, etc.
-
-        //    // opengl textures
-        //    unsigned int gl_diffuse_tex{};
-        //    unsigned int gl_ao_tex{};
-        //    unsigned int gl_emissive_tex{};
-        //};
-
         // Submesh: supports multi-material, LODs
         struct Submesh {
             std::string name;

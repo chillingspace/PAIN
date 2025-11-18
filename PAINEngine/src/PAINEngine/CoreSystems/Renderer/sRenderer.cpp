@@ -46,6 +46,178 @@ namespace PAIN {
 
 	}
 
+	void sRenderer::InitializeModelRenderer(entt::entity entity, ModelRenderer& component) {
+
+		// Skip if already initialized
+		if (component.IsGPUReady()) return;
+
+		auto assetManager = services->get<Assets::Manager>();
+
+		// Load model asset
+		component.cachedModelAsset = assetManager->getAsset<Assets::Model>(component.modelGUID);
+
+		if (!component.cachedModelAsset) {
+			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
+			return;
+		}
+
+		const auto& modelAsset = component.cachedModelAsset;
+
+		// Upload geometry to GPU ONCE
+		glGenVertexArrays(1, &component.vaoHandle);
+		glGenBuffers(1, &component.vboHandle);
+		glGenBuffers(1, &component.iboHandle);
+
+		glBindVertexArray(component.vaoHandle);
+
+		// Upload vertices
+		glBindBuffer(GL_ARRAY_BUFFER, component.vboHandle);
+		glBufferData(GL_ARRAY_BUFFER,
+			modelAsset->vertices.size() * sizeof(Assets::Vertex),
+			modelAsset->vertices.data(),
+			GL_STATIC_DRAW); // STATIC, not DYNAMIC!
+
+		// Upload indices
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, component.iboHandle);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			modelAsset->indices.size() * sizeof(unsigned int),
+			modelAsset->indices.data(),
+			GL_STATIC_DRAW);
+
+		// Setup vertex attributes (same as your geometry_vao)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, pos));
+		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, normal));
+		glEnableVertexAttribArray(1);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, uv));
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+
+		// Initialize materials
+		if (component.materials.empty()) {
+			component.materials.reserve(modelAsset->materials.size());
+
+			for (const auto& materialPath : modelAsset->materials) {
+				MaterialInstance matInstance;
+
+				// Load material asset
+				auto materialAsset = assetManager->getAsset<Assets::Material>(materialPath);
+
+				if (materialAsset) {
+					matInstance.materialGUID = materialAsset->guid;
+
+					if (!materialAsset->albedoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->albedoTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->albedoTexturePath
+						);
+						if (texAsset) {
+							matInstance.albedoTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->normalTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->normalTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->normalTexturePath
+						);
+						if (texAsset) {
+							matInstance.normalTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->metallicTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->metallicTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->metallicTexturePath
+						);
+						if (texAsset) {
+							matInstance.metallicTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->roughnessTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->roughnessTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->roughnessTexturePath
+						);
+						if (texAsset) {
+							matInstance.roughnessTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->aoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->aoTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->aoTexturePath
+						);
+						if (texAsset) {
+							matInstance.aoTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->emissiveTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->emissiveTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->emissiveTexturePath
+						);
+						if (texAsset) {
+							matInstance.emissiveTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->heightTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->heightTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->heightTexturePath
+						);
+						if (texAsset) {
+							matInstance.heightTexture = texAsset->gl_texture;
+						}
+					}
+
+					if (!materialAsset->opacityTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->opacityTexturePath)) {
+						auto texAsset = assetManager->getAsset<Assets::Texture>(
+							materialAsset->opacityTexturePath
+						);
+						if (texAsset) {
+							matInstance.opacityTexture = texAsset->gl_texture;
+						}
+					}
+				}
+
+				component.materials.push_back(std::move(matInstance));
+			}
+		}
+
+		// Initialize bone transforms if animated
+		if (!modelAsset->skeleton.empty() && component.boneTransforms.empty()) {
+			component.boneTransforms.resize(modelAsset->skeleton.size(), glm::mat4(1.0f));
+		}
+
+		// Initialize morph weights
+		if (!modelAsset->morphTargets.empty() && component.morphWeights.empty()) {
+			component.morphWeights.resize(modelAsset->morphTargets.size(), 0.0f);
+		}
+
+		PN_CORE_INFO("Initialized ModelRenderer for entity {} with {} submeshes",
+			(uint32_t)entity, component.materials.size());
+	}
+
+	void sRenderer::CleanupModelRenderer(entt::entity entity, ModelRenderer& component) {
+		if (component.vaoHandle != 0) {
+			glDeleteVertexArrays(1, &component.vaoHandle);
+			component.vaoHandle = 0;
+		}
+		if (component.vboHandle != 0) {
+			glDeleteBuffers(1, &component.vboHandle);
+			component.vboHandle = 0;
+		}
+		if (component.iboHandle != 0) {
+			glDeleteBuffers(1, &component.iboHandle);
+			component.iboHandle = 0;
+		}
+	}
+
 	void sRenderer::shadowPass()
 	{
 		// populate shadow map first
@@ -77,11 +249,9 @@ namespace PAIN {
 					model_xform = transform.value().get().getMatrix();
 				}
 
-				if (mdl.has_value())
+				if (mdl.has_value() && mdl->get().IsGPUReady() && mdl->get().castShadows)
 				{
-					//Get model asset
-					auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
+					w_renderer->DrawShadows(mdl->get(), model_xform, l); // uses shadow_shader
 
 				}
 
@@ -110,6 +280,7 @@ namespace PAIN {
 
   			auto transform = ecs->getEntityComponent<Transform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
@@ -117,9 +288,25 @@ namespace PAIN {
 			}
 			if (mdl.has_value())
 			{
-				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
+				//Init component if model is not ready
+				if (!mdl->get().IsGPUReady()) {
+					InitializeModelRenderer(e, mdl->get());
+				}
+
+				// Skip if not visible or not ready
+				if (!mdl->get().visible || !mdl->get().IsGPUReady()) {
+					continue;
+				}
+
+				// Ensure asset is loaded
+				if (!mdl->get().cachedModelAsset) {
+					mdl->get().cachedModelAsset = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().modelGUID);
+				}
+
+				//Draw geo
+				w_renderer->DrawGeometry(m_Scene, mdl->get(), model_xform);
 			}
+			
 
 		}
 		w_renderer->EndGeometryPass();
@@ -148,10 +335,9 @@ namespace PAIN {
 			{
 				model_xform = transform.value().get().getMatrix();
 			}
-			if (mdl.has_value())
+			if (mdl.has_value() && mdl->get().IsGPUReady())
 			{
-				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-				w_renderer->ReflectionPass(*mdl_ptr);
+				w_renderer->ReflectionPass(mdl->get());
 			}
 
 		}
