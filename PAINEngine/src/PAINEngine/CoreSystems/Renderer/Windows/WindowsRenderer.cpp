@@ -462,7 +462,22 @@ namespace PAIN {
 		glBindVertexArray(component.vaoHandle);
 
 		const auto& modelAsset = component.cachedModelAsset;
-		glDrawElements(GL_TRIANGLES, modelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+		if (modelAsset->submeshes.empty()) {
+			// No submeshes - draw entire model
+			glDrawElements(GL_TRIANGLES, modelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+		}
+		else {
+			// Draw each submesh with correct offset
+			for (const auto& submesh : modelAsset->submeshes) {
+				glDrawElementsBaseVertex(
+					GL_TRIANGLES,
+					submesh.indexCount,
+					GL_UNSIGNED_INT,
+					(void*)(submesh.firstIndex * sizeof(unsigned int)),
+					submesh.vertexOffset
+				);
+			}
+		}
 
 		glBindVertexArray(0);
 	}
@@ -548,14 +563,17 @@ namespace PAIN {
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
+			// TEMPORARY: Only render first submesh
 			const auto& submesh = modelAsset->submeshes[i];
 
-			// Get material for this submesh
-			const MaterialInstance* material = &component.materials.at(submesh.materialIndex);
-			if (!material) {
-				PN_CORE_WARN("Missing material for submesh {}", i);
-				continue;
+			//Check out of bounds
+			if (submesh.materialIndex >= component.materials.size()) {
+				PN_CORE_WARN("Submesh {} references material index {} but only {} materials available",
+					i, submesh.materialIndex, component.materials.size());
+				continue; // Skip this submesh
 			}
+
+			const MaterialInstance* material = &component.materials[submesh.materialIndex];
 
 			//Load material asset for properties
 			auto materialAsset = services->get<Assets::Manager>()->getAsset<Assets::Material>(material->materialGUID);

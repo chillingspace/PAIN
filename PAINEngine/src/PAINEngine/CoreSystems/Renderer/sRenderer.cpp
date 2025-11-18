@@ -84,7 +84,7 @@ namespace PAIN {
 		glBufferData(GL_ARRAY_BUFFER,
 			modelAsset->vertices.size() * sizeof(Assets::Vertex),
 			modelAsset->vertices.data(),
-			GL_STATIC_DRAW); // STATIC, not DYNAMIC!
+			GL_STATIC_DRAW); 
 
 		// Upload indices
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, component.iboHandle);
@@ -93,20 +93,59 @@ namespace PAIN {
 			modelAsset->indices.data(),
 			GL_STATIC_DRAW);
 
-		// Setup vertex attributes (same as your geometry_vao)
+		// === COMPLETE VERTEX ATTRIBUTE SETUP ===
+
+		// Layout location 0: Position
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
 			(void*)offsetof(Assets::Vertex, pos));
 		glEnableVertexAttribArray(0);
 
+		// Layout location 1: Normal
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
 			(void*)offsetof(Assets::Vertex, normal));
 		glEnableVertexAttribArray(1);
 
+		// Layout location 2: UV
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
 			(void*)offsetof(Assets::Vertex, uv));
 		glEnableVertexAttribArray(2);
 
+		// Layout location 3: Tangent (ADDED!)
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, tangent));
+		glEnableVertexAttribArray(3);
+
+		// Layout location 4: Bitangent (ADDED!)
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, bitangent));
+		glEnableVertexAttribArray(4);
+
+		// Layout location 5: Bone Indices (ADDED! - for skeletal animation)
+		glVertexAttribIPointer(5, 4, GL_UNSIGNED_BYTE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, boneIndices));
+		glEnableVertexAttribArray(5);
+
+		// Layout location 6: Bone Weights (ADDED! - for skeletal animation)
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, boneWeights));
+		glEnableVertexAttribArray(6);
+
+		// Layout location 7: Vertex Color (ADDED! - optional)
+		glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+			(void*)offsetof(Assets::Vertex, color));
+		glEnableVertexAttribArray(7);
+
 		glBindVertexArray(0);
+
+		// Check for OpenGL errors
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error after setting up VAO for entity {}: 0x{:x}",
+				(uint32_t)entity, err);
+			// Cleanup on error
+			component.cleanup();
+			return;
+		}
 
 		// Initialize materials
 		if (!component.materials.empty()) {
@@ -212,21 +251,6 @@ namespace PAIN {
 
 		PN_CORE_INFO("Initialized ModelRenderer for entity {} with {} submeshes",
 			(uint32_t)entity, component.materials.size());
-	}
-
-	void sRenderer::CleanupModelRenderer(entt::entity entity, ModelRenderer& component) {
-		if (component.vaoHandle != 0) {
-			glDeleteVertexArrays(1, &component.vaoHandle);
-			component.vaoHandle = 0;
-		}
-		if (component.vboHandle != 0) {
-			glDeleteBuffers(1, &component.vboHandle);
-			component.vboHandle = 0;
-		}
-		if (component.iboHandle != 0) {
-			glDeleteBuffers(1, &component.iboHandle);
-			component.iboHandle = 0;
-		}
 	}
 
 	void sRenderer::shadowPass()

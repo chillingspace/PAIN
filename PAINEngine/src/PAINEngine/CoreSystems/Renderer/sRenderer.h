@@ -19,7 +19,6 @@ namespace PAIN {
 		std::shared_ptr<Scene> m_Scene;
 
 		void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);
-		void CleanupModelRenderer(entt::entity entity, ModelRenderer& component);
 
 		void onDetach() override;
         void onAttach() override;
