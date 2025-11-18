@@ -48,6 +48,7 @@ namespace PAIN {
 
     struct ModelRenderer {
         // Asset reference
+        Assets::GUID prevModelGUID;
         Assets::GUID modelGUID;
 
         // Per-instance materials (one per submesh)
@@ -138,21 +139,20 @@ namespace PAIN {
 // ============================================
 // REFLECTION (Editor Integration)
 // ============================================
-//REFL_TYPE(PAIN::MaterialInstance)
-//REFL_FIELD(materialGUID)
-//REFL_FIELD(baseColorOverride)
-//REFL_FIELD(metallicOverride)
-//REFL_FIELD(roughnessOverride)
-//REFL_FIELD(emissiveOverride)
-//REFL_FIELD(useOverrides)
-//REFL_END
+REFL_TYPE(PAIN::MaterialInstance)
+REFL_FIELD(materialGUID)
+REFL_FIELD(baseColorOverride)
+REFL_FIELD(metallicOverride)
+REFL_FIELD(roughnessOverride)
+REFL_FIELD(emissiveOverride)
+REFL_FIELD(useOverrides)
+REFL_END
 
 REFL_TYPE(PAIN::ModelRenderer)
-REFL_FIELD(modelGUID,
-PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
+REFL_FIELD(modelGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
 //REFL_FIELD(materials)
-//REFL_FIELD(visible)
-//REFL_FIELD(castShadows)
-//REFL_FIELD(receiveShadows)
+REFL_FIELD(visible)
+REFL_FIELD(castShadows)
+REFL_FIELD(receiveShadows)
 REFL_END
 
