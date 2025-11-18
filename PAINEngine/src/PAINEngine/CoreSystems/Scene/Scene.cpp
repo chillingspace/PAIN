@@ -168,7 +168,7 @@ namespace PAIN {
 		Skybox::get().init(services, sb_path);
 
 		// Test load prefab
-		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("sdcc.prefab");
+		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("ogre_right.prefab");
 		//for (auto e : loaded_entities) {
 		//	// Info: Print entity names, transforms, etc.
 		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<MetaData::EntityName>(e);

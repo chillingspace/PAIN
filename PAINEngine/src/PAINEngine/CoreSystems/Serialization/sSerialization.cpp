@@ -335,16 +335,19 @@ namespace PAIN {
         {
             auto controller = services->get<PAIN::ECS::Controller>();
             auto metadata_service = services->get<PAIN::MetaData::Service>();
+            auto path_service = services->get<PAIN::Path::Path>();
 
             std::vector<entt::entity> entities;
 
-            std::string prefab_filepath = resolvePrefabPath(filepath);
+            std::string prefab_virtual_filepath = resolvePrefabPath(filepath);
 
 #ifdef PN_PLATFORM_WINDOWS
-            assert(std::filesystem::exists(prefab_filepath) && "Prefab file does not exist or path is invalid!");
+            // Debugging purposes
+            std::string prefab_abs_path = path_service->resolvePath(prefab_virtual_filepath);
+            assert(std::filesystem::exists(prefab_abs_path) && "Prefab file does not exist or path is invalid!");
 #endif
 
-            nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
+            nlohmann::json prefab_json = loadJsonFile(prefab_virtual_filepath);
             if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
 
             for (const auto& E : prefab_json["Entities"]) {
@@ -356,9 +359,12 @@ namespace PAIN {
                 if (E.contains("Components")) {
                     controller->loadAllComponentsFromJson(e, E["Components"]);
                 }
+
+                // Change entity name to be known that it is created from prefab
+                if (controller->getEntityComponent<MetaData::EntityName>(e).has_value()) { controller->getEntityComponent<MetaData::EntityName>(e).value().get().name += "_prefab"; }
             }
 
-            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_filepath);
+            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_abs_path);
             return entities;
         }
 
