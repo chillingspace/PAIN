@@ -18,7 +18,7 @@
         "roughness": 0.14195884764194489
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/plate_baseColor.png",
-        "normal": "game\\textures\\930\\textures/plate_normal.png"
+        "albedo": "game\\textures\\930\\textures\\plate_baseColor.png",
+        "normal": "game\\textures\\930\\textures\\plate_normal.png"
     }
 }

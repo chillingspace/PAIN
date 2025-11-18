@@ -18,6 +18,6 @@
         "roughness": 0.45164287090301514
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/930_stickers_baseColor.png"
+        "albedo": "game\\textures\\930\\textures\\930_stickers_baseColor.png"
     }
 }

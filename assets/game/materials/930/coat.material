@@ -18,9 +18,9 @@
         "roughness": 0.7163114547729492
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/coat_baseColor.png",
-        "metallic": "game\\textures\\930\\textures/coat_metallicRoughness.png",
-        "normal": "game\\textures\\930\\textures/paint_clearcoat_normal.png",
-        "roughness": "game\\textures\\930\\textures/coat_metallicRoughness.png"
+        "albedo": "game\\textures\\930\\textures\\coat_baseColor.png",
+        "metallic": "game\\textures\\930\\textures\\coat_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures\\paint_clearcoat_normal.png",
+        "roughness": "game\\textures\\930\\textures\\coat_metallicRoughness.png"
     }
 }

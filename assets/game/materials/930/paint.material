@@ -18,10 +18,10 @@
         "roughness": 0.42480701208114624
     },
     "textures": {
-        "ao": "game\\textures\\930\\textures/paint_metallicRoughness.png",
-        "clearCoat": "game\\textures\\930\\textures/paint_clearcoat.png",
-        "lightmap": "game\\textures\\930\\textures/paint_metallicRoughness.png",
-        "metallic": "game\\textures\\930\\textures/paint_metallicRoughness.png",
-        "roughness": "game\\textures\\930\\textures/paint_metallicRoughness.png"
+        "ao": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "clearCoat": "game\\textures\\930\\textures\\paint_clearcoat.png",
+        "lightmap": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "metallic": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "roughness": "game\\textures\\930\\textures\\paint_metallicRoughness.png"
     }
 }

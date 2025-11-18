@@ -18,11 +18,11 @@
         "roughness": 0.8620637059211731
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/930_rim_baseColor.png",
-        "ao": "game\\textures\\930\\textures/930_rim_metallicRoughness.png",
-        "lightmap": "game\\textures\\930\\textures/930_rim_metallicRoughness.png",
-        "metallic": "game\\textures\\930\\textures/930_rim_metallicRoughness.png",
-        "normal": "game\\textures\\930\\textures/930_rim_normal.png",
-        "roughness": "game\\textures\\930\\textures/930_rim_metallicRoughness.png"
+        "albedo": "game\\textures\\930\\textures\\930_rim_baseColor.png",
+        "ao": "game\\textures\\930\\textures\\930_rim_metallicRoughness.png",
+        "lightmap": "game\\textures\\930\\textures\\930_rim_metallicRoughness.png",
+        "metallic": "game\\textures\\930\\textures\\930_rim_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures\\930_rim_normal.png",
+        "roughness": "game\\textures\\930\\textures\\930_rim_metallicRoughness.png"
     }
 }

@@ -18,6 +18,6 @@
         "roughness": 0.18188662827014923
     },
     "textures": {
-        "normal": "game\\textures\\930\\textures/930_lights_normal.png"
+        "normal": "game\\textures\\930\\textures\\930_lights_normal.png"
     }
 }

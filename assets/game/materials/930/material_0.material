@@ -18,6 +18,6 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/material_0_baseColor.png"
+        "albedo": "game\\textures\\930\\textures\\material_0_baseColor.png"
     }
 }

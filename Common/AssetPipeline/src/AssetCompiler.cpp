@@ -817,113 +817,113 @@ namespace PAIN {
 
                     // Albedo/Base Color (try multiple texture types)
                     if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &texPath) == AI_SUCCESS) {
-                        mat.albedoTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.albedoTexturePath = texture_folder / relative_path / std::filesystem::path(std::filesystem::path(texPath.C_Str()).lexically_normal()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
-                        mat.albedoTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.albedoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Normal Map
                     if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS) {
-                        mat.normalTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &texPath) == AI_SUCCESS) {
-                        mat.normalTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_HEIGHT, 0, &texPath) == AI_SUCCESS) {
                         // Some formats use HEIGHT for normal maps
-                        mat.normalTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Metallic Map
                     if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS) {
-                        mat.metallicTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.metallicTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Roughness Map
                     if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == AI_SUCCESS) {
-                        mat.roughnessTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.roughnessTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_SHININESS, 0, &texPath) == AI_SUCCESS) {
                         // Shininess can be inverted to get roughness
-                        mat.roughnessTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.roughnessTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Ambient Occlusion
                     if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &texPath) == AI_SUCCESS) {
-                        mat.aoTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.aoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS) {
-                        mat.aoTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.aoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Emissive/Glow
                     if (material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &texPath) == AI_SUCCESS) {
-                        mat.emissiveTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.emissiveTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
                     else if (material->GetTexture(aiTextureType_EMISSIVE, 0, &texPath) == AI_SUCCESS) {
-                        mat.emissiveTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.emissiveTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Height/Parallax
                     if (material->GetTexture(aiTextureType_HEIGHT, 0, &texPath) == AI_SUCCESS) {
                         // If not already used for normal map
                         if (mat.heightTexturePath.empty()) {
-                            mat.heightTexturePath = texture_folder / relative_path / texPath.C_Str();
+                            mat.heightTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                         }
                     }
                     else if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath) == AI_SUCCESS) {
-                        mat.heightTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.heightTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Opacity/Alpha
                     if (material->GetTexture(aiTextureType_OPACITY, 0, &texPath) == AI_SUCCESS) {
-                        mat.opacityTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.opacityTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Sheen (Fabric)
                     if (material->GetTexture(aiTextureType_SHEEN, 0, &texPath) == AI_SUCCESS) {
-                        mat.sheenTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.sheenTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Clear Coat (Car paint)
                     if (material->GetTexture(aiTextureType_CLEARCOAT, 0, &texPath) == AI_SUCCESS) {
-                        mat.clearCoatTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.clearCoatTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Transmission (Glass)
                     if (material->GetTexture(aiTextureType_TRANSMISSION, 0, &texPath) == AI_SUCCESS) {
-                        mat.transmissionTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.transmissionTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Specular (Legacy workflow)
                     if (material->GetTexture(aiTextureType_SPECULAR, 0, &texPath) == AI_SUCCESS) {
-                        mat.specularTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.specularTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Ambient (Legacy)
                     if (material->GetTexture(aiTextureType_AMBIENT, 0, &texPath) == AI_SUCCESS) {
-                        mat.ambientTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.ambientTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Lightmap (Baked lighting)
                     if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS) {
                         // Only if not already used for AO
                         if (mat.lightmapTexturePath.empty()) {
-                            mat.lightmapTexturePath = texture_folder / relative_path / texPath.C_Str();
+                            mat.lightmapTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                         }
                     }
 
                     // Reflection/Cubemap
                     if (material->GetTexture(aiTextureType_REFLECTION, 0, &texPath) == AI_SUCCESS) {
-                        mat.reflectionTexturePath = texture_folder / relative_path / texPath.C_Str();
+                        mat.reflectionTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                     }
 
                     // Displacement
                     if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath) == AI_SUCCESS) {
                         // Only if not already used for height
                         if (mat.displacementTexturePath.empty()) {
-                            mat.displacementTexturePath = texture_folder / relative_path / texPath.C_Str();
+                            mat.displacementTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
                         }
                     }
                 }

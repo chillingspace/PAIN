@@ -18,11 +18,11 @@
         "roughness": 0.740603506565094
     },
     "textures": {
-        "albedo": "game\\textures\\930\\textures/930_tire_baseColor.png",
-        "ao": "game\\textures\\930\\textures/930_tire_metallicRoughness.png",
-        "lightmap": "game\\textures\\930\\textures/930_tire_metallicRoughness.png",
-        "metallic": "game\\textures\\930\\textures/930_tire_metallicRoughness.png",
-        "normal": "game\\textures\\930\\textures/930_tire_normal.png",
-        "roughness": "game\\textures\\930\\textures/930_tire_metallicRoughness.png"
+        "albedo": "game\\textures\\930\\textures\\930_tire_baseColor.png",
+        "ao": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "lightmap": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "metallic": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures\\930_tire_normal.png",
+        "roughness": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png"
     }
 }
