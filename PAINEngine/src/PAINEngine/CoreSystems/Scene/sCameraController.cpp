@@ -10,7 +10,7 @@ namespace PAIN {
 		m_Scene = services->get<Scene>();
 
 	}
-#ifdef _DEBUG
+#ifdef PN_PLATFORM_ANDROID
 	// ANDROID ONLY
     void sCameraController::beginTouchControls(int pointerId, float x, float y) {
 
@@ -380,9 +380,6 @@ namespace PAIN {
 			endTouchControls(e.getPointerId());
 			return false;
 			});
-
-
-
 #endif
 	}
 

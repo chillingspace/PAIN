@@ -34,7 +34,7 @@ if (ANDROID)
 	
 add_compile_definitions(
     JPH_DISABLE_ASSERTS
-    JPH_PROFILE_ENABLED=0
+    JPH_PROFILE_ENABLED=1
     JPH_DEBUG_RENDERER=0
     NDEBUG
   )
@@ -107,4 +107,5 @@ endif()
 # Set the startup project for the Visual Studio solution
 if (MSVC)
   set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
+  add_compile_options(/MP)
 endif()
