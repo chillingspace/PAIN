@@ -53,11 +53,6 @@ namespace PAIN {
 		//Check for valid GUID
 		if (!component.modelGUID.IsValid()) return;
 
-		//If already ready, clean up before going again
-		if (component.IsGPUReady()) {
-			component.cleanup();
-		}
-
 		// Load model asset
 		component.cachedModelAsset = assetManager->getAsset<Assets::Model>(component.modelGUID);
 
@@ -71,81 +66,6 @@ namespace PAIN {
 
 		//Cache model
 		const auto& modelAsset = component.cachedModelAsset;
-
-		// Upload geometry to GPU ONCE
-		glGenVertexArrays(1, &component.vaoHandle);
-		glGenBuffers(1, &component.vboHandle);
-		glGenBuffers(1, &component.iboHandle);
-
-		glBindVertexArray(component.vaoHandle);
-
-		// Upload vertices
-		glBindBuffer(GL_ARRAY_BUFFER, component.vboHandle);
-		glBufferData(GL_ARRAY_BUFFER,
-			modelAsset->vertices.size() * sizeof(Assets::Vertex),
-			modelAsset->vertices.data(),
-			GL_STATIC_DRAW); 
-
-		// Upload indices
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, component.iboHandle);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-			modelAsset->indices.size() * sizeof(unsigned int),
-			modelAsset->indices.data(),
-			GL_STATIC_DRAW);
-
-		// === COMPLETE VERTEX ATTRIBUTE SETUP ===
-
-		// Layout location 0: Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, pos));
-		glEnableVertexAttribArray(0);
-
-		// Layout location 1: Normal
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, normal));
-		glEnableVertexAttribArray(1);
-
-		// Layout location 2: UV
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, uv));
-		glEnableVertexAttribArray(2);
-
-		// Layout location 3: Tangent (ADDED!)
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, tangent));
-		glEnableVertexAttribArray(3);
-
-		// Layout location 4: Bitangent (ADDED!)
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, bitangent));
-		glEnableVertexAttribArray(4);
-
-		// Layout location 5: Bone Indices (ADDED! - for skeletal animation)
-		glVertexAttribIPointer(5, 4, GL_UNSIGNED_BYTE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, boneIndices));
-		glEnableVertexAttribArray(5);
-
-		// Layout location 6: Bone Weights (ADDED! - for skeletal animation)
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, boneWeights));
-		glEnableVertexAttribArray(6);
-
-		// Layout location 7: Vertex Color (ADDED! - optional)
-		glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-			(void*)offsetof(Assets::Vertex, color));
-		glEnableVertexAttribArray(7);
-
-		glBindVertexArray(0);
-
-		// Check for OpenGL errors
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after setting up VAO for entity {}: 0x{:x}",
-				(uint32_t)entity, err);
-			// Cleanup on error
-			component.cleanup();
-			return;
-		}
 
 		// Initialize materials
 		if (!component.materials.empty()) {
@@ -284,7 +204,7 @@ namespace PAIN {
 					model_xform = transform.value().get().getMatrix();
 				}
 
-				if (mdl.has_value() && mdl->get().IsGPUReady() && mdl->get().castShadows)
+				if (mdl.has_value() && mdl->get().castShadows)
 				{
 					w_renderer->DrawShadows(mdl->get(), model_xform, l); // uses shadow_shader
 
@@ -324,12 +244,12 @@ namespace PAIN {
 			if (mdl.has_value())
 			{
 				//Init component if not ready or if model GUID has been updated
-				if (!mdl->get().IsGPUReady() || mdl->get().modelGUID != mdl->get().prevModelGUID) {
+				if (mdl->get().modelGUID != mdl->get().prevModelGUID) {
 					InitializeModelRenderer(e, mdl->get());
 				}
 
 				// Skip if not visible or not ready
-				if (!mdl->get().visible || !mdl->get().IsGPUReady()) {
+				if (!mdl->get().visible) {
 					continue;
 				}
 
@@ -370,7 +290,7 @@ namespace PAIN {
 			{
 				model_xform = transform.value().get().getMatrix();
 			}
-			if (mdl.has_value() && mdl->get().IsGPUReady())
+			if (mdl.has_value())
 			{
 				w_renderer->ReflectionPass(mdl->get());
 			}

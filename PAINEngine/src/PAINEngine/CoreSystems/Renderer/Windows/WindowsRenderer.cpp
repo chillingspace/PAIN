@@ -449,7 +449,7 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawShadows(const ModelRenderer& component, const glm::mat4& M, const Light& l)
 	{
-		if (!shadow_shader || !component.IsGPUReady() || !component.castShadows) {
+		if (!shadow_shader || !component.cachedModelAsset || !component.castShadows) {
 			return;
 		}
 
@@ -458,17 +458,19 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		// Use component's VAO (no need to re-upload data!)
-		glBindVertexArray(component.vaoHandle);
+		glBindVertexArray(geometry_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
-		const auto& modelAsset = component.cachedModelAsset;
-		if (modelAsset->submeshes.empty()) {
+		if (component.cachedModelAsset->submeshes.empty()) {
 			// No submeshes - draw entire model
-			glDrawElements(GL_TRIANGLES, modelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, component.cachedModelAsset->indices.size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
 			// Draw each submesh with correct offset
-			for (const auto& submesh : modelAsset->submeshes) {
+			for (const auto& submesh : component.cachedModelAsset->submeshes) {
 				glDrawElements(
 					GL_TRIANGLES,
 					submesh.indexCount,
@@ -479,6 +481,11 @@ namespace PAIN {
 		}
 
 		glBindVertexArray(0);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, component.cachedModelAsset->vpath);
+		}
 	}
 
 	void WindowsRenderer::EndShadowPass()
@@ -548,7 +555,7 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
 		}
 
-		if (!geometry_shader || !component.IsGPUReady() || !component.cachedModelAsset) {
+		if (!geometry_shader || !component.cachedModelAsset) {
 			return;
 		}
 
@@ -558,7 +565,11 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
 		// Bind component's VAO (already has vertex data uploaded)
-		glBindVertexArray(component.vaoHandle);
+		glBindVertexArray(geometry_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {

@@ -70,11 +70,6 @@ namespace PAIN {
         uint32_t renderLayer = 0;
         int currentLOD = 0;
 
-        // GPU handles (uploaded once, stored here)
-        uint32_t vaoHandle = 0;
-        uint32_t vboHandle = 0;
-        uint32_t iboHandle = 0;
-
         // Cached asset pointer (DO NOT SERIALIZE)
         mutable std::shared_ptr<const Assets::Model> cachedModelAsset;
 
@@ -82,11 +77,8 @@ namespace PAIN {
         ModelRenderer() = default;
         explicit ModelRenderer(const Assets::GUID& guid) : modelGUID(guid) {}
         ~ModelRenderer() {
-            cleanup();
+            //cleanup();
         }
-
-        // Helper methods
-        bool IsGPUReady() const { return vaoHandle != 0; }
 
         MaterialInstance* GetMaterial(size_t index) {
             return (index < materials.size()) ? &materials[index] : nullptr;
@@ -116,21 +108,6 @@ namespace PAIN {
                     animationTime = anim.duration;
                     isPlaying = false;
                 }
-            }
-        }
-
-        void cleanup() {
-            if (vaoHandle != 0) {
-                glDeleteVertexArrays(1, &vaoHandle);
-                vaoHandle = 0;
-            }
-            if (vboHandle != 0) {
-                glDeleteBuffers(1, &vboHandle);
-                vboHandle = 0;
-            }
-            if (iboHandle != 0) {
-                glDeleteBuffers(1, &iboHandle);
-                iboHandle = 0;
             }
         }
     };
