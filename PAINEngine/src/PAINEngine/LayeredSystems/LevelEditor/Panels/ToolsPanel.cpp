@@ -263,7 +263,15 @@ namespace PAIN {
                         if (ImGui::MenuItem("Save As...")) { openPopUp("Save As..."); }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Settings")) { openPopUp("Settings"); }
-                        if (ImGui::MenuItem("Exit")) {/*TODO*/ }
+                        if (ImGui::MenuItem("Exit")) {
+                        
+                            auto win = services->get<Window::Window>();
+                            win->safeShutdown();
+
+                            // TO DO:
+                            //unsavedChangesPopUp("Unsaved Changes");
+                            //unsavedScenePopUp("Unsaved Scene");
+                        }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Edit")) {
