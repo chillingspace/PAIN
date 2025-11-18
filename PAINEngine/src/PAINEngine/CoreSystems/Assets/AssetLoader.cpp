@@ -515,12 +515,7 @@ namespace PAIN {
             uint32_t matCount = 0;
             readMem(&matCount, sizeof(matCount));
             asset.materials.resize(matCount);
-            for (Material& mat : asset.materials) {
-                uint32_t nameLen = 0;
-                readMem(&nameLen, sizeof(nameLen));
-                mat.name.resize(nameLen);
-                readMem(mat.name.data(), nameLen);
-
+            for (auto& mat : asset.materials) {
                 auto readStr = [&](std::string& str) {
                     uint32_t len = 0;
                     readMem(&len, sizeof(len));
@@ -528,17 +523,9 @@ namespace PAIN {
                     readMem(str.data(), len);
                     };
 
-                readStr(mat.diffuse_map_buf);
-                readStr(mat.normalMap);
-                readStr(mat.metallicMap);
-                readStr(mat.roughnessMap);
-                readStr(mat.aoMap);
-                readStr(mat.emissionMap);
-
-                readMem(&mat.baseColor, sizeof(mat.baseColor));
-                readMem(&mat.metallic, sizeof(mat.metallic));
-                readMem(&mat.roughness, sizeof(mat.roughness));
-                readMem(&mat.emission, sizeof(mat.emission));
+                std::string temp_str;
+                readStr(temp_str);
+                mat = std::filesystem::path(temp_str);
             }
 
             asset.vpath = virtual_path;
@@ -684,6 +671,112 @@ namespace PAIN {
 
         std::shared_ptr<Fonts::FontFace> Loader::ImportFont(std::string const& virtual_path) const {
             return std::make_shared<Fonts::FontFace>(path_service, virtual_path);
+        }
+
+        std::shared_ptr<Material> Loader::ImportMaterial(std::string const& virtual_path) const {
+
+            //Check if virtual path has valid extension
+            if (std::filesystem::path(path_service->resolvePath(virtual_path)).extension() != ".material") {
+                throw std::runtime_error("Invalid file type: " + virtual_path);
+            }
+
+            try {
+                auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
+                if (!stream || !stream->good()) {
+                    PN_CORE_ERROR("Failed to open model file: {}", virtual_path);
+                    throw std::runtime_error("Failed to open model file: " + virtual_path);
+                }
+
+                std::vector<uint8_t> data(stream->size());
+                size_t read = stream->read(data.data(), data.size());
+                if (read != data.size()) {
+                    PN_CORE_ERROR("Failed to read full model file: {}", virtual_path);
+                    throw std::runtime_error("Failed to read full model file: " + virtual_path);
+                }
+
+                std::string jsonString(data.begin(), data.end());
+                nlohmann::json j = nlohmann::json::parse(jsonString);
+
+                auto* material = new Material();
+
+                if (j.contains("asset")) {
+                    material->guid = Assets::GUID(j["asset"]["guid"]);
+                    material->name = j["asset"]["name"];
+                    material->type = Assets::Type::Material;
+                }
+
+                auto LoadTexture = [&](const char* key, std::filesystem::path& path) {
+                    if (j.contains("textures") && j["textures"].contains(key)) {
+                        path = j["textures"][key].get<std::string>();
+                    }
+                    };
+
+                // PBR
+                LoadTexture("albedo", material->albedoTexturePath);
+                LoadTexture("normal", material->normalTexturePath);
+                LoadTexture("metallic", material->metallicTexturePath);
+                LoadTexture("roughness", material->roughnessTexturePath);
+                LoadTexture("ao", material->aoTexturePath);
+                LoadTexture("emissive", material->emissiveTexturePath);
+                LoadTexture("height", material->heightTexturePath);
+                LoadTexture("opacity", material->opacityTexturePath);
+
+                // Advanced
+                LoadTexture("sheen", material->sheenTexturePath);
+                LoadTexture("clearCoat", material->clearCoatTexturePath);
+                LoadTexture("transmission", material->transmissionTexturePath);
+
+                // Legacy
+                LoadTexture("specular", material->specularTexturePath);
+                LoadTexture("glossiness", material->glossinessTexturePath);
+                LoadTexture("ambient", material->ambientTexturePath);
+
+                // Special
+                LoadTexture("lightmap", material->lightmapTexturePath);
+                LoadTexture("reflection", material->reflectionTexturePath);
+                LoadTexture("displacement", material->displacementTexturePath);
+
+                if (j.contains("properties")) {
+                    auto& props = j["properties"];
+
+                    if (props.contains("baseColor")) {
+                        material->baseColor = glm::vec3(
+                            props["baseColor"][0],
+                            props["baseColor"][1],
+                            props["baseColor"][2]
+                        );
+                    }
+
+                    if (props.contains("metallic")) {
+                        material->metallic = props["metallic"];
+                    }
+
+                    if (props.contains("roughness")) {
+                        material->roughness = props["roughness"];
+                    }
+
+                    if (props.contains("emissive")) {
+                        material->emissive = glm::vec3(
+                            props["emissive"][0],
+                            props["emissive"][1],
+                            props["emissive"][2]
+                        );
+                    }
+                }
+
+                if (j.contains("flags")) {
+                    material->isTransparent = j["flags"]["transparent"];
+                    material->doubleSided = j["flags"]["doubleSided"];
+                }
+
+                PN_CORE_INFO("Material loaded: {}", virtual_path);
+                return std::make_shared<Material>(std::move(material));
+
+            }
+            catch (const std::exception& e) {
+                PN_CORE_ERROR("Failed to load material: {}", e.what());
+                return nullptr;
+            }
         }
 	}
 }

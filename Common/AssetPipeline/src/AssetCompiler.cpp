@@ -1018,7 +1018,7 @@ namespace PAIN {
                 ExportMaterial(mat, out_mat_path);
 
                 //Export material
-                asset.materials.push_back(mat);
+                asset.materials.push_back(material_folder / relative_path / mat.name);
             }
 
             //Export model
@@ -1343,32 +1343,19 @@ namespace PAIN {
                 }
             }
 
-            //// Write materials
-            //uint32_t matCount = (uint32_t)asset.materials.size();
-            //out.write((char*)&matCount, sizeof(matCount));
-            //for (const Material& mat : asset.materials) {
-            //    uint32_t nameLen = (uint32_t)mat.name.size();
-            //    out.write((char*)&nameLen, sizeof(nameLen));
-            //    out.write(mat.name.data(), nameLen);
+            // Write materials
+            uint32_t matCount = (uint32_t)asset.materials.size();
+            out.write((char*)&matCount, sizeof(matCount));
+            for (auto const& mat_path : asset.materials) {
 
-            //    auto writeStr = [&](const std::string& str) {
-            //        uint32_t len = (uint32_t)str.size();
-            //        out.write((char*)&len, sizeof(len));
-            //        out.write(str.data(), len);
-            //        };
+                auto writeStr = [&](const std::string& str) {
+                    uint32_t len = (uint32_t)str.size();
+                    out.write((char*)&len, sizeof(len));
+                    out.write(str.data(), len);
+                    };
 
-            //    writeStr(mat.diffuse_map_buf);
-            //    writeStr(mat.normalMap);
-            //    writeStr(mat.metallicMap);
-            //    writeStr(mat.roughnessMap);
-            //    writeStr(mat.aoMap);
-            //    writeStr(mat.emissionMap);
-
-            //    out.write((char*)&mat.baseColor, sizeof(mat.baseColor));
-            //    out.write((char*)&mat.metallic, sizeof(mat.metallic));
-            //    out.write((char*)&mat.roughness, sizeof(mat.roughness));
-            //    out.write((char*)&mat.emission, sizeof(mat.emission));
-            //}
+                writeStr(mat_path.string());
+            }
 
             out.close();
         }

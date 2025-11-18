@@ -193,7 +193,9 @@ namespace PAIN {
             std::vector<Bone> skeleton;
             std::vector<MorphTarget> morphTargets;
             std::vector<AnimationClip> animations;
-            std::vector<Material> materials;
+
+            //Paths to materials
+            std::vector<std::filesystem::path> materials;
 
             // Extra: bounding box, LODs, instancing support, metadata, engine tags, etc.
             glm::vec3 aabbMin, aabbMax;
