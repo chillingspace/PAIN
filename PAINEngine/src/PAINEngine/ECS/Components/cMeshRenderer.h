@@ -14,7 +14,6 @@ namespace PAIN {
 
     //Material instance
     struct MaterialInstance {
-    private:
 
         //Read only
         std::shared_ptr<const Assets::Material> material_asset;
@@ -32,61 +31,6 @@ namespace PAIN {
         float metallicOverride = -1.0f;
         float roughnessOverride = -1.0f;
         glm::vec3 emissiveOverride{ -1.0f };
-
-    public:
-        glm::vec3 GetBaseColor() const {
-            // If override is set (not negative), use it
-            if (baseColorOverride.x >= 0.0f) {
-                return baseColorOverride;
-            }
-            // Otherwise use asset default
-            return material_asset->baseColor;
-        }
-
-        float GetMetallic() const {
-            return (metallicOverride >= 0.0f) ? metallicOverride : material_asset->metallic;
-        }
-
-        float GetRoughness() const {
-            return (roughnessOverride >= 0.0f) ? roughnessOverride : material_asset->roughness;
-        }
-
-        glm::vec3 GetEmissive() const {
-            if (emissiveOverride.x >= 0.0f) {
-                return emissiveOverride;
-            }
-            return material_asset->emissive;
-        }
-
-        void SetBaseColor(const glm::vec3& color) {
-            baseColorOverride = color;
-        }
-
-        void SetMetallic(float value) {
-            metallicOverride = glm::clamp(value, 0.0f, 1.0f);
-        }
-
-        void SetRoughness(float value) {
-            roughnessOverride = glm::clamp(value, 0.0f, 1.0f);
-        }
-
-        void SetEmissive(const glm::vec3& color) {
-            emissiveOverride = color;
-        }
-
-        void ResetToDefaults() {
-            baseColorOverride = glm::vec3(-1.0f);
-            metallicOverride = -1.0f;
-            roughnessOverride = -1.0f;
-            emissiveOverride = glm::vec3(-1.0f);
-        }
-
-        bool HasOverrides() const {
-            return baseColorOverride.x >= 0.0f ||
-                metallicOverride >= 0.0f ||
-                roughnessOverride >= 0.0f ||
-                emissiveOverride.x >= 0.0f;
-        }
     };
 
     struct ModelInstance {

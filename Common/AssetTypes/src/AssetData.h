@@ -175,7 +175,7 @@ namespace PAIN {
             temp[Type::Data] = engine_assets_folder / "data";
             temp[Type::Shader] = engine_assets_folder / "shaders";
             temp[Type::Font] = engine_assets_folder / "fonts";
-            temp[Type::Material] = game_assets_folder / "materials";
+            temp[Type::Material] = engine_assets_folder / "materials";
             temp[Type::Other] = engine_assets_folder / "others";
 
             return temp;

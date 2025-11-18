@@ -370,7 +370,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) const {
+        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) {
 
             //Find asset type and platform
             switch (desc_file.type) {
@@ -585,7 +585,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
+        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) {
 
             //Skip .bin files
             if (asset_info.raw_path.extension() == ".bin") return;
@@ -804,7 +804,7 @@ namespace PAIN {
                 bool game_folder = true;
                 if (relative_path.empty()) {
                     relative_path = std::filesystem::relative(asset_info.relative_folder, getAllEngineFolders()[Assets::Type::Model]);
-                    game_folder = true;
+                    game_folder = false;
                 }
 
                 //Get material textures
@@ -1012,12 +1012,17 @@ namespace PAIN {
                 std::filesystem::path material_folder = game_folder ? getAllGameFolders()[Assets::Type::Material] : getAllEngineFolders()[Assets::Type::Material];
                 auto mat_path = assets_root / material_folder / relative_path / mat.name;
                 mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
-                auto out_mat_path = output_dir / material_folder / relative_path / mat.name;
-                out_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
                 
                 //Export material
                 ExportMaterial(mat, mat_path);
-                ExportMaterial(mat, out_mat_path);
+
+                //Process asset
+                Info mat_asset;
+                mat_asset.raw_path = mat_path;
+                mat_asset.name = mat_asset.raw_path.filename().string();
+                mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
+                mat_asset.type = getAssetType(mat_asset.raw_path);
+                processAsset(mat_asset);
 
                 //Export material
                 asset.materials.push_back(material_folder / relative_path / mat.name);
