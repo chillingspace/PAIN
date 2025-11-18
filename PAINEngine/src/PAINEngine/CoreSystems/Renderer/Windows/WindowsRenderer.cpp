@@ -469,12 +469,11 @@ namespace PAIN {
 		else {
 			// Draw each submesh with correct offset
 			for (const auto& submesh : modelAsset->submeshes) {
-				glDrawElementsBaseVertex(
+				glDrawElements(
 					GL_TRIANGLES,
 					submesh.indexCount,
 					GL_UNSIGNED_INT,
-					(void*)(submesh.firstIndex * sizeof(unsigned int)),
-					submesh.vertexOffset
+					(void*)(submesh.firstIndex * sizeof(unsigned int))
 				);
 			}
 		}
@@ -619,12 +618,11 @@ namespace PAIN {
 			}
 
 			// Draw this submesh
-			glDrawElementsBaseVertex(
+			glDrawElements(
 				GL_TRIANGLES,
 				submesh.indexCount,
 				GL_UNSIGNED_INT,
-				(void*)(submesh.firstIndex * sizeof(unsigned int)),
-				submesh.vertexOffset
+				(void*)(submesh.firstIndex * sizeof(unsigned int))
 			);
 		}
 
