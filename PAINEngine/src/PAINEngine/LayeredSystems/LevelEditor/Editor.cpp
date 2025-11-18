@@ -330,7 +330,6 @@ namespace PAIN {
             panels->forEachOfType<Panel::IPanel>([&event](std::shared_ptr<Panel::IPanel> panel) {
                 panel->onEvent(event);
                 });
-#endif
         }
 
 
