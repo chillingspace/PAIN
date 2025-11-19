@@ -364,7 +364,7 @@ namespace PAIN {
                 if (controller->getEntityComponent<MetaData::EntityName>(e).has_value()) { controller->getEntityComponent<MetaData::EntityName>(e).value().get().name += "_prefab"; }
             }
 
-            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_abs_path);
+            PN_CORE_INFO("Loaded prefab with {} entities from virtual path: {}", entities.size(), prefab_virtual_filepath);
             return entities;
         }
 
