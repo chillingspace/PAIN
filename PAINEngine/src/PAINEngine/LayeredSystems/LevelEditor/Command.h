@@ -42,6 +42,8 @@ namespace PAIN {
 			// NEW: Flag to prevent recording during undo/redo
 			bool is_executing_undo_redo = false;
 
+			int modification_count = 0;
+
 		public:
 			CommandManager() = default;
 			~CommandManager() = default;
@@ -83,6 +85,12 @@ namespace PAIN {
 
 			// Check if currently executing undo/redo
 			bool isExecutingUndoRedo() const { return is_executing_undo_redo; }
+
+			// Get modification counter
+			int getModificationCount() const { return modification_count; }
+				 
+			// Hooks
+			std::function<void()> onModifySceneHook;
 		};
 
 		// Helper macro for creating actions with less boilerplate

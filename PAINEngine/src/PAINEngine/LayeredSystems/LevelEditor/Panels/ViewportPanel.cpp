@@ -490,8 +490,8 @@ namespace PAIN {
 					}
 
 					// ========================================
-// === Camera Controls ===
-// ========================================
+					// === Camera Controls ===
+					// ========================================
 
 					ImGuiIO& io = ImGui::GetIO();
 					auto camera = services->get<sCameraController>();

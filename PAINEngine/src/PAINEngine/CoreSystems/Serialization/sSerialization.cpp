@@ -45,14 +45,16 @@ namespace PAIN {
         }
 
         void PAIN::Serialization::Service::onDetach() {
-            if (!curr_scene_file_.empty()) {
-                if (isModifiedScene) {
-                    PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
-                    if (!saveCurrentScene()) {
-                        PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
-                    }
-                }
-            }
+
+            // Handled in Tools panel
+            //if (!curr_scene_file_.empty()) {
+            //    if (isModifiedScene) {
+            //        PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
+            //        if (!saveCurrentScene()) {
+            //            PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
+            //        }
+            //    }
+            //}
         }
 
         // ----------------------------

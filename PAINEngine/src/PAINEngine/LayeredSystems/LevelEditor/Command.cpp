@@ -25,6 +25,8 @@ namespace PAIN {
 
 			action.undo_action();
 
+			if (onModifySceneHook) onModifySceneHook();
+
 			redo_stack.push(std::move(action));
 			undo_stack.pop();
 
@@ -52,6 +54,8 @@ namespace PAIN {
 
 			action.do_action();
 
+			if (onModifySceneHook) onModifySceneHook();
+
 			undo_stack.push(std::move(action));
 			redo_stack.pop();
 
@@ -68,6 +72,8 @@ namespace PAIN {
 
 			// Execute action immediately
 			action.do_action();
+
+			if (onModifySceneHook) onModifySceneHook();
 
 			// Push executed action onto the undo action stack
 			undo_stack.push(std::move(action));

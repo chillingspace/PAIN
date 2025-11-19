@@ -130,6 +130,19 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::ResourcePanel>());
 #endif
 
+            // Use weak ptr to prevent mem leak
+            auto weakScenesPanel = std::weak_ptr<Panel::ScenesPanel>(scenesPanel);
+
+            command_manager->onModifySceneHook = [weakScenesPanel]() {
+                if (auto sp = weakScenesPanel.lock()) {  // convert to shared_ptr safely
+
+                    sp->notifyModifyScene();
+                }
+            };
+
+            
+            
+
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
                 panel->onAttach();

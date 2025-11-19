@@ -43,6 +43,13 @@ namespace PAIN {
 
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }
 
+                // Expose hooks
+                void notifyModifyScene() {
+                    if (hooks_.onModifyScene) {
+                        hooks_.onModifyScene(currSceneId_);
+                    }
+                }
+
             private:
                 // Error message when loading scene fails
                 bool showSceneLoadError_ = false;
