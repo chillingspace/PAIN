@@ -61,15 +61,19 @@ namespace PAIN {
 
 		bool m_isMuted = false; // For toggling all audio (testing)
 
-        float m_surfaceWidth = 0.f;
-        float m_surfaceHeight = 0.f;
+		float m_surfaceWidth = 0.f;
+		float m_surfaceHeight = 0.f;
 
+		// Add these lines:
+		float m_mouseLastX = 0.f;
+		float m_mouseLastY = 0.f;
 
-        // Mobile Movements
-        bool  m_touchLooking = false;
-        int   m_touchPointerId = -1;
-        float m_touchLastX = 0.f;
-        float m_touchLastY = 0.f;
+		// Mobile Movements
+		bool  m_touchLooking = false;
+		int   m_touchPointerId = -1;
+		float m_touchLastX = 0.f;
+		float m_touchLastY = 0.f;
+
 
         struct MoveStick {
             bool active = false;

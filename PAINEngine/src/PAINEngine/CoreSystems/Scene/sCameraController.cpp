@@ -1,86 +1,77 @@
 #include "sCameraController.h"
 
-
 namespace PAIN {
-	void sCameraController::onDetach() {}
+    void sCameraController::onDetach() {}
 
-	void sCameraController::onAttach()
-	{
-		//get scene
-		m_Scene = services->get<Scene>();
-
-	}
-#ifdef PN_PLATFORM_ANDROID
-	// ANDROID ONLY
-    void sCameraController::beginTouchControls(int pointerId, float x, float y) {
-
-		auto editor = services->get<Editor::Editor>();
-		float screen_center = 0.f;
-		if (editor->isVisible()) {
-			if (!vp_hovered) return;
-
-
-			float relativeX = x - m_vpPosX;
-			float relativeY = y - m_vpPosY;
-
-			if (relativeX < 0 || relativeX > m_vpWidth ||
-				relativeY < 0 || relativeY > m_vpHeight) {
-				return;  // Touch outside viewport
-			}
-			screen_center = m_vpWidth / 2.f;
-
-
-			if (relativeX >= screen_center) {
-				if (m_touchLooking) return;
-
-				m_touchLooking = true;
-				m_touchPointerId = pointerId;
-				m_touchLastX = x;
-				m_touchLastY = y;
-				mouseButtonDown = true; // reuse existing yaw/pitch code path
-			}
-			if (relativeX < screen_center) {
-				if (m_move.active) return;
-
-				m_move.active = true;
-				m_move.id = pointerId;
-				m_move.start_x = x;
-				m_move.start_y = y;
-				m_move.last_x = x;
-				m_move.last_y = y;
-			}
-
-		}
-		else {
-			screen_center = m_surfaceWidth / 2.f;
-
-
-			if (x >= screen_center) {
-				if (m_touchLooking) return;
-
-				m_touchLooking = true;
-				m_touchPointerId = pointerId;
-				m_touchLastX = x;
-				m_touchLastY = y;
-				mouseButtonDown = true; // reuse existing yaw/pitch code path
-			}
-			if (x < screen_center) {
-				if (m_move.active) return;
-
-				m_move.active = true;
-				m_move.id = pointerId;
-				m_move.start_x = x;
-				m_move.start_y = y;
-				m_move.last_x = x;
-				m_move.last_y = y;
-			}
-
-		}
-
-
+    void sCameraController::onAttach()
+    {
+        //get scene
+        m_Scene = services->get<Scene>();
     }
 
-	// ANDROID ONLY
+#ifdef PN_PLATFORM_ANDROID
+    // ANDROID ONLY
+    void sCameraController::beginTouchControls(int pointerId, float x, float y) {
+        auto editor = services->get<Editor::Editor>();
+        float screen_center = 0.f;
+        if (editor->isVisible()) {
+            if (!vp_hovered) return;
+
+            float relativeX = x - m_vpPosX;
+            float relativeY = y - m_vpPosY;
+
+            if (relativeX < 0 || relativeX > m_vpWidth ||
+                relativeY < 0 || relativeY > m_vpHeight) {
+                return;  // Touch outside viewport
+            }
+            screen_center = m_vpWidth / 2.f;
+
+            if (relativeX >= screen_center) {
+                if (m_touchLooking) return;
+
+                m_touchLooking = true;
+                m_touchPointerId = pointerId;
+                m_touchLastX = x;
+                m_touchLastY = y;
+                mouseButtonDown = true; // reuse existing yaw/pitch code path
+            }
+            if (relativeX < screen_center) {
+                if (m_move.active) return;
+
+                m_move.active = true;
+                m_move.id = pointerId;
+                m_move.start_x = x;
+                m_move.start_y = y;
+                m_move.last_x = x;
+                m_move.last_y = y;
+            }
+        }
+        else {
+            screen_center = m_surfaceWidth / 2.f;
+
+            if (x >= screen_center) {
+                if (m_touchLooking) return;
+
+                m_touchLooking = true;
+                m_touchPointerId = pointerId;
+                m_touchLastX = x;
+                m_touchLastY = y;
+                mouseButtonDown = true; // reuse existing yaw/pitch code path
+            }
+            if (x < screen_center) {
+                if (m_move.active) return;
+
+                m_move.active = true;
+                m_move.id = pointerId;
+                m_move.start_x = x;
+                m_move.start_y = y;
+                m_move.last_x = x;
+                m_move.last_y = y;
+            }
+        }
+    }
+
+    // ANDROID ONLY
     void sCameraController::updateTouchControls(int pointerId, float x, float y) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
             // yOffset = lastY - y so drag up looks up
@@ -89,14 +80,14 @@ namespace PAIN {
             m_touchLastX = x;
             m_touchLastY = y;
         }
-        if (m_move.active && pointerId == m_move.id){
-			// acts as a jpy stick
+        if (m_move.active && pointerId == m_move.id) {
+            // acts as a jpy stick
             // Compute vector from stick center to current
             float dx = x - m_move.start_x;
             float dy = y - m_move.start_y;
 
             // if the touch is back at the origin don't move
-            float len = sqrtf(dx*dx + dy*dy);
+            float len = sqrtf(dx * dx + dy * dy);
             if (len < m_moveDeadzonePx) {
                 dx = 0.f; dy = 0.f; len = 0.f;
             }
@@ -120,10 +111,9 @@ namespace PAIN {
             m_cachedMoveX = nx;
             m_cachedMoveY = ny;
         }
-
     }
-	
-	// ANDROID ONLY
+
+    // ANDROID ONLY
     void sCameraController::endTouchControls(int pointerId) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
             m_touchLooking = false;
@@ -136,251 +126,255 @@ namespace PAIN {
             m_cachedMoveY = 0.f;
         }
     }
-
 #endif
-	void sCameraController::onUpdate(AppTiming timing)
-	{
-		const float dt = timing.dt;
-		camera = m_Scene->GetActiveCamera();
 
-		switch (move_mode) {
-		case CAMERA:
-			if (camera->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
-				// spherical
-				float radius = glm::length(camera->pos);
-				float theta = atan2(camera->pos.z, camera->pos.x);
-				float phi = acos(camera->pos.y / radius);
+    void sCameraController::onUpdate(AppTiming timing)
+    {
+        const float dt = timing.dt;
+        camera = m_Scene->GetActiveCamera();
 
-				if (W_KEYDOWN) radius -= camera->speed * dt;
-				if (S_KEYDOWN) radius += camera->speed * dt;
-				if (A_KEYDOWN) theta += 1.5f * dt;
-				if (D_KEYDOWN) theta -= 1.5f * dt;
-				if (SPACE_KEYDOWN) phi -= 1.5f * dt;
-				if (LCTRL_KEYDOWN) phi += 1.5f * dt;
+        switch (move_mode) {
+        case CAMERA:
+            if (camera->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
+                // spherical
+                float radius = glm::length(camera->pos);
+                float theta = atan2(camera->pos.z, camera->pos.x);
+                float phi = acos(camera->pos.y / radius);
 
-				// clamp phi
-				phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
+                if (W_KEYDOWN) radius -= camera->speed * dt;
+                if (S_KEYDOWN) radius += camera->speed * dt;
+                if (A_KEYDOWN) theta += 1.5f * dt;
+                if (D_KEYDOWN) theta -= 1.5f * dt;
+                if (SPACE_KEYDOWN) phi -= 1.5f * dt;
+                if (LCTRL_KEYDOWN) phi += 1.5f * dt;
 
-				// cartesian
-				camera->pos.x = radius * sin(phi) * cos(theta);
-				camera->pos.y = radius * cos(phi);
-				camera->pos.z = radius * sin(phi) * sin(theta);
+                // clamp phi
+                phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
 
-				// look at origin
-				camera->forward = -glm::normalize(camera->pos);
-			}
+                // cartesian
+                camera->pos.x = radius * sin(phi) * cos(theta);
+                camera->pos.y = radius * cos(phi);
+                camera->pos.z = radius * sin(phi) * sin(theta);
 
-		case NUM_MOVE_MODES:
+                // look at origin
+                camera->forward = -glm::normalize(camera->pos);
+            }
 
-			static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
-			if (W_KEYDOWN) {
-				glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
-				camera->pos += offset;
-			}
-			if (S_KEYDOWN) {
-				glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
-				camera->pos -= offset;
-			}
-			if (A_KEYDOWN) {
-				glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
-				camera->pos -= offset;
-			}
-			if (D_KEYDOWN) {
-				glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
-				camera->pos += offset;
-			}
-			if (SPACE_KEYDOWN) {
-				glm::vec3 offset = camera->up * camera->speed * dt;
-				camera->pos += offset;
-			}
-			if (LCTRL_KEYDOWN) {
-				glm::vec3 offset = camera->up * camera->speed * dt;
-				camera->pos -= offset;
-			}
-
-			break;
-		}
+        case NUM_MOVE_MODES:
+            static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
+            if (W_KEYDOWN) {
+                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
+                camera->pos += offset;
+            }
+            if (S_KEYDOWN) {
+                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
+                camera->pos -= offset;
+            }
+            if (A_KEYDOWN) {
+                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
+                camera->pos -= offset;
+            }
+            if (D_KEYDOWN) {
+                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
+                camera->pos += offset;
+            }
+            if (SPACE_KEYDOWN) {
+                glm::vec3 offset = camera->up * camera->speed * dt;
+                camera->pos += offset;
+            }
+            if (LCTRL_KEYDOWN) {
+                glm::vec3 offset = camera->up * camera->speed * dt;
+                camera->pos -= offset;
+            }
+            break;
+        }
 
         if (m_move.active && camera) {
             // Project forward to XZ like you already do
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
-            glm::vec3 fwd   = glm::normalize(glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)));
+            glm::vec3 fwd = glm::normalize(glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)));
             glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
 
             // Map: up on stick (negative ny) -> forward, right on stick (positive nx) -> strafe right
             float speed = camera->speed * m_moveScale;
-            camera->pos += (-m_cachedMoveY) * fwd   * speed * dt;
-            camera->pos += ( m_cachedMoveX) * right * speed * dt;
+            camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
+            camera->pos += (m_cachedMoveX)*right * speed * dt;
         }
 
-		if (mouseButtonDown && xOffset != 0.f) {
-			// transformation matrix(rotate)
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * xOffset), camera->up);
-			camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
-		}
+        if (mouseButtonDown && xOffset != 0.f) {
+            // transformation matrix(rotate)
+            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * xOffset), camera->up);
+            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
+        }
 
-		if (mouseButtonDown && yOffset != 0.f) {
-			// transformation matrix(rotate)
-			const glm::vec3 right = -glm::normalize(glm::cross(camera->forward, camera->up));
-			const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * yOffset), right);
-			camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
-		}
-		xOffset = 0.f;
-		yOffset = 0.f;
+        if (mouseButtonDown && yOffset != 0.f) {
+            // transformation matrix(rotate)
+            const glm::vec3 right = -glm::normalize(glm::cross(camera->forward, camera->up));
+            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * yOffset), right);
+            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
+        }
+        xOffset = 0.f;
+        yOffset = 0.f;
+    }
 
-	}
-
-	void sCameraController::onEvent(Event::Event& e) {
+    void sCameraController::onEvent(Event::Event& e) {
         Event::Dispatcher dispatcher(e);
+
 #ifdef PN_PLATFORM_WINDOWS
-		dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
 
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_W:
-				W_KEYDOWN = true;
-				break;
-			case PAIN_KEY_A:
-				A_KEYDOWN = true;
-				break;
-			case PAIN_KEY_S:
-				S_KEYDOWN = true;
-				break;
-			case PAIN_KEY_D:
-				D_KEYDOWN = true;
-				break;
-			case PAIN_KEY_SPACE:
-				SPACE_KEYDOWN = true;
-				break;
-			case PAIN_KEY_LEFT_CONTROL:
-				LCTRL_KEYDOWN = true;
-				break;
-			default:
-				break;
-			}
+#ifndef _DEBUG
+        // ===== RELEASE MODE ONLY: Use event-based WASD/Ctrl input =====
+        dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
+            switch (e.getKeyCode()) {
+            case PAIN_KEY_W:
+                W_KEYDOWN = true;
+                break;
+            case PAIN_KEY_A:
+                A_KEYDOWN = true;
+                break;
+            case PAIN_KEY_S:
+                S_KEYDOWN = true;
+                break;
+            case PAIN_KEY_D:
+                D_KEYDOWN = true;
+                break;
+            case PAIN_KEY_SPACE:
+                SPACE_KEYDOWN = true;
+                break;
+            case PAIN_KEY_LEFT_CONTROL:
+                LCTRL_KEYDOWN = true;
+                break;
+            default:
+                break;
+            }
+            return false;
+            });
 
+        dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
+            switch (e.getKeyCode()) {
+            case PAIN_KEY_W:
+                W_KEYDOWN = false;
+                break;
+            case PAIN_KEY_A:
+                A_KEYDOWN = false;
+                break;
+            case PAIN_KEY_S:
+                S_KEYDOWN = false;
+                break;
+            case PAIN_KEY_D:
+                D_KEYDOWN = false;
+                break;
+            case PAIN_KEY_SPACE:
+                SPACE_KEYDOWN = false;
+                break;
+            case PAIN_KEY_LEFT_CONTROL:
+                LCTRL_KEYDOWN = false;
+                break;
+            default:
+                break;
+            }
+            return false;
+            });
 
-			return false;
-			});
+        // ===== MOUSE CONTROL FOR CAMERA (RELEASE MODE) =====
+        dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
+            // Right mouse button (button code 1)
+            if (e.getBtnCode() == 1) {
+                mouseButtonDown = true;
+            }
+            return false;
+            });
 
-		dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
+        dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
+            if (e.getBtnCode() == 1) {
+                mouseButtonDown = false;
+            }
+            return false;
+            });
 
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_W:
-				W_KEYDOWN = false;
-				break;
-			case PAIN_KEY_A:
-				A_KEYDOWN = false;
-				break;
-			case PAIN_KEY_S:
-				S_KEYDOWN = false;
-				break;
-			case PAIN_KEY_D:
-				D_KEYDOWN = false;
-				break;
-			case PAIN_KEY_SPACE:
-				SPACE_KEYDOWN = false;
-				break;
-			case PAIN_KEY_LEFT_CONTROL:
-				LCTRL_KEYDOWN = false;
-				break;
-			default:
-				break;
-			}
-			return false;
-			});
+        dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
+            if (mouseButtonDown) {
+                glm::vec2 currentPos = e.getWindowPos();
 
-		dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+                xOffset += (currentPos.x - m_mouseLastX);
+                yOffset += (m_mouseLastY - currentPos.y);
 
-			switch (e.getKeyCode()) {
-			case PAIN_KEY_TAB:
-				move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
-				break;
-			case PAIN_KEY_O:
-				camera->move_mode = static_cast<Camera::MOVE_MODES>((camera->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
-				break;
-			case PAIN_KEY_M:
-			{
-				m_isMuted = !m_isMuted; // Toggle the state
-				auto audio = services->get<Audio::Audio>();
-				if (audio) {
-					audio->setMuteAll(m_isMuted); // Use the new mute function
-					if (m_isMuted) {
-						PN_CORE_INFO("Audio Muted");
-					}
-					else {
-						PN_CORE_INFO("Audio Unmuted");
-					}
-				}
-				break;
-			}
-			default:
-				break;
-			}
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
-			//PN_CORE_INFO(e.toString());
-
-			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
-				mouseButtonDown = true;
-			}
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
-
-			if (e.getBtnCode() == PAIN_MOUSE_BUTTON_LEFT) {
-				mouseButtonDown = false;
-			}
-
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-			static float lastX = 0.0f;
-			static float lastY = 0.0f;
-
-			xOffset = e.getWindowPos().x - lastX;
-			yOffset = lastY - e.getWindowPos().y; // reversed since y-coordinates go from bottom to top
+                m_mouseLastX = currentPos.x;
+                m_mouseLastY = currentPos.y;
+            }
+            else {
+                // Update last position even when not dragging so the first drag is smooth
+                glm::vec2 currentPos = e.getWindowPos();
+                m_mouseLastX = currentPos.x;
+                m_mouseLastY = currentPos.y;
+            }
+            return false;
+            });
+#endif // _DEBUG
 
 
-			lastX = e.getWindowPos().x;
-			lastY = e.getWindowPos().y;
+        // ===== BOTH MODES: Camera mode switching and audio mute =====
+        dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+            switch (e.getKeyCode()) {
+            case PAIN_KEY_TAB:
+                move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
+                break;
+            case PAIN_KEY_O:
+                camera->move_mode = static_cast<Camera::MOVE_MODES>((camera->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
+                break;
+            case PAIN_KEY_M:
+            {
+                m_isMuted = !m_isMuted;
+                auto audio = services->get<Audio::Audio>();
+                if (audio) {
+                    audio->setMuteAll(m_isMuted);
+                    if (m_isMuted) {
+                        PN_CORE_INFO("Audio Muted");
+                    }
+                    else {
+                        PN_CORE_INFO("Audio Unmuted");
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+            }
+            return false;
+            });
 
-			return false;
-			});
-
-		dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
-			PN_CORE_INFO(e.toString());
-			return false;
-			});
+        dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
+            PN_CORE_INFO(e.toString());
+            return false;
+            });
 
 #else
-		dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& e) -> bool {
-			m_surfaceWidth = e.getWidth();
-			m_surfaceHeight = e.getHeight();
-			return false;
-			});
+        // ===== ANDROID: Touch events remain unchanged =====
+        dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& e) -> bool {
+            m_surfaceWidth = e.getWidth();
+            m_surfaceHeight = e.getHeight();
+            return false;
+            });
 
-		dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
-			beginTouchControls(e.getPointerId(), e.getX(), e.getY());
-			return false;
-			});
-		dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-			updateTouchControls(e.getPointerId(), e.getX(), e.getY());
-			return false;
-			});
-		dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
-			endTouchControls(e.getPointerId());
-			return false;
-			});
-		dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
-			endTouchControls(e.getPointerId());
-			return false;
-			});
+        dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
+            beginTouchControls(e.getPointerId(), e.getX(), e.getY());
+            return false;
+            });
+
+        dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
+            updateTouchControls(e.getPointerId(), e.getX(), e.getY());
+            return false;
+            });
+
+        dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
+            endTouchControls(e.getPointerId());
+            return false;
+            });
+
+        dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
+            endTouchControls(e.getPointerId());
+            return false;
+            });
 #endif
-	}
-
+    }
 }
