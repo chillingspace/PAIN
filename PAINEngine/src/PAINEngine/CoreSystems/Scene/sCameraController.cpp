@@ -12,41 +12,77 @@ namespace PAIN {
 #ifdef PN_PLATFORM_ANDROID
     // ANDROID ONLY
     void sCameraController::beginTouchControls(int pointerId, float x, float y) {
+#ifdef _DEBUG
         auto editor = services->get<Editor::Editor>();
+        bool hasEditor = (editor != nullptr);
+#else
+        bool hasEditor = false;
+#endif
+
         float screen_center = 0.f;
-        if (editor->isVisible()) {
-            if (!vp_hovered) return;
+        if (hasEditor) {
+#ifdef _DEBUG
+            if (editor->isVisible()) {
+                if (!vp_hovered) return;
 
-            float relativeX = x - m_vpPosX;
-            float relativeY = y - m_vpPosY;
+                float relativeX = x - m_vpPosX;
+                float relativeY = y - m_vpPosY;
 
-            if (relativeX < 0 || relativeX > m_vpWidth ||
-                relativeY < 0 || relativeY > m_vpHeight) {
-                return;  // Touch outside viewport
+                if (relativeX < 0 || relativeX > m_vpWidth ||
+                    relativeY < 0 || relativeY > m_vpHeight) {
+                    return;  // Touch outside viewport
+                }
+                screen_center = m_vpWidth / 2.f;
+
+                if (relativeX >= screen_center) {
+                    if (m_touchLooking) return;
+
+                    m_touchLooking = true;
+                    m_touchPointerId = pointerId;
+                    m_touchLastX = x;
+                    m_touchLastY = y;
+                    mouseButtonDown = true; // reuse existing yaw/pitch code path
+                }
+                if (relativeX < screen_center) {
+                    if (m_move.active) return;
+
+                    m_move.active = true;
+                    m_move.id = pointerId;
+                    m_move.start_x = x;
+                    m_move.start_y = y;
+                    m_move.last_x = x;
+                    m_move.last_y = y;
+                }
             }
-            screen_center = m_vpWidth / 2.f;
+            else
+#endif
+            {
+                // Editor hidden or release mode
+                screen_center = m_surfaceWidth / 2.f;
 
-            if (relativeX >= screen_center) {
-                if (m_touchLooking) return;
+                if (x >= screen_center) {
+                    if (m_touchLooking) return;
 
-                m_touchLooking = true;
-                m_touchPointerId = pointerId;
-                m_touchLastX = x;
-                m_touchLastY = y;
-                mouseButtonDown = true; // reuse existing yaw/pitch code path
-            }
-            if (relativeX < screen_center) {
-                if (m_move.active) return;
+                    m_touchLooking = true;
+                    m_touchPointerId = pointerId;
+                    m_touchLastX = x;
+                    m_touchLastY = y;
+                    mouseButtonDown = true;
+                }
+                if (x < screen_center) {
+                    if (m_move.active) return;
 
-                m_move.active = true;
-                m_move.id = pointerId;
-                m_move.start_x = x;
-                m_move.start_y = y;
-                m_move.last_x = x;
-                m_move.last_y = y;
+                    m_move.active = true;
+                    m_move.id = pointerId;
+                    m_move.start_x = x;
+                    m_move.start_y = y;
+                    m_move.last_x = x;
+                    m_move.last_y = y;
+                }
             }
         }
         else {
+            // No editor (release mode)
             screen_center = m_surfaceWidth / 2.f;
 
             if (x >= screen_center) {
@@ -56,7 +92,7 @@ namespace PAIN {
                 m_touchPointerId = pointerId;
                 m_touchLastX = x;
                 m_touchLastY = y;
-                mouseButtonDown = true; // reuse existing yaw/pitch code path
+                mouseButtonDown = true;
             }
             if (x < screen_center) {
                 if (m_move.active) return;
@@ -222,96 +258,104 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_WINDOWS
 
-#ifndef _DEBUG
-        // ===== RELEASE MODE ONLY: Use event-based WASD/Ctrl input =====
-        dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
-            switch (e.getKeyCode()) {
-            case PAIN_KEY_W:
-                W_KEYDOWN = true;
-                break;
-            case PAIN_KEY_A:
-                A_KEYDOWN = true;
-                break;
-            case PAIN_KEY_S:
-                S_KEYDOWN = true;
-                break;
-            case PAIN_KEY_D:
-                D_KEYDOWN = true;
-                break;
-            case PAIN_KEY_SPACE:
-                SPACE_KEYDOWN = true;
-                break;
-            case PAIN_KEY_LEFT_CONTROL:
-                LCTRL_KEYDOWN = true;
-                break;
-            default:
-                break;
-            }
-            return false;
-            });
+#ifdef _DEBUG
+        // ===== DEBUG MODE: Check editor visibility =====
+        auto editor = services->get<Editor::Editor>();
+        bool editorIsVisible = editor && editor->isVisible();
+#else
+        // ===== RELEASE MODE: No editor exists, always allow controls =====
+        bool editorIsVisible = false;
+#endif
 
-        dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
-            switch (e.getKeyCode()) {
-            case PAIN_KEY_W:
-                W_KEYDOWN = false;
-                break;
-            case PAIN_KEY_A:
-                A_KEYDOWN = false;
-                break;
-            case PAIN_KEY_S:
-                S_KEYDOWN = false;
-                break;
-            case PAIN_KEY_D:
-                D_KEYDOWN = false;
-                break;
-            case PAIN_KEY_SPACE:
-                SPACE_KEYDOWN = false;
-                break;
-            case PAIN_KEY_LEFT_CONTROL:
-                LCTRL_KEYDOWN = false;
-                break;
-            default:
-                break;
-            }
-            return false;
-            });
+        // ===== CAMERA CONTROLS: Active in Release OR when Editor is hidden in Debug =====
+        if (!editorIsVisible) {
+            dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
+                switch (e.getKeyCode()) {
+                case PAIN_KEY_W:
+                    W_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_A:
+                    A_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_S:
+                    S_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_D:
+                    D_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_SPACE:
+                    SPACE_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_LEFT_CONTROL:
+                    LCTRL_KEYDOWN = true;
+                    break;
+                default:
+                    break;
+                }
+                return false;
+                });
 
-        // ===== MOUSE CONTROL FOR CAMERA (RELEASE MODE) =====
-        dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
-            // Right mouse button (button code 1)
-            if (e.getBtnCode() == 1) {
-                mouseButtonDown = true;
-            }
-            return false;
-            });
+            dispatcher.Dispatch<Event::KeyReleased>([&](Event::KeyReleased& e) -> bool {
+                switch (e.getKeyCode()) {
+                case PAIN_KEY_W:
+                    W_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_A:
+                    A_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_S:
+                    S_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_D:
+                    D_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_SPACE:
+                    SPACE_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_LEFT_CONTROL:
+                    LCTRL_KEYDOWN = false;
+                    break;
+                default:
+                    break;
+                }
+                return false;
+                });
 
-        dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
-            if (e.getBtnCode() == 1) {
-                mouseButtonDown = false;
-            }
-            return false;
-            });
+            // ===== MOUSE CONTROL FOR CAMERA =====
+            dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
+                // Right mouse button (button code 1)
+                if (e.getBtnCode() == 1) {
+                    mouseButtonDown = true;
+                }
+                return false;
+                });
 
-        dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-            if (mouseButtonDown) {
-                glm::vec2 currentPos = e.getWindowPos();
+            dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
+                if (e.getBtnCode() == 1) {
+                    mouseButtonDown = false;
+                }
+                return false;
+                });
 
-                xOffset += (currentPos.x - m_mouseLastX);
-                yOffset += (m_mouseLastY - currentPos.y);
+            dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
+                if (mouseButtonDown) {
+                    glm::vec2 currentPos = e.getWindowPos();
 
-                m_mouseLastX = currentPos.x;
-                m_mouseLastY = currentPos.y;
-            }
-            else {
-                // Update last position even when not dragging so the first drag is smooth
-                glm::vec2 currentPos = e.getWindowPos();
-                m_mouseLastX = currentPos.x;
-                m_mouseLastY = currentPos.y;
-            }
-            return false;
-            });
-#endif // _DEBUG
+                    xOffset += (currentPos.x - m_mouseLastX);
+                    yOffset += (m_mouseLastY - currentPos.y);
 
+                    m_mouseLastX = currentPos.x;
+                    m_mouseLastY = currentPos.y;
+                }
+                else {
+                    // Update last position even when not dragging so the first drag is smooth
+                    glm::vec2 currentPos = e.getWindowPos();
+                    m_mouseLastX = currentPos.x;
+                    m_mouseLastY = currentPos.y;
+                }
+                return false;
+                });
+        }
 
         // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {

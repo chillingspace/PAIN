@@ -527,7 +527,7 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_WINDOWS
 							camera->xOffset = io.MouseDelta.x;
-							camera->yOffset = io.MouseDelta.y;
+							camera->yOffset = -io.MouseDelta.y;
 #endif
 						}
 						else {
