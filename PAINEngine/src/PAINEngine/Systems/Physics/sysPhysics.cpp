@@ -136,10 +136,31 @@ namespace PAIN {
 			//PN_CORE_WARN("[PHYSICS] Contact b1={}, b2={}", (uint32_t)a, (uint32_t)b);
 			if (a == entt::null || b == entt::null) return;
 
-			if (auto svc = services.lock()) { // tell lua
+			{
+				std::lock_guard<std::mutex> lock(collisionMutex_);
+				pendingCollisions_.push_back({ a, b });
+			}
+		}
+
+		void System::dispatchCollisionEvents(entt::registry& reg)
+		{
+			// move pending collisions to a local vector so hold the mutex briefly
+			std::vector<PendingCollision> localCollisions;
+			{
+				std::lock_guard<std::mutex> lock(collisionMutex_);
+				localCollisions.swap(pendingCollisions_);
+			}
+
+			if (localCollisions.empty())
+				return;
+
+			// now can use lua on main thread
+			if (auto svc = services.lock()) {
 				if (auto ecs = svc->get<ECS::Controller>()) {
 					if (auto gs = ecs->getSystem<PAIN::Scripting::GameScriptingSystem>()) {
-						gs->onCollision(a, b);   // forwards to luamanager that registered handlers
+						for (const auto& c : localCollisions) {
+							gs->onCollision(c.a, c.b);
+						}
 					}
 					else {
 						PN_CORE_WARN("[PHYSICS] No GameScriptingSystem in ECS; skipping Lua dispatch");
@@ -150,9 +171,8 @@ namespace PAIN {
 				}
 			}
 			else {
-				PN_CORE_WARN("[PHYSICS] Services expired in notifyContact; skipping Lua dispatch");
+				PN_CORE_WARN("[PHYSICS] Services expired in dispatchCollisionEvents; skipping Lua dispatch");
 			}
-
 		}
 
 		System::System(std::shared_ptr<Services> svc) : ISystem(svc), 
@@ -218,6 +238,7 @@ namespace PAIN {
                 {
                     syncNewBodies(registry);
                     jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+					dispatchCollisionEvents(registry);
                 }
             }
         }

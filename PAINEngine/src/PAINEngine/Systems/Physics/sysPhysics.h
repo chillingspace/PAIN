@@ -61,6 +61,15 @@ namespace PAIN {
 
 		private:
 			struct LuaContactListener; // fwd decl for jolt lua bridge
+			std::unique_ptr<LuaContactListener> contact_listener;
+
+			struct PendingCollision {
+				entt::entity a;
+				entt::entity b;
+			};
+			std::mutex collisionMutex_;
+			std::vector<PendingCollision> pendingCollisions_;
+
 
 			std::unique_ptr<JPH::PhysicsSystem> jolt_physics;
 
@@ -100,12 +109,12 @@ namespace PAIN {
 
 			const i32 collision_steps;
 
-			std::unique_ptr<LuaContactListener> contact_listener;
 
 			// Jolt init setup
 			void joltSetup();
 
-			void notifyContact(const JPH::Body& b1, const JPH::Body& b2);
+			void notifyContact(const JPH::Body& b1, const JPH::Body& b2); // @TODO change to only enqueue collision, no lua
+			void dispatchCollisionEvents(entt::registry& reg);
 		};
 
 	} // Physics
