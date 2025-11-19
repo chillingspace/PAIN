@@ -63,6 +63,7 @@ struct IEngineAPI {
     virtual void AssignGroup(entt::entity entityId, std::string group) = 0;
     virtual void UnassignGroup(entt::entity entityId) = 0;
     virtual std::optional<std::string> GetGroup(entt::entity entityId) = 0;
+    virtual std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) = 0;
 
     /* =========================================================================== */
     /*                                Transform                                    */
@@ -71,6 +72,8 @@ struct IEngineAPI {
     virtual void SetPosition(entt::entity entityId, glm::vec3 p) = 0;
     virtual glm::vec3 GetScale(entt::entity entityId) = 0;
     virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
+    virtual glm::vec3 GetRotation(entt::entity entityId) = 0;   
+    virtual void SetRotation(entt::entity entityId, glm::vec3 r) = 0;
 
     /* =========================================================================== */
     /*                                  Physics                                    */
