@@ -317,6 +317,25 @@ namespace PAIN {
             throw std::runtime_error("Could not find project root containing Assets/ directory");
         }
 
+        static bool isSubPath(const std::filesystem::path& descendantPath, const std::filesystem::path& rootPath) {
+            std::error_code ec;
+            auto canonDescendant = std::filesystem::weakly_canonical(descendantPath, ec);
+            auto canonRoot = std::filesystem::weakly_canonical(rootPath, ec);
+
+            if (ec) return false; // if any canonicalization fails
+
+            // Compare each path component
+            auto rootIt = canonRoot.begin();
+            auto detIt = canonDescendant.begin();
+
+            for (; rootIt != canonRoot.end(); ++rootIt, ++detIt) {
+                if (detIt == canonDescendant.end() || *rootIt != *detIt)
+                    return false; // paths diverge
+            }
+            // Passed all root elements matched; can be equal or a subpath
+            return true;
+        }
+
         static bool isMusic(std::filesystem::path const& path) {
 
             auto audio_exts = getAllExtensions()[Type::Audio];
