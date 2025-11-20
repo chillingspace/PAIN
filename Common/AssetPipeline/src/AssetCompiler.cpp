@@ -370,7 +370,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) {
+        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
 
             //Find asset type and platform
             switch (desc_file.type) {
@@ -383,7 +383,7 @@ namespace PAIN {
                 break;
 
             case Type::Model:
-                compileModel(desc_file, asset_info);
+                compileModel(desc_file, asset_info, opt_assets);
                 break;
                 
             default:
@@ -585,7 +585,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) {
+        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
 
             //Skip .bin files
             if (asset_info.raw_path.extension() == ".bin") return;
@@ -1024,6 +1024,17 @@ namespace PAIN {
                 mat_asset.type = getAssetType(mat_asset.raw_path);
                 processAsset(mat_asset);
 
+                //Craft asset interface
+                IAsset asset_interface;
+                asset_interface.guid = mat_asset.guid;
+                asset_interface.name = mat_asset.shipped_path.filename().string();
+                asset_interface.type = mat_asset.type;
+                asset_interface.main_relative_path = mat_asset.relative_path;
+                asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
+
+                //Add into optional assets
+                opt_assets.push_back(asset_interface);
+
                 //Export material
                 std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
                 relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
@@ -1392,7 +1403,10 @@ namespace PAIN {
             return false;
         }
 
-		void Compiler::processAsset(Info& asset_info) {
+        std::optional<std::vector<IAsset>> Compiler::processAsset(Info& asset_info) {
+
+            //Optional vec
+            std::vector<IAsset> opt_assets;
 
             //Check for desc files and output
             auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.filename().string() + desc_ext);
@@ -1412,7 +1426,7 @@ namespace PAIN {
             if (Assets::isAssetCompilable(asset_info.type)) {
 
                 //Compiling operation
-                compileAndShip(desc_obj, asset_info);
+                compileAndShip(desc_obj, asset_info, opt_assets);
             }
             else {
 
@@ -1433,6 +1447,14 @@ namespace PAIN {
             //Double check if there are desc changes
             if (desc_obj != readDescFile(asset_info, asset_desc_path)) {
                 saveDescFile(desc_obj, asset_desc_path);
+            }
+
+            //Check optional assets
+            if (!opt_assets.empty()) {
+                return opt_assets;
+            }
+            else {
+                return std::nullopt;
             }
 		}
 	}

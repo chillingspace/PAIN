@@ -368,7 +368,7 @@ namespace PAIN {
             if (!std::filesystem::exists(file_path) || file_path.extension() == desc_ext) return std::nullopt;
 
             //Lamda function
-            auto organize_and_process = [&](std::filesystem::path const& file_path)->std::optional<IAsset> {
+            auto organize_and_process = [&](std::filesystem::path const& file_path)->std::optional<std::vector<IAsset>> {
                 //create asset info
                 Info asset;
                 asset.raw_path = file_path;
@@ -399,7 +399,7 @@ namespace PAIN {
                 asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
 
                 //Compile asset
-                compiler->processAsset(asset);
+                std::optional<std::vector<IAsset>> optional_assets = compiler->processAsset(asset);
 
                 //Craft asset interface
                 IAsset asset_interface;
@@ -409,7 +409,14 @@ namespace PAIN {
                 asset_interface.main_relative_path = asset.relative_path;
                 asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
 
-                return asset_interface;
+                if (optional_assets.has_value()) {
+                    optional_assets.value().push_back(asset_interface);
+                    return optional_assets.value();
+                }
+                else {
+                    std::vector<IAsset> vec = { asset_interface };
+                    return vec;
+                }
                 };
 
             //Check if directory
@@ -420,8 +427,12 @@ namespace PAIN {
 
                 //Recursive iterate
                 for (auto const& entry : std::filesystem::recursive_directory_iterator(file_path)) {
-                    auto asset = organize_and_process(file_path);
-                    if (asset.has_value()) vec.push_back(asset.value());
+                    auto assets = organize_and_process(file_path);
+                    if (assets.has_value()) {
+                        for (auto const& asset : assets.value()) {
+                            vec.push_back(asset);
+                        }
+                    }
                 }
 
                 if(!vec.empty()) return vec;
