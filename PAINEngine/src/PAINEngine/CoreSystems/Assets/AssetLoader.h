@@ -83,6 +83,9 @@ namespace PAIN {
 
 			//Import Font
 			std::shared_ptr<Fonts::FontFace> ImportFont(std::string const& virtual_path) const;
+
+			//Import material
+			std::shared_ptr<Material> ImportMaterial(std::string const& virtual_path) const;
 		};
 	}
 }

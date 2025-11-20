@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_lights.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17535703346242463972
+  },
+  "descriptor_version": 1,
+  "guid": "c68160de-59ae-b640-b479-6b1df64559bf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_lights.material"
+  }
+}

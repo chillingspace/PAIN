@@ -111,29 +111,6 @@ namespace PAIN {
             bool isAdditive; // For blending, layering
         };
 
-        // Material (PBR support)
-        struct Material {
-            std::string name{};
-            std::string diffuse_map_buf{};
-            std::string normalMap{};
-            std::string metallicMap{};
-            std::string roughnessMap{};
-            std::string aoMap{};
-            std::string emissionMap{};
-            std::string bumpMap{};
-            std::string heightMap{};
-            glm::vec3 baseColor{1.f, 0.f, 1.f};
-            float metallic{0.1f};
-            float roughness{0.1f};
-            float emission{};
-            // Additional: transparency, alpha mode, etc.
-
-            // opengl textures
-            unsigned int gl_diffuse_tex{};
-            unsigned int gl_ao_tex{};
-            unsigned int gl_emissive_tex{};
-        };
-
         // Submesh: supports multi-material, LODs
         struct Submesh {
             std::string name;
@@ -142,6 +119,45 @@ namespace PAIN {
             uint32_t indexCount;
             uint32_t vertexOffset;
             // Optionally: bounding box, LOD info
+        };
+
+        // Simple Material Asset - Read-only template
+        struct Material : public IAsset {
+
+            // PBR TEXTURE PATHS (Modern Workflow)
+            std::filesystem::path albedoTexturePath;      // Base color/Diffuse
+            std::filesystem::path normalTexturePath;      // Normal map
+            std::filesystem::path metallicTexturePath;    // Metallic map
+            std::filesystem::path roughnessTexturePath;   // Roughness map
+            std::filesystem::path aoTexturePath;          // Ambient Occlusion
+            std::filesystem::path emissiveTexturePath;    // Emission/Glow
+            std::filesystem::path heightTexturePath;      // Height/Parallax
+            std::filesystem::path opacityTexturePath;     // Alpha/Transparency
+
+            // ADVANCED PBR TEXTURES (Optional)
+            std::filesystem::path sheenTexturePath;       // Fabric sheen
+            std::filesystem::path clearCoatTexturePath;   // Clear coat
+            std::filesystem::path transmissionTexturePath;// Glass transmission
+
+            // LEGACY TEXTURES (For older formats)
+            std::filesystem::path specularTexturePath;    // Specular (Phong)
+            std::filesystem::path glossinessTexturePath;  // Glossiness (Specular workflow)
+            std::filesystem::path ambientTexturePath;     // Ambient (legacy)
+
+            // SPECIAL TEXTURES
+            std::filesystem::path lightmapTexturePath;    // Baked lighting
+            std::filesystem::path reflectionTexturePath;  // Reflection/Cubemap
+            std::filesystem::path displacementTexturePath;// Displacement
+            
+            //Materials
+            glm::vec3 baseColor{ 1.0f, 1.0f, 1.0f };
+            float metallic = 0.0f;
+            float roughness = 0.5f;
+            glm::vec3 emissive{ 0.0f, 0.0f, 0.0f };
+
+            //Variables
+            bool isTransparent = false;
+            bool doubleSided = false;
         };
 
         // Model class - full AAA-ready object
@@ -154,7 +170,9 @@ namespace PAIN {
             std::vector<Bone> skeleton;
             std::vector<MorphTarget> morphTargets;
             std::vector<AnimationClip> animations;
-            std::vector<Material> materials;
+
+            //Paths to materials
+            std::vector<std::filesystem::path> materials;
 
             // Extra: bounding box, LODs, instancing support, metadata, engine tags, etc.
             glm::vec3 aabbMin, aabbMax;

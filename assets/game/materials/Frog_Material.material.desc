@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Frog_Material.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 2091298263044947308
+  },
+  "descriptor_version": 1,
+  "guid": "3e8dc653-3d17-ab42-bb53-da040f01f965",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Frog_Material.material"
+  }
+}

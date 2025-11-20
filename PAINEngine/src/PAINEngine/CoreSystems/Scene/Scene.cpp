@@ -73,14 +73,17 @@ namespace PAIN {
 
 			//Get model
 			mdl = asset_manager->getAsset<Assets::Model>(ogre_smile_path);
-			mdl->materials[0].metallic = 0.f;
-			mdl->materials[0].roughness = 1.f;
-			mdl->materials[0].baseColor = { 1, 0, 1 };
+
+			//mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
+			//mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+			//mdl->materials[0].metallic = 0.f;
+			//mdl->materials[0].roughness = 1.f;
+			//mdl->materials[0].baseColor = { 1, 0, 1 };
 
 			// logging to check data
 			{
 				PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", mdl->vpath, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
-				PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
+				//PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
 			}
 
 			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
@@ -92,10 +95,13 @@ namespace PAIN {
 		std::filesystem::path ogre_path = "game\\models\\ogre.mesh";
 #endif
 		//Get model
-		mdl = asset_manager->getAsset<Assets::Model>(ogre_path);	
-		mdl->materials[0].metallic = 0.f;
-		mdl->materials[0].roughness = 1.f;
-		mdl->materials[0].baseColor = { 1, 0, 1 };
+		mdl = asset_manager->getAsset<Assets::Model>(ogre_path);
+		//mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
+		//mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+		//mdl->materials[0].metallic = 0.f;
+		//mdl->materials[0].roughness = 1.f;
+		//mdl->materials[0].baseColor = { 1, 0, 1 };
+		AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 		AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
 		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
@@ -109,12 +115,11 @@ namespace PAIN {
 		auto sdcc_diff = Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695");
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(sdcc_path);
-
-		mdl->materials[0].metallic = 1.f;
-		mdl->materials[0].roughness = 0.f;
-		mdl->materials[0].baseColor = { 1, 0, 1 };
-		AddObject(mdl, "sdcc", {5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {3.f, 3.f, 3.f}, sdcc_diff);
-
+		//mdl->materials[0].gl_diffuse_tex = sdcc_tex->gl_texture;
+		//mdl->materials[0].metallic = 1.f;
+		//mdl->materials[0].roughness = 0.f;
+		//mdl->materials[0].baseColor = { 1, 0, 1 };
+		AddObject(mdl, "sdcc", {5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {3.f, 3.f, 3.f});
 
 #ifdef PN_PLATFORM_WINDOWS
 		std::filesystem::path city_path = "game/models/city.mesh";
@@ -125,11 +130,11 @@ namespace PAIN {
 		auto city_diff = Assets::GUID{ "29fe999b-d257-bf41-879d-6d7578d43734" };
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(city_path);
-
-		mdl->materials[0].metallic = 0.f;
-		mdl->materials[0].roughness = 1.f;
-		mdl->materials[0].baseColor = { 0, 1, 0 };
-		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f }, city_diff);
+		//mdl->materials[0].gl_diffuse_tex = city_tex->gl_texture;
+		//mdl->materials[0].metallic = 0.f;
+		//mdl->materials[0].roughness = 1.f;
+		//mdl->materials[0].baseColor = { 0, 1, 0 };
+		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 
 #ifdef PN_PLATFORM_WINDOWS
 		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
@@ -138,9 +143,9 @@ namespace PAIN {
 #endif
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(crumpled_path);
-		mdl->materials[0].metallic = 0.f;
-		mdl->materials[0].roughness = 1.f;
-		mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+		//mdl->materials[0].metallic = 0.f;
+		//mdl->materials[0].roughness = 1.f;
+		//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
 		AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 
 

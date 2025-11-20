@@ -447,32 +447,44 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawShadows(const Assets::Model& mdl, const glm::mat4& M, const Light& l)
+	void WindowsRenderer::DrawShadows(const ModelRenderer& component, const glm::mat4& M, const Light& l)
 	{
-		if (!shadow_shader) return;
+		if (!shadow_shader || !component.cachedModelAsset || !component.castShadows) {
+			return;
+		}
 
 		shadow_shader->Bind();
-
 		shadow_shader->SetUniform("u_M", M);
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		//mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
-
 		glBindVertexArray(geometry_vao);
-
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
-
+		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
-		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		if (component.cachedModelAsset->submeshes.empty()) {
+			// No submeshes - draw entire model
+			glDrawElements(GL_TRIANGLES, component.cachedModelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+		}
+		else {
+			// Draw each submesh with correct offset
+			for (const auto& submesh : component.cachedModelAsset->submeshes) {
+				glDrawElements(
+					GL_TRIANGLES,
+					submesh.indexCount,
+					GL_UNSIGNED_INT,
+					(void*)(submesh.firstIndex * sizeof(unsigned int))
+				);
+			}
+		}
+
 		glBindVertexArray(0);
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, mdl.vpath);;
+			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, component.cachedModelAsset->vpath);
 		}
 	}
 
@@ -536,58 +548,95 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, const Assets::Model& mdl, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, const ModelRenderer& component, const glm::mat4& M)
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
 		}
 
-		if (!geometry_shader) return;
+		if (!geometry_shader || !component.cachedModelAsset) {
+			return;
+		}
+
+		const auto& modelAsset = component.cachedModelAsset;
 
 		geometry_shader->SetUniform("u_M", M);
-
-		geometry_shader->SetUniform("material.rough", mdl.materials[0].roughness);
-		geometry_shader->SetUniform("material.metal", mdl.materials[0].metallic);
-		geometry_shader->SetUniform("material.color", mdl.materials[0].baseColor);
-		geometry_shader->SetUniform("material.useTex", mdl.materials[0].gl_diffuse_tex ? 1.f : 0.f);
-		geometry_shader->SetUniform("material.alwaysLit", mdl.materials[0].gl_emissive_tex ? 1.f : 0.f);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
-		if (mdl.materials[0].gl_diffuse_tex) {
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_diffuse_tex);
-			geometry_shader->SetUniform("material.tex", 6);
-
-			if (GraphicsSettings::get().ao && mdl.materials[0].gl_ao_tex) {
-				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_ao_tex);
-				geometry_shader->SetUniform("material.ao_map", 7);
-				geometry_shader->SetUniform("material.use_ao", 1.f);
-			}
-			else {
-				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				geometry_shader->SetUniform("material.use_ao", 0.f);
-			}
-		}
-		else {
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE7);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		//mdl.Draw(geometry_vao, geometry_vbo, geometry_ebo);
-
+		// Bind component's VAO (already has vertex data uploaded)
 		glBindVertexArray(geometry_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
-
+		glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
 
-		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		// Render each submesh with its material
+		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
+			// TEMPORARY: Only render first submesh
+			const auto& submesh = modelAsset->submeshes[i];
+
+			//Check out of bounds
+			if (submesh.materialIndex >= component.materials.size()) {
+				PN_CORE_WARN("Submesh {} references material index {} but only {} materials available",
+					i, submesh.materialIndex, component.materials.size());
+				continue; // Skip this submesh
+			}
+
+			const MaterialInstance* material = &component.materials[submesh.materialIndex];
+
+			//Load material asset for properties
+			auto materialAsset = services->get<Assets::Manager>()->getAsset<Assets::Material>(material->materialGUID);
+
+			if (materialAsset) {
+				// Use override or asset default
+				glm::vec3 baseColor = material->useOverrides && material->baseColorOverride.x >= 0.0f
+					? material->baseColorOverride
+					: materialAsset->baseColor;
+
+				float metallic = material->useOverrides && material->metallicOverride >= 0.0f
+					? material->metallicOverride
+					: materialAsset->metallic;
+
+				float roughness = material->useOverrides && material->roughnessOverride >= 0.0f
+					? material->roughnessOverride
+					: materialAsset->roughness;
+
+				geometry_shader->SetUniform("material.rough", roughness);
+				geometry_shader->SetUniform("material.metal", metallic);
+				geometry_shader->SetUniform("material.color", baseColor);
+			}
+
+			// Bind textures from MaterialInstance
+			bool hasTexture = material->albedoTexture != 0;
+			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+			geometry_shader->SetUniform("material.alwaysLit", material->emissiveTexture ? 1.f : 0.f);
+
+			if (hasTexture) {
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, material->albedoTexture);
+				geometry_shader->SetUniform("material.tex", 6);
+
+				if (GraphicsSettings::get().ao && material->aoTexture != 0) {
+					glActiveTexture(GL_TEXTURE7);
+					glBindTexture(GL_TEXTURE_2D, material->aoTexture);
+					geometry_shader->SetUniform("material.ao_map", 7);
+					geometry_shader->SetUniform("material.use_ao", 1.0f);
+				}
+				else {
+					geometry_shader->SetUniform("material.use_ao", 0.0f);
+				}
+			}
+
+			// Draw this submesh
+			glDrawElements(
+				GL_TRIANGLES,
+				submesh.indexCount,
+				GL_UNSIGNED_INT,
+				(void*)(submesh.firstIndex * sizeof(unsigned int))
+			);
+		}
+
 		glBindVertexArray(0);
 
 		err = glGetError();
@@ -601,7 +650,7 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void WindowsRenderer::ReflectionPass(const Assets::Model& m)
+	void WindowsRenderer::ReflectionPass(const ModelRenderer& component)
 	{
 		//if (m.materials[0].reflection_type == m.materials[0].REFLECTION_TYPES::NONE) {
 		//	return;

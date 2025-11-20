@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "DefaultMaterial.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 6361441181414400984
+  },
+  "descriptor_version": 1,
+  "guid": "8357e7de-3280-bb42-a13e-05a73647f537",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\materials\\DefaultMaterial.material"
+  }
+}

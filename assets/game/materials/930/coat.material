@@ -1,0 +1,26 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": true
+    },
+    "properties": {
+        "baseColor": [
+            0.6798734068870544,
+            0.6798734068870544,
+            0.6798734068870544
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 1.0,
+        "roughness": 0.7163114547729492
+    },
+    "textures": {
+        "albedo": "game\\textures\\930\\textures\\coat_baseColor.png",
+        "metallic": "game\\textures\\930\\textures\\coat_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures\\paint_clearcoat_normal.png",
+        "roughness": "game\\textures\\930\\textures\\coat_metallicRoughness.png"
+    }
+}

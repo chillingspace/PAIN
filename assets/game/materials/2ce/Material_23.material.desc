@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Material_23.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 4135738406177458135
+  },
+  "descriptor_version": 1,
+  "guid": "eb85745d-92e9-2645-873e-176722a30b6e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\2ce\\Material_23.material"
+  }
+}
