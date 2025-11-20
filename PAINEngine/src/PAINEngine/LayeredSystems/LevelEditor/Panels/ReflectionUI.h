@@ -418,6 +418,9 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
 
     ImGui::PushID(&mat); // Use pointer as unique ID
 
+    //Render text
+    ImGui::Text("Select A Material");
+
     // Material Asset Selector
     if (panel) {
         changed |= DrawAssetSelectorField("Material Asset",
@@ -524,7 +527,7 @@ inline bool DrawField(const char* label, std::vector<PAIN::MaterialInstance>& ma
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.6f, 0.9f));
 
     std::string header = std::string(label) + " (" + std::to_string(materials.size()) + ")";
-    bool open = ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+    bool open = ImGui::CollapsingHeader(header.c_str());
 
     ImGui::PopStyleColor();
 
@@ -546,8 +549,8 @@ inline bool DrawField(const char* label, std::vector<PAIN::MaterialInstance>& ma
                 ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.2f, 0.3f, 0.4f, 0.9f));
                 ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.25f, 0.35f, 0.45f, 1.0f));
 
-                std::string slot_label = "Slot " + std::to_string(i) + " (Submesh " + std::to_string(i) + ")";
-                bool slot_open = ImGui::CollapsingHeader(slot_label.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+                std::string slot_label = "(Submesh " + std::to_string(i) + ")";
+                bool slot_open = ImGui::CollapsingHeader(slot_label.c_str());
 
                 ImGui::PopStyleColor(3);
 

@@ -132,6 +132,8 @@ namespace PAIN {
 
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
+                            ImGui::Text("Select A Model");
+
                             // Model Asset Selection
                             if (DrawAssetSelectorField("Model Asset",
                                 renderer.modelGUID,
@@ -145,7 +147,7 @@ namespace PAIN {
                             ImGui::Spacing();
 
                             // Rendering Options
-                            if (ImGui::CollapsingHeader("Rendering Options", ImGuiTreeNodeFlags_DefaultOpen)) {
+                            if (ImGui::CollapsingHeader("Rendering Options")) {
                                 ImGui::Indent(10.0f);
                                 changed |= ImGui::Checkbox("Visible", &renderer.visible);
                                 changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
