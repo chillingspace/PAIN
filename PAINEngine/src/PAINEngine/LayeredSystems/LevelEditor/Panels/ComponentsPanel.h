@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifdef _DEBUG
 #ifndef PAIN_EDITOR_COMPONENTS_PANEL_HPP
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
@@ -7,7 +7,7 @@
 #include "Utility/ECSUtility.h"
 
 namespace PAIN {
-	namespace Editor {		
+	namespace Editor {
 
 		namespace Panel {
 			class EntityPanel;
@@ -67,7 +67,6 @@ namespace PAIN {
 
 				std::function<void(std::any const&)> addComponentPopUp(std::string const& popup_id);
 
-
 				std::function<void(std::any const&)> removeComponentPopUp(std::string const& popup_id);
 
 				bool should_open_remove_popup = false;
@@ -78,7 +77,9 @@ namespace PAIN {
 				std::weak_ptr<EntityPanel> entities_panel;
 				std::weak_ptr<ResourcePanel> resources_panel;
 
+				// Transform tracking removed - now handled as static in .cpp
 			};
+
 
 		} // namespace Panel
 	} // namespace Editor

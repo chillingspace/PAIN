@@ -175,6 +175,11 @@ namespace PAIN {
             case GLFW_KEY_D: return "D";
             case GLFW_KEY_S: return "S";
             case GLFW_KEY_W: return "W";
+            case GLFW_KEY_RIGHT: return "KEY_R";
+            case GLFW_KEY_LEFT: return "KEY_L";
+            case GLFW_KEY_DOWN: return "KEY_D";
+            case GLFW_KEY_UP: return "KEY_U";
+
 
             case GLFW_KEY_C: return "C";
             case GLFW_KEY_E: return "E";
@@ -189,6 +194,13 @@ namespace PAIN {
             case 68: return "D";
             case 83: return "S";
             case 87: return "W";
+
+            case 262: return "KEY_R";
+            case 263: return "KEY_L";
+            case 264: return "KEY_D";
+            case 265: return "KEY_U";
+
+            case 67: return "C";
 
 #endif
 

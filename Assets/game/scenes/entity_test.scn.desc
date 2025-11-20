@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "entity_test.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 18223392738565546847
+  },
+  "descriptor_version": 1,
+  "guid": "c555a71e-90fb-e743-83ad-9746ba0b5816",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\entity_test.scn"
+  }
+}

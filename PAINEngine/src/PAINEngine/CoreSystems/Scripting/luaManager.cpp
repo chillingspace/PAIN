@@ -483,6 +483,11 @@ void LuaManager::bindEngineAPI() {
         auto g = api_->GetGroup(entityId);
         return g ? sol::make_object(lua_, *g) : sol::make_object(lua_, sol::nil);
         });
+    lua_.set_function("getEntitiesByTag", [this](const std::string& tag) {
+        if (!api_) return std::vector<entt::entity>{};
+        return api_->GetEntitiesByTag(tag);
+        });
+
 
     /* =========================================================================== */
     /*                                Transform                                    */
@@ -502,6 +507,17 @@ void LuaManager::bindEngineAPI() {
         return std::make_tuple(s.x, s.y, s.z);
         });
     lua_.set_function("setScale", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetScale(entityId, { x,y,z }); });
+    lua_.set_function("getRotation", [this](entt::entity entityId) {
+        if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
+        auto r = api_->GetRotation(entityId);
+        return std::make_tuple(r.x, r.y, r.z);   
+        });
+
+    lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
+        if (!api_) return;
+        api_->SetRotation(entityId, { x, y, z });   
+        });
+
 
     /* =========================================================================== */
     /*                                  Physics                                    */

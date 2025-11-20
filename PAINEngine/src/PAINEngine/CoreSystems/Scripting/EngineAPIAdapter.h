@@ -65,6 +65,7 @@ public:
     void AssignGroup(entt::entity entityId, std::string group) override;
     void UnassignGroup(entt::entity entityId) override;
     std::optional<std::string> GetGroup(entt::entity entityId) override;
+    std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) override;
 
     /* =========================================================================== */
     /*                                Transform                                    */
@@ -73,6 +74,8 @@ public:
     void SetPosition(entt::entity entityId, glm::vec3 p) override;
     glm::vec3 GetScale(entt::entity entityId) override;
     void SetScale(entt::entity entityId, glm::vec3 s) override;
+    glm::vec3 GetRotation(entt::entity entityId) override;
+    void SetRotation(entt::entity entityId, glm::vec3 r) override;
 
     /* =========================================================================== */
     /*                                  Physics                                    */

@@ -50,36 +50,38 @@ namespace PAIN {
                     }
 
                     if (strlen(entity_name) > 0 && (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
-                        Action create;
-                        std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(entity_name);
+                        // Store name in a string before creating action
+                        std::string final_name = std::string(entity_name);
 
-                        create.do_action = [&, shared_id]() {
-                            auto ecs = services->get<ECS::Controller>();
-                            auto scene = services->get<Scene>();
+                        command_manager->executeAction(Action{
+                            [this, final_name]() {  // Capture by value
+                                auto ecs = services->get<ECS::Controller>();
+                                auto scene = services->get<Scene>();
 
-                            glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
-                            glm::quat rot = { 1.f, 0.f, 0.f, 0.f };
-                            glm::vec3 scale = { 1.f, 1.f, 1.f };
+                                glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
+                                glm::quat rot = { 1.f, 0.f, 0.f, 0.f };
+                                glm::vec3 scale = { 1.f, 1.f, 1.f };
 
-                            entt::entity entity = ecs->createEntity();
-                            ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
-                            ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-                            ecs->addEntityComponent(entity, Hierarchy{});
-                            if (scene) {
-                                //Get first model GUID to init
-                                auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
-                                ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
-                            }
-                            };
+                                entt::entity entity = ecs->createEntity();
+                                ecs->addEntityComponent(entity, MetaData::EntityName{ final_name });
+                                ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+                                ecs->addEntityComponent(entity, Hierarchy{});
+                                if (scene) {
+                                    auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                    ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
+                                }
+                            },
+                            [this, final_name]() {  // Capture by value
+                                auto metadata = services->get<MetaData::Service>();
+                                auto ecs = services->get<ECS::Controller>();
+                                auto entity = metadata->getEntityByName(final_name);
+                                if (entity.has_value()) {
+                                    ecs->destroyEntity(entity.value());
+                                }
+                            },
+                            "Create Entity: " + final_name  // Description for Debug Panel
+                            });
 
-                        create.undo_action = [&, shared_id]() {
-                            auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
-                            if (entity.has_value()) {
-                                PN_ECS_SERVICE->destroyEntity(entity.value());
-                            }
-                            };
-
-                        command_manager->executeAction(std::move(create));
                         entity_name[0] = '\0';
                         closePopUp(popup_id);
                     }
@@ -92,9 +94,11 @@ namespace PAIN {
                     };
             }
 
+
             std::function<void(std::any const&)> EntityPanel::removeEntityPopUp(std::string const& popup_id) {
                 return [this, popup_id](std::any const& data) {
-                    std::string selected_name = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(selected_entity).value().get().name;
+                    auto ecs = services->get<ECS::Controller>();
+                    std::string selected_name = ecs->getEntityComponent<MetaData::EntityName>(selected_entity).value().get().name;
 
                     ImGui::Spacing();
                     ImGui::TextWrapped("Are you sure you want to remove '%s'?", selected_name.c_str());
@@ -107,23 +111,28 @@ namespace PAIN {
                     float button_width = ImGui::GetContentRegionAvail().x * 0.48f;
 
                     if (ImGui::Button("Remove", ImVec2(button_width, 40))) {
-                        Action remove;
-                        std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(selected_name);
+                        // Capture entity and name by value
                         entt::entity entity_to_remove = selected_entity;
+                        std::string entity_name = selected_name;
 
-                        remove.undo_action = [&, shared_id, entity_to_remove]() {
-                            // TODO: Need to use clone
-                            };
+                        // TODO: Serialize entity for proper undo
+                        // For now, undo is not implemented
 
-                        remove.do_action = [&, entity_to_remove]() {
-                            if (PN_ECS_SERVICE->checkEntity(entity_to_remove)) {
-                                removeEntityWithChildren(entity_to_remove);
-                            }
-                            selected_entity = entt::null;
-                            force_refresh = true;
-                            };
+                        command_manager->executeAction(Action{
+                            [this, entity_to_remove]() {  // Capture by value
+                                auto ecs = services->get<ECS::Controller>();
+                                if (ecs->checkEntity(entity_to_remove)) {
+                                    removeEntityWithChildren(entity_to_remove);
+                                }
+                                selected_entity = entt::null;
+                                force_refresh = true;
+                            },
+                            []() {  // Empty undo for now
+                                PN_CORE_WARN("Undo for entity deletion not yet implemented");
+                            },
+                            "Delete Entity: " + entity_name  // Description
+                            });
 
-                        command_manager->executeAction(std::move(remove));
                         closePopUp(popup_id);
                     }
 
@@ -136,6 +145,7 @@ namespace PAIN {
                     };
             }
 
+
             std::function<void(std::any const&)> EntityPanel::cloneEntityPopUp(std::string const& popup_id) {
                 return [this, popup_id](std::any const& data) {
                     static char entity_name[128] = "";
@@ -145,34 +155,36 @@ namespace PAIN {
                     }
 
                     if (strlen(entity_name) > 0 && (ImGui::Button("Clone") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
-                        Action clone;
-                        std::shared_ptr<std::string> shared_id = std::make_shared<std::string>(entity_name);
+                        // Capture values before lambda
+                        std::string final_name = std::string(entity_name);
                         entt::entity clone_entity = selected_entity;
 
-                        clone.do_action = [&, shared_id, clone_entity]() {
-                            if (PN_ECS_SERVICE->checkEntity(clone_entity)) {
-                                entt::entity new_id = PN_ECS_SERVICE->cloneEntity(clone_entity);
+                        command_manager->executeAction(Action{
+                            [this, final_name, clone_entity]() {  // Capture by value
+                                auto ecs = services->get<ECS::Controller>();
+                                auto metadata = services->get<MetaData::Service>();
 
-                                if (!shared_id->empty() && PN_METADATA_SERVICE->isNameValid(*shared_id)) {
-                                    PN_METADATA_SERVICE->setEntityName(new_id, *shared_id);
+                                if (ecs->checkEntity(clone_entity)) {
+                                    entt::entity new_id = ecs->cloneEntity(clone_entity);
+
+                                    if (!final_name.empty() && metadata->isNameValid(final_name)) {
+                                        metadata->setEntityName(new_id, final_name);
+                                    }
+
+                                    // Clone children recursively
+                                    cloneEntityChildren(clone_entity, new_id);
                                 }
-                                else {
-                                    shared_id->assign(PN_METADATA_SERVICE->getEntityName(new_id));
+                            },
+                            [this, final_name]() {  // Capture by value
+                                auto metadata = services->get<MetaData::Service>();
+                                auto entity = metadata->getEntityByName(final_name);
+                                if (entity.has_value()) {
+                                    removeEntityWithChildren(entity.value());
                                 }
+                            },
+                            "Clone Entity: " + final_name  // Description
+                            });
 
-                                // Clone children recursively
-                                cloneEntityChildren(clone_entity, new_id);
-                            }
-                            };
-
-                        clone.undo_action = [&, shared_id]() {
-                            auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
-                            if (entity.has_value()) {
-                                removeEntityWithChildren(entity.value());
-                            }
-                            };
-
-                        command_manager->executeAction(std::move(clone));
                         entity_name[0] = '\0';
                         closePopUp(popup_id);
                     }
@@ -184,6 +196,7 @@ namespace PAIN {
                     }
                     };
             }
+
 
             void EntityPanel::ungroupEntity(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
@@ -584,13 +597,34 @@ namespace PAIN {
 
                     if (ImGui::MenuItem("Delete", "Del")) {
                         PN_CORE_INFO("[EntityPanel] Deleting entity {}", static_cast<uint32_t>(entity_id));
-                        removeEntityWithChildren(entity_id);
-                        if (selected_entity == entity_id) {
-                            selected_entity = entt::null;
+
+                        // Get entity name for description
+                        std::string entity_name = "Unnamed";
+                        auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(entity_id);
+                        if (name_comp.has_value()) {
+                            entity_name = name_comp.value().get().name;
                         }
-                        force_refresh = true;
+
+                        // Capture entity by value
+                        entt::entity entity_to_delete = entity_id;
+
+                        command_manager->executeAction(Action{
+                            [this, entity_to_delete]() {
+                                removeEntityWithChildren(entity_to_delete);
+                                if (selected_entity == entity_to_delete) {
+                                    selected_entity = entt::null;
+                                }
+                                force_refresh = true;
+                            },
+                            []() {
+                                PN_CORE_WARN("Undo for entity deletion not yet implemented");
+                            },
+                            "Delete Entity: " + entity_name
+                            });
+
                         ImGui::CloseCurrentPopup();
                     }
+
 
                     ImGui::EndPopup();
                 }

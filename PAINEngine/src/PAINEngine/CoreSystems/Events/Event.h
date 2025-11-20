@@ -100,7 +100,7 @@ namespace PAIN {
 		public:
 
 			//Explicit dispatcher constructor
-			explicit Dispatcher(Event& event) : event{ event }{}
+			explicit Dispatcher(Event& event) : event{ event } {}
 
 			// Callable must be: bool(T& e)
 			template<typename T>

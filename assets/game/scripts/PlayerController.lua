@@ -251,7 +251,7 @@
 -- end
 
 
--- -- Test_19 play sound
+-- Test_19 play sound
 registerUpdate(function(dt)
     if wasKeyPressed(257) then -- enter
         log("[AudioTest] ENTER pressed, playing sound")
@@ -271,7 +271,8 @@ end)
 -- -- setPosition(ogre_right, 0, 0, 0)
 -- -- setPosition(ogre_left, 0, 0, 0)
 
--- registerOnCollision(function(self, other) print("filtered", self, other) end, ogre_left)
+-- registerOnCollision(function(self, other) 
+--     print("filtered", self, other) end, ogre_left)
 -- -- registerOnCollision(function(self, other) print("any", self, other) end, nil)
 
 
