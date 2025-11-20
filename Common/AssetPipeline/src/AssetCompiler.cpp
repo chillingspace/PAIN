@@ -1022,6 +1022,7 @@ namespace PAIN {
                 mat_asset.name = mat_asset.raw_path.filename().string();
                 mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
                 mat_asset.type = getAssetType(mat_asset.raw_path);
+                mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
                 processAsset(mat_asset);
 
                 //Craft asset interface
