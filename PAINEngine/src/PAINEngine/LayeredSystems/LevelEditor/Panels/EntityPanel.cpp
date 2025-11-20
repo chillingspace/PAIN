@@ -9,7 +9,9 @@
  *********************************************************************/
 
 #include "pch.h"
+#include "../Editor.h"
 #include "EntityPanel.h"
+#include "ResourcePanel.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -394,8 +396,22 @@ namespace PAIN {
 
                 ImGui::End();
 
+                // Ensure resource panel reference is valid
+                auto resource_panel = resources_panel.lock();
+                if (!resource_panel) {
+                    auto editor = services->get<PAIN::Editor::Editor>();
+                    if (editor) {
+                        auto rp = editor->getPanel<Panel::ResourcePanel>();
+                        if (rp) {
+                            resources_panel = rp;
+                            resource_panel = rp;
+                        }
+                    }
+                }
+
                 // Reset entity changed flag
                 if (b_entity_changed) {
+                    resource_panel->setSelectedFilePath("");
                     b_entity_changed = false;
                 }
             }

@@ -11,6 +11,7 @@ namespace PAIN {
 
 		namespace Panel {
 			class EntityPanel;
+			class ResourcePanel;
 
 			class ComponentsPanel : public IPanel {
 			public:
@@ -75,6 +76,7 @@ namespace PAIN {
 				std::unordered_map<std::string, std::function<void(ComponentsPanel&, void*)>> comps_ui;
 
 				std::weak_ptr<EntityPanel> entities_panel;
+				std::weak_ptr<ResourcePanel> resources_panel;
 
 			};
 

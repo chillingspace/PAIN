@@ -101,6 +101,8 @@ namespace PAIN {
                 std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
 
                 void drawEntityHierarchy(entt::entity entity_id, int depth);
+
+                std::weak_ptr<ResourcePanel> resources_panel;
             };
 
         } // namespace Panel

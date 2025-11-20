@@ -3,6 +3,8 @@
 
 #include "pch.h"
 #include "ResourcePanel.h"
+#include "EntityPanel.h"
+#include "../Editor.h"
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
@@ -566,6 +568,30 @@ namespace PAIN {
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 						open_files.push_back(file);
 					}
+					
+					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
+						setSelectedFilePath(file.path.string());
+
+						auto entity_panel = entities_panel.lock();
+						if (!entity_panel) {
+							// Recover weak_ptr if it expired (happens on panel reload/scene change)
+							auto editor = services->get<PAIN::Editor::Editor>();
+							if (editor) {
+								auto ep = editor->getPanel<Panel::EntityPanel>();
+								if (ep) {
+									entities_panel = ep;
+									entity_panel = ep;
+								}
+							}
+						}
+
+						entity_panel->unselectEntity();
+
+					}
+					else if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+						setSelectedFilePath("");
+					}
+
 					ImGui::PopStyleColor();
 
 					//Render context
@@ -737,6 +763,14 @@ namespace PAIN {
 						}
 					}
 				}*/
+			}
+
+			std::string ResourcePanel::getSelectedFilePath() {
+				return selected_filepath;
+			}
+
+			void ResourcePanel::setSelectedFilePath(std::string filepath) {
+				selected_filepath = filepath;
 			}
 
 			void ResourcePanel::renderFileEditor() {

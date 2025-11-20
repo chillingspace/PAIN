@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
 #include "EntityPanel.h"
+#include "ResourcePanel.h"
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
@@ -68,6 +69,7 @@ namespace PAIN {
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {
                     entities_panel = editor->getPanel<EntityPanel>();
+                    resources_panel = editor->getPanel<ResourcePanel>();
                 }
 
                 // Register Add Component popup
@@ -274,6 +276,8 @@ namespace PAIN {
                     return;
                 }
 
+                // if lua script active.
+
                 // Get all component names for this entity
                 auto component_names = ecs->getEntityComponentNames(entity);
 
@@ -380,6 +384,7 @@ namespace PAIN {
             }
 
             void ComponentsPanel::onUpdate(AppTiming timing) {
+
                 auto ecs = services->get<ECS::Controller>();
                 if (!ecs) {
                     ImGui::Spacing();
@@ -411,6 +416,20 @@ namespace PAIN {
                     }
                 }
 
+                // Ensure resource panel reference is valid
+                auto resource_panel = resources_panel.lock();
+                if (!resource_panel) {
+                    auto editor = services->get<PAIN::Editor::Editor>();
+                    if (editor) {
+                        auto rp = editor->getPanel<Panel::ResourcePanel>();
+                        if (rp) {
+                            resources_panel = rp;
+                            resource_panel = rp;
+                        }
+                    }
+                }
+
+
                 if (!entity_panel) {
                     ImGui::Spacing();
                     ImGui::TextDisabled("Entity Panel not available");
@@ -419,9 +438,17 @@ namespace PAIN {
 
                 // Get selected entity
                 entt::entity selected = entity_panel->getSelectedEntity();
+                auto selected_filepath = resource_panel->getSelectedFilePath();
+
+                if (!selected_filepath.empty()) {
+                    ImGui::Text("Lua Detected");
+                    ImGui::Text("%s", selected_filepath.c_str());
+                    return;
+                }
 
                 // No entity selected - show placeholder
                 if (selected == entt::null || !ecs->checkEntity(selected)) {
+
                     ImGui::Spacing();
                     ImGui::Spacing();
 
