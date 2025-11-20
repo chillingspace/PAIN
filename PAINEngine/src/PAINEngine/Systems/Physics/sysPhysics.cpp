@@ -257,6 +257,15 @@ namespace PAIN {
 						}
 					}
 
+					// Check and apply motion type update
+					JPH::EMotionType desired_motion_type;
+					switch (rigidBody.motion_type) {
+					case MotionType::Static:    desired_motion_type = JPH::EMotionType::Static; break;
+					case MotionType::Kinematic: desired_motion_type = JPH::EMotionType::Kinematic; break;
+					case MotionType::Dynamic:
+					default:                    desired_motion_type = JPH::EMotionType::Dynamic; break;
+					}
+
 					// Lock body for reading
 					{
 						// Lock the body for reading
@@ -266,6 +275,11 @@ namespace PAIN {
 							const JPH::RVec3 position = body.GetPosition();
 							const JPH::Quat rotation = body.GetRotation();
 
+							// Check motion type mismatch
+							if (body.GetMotionType() != desired_motion_type) {
+								// Will update after releasing lock
+							}
+
 							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						}
@@ -274,6 +288,11 @@ namespace PAIN {
 						}
 					}
 					// end lock
+
+					JPH::EMotionType current_motion_type = body_interface.GetMotionType(rigidBody.bodyID);
+					if (current_motion_type != desired_motion_type) {
+						body_interface.SetMotionType(rigidBody.bodyID, desired_motion_type, JPH::EActivation::Activate);
+					}
 
 					if (registry.all_of<Audio::AudioSource, MetaData::EntityName>(entity)) {
 						auto& name = registry.get<MetaData::EntityName>(entity);
@@ -313,6 +332,13 @@ namespace PAIN {
 								  .5f * transform.scale.z),
 								  .0f);
 
+					JPH::EMotionType motion_type;
+					switch (rigidBody.motion_type) {
+					case MotionType::Static:    motion_type = JPH::EMotionType::Static; break;
+					case MotionType::Kinematic: motion_type = JPH::EMotionType::Kinematic; break;
+					default:                    motion_type = JPH::EMotionType::Dynamic; break;
+					}
+
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
 						boxShape,
@@ -320,9 +346,11 @@ namespace PAIN {
 								   transform.position.y, 
 								   transform.position.z),
 						rotationQuat,
-						JPH::EMotionType::Dynamic,
+						motion_type,
 						rigidBody.layer
 					);
+
+					settings.mAllowDynamicOrKinematic = true;  // Allow runtime motion type changes
 
 					// tag body with owning entt::entity so contact listener can map back
 					settings.mUserData = static_cast<uint64_t>(static_cast<uint32_t>(entity));
@@ -349,15 +377,6 @@ namespace PAIN {
 
 			auto& transform = view.get<Transform>(targetEntity);
 			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
-
-			//// Lock body for reading
-			//const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), rigidBody.bodyID);
-			//if (!lock.Succeeded()) {
-			//	PN_CORE_WARN("Failed to lock body for reading");
-			//	return;
-			//}
-
-			//const JPH::Body& body = lock.GetBody();
 
 			// Ground check
 			glm::f32 half_height = 0.5f * transform.scale.y;

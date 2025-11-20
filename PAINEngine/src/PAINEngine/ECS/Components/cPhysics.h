@@ -36,6 +36,12 @@ namespace PAIN {
 		// Wrapper for Jolt ObjectLayer to allow reflection and serialization
         class System;
 
+        enum class MotionType {
+            Static,
+            Dynamic,
+            Kinematic
+        };
+
         struct PhysicsLayer {
             JPH::ObjectLayer value = Layer::MOVING;
             JPH::BodyID* bodyID_ptr = nullptr;  // Pointer to parent's bodyID
@@ -61,7 +67,7 @@ namespace PAIN {
 			JPH::BodyID bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
 			bool b_is_dynamic;  
             PhysicsLayer layer = Layer::MOVING;
-
+            MotionType motion_type = MotionType::Dynamic;
             // Constructor to link layer to bodyID
             RigidBody3D() {
                 layer.setBodyReference(bodyID);
@@ -250,6 +256,7 @@ REFL_FIELD(mass)
 //REFL_FIELD(bodyID)   // Uneditable; Uncommenting this causes issues with the serialization
 REFL_FIELD(b_is_dynamic)
 REFL_FIELD(layer)
+REFL_FIELD(motion_type)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);

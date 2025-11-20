@@ -50,7 +50,6 @@ namespace PAIN {
 
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
-                //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
 
                  // ---- Script ----
                 registerCompUIFunc<PAIN::Script>("Script",
@@ -73,8 +72,12 @@ namespace PAIN {
                 // Register Add Component popup
                 registerPopUp("AddComponent", addComponentPopUp("AddComponent"));
 
+
                 // Register Remove Component popup
                 registerPopUp("RemoveComponent", removeComponentPopUp("RemoveComponent"));
+
+				// Register RigidBody3D Config popup
+                registerPopUp("AddRigidBody3DConfig", addRigidBodyConfigPopUp("AddRigidBody3DConfig"));
             }
 
             void ComponentsPanel::nextWindowSettings() {
@@ -147,9 +150,16 @@ namespace PAIN {
                         found_any = true;
 
                         if (ImGui::Selectable(comp_name.c_str(), false)) {
-                            ecs->addComponentByName(selected_entity, comp_name);
-                            search_filter[0] = '\0';
-                            closePopUp(popup_id);
+                            if (comp_name == "RigidBody3D") {
+                                openPopUp("AddRigidBody3DConfig");
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
+                            else {
+                                ecs->addComponentByName(selected_entity, comp_name);
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
                         }
                     }
 
@@ -263,6 +273,38 @@ namespace PAIN {
                         closePopUp(popup_id);
                     }
                 };
+            }
+
+            std::function<void(std::any const&)> ComponentsPanel::addRigidBodyConfigPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+                    auto ecs = services->get<ECS::Controller>();
+                    auto entity_panel = entities_panel.lock();
+                    if (!entity_panel) return;
+
+                    entt::entity selected_entity = entity_panel->getSelectedEntity();
+                    if (!ecs->checkEntity(selected_entity)) return;
+
+                    static int motion_type_idx = 1; // Default to Dynamic
+                    const char* motion_names[] = { "Static", "Dynamic", "Kinematic" };
+
+                    ImGui::Text("Select Motion Type:");
+                    ImGui::Combo("Motion Type", &motion_type_idx, motion_names, IM_ARRAYSIZE(motion_names));
+
+                    ImGui::Spacing();
+                    if (ImGui::Button("Add RigidBody3D", ImVec2(-1, 0))) {
+                        // Add the component
+
+                        if (!ecs->hasComponentByName(selected_entity, "RigidBody3D")) {
+                            Physics::RigidBody3D rb;
+                            rb.motion_type = static_cast<PAIN::Physics::MotionType>(motion_type_idx);
+                            ecs->addEntityComponent<PAIN::Physics::RigidBody3D>(selected_entity, std::move(rb));
+                        }
+                        closePopUp(popup_id);
+                    }
+                    if (ImGui::Button("Cancel", ImVec2(-1, 0))) {
+                        closePopUp(popup_id);
+                    }
+                    };
             }
 
             void ComponentsPanel::renderEntityComponents(entt::entity entity) {
