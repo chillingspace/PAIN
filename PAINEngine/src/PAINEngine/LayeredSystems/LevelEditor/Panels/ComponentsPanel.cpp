@@ -124,11 +124,61 @@ namespace PAIN {
                         }
                     });
 
-
-
                 // ---- ModelRenderer ---- (UNCHANGED)
-                registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
-                    [this](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
+                    registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
+                        [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
+                            // Model GUID selector (using reflection)
+                            bool changed = false;
+
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                            // Model Asset Selection
+                            if (DrawAssetSelectorField("Model Asset",
+                                renderer.modelGUID,
+                                PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
+                                panel)) {
+                                changed = true;
+                            }
+
+                            ImGui::Spacing();
+                            ImGui::Separator();
+                            ImGui::Spacing();
+
+                            // Rendering Options
+                            if (ImGui::CollapsingHeader("Rendering Options", ImGuiTreeNodeFlags_DefaultOpen)) {
+                                ImGui::Indent(10.0f);
+                                changed |= ImGui::Checkbox("Visible", &renderer.visible);
+                                changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
+                                changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
+                                ImGui::Unindent(10.0f);
+                            }
+
+                            ImGui::Spacing();
+                            ImGui::Separator();
+                            ImGui::Spacing();
+
+                            // MATERIALS SECTION - This is where the magic happens!
+                            if (DrawField("Materials", renderer.materials, &panel)) {
+                                changed = true;
+                            }
+
+                            ImGui::PopStyleVar();
+
+                            // Optional: Add animation info if present
+                            if (renderer.currentAnimationIndex >= 0) {
+                                ImGui::Spacing();
+                                ImGui::Separator();
+                                ImGui::Spacing();
+
+                                if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
+                                    ImGui::BeginDisabled();
+                                    ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
+                                    ImGui::Text("Animation Time: %.2f", renderer.animationTime);
+                                    ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
+                                    ImGui::EndDisabled();
+                                }
+                            }
+                        });
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

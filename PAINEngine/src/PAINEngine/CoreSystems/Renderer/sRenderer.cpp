@@ -82,6 +82,7 @@ namespace PAIN {
 
 			if (materialAsset) {
 				matInstance.materialGUID = materialAsset->guid;
+				matInstance.prevMaterialGUID = matInstance.materialGUID;
 
 				if (!materialAsset->albedoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->albedoTexturePath)) {
 					auto texAsset = assetManager->getAsset<Assets::Texture>(

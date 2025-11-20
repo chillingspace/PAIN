@@ -548,7 +548,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, const ModelRenderer& component, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -558,6 +558,8 @@ namespace PAIN {
 		if (!geometry_shader || !component.cachedModelAsset) {
 			return;
 		}
+
+		auto assetManager = services->get<Assets::Manager>();
 
 		const auto& modelAsset = component.cachedModelAsset;
 
@@ -583,22 +585,120 @@ namespace PAIN {
 				continue; // Skip this submesh
 			}
 
-			const MaterialInstance* material = &component.materials[submesh.materialIndex];
+			MaterialInstance* material = &component.materials[submesh.materialIndex];
 
 			//Load material asset for properties
 			auto materialAsset = services->get<Assets::Manager>()->getAsset<Assets::Material>(material->materialGUID);
 
+			//Check for updates in the render material
+			if (material->prevMaterialGUID != material->materialGUID) {
+
+				//Update prev GUID
+				material->prevMaterialGUID = material->materialGUID;
+
+				//Reset textures
+				material->albedoTexture = 0;
+				material->normalTexture = 0;
+				material->metallicTexture = 0;
+				material->roughnessTexture = 0;
+				material->aoTexture = 0;
+				material->emissiveTexture = 0;
+				material->heightTexture = 0;
+				material->opacityTexture = 0;
+
+				//Get new textures if available in material
+				if (!materialAsset->albedoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->albedoTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->albedoTexturePath
+					);
+					if (texAsset) {
+						material->albedoTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->normalTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->normalTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->normalTexturePath
+					);
+					if (texAsset) {
+						material->normalTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->metallicTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->metallicTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->metallicTexturePath
+					);
+					if (texAsset) {
+						material->metallicTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->roughnessTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->roughnessTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->roughnessTexturePath
+					);
+					if (texAsset) {
+						material->roughnessTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->aoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->aoTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->aoTexturePath
+					);
+					if (texAsset) {
+						material->aoTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->emissiveTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->emissiveTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->emissiveTexturePath
+					);
+					if (texAsset) {
+						material->emissiveTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->heightTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->heightTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->heightTexturePath
+					);
+					if (texAsset) {
+						material->heightTexture = texAsset->gl_texture;
+					}
+				}
+
+				if (!materialAsset->opacityTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->opacityTexturePath)) {
+					auto texAsset = assetManager->getAsset<Assets::Texture>(
+						materialAsset->opacityTexturePath
+					);
+					if (texAsset) {
+						material->opacityTexture = texAsset->gl_texture;
+					}
+				}
+
+				//Reset overrides
+				material->baseColorOverride = { 1.0f, 1.0f, 1.0f };
+				material->metallicOverride = 0.0f;
+				material->roughnessOverride = 0.5f;
+				material->emissiveOverride = { 0.0f, 0.0f, 0.0f };
+				material->useOverrides = false;
+			}
+
+			//Check material asset
 			if (materialAsset) {
 				// Use override or asset default
-				glm::vec3 baseColor = material->useOverrides && material->baseColorOverride.x >= 0.0f
+				glm::vec3 baseColor = material->useOverrides
 					? material->baseColorOverride
 					: materialAsset->baseColor;
 
-				float metallic = material->useOverrides && material->metallicOverride >= 0.0f
+				float metallic = material->useOverrides
 					? material->metallicOverride
 					: materialAsset->metallic;
 
-				float roughness = material->useOverrides && material->roughnessOverride >= 0.0f
+				float roughness = material->useOverrides
 					? material->roughnessOverride
 					: materialAsset->roughness;
 

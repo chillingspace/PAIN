@@ -9,6 +9,7 @@ namespace PAIN {
     //Material instance
     struct MaterialInstance {
         //material GUID
+        Assets::GUID prevMaterialGUID;
         Assets::GUID materialGUID;
 
         // GPU texture handles (uploaded once, reused)
@@ -37,10 +38,10 @@ namespace PAIN {
         //unsigned int displacementTexture = 0;
 
         // Per-instance overrides
-        glm::vec3 baseColorOverride{ -1.0f };
-        float metallicOverride = -1.0f;
-        float roughnessOverride = -1.0f;
-        glm::vec3 emissiveOverride{ -1.0f };
+        glm::vec3 baseColorOverride{ 1.0f, 1.0f, 1.0f };
+        float metallicOverride = 0.0f;
+        float roughnessOverride = 0.5f;
+        glm::vec3 emissiveOverride{ 0.0f, 0.0f, 0.0f };
 
         bool useOverrides = false;
     };
@@ -116,17 +117,17 @@ namespace PAIN {
 // REFLECTION (Editor Integration)
 // ============================================
 REFL_TYPE(PAIN::MaterialInstance)
-REFL_FIELD(materialGUID)
-REFL_FIELD(baseColorOverride)
-REFL_FIELD(metallicOverride)
-REFL_FIELD(roughnessOverride)
-REFL_FIELD(emissiveOverride)
-REFL_FIELD(useOverrides)
+REFL_FIELD(materialGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material))
+REFL_FIELD(useOverrides, PAIN::Editor::Attributes::Tooltip("Enable to override material properties"))
+REFL_FIELD(baseColorOverride, PAIN::Editor::Attributes::DisplayName("Base Color"))
+REFL_FIELD(metallicOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Metallic"))
+REFL_FIELD(roughnessOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Roughness"))
+REFL_FIELD(emissiveOverride, PAIN::Editor::Attributes::DisplayName("Emissive Color"))
 REFL_END
 
 REFL_TYPE(PAIN::ModelRenderer)
 REFL_FIELD(modelGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
-//REFL_FIELD(materials)
+REFL_FIELD(materials)
 REFL_FIELD(visible)
 REFL_FIELD(castShadows)
 REFL_FIELD(receiveShadows)

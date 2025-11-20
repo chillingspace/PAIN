@@ -51,7 +51,7 @@ namespace PAIN {
 		void EndShadowPass();
 
 		void BeginGeometryPass(std::shared_ptr<Scene> scene);
-		void DrawGeometry(std::shared_ptr<Scene> scene, const ModelRenderer& component, const glm::mat4& M);
+		void DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
 
 
