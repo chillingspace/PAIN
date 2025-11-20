@@ -19,51 +19,146 @@ namespace PAIN {
 
             void ComponentsPanel::onAttach() {
                 // Register component-specific UI
-                
-                // ---- Transform ----
-                registerCompUIFunc<PAIN::Transform>("Transform",
-                    [](ComponentsPanel&, PAIN::Transform& as) { DrawWithReflection(as); });
 
-                // ---- ModelRenderer ----
+// ---- Transform ---- (FIXED: Skip detection after undo/redo)
+                registerCompUIFunc<PAIN::Transform>("Transform",
+                    [this](ComponentsPanel& panel, PAIN::Transform& transform_ref) {
+                        static struct {
+                            entt::entity entity = entt::null;
+                            Transform original_transform;
+                            Transform last_frame_transform;
+                            bool is_editing = false;
+                            int skip_frames = 0;  // NEW: Skip detection for N frames
+                        } state;
+
+                        auto entity_panel = entities_panel.lock();
+                        if (!entity_panel) {
+                            DrawWithReflection(transform_ref);
+                            return;
+                        }
+
+                        entt::entity selected = entity_panel->getSelectedEntity();
+                        if (selected == entt::null) {
+                            DrawWithReflection(transform_ref);
+                            return;
+                        }
+
+                        // NEW: Skip detection if undo/redo is executing
+                        if (command_manager && command_manager->isExecutingUndoRedo()) {
+                            state.skip_frames = 2;  // Skip next 2 frames
+                            state.is_editing = false;
+                            DrawWithReflection(transform_ref);
+                            return;
+                        }
+
+                        // NEW: Decrement skip counter
+                        if (state.skip_frames > 0) {
+                            state.skip_frames--;
+                            DrawWithReflection(transform_ref);
+                            return;
+                        }
+
+                        // Start tracking when any ImGui item becomes active
+                        if (ImGui::IsAnyItemActive() && !state.is_editing) {
+                            state.entity = selected;
+                            state.original_transform = transform_ref;
+                            state.last_frame_transform = transform_ref;
+                            state.is_editing = true;
+                        }
+
+                        // Draw the reflection UI
+                        DrawWithReflection(transform_ref);
+
+                        // Detect if transform changed this frame
+                        if (state.is_editing) {
+                            if (state.last_frame_transform.position != transform_ref.position ||
+                                state.last_frame_transform.rotation != transform_ref.rotation ||
+                                state.last_frame_transform.scale != transform_ref.scale) {
+                                state.last_frame_transform = transform_ref;
+                            }
+                        }
+
+                        // When user stops editing
+                        if (state.is_editing && !ImGui::IsAnyItemActive() && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                            // Check if anything actually changed
+                            if (state.original_transform.position != transform_ref.position ||
+                                state.original_transform.rotation != transform_ref.rotation ||
+                                state.original_transform.scale != transform_ref.scale) {
+
+                                // Create undo/redo action
+                                Transform final_transform = transform_ref;
+                                Transform old_transform = state.original_transform;
+                                entt::entity entity = selected;
+
+                                auto ecs = services->get<ECS::Controller>();
+                                auto metadata = services->get<MetaData::Service>();
+
+                                std::string entity_name = "Entity";
+                                if (metadata) {
+                                    entity_name = metadata->getEntityName(entity);
+                                }
+
+                                command_manager->executeAction(Action{
+                                    [ecs, entity, final_transform]() {
+                                        if (ecs->checkEntity(entity)) {
+                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            if (transform_opt.has_value()) {
+                                                transform_opt.value().get() = final_transform;
+                                            }
+                                        }
+                                    },
+                                    [ecs, entity, old_transform]() {
+                                        if (ecs->checkEntity(entity)) {
+                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            if (transform_opt.has_value()) {
+                                                transform_opt.value().get() = old_transform;
+                                            }
+                                        }
+                                    },
+                                    "Modify Transform: " + entity_name
+                                    });
+                            }
+
+                            // Reset editing state
+                            state.is_editing = false;
+                        }
+                    });
+
+
+
+                // ---- ModelRenderer ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
                     [this](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
-                // ---- Light ----
+                // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
                     [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
 
-                // ---- AudioSource ----
+                // ---- AudioSource ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
                     [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
-                // ---- BoundingVolume ----
+                // ---- BoundingVolume ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
                     [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
 
-                // ---- Hierarchy ----
+                // ---- Hierarchy ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
                     [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
 
-                // ---- Physics ----
+                // ---- Physics ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Joint>("Joint",
                     [](ComponentsPanel&, PAIN::Joint& as) { DrawWithReflection(as); });
 
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
-                //PAIN::Editor::Panel::RegisterReflected<Physics::RigidBody3D>(*this, "RigidBody3D");
 
-                 // ---- Script ----
+                // ---- Script ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Script>("Script",
                     [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
+                PAIN::Editor::Panel::RegisterColliderUI(*this);
 
-                PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions
-
-                //auto ecs = services->get<ECS::Controller>();
-                //for (auto const& [name, _] : ecs->getComponentFactories()) {
-                //    PN_CORE_INFO("Factory: {}", name); 
-                //}
-                
                 // Get entity panel reference
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {
@@ -73,9 +168,15 @@ namespace PAIN {
                 // Register Add Component popup
                 registerPopUp("AddComponent", addComponentPopUp("AddComponent"));
 
+
                 // Register Remove Component popup
                 registerPopUp("RemoveComponent", removeComponentPopUp("RemoveComponent"));
+
+				// Register RigidBody3D Config popup
+                registerPopUp("AddRigidBody3DConfig", addRigidBodyConfigPopUp("AddRigidBody3DConfig"));
             }
+
+
 
             void ComponentsPanel::nextWindowSettings() {
                 ImGui::SetNextWindowSize(ImVec2(350, 600), ImGuiCond_FirstUseEver);
@@ -147,9 +248,16 @@ namespace PAIN {
                         found_any = true;
 
                         if (ImGui::Selectable(comp_name.c_str(), false)) {
-                            ecs->addComponentByName(selected_entity, comp_name);
-                            search_filter[0] = '\0';
-                            closePopUp(popup_id);
+                            if (comp_name == "RigidBody3D") {
+                                openPopUp("AddRigidBody3DConfig");
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
+                            else {
+                                ecs->addComponentByName(selected_entity, comp_name);
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
                         }
                     }
 
@@ -263,6 +371,38 @@ namespace PAIN {
                         closePopUp(popup_id);
                     }
                 };
+            }
+
+            std::function<void(std::any const&)> ComponentsPanel::addRigidBodyConfigPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+                    auto ecs = services->get<ECS::Controller>();
+                    auto entity_panel = entities_panel.lock();
+                    if (!entity_panel) return;
+
+                    entt::entity selected_entity = entity_panel->getSelectedEntity();
+                    if (!ecs->checkEntity(selected_entity)) return;
+
+                    static int motion_type_idx = 1; // Default to Dynamic
+                    const char* motion_names[] = { "Static", "Dynamic", "Kinematic" };
+
+                    ImGui::Text("Select Motion Type:");
+                    ImGui::Combo("Motion Type", &motion_type_idx, motion_names, IM_ARRAYSIZE(motion_names));
+
+                    ImGui::Spacing();
+                    if (ImGui::Button("Add RigidBody3D", ImVec2(-1, 0))) {
+                        // Add the component
+
+                        if (!ecs->hasComponentByName(selected_entity, "RigidBody3D")) {
+                            Physics::RigidBody3D rb;
+                            rb.motion_type = static_cast<PAIN::Physics::MotionType>(motion_type_idx);
+                            ecs->addEntityComponent<PAIN::Physics::RigidBody3D>(selected_entity, std::move(rb));
+                        }
+                        closePopUp(popup_id);
+                    }
+                    if (ImGui::Button("Cancel", ImVec2(-1, 0))) {
+                        closePopUp(popup_id);
+                    }
+                    };
             }
 
             void ComponentsPanel::renderEntityComponents(entt::entity entity) {

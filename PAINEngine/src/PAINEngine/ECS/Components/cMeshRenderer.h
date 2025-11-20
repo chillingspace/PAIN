@@ -1,8 +1,7 @@
 ﻿#pragma once
 
 #include "pch.h"
-// Somehow, if i dont include this, refl macro cannot be foundl, even tho is in pch...
-#include "refl.hpp"
+
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 namespace PAIN {

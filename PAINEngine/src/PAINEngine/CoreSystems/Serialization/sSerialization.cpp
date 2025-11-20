@@ -45,14 +45,16 @@ namespace PAIN {
         }
 
         void PAIN::Serialization::Service::onDetach() {
-            if (!curr_scene_file_.empty()) {
-                if (isModifiedScene) {
-                    PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
-                    if (!saveCurrentScene()) {
-                        PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
-                    }
-                }
-            }
+
+            // Handled in Tools panel
+            //if (!curr_scene_file_.empty()) {
+            //    if (isModifiedScene) {
+            //        PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
+            //        if (!saveCurrentScene()) {
+            //            PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
+            //        }
+            //    }
+            //}
         }
 
         // ----------------------------
@@ -78,8 +80,8 @@ namespace PAIN {
                 PN_CORE_INFO("Save file: {}", file_path);
                 return true;
             }
-            catch (...) {
-                PN_CORE_ERROR("Exception when saving JSON: {}", file_path);
+            catch (const std::exception& e) {
+                PN_CORE_ERROR("Exception when saving JSON: {} | Reason: {}", file_path, e.what());
                 return false;
             }
         }
@@ -335,16 +337,19 @@ namespace PAIN {
         {
             auto controller = services->get<PAIN::ECS::Controller>();
             auto metadata_service = services->get<PAIN::MetaData::Service>();
+            auto path_service = services->get<PAIN::Path::Path>();
 
             std::vector<entt::entity> entities;
 
-            std::string prefab_filepath = resolvePrefabPath(filepath);
+            std::string prefab_virtual_filepath = resolvePrefabPath(filepath);
 
 #ifdef PN_PLATFORM_WINDOWS
-            assert(std::filesystem::exists(prefab_filepath) && "Prefab file does not exist or path is invalid!");
+            // Debugging purposes
+            std::string prefab_abs_path = path_service->resolvePath(prefab_virtual_filepath);
+            assert(std::filesystem::exists(prefab_abs_path) && "Prefab file does not exist or path is invalid!");
 #endif
 
-            nlohmann::json prefab_json = loadJsonFile(prefab_filepath);
+            nlohmann::json prefab_json = loadJsonFile(prefab_virtual_filepath);
             if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
 
             for (const auto& E : prefab_json["Entities"]) {
@@ -356,9 +361,12 @@ namespace PAIN {
                 if (E.contains("Components")) {
                     controller->loadAllComponentsFromJson(e, E["Components"]);
                 }
+
+                // Change entity name to be known that it is created from prefab
+                if (controller->getEntityComponent<MetaData::EntityName>(e).has_value()) { controller->getEntityComponent<MetaData::EntityName>(e).value().get().name += "_prefab"; }
             }
 
-            PN_CORE_INFO("Loaded prefab with {} entities from: {}", entities.size(), prefab_filepath);
+            PN_CORE_INFO("Loaded prefab with {} entities from virtual path: {}", entities.size(), prefab_virtual_filepath);
             return entities;
         }
 
@@ -371,13 +379,12 @@ namespace PAIN {
             // If do not have the .prefab extension, add it in
             if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
 
-#ifdef PN_PLATFORM_WINDOWS
-            // Windows file path
-            return path_service->resolvePath("main_game_assets://prefabs/" + prefab_with_ext);
-#elif PN_PLATFORM_ANDROID
-            // Andriod file path
-            return path_service->resolvePath("game_assets://prefabs/" + prefab_with_ext);
-#endif
+            #ifdef PN_PLATFORM_WINDOWS
+                        // Windows file path
+                        return "main_game_assets://prefabs/" + prefab_with_ext;
+            #elif PN_PLATFORM_ANDROID
+                        return "game_assets://prefabs/" + prefab_with_ext;
+            #endif
         }
 
         bool Service::createNewScene(std::string_view baseName)

@@ -253,7 +253,7 @@ inline bool DrawField(const char* label, JPH::BodyID& id) {
 
 // ---- JPH::ObjectLayer enum drawer (Physics Layers) ----
 inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
-    const char* names[] = { "NON_MOVING", "MOVING", "DEBRIS", "SENSOR" };
+    const char* names[] = { "NON-MOVING", "MOVING", "DEBRIS", "SENSOR" };
     const uint16_t values[] = {
         PAIN::Layer::NON_MOVING,
         PAIN::Layer::MOVING,
@@ -289,6 +289,21 @@ inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
 
     return changed;  // Return the change state
 }
+
+// ---- MotionType enum drawer with automatic physics integration ----
+inline bool DrawField(const char* label, PAIN::Physics::MotionType& motion_type) {
+    const char* names[] = { "Static", "Dynamic", "Kinematic" };
+    int idx = static_cast<int>(motion_type);
+    bool changed = ImGui::Combo(label, &idx, names, 3);
+
+    if (changed) {
+        motion_type = static_cast<PAIN::Physics::MotionType>(idx);
+        // Motion type changed - will be applied in next physics sync or via global update
+    }
+
+    return changed;
+}
+
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
     bool changed = false;
