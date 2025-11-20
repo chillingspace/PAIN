@@ -241,7 +241,7 @@ namespace PAIN {
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid, diff_id, ao_id, mdl->materials[0].baseColor, mdl->materials[0].metallic, mdl->materials[0].roughness});
+		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
 
 		if (meta) meta->setEntityName(entity, name);
 
