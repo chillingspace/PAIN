@@ -15,7 +15,7 @@ namespace PAIN {
 		public:
 
 			//Construct event
-			WindowResized(glm::uvec2 frame_buffer) : frame_buffer{ frame_buffer }{}
+			WindowResized(glm::uvec2 frame_buffer) : frame_buffer{ frame_buffer } {}
 
 			//Frame buffer fetch
 			glm::uvec2 getFrameBuffer() const { return frame_buffer; }
@@ -29,7 +29,7 @@ namespace PAIN {
 
 			//Register event
 			EVENT_CLASS_TYPE(WindowResize)
-			EVENT_CLASS_CATEGORY(Category::Application)
+				EVENT_CLASS_CATEGORY(Category::Application)
 		};
 
 		class WindowFocused : public Event {

@@ -92,6 +92,7 @@ if(NOT jolt_POPULATED)
     if(ANDROID AND TARGET Jolt)
         target_compile_definitions(Jolt PUBLIC
             JPH_DISABLE_ASSERTS
+            JPH_PROFILE_ENABLED=1
             NDEBUG
         )
         message(STATUS "Jolt configured for Android (assertions disabled)")

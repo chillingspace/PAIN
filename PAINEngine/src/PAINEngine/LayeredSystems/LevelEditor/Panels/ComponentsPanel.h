@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifdef _DEBUG
 #ifndef PAIN_EDITOR_COMPONENTS_PANEL_HPP
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
@@ -7,7 +7,7 @@
 #include "Utility/ECSUtility.h"
 
 namespace PAIN {
-	namespace Editor {		
+	namespace Editor {
 
 		namespace Panel {
 			class EntityPanel;
@@ -77,7 +77,9 @@ namespace PAIN {
 
 				std::weak_ptr<EntityPanel> entities_panel;
 
+				// Transform tracking removed - now handled as static in .cpp
 			};
+
 
 		} // namespace Panel
 	} // namespace Editor

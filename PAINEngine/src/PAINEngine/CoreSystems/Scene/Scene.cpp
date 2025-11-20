@@ -23,7 +23,6 @@ namespace PAIN {
 	void Scene::onAttach()
 	{
 
-		// For audio comp testing
 		auto ecs = services->get<ECS::Controller>();
 
 		// Camera and Scene Setup
@@ -55,21 +54,13 @@ namespace PAIN {
 		//lc.far_plane = 200.f;
 		//lc.forward = -lc.position;
 
-
-		//LightSources::get().create("b");
-		//auto olb = LightSources::get().get("b");
-		//Light& lb = olb.value();
-		//lb.position = glm::vec3(-4.f, 4.f, -8.f);
-		//lb.L_intensity = glm::vec3(0.2f);
-
 		// Demo Object and Audio Setup
 		auto audioManager = services->get<Audio::Audio>();
 		auto pathService = services->get<Path::Path>();
 		auto asset_manager = services->get<Assets::Manager>();
 
-		auto ogre_diffuse_tex = asset_manager->getAsset<Assets::Texture>(Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3"));
-		auto ogre_smile_ao_map = asset_manager->getAsset<Assets::Texture>(Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1"));
-
+		auto ogre_diff = Assets::GUID("5923aab8-5293-f945-958e-496acd0218c3");
+		auto ogre_smile_ao = Assets::GUID("cee03212-928a-6347-9d55-07fe46ac3ea1");
 
 		// for .mesh(converted from .obj only)
 		std::shared_ptr<Assets::Model> mdl;
@@ -79,11 +70,9 @@ namespace PAIN {
 #else	
 			std::filesystem::path ogre_smile_path = "game\\models\\ogre_smile.mesh";
 #endif
+
 			//Get model
 			mdl = asset_manager->getAsset<Assets::Model>(ogre_smile_path);
-
-			mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
-			mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
 			mdl->materials[0].metallic = 0.f;
 			mdl->materials[0].roughness = 1.f;
 			mdl->materials[0].baseColor = { 1, 0, 1 };
@@ -94,7 +83,7 @@ namespace PAIN {
 				PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
 			}
 
-			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+			AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
@@ -103,49 +92,44 @@ namespace PAIN {
 		std::filesystem::path ogre_path = "game\\models\\ogre.mesh";
 #endif
 		//Get model
-		mdl = asset_manager->getAsset<Assets::Model>(ogre_path);
-		mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
-		mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
+		mdl = asset_manager->getAsset<Assets::Model>(ogre_path);	
 		mdl->materials[0].metallic = 0.f;
 		mdl->materials[0].roughness = 1.f;
 		mdl->materials[0].baseColor = { 1, 0, 1 };
-		AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
-		//mdl = getModel(djb2_hash("game_assets://models/ogre.mesh"));
-		//mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
-		//mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
-		//mdl->materials[0].metallic = 0.f;
-		//mdl->materials[0].roughness = 1.f;
-		//mdl->materials[0].baseColor = { 1, 0, 1 };
-		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
+		AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
+		AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
 
-		auto sdcc_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695"));
 #ifdef PN_PLATFORM_WINDOWS
 		std::filesystem::path sdcc_path = "game/models/sdcc.mesh";
 #else	
 		std::filesystem::path sdcc_path = "game\\models\\sdcc.mesh";
 #endif
+
+		auto sdcc_diff = Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695");
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(sdcc_path);
-		mdl->materials[0].gl_diffuse_tex = sdcc_tex->gl_texture;
+
 		mdl->materials[0].metallic = 1.f;
 		mdl->materials[0].roughness = 0.f;
 		mdl->materials[0].baseColor = { 1, 0, 1 };
-		AddObject(mdl, "sdcc", {5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {3.f, 3.f, 3.f});
+		AddObject(mdl, "sdcc", {5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), {3.f, 3.f, 3.f}, sdcc_diff);
 
-		auto city_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("29fe999b-d257-bf41-879d-6d7578d43734"));
+
 #ifdef PN_PLATFORM_WINDOWS
 		std::filesystem::path city_path = "game/models/city.mesh";
 #else	
 		std::filesystem::path city_path = "game\\models\\city.mesh";
 #endif
+
+		auto city_diff = Assets::GUID{ "29fe999b-d257-bf41-879d-6d7578d43734" };
 		//Get model
 		mdl = asset_manager->getAsset<Assets::Model>(city_path);
-		mdl->materials[0].gl_diffuse_tex = city_tex->gl_texture;
+
 		mdl->materials[0].metallic = 0.f;
 		mdl->materials[0].roughness = 1.f;
 		mdl->materials[0].baseColor = { 0, 1, 0 };
-		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
+		AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f }, city_diff);
 
 #ifdef PN_PLATFORM_WINDOWS
 		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
@@ -170,24 +154,6 @@ namespace PAIN {
 		}
 #endif
 
-		/*
-		{
-			auto obj_path = services->get<Path::Path>()->resolvePath("game_assets://models/ogre_smile.obj");
-			auto smile_ogre_mesh_id = cacheMesh(obj_path);
-			auto smile_ogre_mesh = getMesh(smile_ogre_mesh_id);
-
-			smile_ogre_mesh->texture_id = ogre_diffuse_tex->gl_texture;
-			smile_ogre_mesh->material.tex = smile_ogre_mesh->texture_id;
-			smile_ogre_mesh->material.useTex = true;
-			smile_ogre_mesh->material.aoTex = ogre_smile_ao_map->gl_texture;
-			smile_ogre_mesh->material.useAo = true;
-			smile_ogre_mesh->material.metal = 0.f;
-			smile_ogre_mesh->material.rough = 1.f;
-
-			//AddObject(smile_ogre_mesh_id, "ogre_1", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-		}
-		*/
-
 
 		// font
 		TextRenderer::get();
@@ -202,7 +168,7 @@ namespace PAIN {
 		Skybox::get().init(services, sb_path);
 
 		// Test load prefab
-		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("sdcc.prefab");
+		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("ogre_right.prefab");
 		//for (auto e : loaded_entities) {
 		//	// Info: Print entity names, transforms, etc.
 		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<MetaData::EntityName>(e);
@@ -262,7 +228,7 @@ namespace PAIN {
 
 	void Scene::onEvent(Event::Event& e) {}
 
-	entt::entity Scene::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+	entt::entity Scene::AddObject(const std::shared_ptr<Assets::Model>& mdl,  const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, Assets::GUID const& diff_id, Assets::GUID const& ao_id)
 	{
 		auto ecs = services->get<ECS::Controller>();
 		auto meta = services->get<MetaData::Service>();
@@ -270,7 +236,7 @@ namespace PAIN {
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
+		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid, diff_id, ao_id, mdl->materials[0].baseColor, mdl->materials[0].metallic, mdl->materials[0].roughness});
 
 		if (meta) meta->setEntityName(entity, name);
 

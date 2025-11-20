@@ -10,6 +10,8 @@
 #include "ECS/Components/cMetadata.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
+#include <glm/gtx/quaternion.hpp>   // for glm::eulerAngles, glm::quat(vec3)
+
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -194,6 +196,7 @@ bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return m
 void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
 void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
 std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }
+std::vector<entt::entity> EngineAPIAdapter::GetEntitiesByTag(const std::string& tag) { return meta_.getEntitiesByTag(tag); }
 
 /* =========================================================================== */
 /*                                Transform                                    */
@@ -233,6 +236,23 @@ glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
 void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
     auto& t = ensure<PAIN::Transform>(entityId);
     t.scale = { s.x, s.y, s.z };
+}
+
+glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
+{
+    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+        const auto& t = opt->get();
+        // convert quaternion -> euler angles, in rad
+        glm::vec3 euler = glm::eulerAngles(t.rotation);
+        return euler;
+    }
+    return { 0.f, 0.f, 0.f };
+}
+
+void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
+{
+    auto& t = ensure<PAIN::Transform>(entityId);
+    t.rotation = glm::quat(r); // euler to quat
 }
 
 /* =========================================================================== */

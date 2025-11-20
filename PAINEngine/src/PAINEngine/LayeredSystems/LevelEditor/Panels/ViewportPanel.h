@@ -53,7 +53,9 @@ namespace PAIN {
                 ImGuizmo::OPERATION m_GizmoOperation;
                 ImGuizmo::MODE m_GizmoMode;
 
-                // ADD THIS - Shared pointer to EntityPanel
+                entt::entity m_HoveredEntity = entt::null;
+                entt::entity findEntityUnderMouse(ImVec2 localMousePos, ImVec2 viewportSize);
+
                 std::shared_ptr<EntityPanel> m_EntityPanel;
 
                 // Ray casting methods

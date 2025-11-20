@@ -81,6 +81,9 @@ namespace PAIN {
 				{
 					//Get model asset
 					auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
+					mdl_ptr->materials[0].baseColor = mdl->get().baseColor;
+					mdl_ptr->materials[0].metallic = mdl->get().metallic;
+					mdl_ptr->materials[0].roughness = mdl->get().roughness;
 					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
 
 				}
@@ -118,6 +121,21 @@ namespace PAIN {
 			if (mdl.has_value())
 			{
 				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
+				
+				if (mdl->get().selected_diff_tex.IsValid()) {
+					auto diff_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(mdl->get().selected_diff_tex);
+					mdl_ptr->materials[0].gl_diffuse_tex = diff_tex->gl_texture;
+				}
+				if (mdl->get().selected_ao_tex.IsValid()) {
+					auto ao_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(mdl->get().selected_ao_tex);
+					mdl_ptr->materials[0].gl_ao_tex = ao_tex->gl_texture;
+				}
+
+				mdl_ptr->materials[0].baseColor = mdl->get().baseColor;
+				mdl_ptr->materials[0].metallic = mdl->get().metallic;
+				mdl_ptr->materials[0].roughness = mdl->get().roughness;
+
+
 				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
 			}
 
