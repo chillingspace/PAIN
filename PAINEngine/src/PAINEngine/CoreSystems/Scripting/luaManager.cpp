@@ -456,7 +456,7 @@ void LuaManager::bindEngineAPI() {
         }); 
     lua_.set_function("getImageID",   [this](const std::string name) { return api_ ? api_->GetImageGUID(name) : std::string{};   });
     lua_.set_function("getScriptID",  [this](const std::string name) { return api_ ? api_->GetScriptGUID(name) : std::string{};  });
-    //lua_.set_function("getAudioID",   [this](const std::string name) { return api_ ? api_->GetAudioGUID(name) : std::string{};   });
+    lua_.set_function("getAudioID",   [this](const std::string name) { return api_ ? api_->GetAudioGUID(name) : std::string{};   });
     lua_.set_function("getModelID",   [this](const std::string name) { return api_ ? api_->GetModelGUID(name) : std::string{};   });
     lua_.set_function("getFontID",    [this](const std::string name) { return api_ ? api_->GetFontGUID(name) : std::string{};    });
     lua_.set_function("getScenesID",  [this](const std::string name) { return api_ ? api_->GetScenesGUID(name) : std::string{};  });

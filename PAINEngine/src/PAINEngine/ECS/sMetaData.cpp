@@ -471,6 +471,13 @@ namespace PAIN {
             if (data.contains("registered_tags")) {
                 registered_tags = data["registered_tags"].get<std::set<std::string>>();
             }
+           
+            registerTag("letter_collectible");
+            registerTag("letter_carried");
+            registerTag("letter_collection");
+            registerTag("hiding_spot");
+            registerTag("enemy_patrol_start");
+            registerTag("enemy_patrol_end");
 
             if (data.contains("groups")) {
                 auto groups_data = data["groups"];

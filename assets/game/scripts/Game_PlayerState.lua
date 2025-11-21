@@ -16,29 +16,38 @@ _G.PlayerState = {
 
     player = nil, -- cache the player entity
     carriedLetter = nil, -- entity id of letter currently on back
-    pickupRadius = 4.0,  -- how close player must be
+    pickupRadius = 2.0,  -- how close player must be to pick up letter
+
+    deliveryRadius  = 4.0, --  to drop off at collection point
+    lettersDelivered = 0,  -- letters delivered so far
+    lettersToWin = 3,  -- how many letters needed to win
+
     carriedOffset = {   -- offset of letter on the player's back
         x = 0.0,
         y = 1.2,
         z = -0.3
     },
 
+    hidden = false, -- is player hiding
+    hiddenIn = nil, -- which spot
+    hideRadius = 4.5,  -- how close to hide
+    playerBaseScale = nil,   -- original scale of player
+    letterBaseScale = nil,
+    hideScaleFactor = 0.4,   -- how small when hiding 
+
     _keysRegistered = false
 }
 
 local S = _G.PlayerState
 local collectPressed = false
+local hidePressed = false
 
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
-    registerKeyDown("C", function()
-        collectPressed = true
-    end)
-
-    registerKeyUp("C", function()
-        collectPressed = false
-    end)
-
+    registerKeyDown("C", function() collectPressed = true end)
+    registerKeyUp("C", function() collectPressed = false end)
+    registerKeyDown("H", function() hidePressed = true end)
+    registerKeyUp("H",   function() hidePressed = false end)
     S._keysRegistered = true
 end
 
@@ -74,8 +83,6 @@ function S.update(dt)
         S.pendingRespawn = nil
     end
 
-    -- collectible logic:
-
     -- no player, nth to do
     if not S.player then
         return
@@ -83,15 +90,186 @@ function S.update(dt)
 
     local px, py, pz = getPosition(S.player)
 
+    -------------------------------------------------
+    -- hiding logic -> press H
+    -------------------------------------------------
+    if hidePressed then
+        hidePressed = false -- consume key press
+
+        if S.hidden then
+            -- unhide
+            S.hidden = false
+            S.hiddenIn = nil
+
+            -- restore player original scale 
+            if S.playerBaseScale then
+                setScale(S.player,
+                    S.playerBaseScale.x,
+                    S.playerBaseScale.y,
+                    S.playerBaseScale.z
+                )
+            end
+
+            -- restore scale of letter
+            if S.carriedLetter and S.letterBaseScale then
+                setScale(S.carriedLetter,
+                    S.letterBaseScale.x,
+                    S.letterBaseScale.y,
+                    S.letterBaseScale.z
+                )
+            end
+
+            log("[PlayerState] Player left hiding spot")
+
+        else
+            -- try to hide: find nearest hiding_spot within radius
+            local spots = getEntitiesByTag("hiding_spot")
+            if spots and #spots > 0 then
+                local bestSpot = nil
+                local bestDistSq = S.hideRadius * S.hideRadius
+
+                -- find nearest hiding spot
+                for _, spot in ipairs(spots) do
+                    local bx, by, bz = getPosition(spot)
+                    local dx = px - bx
+                    local dy = py - by
+                    local dz = pz - bz
+                    local distSq = dx*dx + dy*dy + dz*dz
+
+                    if distSq <= bestDistSq then
+                        bestDistSq = distSq
+                        bestSpot = spot
+                    end
+                end
+
+                if bestSpot then
+                    -- snap player into box
+                    local bx, by, bz = getPosition(bestSpot)
+                    setPosition(S.player, bx, by, bz)
+
+                    -- cache base scale 
+                    if not S.playerBaseScale then
+                        local sx, sy, sz = getScale(S.player)
+                        S.playerBaseScale = { x = sx, y = sy, z = sz }
+                    end
+
+                    -- apply smaller scale while hiding
+                    local factor = S.hideScaleFactor
+                    local bs = S.playerBaseScale
+                    setScale(S.player,
+                        bs.x * factor,
+                        bs.y * factor,
+                        bs.z * factor
+                    )
+
+                    if S.carriedLetter then
+                        if not S.letterBaseScale then
+                            local lx, ly, lz = getScale(S.carriedLetter)
+                            S.letterBaseScale = { x = lx, y = ly, z = lz }
+                        end
+
+                        local lbs = S.letterBaseScale
+                        setScale(S.carriedLetter,
+                            lbs.x * factor,
+                            lbs.y * factor,
+                            lbs.z * factor
+                        )
+                    end
+
+                    S.hidden = true
+                    S.hiddenIn = bestSpot
+                    log("[PlayerState] Player is hiding in a box")
+                end
+            end
+        end
+    end
+
+    -------------------------------------------------
+    -- letter collect/deliver logic -> press C
+    -------------------------------------------------
     -- if already carrying a letter, keep it on player
     if S.carriedLetter then
         local off = S.carriedOffset
+
+        -- if hidden, scale down the carried letter offset accordingly
+        if S.hidden then
+            local factor = S.hideScaleFactor 
+            off = {
+                x = off.x * factor,
+                y = off.y * factor,
+                z = off.z * factor
+            }
+        end
+
         setPosition(
             S.carriedLetter,
             px + off.x,
             py + off.y,
             pz + off.z
         )
+        
+        -- check for nearby collection point(s) 
+        local collectionPoints = getEntitiesByTag("letter_collection")
+        if collectionPoints and #collectionPoints > 0 then
+            local bestPoint = nil
+            local bestDistSq = S.deliveryRadius * S.deliveryRadius
+
+            for _, cp in ipairs(collectionPoints) do
+                local cx, cy, cz = getPosition(cp)
+                local dx = px - cx
+                local dy = py - cy
+                local dz = pz - cz
+                local distSq = dx*dx + dy*dy + dz*dz
+
+                if distSq <= bestDistSq then
+                    bestDistSq = distSq
+                    bestPoint = cp
+                end
+            end
+
+            -- inside delivery radius + C pressed = deliver
+            if bestPoint and collectPressed then
+                collectPressed = false
+
+                -- snap the letter onto the collection point first (??)
+                -- local cx, cy, cz = getPosition(bestPoint)
+                -- setPosition(S.carriedLetter, cx, cy, cz)
+
+                -- remove letter entity from the world
+                if deleteEntity then
+                    deleteEntity(S.carriedLetter)
+                end
+
+                if removeTag then
+                    removeTag(S.carriedLetter, "letter_carried")
+                end
+
+                S.carriedLetter = nil
+                S.lettersDelivered = (S.lettersDelivered or 0) + 1
+
+                log(string.format(
+                    "[PlayerState] Delivered letter %d / %d at collection point",
+                    S.lettersDelivered,
+                    S.lettersToWin or 3
+                ))
+
+                -- WIN CHECK
+                if S.lettersDelivered >= (S.lettersToWin or 3) then
+                    log("[PlayerState] All letters delivered! YOU WIN")
+
+                    -- @TODO: hook win behaviour here
+                    -- changeScene("WinScene")
+
+                end
+            end
+        end
+        -- still carrying or just delivered – dott try to pick up new letters this frame
+        return
+
+    end
+
+    -- if hidden, skip pickup/delivery logic
+    if S.hidden then
         return
     end
 
@@ -118,7 +296,6 @@ function S.update(dt)
     end
 
     if bestLetter then
-        -- pickup, C key
         if collectPressed then
             S.carriedLetter = bestLetter
             collectPressed = false -- avoid multiple logs
@@ -128,12 +305,25 @@ function S.update(dt)
                 addTag(bestLetter, "letter_carried") 
             end
 
+            if audioPlay then
+                audioPlay(bestLetter)
+            end
+
             log("[PlayerState] Collected letter on back")
         end
     end
 end
 
+function S.isHidden()
+    return S.hidden == true
+end
+
 function S.canBeCaught()
+    -- cannot be caught while hiding
+    if S.hidden then
+        return false
+    end
+
     return S.respawnCooldown <= 0
 end
 
