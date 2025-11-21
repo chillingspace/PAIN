@@ -8,6 +8,7 @@
  * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
+#ifdef _DEBUG
 #pragma once
 
 #ifndef REFELCTION_UI_HPP
@@ -578,8 +579,6 @@ inline bool DrawField(const char* label, std::vector<PAIN::MaterialInstance>& ma
     return changed;
 }
 
-#ifdef _DEBUG
-
 // ---------- Reflection driver ----------
  template <typename T>
 bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
@@ -649,7 +648,6 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
         });
     return changed;
 }
-#endif
 
 
 //template <typename T>
@@ -668,7 +666,7 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
 //
 //    return changed;
 //}
-#ifdef _DEBUG
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
