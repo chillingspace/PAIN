@@ -1014,32 +1014,33 @@ namespace PAIN {
                 mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
                 
                 //Export material
-                ExportMaterial(mat, mat_path);
+                if (ExportMaterial(mat, mat_path)) {
 
-                //Process asset
-                Info mat_asset;
-                mat_asset.raw_path = mat_path;
-                mat_asset.name = mat_asset.raw_path.filename().string();
-                mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
-                mat_asset.type = getAssetType(mat_asset.raw_path);
-                mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
-                processAsset(mat_asset);
+                    //Process asset
+                    Info mat_asset;
+                    mat_asset.raw_path = mat_path;
+                    mat_asset.name = mat_asset.raw_path.filename().string();
+                    mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
+                    mat_asset.type = getAssetType(mat_asset.raw_path);
+                    mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
+                    processAsset(mat_asset);
 
-                //Craft asset interface
-                IAsset asset_interface;
-                asset_interface.guid = mat_asset.guid;
-                asset_interface.name = mat_asset.shipped_path.filename().string();
-                asset_interface.type = mat_asset.type;
-                asset_interface.main_relative_path = mat_asset.relative_path;
-                asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
+                    //Craft asset interface
+                    IAsset asset_interface;
+                    asset_interface.guid = mat_asset.guid;
+                    asset_interface.name = mat_asset.shipped_path.filename().string();
+                    asset_interface.type = mat_asset.type;
+                    asset_interface.main_relative_path = mat_asset.relative_path;
+                    asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
 
-                //Add into optional assets
-                opt_assets.push_back(asset_interface);
+                    //Add into optional assets
+                    opt_assets.push_back(asset_interface);
 
-                //Export material
-                std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
-                relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
-                asset.materials.push_back(relative_mat_path.lexically_normal());
+                    //Export material
+                    std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
+                    relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
+                    asset.materials.push_back(relative_mat_path.lexically_normal());
+                }
             }
 
             //Export model
@@ -1203,7 +1204,7 @@ namespace PAIN {
             return "ffmpeg.exe"; // Fallback
         }
 
-        void Compiler::ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const {
+        bool Compiler::ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const {
             try {
                 nlohmann::json j;
 
@@ -1268,9 +1269,10 @@ namespace PAIN {
                 file.close();
 
                 std::cout << "Material saved: " << out_path.string() << std::endl;
+                return true;
             }
             catch (const std::exception& e) {
-                throw std::runtime_error(e.what());
+                return false;
             }
         }
 

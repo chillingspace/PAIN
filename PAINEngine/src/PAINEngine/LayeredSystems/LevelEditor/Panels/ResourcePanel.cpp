@@ -298,6 +298,11 @@ namespace PAIN {
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
 					}
+					if (file.type == Assets::Type::Material && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
+					}
 					if (ImGui::MenuItem("Delete##file")) {
 						openPopUp("Delete File", std::make_shared<File>(file));
 					}
@@ -341,6 +346,35 @@ namespace PAIN {
 					}
 					if (ImGui::MenuItem("Delete##dir")) {
 						openPopUp("Delete Folder", std::make_shared<Dir>(dir));
+					}
+					if (ImGui::MenuItem("New Folder##dir")) {
+						openPopUp("New Folder");
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
+			bool ResourcePanel::renderPopUpContext(std::string const& virtual_path) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(virtual_path.c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextWindow("AssetContextMenu##VirtualDirectory")) {
+					//Decide the directory it is in
+					auto relative = std::filesystem::relative(path_service->resolvePath(virtual_path), root);
+					auto engine_material = Assets::getAllEngineFolders()[Assets::Type::Material];
+					auto game_material = Assets::getAllGameFolders()[Assets::Type::Material];
+					if ((relative == engine_material || relative == game_material) && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
 					}
 					if (ImGui::MenuItem("New Folder##dir")) {
 						openPopUp("New Folder");
@@ -421,6 +455,9 @@ namespace PAIN {
 
 				//Local shown count
 				int shown_count = 0;
+
+				//General context
+				renderPopUpContext(virtual_path);
 
 				//Display all directories
 				for (const auto& dir : directories) {
@@ -1104,6 +1141,57 @@ namespace PAIN {
 					};
 			}
 
+			std::function<void(std::any const&)> ResourcePanel::newMaterialPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Select a component to add
+					ImGui::Text("New material name without extension: ");
+
+					//New folder name
+					static std::string mat_name = "";
+					mat_name.resize(32);
+					ImGui::InputText("##Newmat_name", mat_name.data(), mat_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Create")) {
+
+						//Craft outpath
+						std::filesystem::path out_path = path_service->resolvePath(current_path);
+						out_path /= mat_name.c_str();
+						out_path.replace_extension(*Assets::getAllExtensions()[Assets::Type::Material].begin());
+
+						//Create material
+						Assets::Material def_material;
+						asset_service->createNewMaterial(def_material, out_path);
+
+						//Update directories & files
+						populateFiles(current_path);
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
 			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback) {
 
 				std::lock_guard<std::mutex> lock(file_event_mutex);
@@ -1123,6 +1211,7 @@ namespace PAIN {
 				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
 				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
 
 				//Initialize root and current path

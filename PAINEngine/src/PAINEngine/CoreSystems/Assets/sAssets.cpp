@@ -478,6 +478,19 @@ namespace PAIN {
 			//Actually copy the file
 			std::filesystem::copy_file(file_path, destination);
 		}
+
+		void Manager::createNewMaterial(Material const& mat, std::filesystem::path const& out_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//if export succeedds
+			if (asset_compiler->ExportMaterial(mat, out_path)) {
+
+				//Register asset
+				registerAsset(std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, "")));
+			}
+		}
 #endif
 #endif
 	}

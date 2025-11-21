@@ -139,6 +139,7 @@ namespace PAIN {
                 void DrawDirectoryTree(std::filesystem::path const& path);
                 bool renderPopUpContext(File const& file);
                 bool renderPopUpContext(Dir const& file);
+                bool renderPopUpContext(std::string const& virtual_path);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
 
@@ -153,7 +154,7 @@ namespace PAIN {
                 std::function<void(std::any const&)> deleteFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
-
+                std::function<void(std::any const&)> newMaterialPopup(std::string const& popup_id);
 
                 // ----------------------------
                 // File Operations
