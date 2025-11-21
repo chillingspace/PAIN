@@ -89,6 +89,9 @@ namespace PAIN {
 							//Target directory ( main game asset folder )
 							auto target = path_service->resolvePath(Path::main_assets_alias, file_path.filename().string());
 
+							//SKip
+							if (file_path == target) continue;
+
 							//Throw asset into the game asset folder
 							std::filesystem::copy(file_path, target, std::filesystem::copy_options::overwrite_existing);
 
@@ -136,13 +139,9 @@ namespace PAIN {
 					//Get display icon
 					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
-					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						temp.icon = 0;
-					}
+					//Get Folder icon
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					temp.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Instantiate name
 					temp.file_name = relative.filename().string();
@@ -265,12 +264,8 @@ namespace PAIN {
 					static std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
 					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						dir_copy.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						dir_copy.icon = 0;
-					}
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					dir_copy.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Set drag payload with asset name
 					ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
@@ -302,6 +297,11 @@ namespace PAIN {
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					if (file.type == Assets::Type::Material && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
 					}
 					if (ImGui::MenuItem("Delete##file")) {
 						openPopUp("Delete File", std::make_shared<File>(file));
@@ -357,6 +357,35 @@ namespace PAIN {
 				return b_break;
 			}
 
+			bool ResourcePanel::renderPopUpContext(std::string const& virtual_path) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(virtual_path.c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextWindow("AssetContextMenu##VirtualDirectory")) {
+					//Decide the directory it is in
+					auto relative = std::filesystem::relative(path_service->resolvePath(virtual_path), root);
+					auto engine_material = Assets::getAllEngineFolders()[Assets::Type::Material];
+					auto game_material = Assets::getAllGameFolders()[Assets::Type::Material];
+					if ((relative == engine_material || relative == game_material) && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
+					}
+					if (ImGui::MenuItem("New Folder##dir")) {
+						openPopUp("New Folder");
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
@@ -395,18 +424,18 @@ namespace PAIN {
 					//Get texture
 					auto texture = asset_service->getAsset<Assets::Texture>(icon_path);
 
+					//Folder icon
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path);
+
 					//Check and ensure texture is not a cubemap
-					if (!texture->is_cube_map) {
-						return static_cast<ImTextureID>(texture->gl_texture);
+					if (texture_opt.has_value() && !texture.value()->is_cube_map) {
+						return static_cast<ImTextureID>(texture.value()->gl_texture);
 					}
 				}
 
-				if (asset_service->checkAssetRegistered(def_icon_path)) {
-					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
-				}
-				else {
-					return ImTextureID(0);
-				}
+				//Folder icon
+				auto def_icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(def_icon_path);
+				return def_icon_opt.has_value() ? static_cast<ImTextureID>(def_icon_opt.value()->gl_texture) : ImTextureID(0);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -426,6 +455,9 @@ namespace PAIN {
 
 				//Local shown count
 				int shown_count = 0;
+
+				//General context
+				renderPopUpContext(virtual_path);
 
 				//Display all directories
 				for (const auto& dir : directories) {
@@ -1109,6 +1141,57 @@ namespace PAIN {
 					};
 			}
 
+			std::function<void(std::any const&)> ResourcePanel::newMaterialPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Select a component to add
+					ImGui::Text("New material name without extension: ");
+
+					//New folder name
+					static std::string mat_name = "";
+					mat_name.resize(32);
+					ImGui::InputText("##Newmat_name", mat_name.data(), mat_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Create")) {
+
+						//Craft outpath
+						std::filesystem::path out_path = path_service->resolvePath(current_path);
+						out_path /= mat_name.c_str();
+						out_path.replace_extension(*Assets::getAllExtensions()[Assets::Type::Material].begin());
+
+						//Create material
+						Assets::Material def_material;
+						asset_service->createNewMaterial(def_material, out_path);
+
+						//Update directories & files
+						populateFiles(current_path);
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
 			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback) {
 
 				std::lock_guard<std::mutex> lock(file_event_mutex);
@@ -1128,6 +1211,7 @@ namespace PAIN {
 				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
 				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
 
 				//Initialize root and current path
@@ -1186,7 +1270,8 @@ namespace PAIN {
 
 								//Recursive register all assets in directory
 								for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
-									auto relative = std::filesystem::relative(file, root);
+									if (entry.path().extension() == Assets::descriptor_ext) continue;
+									auto relative = std::filesystem::relative(entry.path(), root);
 									asset_service->registerAsset(relative);
 								}
 							}
@@ -1231,7 +1316,20 @@ namespace PAIN {
 
 							//Check asset been registered
 							if (!asset_service->checkAssetRegistered(relative)) {
-								asset_service->registerAsset(relative);
+								//Register asset
+								if (std::filesystem::is_directory(file)) {
+
+									//Recursive register all assets in directory
+									for (auto const& entry : std::filesystem::recursive_directory_iterator(file)) {
+										if (entry.path().extension() == Assets::descriptor_ext) continue;
+										auto relative = std::filesystem::relative(entry.path(), root);
+										asset_service->registerAsset(relative);
+									}
+								}
+								else {
+									auto relative = std::filesystem::relative(file, root);
+									asset_service->registerAsset(relative);
+								}
 							}
 							else {
 								//Get GUID
@@ -1368,6 +1466,9 @@ namespace PAIN {
 						}
 						catch (std::exception const&) {
 							PN_CORE_WARN("Invalid Callback From FileWatcher Handled. Loop Continues.");
+
+							//Pop from queue
+							file_event_queue.pop();
 						}
 					}
 				}

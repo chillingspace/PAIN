@@ -483,6 +483,11 @@ void LuaManager::bindEngineAPI() {
         auto g = api_->GetGroup(entityId);
         return g ? sol::make_object(lua_, *g) : sol::make_object(lua_, sol::nil);
         });
+    lua_.set_function("getEntitiesByTag", [this](const std::string& tag) {
+        if (!api_) return std::vector<entt::entity>{};
+        return api_->GetEntitiesByTag(tag);
+        });
+
 
     /* =========================================================================== */
     /*                                Transform                                    */
@@ -502,6 +507,17 @@ void LuaManager::bindEngineAPI() {
         return std::make_tuple(s.x, s.y, s.z);
         });
     lua_.set_function("setScale", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetScale(entityId, { x,y,z }); });
+    lua_.set_function("getRotation", [this](entt::entity entityId) {
+        if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
+        auto r = api_->GetRotation(entityId);
+        return std::make_tuple(r.x, r.y, r.z);   
+        });
+
+    lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
+        if (!api_) return;
+        api_->SetRotation(entityId, { x, y, z });   
+        });
+
 
     /* =========================================================================== */
     /*                                  Physics                                    */
@@ -531,6 +547,32 @@ void LuaManager::bindEngineAPI() {
     //lua_.set_function("audioSetListener", [this](float px, float py, float pz, float vx, float vy, float vz, float fx, float fy, float fz, float ux, float uy, float uz) { if (api_) api_->Audio_SetListener(px, py, pz, vx, vy, vz, fx, fy, fz, ux, uy, uz); });
     //lua_.set_function("audioSetGroupVolumeDb", [this](std::string group, float db) { return api_ && api_->Audio_SetGroupVolumeDb(group, db); });
     //lua_.set_function("audioFadeGroupToDb", [this](std::string group, float targetDb, float seconds) { return api_ && api_->Audio_FadeGroupToDb(group, targetDb, seconds); });
+
+    lua_.set_function("audioPlay", [this](entt::entity entityId) {
+        if (!api_) return;
+        api_->Audio_Play(entityId);
+        });
+
+    lua_.set_function("audioStop", [this](entt::entity entityId) {
+        if (!api_) return;
+        api_->Audio_Stop(entityId);
+        });
+
+    lua_.set_function("audioSetVolumeDb", [this](entt::entity entityId, float db) {
+        if (!api_) return;
+        api_->Audio_SetVolumeDb(entityId, db);
+        });
+
+    lua_.set_function("audioSetGroup", [this](entt::entity entityId, std::string group) {
+        if (!api_) return;
+        api_->Audio_SetGroup(entityId, std::move(group));
+        });
+
+    lua_.set_function("audioSetLooping", [this](entt::entity entityId, bool looping) {
+        if (!api_) return;
+        api_->Audio_SetLooping(entityId, looping);
+        });
+
 
     /* =========================================================================== */
     /*                           Scene / System state                              */

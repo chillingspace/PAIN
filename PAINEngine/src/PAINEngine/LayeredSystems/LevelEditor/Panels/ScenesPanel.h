@@ -4,10 +4,7 @@
 #define PAIN_EDITOR_SCENES_PANEL_HPP
 
 #include "Panels.h"
-#include <functional>
-#include <memory>
-#include <string>
-#include <vector>
+
 
 namespace PAIN {
     namespace Editor {
@@ -45,6 +42,13 @@ namespace PAIN {
                 void onUpdate(AppTiming timing) override;
 
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }
+
+                // Expose hooks
+                void notifyModifyScene() {
+                    if (hooks_.onModifyScene) {
+                        hooks_.onModifyScene(currSceneId_);
+                    }
+                }
 
             private:
                 // Error message when loading scene fails
@@ -91,6 +95,10 @@ namespace PAIN {
                 void drawDeleteModal();
                 void drawSaveAsModal();
                 void drawEditMaskModal();
+
+                // ui 
+
+                void drawSkyboxSettingsPanel();
             };
 
         } // namespace Panel

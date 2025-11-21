@@ -13,8 +13,8 @@ namespace PAIN {
 
     struct Script {
         Assets::GUID script_asset;
-        bool enabled = true;
-        bool loaded = false;
+        bool enabled = true; // active or not
+        bool loaded = false; // runtime flag
     };
 
 } 
@@ -26,7 +26,7 @@ REFL_TYPE(PAIN::Script)
         PAIN::Editor::Attributes::DisplayName("Script Asset"),
         PAIN::Editor::Attributes::Tooltip("Select a Lua script"))
     REFL_FIELD(enabled)
-    REFL_FIELD(loaded)
+    //REFL_FIELD(loaded)
 REFL_END
 
 #endif

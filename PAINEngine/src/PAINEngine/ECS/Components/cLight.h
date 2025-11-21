@@ -25,7 +25,7 @@ namespace PAIN {
     };
 
 	struct Lighting {
-		glm::vec3 position;
+		glm::vec3 offset;
 		glm::vec3 light_intensity;
 		TYPES light_type;
 
@@ -45,8 +45,8 @@ namespace PAIN {
             ImGui::Separator();
 
             // Position
-            ImGui::Text("Position");
-            ImGui::DragFloat3("Position", &light.position.x, 0.1f);
+            ImGui::Text("Offset");
+            ImGui::DragFloat3("Offset", &light.offset.x, 0.1f);
 
             // Light Intensity
             ImGui::Text("Light Intensity");
@@ -119,7 +119,7 @@ namespace nlohmann {
 template<>
     struct adl_serializer<PAIN::Lighting> {
         static void to_json(json& j, const PAIN::Lighting& light) {
-            j["position"] = light.position;
+            j["position"] = light.offset;
             j["light_intensity"] = light.light_intensity;
             j["light_type"] = light.light_type;
             j["forward"] = light.forward;
@@ -127,7 +127,7 @@ template<>
         }
 
         static void from_json(const json& j, PAIN::Lighting& light) {
-            light.position = j["position"].get<glm::vec3>();
+            light.offset = j["offset"].get<glm::vec3>();
             light.light_intensity = j["light_intensity"].get<glm::vec3>();
             light.light_type = j["light_type"].get<PAIN::TYPES>();
             light.forward = j["forward"].get<glm::vec3>();
@@ -138,7 +138,7 @@ template<>
 
 // Reflection
 REFL_TYPE(PAIN::Lighting)
-REFL_FIELD(position)
+REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
 REFL_FIELD(forward)

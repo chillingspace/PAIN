@@ -1,4 +1,13 @@
 import org.apache.tools.ant.taskdefs.condition.Os
+import java.util.Properties
+import java.io.FileInputStream
+
+// Load keystore properties
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
 
 tasks.register<Exec>("runAssetCompiler") {
     val assetCompilerExe = File(rootDir.parentFile, "build/Tools/AssetCompilerTool.exe").absolutePath
@@ -53,6 +62,19 @@ android {
         }
     }
 
+    // Add signingConfigs here
+    signingConfigs {
+        create("release") {
+            val storeFilePath = keystoreProperties["storeFile"] as String?
+            if (!storeFilePath.isNullOrBlank()) {
+                storeFile = file(storeFilePath)
+            }
+            storePassword = keystoreProperties["storePassword"] as String?
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+        }
+    }
+
     ndkVersion = "27.0.12077973"
 
     java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
@@ -62,7 +84,8 @@ android {
     }
     buildTypes {
         debug { isJniDebuggable = true }
-        release { isMinifyEnabled = false }
+        release { isMinifyEnabled = false
+        signingConfig = signingConfigs.getByName("release") }
     }
     externalNativeBuild {
         cmake {

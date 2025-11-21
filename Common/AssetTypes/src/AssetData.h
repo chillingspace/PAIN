@@ -71,6 +71,7 @@ namespace PAIN {
             Scenes,
             Font,
             Prefabs, // .prefab
+            Material,
             Other
         };
 
@@ -86,6 +87,7 @@ namespace PAIN {
             temp[Type::Scenes] = "Scenes";
             temp[Type::Font] = "Font";
             temp[Type::Prefabs] = "Prefabs";
+            temp[Type::Material] = "Materials";
             temp[Type::Other] = "Other";
 
             return temp;
@@ -106,7 +108,7 @@ namespace PAIN {
         }
 
         static bool isAssetCacheable(Type const& type) {
-            if (type == Type::Texture || type == Type::Audio || type == Type::Model || type == Type::Shader || type == Type::Font || type == Type::Script) return true;
+            if (type == Type::Texture || type == Type::Audio || type == Type::Model || type == Type::Shader || type == Type::Font || type == Type::Script || type == Type::Material) return true;
             return false;
         }
 
@@ -129,13 +131,14 @@ namespace PAIN {
 
             //Set up extensions for asset types
             temp[Type::Texture] = { ".png", ".jpg", ".jpeg", ".hdr", ".tex" };
-            temp[Type::Model] = { ".obj", ".gltf" };
+            temp[Type::Model] = { ".obj", ".gltf", ".bin" };
             temp[Type::Audio] = { ".wav", ".mp3", ".ogg" };
             temp[Type::Script] = { ".lua" };
             temp[Type::Data] = { ".json" };
             temp[Type::Shader] = { ".vert", ".frag" };
             temp[Type::Scenes] = { ".scn" };
             temp[Type::Prefabs] = { ".prefab" };
+            temp[Type::Material] = { ".material" };
             temp[Type::Font] = { ".ttf" };
 
             return temp;
@@ -157,6 +160,7 @@ namespace PAIN {
             temp[Type::Data] = game_assets_folder / "data";
             temp[Type::Scenes] = game_assets_folder / "scenes";
             temp[Type::Prefabs] = game_assets_folder / "prefabs";
+            temp[Type::Material] = game_assets_folder / "materials";
             temp[Type::Other] = game_assets_folder / "others";
 
             return temp;
@@ -171,6 +175,7 @@ namespace PAIN {
             temp[Type::Data] = engine_assets_folder / "data";
             temp[Type::Shader] = engine_assets_folder / "shaders";
             temp[Type::Font] = engine_assets_folder / "fonts";
+            temp[Type::Material] = engine_assets_folder / "materials";
             temp[Type::Other] = engine_assets_folder / "others";
 
             return temp;
@@ -310,6 +315,25 @@ namespace PAIN {
             }
 
             throw std::runtime_error("Could not find project root containing Assets/ directory");
+        }
+
+        static bool isSubPath(const std::filesystem::path& descendantPath, const std::filesystem::path& rootPath) {
+            std::error_code ec;
+            auto canonDescendant = std::filesystem::weakly_canonical(descendantPath, ec);
+            auto canonRoot = std::filesystem::weakly_canonical(rootPath, ec);
+
+            if (ec) return false; // if any canonicalization fails
+
+            // Compare each path component
+            auto rootIt = canonRoot.begin();
+            auto detIt = canonDescendant.begin();
+
+            for (; rootIt != canonRoot.end(); ++rootIt, ++detIt) {
+                if (detIt == canonDescendant.end() || *rootIt != *detIt)
+                    return false; // paths diverge
+            }
+            // Passed all root elements matched; can be equal or a subpath
+            return true;
         }
 
         static bool isMusic(std::filesystem::path const& path) {

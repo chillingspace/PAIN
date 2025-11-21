@@ -111,6 +111,28 @@ namespace PAIN {
 
         void Organizer::enforceGameAssetLocation(Info& asset) const {
 
+            //Identify asset relative folder
+            std::filesystem::path relative_path;
+
+            //Check asset root first
+            if (isSubPath(asset.raw_path.parent_path(), assets_root)) relative_path = std::filesystem::relative(asset.raw_path.parent_path(), assets_root);
+
+            //Iterate through to find relative folder
+            if (relative_path.empty()) {
+                for (auto const& [type, folder] : getAllGameFolders()) {
+
+                    //Check if sub path
+                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
+                }
+            }
+            if (relative_path.empty()) {
+                for (auto const& [type, folder] : getAllEngineFolders()) {
+
+                    //Check if sub path
+                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
+                }
+            }
+
             //Check if game dir has asset type
             if (game_dir.find(asset.type) != game_dir.end()) {
 
@@ -121,7 +143,10 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    auto target = assets_root / dir_path / relative_path / asset.name;
+
+                    //Create parent path just to be sure
+                    std::filesystem::create_directories(target.parent_path());
 
                     //Reposition asset into the right directory
                     moveFile(asset, target);
@@ -135,7 +160,10 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    auto target = assets_root / dir_path / relative_path / asset.name;
+
+                    //Create parent path just to be sure
+                    std::filesystem::create_directories(target.parent_path());
 
                     //Reposition asset into the right directory
                     moveFile(asset, target);
@@ -144,6 +172,28 @@ namespace PAIN {
         }
 
         void Organizer::enforceEngineAssetLocation(Info& asset) const {
+
+            //Identify asset relative folder
+            std::filesystem::path relative_path;
+
+            //Check asset root first
+            if (isSubPath(asset.raw_path.parent_path(), assets_root)) relative_path = std::filesystem::relative(asset.raw_path.parent_path(), assets_root);
+
+            //Iterate through to find relative folder
+            if (relative_path.empty()) {
+                for (auto const& [type, folder] : getAllGameFolders()) {
+
+                    //Check if sub path
+                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
+                }
+            }
+            if (relative_path.empty()) {
+                for (auto const& [type, folder] : getAllEngineFolders()) {
+
+                    //Check if sub path
+                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
+                }
+            }
 
             //Check if game dir has asset type
             if (engine_dir.find(asset.type) != engine_dir.end()) {
@@ -155,7 +205,10 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    auto target = assets_root / dir_path / relative_path / asset.name;
+
+                    //Create parent path just to be sure
+                    std::filesystem::create_directories(target.parent_path());
 
                     //Reposition asset into the right directory
                     moveFile(asset, target);
@@ -170,7 +223,10 @@ namespace PAIN {
                 if (!isPathPartOfRoot(asset.relative_folder, dir_path)) {
 
                     //Get target path
-                    auto target = assets_root / dir_path / asset.name;
+                    auto target = assets_root / dir_path / relative_path / asset.name;
+
+                    //Create parent path just to be sure
+                    std::filesystem::create_directories(target.parent_path());
 
                     //Reposition asset into the right directory
                     moveFile(asset, target);
@@ -306,45 +362,90 @@ namespace PAIN {
             }
         }
 
-        IAsset Organizer::organizeAndProcessAsset(std::filesystem::path const& file_path) const {
-            //create asset info
-            Info asset;
-            asset.raw_path = file_path;
-            asset.name = asset.raw_path.filename().string();
-            asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
-            asset.type = getAssetType(asset.raw_path);
+        std::optional<std::vector<IAsset>> Organizer::organizeAndProcessAsset(std::filesystem::path const& file_path) const {
 
-            //Check if asset is in engine or game
-            if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
+            //Return if not a valid file
+            if (!std::filesystem::exists(file_path) || file_path.extension() == desc_ext) return std::nullopt;
 
-                //Enforce asset location
-                enforceGameAssetLocation(asset);
-            }
-            else if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
+            //Lamda function
+            auto organize_and_process = [&](std::filesystem::path const& file_path)->std::optional<std::vector<IAsset>> {
+                //create asset info
+                Info asset;
+                asset.raw_path = file_path;
+                asset.name = asset.raw_path.filename().string();
+                asset.relative_folder = std::filesystem::relative(asset.raw_path, assets_root).parent_path();
+                asset.type = getAssetType(asset.raw_path);
 
-                //Enforce asset location
-                enforceEngineAssetLocation(asset);
+                //Check if asset is in engine or game
+                if (isPathPartOfRoot(asset.relative_folder, game_folder)) {
+
+                    //Enforce asset location
+                    enforceGameAssetLocation(asset);
+                }
+                else if (isPathPartOfRoot(asset.relative_folder, engine_folder)) {
+
+                    //Enforce asset location
+                    enforceEngineAssetLocation(asset);
+                }
+                else {
+                    //Enforce asset location into game folder
+                    enforceGameAssetLocation(asset);
+                }
+
+                //Skip bin files
+                if (asset.raw_path.extension() == ".bin" || asset.raw_path.extension() == desc_ext) return std::nullopt;
+
+                //Update asset relative path
+                asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
+
+                //Compile asset
+                std::optional<std::vector<IAsset>> optional_assets = compiler->processAsset(asset);
+
+                //Craft asset interface
+                IAsset asset_interface;
+                asset_interface.guid = asset.guid;
+                asset_interface.name = asset.shipped_path.filename().string();
+                asset_interface.type = asset.type;
+                asset_interface.main_relative_path = asset.relative_path;
+                asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
+
+                if (optional_assets.has_value()) {
+                    optional_assets.value().push_back(asset_interface);
+                    return optional_assets.value();
+                }
+                else {
+                    std::vector<IAsset> vec = { asset_interface };
+                    return vec;
+                }
+                };
+
+            //Check if directory
+            if (std::filesystem::is_directory(file_path)) {
+
+                //Empty vec
+                std::vector<IAsset> vec;
+
+                //Recursive iterate
+                for (auto const& entry : std::filesystem::recursive_directory_iterator(file_path)) {
+                    auto assets = organize_and_process(file_path);
+                    if (assets.has_value()) {
+                        for (auto const& asset : assets.value()) {
+                            vec.push_back(asset);
+                        }
+                    }
+                }
+
+                if(!vec.empty()) return vec;
             }
             else {
-                //Enforce asset location into game folder
-                enforceGameAssetLocation(asset);
+                auto asset = organize_and_process(file_path);
+                if (asset.has_value()) {
+                    std::vector<IAsset> vec = { asset.value() };
+                    return vec;
+                }
             }
 
-            //Update asset relative path
-            asset.relative_path = std::filesystem::relative(asset.raw_path, assets_root);
-
-            //Compile asset
-            compiler->processAsset(asset);
-
-            //Craft asset interface
-            IAsset asset_interface;
-            asset_interface.guid = asset.guid;
-            asset_interface.name = asset.shipped_path.filename().string();
-            asset_interface.type = asset.type;
-            asset_interface.main_relative_path = asset.relative_path;
-            asset_interface.shipped_relative_path = asset.relative_path.parent_path() / asset.shipped_path.filename();
-
-            return asset_interface;
+            return std::nullopt;
         }
 
         void Organizer::scanAssetDirectories() {
@@ -360,30 +461,6 @@ namespace PAIN {
                 //Temp skip config.json
                 if (file.filename() == "Config.json") return;
 
-                static constexpr std::array<const char*, 4> ACCEPTED_GLTF_NEIGHBOURS = {
-                    ".bin",
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                };
-
-                // skip .bin files that are dependencies of .gltf files
-                // .bin files aren't models themselves, but are required by .gltf files
-                if (std::find(ACCEPTED_GLTF_NEIGHBOURS.begin(), ACCEPTED_GLTF_NEIGHBOURS.end(), file.extension()) != ACCEPTED_GLTF_NEIGHBOURS.end()) {
-                    // Check if ANY .gltf file exists in the same directory
-                    bool has_gltf_neighbor = false;
-                    for (const auto& entry : std::filesystem::directory_iterator(file.parent_path())) {
-                        if (entry.path().extension() == ".gltf") {
-                            has_gltf_neighbor = true;
-                            break;
-                        }
-                    }
-
-                    if (has_gltf_neighbor) {
-                        return; // Skip this, it's likely a GLTF dependency
-                    }
-                }
-
                 //Check if asset is a desc file, locate raw asset in same directory
                 if (file.extension() == desc_ext) {
 
@@ -393,10 +470,16 @@ namespace PAIN {
                 }
 
                 //Organize and process asset
-                auto asset_interface = organizeAndProcessAsset(file);
+                auto asset_vec = organizeAndProcessAsset(file);
 
-                //Inser asset into assets
-                assets.push_back(asset_interface);
+                //Insert asset into assets
+                if (asset_vec.has_value()) {
+                    
+                    //Iterate through all values
+                    for (auto const& i_asset : asset_vec.value()) {
+                        assets.push_back(i_asset);
+                    }
+                }
                 },
                 [](std::filesystem::path) {});
 

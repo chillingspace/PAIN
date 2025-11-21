@@ -5,6 +5,9 @@
 #ifdef _DEBUG
 #include "ECS/sMetaData.h"
 #include "CoreSystems/Serialization/sSerialization.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Windows/Window.h"
+
 
 namespace PAIN {
 	namespace Editor {
@@ -29,6 +32,9 @@ namespace PAIN {
 
                 registerPopUp("New Scene", createNewScenePopUp("New Scene"));
                 registerPopUp("Save As...", saveAsPopUp("Save As..."));
+                registerPopUp("Settings", settingsPopUp("Settings"));
+                registerPopUp("Unsaved Changes", unsavedChangesPopUp("Unsaved Changes"));
+                registerPopUp("Unsaved Scene", unsavedScenePopUp("Unsaved Scene"));
 			}
             
 			void Tools::nextWindowSettings() {
@@ -95,6 +101,142 @@ namespace PAIN {
                     };
             }
 
+            std::function<void(std::any const&)> Tools::settingsPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+                         auto& gfx = GraphicsSettings::get();
+
+                        // Shadow Type Dropdown
+                        const char* shadow_types[] = { "Softest", "Soft", "Hard" };
+                        int current_shadow = static_cast<int>(gfx.shadow_type);
+                        if (ImGui::Combo("Shadow Type", &current_shadow, shadow_types, IM_ARRAYSIZE(shadow_types))) {
+                            gfx.shadow_type = static_cast<GraphicsSettings::SHADOW_TYPES>(current_shadow);
+                        }
+                        ImGui::Text("Shadow Map Width: %d", gfx.getShadowMapWidth());
+
+                        ImGui::Separator();
+
+                        // Gamma Correction Checkbox
+                        if (ImGui::Checkbox("Gamma Correction", &gfx.gamma_correction)) {}
+
+                        // Ambient Light Color (using glm::vec3)
+                        float ambient_light[3] = { gfx.AMBIENT_LIGHT.r, gfx.AMBIENT_LIGHT.g, gfx.AMBIENT_LIGHT.b };
+                        if (ImGui::ColorEdit3("Ambient Light", ambient_light)) {
+                            gfx.AMBIENT_LIGHT = glm::vec3(ambient_light[0], ambient_light[1], ambient_light[2]);
+                        }
+
+                        // Daytime Toggle
+                        if (ImGui::Checkbox("Daytime", &gfx.daytime)) {}
+
+                        // Field of View slider
+                        if (ImGui::SliderFloat("FOV", &gfx.fov, 30.0f, 120.0f)) {}
+
+                        ImGui::Separator();
+
+                        // Ambient Occlusion toggle
+                        if (ImGui::Checkbox("Ambient Occlusion", &gfx.ao)) {}
+
+                        // Blur Quality slider (integer)
+                        if (ImGui::SliderInt("Blur Quality", &gfx.blur_quality, 2, 10)) {}
+
+                        // Blur Strength slider
+                        if (ImGui::SliderFloat("Blur Strength", &gfx.blur_strength, 0.0f, 10.0f)) {}
+
+                        ImGui::Separator();
+
+                        // Bloom Enable checkbox
+                        if (ImGui::Checkbox("Bloom", &gfx.bloom)) {}
+
+                        // Bloom threshold slider
+                        if (ImGui::SliderFloat("Bloom Threshold", &gfx.bloom_threshold, 0.0f, 5.0f)) {}
+
+                        // Bloom blur strength slider
+                        if (ImGui::SliderFloat("Bloom Blur Strength", &gfx.bloom_blur_strength, 0.1f, 10.0f)) {}
+
+                        // Bloom strength slider
+                        if (ImGui::SliderFloat("Bloom Strength", &gfx.bloom_strength, 0.0f, 5.0f)) {}
+
+                        // Bloom quality slider (integer)
+                        if (ImGui::SliderInt("Bloom Quality", &gfx.bloom_quality, 2, 10)) {}
+
+                        ImGui::Separator();
+
+                        // Tone mapping mode Combo
+                        const char* tone_mapping_modes[] = { "None", "ACES", "Reinhard", "Uncharted2" };
+                        int current_tone = static_cast<int>(gfx.tone_mapping_mode);
+                        if (ImGui::Combo("Tone Mapping", &current_tone, tone_mapping_modes, IM_ARRAYSIZE(tone_mapping_modes)))
+                        {
+                            gfx.tone_mapping_mode = static_cast<GraphicsSettings::TONE_MAPPING_TYPES>(current_tone);
+                        }
+
+                        // Tone mapping exposure slider
+                        if (ImGui::SliderFloat("Tone Exposure", &gfx.tone_mapping_exposure, 0.0f, 5.0f)) {}
+
+                        // Image based lighting toggle
+                        if (ImGui::Checkbox("Image Based Lighting (IBL)", &gfx.ibl)) {}
+                    
+                        if (ImGui::Button("Close Settings")) {
+
+                            closePopUp(popup_id);
+                        }
+                   
+                };
+            }
+
+            std::function<void(std::any const&)> Tools::unsavedChangesPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+
+                    auto ser = services->get<Serialization::Service>();
+                    auto win = services->get<Window::Window>();
+
+                    ImGui::Text("You have unsaved changes. Save before exit?");
+                    if (ImGui::Button("Save and Exit")) {
+                        ser->saveCurrentScene();
+                        win->safeShutdown();
+
+                        closePopUp(popup_id);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Exit Without Saving")) {
+                        win->safeShutdown();
+
+                        closePopUp(popup_id);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+
+                        closePopUp(popup_id);
+                    }
+          
+                };
+            }
+
+            std::function<void(std::any const&)> Tools::unsavedScenePopUp(std::string const& popup_id)
+            {
+                return [this, popup_id](std::any const& data) {
+
+                    auto ser = services->get<Serialization::Service>();
+                    auto win = services->get<Window::Window>();
+
+                    ImGui::Text("Scene Not Saved! Save before exit?");
+                    if (ImGui::Button("Save scene as (HAVEN'T IMPLEMENTED SAVE SCENE AS)")) {
+
+                        closePopUp(popup_id);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Exit Without Saving")) {
+                        win->safeShutdown();
+
+                        closePopUp(popup_id);
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+
+                        closePopUp(popup_id);
+                    }
+
+                };
+            }
+
             void Tools::onAttach()
             {
             }
@@ -120,6 +262,7 @@ namespace PAIN {
                         if (ImGui::MenuItem("Save", "Ctrl+S")) { PN_SERI_SERVICE->saveCurrentScene(); }
                         if (ImGui::MenuItem("Save As...")) { openPopUp("Save As..."); }
                         ImGui::Separator();
+                        if (ImGui::MenuItem("Settings")) { openPopUp("Settings"); }
                         if (ImGui::MenuItem("Exit")) {/*TODO*/ }
                         ImGui::EndMenu();
                     }
@@ -209,7 +352,37 @@ namespace PAIN {
 
                 ImGui::EndChild();
 			}
+            void Tools::onEvent(Event::Event& event) {
+#ifdef PN_PLATFORM_WINDOWS
+                // Handle closing of application tool panel
+                Event::Dispatcher dispatcher(event);
+
+                dispatcher.Dispatch<Event::WindowClosed>([&](Event::WindowClosed& e) -> bool {
+                    auto ser = services->get<PAIN::Serialization::Service>();
+
+                    closeAllPopUps();
+
+                    // Is modified scene doesnt work currently
+                    if (ser->getIsModifiedScene()) {
+                        openPopUp("Unsaved Changes");
+                        return true; // handled
+                    }
+                    else if (ser->getIsCurSceneEmpty()) {
+                        /*showCloseNoScenePopup = true;*/
+                        openPopUp("Unsaved Scene");
+                        return true;
+                    }
+
+
+                    auto win = services->get<Window::Window>();
+                    win->safeShutdown();
+                    return true;
+
+                    });
+#endif
 		}
+
+        }
 	}
 }
 

@@ -10,6 +10,8 @@
 #include "ECS/Components/cMetadata.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
+#include <glm/gtx/quaternion.hpp>   // for glm::eulerAngles, glm::quat(vec3)
+
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -194,6 +196,7 @@ bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return m
 void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
 void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
 std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }
+std::vector<entt::entity> EngineAPIAdapter::GetEntitiesByTag(const std::string& tag) { return meta_.getEntitiesByTag(tag); }
 
 /* =========================================================================== */
 /*                                Transform                                    */
@@ -233,6 +236,23 @@ glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
 void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
     auto& t = ensure<PAIN::Transform>(entityId);
     t.scale = { s.x, s.y, s.z };
+}
+
+glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
+{
+    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+        const auto& t = opt->get();
+        // convert quaternion -> euler angles, in rad
+        glm::vec3 euler = glm::eulerAngles(t.rotation);
+        return euler;
+    }
+    return { 0.f, 0.f, 0.f };
+}
+
+void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
+{
+    auto& t = ensure<PAIN::Transform>(entityId);
+    t.rotation = glm::quat(r); // euler to quat
 }
 
 /* =========================================================================== */
@@ -281,6 +301,50 @@ void EngineAPIAdapter::SetVelocity(entt::entity entityId, glm::vec3 v) {
 //bool EngineAPIAdapter::Audio_SetGroupVolumeDb(const std::string& group, float db) { return audio_ && audio_->setGroupVolumeDb(group.c_str(), db) == AudioResult::Ok; }
 //bool EngineAPIAdapter::Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) { return audio_ && audio_->fadeGroupToDb(group.c_str(), targetDb, seconds) == AudioResult::Ok; }
 //bool EngineAPIAdapter::Audio_SetMuteAll(bool mute) { return audio_ && audio_->setMuteAll(mute) == AudioResult::Ok; }
+
+void EngineAPIAdapter::Audio_Play(entt::entity entityId)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    auto& src = reg.get<PAIN::Audio::AudioSource>(entityId);
+    src.playTrigger = true;  // tells audiosys to start
+    src.stopTrigger = false;
+}
+
+void EngineAPIAdapter::Audio_Stop(entt::entity entityId)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    auto& src = reg.get<PAIN::Audio::AudioSource>(entityId);
+    src.stopTrigger = true;
+    src.playTrigger = false;
+}
+
+void EngineAPIAdapter::Audio_SetVolumeDb(entt::entity entityId, float db)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).volumeDb = db;
+}
+
+void EngineAPIAdapter::Audio_SetGroup(entt::entity entityId, std::string group)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).group_name = std::move(group);
+}
+
+void EngineAPIAdapter::Audio_SetLooping(entt::entity entityId, bool looping)
+{
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Audio::AudioSource>(entityId)) return;
+
+    reg.get<PAIN::Audio::AudioSource>(entityId).looping = looping;
+}
 
 /* =========================================================================== */
 /*                           Scene / System state                              */
@@ -469,7 +533,7 @@ void EngineAPIAdapter::RemoveLight(entt::entity entityId) {
 }
 void EngineAPIAdapter::SetLightPosition(entt::entity entityId, float x, float y, float z) {
     auto& l = ensure<PAIN::Lighting>(entityId);
-    l.position = { x,y,z }; 
+    l.offset = { x,y,z };
 
     /*PAIN::Lighting* l = nullptr;
     if (!try_get<PAIN::Lighting>(entityId, l)) {

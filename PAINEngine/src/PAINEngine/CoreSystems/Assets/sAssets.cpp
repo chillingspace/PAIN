@@ -121,6 +121,12 @@ namespace PAIN {
 				return audio_service->createSound(virtual_path);
 				});
 
+			//Register Material loader
+			asset_loader->RegisterLoader(Type::Material, [this](std::string const& virtual_path) {
+
+				return asset_loader->ImportMaterial(virtual_path);
+				});
+
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
@@ -164,17 +170,24 @@ namespace PAIN {
 			if (checkAssetRegistered(findGUID(relative_path))) return;
 
 			//Process asset
-			auto asset = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
+			auto asset_vec = asset_organizer->organizeAndProcessAsset(path_service->resolvePath(Path::main_assets_alias, relative_path.string()));
 
-			//Check to ensure that GUID is valid
-			if (!asset.guid.IsValid()) return;
+			//Check to ensure asset vec has value
+			if (!asset_vec.has_value()) return;
 
-			//Get asset registry data
-			asset_registry[asset.guid] = std::make_shared<IAsset>(asset);
+			//Iterate through all assets
+			for (auto const& i_asset : asset_vec.value()) {
 
-			//Register paths to guid
-			shipped_path_to_guid[asset.shipped_relative_path] = asset.guid;
-			main_path_to_guid[asset.main_relative_path] = asset.guid;
+				//Check for valid guid
+				if (!i_asset.guid.IsValid()) return;
+
+				//Get asset registry data
+				asset_registry[i_asset.guid] = std::make_shared<IAsset>(i_asset);
+
+				//Register paths to guid
+				shipped_path_to_guid[i_asset.shipped_relative_path] = i_asset.guid;
+				main_path_to_guid[i_asset.main_relative_path] = i_asset.guid;
+			}
 		}
 #endif
 
@@ -464,6 +477,19 @@ namespace PAIN {
 
 			//Actually copy the file
 			std::filesystem::copy_file(file_path, destination);
+		}
+
+		void Manager::createNewMaterial(Material const& mat, std::filesystem::path const& out_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//if export succeedds
+			if (asset_compiler->ExportMaterial(mat, out_path)) {
+
+				//Register asset
+				registerAsset(std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, "")));
+			}
 		}
 #endif
 #endif

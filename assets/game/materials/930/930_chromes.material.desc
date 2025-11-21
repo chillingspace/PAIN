@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_chromes.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 4187628420117453060
+  },
+  "descriptor_version": 1,
+  "guid": "d25ebdd4-8084-994a-91ef-dc5d38e4f789",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_chromes.material"
+  }
+}

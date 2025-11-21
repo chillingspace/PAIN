@@ -320,6 +320,11 @@ namespace PAIN {
                 ImGui::EndPopup();
             }
 
+            void ScenesPanel::drawSkyboxSettingsPanel()
+            {
+             
+            }
+
             void ScenesPanel::onAttach()
             {
                 registerPopUp("CreateScene", createScenePopup("CreateScene"));
@@ -414,38 +419,41 @@ namespace PAIN {
 
                 ImGui::Separator();
 
+                // Graphics Settings
+                drawSkyboxSettingsPanel();
+
                 // Layers
-                ImGui::Text("Total Layers: %u", (unsigned)doc.layers.size());
+                //ImGui::Text("Total Layers: %u", (unsigned)doc.layers.size());
 
-                if (ImGui::Button("Create Layer")) {
-                    ser->addLayer();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Remove Layer")) {
-                    // pick a selected index from your panel state; here assume 0 for sample
-                    unsigned sel = std::min<unsigned>(selectedLayerIdx_, (unsigned)doc.layers.size() - 1);
-                    ser->removeLayer(sel);
-                    selectedLayerIdx_ = (unsigned)std::min<size_t>(selectedLayerIdx_, doc.layers.size() ? doc.layers.size() - 1 : 0);
-                }
+                //if (ImGui::Button("Create Layer")) {
+                //    ser->addLayer();
+                //}
+                //ImGui::SameLine();
+                //if (ImGui::Button("Remove Layer")) {
+                //    // pick a selected index from your panel state; here assume 0 for sample
+                //    unsigned sel = std::min<unsigned>(selectedLayerIdx_, (unsigned)doc.layers.size() - 1);
+                //    ser->removeLayer(sel);
+                //    selectedLayerIdx_ = (unsigned)std::min<size_t>(selectedLayerIdx_, doc.layers.size() ? doc.layers.size() - 1 : 0);
+                //}
 
-                ImGui::TextUnformatted("Layer List:");
-                ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
-                for (unsigned i = 0; i < doc.layers.size(); ++i) {
-                    bool vis = doc.layers[i].enabled;
-                    if (ImGui::Checkbox((std::string("##vis_") + std::to_string(i)).c_str(), &vis)) {
-                        ser->setLayerVisible(i, vis);        // <- write to service
-                        if (hooks_.onLayerVisibleChanged) hooks_.onLayerVisibleChanged(i, vis);
-                        if (hooks_.onDirty)               hooks_.onDirty();
-                    }
-                    ImGui::SameLine();
-                    std::string label = "Layer " + std::to_string(doc.layers[i].id);
-                    if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
-                        selectedLayerIdx_ = i;
-                    }
-                }
-                ImGui::EndChild();
+                //ImGui::TextUnformatted("Layer List:");
+                //ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
+                //for (unsigned i = 0; i < doc.layers.size(); ++i) {
+                //    bool vis = doc.layers[i].enabled;
+                //    if (ImGui::Checkbox((std::string("##vis_") + std::to_string(i)).c_str(), &vis)) {
+                //        ser->setLayerVisible(i, vis);        // <- write to service
+                //        if (hooks_.onLayerVisibleChanged) hooks_.onLayerVisibleChanged(i, vis);
+                //        if (hooks_.onDirty)               hooks_.onDirty();
+                //    }
+                //    ImGui::SameLine();
+                //    std::string label = "Layer " + std::to_string(doc.layers[i].id);
+                //    if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
+                //        selectedLayerIdx_ = i;
+                //    }
+                //}
+                //ImGui::EndChild();
 
-                if (ImGui::Button("Edit Layer Bit Mask")) { showEditMask_ = true; }
+                //if (ImGui::Button("Edit Layer Bit Mask")) { showEditMask_ = true; }
 
                 // Modals last
                 drawCreateModal();

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "UnamedMaterial_0.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 8687348065749922267
+  },
+  "descriptor_version": 1,
+  "guid": "34618c84-1a57-7647-a194-e1cc9b50a0bf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\UnamedMaterial_0.material"
+  }
+}

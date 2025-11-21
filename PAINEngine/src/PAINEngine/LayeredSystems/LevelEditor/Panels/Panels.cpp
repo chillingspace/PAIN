@@ -131,6 +131,14 @@ namespace PAIN {
 				ImGui::CloseCurrentPopup();
 			}
 
+			void IPanel::closeAllPopUps() {
+				b_popup_showing = false;
+				for (auto& p : popups) {
+					p.second.b_is_open = false;
+				}
+				ImGui::CloseCurrentPopup(); // This will close only the CURRENT popup context in ImGui this frame.
+			}
+
 			void IPanel::renderPopUps() {
 
 				//Iterate through all popup and render

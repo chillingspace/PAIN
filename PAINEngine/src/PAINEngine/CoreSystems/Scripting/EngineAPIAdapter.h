@@ -65,6 +65,7 @@ public:
     void AssignGroup(entt::entity entityId, std::string group) override;
     void UnassignGroup(entt::entity entityId) override;
     std::optional<std::string> GetGroup(entt::entity entityId) override;
+    std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) override;
 
     /* =========================================================================== */
     /*                                Transform                                    */
@@ -73,6 +74,8 @@ public:
     void SetPosition(entt::entity entityId, glm::vec3 p) override;
     glm::vec3 GetScale(entt::entity entityId) override;
     void SetScale(entt::entity entityId, glm::vec3 s) override;
+    glm::vec3 GetRotation(entt::entity entityId) override;
+    void SetRotation(entt::entity entityId, glm::vec3 r) override;
 
     /* =========================================================================== */
     /*                                  Physics                                    */
@@ -103,6 +106,12 @@ public:
     //bool  Audio_SetGroupVolumeDb(const std::string& group, float db) override;
     //bool  Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) override;
     //bool  Audio_SetMuteAll(bool mute) override;
+
+    void Audio_Play(entt::entity entityId) override;
+    void Audio_Stop(entt::entity entityId) override;
+    void Audio_SetVolumeDb(entt::entity entityId, float db) override;
+    void Audio_SetGroup(entt::entity entityId, std::string group) override;
+    void Audio_SetLooping(entt::entity entityId, bool looping) override;
 
     /* =========================================================================== */
     /*                           Scene / System state                              */

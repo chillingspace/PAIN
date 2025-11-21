@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Material_19.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 11688450757990040975
+  },
+  "descriptor_version": 1,
+  "guid": "f5984def-94f2-6a43-82db-b96f46c26e92",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\2ce\\Material_19.material"
+  }
+}

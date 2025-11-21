@@ -370,7 +370,7 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info) const {
+        void Compiler::compileAndShip(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
 
             //Find asset type and platform
             switch (desc_file.type) {
@@ -383,7 +383,7 @@ namespace PAIN {
                 break;
 
             case Type::Model:
-                compileModel(desc_file, asset_info);
+                compileModel(desc_file, asset_info, opt_assets);
                 break;
                 
             default:
@@ -585,11 +585,17 @@ namespace PAIN {
             }
         }
 
-        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info) const {
+        void Compiler::compileModel(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
+
+            //Skip .bin files
+            if (asset_info.raw_path.extension() == ".bin") return;
 
             // Set output extension
             std::string out_ext = desc_file.import_settings.value("extension", ".mesh");
             asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + out_ext);
+
+            //Create output directory
+            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
 
             // Check if recompilation is needed
             if (!needsRecompilation(asset_info, desc_file)) return;
@@ -747,7 +753,7 @@ namespace PAIN {
                 // -----------------------------------------------
             }
 
-            // Animation extraction as previously shown (unchanged)
+            // Animation extraction as previously shown
 
             if (import_animations && scene->HasAnimations()) {
                 for (unsigned int a = 0; a < scene->mNumAnimations; ++a) {
@@ -782,51 +788,260 @@ namespace PAIN {
                 }
             }
 
+            //Extract material
             for (unsigned int m = 0; m < scene->mNumMaterials; ++m) {
                 aiMaterial* material = scene->mMaterials[m];
                 Material mat;
                 mat.name = material->GetName().C_Str();
-                aiString texPath;
+                static int def_name_count = 0;
+                mat.name = mat.name.empty() ? "UnamedMaterial_" + std::to_string(def_name_count++) : mat.name;
 
-                if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
-                    mat.diffuse_map_buf = texPath.C_Str();
-                if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS)
-                    mat.normalMap = texPath.C_Str();
-                if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS)
-                    mat.metallicMap = texPath.C_Str();
-                if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == AI_SUCCESS)
-                    mat.roughnessMap = texPath.C_Str();
-                if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS)
-                    mat.aoMap = texPath.C_Str();
+                //Identify the nested folder
+                std::filesystem::path relative_path;
 
-                // Base (albedo) color
-                aiColor3D baseColor(1, 1, 1);
-                if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor))
-                    mat.baseColor = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+                //Get relative path
+                relative_path = std::filesystem::relative(asset_info.relative_folder, getAllGameFolders()[Assets::Type::Model]);
+                bool game_folder = true;
+                if (relative_path.empty()) {
+                    relative_path = std::filesystem::relative(asset_info.relative_folder, getAllEngineFolders()[Assets::Type::Model]);
+                    game_folder = false;
+                }
 
-                // Metallic
-                float metallic = 0.0f;
-                if (AI_SUCCESS == material->Get(AI_MATKEY_METALLIC_FACTOR, metallic))
-                    mat.metallic = metallic;
+                //Get material textures
+                {
+                    //Identify texture folder
+                    std::filesystem::path texture_folder = game_folder ? getAllGameFolders()[Assets::Type::Texture] : getAllEngineFolders()[Assets::Type::Texture];
 
-                // Roughness
-                float roughness = 0.0f;
-                if (AI_SUCCESS == material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness))
-                    mat.roughness = roughness;
+                    //Get texture path
+                    aiString texPath;
 
-                // Emissive color/intensity
-                aiColor3D emissiveColor(0, 0, 0);
-                float emissiveIntensity = 1.0f;
-                if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor))
-                    mat.emission = glm::length(glm::vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b));
-                if (AI_SUCCESS == material->Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveIntensity))
-                    mat.emission *= emissiveIntensity;
+                    // Albedo/Base Color (try multiple texture types)
+                    if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &texPath) == AI_SUCCESS) {
+                        mat.albedoTexturePath = texture_folder / relative_path / std::filesystem::path(std::filesystem::path(texPath.C_Str()).lexically_normal()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
+                        mat.albedoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
 
-                asset.materials.push_back(mat);
+                    // Normal Map
+                    if (material->GetTexture(aiTextureType_NORMALS, 0, &texPath) == AI_SUCCESS) {
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &texPath) == AI_SUCCESS) {
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_HEIGHT, 0, &texPath) == AI_SUCCESS) {
+                        // Some formats use HEIGHT for normal maps
+                        mat.normalTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Metallic Map
+                    if (material->GetTexture(aiTextureType_METALNESS, 0, &texPath) == AI_SUCCESS) {
+                        mat.metallicTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Roughness Map
+                    if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == AI_SUCCESS) {
+                        mat.roughnessTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_SHININESS, 0, &texPath) == AI_SUCCESS) {
+                        // Shininess can be inverted to get roughness
+                        mat.roughnessTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Ambient Occlusion
+                    if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &texPath) == AI_SUCCESS) {
+                        mat.aoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS) {
+                        mat.aoTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Emissive/Glow
+                    if (material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &texPath) == AI_SUCCESS) {
+                        mat.emissiveTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+                    else if (material->GetTexture(aiTextureType_EMISSIVE, 0, &texPath) == AI_SUCCESS) {
+                        mat.emissiveTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Height/Parallax
+                    if (material->GetTexture(aiTextureType_HEIGHT, 0, &texPath) == AI_SUCCESS) {
+                        // If not already used for normal map
+                        if (mat.heightTexturePath.empty()) {
+                            mat.heightTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                        }
+                    }
+                    else if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath) == AI_SUCCESS) {
+                        mat.heightTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Opacity/Alpha
+                    if (material->GetTexture(aiTextureType_OPACITY, 0, &texPath) == AI_SUCCESS) {
+                        mat.opacityTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Sheen (Fabric)
+                    if (material->GetTexture(aiTextureType_SHEEN, 0, &texPath) == AI_SUCCESS) {
+                        mat.sheenTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Clear Coat (Car paint)
+                    if (material->GetTexture(aiTextureType_CLEARCOAT, 0, &texPath) == AI_SUCCESS) {
+                        mat.clearCoatTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Transmission (Glass)
+                    if (material->GetTexture(aiTextureType_TRANSMISSION, 0, &texPath) == AI_SUCCESS) {
+                        mat.transmissionTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Specular (Legacy workflow)
+                    if (material->GetTexture(aiTextureType_SPECULAR, 0, &texPath) == AI_SUCCESS) {
+                        mat.specularTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Ambient (Legacy)
+                    if (material->GetTexture(aiTextureType_AMBIENT, 0, &texPath) == AI_SUCCESS) {
+                        mat.ambientTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Lightmap (Baked lighting)
+                    if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &texPath) == AI_SUCCESS) {
+                        // Only if not already used for AO
+                        if (mat.lightmapTexturePath.empty()) {
+                            mat.lightmapTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                        }
+                    }
+
+                    // Reflection/Cubemap
+                    if (material->GetTexture(aiTextureType_REFLECTION, 0, &texPath) == AI_SUCCESS) {
+                        mat.reflectionTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                    }
+
+                    // Displacement
+                    if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath) == AI_SUCCESS) {
+                        // Only if not already used for height
+                        if (mat.displacementTexturePath.empty()) {
+                            mat.displacementTexturePath = texture_folder / relative_path / std::filesystem::path(texPath.C_Str()).lexically_normal();
+                        }
+                    }
+                }
+
+                //Get Material variables
+                {
+                    // Base Color / Albedo
+                    aiColor3D baseColor(1.0f, 1.0f, 1.0f);
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor)) {
+                        mat.baseColor = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+                    }
+                    // Alternative: Try base color (glTF 2.0)
+                    else if (AI_SUCCESS == material->Get(AI_MATKEY_BASE_COLOR, baseColor)) {
+                        mat.baseColor = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+                    }
+
+                    // Metallic Factor
+                    float metallic = 0.0f;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_METALLIC_FACTOR, metallic)) {
+                        mat.metallic = metallic;
+                    }
+
+                    // Roughness Factor
+                    float roughness = 0.5f;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness)) {
+                        mat.roughness = roughness;
+                    }
+                    // Alternative: Try glossiness (inverse of roughness)
+                    else {
+                        float glossiness = 0.5f;
+                        if (AI_SUCCESS == material->Get(AI_MATKEY_GLOSSINESS_FACTOR, glossiness)) {
+                            mat.roughness = 1.0f - glossiness;  // Convert to roughness
+                        }
+                    }
+
+                    // Emissive Color
+                    aiColor3D emissive(0.0f, 0.0f, 0.0f);
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_EMISSIVE, emissive)) {
+                        mat.emissive = glm::vec3(emissive.r, emissive.g, emissive.b);
+                    }
+
+                    // Emissive Strength (multiplier)
+                    float emissiveStrength = 1.0f;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveStrength)) {
+                        mat.emissive *= emissiveStrength;  // Apply multiplier
+                    }
+
+                    // Opacity (0 = transparent, 1 = opaque)
+                    float opacity = 1.0f;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_OPACITY, opacity)) {
+                        mat.isTransparent = (opacity < 1.0f);
+                    }
+
+                    // Transparency Factor (alternative)
+                    float transparencyFactor = 0.0f;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_TRANSPARENCYFACTOR, transparencyFactor)) {
+                        if (transparencyFactor > 0.0f) {
+                            mat.isTransparent = true;
+                        }
+                    }
+
+                    // Blend Mode
+                    int blendMode = 0;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_BLEND_FUNC, blendMode)) {
+                        if (blendMode != 0) {  // Not opaque
+                            mat.isTransparent = true;
+                        }
+                    }
+
+                    // Two-Sided / Double-Sided
+                    int twoSided = 0;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_TWOSIDED, twoSided)) {
+                        mat.doubleSided = (twoSided != 0);
+                    }
+
+                    // Alternative: Check enable culling flag
+                    int enableCulling = 1;
+                    if (AI_SUCCESS == material->Get(AI_MATKEY_ENABLE_WIREFRAME, enableCulling)) {
+                        if (enableCulling == 0) {
+                            mat.doubleSided = true;
+                        }
+                    }
+                }
+
+                //Material shipped path
+                std::filesystem::path material_folder = game_folder ? getAllGameFolders()[Assets::Type::Material] : getAllEngineFolders()[Assets::Type::Material];
+                auto mat_path = assets_root / material_folder / relative_path / mat.name;
+                mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
+                
+                //Export material
+                if (ExportMaterial(mat, mat_path)) {
+
+                    //Process asset
+                    Info mat_asset;
+                    mat_asset.raw_path = mat_path;
+                    mat_asset.name = mat_asset.raw_path.filename().string();
+                    mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
+                    mat_asset.type = getAssetType(mat_asset.raw_path);
+                    mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
+                    processAsset(mat_asset);
+
+                    //Craft asset interface
+                    IAsset asset_interface;
+                    asset_interface.guid = mat_asset.guid;
+                    asset_interface.name = mat_asset.shipped_path.filename().string();
+                    asset_interface.type = mat_asset.type;
+                    asset_interface.main_relative_path = mat_asset.relative_path;
+                    asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
+
+                    //Add into optional assets
+                    opt_assets.push_back(asset_interface);
+
+                    //Export material
+                    std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
+                    relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
+                    asset.materials.push_back(relative_mat_path.lexically_normal());
+                }
             }
-
-            //Create output directory
-            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
 
             //Export model
             ExportModel(asset, asset_info.shipped_path);
@@ -985,8 +1200,80 @@ namespace PAIN {
                 }
             }
 
-            std::cout << "WARNING: ffmpegffmpeg executable not found!" << std::endl;
+            std::cout << "WARNING: ffmpeg executable not found!" << std::endl;
             return "ffmpeg.exe"; // Fallback
+        }
+
+        bool Compiler::ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const {
+            try {
+                nlohmann::json j;
+
+                //Save textures
+                auto SaveTexture = [&](const char* key, const std::filesystem::path& path) {
+                    if (!path.empty()) {
+                        j["textures"][key] = path.string();
+                    }
+                    };
+
+                SaveTexture("albedo", asset.albedoTexturePath);
+                SaveTexture("normal", asset.normalTexturePath);
+                SaveTexture("metallic", asset.metallicTexturePath);
+                SaveTexture("roughness", asset.roughnessTexturePath);
+                SaveTexture("ao", asset.aoTexturePath);
+                SaveTexture("emissive", asset.emissiveTexturePath);
+                SaveTexture("height", asset.heightTexturePath);
+                SaveTexture("opacity", asset.opacityTexturePath);
+
+                //Advanced PBR
+                SaveTexture("sheen", asset.sheenTexturePath);
+                SaveTexture("clearCoat", asset.clearCoatTexturePath);
+                SaveTexture("transmission", asset.transmissionTexturePath);
+
+                //Legacy
+                SaveTexture("specular", asset.specularTexturePath);
+                SaveTexture("glossiness", asset.glossinessTexturePath);
+                SaveTexture("ambient", asset.ambientTexturePath);
+
+                //Special
+                SaveTexture("lightmap", asset.lightmapTexturePath);
+                SaveTexture("reflection", asset.reflectionTexturePath);
+                SaveTexture("displacement", asset.displacementTexturePath);
+
+                //Properties
+                j["properties"]["baseColor"] = {
+                    asset.baseColor.r,
+                    asset.baseColor.g,
+                    asset.baseColor.b
+                };
+                j["properties"]["metallic"] = asset.metallic;
+                j["properties"]["roughness"] = asset.roughness;
+                j["properties"]["emissive"] = {
+                    asset.emissive.r,
+                    asset.emissive.g,
+                    asset.emissive.b
+                };
+
+                //Flags
+                j["flags"]["transparent"] = asset.isTransparent;
+                j["flags"]["doubleSided"] = asset.doubleSided;
+
+                //Create directory if it doesn't exist
+                std::filesystem::create_directories(out_path.parent_path());
+
+                std::ofstream file(out_path);
+                if (!file.is_open()) {
+                    throw std::runtime_error("Failed to open file for writing.");
+                }
+
+                file << j.dump(4);
+                file.close();
+
+                std::cout << "Material saved: " << out_path.string() << std::endl;
+                return true;
+            }
+            catch (const std::exception& e) {
+                return false;
+            }
         }
 
         void Compiler::ExportModel(const Model& asset, const std::filesystem::path& out_path) const {
@@ -1082,10 +1369,7 @@ namespace PAIN {
             // Write materials
             uint32_t matCount = (uint32_t)asset.materials.size();
             out.write((char*)&matCount, sizeof(matCount));
-            for (const Material& mat : asset.materials) {
-                uint32_t nameLen = (uint32_t)mat.name.size();
-                out.write((char*)&nameLen, sizeof(nameLen));
-                out.write(mat.name.data(), nameLen);
+            for (auto const& mat_path : asset.materials) {
 
                 auto writeStr = [&](const std::string& str) {
                     uint32_t len = (uint32_t)str.size();
@@ -1093,17 +1377,7 @@ namespace PAIN {
                     out.write(str.data(), len);
                     };
 
-                writeStr(mat.diffuse_map_buf);
-                writeStr(mat.normalMap);
-                writeStr(mat.metallicMap);
-                writeStr(mat.roughnessMap);
-                writeStr(mat.aoMap);
-                writeStr(mat.emissionMap);
-
-                out.write((char*)&mat.baseColor, sizeof(mat.baseColor));
-                out.write((char*)&mat.metallic, sizeof(mat.metallic));
-                out.write((char*)&mat.roughness, sizeof(mat.roughness));
-                out.write((char*)&mat.emission, sizeof(mat.emission));
+                writeStr(mat_path.string());
             }
 
             out.close();
@@ -1132,7 +1406,10 @@ namespace PAIN {
             return false;
         }
 
-		void Compiler::processAsset(Info& asset_info) {
+        std::optional<std::vector<IAsset>> Compiler::processAsset(Info& asset_info) {
+
+            //Optional vec
+            std::vector<IAsset> opt_assets;
 
             //Check for desc files and output
             auto asset_desc_path = assets_root / asset_info.relative_folder / (asset_info.raw_path.filename().string() + desc_ext);
@@ -1152,7 +1429,7 @@ namespace PAIN {
             if (Assets::isAssetCompilable(asset_info.type)) {
 
                 //Compiling operation
-                compileAndShip(desc_obj, asset_info);
+                compileAndShip(desc_obj, asset_info, opt_assets);
             }
             else {
 
@@ -1173,6 +1450,14 @@ namespace PAIN {
             //Double check if there are desc changes
             if (desc_obj != readDescFile(asset_info, asset_desc_path)) {
                 saveDescFile(desc_obj, asset_desc_path);
+            }
+
+            //Check optional assets
+            if (!opt_assets.empty()) {
+                return opt_assets;
+            }
+            else {
+                return std::nullopt;
             }
 		}
 	}

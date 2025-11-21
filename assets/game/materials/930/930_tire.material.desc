@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_tire.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9548320137231499411
+  },
+  "descriptor_version": 1,
+  "guid": "f356b05f-3ced-8047-a6d7-453b267f6047",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_tire.material"
+  }
+}

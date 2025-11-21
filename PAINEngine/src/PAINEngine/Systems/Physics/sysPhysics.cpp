@@ -136,10 +136,31 @@ namespace PAIN {
 			//PN_CORE_WARN("[PHYSICS] Contact b1={}, b2={}", (uint32_t)a, (uint32_t)b);
 			if (a == entt::null || b == entt::null) return;
 
-			if (auto svc = services.lock()) { // tell lua
+			{
+				std::lock_guard<std::mutex> lock(collisionMutex_);
+				pendingCollisions_.push_back({ a, b });
+			}
+		}
+
+		void System::dispatchCollisionEvents(entt::registry& reg)
+		{
+			// move pending collisions to a local vector so hold the mutex briefly
+			std::vector<PendingCollision> localCollisions;
+			{
+				std::lock_guard<std::mutex> lock(collisionMutex_);
+				localCollisions.swap(pendingCollisions_);
+			}
+
+			if (localCollisions.empty())
+				return;
+
+			// now can use lua on main thread
+			if (auto svc = services.lock()) {
 				if (auto ecs = svc->get<ECS::Controller>()) {
 					if (auto gs = ecs->getSystem<PAIN::Scripting::GameScriptingSystem>()) {
-						gs->onCollision(a, b);   // forwards to luamanager that registered handlers
+						for (const auto& c : localCollisions) {
+							gs->onCollision(c.a, c.b);
+						}
 					}
 					else {
 						PN_CORE_WARN("[PHYSICS] No GameScriptingSystem in ECS; skipping Lua dispatch");
@@ -150,9 +171,8 @@ namespace PAIN {
 				}
 			}
 			else {
-				PN_CORE_WARN("[PHYSICS] Services expired in notifyContact; skipping Lua dispatch");
+				PN_CORE_WARN("[PHYSICS] Services expired in dispatchCollisionEvents; skipping Lua dispatch");
 			}
-
 		}
 
 		System::System(std::shared_ptr<Services> svc) : ISystem(svc), 
@@ -218,6 +238,7 @@ namespace PAIN {
                 {
                     syncNewBodies(registry);
                     jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
+					dispatchCollisionEvents(registry);
                 }
             }
         }
@@ -257,6 +278,15 @@ namespace PAIN {
 						}
 					}
 
+					// Check and apply motion type update
+					JPH::EMotionType desired_motion_type;
+					switch (rigidBody.motion_type) {
+					case MotionType::Static:    desired_motion_type = JPH::EMotionType::Static; break;
+					case MotionType::Kinematic: desired_motion_type = JPH::EMotionType::Kinematic; break;
+					case MotionType::Dynamic:
+					default:                    desired_motion_type = JPH::EMotionType::Dynamic; break;
+					}
+
 					// Lock body for reading
 					{
 						// Lock the body for reading
@@ -266,6 +296,11 @@ namespace PAIN {
 							const JPH::RVec3 position = body.GetPosition();
 							const JPH::Quat rotation = body.GetRotation();
 
+							// Check motion type mismatch
+							if (body.GetMotionType() != desired_motion_type) {
+								// Will update after releasing lock
+							}
+
 							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 						}
@@ -274,6 +309,11 @@ namespace PAIN {
 						}
 					}
 					// end lock
+
+					JPH::EMotionType current_motion_type = body_interface.GetMotionType(rigidBody.bodyID);
+					if (current_motion_type != desired_motion_type) {
+						body_interface.SetMotionType(rigidBody.bodyID, desired_motion_type, JPH::EActivation::Activate);
+					}
 
 					if (registry.all_of<Audio::AudioSource, MetaData::EntityName>(entity)) {
 						auto& name = registry.get<MetaData::EntityName>(entity);
@@ -313,6 +353,13 @@ namespace PAIN {
 								  .5f * transform.scale.z),
 								  .0f);
 
+					JPH::EMotionType motion_type;
+					switch (rigidBody.motion_type) {
+					case MotionType::Static:    motion_type = JPH::EMotionType::Static; break;
+					case MotionType::Kinematic: motion_type = JPH::EMotionType::Kinematic; break;
+					default:                    motion_type = JPH::EMotionType::Dynamic; break;
+					}
+
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
 						boxShape,
@@ -320,9 +367,11 @@ namespace PAIN {
 								   transform.position.y, 
 								   transform.position.z),
 						rotationQuat,
-						JPH::EMotionType::Dynamic,
+						motion_type,
 						rigidBody.layer
 					);
+
+					settings.mAllowDynamicOrKinematic = true;  // Allow runtime motion type changes
 
 					// tag body with owning entt::entity so contact listener can map back
 					settings.mUserData = static_cast<uint64_t>(static_cast<uint32_t>(entity));
@@ -349,15 +398,6 @@ namespace PAIN {
 
 			auto& transform = view.get<Transform>(targetEntity);
 			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
-
-			//// Lock body for reading
-			//const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), rigidBody.bodyID);
-			//if (!lock.Succeeded()) {
-			//	PN_CORE_WARN("Failed to lock body for reading");
-			//	return;
-			//}
-
-			//const JPH::Body& body = lock.GetBody();
 
 			// Ground check
 			glm::f32 half_height = 0.5f * transform.scale.y;

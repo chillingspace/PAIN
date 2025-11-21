@@ -1,4 +1,4 @@
-#ifdef _DEBUG
+﻿#ifdef _DEBUG
 
 #include "pch.h"
 #ifdef max
@@ -496,85 +496,77 @@ namespace PAIN {
 					ImGuiIO& io = ImGui::GetIO();
 					auto camera = services->get<sCameraController>();
 
-
 					if (camera) {
 
-						#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 						bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
-
-						#else
+#else
 						camera->m_vpHeight = size.y;
 						camera->m_vpWidth = size.x;
-						camera->m_vpPosX = viewportPos.x; 
-						camera->m_vpPosY = viewportPos.y;  
+						camera->m_vpPosX = viewportPos.x;
+						camera->m_vpPosY = viewportPos.y;
 						camera->vp_hovered = contentHovered;
-
 						bool rightMouseHeld = contentHovered;
+#endif 
 
-						#endif 
+						// Check if gizmo is active
+						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
 
-						if (!isSimulationPaused && contentHovered && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver()) {
-							if (rightMouseHeld) {
-								camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-								camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-								camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-								camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-								camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-								camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
-							}
-							else {
-								camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
-								camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
-							}
+						// Camera controls ONLY work when RIGHT MOUSE is held (and conditions met)
+						if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
+							// Enable all camera movement keys
+							camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+							camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+							camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+							camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+							camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
-							camera->mouseButtonDown = rightMouseHeld;
+							// Enable mouse look
+							camera->mouseButtonDown = true;
 
-							if (camera->mouseButtonDown) {
+#ifdef PN_PLATFORM_WINDOWS
+							camera->xOffset = io.MouseDelta.x;
+							camera->yOffset = -io.MouseDelta.y;
+#endif
+						}
+						else {
+							// Reset all camera inputs when right mouse NOT held
+							camera->W_KEYDOWN = false;
+							camera->A_KEYDOWN = false;
+							camera->S_KEYDOWN = false;
+							camera->D_KEYDOWN = false;
+							camera->SPACE_KEYDOWN = false;
+							camera->LCTRL_KEYDOWN = false;
+							camera->mouseButtonDown = false;
+							camera->xOffset = 0.0f;
+							camera->yOffset = 0.0f;
+						}
 
+						// Mouse wheel zoom (works independently of right-click)
+						if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
+							float mouseWheel = io.MouseWheel;
+							float zoomSpeed = 0.1f;
+							auto activeCamera = scene->GetActiveCamera();
 
-								#ifdef PN_PLATFORM_WINDOWS
-								camera->xOffset = io.MouseDelta.x;
-								camera->yOffset = io.MouseDelta.y;
-								#endif
-							}
-							else {
-								camera->xOffset = 0.0f;
-								camera->yOffset = 0.0f;
-							}
+							if (activeCamera) {
+								glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 
-							// Mouse wheel zoom
-							if (contentHovered && io.MouseWheel != 0.0f) {
-								float mouseWheel = io.MouseWheel;
-								float zoomSpeed = 0.1f;
-								auto activeCamera = scene->GetActiveCamera();
-
-								if (activeCamera) {
-									glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
-
-									if (mouseWheel > 0.0f) {
-										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-											* activeCamera->speed * zoomSpeed * mouseWheel;
-										activeCamera->pos += offset;
-									}
-									else if (mouseWheel < 0.0f) {
-										glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-											* activeCamera->speed * zoomSpeed * abs(mouseWheel);
-										activeCamera->pos -= offset;
-									}
+								if (mouseWheel > 0.0f) {
+									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+										* activeCamera->speed * zoomSpeed * mouseWheel;
+									activeCamera->pos += offset;
+								}
+								else if (mouseWheel < 0.0f) {
+									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+										* activeCamera->speed * zoomSpeed * abs(mouseWheel);
+									activeCamera->pos -= offset;
 								}
 							}
 						}
-						else {
-							auto camera = services->get<sCameraController>();
-							if (camera) {
-								camera->W_KEYDOWN = camera->A_KEYDOWN = camera->S_KEYDOWN = camera->D_KEYDOWN = false;
-								camera->SPACE_KEYDOWN = camera->LCTRL_KEYDOWN = false;
-								camera->mouseButtonDown = false;
-								camera->xOffset = 0.0f;
-								camera->yOffset = 0.0f;
-							}
-						}
 					}
+
+
 					
 				}
 				ImGui::End();

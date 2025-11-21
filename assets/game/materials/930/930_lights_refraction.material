@@ -1,0 +1,23 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": true
+    },
+    "properties": {
+        "baseColor": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 1.0,
+        "roughness": 0.18188662827014923
+    },
+    "textures": {
+        "normal": "game\\textures\\930\\textures\\930_lights_normal.png"
+    }
+}

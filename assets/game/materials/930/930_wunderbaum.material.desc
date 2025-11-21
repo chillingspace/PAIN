@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "930_wunderbaum.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 11800670289799218381
+  },
+  "descriptor_version": 1,
+  "guid": "89cc077e-4973-8549-9783-1fb2f71e676e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\930\\930_wunderbaum.material"
+  }
+}
