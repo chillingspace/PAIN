@@ -42,7 +42,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "0c2ba523-5de4-cc4b-a43e-806d24489ebb"
+                            "modelGUID": "0c2ba523-5de4-cc4b-a43e-806d24489ebb"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -126,7 +126,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
+                            "modelGUID": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -210,7 +210,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
+                            "modelGUID": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -295,7 +295,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "063dd5ad-0b73-5a43-865b-9f2d328749c9"
+                            "modelGUID": "063dd5ad-0b73-5a43-865b-9f2d328749c9"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -379,7 +379,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "df7c9ed7-0f4f-a646-974c-3ece974cf161"
+                            "modelGUID": "df7c9ed7-0f4f-a646-974c-3ece974cf161"
                         },
                         "Script": {
                             "enabled": true,
@@ -446,7 +446,7 @@
                             "parent": 4294967295
                         },
                         "ModelRenderer": {
-                            "selected_model": "5b56b753-ec3a-0f47-a329-5c898f7b58a2"
+                            "modelGUID": "5b56b753-ec3a-0f47-a329-5c898f7b58a2"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
