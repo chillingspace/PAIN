@@ -16,19 +16,11 @@ macro(importDependencies)
     FetchContent_Declare(
       imguizmo
       GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
-      GIT_TAG 1.83
+      GIT_TAG master
       GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(imguizmo)
 
-    # ImNodes
-    FetchContent_Declare(
-        imnodes
-        GIT_REPOSITORY https://github.com/Nelarius/imnodes.git
-        GIT_TAG v0.5
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(imnodes)
 
     # GLM
     FetchContent_Declare(
