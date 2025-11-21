@@ -86,6 +86,18 @@ if(NOT TARGET imguizmo)
     target_compile_definitions(imguizmo PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 endif()
 
+# ======================= ImNodes =========================
+# Create interface target
+add_library(imnodes_vendor INTERFACE)
+target_include_directories(imnodes_vendor INTERFACE 
+    ${imnodes_SOURCE_DIR}
+)
+target_sources(imnodes_vendor INTERFACE
+    ${imnodes_SOURCE_DIR}/imnodes.h
+    ${imnodes_SOURCE_DIR}/imnodes.cpp
+)
+target_link_libraries(imnodes_vendor INTERFACE imgui::imgui)
+
 # ======================= stb =========================
 if (WIN32 AND NOT ANDROID)
     add_library(stb_implementation STATIC "${CMAKE_CURRENT_LIST_DIR}/stb_impl.cpp")

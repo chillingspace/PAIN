@@ -53,9 +53,10 @@ target_link_libraries(PAINEngine
 	    reflcpp
         gli_headers
         entt_header_only
-imguizmo
-sol2::sol2
-lua::lua
+        imguizmo
+        imnodes_vendor
+        sol2::sol2
+        lua::lua
 
 )
 
