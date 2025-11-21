@@ -68,29 +68,26 @@ namespace PAIN {
 
 			//Get asset
 			template <typename T>
-			std::shared_ptr<T> getAsset(std::filesystem::path const& relative_path) {
+			std::optional<std::shared_ptr<T>> getAsset(std::filesystem::path const& relative_path) {
+
+				//Check if path is empty early return
+				if(relative_path.empty()) return std::nullopt;
 
 				//Find GUID
 				auto id = findGUID(relative_path);
 
+				//Check GUID
+				if (!id.IsValid() || !checkAssetRegistered(id)) return std::nullopt;
+
 				//Get asset
 				return getAsset<T>(id);
 			}
+			
 			template <typename T>
-			std::shared_ptr<T> getAsset(GUID const& id) {
+			std::optional<std::shared_ptr<T>> getAsset(GUID const& id) {
 
-				//Check if GUID is valid
-				if (!id.IsValid()) {
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Invalid GUID.");
-				}
-
-				//Check if asset register has id
-				if (asset_registry.find(id) == asset_registry.end()) {
-
-					//Asset doesnt exist in registry
-					throw std::runtime_error("Asset doesn't exist in registry.");
-				}
+				//Check GUID
+				if (!id.IsValid() || !checkAssetRegistered(id)) return std::nullopt;
 
 				//Asset template
 				std::shared_ptr<IAsset> asset;
@@ -137,7 +134,10 @@ namespace PAIN {
 
 				//Find all assets with type
 				for (auto const& asset : asset_registry) {
-					if (asset.second->type == type) container.push_back(getAsset<T>(asset.first));
+					if (asset.second->type == type) {
+						auto opt_asset = getAsset<T>(asset.first);
+						if(opt_asset.has_value()) container.push_back(opt_asset.value());
+					}
 				}
 
 				//Return all assets

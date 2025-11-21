@@ -28,7 +28,8 @@ namespace PAIN {
 			std::filesystem::path text_path = "engine\\shaders\\text.vert";
 #endif
 
-			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
+			auto shader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
+			shader = shader_opt.has_value() ? shader_opt.value() : shader;
 			PN_CORE_INFO("Text shader compiled, ID: {}", shader->GetRendererID());
 		}
 		GLenum error = glGetError();

@@ -454,6 +454,49 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
         if (ImGui::CollapsingHeader("Material Overrides", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Indent(10.0f);
 
+            //Textures override dropdown
+            if(ImGui::CollapsingHeader("Texture Overrides")) {
+                DrawAssetSelectorField("Albedo Texture Override",
+                    mat.albedoTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Normal Texture Override",
+                    mat.normalTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Metallic Texture Override",
+                    mat.metallicTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Roughness Texture Override",
+                    mat.roughnessTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("AO Texture Override",
+                    mat.aoTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Emissive Texture Override",
+                    mat.emissiveTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Height Texture Override",
+                    mat.heightTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+
+                DrawAssetSelectorField("Opacity Texture Override",
+                    mat.opacityTextureOverride,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    *panel);
+            }
+
             // Base Color Override
             if (ImGui::ColorEdit3("Base Color", glm::value_ptr(mat.baseColorOverride))) {
                 changed = true;
@@ -487,28 +530,6 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
         }
 
         ImGui::PopStyleColor();
-    }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // GPU Texture Info (Read-Only Debug Info)
-    if (ImGui::CollapsingHeader("GPU Textures (Runtime - Read Only)")) {
-        ImGui::BeginDisabled();
-        ImGui::Indent(10.0f);
-
-        ImGui::Text("Albedo Texture:    %u", mat.albedoTexture);
-        ImGui::Text("Normal Texture:    %u", mat.normalTexture);
-        ImGui::Text("Metallic Texture:  %u", mat.metallicTexture);
-        ImGui::Text("Roughness Texture: %u", mat.roughnessTexture);
-        ImGui::Text("AO Texture:        %u", mat.aoTexture);
-        ImGui::Text("Emissive Texture:  %u", mat.emissiveTexture);
-        ImGui::Text("Height Texture:    %u", mat.heightTexture);
-        ImGui::Text("Opacity Texture:   %u", mat.opacityTexture);
-
-        ImGui::Unindent(10.0f);
-        ImGui::EndDisabled();
     }
 
     ImGui::PopID();

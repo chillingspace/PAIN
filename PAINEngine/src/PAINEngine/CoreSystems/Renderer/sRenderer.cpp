@@ -53,8 +53,11 @@ namespace PAIN {
 		//Check for valid GUID
 		if (!component.modelGUID.IsValid()) return;
 
+		//optional material asset
+		auto model_opt = assetManager->getAsset<Assets::Model>(component.modelGUID);
+
 		// Load model asset
-		component.cachedModelAsset = assetManager->getAsset<Assets::Model>(component.modelGUID);
+		component.cachedModelAsset = model_opt.has_value() ? model_opt.value() : nullptr;
 
 		if (!component.cachedModelAsset) {
 			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
@@ -77,84 +80,29 @@ namespace PAIN {
 		for (const auto& materialPath : modelAsset->materials) {
 			MaterialInstance matInstance;
 
-			// Load material asset
-			auto materialAsset = assetManager->getAsset<Assets::Material>(materialPath);
+			//optional material asset
+			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
 
+			// Load material asset
+			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+			//Check valid material asset
 			if (materialAsset) {
 				matInstance.materialGUID = materialAsset->guid;
-				matInstance.prevMaterialGUID = matInstance.materialGUID;
 
-				if (!materialAsset->albedoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->albedoTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->albedoTexturePath
-					);
-					if (texAsset) {
-						matInstance.albedoTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->normalTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->normalTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->normalTexturePath
-					);
-					if (texAsset) {
-						matInstance.normalTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->metallicTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->metallicTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->metallicTexturePath
-					);
-					if (texAsset) {
-						matInstance.metallicTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->roughnessTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->roughnessTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->roughnessTexturePath
-					);
-					if (texAsset) {
-						matInstance.roughnessTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->aoTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->aoTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->aoTexturePath
-					);
-					if (texAsset) {
-						matInstance.aoTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->emissiveTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->emissiveTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->emissiveTexturePath
-					);
-					if (texAsset) {
-						matInstance.emissiveTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->heightTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->heightTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->heightTexturePath
-					);
-					if (texAsset) {
-						matInstance.heightTexture = texAsset->gl_texture;
-					}
-				}
-
-				if (!materialAsset->opacityTexturePath.empty() && assetManager->checkAssetRegistered(materialAsset->opacityTexturePath)) {
-					auto texAsset = assetManager->getAsset<Assets::Texture>(
-						materialAsset->opacityTexturePath
-					);
-					if (texAsset) {
-						matInstance.opacityTexture = texAsset->gl_texture;
-					}
-				}
+				//Init material overrides
+				matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
+				matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
+				matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
+				matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
+				matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
+				matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
+				matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
+				matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
+				matInstance.baseColorOverride = materialAsset->baseColor;
+				matInstance.metallicOverride = materialAsset->metallic;
+				matInstance.roughnessOverride = materialAsset->roughness;
+				matInstance.emissiveOverride = materialAsset->emissive;
 			}
 
 			component.materials.push_back(std::move(matInstance));
@@ -252,11 +200,6 @@ namespace PAIN {
 				// Skip if not visible or not ready
 				if (!mdl->get().visible) {
 					continue;
-				}
-
-				// Ensure asset is loaded
-				if (!mdl->get().cachedModelAsset) {
-					mdl->get().cachedModelAsset = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().modelGUID);
 				}
 
 				//Draw geo

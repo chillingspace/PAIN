@@ -139,13 +139,9 @@ namespace PAIN {
 					//Get display icon
 					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
-					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						temp.icon = 0;
-					}
+					//Get Folder icon
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					temp.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Instantiate name
 					temp.file_name = relative.filename().string();
@@ -268,12 +264,8 @@ namespace PAIN {
 					static std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
 					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						dir_copy.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						dir_copy.icon = 0;
-					}
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					dir_copy.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Set drag payload with asset name
 					ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
@@ -398,18 +390,18 @@ namespace PAIN {
 					//Get texture
 					auto texture = asset_service->getAsset<Assets::Texture>(icon_path);
 
+					//Folder icon
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path);
+
 					//Check and ensure texture is not a cubemap
-					if (!texture->is_cube_map) {
-						return static_cast<ImTextureID>(texture->gl_texture);
+					if (texture_opt.has_value() && !texture.value()->is_cube_map) {
+						return static_cast<ImTextureID>(texture.value()->gl_texture);
 					}
 				}
 
-				if (asset_service->checkAssetRegistered(def_icon_path)) {
-					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
-				}
-				else {
-					return ImTextureID(0);
-				}
+				//Folder icon
+				auto def_icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(def_icon_path);
+				return def_icon_opt.has_value() ? static_cast<ImTextureID>(def_icon_opt.value()->gl_texture) : ImTextureID(0);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {

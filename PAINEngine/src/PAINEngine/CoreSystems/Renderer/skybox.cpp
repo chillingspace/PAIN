@@ -212,12 +212,13 @@ namespace PAIN {
 #else
 			std::filesystem::path eqr_shader_path = "engine\\shaders\\eqr_to_skybox.vert";
 #endif
-
-			conversionShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(eqr_shader_path);
+			auto conversionShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(eqr_shader_path);
+			conversionShader = conversionShader_opt.has_value() ? conversionShader_opt.value() : conversionShader;
 			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader->GetRendererID());
 		}
 
-		skybox_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path)->gl_texture;
+		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
+		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
 		convertEquirectangularToCubemap();
 
 		// generate IBL textures
@@ -232,7 +233,8 @@ namespace PAIN {
 #else
 			std::filesystem::path skybox_shader_path = "engine\\shaders\\skybox.vert";
 #endif
-			shader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(skybox_shader_path);
+			auto shader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(skybox_shader_path);
+			shader = shader_opt.has_value() ? shader_opt.value() : shader;
 			PN_CORE_INFO("Skybox shader compiled, ID: {}", shader->GetRendererID());
 		}
 
@@ -317,94 +319,97 @@ namespace PAIN {
 #endif
 
 		// Load irradiance shader
-		auto irradianceShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
+		auto irradianceShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
+		if (irradianceShader_opt.has_value()) {
+			auto irradianceShader = irradianceShader_opt.value();
 
-		// Force complete mipmap chain OR disable mipmaps
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // NO mipmaps
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			// Force complete mipmap chain OR disable mipmaps
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // NO mipmaps
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		// debug
-		{
-			// Verify texture is complete
-			GLint textureComplete;
-			glGetTexParameteriv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, &textureComplete);
-			PN_CORE_INFO("Cubemap min filter: {}", textureComplete);
-		}
-
-		irradianceShader->Bind();
-		irradianceShader->SetUniform("environmentMap", 0);
-		irradianceShader->SetUniform("projection", captureProjection);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		glViewport(0, 0, 32, 32);
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-
-		// debug
-		{
-			PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
-			GLint boundTexture;
-			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &boundTexture);
-			PN_CORE_INFO("Bound cubemap before irradiance render: {} (expected: {})", boundTexture, cubemap_tex);
-
-			if (boundTexture != (GLint)cubemap_tex) {
-				PN_CORE_ERROR("CUBEMAP NOT BOUND! Rebinding...");
-				glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			// debug
+			{
+				// Verify texture is complete
+				GLint textureComplete;
+				glGetTexParameteriv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, &textureComplete);
+				PN_CORE_INFO("Cubemap min filter: {}", textureComplete);
 			}
-		}
 
-		// Render to each cubemap face
-		for (unsigned int i = 0; i < 6; ++i) {
-			irradianceShader->SetUniform("view", captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
+			irradianceShader->Bind();
+			irradianceShader->SetUniform("environmentMap", 0);
+			irradianceShader->SetUniform("projection", captureProjection);
 
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-				PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete! side: {}", i);
-				GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-				switch (status) {
-				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-					PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
-				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-					PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
-				case GL_FRAMEBUFFER_UNSUPPORTED:
-					PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
-				default:
-					PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+			glViewport(0, 0, 32, 32);
+			glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+			// debug
+			{
+				PN_CORE_INFO("cubemap_tex ID: {}", cubemap_tex);
+				GLint boundTexture;
+				glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &boundTexture);
+				PN_CORE_INFO("Bound cubemap before irradiance render: {} (expected: {})", boundTexture, cubemap_tex);
+
+				if (boundTexture != (GLint)cubemap_tex) {
+					PN_CORE_ERROR("CUBEMAP NOT BOUND! Rebinding...");
+					glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 				}
-				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
 			}
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// Render to each cubemap face
+			for (unsigned int i = 0; i < 6; ++i) {
+				irradianceShader->SetUniform("view", captureViews[i]);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_map, 0);
 
-			renderCube();
-		}
+				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+					PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete! side: {}", i);
+					GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+					switch (status) {
+					case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+					case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+					case GL_FRAMEBUFFER_UNSUPPORTED:
+						PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
+					default:
+						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+					}
+					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+				}
 
-		// debug
-		{
-			// Read back a pixel from the center of the irradiance map
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
-			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X, irradiance_map, 0);
-			glReadBuffer(GL_COLOR_ATTACHMENT0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			GLfloat pixel[4];
-			glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
-			PN_CORE_INFO("Irradiance center pixel: R={}, G={}, B={}, A={}",
-				pixel[0], pixel[1], pixel[2], pixel[3]);
+				renderCube();
+			}
+
+			// debug
+			{
+				// Read back a pixel from the center of the irradiance map
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X, irradiance_map, 0);
+				glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+				GLfloat pixel[4];
+				glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
+				PN_CORE_INFO("Irradiance center pixel: R={}, G={}, B={}, A={}",
+					pixel[0], pixel[1], pixel[2], pixel[3]);
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
+
+			glDeleteFramebuffers(1, &captureFBO);
+
+			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
+
+			PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
 		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
-
-		glDeleteFramebuffers(1, &captureFBO);
-
-		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
-
-		PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
 	}
 
 
@@ -443,101 +448,104 @@ namespace PAIN {
 #endif
 
 		// Load prefilter shader
-		auto prefilterShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
+		auto prefilterShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
+		if (prefilterShader_opt.has_value()) {
+			auto prefilterShader = prefilterShader_opt.value();
 
-		// Setup projection and views (same as before)
-		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		glm::mat4 captureViews[] = {
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-		};
+			// Setup projection and views (same as before)
+			glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+			glm::mat4 captureViews[] = {
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+				glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+			};
 
-		prefilterShader->Bind();
-		prefilterShader->SetUniform("environmentMap", 0);
-		prefilterShader->SetUniform("projection", captureProjection);
+			prefilterShader->Bind();
+			prefilterShader->SetUniform("environmentMap", 0);
+			prefilterShader->SetUniform("projection", captureProjection);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
-		unsigned int captureFBO;
-		glGenFramebuffers(1, &captureFBO);
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+			unsigned int captureFBO;
+			glGenFramebuffers(1, &captureFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
-		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before rendering to mipmap: {}", err);
+			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before rendering to mipmap: {}", err);
 
-		// Render for each mip level (each roughness level)
-		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
-		{
-			// Resize framebuffer according to mip-level size
-			unsigned int mipWidth = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
-
-
-
-			glViewport(0, 0, mipWidth, mipWidth);
-
-			float roughness = (float)mip / (float)(maxMipLevels - 1);
-			prefilterShader->SetUniform("roughness", roughness);
-
-			for (unsigned int i = 0; i < 6; ++i)
+			// Render for each mip level (each roughness level)
+			for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 			{
-				prefilterShader->SetUniform("view", captureViews[i]);
+				// Resize framebuffer according to mip-level size
+				unsigned int mipWidth = static_cast<unsigned int>(MIP_WIDTH * std::pow(0.5, mip));
 
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
 
-				if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-					PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete! mip: {}, side: {}", mip, i);
-					GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-					switch (status) {
-					case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
-					case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-						PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
-					case GL_FRAMEBUFFER_UNSUPPORTED:
-						PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
-					default:
-						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+
+				glViewport(0, 0, mipWidth, mipWidth);
+
+				float roughness = (float)mip / (float)(maxMipLevels - 1);
+				prefilterShader->SetUniform("roughness", roughness);
+
+				for (unsigned int i = 0; i < 6; ++i)
+				{
+					prefilterShader->SetUniform("view", captureViews[i]);
+
+					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilter_map, mip);
+
+					if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+						PN_CORE_ERROR("CaptureFBO in generatePrefilterMap not complete! mip: {}, side: {}", mip, i);
+						GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+						switch (status) {
+						case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+							PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
+						case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+							PN_CORE_ERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
+						case GL_FRAMEBUFFER_UNSUPPORTED:
+							PN_CORE_ERROR("GL_FRAMEBUFFER_UNSUPPORTED"); break;
+						default:
+							PN_CORE_ERROR("Unknown FBO error: {}", status); break;
+						}
+						while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
 					}
-					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderCube in generatePrefilterMap: {}", err);
+					renderCube();
+					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderCube in generatePrefilterMap: {}", err);
 				}
-
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderCube in generatePrefilterMap: {}", err);
-				renderCube();
-				while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderCube in generatePrefilterMap: {}", err);
 			}
-		}
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 4);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 4);
 
-		// debug
-		{
-			// Read back a pixel from the center of the irradiance map
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
-			glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X, prefilter_map, 0);
-			glReadBuffer(GL_COLOR_ATTACHMENT0);
+			// debug
+			{
+				// Read back a pixel from the center of the irradiance map
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, captureFBO);
+				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X, prefilter_map, 0);
+				glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-			GLfloat pixel[4];
-			glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
-			PN_CORE_INFO("Prefilter center pixel: R={}, G={}, B={}, A={}",
-				pixel[0], pixel[1], pixel[2], pixel[3]);
+				GLfloat pixel[4];
+				glReadPixels(16, 16, 1, 1, GL_RGBA, GL_FLOAT, pixel); // Center of 32x32
+				PN_CORE_INFO("Prefilter center pixel: R={}, G={}, B={}, A={}",
+					pixel[0], pixel[1], pixel[2], pixel[3]);
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
+
+			glDeleteFramebuffers(1, &captureFBO);
+
+			PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
 		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
-
-		glDeleteFramebuffers(1, &captureFBO);
-
-		PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
 	}
 
 
@@ -586,26 +594,29 @@ namespace PAIN {
 
 
 		// Load BRDF shader
-		auto brdfShader = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
+		auto brdfShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
+		if (brdfShader_opt.has_value()) {
+			auto brdfShader = brdfShader_opt.value();
 
-		glViewport(0, 0, 512, 512);
-		brdfShader->Bind();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, 512, 512);
+			brdfShader->Bind();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
+			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
 
-		renderQuad(); // Render a fullscreen quad (see below)
+			renderQuad(); // Render a fullscreen quad (see below)
 
-		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
+			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
-		glDeleteFramebuffers(1, &captureFBO);
-		//glDeleteRenderbuffers(1, &captureRBO);
+			glDeleteFramebuffers(1, &captureFBO);
+			//glDeleteRenderbuffers(1, &captureRBO);
 
-		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
-		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
+			PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
+			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
+		}
 	}
 
 

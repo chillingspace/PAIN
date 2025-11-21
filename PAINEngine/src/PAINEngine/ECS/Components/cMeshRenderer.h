@@ -9,18 +9,7 @@ namespace PAIN {
     //Material instance
     struct MaterialInstance {
         //material GUID
-        Assets::GUID prevMaterialGUID;
         Assets::GUID materialGUID;
-
-        // GPU texture handles (uploaded once, reused)
-        unsigned int albedoTexture = 0;
-        unsigned int normalTexture = 0;
-        unsigned int metallicTexture = 0;
-        unsigned int roughnessTexture = 0;
-        unsigned int aoTexture = 0;
-        unsigned int emissiveTexture = 0;
-        unsigned int heightTexture = 0;
-        unsigned int opacityTexture = 0;
 
         // ADVANCED PBR TEXTURES (Optional)
         //unsigned int sheenTexture = 0;
@@ -36,6 +25,16 @@ namespace PAIN {
         //unsigned int lightmapTexture = 0;
         //unsigned int reflectionTexture = 0;
         //unsigned int displacementTexture = 0;
+
+        //Override with different textures
+        Assets::GUID albedoTextureOverride;
+        Assets::GUID normalTextureOverride;
+        Assets::GUID metallicTextureOverride;
+        Assets::GUID roughnessTextureOverride;
+        Assets::GUID aoTextureOverride;
+        Assets::GUID emissiveTextureOverride;
+        Assets::GUID heightTextureOverride;
+        Assets::GUID opacityTextureOverride;
 
         // Per-instance overrides
         glm::vec3 baseColorOverride{ 1.0f, 1.0f, 1.0f };
@@ -119,6 +118,14 @@ namespace PAIN {
 REFL_TYPE(PAIN::MaterialInstance)
 REFL_FIELD(materialGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material))
 REFL_FIELD(useOverrides, PAIN::Editor::Attributes::Tooltip("Enable to override material properties"))
+REFL_FIELD(albedoTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(normalTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(metallicTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(roughnessTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(aoTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(emissiveTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(heightTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(opacityTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
 REFL_FIELD(baseColorOverride, PAIN::Editor::Attributes::DisplayName("Base Color"))
 REFL_FIELD(metallicOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Metallic"))
 REFL_FIELD(roughnessOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Roughness"))
