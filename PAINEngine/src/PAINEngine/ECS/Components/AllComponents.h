@@ -53,9 +53,9 @@ namespace PAIN {
         // AI
         //AI::Blackboard,
         AI::Controller,
-        AI::Sensors
-        //AI::NavAgent,
-        //AI::Steering,
+        AI::Sensors,
+        AI::NavAgent,
+        AI::Steering
         //AI::CommandQueue
     >;
 

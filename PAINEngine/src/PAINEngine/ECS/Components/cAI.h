@@ -130,9 +130,10 @@ namespace nlohmann {
     template<>
     struct adl_serializer<PAIN::AI::CommandQueue> {
         static void to_json(json& j, const PAIN::AI::CommandQueue& q) {
-            // Don't serialize pending commands; just store an empty object
+            // Don't serialize pending commands; just store empty object
             j = json::object();
-            // or j["pending_count"] = q.pending.size(); if you want debug info
+            // For debug info
+            // j["pending_count"] = q.pending.size();
         }
 
         static void from_json(const json& j, PAIN::AI::CommandQueue& q) {

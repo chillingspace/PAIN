@@ -60,7 +60,13 @@ namespace PAIN {
                     [](ComponentsPanel&, PAIN::AI::Controller& rb) { DrawWithReflection(rb); });
                 
                 registerCompUIFunc<PAIN::AI::Sensors>("AISensors",
-                    [](ComponentsPanel&, PAIN::AI::Sensors& rb) { DrawWithReflection(rb); });
+                    [](ComponentsPanel&, PAIN::AI::Sensors& rb) { DrawWithReflection(rb); });               
+                
+                registerCompUIFunc<PAIN::AI::NavAgent>("AINavAgent",
+                    [](ComponentsPanel&, PAIN::AI::NavAgent& rb) { DrawWithReflection(rb); });                
+                
+                registerCompUIFunc<PAIN::AI::Steering>("AISteering",
+                    [](ComponentsPanel&, PAIN::AI::Steering& rb) { DrawWithReflection(rb); });
 
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this); // Manually draw ui for collider because Reflection can't handle Unions

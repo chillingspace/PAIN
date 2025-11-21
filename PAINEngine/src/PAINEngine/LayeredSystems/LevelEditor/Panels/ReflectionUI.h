@@ -28,6 +28,7 @@
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
+#include "ECS/Components/cAI.h"
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
@@ -240,8 +241,6 @@ inline bool DrawField(const char* label, PAIN::JOINT_TYPE& v) {
 
 // ---- RigidBody3D (cPhysics) ----
 inline bool DrawField(const char* label, JPH::BodyID& id) {
-    // Jolt exposes either GetIndexAndSequenceNumber() or GetValue() depending on version.
-    // Use whichever your Jolt has. If both exist, prefer GetIndexAndSequenceNumber().
     const uint32_t val = id.GetIndexAndSequenceNumber();
 
     ImGui::BeginDisabled(true);
@@ -289,6 +288,21 @@ inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
 
     return changed;  // Return the change state
 }
+
+// ---- AI::SensorsConfig (cfg) ----
+inline bool DrawField(const char* label, PAIN::AI::SensorsConfig& cfg) {
+    bool changed = false;
+
+    changed |= DrawField("Sight Range", cfg.sight_range);
+    changed |= DrawField("Sight FOV (deg)", cfg.sight_fov_deg);
+    changed |= DrawField("Hear Range", cfg.hear_range);
+    changed |= DrawField("Require LOS", cfg.require_los);
+    changed |= DrawField("LOS Mask", cfg.los_collision_mask); // uint32
+
+    return changed;
+}
+
+
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
     bool changed = false;
