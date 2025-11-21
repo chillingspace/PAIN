@@ -40,7 +40,6 @@ namespace PAIN {
 			auto& ts = reg.get<PAIN::Transform>(self);
 			auto& to = reg.get<PAIN::Transform>(other);
 			glm::vec3 delta = to.position - ts.position;
-			//float dist2 = glm::length2(delta);
 			float dist2 = glm::dot(delta, delta);
 
 			if (dist2 > range * range) return false;
