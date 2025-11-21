@@ -11,84 +11,206 @@
 #include "pch.h"
 #include "sysAI.h"
 
+
+static IEngineAPI* GetEngineAPI(std::shared_ptr<PAIN::Services> svc) {
+	return svc->get<IEngineAPI>().get();
+}
+
 namespace PAIN {
-
 	namespace AI {
-
-		void System::aiSetup()
-		{
-			// Initialize AI-specific data structures
-			// Setup behavior trees, state machines, or decision systems
-			// Register AI component types if needed
-
-			accumulated_time = 0.0f;
-			b_ai_enabled = true;
-
-			PN_CORE_TRACE("AI System setup complete");
+		/*======================== Perception ========================*/
+		PerceptionSystem::PerceptionSystem(std::shared_ptr<PAIN::Services> services)
+			: services_(std::move(services)) {
+			ensureCache();
 		}
 
-		System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_ai_entities(1024), c_ai_update_interval(0.1f), accumulated_time(0.0f)
-		{
-			aiSetup();
+		bool PerceptionSystem::ensureCache() {
+			if (!phys_) phys_ = services_->get<PAIN::Physics::System>();
+			return (bool)phys_;
 		}
 
-
-		System::~System()
-		{
-			// Cleanup AI resources
-			// Clear behavior trees, navigation data, etc.
-
-			PN_CORE_TRACE("AI System destroyed");
+		static glm::vec3 forward_of(entt::registry& reg, entt::entity e) {
+			auto& t = reg.get<PAIN::Transform>(e);
+			return t.forward();
 		}
 
-		void System::onUpdate(AppTiming timing, entt::registry& registry)
+		bool PerceptionSystem::canSee(entt::entity self, entt::entity other, entt::registry& reg,
+			float fovDeg, float range, bool requireLOS)
 		{
-			// Skip AI updates if disabled
-			if (!b_ai_enabled) return;
+			auto& ts = reg.get<PAIN::Transform>(self);
+			auto& to = reg.get<PAIN::Transform>(other);
+			glm::vec3 delta = to.position - ts.position;
+			//float dist2 = glm::length2(delta);
+			float dist2 = glm::dot(delta, delta);
 
-			// Main AI update logic
-			// Process AI entities based on components
-			// Execute behavior trees, state machines, pathfinding, etc.
+			if (dist2 > range * range) return false;
 
-			// Implement time-sliced updates for better performance
-			accumulated_time += timing.dt;
+			glm::vec3 fwd = forward_of(reg, self);
+			float cosang = glm::dot(glm::normalize(delta), glm::normalize(fwd));
+			float fovCos = std::cos(glm::radians(fovDeg * 0.5f));
+			if (cosang < fovCos) return false;
 
-			if (accumulated_time >= c_ai_update_interval)
-			{
-				// Update AI logic here
-				// Iterate through entities with AI components
-				// Execute decision-making, pathfinding, behavior selection
-
-				// TODO: Add actual AI entity processing when AI components are registered
-				// Example:
-				// for (auto entity : ai_entities) {
-				//     processAILogic(entity);
-				// }
-
-				accumulated_time -= c_ai_update_interval;
+			if (requireLOS && phys_) {
+				// Raycast: if hit something before 'other', LOS blocked
+				// Pseudocode: phys_->raycast(ts.position, to.position, mask);
+				// Return true if only hits 'other' collider or nothing blocks.
 			}
-		}
-		void System::onEvent(Event::Event& e)
-		{
-			// Handle AI-related events
-			// e.g., target acquired, path blocked, entity spawned
-
-			// Example event handling structure:
-			// Event::EventDispatcher dispatcher(e);
-			// dispatcher.dispatch<Event::EntitySpawnedEvent>(PN_BIND_EVENT_FN(System::onEntitySpawned));
-			// dispatcher.dispatch<Event::EntityDestroyedEvent>(PN_BIND_EVENT_FN(System::onEntityDestroyed));
+			return true;
 		}
 
-		void System::enableAI(bool enable)
-		{
-			b_ai_enabled = enable;
-			PN_CORE_TRACE("AI System {0}", enable ? "enabled" : "disabled");
+		void PerceptionSystem::onUpdate(float dt, entt::registry& reg) {
+			(void)dt;
+
+			auto sensorView = reg.view<Sensors, PAIN::Transform>();
+			auto transformView = reg.view<PAIN::Transform>();
+
+			// !TODO: naive N^2 sample; replace with spatial query later
+			
+			// Iterate all entities that have Sensors + Transform
+			sensorView.each([&](entt::entity e, Sensors& sens, PAIN::Transform& ts) {
+				sens.visible_targets.clear();
+
+				// Iterate all entities that have Transform
+				transformView.each([&](entt::entity other, PAIN::Transform& to) {
+					if (other == e) return; // skip self
+
+					if (canSee(e, other, reg,
+						sens.cfg.sight_fov_deg,
+						sens.cfg.sight_range,
+						sens.cfg.require_los)) {
+						sens.visible_targets.push_back(other);
+					}
+					});
+
+				// write summary facts into Blackboard
+				if (reg.any_of<Blackboard>(e)) {
+					auto& bb = reg.get<Blackboard>(e);
+					bb.set<bool>("hasTargets", !sens.visible_targets.empty());
+					if (!sens.visible_targets.empty()) {
+						bb.set<std::uint32_t>("targetId",
+							static_cast<std::uint32_t>(sens.visible_targets.front()));
+					}
+				}
+				});
 		}
 
-		bool System::isAIEnabled() const
-		{
-			return b_ai_enabled;
+		/*======================== Behavior Runtime ========================*/
+		//BehaviorRuntimeSystem::BehaviorRuntimeSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
+		//	: services_(std::move(services)), api_(api) {
+		//}
+
+		//void BehaviorRuntimeSystem::onUpdate(float dt, entt::registry& reg) {
+		//	auto view = reg.view<Controller>();
+		//	for (auto e : view) {
+		//		auto& ctrl = view.get<Controller>(e);
+		//		if (!ctrl.enabled) continue;
+		//		ctrl.accum_dt += dt;
+		//		if (ctrl.accum_dt < ctrl.tick_interval) continue;
+		//		ctrl.accum_dt = 0.0f;
+		//		tickEntity(dt, e, reg);
+		//	}
+		//}
+
+
+		System::System(std::shared_ptr<Services> svc): ECS::System::ISystem(svc)
+			, services_(svc)
+			, perception_(svc)
+			//, behavior_(svc, GetEngineAPI(svc))
+			//, navigation_(svc)
+			//, steering_(svc, GetEngineAPI(svc))
+			//, commandFlush_(svc, GetEngineAPI(svc))
+		{}
+
+
+		void System::onUpdate(AppTiming timing, entt::registry& reg) {
+			if (!b_ai_enabled)
+				return;
+
+			float dt = timing.dt;
+
+			perception_.onUpdate(dt, reg);
+			//behavior_.onUpdate(dt, reg);
+			//navigation_.onUpdate(dt, reg);
+			//steering_.onUpdate(dt, reg);
+			//commandFlush_.onUpdate(dt, reg);
 		}
+
+
+		// Old Code Below		
+		//void System::aiSetup()
+		//{
+		//	// Initialize AI-specific data structures
+		//	// Setup behavior trees, state machines, or decision systems
+		//	// Register AI component types if needed
+
+		//	accumulated_time = 0.0f;
+		//	b_ai_enabled = true;
+
+		//	PN_CORE_TRACE("AI System setup complete");
+		//}
+
+		//System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_ai_entities(1024), c_ai_update_interval(0.1f), accumulated_time(0.0f)
+		//{
+		//	aiSetup();
+		//}
+
+
+		//System::~System()
+		//{
+		//	// Cleanup AI resources
+		//	// Clear behavior trees, navigation data, etc.
+
+		//	PN_CORE_TRACE("AI System destroyed");
+		//}
+
+		//void System::onUpdate(AppTiming timing, entt::registry& registry)
+		//{
+		//	// Skip AI updates if disabled
+		//	if (!b_ai_enabled) return;
+
+		//	// Main AI update logic
+		//	// Process AI entities based on components
+		//	// Execute behavior trees, state machines, pathfinding, etc.
+
+		//	// Implement time-sliced updates for better performance
+		//	accumulated_time += timing.dt;
+
+		//	if (accumulated_time >= c_ai_update_interval)
+		//	{
+		//		// Update AI logic here
+		//		// Iterate through entities with AI components
+		//		// Execute decision-making, pathfinding, behavior selection
+
+		//		// TODO: Add actual AI entity processing when AI components are registered
+		//		// Example:
+		//		// for (auto entity : ai_entities) {
+		//		//     processAILogic(entity);
+		//		// }
+
+		//		accumulated_time -= c_ai_update_interval;
+		//	}
+		//}
+		//void System::onEvent(Event::Event& e)
+		//{
+		//	// Handle AI-related events
+		//	// e.g., target acquired, path blocked, entity spawned
+
+		//	// Example event handling structure:
+		//	// Event::EventDispatcher dispatcher(e);
+		//	// dispatcher.dispatch<Event::EntitySpawnedEvent>(PN_BIND_EVENT_FN(System::onEntitySpawned));
+		//	// dispatcher.dispatch<Event::EntityDestroyedEvent>(PN_BIND_EVENT_FN(System::onEntityDestroyed));
+		//}
+
+		//void System::enableAI(bool enable)
+		//{
+		//	b_ai_enabled = enable;
+		//	PN_CORE_TRACE("AI System {0}", enable ? "enabled" : "disabled");
+		//}
+
+		//bool System::isAIEnabled() const
+		//{
+		//	return b_ai_enabled;
+		//}
 
 	}
 }

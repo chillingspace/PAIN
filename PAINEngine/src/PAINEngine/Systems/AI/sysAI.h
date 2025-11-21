@@ -15,45 +15,91 @@
 
 #include "pch.h"
 #include "ECS/System/ISystem.h"
+#include "PAINEngine/Systems/Physics/sysPhysics.h" 
+#include "PAINEngine/CoreSystems/Scripting/IEngineAPI.h"
+//#include <entt/entt.hpp>
 
 namespace PAIN {
 
 	class Services; 
 	namespace Physics { class System; }
-	class IEngineAPI;
 
 	namespace AI {
+		class PerceptionSystem {
+		public:
+			explicit PerceptionSystem(std::shared_ptr<Services> services);
+			void onUpdate(float dt, entt::registry& reg);
+		private:
+			std::shared_ptr<Services> services_;
+			std::shared_ptr<Physics::System> phys_;
+			bool ensureCache();
+			bool canSee(entt::entity self, entt::entity other, entt::registry& reg, float fovDeg, float range, bool requireLOS);
+		};
 
-		class System : public ECS::System::ISystem
-		{
+		//class BehaviorRuntimeSystem {
+		//public:
+		//	BehaviorRuntimeSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+		//	void onUpdate(float dt, entt::registry& reg);
+		//private:
+		//	std::shared_ptr<Services> services_;
+		//	IEngineAPI* api_; // used to enqueue safe engine commands
+		//	void tickEntity(float dt, entt::entity e, entt::registry& reg);
+		//	// hooks: call into LuaManager (registered elsewhere) through narrow API
+		//	bool lua_decide(entt::entity e, entt::registry& reg); // reads/writes blackboard, pushes commands
+		//};
+
+		//class NavigationSystem {
+		//public:
+		//	explicit NavigationSystem(std::shared_ptr<Services> services);
+		//	void onUpdate(float dt, entt::registry& reg);
+		//private:
+		//	std::shared_ptr<Services> services_;
+		//	void startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal);
+		//	void advanceAlongPath(float dt, entt::entity e, entt::registry& reg);
+		//};
+
+		//class SteeringSystem {
+		//public:
+		//	explicit SteeringSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+		//	void onUpdate(float dt, entt::registry& reg);
+		//private:
+		//	std::shared_ptr<Services> services_;
+		//	IEngineAPI* api_;
+		//	void applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt);
+		//};
+
+		//class AICommandFlushSystem {
+		//public:
+		//	explicit AICommandFlushSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+		//	void onUpdate(float dt, entt::registry& reg);
+		//private:
+		//	std::shared_ptr<Services> services_;
+		//	IEngineAPI* api_;
+		//	void execute(entt::entity e, entt::registry& reg);
+		//};
+
+		class System : public ECS::System::ISystem {
 		public:
 			explicit System(std::shared_ptr<Services> svc);
-			~System();
 
-			void onUpdate(AppTiming timing, entt::registry& reg) override;
-			// Event handler for app layer
-			void onEvent(Event::Event& e) override;
 			std::string getSysName() const override { return "AI System"; }
 
-			// external
-			void enableAI(bool enable);
-			bool isAIEnabled() const;
+			void onUpdate(AppTiming timing, entt::registry& reg) override;
+			//void onFixedUpdate(AppTiming, entt::registry&) override {}
+			//void onEvent(Event::Event& e) override {}                 
+			void enableAI(bool enable) { b_ai_enabled = enable; }
+			bool isAIEnabled() const { return b_ai_enabled; }
 
 		private:
+			std::shared_ptr<Services> services_; // local strong ref
 
-			// AI system configuration values
-			const int c_max_ai_entities;
-			const float c_ai_update_interval; // Time between AI updates in seconds
+			PerceptionSystem      perception_;
+			//BehaviorRuntimeSystem behavior_;
+			//NavigationSystem      navigation_;
+			//SteeringSystem        steering_;
+			//AICommandFlushSystem  commandFlush_;
 
-			// AI update tracking
-			float accumulated_time;
-
-			// AI state control
-			bool b_ai_enabled;
-
-			// AI initialization setup
-			void aiSetup();
-
+			bool b_ai_enabled = true;
 		};
 	}
 
