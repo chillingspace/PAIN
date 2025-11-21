@@ -95,27 +95,70 @@ namespace PAIN {
 		}
 
 		/*======================== Behavior Runtime ========================*/
-		//BehaviorRuntimeSystem::BehaviorRuntimeSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
-		//	: services_(std::move(services)), api_(api) {
-		//}
+		BehaviorRuntimeSystem::BehaviorRuntimeSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
+			: services_(std::move(services)), api_(api) {
+		}
 
-		//void BehaviorRuntimeSystem::onUpdate(float dt, entt::registry& reg) {
-		//	auto view = reg.view<Controller>();
-		//	for (auto e : view) {
-		//		auto& ctrl = view.get<Controller>(e);
-		//		if (!ctrl.enabled) continue;
-		//		ctrl.accum_dt += dt;
-		//		if (ctrl.accum_dt < ctrl.tick_interval) continue;
-		//		ctrl.accum_dt = 0.0f;
-		//		tickEntity(dt, e, reg);
-		//	}
-		//}
+		void BehaviorRuntimeSystem::onUpdate(float dt, entt::registry& reg) {
+			auto view = reg.view<Controller>();
+			for (auto e : view) {
+				auto& ctrl = view.get<Controller>(e);
+				if (!ctrl.enabled) continue;
+				ctrl.accum_dt += dt;
+				if (ctrl.accum_dt < ctrl.tick_interval) continue;
+				ctrl.accum_dt = 0.0f;
+				tickEntity(dt, e, reg);
+			}
+		}
 
+		bool BehaviorRuntimeSystem::lua_decide(entt::entity e, entt::registry& reg) {
+			// This is a narrow junction point to your LuaManager.
+			// Example idea:
+			// auto lua = services_->get<LuaManager>();
+			// return lua->tick_ai_behavior(e, reg);
+			// For now, do a trivial “patrol or chase” decision using Blackboard facts.
+			auto& bb = reg.get<Blackboard>(e);
+			bool hasTargets = bb.get_bool("hasTargets", false);
+			if (hasTargets) {
+				// enqueue a chase command
+				auto& cq = reg.get_or_emplace<CommandQueue>(e);
+				// Ask C++ to replan towards current target each tick; NavigationSystem will handle dedup.
+				if (auto tid = bb.get<std::uint32_t>("targetId")) {
+					// In a real build you'd expose a safe API to query target position; here we just set RequestPath and MoveTarget.
+					cq.push({ CommandType::RequestPath });
+				}
+				return true;
+			}
+			else {
+				// patrol: set/keep a waypoint if not existing
+				auto& nav = reg.get_or_emplace<NavAgent>(e);
+				if (!nav.move_target.has_value()) {
+					// Pick a dummy local waypoint; plug your patrol system here.
+					auto& t = reg.get<PAIN::Transform>(e);
+					nav.move_target = t.position + glm::vec3{ 3.0f, 0.0f, 0.0f };
+					auto& cq = reg.get_or_emplace<CommandQueue>(e);
+					cq.push({ CommandType::SetMoveTarget, *nav.move_target });
+				}
+				return true;
+			}
+		}
+
+		void BehaviorRuntimeSystem::tickEntity(float dt, entt::entity e, entt::registry& reg) {
+			(void)dt;
+			// Pre-conditions: ensure components
+			if (!reg.all_of<Blackboard, CommandQueue, NavAgent>(e)) {
+				reg.emplace<Blackboard>(e);
+				reg.emplace<CommandQueue>(e);
+				reg.emplace<NavAgent>(e);
+			}
+			// Decide (Lua or trivial fallback)
+			lua_decide(e, reg);
+		}
 
 		System::System(std::shared_ptr<Services> svc): ECS::System::ISystem(svc)
 			, services_(svc)
 			, perception_(svc)
-			//, behavior_(svc, GetEngineAPI(svc))
+			, behavior_(svc, GetEngineAPI(svc))
 			//, navigation_(svc)
 			//, steering_(svc, GetEngineAPI(svc))
 			//, commandFlush_(svc, GetEngineAPI(svc))
@@ -129,7 +172,7 @@ namespace PAIN {
 			float dt = timing.dt;
 
 			perception_.onUpdate(dt, reg);
-			//behavior_.onUpdate(dt, reg);
+			behavior_.onUpdate(dt, reg);
 			//navigation_.onUpdate(dt, reg);
 			//steering_.onUpdate(dt, reg);
 			//commandFlush_.onUpdate(dt, reg);

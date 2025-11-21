@@ -36,17 +36,17 @@ namespace PAIN {
 			bool canSee(entt::entity self, entt::entity other, entt::registry& reg, float fovDeg, float range, bool requireLOS);
 		};
 
-		//class BehaviorRuntimeSystem {
-		//public:
-		//	BehaviorRuntimeSystem(std::shared_ptr<Services> services, IEngineAPI* api);
-		//	void onUpdate(float dt, entt::registry& reg);
-		//private:
-		//	std::shared_ptr<Services> services_;
-		//	IEngineAPI* api_; // used to enqueue safe engine commands
-		//	void tickEntity(float dt, entt::entity e, entt::registry& reg);
-		//	// hooks: call into LuaManager (registered elsewhere) through narrow API
-		//	bool lua_decide(entt::entity e, entt::registry& reg); // reads/writes blackboard, pushes commands
-		//};
+		class BehaviorRuntimeSystem {
+		public:
+			BehaviorRuntimeSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+			void onUpdate(float dt, entt::registry& reg);
+		private:
+			std::shared_ptr<Services> services_;
+			IEngineAPI* api_; // used to enqueue safe engine commands
+			void tickEntity(float dt, entt::entity e, entt::registry& reg);
+			// hooks: call into LuaManager (registered elsewhere) through narrow API
+			bool lua_decide(entt::entity e, entt::registry& reg); // reads/writes blackboard, pushes commands
+		};
 
 		//class NavigationSystem {
 		//public:
@@ -94,7 +94,7 @@ namespace PAIN {
 			std::shared_ptr<Services> services_; // local strong ref
 
 			PerceptionSystem      perception_;
-			//BehaviorRuntimeSystem behavior_;
+			BehaviorRuntimeSystem behavior_;
 			//NavigationSystem      navigation_;
 			//SteeringSystem        steering_;
 			//AICommandFlushSystem  commandFlush_;
