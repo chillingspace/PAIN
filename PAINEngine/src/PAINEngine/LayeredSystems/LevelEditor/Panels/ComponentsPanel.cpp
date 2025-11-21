@@ -19,7 +19,7 @@ namespace PAIN {
             void ComponentsPanel::onAttach() {
                 // Register component-specific UI
 
-// ---- Transform ---- (FIXED: Skip detection after undo/redo)
+                // ---- Transform ---- (FIXED: Skip detection after undo/redo)
                 registerCompUIFunc<PAIN::Transform>("Transform",
                     [this](ComponentsPanel& panel, PAIN::Transform& transform_ref) {
                         static struct {
@@ -123,7 +123,7 @@ namespace PAIN {
                         }
                     });
 
-                // ---- ModelRenderer ---- (UNCHANGED)
+                    // ---- ModelRenderer ---- (UNCHANGED)
                     registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
                         [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
                             // Model GUID selector (using reflection)

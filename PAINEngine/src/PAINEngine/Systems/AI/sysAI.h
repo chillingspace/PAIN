@@ -48,35 +48,35 @@ namespace PAIN {
 			bool lua_decide(entt::entity e, entt::registry& reg); // reads/writes blackboard, pushes commands
 		};
 
-		//class NavigationSystem {
-		//public:
-		//	explicit NavigationSystem(std::shared_ptr<Services> services);
-		//	void onUpdate(float dt, entt::registry& reg);
-		//private:
-		//	std::shared_ptr<Services> services_;
-		//	void startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal);
-		//	void advanceAlongPath(float dt, entt::entity e, entt::registry& reg);
-		//};
+		class NavigationSystem {
+		public:
+			explicit NavigationSystem(std::shared_ptr<Services> services);
+			void onUpdate(float dt, entt::registry& reg);
+		private:
+			std::shared_ptr<Services> services_;
+			void startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal);
+			void advanceAlongPath(float dt, entt::entity e, entt::registry& reg);
+		};
 
-		//class SteeringSystem {
-		//public:
-		//	explicit SteeringSystem(std::shared_ptr<Services> services, IEngineAPI* api);
-		//	void onUpdate(float dt, entt::registry& reg);
-		//private:
-		//	std::shared_ptr<Services> services_;
-		//	IEngineAPI* api_;
-		//	void applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt);
-		//};
+		class SteeringSystem {
+		public:
+			explicit SteeringSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+			void onUpdate(float dt, entt::registry& reg);
+		private:
+			std::shared_ptr<Services> services_;
+			IEngineAPI* api_;
+			void applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt);
+		};
 
-		//class AICommandFlushSystem {
-		//public:
-		//	explicit AICommandFlushSystem(std::shared_ptr<Services> services, IEngineAPI* api);
-		//	void onUpdate(float dt, entt::registry& reg);
-		//private:
-		//	std::shared_ptr<Services> services_;
-		//	IEngineAPI* api_;
-		//	void execute(entt::entity e, entt::registry& reg);
-		//};
+		class AICommandFlushSystem {
+		public:
+			explicit AICommandFlushSystem(std::shared_ptr<Services> services, IEngineAPI* api);
+			void onUpdate(float dt, entt::registry& reg);
+		private:
+			std::shared_ptr<Services> services_;
+			IEngineAPI* api_;
+			void execute(entt::entity e, entt::registry& reg);
+		};
 
 		class System : public ECS::System::ISystem {
 		public:
@@ -95,9 +95,9 @@ namespace PAIN {
 
 			PerceptionSystem      perception_;
 			BehaviorRuntimeSystem behavior_;
-			//NavigationSystem      navigation_;
-			//SteeringSystem        steering_;
-			//AICommandFlushSystem  commandFlush_;
+			NavigationSystem      navigation_;
+			SteeringSystem        steering_;
+			AICommandFlushSystem  commandFlush_;
 
 			bool b_ai_enabled = true;
 		};

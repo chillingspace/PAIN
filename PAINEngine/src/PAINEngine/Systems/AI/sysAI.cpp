@@ -133,7 +133,7 @@ namespace PAIN {
 				// patrol: set/keep a waypoint if not existing
 				auto& nav = reg.get_or_emplace<NavAgent>(e);
 				if (!nav.move_target.has_value()) {
-					// Pick a dummy local waypoint; plug your patrol system here.
+					// Pick a dummy local waypoint; plug patrol system here.
 					auto& t = reg.get<PAIN::Transform>(e);
 					nav.move_target = t.position + glm::vec3{ 3.0f, 0.0f, 0.0f };
 					auto& cq = reg.get_or_emplace<CommandQueue>(e);
@@ -146,22 +146,157 @@ namespace PAIN {
 		void BehaviorRuntimeSystem::tickEntity(float dt, entt::entity e, entt::registry& reg) {
 			(void)dt;
 			// Pre-conditions: ensure components
-			if (!reg.all_of<Blackboard, CommandQueue, NavAgent>(e)) {
+			if (!reg.any_of<Blackboard>(e)) {
 				reg.emplace<Blackboard>(e);
+			}
+			if (!reg.any_of<CommandQueue>(e)) {
 				reg.emplace<CommandQueue>(e);
+			}
+			if (!reg.any_of<NavAgent>(e)) {
 				reg.emplace<NavAgent>(e);
 			}
 			// Decide (Lua or trivial fallback)
 			lua_decide(e, reg);
 		}
 
+		/*======================== Navigation ========================*/
+		NavigationSystem::NavigationSystem(std::shared_ptr<PAIN::Services> services)
+			: services_(std::move(services)) {
+		}
+
+		void NavigationSystem::startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal) {
+			auto& agent = reg.get<NavAgent>(e);
+			if (agent.has_request_in_flight) return;
+
+			// !TODO: Integrate navmesh/path service. For now, synthesize a tiny path:
+			agent.path.clear();
+			auto& t = reg.get<PAIN::Transform>(e);
+			agent.path.push_back(goal);
+			agent.path_index = 0;
+			agent.arrived = false;
+			agent.has_request_in_flight = false;
+		}
+
+		void NavigationSystem::advanceAlongPath(float dt, entt::entity e, entt::registry& reg) {
+			auto& agent = reg.get<NavAgent>(e);
+			if (agent.path.empty()) return;
+
+			auto& t = reg.get<PAIN::Transform>(e);
+			glm::vec3 target = agent.path[agent.path_index];
+			glm::vec3 delta = target - t.position;
+			float dist = glm::length(delta);
+			if (dist <= agent.arrival_radius) {
+				agent.path_index++;
+				if (agent.path_index >= agent.path.size()) {
+					agent.arrived = true;
+					agent.path.clear();
+					return;
+				}
+				return;
+			}
+			// write desired velocity for Steering to consume
+			auto& steer = reg.get_or_emplace<Steering>(e);
+			steer.desired_velocity = (dist > 0.0001f ? (delta / dist) : glm::vec3{}) * agent.speed;
+		}
+
+		void NavigationSystem::onUpdate(float dt, entt::registry& reg) {
+			auto navView = reg.view<NavAgent, PAIN::Transform>();
+
+			navView.each([&](entt::entity e, NavAgent& agent, PAIN::Transform&) {
+
+				if (!agent.move_target.has_value())
+					return;
+
+				agent.replan_timer -= dt;
+
+				if (agent.path.empty() || agent.replan_timer <= 0.0f) {
+					startOrUpdatePath(e, reg, *agent.move_target);
+					agent.replan_timer = agent.replan_cooldown;
+				}
+
+				advanceAlongPath(dt, e, reg);
+				});
+		}
+
+		/*======================== Steering / Motion ========================*/
+		SteeringSystem::SteeringSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api) : services_(std::move(services)), api_(api) {
+		}
+
+		void SteeringSystem::applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt) {
+			// Option A: kinematic integration + physics teleport (keeps Transform/Physics in sync):
+			auto& t = reg.get<PAIN::Transform>(e);
+			t.position += vel * dt;
+
+			// If entity has RigidBody3D, use your physics sync helper from EngineAPIAdapter:
+			if (reg.any_of<PAIN::Physics::RigidBody3D>(e) && api_) {
+				api_->SetPosition(e, t.position); // adapter will call phys->teleportBodyToTransform(...)
+			}
+		}
+
+		void SteeringSystem::onUpdate(float dt, entt::registry& reg) {
+			auto view = reg.view<Steering>();
+			for (auto e : view) {
+				auto& s = view.get<Steering>(e);
+				if (glm::dot(s.desired_velocity, s.desired_velocity) > 0.0f) {
+					applyMotion(e, reg, s.desired_velocity, dt);
+				}
+				// clear after use (Navigation will refill next frame)
+				s.desired_velocity = {};
+			}
+		}
+
+		/*======================== Command Flush ========================*/
+		AICommandFlushSystem::AICommandFlushSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
+			: services_(std::move(services)), api_(api) {
+		}
+
+		void AICommandFlushSystem::execute(entt::entity e, entt::registry& reg) {
+			auto& q = reg.get<CommandQueue>(e);
+			auto& agent = reg.get_or_emplace<NavAgent>(e);
+
+			for (const auto& cmd : q.pending) {
+				switch (cmd.type) {
+				case CommandType::SetMoveTarget:
+					agent.move_target = cmd.v3;
+					agent.arrived = false;
+					break;
+				case CommandType::ClearMoveTarget:
+					agent.move_target.reset();
+					agent.arrived = true;
+					agent.path.clear();
+					break;
+				case CommandType::RequestPath:
+					if (agent.move_target.has_value()) {
+						// NavigationSystem will detect and (re)plan on next tick.
+					}
+					break;
+				case CommandType::PlayAnimation:
+					// !TODO: The below is commented because I don't think animation is ready yet
+					//if (api_) api_->PlayAnimation(e, cmd.str.c_str()); // expose this in your adapter
+					break;
+				case CommandType::FaceEntity:
+					// Optional: set a blackboard/steering facing directive
+					break;
+				default: break;
+				}
+			}
+			q.clear();
+		}
+
+		void AICommandFlushSystem::onUpdate(float dt, entt::registry& reg) {
+			(void)dt;
+			auto view = reg.view<CommandQueue>();
+			for (auto e : view) execute(e, reg);
+		}
+
+
 		System::System(std::shared_ptr<Services> svc): ECS::System::ISystem(svc)
 			, services_(svc)
 			, perception_(svc)
 			, behavior_(svc, GetEngineAPI(svc))
-			//, navigation_(svc)
-			//, steering_(svc, GetEngineAPI(svc))
-			//, commandFlush_(svc, GetEngineAPI(svc))
+			, navigation_(svc)
+			, steering_(svc, GetEngineAPI(svc))
+			, commandFlush_(svc, GetEngineAPI(svc))
 		{}
 
 
@@ -173,87 +308,10 @@ namespace PAIN {
 
 			perception_.onUpdate(dt, reg);
 			behavior_.onUpdate(dt, reg);
-			//navigation_.onUpdate(dt, reg);
-			//steering_.onUpdate(dt, reg);
-			//commandFlush_.onUpdate(dt, reg);
+			navigation_.onUpdate(dt, reg);
+			steering_.onUpdate(dt, reg);
+			commandFlush_.onUpdate(dt, reg);
 		}
-
-
-		// Old Code Below		
-		//void System::aiSetup()
-		//{
-		//	// Initialize AI-specific data structures
-		//	// Setup behavior trees, state machines, or decision systems
-		//	// Register AI component types if needed
-
-		//	accumulated_time = 0.0f;
-		//	b_ai_enabled = true;
-
-		//	PN_CORE_TRACE("AI System setup complete");
-		//}
-
-		//System::System(std::shared_ptr<Services> svc) : ISystem(svc), c_max_ai_entities(1024), c_ai_update_interval(0.1f), accumulated_time(0.0f)
-		//{
-		//	aiSetup();
-		//}
-
-
-		//System::~System()
-		//{
-		//	// Cleanup AI resources
-		//	// Clear behavior trees, navigation data, etc.
-
-		//	PN_CORE_TRACE("AI System destroyed");
-		//}
-
-		//void System::onUpdate(AppTiming timing, entt::registry& registry)
-		//{
-		//	// Skip AI updates if disabled
-		//	if (!b_ai_enabled) return;
-
-		//	// Main AI update logic
-		//	// Process AI entities based on components
-		//	// Execute behavior trees, state machines, pathfinding, etc.
-
-		//	// Implement time-sliced updates for better performance
-		//	accumulated_time += timing.dt;
-
-		//	if (accumulated_time >= c_ai_update_interval)
-		//	{
-		//		// Update AI logic here
-		//		// Iterate through entities with AI components
-		//		// Execute decision-making, pathfinding, behavior selection
-
-		//		// TODO: Add actual AI entity processing when AI components are registered
-		//		// Example:
-		//		// for (auto entity : ai_entities) {
-		//		//     processAILogic(entity);
-		//		// }
-
-		//		accumulated_time -= c_ai_update_interval;
-		//	}
-		//}
-		//void System::onEvent(Event::Event& e)
-		//{
-		//	// Handle AI-related events
-		//	// e.g., target acquired, path blocked, entity spawned
-
-		//	// Example event handling structure:
-		//	// Event::EventDispatcher dispatcher(e);
-		//	// dispatcher.dispatch<Event::EntitySpawnedEvent>(PN_BIND_EVENT_FN(System::onEntitySpawned));
-		//	// dispatcher.dispatch<Event::EntityDestroyedEvent>(PN_BIND_EVENT_FN(System::onEntityDestroyed));
-		//}
-
-		//void System::enableAI(bool enable)
-		//{
-		//	b_ai_enabled = enable;
-		//	PN_CORE_TRACE("AI System {0}", enable ? "enabled" : "disabled");
-		//}
-
-		//bool System::isAIEnabled() const
-		//{
-		//	return b_ai_enabled;
-		//}
 
 	}
 }
