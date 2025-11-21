@@ -11,21 +11,6 @@ namespace PAIN {
         //material GUID
         Assets::GUID materialGUID;
 
-        // ADVANCED PBR TEXTURES (Optional)
-        //unsigned int sheenTexture = 0;
-        //unsigned int clearCoatTexture = 0;
-        //unsigned int transmissionTexture = 0;
-
-        //// LEGACY TEXTURES (For older formats)
-        //unsigned int specularTexture = 0;
-        //unsigned int glossinessTexture = 0; 
-        //unsigned int ambientTexture = 0;
-
-        //// SPECIAL TEXTURES
-        //unsigned int lightmapTexture = 0;
-        //unsigned int reflectionTexture = 0;
-        //unsigned int displacementTexture = 0;
-
         //Override with different textures
         Assets::GUID albedoTextureOverride;
         Assets::GUID normalTextureOverride;
@@ -91,17 +76,18 @@ namespace PAIN {
             playbackSpeed = speed;
         }
 
-        void UpdateAnimation(float deltaTime, const Assets::Model* modelAsset) {
-            if (!isPlaying || currentAnimationIndex < 0 || !modelAsset) return;
+        void UpdateAnimation(float deltaTime) {
+            if (!isPlaying || currentAnimationIndex < 0 || !cachedModelAsset) return;
 
-            if (currentAnimationIndex >= modelAsset->animations.size()) return;
+            if (currentAnimationIndex >= cachedModelAsset->animations.size()) return;
 
-            const auto& anim = modelAsset->animations[currentAnimationIndex];
+            const auto& anim = cachedModelAsset->animations[currentAnimationIndex];
             animationTime += deltaTime * playbackSpeed;
 
             if (animationTime >= anim.duration) {
                 if (loopAnimation) {
                     animationTime = fmod(animationTime, anim.duration);
+                    currentAnimationIndex++;
                 }
                 else {
                     animationTime = anim.duration;
