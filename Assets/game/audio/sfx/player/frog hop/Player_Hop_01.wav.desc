@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Player_Hop_01.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 15814071588648941774
+  },
+  "descriptor_version": 1,
+  "guid": "b38a054c-ce95-c249-b4f7-de49964db64f",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_01.wav"
+  }
+}

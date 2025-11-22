@@ -18,7 +18,7 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\ogre_diffuse.png",
+        "albedo": "game\\textures\\.\\frog_diffuse.png",
         "metallic": "game\\textures\\.\\frog_roughness.png",
         "roughness": "game\\textures\\.\\frog_roughness.png"
     }
