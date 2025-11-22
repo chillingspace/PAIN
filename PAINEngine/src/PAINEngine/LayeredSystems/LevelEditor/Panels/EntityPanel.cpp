@@ -1,21 +1,21 @@
 ﻿/*****************************************************************//**
  * \file   EntityPanel.cpp
- * \brief  Definition of animation system states
+ * \brief  Entity hierarchy panel with GUID-based parenting
  *
  * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
  * \co-author
- * \date   October 2025
+ * \date   November 2025
  * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
 #include "pch.h"
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
-#include "ECS/sMetaData.h"
-#include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cEntity.h"
+#include "Systems/Transform/sysTransform.h"
+#include "CoreSystems/Serialization/sSerialization.h"
 
 #ifdef _DEBUG
 
@@ -24,15 +24,12 @@ namespace PAIN {
         namespace Panel {
 
 #define PN_ECS_SERVICE services->get<ECS::Controller>()
-#define PN_METADATA_SERVICE services->get<MetaData::Service>()
 #define PN_SERI_SERVICE services->get<Serialization::Service>()
-
 
             EntityPanel::EntityPanel() {
                 name = "Entity Panel";
                 flags = ImGuiWindowFlags_None;
 
-                // Register popups
                 registerPopUp("Create Entity", createEntityPopUp("Create Entity"));
                 registerPopUp("Remove Entity", removeEntityPopUp("Remove Entity"));
                 registerPopUp("Clone Entity", cloneEntityPopUp("Clone Entity"));
@@ -44,41 +41,52 @@ namespace PAIN {
                     static char entity_name[128] = "";
 
                     ImGui::Text("Enter a name for the new entity:");
-                    if (ImGui::InputText("##Entity Name", entity_name, sizeof(entity_name))) {
-                    }
+                    ImGui::InputText("##Entity Name", entity_name, sizeof(entity_name));
 
                     if (strlen(entity_name) > 0 && (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
-                        // Store name in a string before creating action
                         std::string final_name = std::string(entity_name);
 
                         command_manager->executeAction(Action{
-                            [this, final_name]() {  // Capture by value
-                                auto ecs = services->get<ECS::Controller>();
+                            [this, final_name]() {
+                                auto ecs = PN_ECS_SERVICE;
                                 auto scene = services->get<Scene>();
 
-                                glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
-                                glm::quat rot = { 1.f, 0.f, 0.f, 0.f };
-                                glm::vec3 scale = { 1.f, 1.f, 1.f };
+                                entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
 
-                                entt::entity entity = ecs->createEntity();
+                                // Add core components
                                 ecs->addEntityComponent(entity, MetaData::EntityName{ final_name });
-                                ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+                                ecs->addEntityComponent(entity, LocalTransform{});
                                 ecs->addEntityComponent(entity, WorldTransform{});
                                 ecs->addEntityComponent(entity, Entity::Hierarchy{});
+
+                                // Optional: Add default model
                                 if (scene) {
                                     auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
-                                    ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
+                                    if (!models.empty()) {
+                                        ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
+                                    }
+                                }
+
+                                // Mark transform dirty
+                                auto transformSystem = ecs->getSystem<Transform::System>();
+                                if (transformSystem) {
+                                    transformSystem->markDirty(entity, ecs->getRegistry());
                                 }
                             },
-                            [this, final_name]() {  // Capture by value
-                                auto metadata = services->get<MetaData::Service>();
-                                auto ecs = services->get<ECS::Controller>();
-                                auto entity = metadata->getEntityByName(final_name);
-                                if (entity.has_value()) {
-                                    ecs->destroyEntity(entity.value());
+                            [this, final_name]() {
+                                // Undo: find and delete by name
+                                auto ecs = PN_ECS_SERVICE;
+                                auto& registry = ecs->getRegistry();
+                                auto view = registry.view<MetaData::EntityName>();
+
+                                for (auto entity : view) {
+                                    if (view.get<MetaData::EntityName>(entity).name == final_name) {
+                                        ecs->destroyEntity(entity);
+                                        break;
+                                    }
                                 }
                             },
-                            "Create Entity: " + final_name  // Description for Debug Panel
+                            "Create Entity: " + final_name
                             });
 
                         entity_name[0] = '\0';
@@ -93,11 +101,10 @@ namespace PAIN {
                     };
             }
 
-
             std::function<void(std::any const&)> EntityPanel::removeEntityPopUp(std::string const& popup_id) {
                 return [this, popup_id](std::any const& data) {
-                    auto ecs = services->get<ECS::Controller>();
-                    std::string selected_name = ecs->getEntityComponent<MetaData::EntityName>(selected_entity).value().get().name;
+                    auto ecs = PN_ECS_SERVICE;
+                    std::string selected_name = getEntityName(selected_entity);
 
                     ImGui::Spacing();
                     ImGui::TextWrapped("Are you sure you want to remove '%s'?", selected_name.c_str());
@@ -110,26 +117,22 @@ namespace PAIN {
                     float button_width = ImGui::GetContentRegionAvail().x * 0.48f;
 
                     if (ImGui::Button("Remove", ImVec2(button_width, 40))) {
-                        // Capture entity and name by value
                         entt::entity entity_to_remove = selected_entity;
                         std::string entity_name = selected_name;
 
-                        // TODO: Serialize entity for proper undo
-                        // For now, undo is not implemented
-
                         command_manager->executeAction(Action{
-                            [this, entity_to_remove]() {  // Capture by value
-                                auto ecs = services->get<ECS::Controller>();
+                            [this, entity_to_remove]() {
+                                auto ecs = PN_ECS_SERVICE;
                                 if (ecs->checkEntity(entity_to_remove)) {
-                                    //removeEntityWithChildren(entity_to_remove);
+                                    removeEntityWithChildren(entity_to_remove);
                                 }
                                 selected_entity = entt::null;
                                 force_refresh = true;
                             },
-                            []() {  // Empty undo for now
+                            []() {
                                 PN_CORE_WARN("Undo for entity deletion not yet implemented");
                             },
-                            "Delete Entity: " + entity_name  // Description
+                            "Delete Entity: " + entity_name
                             });
 
                         closePopUp(popup_id);
@@ -144,44 +147,52 @@ namespace PAIN {
                     };
             }
 
-
             std::function<void(std::any const&)> EntityPanel::cloneEntityPopUp(std::string const& popup_id) {
                 return [this, popup_id](std::any const& data) {
                     static char entity_name[128] = "";
 
-                    ImGui::Text("Enter a new name for the cloned entity:");
-                    if (ImGui::InputText("##Entity Clone Name", entity_name, sizeof(entity_name))) {
-                    }
+                    ImGui::Text("Enter a name for the cloned entity:");
+                    ImGui::InputText("##Entity Clone Name", entity_name, sizeof(entity_name));
 
                     if (strlen(entity_name) > 0 && (ImGui::Button("Clone") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
-                        // Capture values before lambda
                         std::string final_name = std::string(entity_name);
-                        entt::entity clone_entity = selected_entity;
+                        entt::entity clone_source = selected_entity;
 
                         command_manager->executeAction(Action{
-                            [this, final_name, clone_entity]() {  // Capture by value
-                                auto ecs = services->get<ECS::Controller>();
-                                auto metadata = services->get<MetaData::Service>();
+                            [this, final_name, clone_source]() {
+                                auto ecs = PN_ECS_SERVICE;
 
-                                if (ecs->checkEntity(clone_entity)) {
-                                    entt::entity new_id = ecs->cloneEntity(clone_entity);
+                                if (ecs->checkEntity(clone_source)) {
+                                    entt::entity new_entity = ecs->cloneEntity(clone_source);
 
-                                    if (!final_name.empty() && metadata->isNameValid(final_name)) {
-                                        metadata->setEntityName(new_id, final_name);
+                                    // Set name
+                                    if (auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(new_entity)) {
+                                        name_comp.value().get().name = final_name;
                                     }
 
                                     // Clone children recursively
-                                    //cloneEntityChildren(clone_entity, new_id);
+                                    cloneEntityWithChildren(clone_source, new_entity);
+
+                                    // Mark dirty
+                                    auto transformSystem = ecs->getSystem<Transform::System>();
+                                    if (transformSystem) {
+                                        transformSystem->markDirty(new_entity, ecs->getRegistry());
+                                    }
                                 }
                             },
-                            [this, final_name]() {  // Capture by value
-                                auto metadata = services->get<MetaData::Service>();
-                                auto entity = metadata->getEntityByName(final_name);
-                                if (entity.has_value()) {
-                                    //removeEntityWithChildren(entity.value());
+                            [this, final_name]() {
+                                auto ecs = PN_ECS_SERVICE;
+                                auto& registry = ecs->getRegistry();
+                                auto view = registry.view<MetaData::EntityName>();
+
+                                for (auto entity : view) {
+                                    if (view.get<MetaData::EntityName>(entity).name == final_name) {
+                                        removeEntityWithChildren(entity);
+                                        break;
+                                    }
                                 }
                             },
-                            "Clone Entity: " + final_name  // Description
+                            "Clone Entity: " + final_name
                             });
 
                         entity_name[0] = '\0';
@@ -197,14 +208,11 @@ namespace PAIN {
             }
 
             void EntityPanel::setSelectedEntity(entt::entity entity) {
-                // Only update if the entity is different
                 if (selected_entity != entity) {
                     selected_entity = entity;
                     b_entity_changed = true;
 
-                    // Update the selected entity index
                     if (entity != entt::null) {
-                        // Find the index of the selected entity in the editor_entities list
                         for (int i = 0; i < editor_entities.size(); ++i) {
                             if (editor_entities[i].first == entity) {
                                 selectedEntityIndex = i;
@@ -216,9 +224,6 @@ namespace PAIN {
                         selectedEntityIndex = -1;
                     }
                 }
-            }
-
-            void EntityPanel::nextWindowSettings() {
             }
 
             entt::entity EntityPanel::getSelectedEntity() const {
@@ -233,14 +238,27 @@ namespace PAIN {
                 return b_entity_changed;
             }
 
-            void EntityPanel::onAttach() {
-            }
+            void EntityPanel::nextWindowSettings() {}
+            void EntityPanel::onAttach() {}
 
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
                 auto ecs = PN_ECS_SERVICE;
-                auto metadata = PN_METADATA_SERVICE;
-                auto ser = services->get<Serialization::Service>();
+                auto ser = PN_SERI_SERVICE;
                 auto& registry = ecs->getRegistry();
+
+                // Auto-add required components to all entities
+                auto view_all = registry.view<MetaData::EntityName>();
+                for (auto entity : view_all) {
+                    if (!registry.all_of<Entity::Hierarchy>(entity)) {
+                        ecs->addEntityComponent(entity, Entity::Hierarchy{});
+                    }
+                    if (!registry.all_of<LocalTransform>(entity)) {
+                        ecs->addEntityComponent(entity, LocalTransform{});
+                    }
+                    if (!registry.all_of<WorldTransform>(entity)) {
+                        ecs->addEntityComponent(entity, WorldTransform{});
+                    }
+                }
 
                 // Detect scene changes
                 if (ser->consumeSceneChanged()) {
@@ -252,18 +270,8 @@ namespace PAIN {
                     force_refresh = true;
                 }
 
-                // Detect name changes
-                if (metadata->entityNameChanged()) {
-                    editor_entities.clear();
-                    total_entities = 0;
-                    b_entity_changed = true;
-                    PN_CORE_INFO("[EntityPanel] Entity Name changed detected, list reset");
-                }
-
-                // Get current entity count from ECS
-                size_t current_count = static_cast<size_t>(ecs->getEntitiesCount());
-
                 // Rebuild entity list if needed
+                size_t current_count = static_cast<size_t>(ecs->getEntitiesCount());
                 if (total_entities != current_count || force_refresh) {
                     total_entities = current_count;
                     editor_entities.clear();
@@ -272,15 +280,7 @@ namespace PAIN {
                     auto view = registry.view<MetaData::EntityName>();
                     for (auto entity : view) {
                         auto& name_comp = view.get<MetaData::EntityName>(entity);
-                        editor_entities.push_back({
-                            entity,
-                            name_comp.name
-                            });
-                    }
-
-                    if (editor_entities.size() != total_entities) {
-                        PN_CORE_WARN("[EntityPanel] Entity count mismatch: displayed={}, total={}",
-                            editor_entities.size(), total_entities);
+                        editor_entities.push_back({ entity, name_comp.name });
                     }
                 }
 
@@ -289,152 +289,88 @@ namespace PAIN {
                 dock_id = ImGui::GetWindowDockID();
                 ImGui::Spacing();
 
-                // Display entity count
                 ImGui::Text("Number of entities in level: %d", total_entities);
                 ImGui::Spacing();
                 ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Drag entities to group them");
                 ImGui::Spacing();
 
-                // Sort button
                 if (ImGui::Checkbox("Sort A-Z", &sort_alphabetically)) {
                     force_refresh = true;
                 }
-                if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Sort entities alphabetically");
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                // Get root entities
+                std::vector<entt::entity> root_entities = getRootEntities();
+
+                // Sort if enabled
+                if (sort_alphabetically) {
+                    std::sort(root_entities.begin(), root_entities.end(), [&](entt::entity a, entt::entity b) {
+                        return getEntityName(a) < getEntityName(b);
+                        });
+                }
+
+                // Render hierarchy
+                for (auto entity : root_entities) {
+                    drawEntityHierarchy(entity, 0);
                 }
 
                 ImGui::Spacing();
                 ImGui::Separator();
-                ImGui::Spacing();
 
-                //// Get root entities (entities without parents)
-                //std::vector<entt::entity> root_entities;
-                //for (const auto& [entity_id, name] : editor_entities) {
-                //    if (ecs->hasEntityComponent<Hierarchy>(entity_id)) {
-                //        auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id);
-                //        if (hierarchy.has_value()) {
-                //            if (hierarchy.value().get().parent == entt::null) {
-                //                root_entities.push_back(entity_id);
-                //            }
-                //        }
-
-                //    }
-                //    else {
-                //        root_entities.push_back(entity_id);
-                //    }
-                //}
-
-                //// Sort root entities if enabled
-                //if (sort_alphabetically) {
-                //    std::sort(root_entities.begin(), root_entities.end(), [&](entt::entity a, entt::entity b) {
-                //        std::string nameA = "Unnamed";
-                //        std::string nameB = "Unnamed";
-
-                //        auto name_comp_a = ecs->getEntityComponent<MetaData::EntityName>(a);
-                //        if (name_comp_a.has_value()) {
-                //            nameA = name_comp_a.value().get().name;
-                //        }
-
-                //        auto name_comp_b = ecs->getEntityComponent<MetaData::EntityName>(b);
-                //        if (name_comp_b.has_value()) {
-                //            nameB = name_comp_b.value().get().name;
-                //        }
-
-                //        return nameA < nameB;
-                //        });
-                //}
-
-                //// Render hierarchy starting from root entities
-                //for (auto entity : root_entities) {
-                //    drawEntityHierarchy(entity, 0);
-                //}
-
-                ImGui::Spacing();
-                ImGui::Separator();
-
-                // Add Entity button
                 if (ImGui::Button("Add Entity", ImVec2(-1, 0))) {
                     openPopUp("Create Entity");
                 }
 
-                // Show Ungroup button when entity with children is selected
+                // Show ungroup button for entities with children
                 if (ecs->checkEntity(selected_entity)) {
-                    //std::vector<entt::entity> children = getEntityChildren(selected_entity);
-                    //if (!children.empty()) {
-                    //    ImGui::Spacing();
-                    //    ImGui::Separator();
-                    //    ImGui::Spacing();
-
-                    //    if (ImGui::Button("Ungroup Children", ImVec2(-1, 0))) {
-                    //        //ungroupEntity(selected_entity);
-                    //    }
-                    //}
+                    std::vector<entt::entity> children = getEntityChildren(selected_entity);
+                    if (!children.empty()) {
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+                        if (ImGui::Button("Ungroup Children", ImVec2(-1, 0))) {
+                            ungroupEntity(selected_entity);
+                        }
+                    }
                 }
 
-                // Render any open popups
                 renderPopUps();
-
                 ImGui::End();
 
-                // Reset entity changed flag
                 if (b_entity_changed) {
                     b_entity_changed = false;
                 }
             }
 
-            void EntityPanel::drawEntityHierarchy(entt::entity entity_id, int depth) {
+            void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth) {
                 auto ecs = PN_ECS_SERVICE;
 
-                if (!ecs->checkEntity(entity_id)) {
-                    return;
-                }
+                if (!ecs->checkEntity(entity)) return;
 
-                // Get entity name
-                std::string entity_name = "Unnamed";
-                auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(entity_id);
-                if (name_comp.has_value()) {
-                    entity_name = name_comp.value().get().name;
-                }
+                std::string entity_name = getEntityName(entity);
+                bool is_selected = (selected_entity == entity);
+                std::vector<entt::entity> children = getEntityChildren(entity);
+                bool has_children = !children.empty();
 
-                bool is_selected = (selected_entity == entity_id);
-                //std::vector<entt::entity> children = getEntityChildren(entity_id);
-                //bool has_children = !children.empty();
-
-                // Create indentation based on depth
-                std::string indent = "";
-                for (int i = 0; i < depth; i++) {
-                    indent += "  ";  // Two spaces per level
-                }
-
-                // Add visual hierarchy indicators
-                std::string prefix = "";
-                if (depth > 0) {
-                    prefix = "└─ ";  // Child indicator
-                }
-                //if (has_children) {
-                //    prefix += "[G] ";  // Group indicator
-                //}
+                // Create indentation
+                std::string indent(depth * 2, ' ');
+                std::string prefix = depth > 0 ? "-> " : "";
+                if (has_children) prefix += "[G] ";
 
                 std::string display_label = indent + prefix + entity_name;
-                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity_id));
+                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
 
-                // Apply different color for child entities
+                // Apply color for child entities
                 if (depth > 0) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
                 }
 
-
-
                 // Render selectable
                 if (ImGui::Selectable(unique_label.c_str(), is_selected)) {
-                    if (is_selected) {
-                        selected_entity = entt::null;
-                        selectedEntityIndex = -1;
-                    }
-                    else {
-                        selected_entity = entity_id;
-                        selectedEntityIndex = -1;
-                    }
+                    selected_entity = is_selected ? entt::null : entity;
+                    selectedEntityIndex = is_selected ? -1 : 0;
                     b_entity_changed = true;
                 }
 
@@ -442,349 +378,271 @@ namespace PAIN {
                     ImGui::PopStyleColor();
                 }
 
-                // DRAG SOURCE - Start dragging this entity
+                // Drag & Drop: Start dragging
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                    ImGui::SetDragDropPayload("ENTITY_DRAG", &entity_id, sizeof(entt::entity));
+                    ImGui::SetDragDropPayload("ENTITY_DRAG", &entity, sizeof(entt::entity));
                     ImGui::Text("Dragging: %s", entity_name.c_str());
                     ImGui::EndDragDropSource();
                 }
 
-                // DROP TARGET - Drop onto this entity to make it the parent
+                // Drag & Drop: Accept as parent
                 if (ImGui::BeginDragDropTarget()) {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
                         entt::entity dragged_entity = *(const entt::entity*)payload->Data;
 
-                        // Don't allow entity to be parented to itself
-                        if (dragged_entity != entity_id) {
-                            //// Check if target is not already a child of the dragged entity (prevent circular parenting)
-                            //if (!isAncestor(dragged_entity, entity_id)) {
-                            //    PN_CORE_INFO("[EntityPanel] Parenting entity {} to {}",
-                            //        static_cast<uint32_t>(dragged_entity),
-                            //        static_cast<uint32_t>(entity_id));
-
-                            //    setEntityParent(dragged_entity, entity_id);
-                            //    force_refresh = true;
-                            //}
-                            //else {
-                            //    PN_CORE_WARN("[EntityPanel] Cannot parent entity to its own descendant");
-                            //}
+                        if (dragged_entity != entity && !isAncestor(dragged_entity, entity)) {
+                            setEntityParent(dragged_entity, entity);
+                            force_refresh = true;
                         }
                     }
                     ImGui::EndDragDropTarget();
                 }
 
-                // RIGHT-CLICK CONTEXT MENU
+                // Right-click context menu
                 if (ImGui::BeginPopupContextItem()) {
-                    selected_entity = entity_id;
+                    selected_entity = entity;
                     b_entity_changed = true;
 
                     if (ImGui::MenuItem("Clone")) {
-                        PN_CORE_INFO("[EntityPanel] Cloning entity {}", static_cast<uint32_t>(entity_id));
-
-                        // Clone the entity
-                        entt::entity new_id = ecs->cloneEntity(entity_id);
-
-                        // Generate a unique name for the clone
-                        std::string original_name = entity_name;
-                        std::string clone_name = original_name + " (Clone)";
-                        int counter = 1;
-
-                        while (!PN_METADATA_SERVICE->isNameValid(clone_name)) {
-                            clone_name = original_name + " (Clone " + std::to_string(counter++) + ")";
-                        }
-
-                        PN_METADATA_SERVICE->setEntityName(new_id, clone_name);
-
-                        //// Clone children recursively
-                        //cloneEntityChildren(entity_id, new_id);
-
-                        force_refresh = true;
-                        ImGui::CloseCurrentPopup();
+                        openPopUp("Clone Entity");
                     }
 
                     if (ImGui::MenuItem("Create Prefab")) {
-                        PN_CORE_INFO("[EntityPanel] Creating prefab from entity {}", static_cast<uint32_t>(entity_id));
-
-                        // Generate unique prefab name
                         std::string prefab_name = generateUniquePrefabName(entity_name);
-
-                        // Collect entity and children
                         std::vector<entt::entity> entities_to_save;
-                        collectEntityHierarchy(entity_id, entities_to_save);
-
-                        // Save prefab (serialization service handles the rest!)
+                        collectEntityHierarchy(entity, entities_to_save);
                         PN_SERI_SERVICE->savePrefabToFile(prefab_name, entities_to_save);
-
-                        PN_CORE_INFO("[EntityPanel] Created prefab '{}' with {} entities",
-                            prefab_name, entities_to_save.size());
-
-                        ImGui::CloseCurrentPopup();
+                        PN_CORE_INFO("Created prefab '{}' with {} entities", prefab_name, entities_to_save.size());
                     }
 
                     ImGui::Separator();
 
-                    //if (has_children) {
-                    //    if (ImGui::MenuItem("Ungroup")) {
-                    //        PN_CORE_INFO("[EntityPanel] Ungrouping entity {}", static_cast<uint32_t>(entity_id));
-                    //        ungroupEntity(entity_id);
-                    //        ImGui::CloseCurrentPopup();
-                    //    }
-                    //}
+                    if (has_children && ImGui::MenuItem("Ungroup")) {
+                        ungroupEntity(entity);
+                    }
 
-                    //if (ecs->hasEntityComponent<Hierarchy>(entity_id)) {
-                    //    auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id);
-                    //    if (hierarchy.has_value()) {
-                    //        if (hierarchy.value().get().parent != entt::null) {
-                    //            if (ImGui::MenuItem("Move to Root")) {
-                    //                PN_CORE_INFO("[EntityPanel] Moving entity {} to root", static_cast<uint32_t>(entity_id));
-                    //                setEntityParent(entity_id, entt::null);
-                    //                force_refresh = true;
-                    //                ImGui::CloseCurrentPopup();
-                    //            }
-                    //        }
-                    //    }
-
-                    //}
+                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                        if (hierarchy.value().get().parentGUID.IsValid() && ImGui::MenuItem("Move to Root")) {
+                            removeParent(entity);
+                            force_refresh = true;
+                        }
+                    }
 
                     ImGui::Separator();
 
                     if (ImGui::MenuItem("Delete", "Del")) {
-                        PN_CORE_INFO("[EntityPanel] Deleting entity {}", static_cast<uint32_t>(entity_id));
-
-                        // Get entity name for description
-                        std::string entity_name = "Unnamed";
-                        auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(entity_id);
-                        if (name_comp.has_value()) {
-                            entity_name = name_comp.value().get().name;
-                        }
-
-                        // Capture entity by value
-                        entt::entity entity_to_delete = entity_id;
+                        entt::entity entity_to_delete = entity;
+                        std::string delete_name = entity_name;
 
                         command_manager->executeAction(Action{
                             [this, entity_to_delete]() {
-                                //removeEntityWithChildren(entity_to_delete);
-                                //if (selected_entity == entity_to_delete) {
-                                //    selected_entity = entt::null;
-                                //}
+                                removeEntityWithChildren(entity_to_delete);
+                                if (selected_entity == entity_to_delete) {
+                                    selected_entity = entt::null;
+                                }
                                 force_refresh = true;
                             },
-                            []() {
-                                PN_CORE_WARN("Undo for entity deletion not yet implemented");
-                            },
-                            "Delete Entity: " + entity_name
+                            []() { PN_CORE_WARN("Undo for entity deletion not yet implemented"); },
+                            "Delete Entity: " + delete_name
                             });
-
-                        ImGui::CloseCurrentPopup();
                     }
-
 
                     ImGui::EndPopup();
                 }
 
-                //// Recursively draw children with increased depth
-                //if (has_children) {
-                //    for (auto child : children) {
-                //        drawEntityHierarchy(child, depth + 1);
-                //    }
-                //}
+                // Recursively draw children
+                if (has_children) {
+                    for (auto child : children) {
+                        drawEntityHierarchy(child, depth + 1);
+                    }
+                }
             }
 
-            //// Helper functions
-            //std::vector<entt::entity> EntityPanel::getEntityChildren(entt::entity parent) {
-            //    std::vector<entt::entity> children;
-            //    auto ecs = PN_ECS_SERVICE;
-            //    auto& registry = ecs->getRegistry();
+            std::vector<entt::entity> EntityPanel::getRootEntities() {
+                std::vector<entt::entity> roots;
+                auto ecs = PN_ECS_SERVICE;
+                auto& registry = ecs->getRegistry();
 
-            //    auto view = registry.view<Hierarchy>();
-            //    for (auto entity : view) {
-            //        auto& hierarchy = view.get<Hierarchy>(entity);
-            //        if (hierarchy.parent == parent) {
-            //            children.push_back(entity);
-            //        }
-            //    }
+                for (const auto& [entity, name] : editor_entities) {
+                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                        if (!hierarchy.value().get().parentGUID.IsValid()) {
+                            roots.push_back(entity);
+                        }
+                    }
+                    else {
+                        roots.push_back(entity);
+                    }
+                }
 
-            //    return children;
-            //}
+                return roots;
+            }
 
-            //void EntityPanel::setEntityParent(entt::entity child, entt::entity parent) {
-            //    auto ecs = PN_ECS_SERVICE;
+            std::vector<entt::entity> EntityPanel::getEntityChildren(entt::entity parent) {
+                std::vector<entt::entity> children;
+                auto ecs = PN_ECS_SERVICE;
 
-            //    if (!ecs->hasEntityComponent<Hierarchy>(child)) {
-            //        ecs->addEntityComponent(child, Hierarchy{});
-            //    }
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(parent);
+                if (!hierarchy_opt) return children;
 
-            //    auto child_hierarchy = ecs->getEntityComponent<Hierarchy>(child);
+                auto& hierarchy = hierarchy_opt.value().get();
+                for (const auto& childGUID : hierarchy.childrenGUIDs) {
+                    entt::entity child = ecs->resolveGUID(childGUID);
+                    if (child != entt::null && ecs->checkEntity(child)) {
+                        children.push_back(child);
+                    }
+                }
 
-            //    if (child_hierarchy.has_value()) {
-            //        // Remove from old parent
-            //        if (child_hierarchy.value().get().parent != entt::null) {
-            //            if (ecs->hasEntityComponent<Hierarchy>(child_hierarchy.value().get().parent)) {
-            //                auto old_parent_hierarchy = ecs->getEntityComponent<Hierarchy>(child_hierarchy.value().get().parent);
-            //                if (old_parent_hierarchy.has_value()) {
-            //                    old_parent_hierarchy.value().get().children.erase(
-            //                        std::remove(old_parent_hierarchy.value().get().children.begin(),
-            //                            old_parent_hierarchy.value().get().children.end(), child),
-            //                        old_parent_hierarchy.value().get().children.end()
-            //                    );
-            //                }
+                return children;
+            }
 
-            //            }
-            //        }
-            //    }
+            void EntityPanel::setEntityParent(entt::entity child, entt::entity parent) {
+                auto ecs = PN_ECS_SERVICE;
+                auto transformSystem = ecs->getSystem<Transform::System>();
 
+                if (transformSystem) {
+                    transformSystem->setParent(child, parent, ecs->getRegistry());
+                    transformSystem->markDirty(child, ecs->getRegistry());
+                }
+            }
 
+            void EntityPanel::removeParent(entt::entity child) {
+                auto ecs = PN_ECS_SERVICE;
+                auto transformSystem = ecs->getSystem<Transform::System>();
 
-            //    // Set new parent
-            //    if (child_hierarchy.has_value()) {
-            //        child_hierarchy.value().get().parent = parent;
-            //    }
+                if (transformSystem) {
+                    transformSystem->removeParent(child, ecs->getRegistry());
+                    transformSystem->markDirty(child, ecs->getRegistry());
+                }
+            }
 
-            //    // Add to new parent's children
-            //    if (parent != entt::null) {
-            //        if (!ecs->hasEntityComponent<Hierarchy>(parent)) {
-            //            ecs->addEntityComponent(parent, Hierarchy{});
-            //        }
-            //        auto parent_hierarchy = ecs->getEntityComponent<Hierarchy>(parent);
-            //        if(parent_hierarchy.has_value()) { parent_hierarchy.value().get().children.push_back(child); }
+            bool EntityPanel::isAncestor(entt::entity potential_ancestor, entt::entity entity) {
+                auto ecs = PN_ECS_SERVICE;
 
-            //    }
-            //}
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity);
+                if (!hierarchy_opt) return false;
 
-            //bool EntityPanel::isAncestor(entt::entity potential_ancestor, entt::entity entity) {
-            //    auto ecs = PN_ECS_SERVICE;
+                std::unordered_set<Assets::GUID> visited;
+                Assets::GUID current_parent_guid = hierarchy_opt->get().parentGUID;
 
-            //    // Check if initial entity has hierarchy component
-            //    auto hierarchy_opt = ecs->getEntityComponent<Hierarchy>(entity);
-            //    if (!hierarchy_opt) {
-            //        return false;  // No hierarchy component
-            //    }
+                constexpr size_t MAX_DEPTH = 100;
+                size_t depth = 0;
 
-            //    // Track visited entities to prevent cycles
-            //    std::unordered_set<entt::entity> visited;
-            //    visited.insert(entity);
+                while (current_parent_guid.IsValid() && depth++ < MAX_DEPTH) {
+                    if (visited.count(current_parent_guid) > 0) {
+                        PN_CORE_ERROR("Cycle detected in hierarchy");
+                        return false;
+                    }
+                    visited.insert(current_parent_guid);
 
-            //    // Get parent from the optional safely
-            //    entt::entity current_parent = hierarchy_opt->get().parent;
+                    entt::entity current_parent = ecs->resolveGUID(current_parent_guid);
+                    if (current_parent == potential_ancestor) {
+                        return true;
+                    }
 
-            //    // Traverse up the hierarchy
-            //    constexpr size_t MAX_DEPTH = 100;
-            //    size_t depth = 0;
+                    auto parent_hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(current_parent);
+                    if (!parent_hierarchy_opt) break;
 
-            //    while (current_parent != entt::null && depth++ < MAX_DEPTH) {
-            //        // Check for cycles
-            //        if (visited.count(current_parent) > 0) {
-            //            PN_CORE_ERROR("Cycle detected in hierarchy for entity {}",
-            //                static_cast<uint32_t>(entity));
-            //            return false;
-            //        }
-            //        visited.insert(current_parent);
+                    current_parent_guid = parent_hierarchy_opt->get().parentGUID;
+                }
 
-            //        // Found the ancestor
-            //        if (current_parent == potential_ancestor) {
-            //            return true;
-            //        }
+                return false;
+            }
 
-            //        // Get parent's hierarchy component
-            //        auto parent_hierarchy_opt = ecs->getEntityComponent<Hierarchy>(current_parent);
-            //        if (!parent_hierarchy_opt) {
-            //            // Parent has no hierarchy component - end of chain
-            //            break;
-            //        }
+            void EntityPanel::removeEntityWithChildren(entt::entity entity) {
+                auto ecs = PN_ECS_SERVICE;
 
-            //        // Move to next parent
-            //        current_parent = parent_hierarchy_opt->get().parent;
-            //    }
+                if (!ecs->checkEntity(entity)) return;
 
-            //    return false;
-            //}
+                std::vector<entt::entity> children = getEntityChildren(entity);
+                for (auto child : children) {
+                    removeEntityWithChildren(child);
+                }
 
+                // Remove from parent's children list
+                if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                    if (hierarchy.value().get().parentGUID.IsValid()) {
+                        entt::entity parent = ecs->resolveGUID(hierarchy.value().get().parentGUID);
+                        if (parent != entt::null && ecs->checkEntity(parent)) {
+                            if (auto parent_hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(parent)) {
+                                auto& children_guids = parent_hierarchy.value().get().childrenGUIDs;
+                                auto child_guid = ecs->getEntityComponent<Entity::GUID>(entity);
+                                if (child_guid) {
+                                    children_guids.erase(
+                                        std::remove(children_guids.begin(), children_guids.end(), child_guid.value().get().guid),
+                                        children_guids.end()
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
 
-            //void EntityPanel::removeEntityWithChildren(entt::entity entity) {
-            //    auto ecs = PN_ECS_SERVICE;
+                ecs->destroyEntity(entity);
+            }
 
-            //    if (!ecs->checkEntity(entity)) {
-            //        return;
-            //    }
+            void EntityPanel::cloneEntityWithChildren(entt::entity source, entt::entity cloned_parent) {
+                auto children = getEntityChildren(source);
+                auto ecs = PN_ECS_SERVICE;
 
-            //    // Get all children first
-            //    std::vector<entt::entity> children = getEntityChildren(entity);
+                for (auto child : children) {
+                    entt::entity cloned_child = ecs->cloneEntity(child);
+                    setEntityParent(cloned_child, cloned_parent);
+                    cloneEntityWithChildren(child, cloned_child);
+                }
+            }
 
-            //    // Recursively remove children
-            //    for (auto child : children) {
-            //        removeEntityWithChildren(child);
-            //    }
+            void EntityPanel::ungroupEntity(entt::entity entity) {
+                auto ecs = PN_ECS_SERVICE;
 
-            //    // Remove from parent's children list
-            //    if (ecs->hasEntityComponent<Hierarchy>(entity)) {
-            //        auto hierarchy_opt = ecs->getEntityComponent<Hierarchy>(entity);
-            //        if (hierarchy_opt.has_value()) {
-            //            auto& hierarchy = hierarchy_opt.value().get();
-            //            if (hierarchy.parent != entt::null && ecs->checkEntity(hierarchy.parent)) {
-            //                auto parent_hierarchy_opt = ecs->getEntityComponent<Hierarchy>(hierarchy.parent);
-            //                if (parent_hierarchy_opt.has_value()) {
-            //                    auto& parent_hierarchy = parent_hierarchy_opt.value().get();
-            //                    parent_hierarchy.children.erase(
-            //                        std::remove(parent_hierarchy.children.begin(),
-            //                            parent_hierarchy.children.end(), entity),
-            //                        parent_hierarchy.children.end()
-            //                    );
-            //                }
-            //            }
-            //        }
-            //    }
+                if (!ecs->checkEntity(entity)) return;
 
-            //    // Destroy the entity
-            //    ecs->destroyEntity(entity);
-            //}
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity);
+                if (!hierarchy_opt) return;
 
-            //void EntityPanel::cloneEntityChildren(entt::entity source, entt::entity cloned_parent) {
-            //    auto children = getEntityChildren(source);
-            //    auto ecs = PN_ECS_SERVICE;
+                Assets::GUID parent_guid = hierarchy_opt->get().parentGUID;
+                entt::entity parent = parent_guid.IsValid() ? ecs->resolveGUID(parent_guid) : entt::null;
 
-            //    for (auto child : children) {
-            //        entt::entity cloned_child = ecs->cloneEntity(child);
-            //        setEntityParent(cloned_child, cloned_parent);
+                std::vector<entt::entity> children = getEntityChildren(entity);
+                for (auto child : children) {
+                    if (parent != entt::null) {
+                        setEntityParent(child, parent);
+                    }
+                    else {
+                        removeParent(child);
+                    }
+                }
 
-            //        // Recursively clone grandchildren
-            //        cloneEntityChildren(child, cloned_child);
-            //    }
-            //}
+                force_refresh = true;
+            }
 
-            /**********************************
-            * Prefab Helper functions
-            ******************************/
+            std::string EntityPanel::getEntityName(entt::entity entity) {
+                auto ecs = PN_ECS_SERVICE;
+                auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(entity);
+                return name_comp ? name_comp.value().get().name : "Unnamed";
+            }
 
-            // Generate unique prefab filename (without path, just name)
             std::string EntityPanel::generateUniquePrefabName(const std::string& base_name) {
-                auto seri_service = services->get<PAIN::Serialization::Service>();
-
+                auto seri = PN_SERI_SERVICE;
                 std::string prefab_name = base_name;
                 int counter = 1;
 
-                std::string test_path = seri_service->resolvePrefabPath(prefab_name);
-
-                while (std::filesystem::exists(test_path)) {
+                while (std::filesystem::exists(seri->resolvePrefabPath(prefab_name))) {
                     prefab_name = base_name + " (" + std::to_string(counter++) + ")";
-                    test_path = seri_service->resolvePrefabPath(prefab_name);
                 }
-                
+
                 return prefab_name;
             }
 
-            // Recursively collect entity and all children
             void EntityPanel::collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities) {
                 out_entities.push_back(entity);
-
-                //// Get children safely
-                //auto children = getEntityChildren(entity);
-                //for (auto child : children) {
-                //    collectEntityHierarchy(child, out_entities);
-                //}
+                auto children = getEntityChildren(entity);
+                for (auto child : children) {
+                    collectEntityHierarchy(child, out_entities);
+                }
             }
 
+        } 
+    } 
+} 
 
-        } // namespace Panel
-    } // namespace Editor
-} // namespace PAIN
 #endif
