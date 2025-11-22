@@ -57,6 +57,9 @@ namespace PAIN {
 				void setScriptChanged(bool is_script_changed);
 				bool getScriptChanged();
 
+				void setScriptSaved(bool is_script_saved);
+				bool getScriptSaved();
+
 				//Expose services
 				std::shared_ptr<Services> services;
 
@@ -85,6 +88,7 @@ namespace PAIN {
 
 				// Script Loading
 				bool is_script_loaded = false;
+				bool is_script_saved = true;
 
 				// Transform tracking removed - now handled as static in .cpp
 			};

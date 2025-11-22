@@ -575,6 +575,16 @@ namespace PAIN {
                 return is_script_loaded;
             }
 
+
+            void ComponentsPanel::setScriptSaved(bool is_script_saved_) {
+                is_script_saved = is_script_saved_;
+            }
+
+            bool ComponentsPanel::getScriptSaved() {
+                return is_script_saved;
+            }
+
+
             void ComponentsPanel::setCompStringRef(std::string const& to_set) {
                 comp_string_ref = to_set;
             }
@@ -658,20 +668,32 @@ namespace PAIN {
                     }
 
                     // Editable text Input
-                    ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
-                        ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput);
+                    if (ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
+                        ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput)) {
+                        setScriptSaved(false);
+                    }
 
                     // Save button (TODO: Check if it updates real time.)
-                    if (ImGui::Button("Save Script")) {
-                        std::ofstream file(selected_filepath, std::ios::out | std::ios::binary);
-                        if (file) {
-                            file.write(script_buffer, strlen(script_buffer));
-                            file.close();
-                        }
-                        else {
-                            PN_CORE_WARN("Failed to save file: ", selected_filepath);
+                    if (!getScriptSaved()) {
+                        if (ImGui::Button("Save Script")) {
+                            std::ofstream file(selected_filepath, std::ios::out | std::ios::binary);
+                            if (file) {
+                                file.write(script_buffer, strlen(script_buffer));
+                                file.close();
+                                setScriptSaved(true);
+                            }
+                            else {
+                                PN_CORE_WARN("Failed to save file: ", selected_filepath);
+                            }
                         }
                     }
+                    else {
+                        ImGui::BeginDisabled();
+                        ImGui::Button("Save Script");
+                        ImGui::EndDisabled();
+                    }
+
+                    ImGui::SameLine();
 
                     // Open in Visual Studio Code button
                     if (ImGui::Button("Open in VS Code")) {
