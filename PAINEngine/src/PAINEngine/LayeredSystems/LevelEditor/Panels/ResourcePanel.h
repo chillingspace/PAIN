@@ -9,23 +9,42 @@
 
 #include <chrono>
 
+namespace PAIN::Editor::Panel {
+
+    //Global files and directories for payload
+    struct Dir {
+        std::filesystem::path path;
+        ImTextureID icon;
+        std::string file_name;
+    };
+
+    struct File {
+        std::filesystem::path path;
+        Assets::GUID id;
+        Assets::Type type;
+        ImTextureID icon;
+        std::string file_name;
+
+        // Use GUID for equality (most efficient)
+        bool operator==(const File& other) const {
+            return id == other.id;
+        }
+    };
+}
+
+namespace std {
+    template<>
+    struct hash<PAIN::Editor::Panel::File> {
+        size_t operator()(const PAIN::Editor::Panel::File& file) const noexcept {
+            // Assuming GUID already has a hash function
+            return std::hash<PAIN::Assets::GUID>{}(file.id);
+        }
+    };
+}
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
-
-            //Global files and directories for payload
-            struct Dir {
-                std::filesystem::path path;
-                ImTextureID icon;
-                std::string file_name;
-            };
-            struct File {
-                std::filesystem::path path;
-                Assets::GUID id;
-                Assets::Type type;
-                ImTextureID icon;
-                std::string file_name;
-            };
 
             class ResourcePanel : public IPanel {
             public:
@@ -94,7 +113,7 @@ namespace PAIN {
                 std::string payload_typestring;
 
                 //Vector of opened files
-                std::vector<File> open_files;
+                std::unordered_set<File> open_files;
 
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
