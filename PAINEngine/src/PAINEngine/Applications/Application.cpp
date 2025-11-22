@@ -29,6 +29,7 @@
 #include "Systems/Audio/sysAudio.h"
 #include "Systems/Collision/sBVHSystem.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
+#include "Systems/Transform/sysTransform.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 
@@ -117,6 +118,7 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
 		// Physics system cross platform
+		services->get<ECS::Controller>()->registerSystem<Transform::System>();
 		services->get<ECS::Controller>()->registerSystem<Physics::System>();
 
 		services->get<ECS::Controller>()->registerSystem<PAIN::Scripting::GameScriptingSystem>();

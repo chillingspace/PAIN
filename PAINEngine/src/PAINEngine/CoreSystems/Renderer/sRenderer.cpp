@@ -143,14 +143,14 @@ namespace PAIN {
 
 			for (auto e : view) {
 
-				auto transform = ecs->getEntityComponent<Transform>(e);
+				auto transform = ecs->getEntityComponent<WorldTransform>(e);
 
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 				glm::mat4 model_xform;
 				if (transform.has_value())
 				{
-					model_xform = transform.value().get().getMatrix();
+					model_xform = transform.value().get().matrix;
 				}
 
 				if (mdl.has_value() && mdl->get().castShadows)
@@ -182,13 +182,13 @@ namespace PAIN {
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
-  			auto transform = ecs->getEntityComponent<Transform>(e);
+  			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -227,12 +227,12 @@ namespace PAIN {
 
 		for (auto e : view) {
 
-			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -254,7 +254,7 @@ namespace PAIN {
 
 		for (auto entity : view) {
 			auto light_comp = ecs->getEntityComponent<Lighting>(entity);
-			auto trans_comp = ecs->getEntityComponent<Transform>(entity);
+			auto trans_comp = ecs->getEntityComponent<LocalTransform>(entity);
 
 			if (!light_comp.has_value() || !trans_comp.has_value())
 				continue;

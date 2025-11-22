@@ -27,7 +27,6 @@
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cBoundingVolume.h"
-#include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "Applications/AppSystem.h"

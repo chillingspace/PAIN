@@ -50,6 +50,9 @@ namespace PAIN {
             // --- RUNTIME (Internal handle) ---
             // Do not serialize or edit
             PAIN::Audio::AudioChannelId channelId{ -1 };
+
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
         };
 
     } // namespace Audio

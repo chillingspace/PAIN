@@ -18,6 +18,9 @@ namespace PAIN {
         AABB worldAABB; // AABB in world space
         int bvhNodeIndex = -1; // Index in BVH node pool, -1 if not added
         bool needsUpdate = true; // Flag for world AABB recalculation
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
     };
 
 #ifdef _DEBUG

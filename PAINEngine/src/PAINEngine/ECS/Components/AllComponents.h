@@ -12,7 +12,6 @@
 
 // To include all components excluding metadata
 #include "cTransform.h"
-#include "cHierarchy.h"
 #include "cMeshRenderer.h"
 #include "cLight.h"
 #include "cPhysics.h"
@@ -42,10 +41,10 @@ namespace PAIN {
         MetaData::EditorVisible,
         MetaData::Relation,
         MetaData::Group,
-        Hierarchy,
 
         // Gameplay
-        Transform,
+        LocalTransform,
+        WorldTransform,
         ModelRenderer,
         Lighting,
         Physics::RigidBody3D,
@@ -69,10 +68,10 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, MetaData::EditorVisible>) return "EditorVisible";
         else if constexpr (std::is_same_v<T, MetaData::Relation>) return "Relation";
         else if constexpr (std::is_same_v<T, MetaData::Group>) return "Group";
-        else if constexpr (std::is_same_v<T, Hierarchy>) return "Hierarchy";
 
         // Gameplay components
-        else if constexpr (std::is_same_v<T, Transform>) return "Transform";
+        else if constexpr (std::is_same_v<T, LocalTransform>) return "LocalTransform";
+        else if constexpr (std::is_same_v<T, WorldTransform>) return "WorldTransform";
         else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";

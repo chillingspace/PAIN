@@ -24,11 +24,17 @@
 		 struct EntityName {
 			 std::string name;
 			 EntityName(std::string const& n = "entity_") : name(n) {}
+
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
 		 };
  
 		 // Tag component for categorization
 		 struct Tag {
 			 std::set<std::string> tags;
+
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
 		 };
  
 		 // Editor-only visibility component
@@ -36,17 +42,26 @@
 			 bool visible;
 			 bool locked;
 			 EditorVisible() : visible(true), locked(false) {}
+
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
 		 };
  
 		 struct Relation {
 			 std::vector<entt::entity> children;
 			 entt::entity parent;
+
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
 		 };
  
 		 // Group assignment component
 		 struct Group {
 			 std::string group_name;
 			 Group(std::string const& name = "") : group_name(name) {}
+
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
 		 };
 	 }
  

@@ -177,13 +177,14 @@ namespace PAIN {
             // Entity components
             registerComponent<Entity::GUID>("GUID");
             //registerComponent<Entity::Name>("Name");
-            //registerComponent<Entity::Hierarchy>("Hierarchy");
+            registerComponent<Entity::Hierarchy>("Hierarchy");
 
             // Core components
-            registerComponent<Transform>("Transform");
+            registerComponent<LocalTransform>("LocalTransform");
+            registerComponent<WorldTransform>("WorldTransform");
             registerComponent<ModelRenderer>("ModelRenderer");
             registerComponent<Lighting>("Lighting");
-            registerComponent<Hierarchy>("Hierarchy");
+            //registerComponent<Hierarchy>("Hierarchy");
             //registerComponent<Camera>("Camera");
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collider");
@@ -312,19 +313,21 @@ namespace PAIN {
 
             // Use fold expression to check and serialize each component
             ([&] {
-                if (registry.all_of<Components>(entity)) {
-                    const auto& comp = registry.get<Components>(entity);
-                    std::string comp_name = getComponentName<Components>();
+                if constexpr (!requires { Components::ShouldSerialize; } || Components::ShouldSerialize) {
+                    if (registry.all_of<Components>(entity)) {
+                        const auto& comp = registry.get<Components>(entity);
+                        std::string comp_name = getComponentName<Components>();
 
-                    // Check if the type is reflectable
-                    if constexpr (refl::trait::is_reflectable_v<Components>) {
-                        // Use reflection-based serialization
-                        components[comp_name] = PAIN::Serialization::to_json_reflected(comp);
-                    }
-                    else {
-                        // Use custom JSON serialization (for glm types)
-                        // nlohmann::json will use custom to_json
-                        components[comp_name] = nlohmann::json(comp);
+                        // Check if the type is reflectable
+                        if constexpr (refl::trait::is_reflectable_v<Components>) {
+                            // Use reflection-based serialization
+                            components[comp_name] = PAIN::Serialization::to_json_reflected(comp);
+                        }
+                        else {
+                            // Use custom JSON serialization (for glm types)
+                            // nlohmann::json will use custom to_json
+                            components[comp_name] = nlohmann::json(comp);
+                        }
                     }
                 }
                 }(), ...);
@@ -339,35 +342,37 @@ namespace PAIN {
             std::tuple<Components...>
         ) {
             ([&] {
-                std::string comp_name = getComponentName<Components>();
+                if constexpr (!requires { Components::ShouldSerialize; } || Components::ShouldSerialize) {
+                    std::string comp_name = getComponentName<Components>();
 
-                if (comps.contains(comp_name)) {
-                    try {
-                        Components comp;
+                    if (comps.contains(comp_name)) {
+                        try {
+                            Components comp;
 
-                        // Check if type is reflectable
-                        if constexpr (refl::trait::is_reflectable_v<Components>) {
-                            // Use refl-cpp deserialization
-                            PAIN::Serialization::from_json_reflected(comp, comps[comp_name]);
-                        }
-                        else {
-                            // Use adl_serializer (for Transform, Lighting, Physics components)
-                            comp = comps[comp_name].get<Components>();
-                        }
+                            // Check if type is reflectable
+                            if constexpr (refl::trait::is_reflectable_v<Components>) {
+                                // Use refl-cpp deserialization
+                                PAIN::Serialization::from_json_reflected(comp, comps[comp_name]);
+                            }
+                            else {
+                                // Use adl_serializer (for Transform, Lighting, Physics components)
+                                comp = comps[comp_name].get<Components>();
+                            }
 
-                        // Add or replace component
-                        if (getRegistry().all_of<Components>(entity)) {
-                            getRegistry().replace<Components>(entity, std::move(comp));
+                            // Add or replace component
+                            if (getRegistry().all_of<Components>(entity)) {
+                                getRegistry().replace<Components>(entity, std::move(comp));
+                            }
+                            else {
+                                getRegistry().emplace<Components>(entity, std::move(comp));
+                            }
                         }
-                        else {
-                            getRegistry().emplace<Components>(entity, std::move(comp));
+                        catch (const nlohmann::json::exception& e) {
+                            PN_CORE_ERROR("Failed to deserialize {} (JSON error): {}", comp_name, e.what());
                         }
-                    }
-                    catch (const nlohmann::json::exception& e) {
-                        PN_CORE_ERROR("Failed to deserialize {} (JSON error): {}", comp_name, e.what());
-                    }
-                    catch (const std::exception& e) {
-                        PN_CORE_ERROR("Failed to deserialize {}: {}", comp_name, e.what());
+                        catch (const std::exception& e) {
+                            PN_CORE_ERROR("Failed to deserialize {}: {}", comp_name, e.what());
+                        }
                     }
                 }
                 }(), ...);

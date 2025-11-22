@@ -20,6 +20,9 @@
 #include "EntityPanel.h"
 
 #include "Systems/Physics/sysPhysics.h"
+#include "ECS/Components/cEntity.h"
+#include "Systems/Transform/sysTransform.h"
+
 
 namespace PAIN {
 
@@ -27,7 +30,7 @@ namespace PAIN {
 	static void SyncBodyToTransform(
 		entt::entity e,
 		ECS::Controller* ecs,
-		const Transform& t,
+		const LocalTransform& t,
 		bool dragging // true while gizmo is moving, false on release
 	) {
 		if (!ecs) return;
@@ -128,7 +131,7 @@ namespace PAIN {
 
 			// AABB ray intersect for picking
 			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const Transform& transform, float& distance) {
+				const LocalTransform& transform, float& distance) {
 				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
 				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
 
@@ -183,10 +186,10 @@ namespace PAIN {
 				float closestDistance = (std::numeric_limits<float>::max)();
 
 				// Iterate through all entities with transforms
-				auto view = ecs->getRegistry().view<Transform>();
+				auto view = ecs->getRegistry().view<LocalTransform>();
 
 				for (auto entity : view) {
-					auto& transform = view.get<Transform>(entity);
+					auto& transform = view.get<LocalTransform>(entity);
 
 					// Skip very large objects (likely background/floor)
 					if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
@@ -279,16 +282,18 @@ namespace PAIN {
 						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
 
 						if (selectedEntity != entt::null) {
-							auto transformOpt = ecs->getEntityComponent<Transform>(selectedEntity);
+							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity);
+							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity);
 
-							if (transformOpt.has_value()) {
-								Transform& transform = transformOpt.value().get();
+							if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
+								LocalTransform& localTransform = localTransformOpt.value().get();
+								WorldTransform& worldTransform = worldTransformOpt.value().get();
 								auto camera = scene->GetActiveCamera();
 
 								if (camera) {
 									glm::mat4 viewMatrix = camera->view();
 									glm::mat4 projectionMatrix = camera->projection();
-									glm::mat4 modelMatrix = transform.getMatrix();
+									glm::mat4 modelMatrix = worldTransform.matrix;
 
 									ImGuizmo::SetOrthographic(false);
 									ImGuizmo::SetDrawlist();
@@ -305,23 +310,22 @@ namespace PAIN {
 									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 									// Setup snapping
-									bool useSnap = ImGui::GetIO().KeyCtrl; // Hold Ctrl to enable snapping
+									bool useSnap = ImGui::GetIO().KeyCtrl;
 									float snapValue = 0.5f;
 
-									// Different snap values for different operations
 									if (m_GizmoOperation == ImGuizmo::ROTATE) {
-										snapValue = 45.0f; // Snap to 45 degrees for rotation
+										snapValue = 45.0f;
 									}
 									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-										snapValue = 0.5f; // Snap to 0.5 units for translation
+										snapValue = 0.5f;
 									}
 									else if (m_GizmoOperation == ImGuizmo::SCALE) {
-										snapValue = 0.1f; // Snap to 0.1 for scale
+										snapValue = 0.1f;
 									}
 
 									float snapValues[3] = { snapValue, snapValue, snapValue };
 
-									// Draw the gizmo
+									// Draw the gizmo (manipulates modelMatrix)
 									ImGuizmo::Manipulate(
 										glm::value_ptr(viewMatrix),
 										glm::value_ptr(projectionMatrix),
@@ -329,20 +333,17 @@ namespace PAIN {
 										m_GizmoMode,
 										glm::value_ptr(modelMatrix),
 										nullptr,
-										useSnap ? snapValues : nullptr // Pass snap values if Ctrl is held
+										useSnap ? snapValues : nullptr
 									);
 
-									// FIXED: Cache values and only update the component being manipulated
+									// Cache management
 									static bool wasUsing = false;
-									static glm::f32vec3 cachedPosition;
-									static glm::f32quat cachedRotation;
-									static glm::f32vec3 cachedScale;
-
+									static glm::vec3 cachedPosition;
+									static glm::quat cachedRotation;
+									static glm::vec3 cachedScale;
 									static entt::entity lastSelectedEntity = entt::null;
-									static glm::mat4 originalMatrix = glm::mat4(1.0f);
 
 									bool isCurrentlyUsing = ImGuizmo::IsUsing();
-
 
 									// Reset cache if entity changed
 									if (selectedEntity != lastSelectedEntity) {
@@ -350,126 +351,163 @@ namespace PAIN {
 										lastSelectedEntity = selectedEntity;
 									}
 
-									// Just started using - cache the original values AND matrix
+									// Just started using - cache original values
 									if (isCurrentlyUsing && !wasUsing) {
-										cachedPosition = transform.position;
-										cachedRotation = transform.rotation;
-										cachedScale = transform.scale;
-
-										originalMatrix = modelMatrix;
+										cachedPosition = localTransform.position;
+										cachedRotation = localTransform.rotation;
+										cachedScale = localTransform.scale;
 									}
-
-									// Get RigidBody ID for selected object if it has one
-									auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
 
 									// Currently manipulating
 									if (isCurrentlyUsing) {
-										float translation[3], rotation[3], scale[3];
-										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(modelMatrix),
-											translation,
-											rotation,
-											scale
-										);
+										// ===================================================
+										// STEP 1: Get parent's world matrix (if exists)
+										// ===================================================
+										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
 
-										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-
-											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
-											transform.rotation = cachedRotation;
-											transform.scale = cachedScale;
-
-											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
-
-											// If object has RigidBody3D, it is a physics object, disable physics temporarily
-											if (rbOpt.has_value()) {
-												auto& rb = rbOpt.value().get();
-												auto physics_system = ecs->getSystem<Physics::System>();
-
-												if (physics_system) {
-													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-													body_interface.DeactivateBody(rb.bodyID);
-													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
-
-													JPH::RVec3 pos(transform.position.x, transform.position.y, transform.position.z);
-
-													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										if (hierarchyOpt.has_value()) {
+											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+											if (hierarchy.parentGUID.IsValid()) {
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												if (parentEntity != entt::null) {
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													if (parentWorldOpt.has_value()) {
+														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+													}
 												}
 											}
 										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {									
 
-											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));							
-											transform.position = cachedPosition;
-											transform.scale = cachedScale;
+										// ===================================================
+										// STEP 2: Convert world matrix to local space
+										// ===================================================
+										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
 
-											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
+										// ===================================================
+										// STEP 3: Decompose local matrix
+										// ===================================================
+										float localTranslation[3], localRotation[3], localScale[3];
+										ImGuizmo::DecomposeMatrixToComponents(
+											glm::value_ptr(newLocalMatrix),
+											localTranslation,
+											localRotation,
+											localScale
+										);
 
-											if (rbOpt.has_value()) {
-												auto& rb = rbOpt.value().get();
-												auto physics_system = ecs->getSystem<Physics::System>();
+										// ===================================================
+										// STEP 4: Update LocalTransform based on gizmo operation
+										// ===================================================
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
+											localTransform.rotation = cachedRotation;
+											localTransform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											localTransform.position = cachedPosition;
+											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
+											localTransform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											localTransform.position = cachedPosition;
+											localTransform.rotation = cachedRotation;
+											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
+										}
 
-												if (physics_system) {
-													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+										// ===================================================
+										// STEP 5: Mark transform dirty & sync physics
+										// ===================================================
+										auto transformSystem = ecs->getSystem<Transform::System>();
+										if (transformSystem) {
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+										}
 
-													// Disable physics temporarily
-													body_interface.DeactivateBody(rb.bodyID);
-													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+										// Physics sync
+										SyncBodyToTransform(selectedEntity, ecs.get(), localTransform, /*dragging=*/true);
 
-													JPH::Quat rot(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+										if (rbOpt.has_value()) {
+											auto& rb = rbOpt.value().get();
+											auto physics_system = ecs->getSystem<Physics::System>();
 
+											if (physics_system) {
+												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+												// Disable physics temporarily during manipulation
+												body_interface.DeactivateBody(rb.bodyID);
+												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+
+												if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+													JPH::RVec3 pos(localTransform.position.x, localTransform.position.y, localTransform.position.z);
+													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
+												}
+												else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+													JPH::Quat rot(localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z, localTransform.rotation.w);
 													body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
 												}
 											}
 										}
-										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-									
-											transform.position = cachedPosition;
-											transform.rotation = cachedRotation;
-											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
-
-											// Jolt does not allow run-time scale changing.
-										}
 									}
 
-									// Just released - final update
+									// Just released - reactivate physics
 									if (!isCurrentlyUsing && wasUsing) {
-										float translation[3], rotation[3], scale[3];
+										// Final decompose (same logic as above)
+										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
+
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										if (hierarchyOpt.has_value()) {
+											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+											if (hierarchy.parentGUID.IsValid()) {
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												if (parentEntity != entt::null) {
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													if (parentWorldOpt.has_value()) {
+														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+													}
+												}
+											}
+										}
+
+										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+
+										float localTranslation[3], localRotation[3], localScale[3];
 										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(modelMatrix),
-											translation,
-											rotation,
-											scale
+											glm::value_ptr(newLocalMatrix),
+											localTranslation,
+											localRotation,
+											localScale
 										);
 
 										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
+											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
 										}
 										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-
-											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));
-
+											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
 										}
 										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
+											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
 										}
 
-										// Reactivate physics for physics object
+										// Mark dirty
+										auto transformSystem = ecs->getSystem<Transform::System>();
+										if (transformSystem) {
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+										}
+
+										// Reactivate physics
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
 										if (rbOpt.has_value()) {
 											auto& rb = rbOpt.value().get();
 											auto physics_system = ecs->getSystem<Physics::System>();
-											JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-											// Set back to dynamic (or whatever it was before)
-											body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
-
-											// Optional: ensure the body is awake
-											body_interface.ActivateBody(rb.bodyID);
+											if (physics_system) {
+												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
+												body_interface.ActivateBody(rb.bodyID);
+											}
 										}
 									}
 
 									wasUsing = isCurrentlyUsing;
-
 								}
 							}
 						}

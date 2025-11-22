@@ -30,16 +30,16 @@ namespace PAIN {
                     [](ComponentsPanel&, PAIN::Entity::Name& as) { DrawWithReflection(as); });
 
                 // ---- Entity Hierarchy ----
-                //registerCompUIFunc<PAIN::Entity::Hierarchy>("Hierarchy",
-                //    [](ComponentsPanel&, PAIN::Entity::Hierarchy& as) { DrawWithReflection(as); });
+                registerCompUIFunc<PAIN::Entity::Hierarchy>("Hierarchy",
+                    [](ComponentsPanel&, PAIN::Entity::Hierarchy& as) { DrawWithReflection(as); });
 
                 // ---- Transform ----
-                registerCompUIFunc<PAIN::Transform>("Transform",
-                    [this](ComponentsPanel& panel, PAIN::Transform& transform_ref) {
+                registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",
+                    [this](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
                         static struct {
                             entt::entity entity = entt::null;
-                            Transform original_transform;
-                            Transform last_frame_transform;
+                            LocalTransform original_transform;
+                            LocalTransform last_frame_transform;
                             bool is_editing = false;
                             int skip_frames = 0;  // NEW: Skip detection for N frames
                         } state;
@@ -82,12 +82,20 @@ namespace PAIN {
                         // Draw the reflection UI
                         DrawWithReflection(transform_ref);
 
+                        //ECS controller
+                        auto ecs = services->get<ECS::Controller>();
+
                         // Detect if transform changed this frame
                         if (state.is_editing) {
                             if (state.last_frame_transform.position != transform_ref.position ||
                                 state.last_frame_transform.rotation != transform_ref.rotation ||
                                 state.last_frame_transform.scale != transform_ref.scale) {
                                 state.last_frame_transform = transform_ref;
+
+                                auto world_opt = ecs->getEntityComponent<WorldTransform>(selected);
+                                if (world_opt.has_value()) {
+                                    world_opt.value().get().dirty = true;
+                                }
                             }
                         }
 
@@ -99,11 +107,10 @@ namespace PAIN {
                                 state.original_transform.scale != transform_ref.scale) {
 
                                 // Create undo/redo action
-                                Transform final_transform = transform_ref;
-                                Transform old_transform = state.original_transform;
+                                LocalTransform final_transform = transform_ref;
+                                LocalTransform old_transform = state.original_transform;
                                 entt::entity entity = selected;
 
-                                auto ecs = services->get<ECS::Controller>();
                                 auto metadata = services->get<MetaData::Service>();
 
                                 std::string entity_name = "Entity";
@@ -114,17 +121,25 @@ namespace PAIN {
                                 command_manager->executeAction(Action{
                                     [ecs, entity, final_transform]() {
                                         if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = final_transform;
+                                            }
+                                            auto world_opt = ecs->getEntityComponent<WorldTransform>(entity);
+                                            if (world_opt.has_value()) {
+                                                world_opt.value().get().dirty = true;
                                             }
                                         }
                                     },
                                     [ecs, entity, old_transform]() {
                                         if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = old_transform;
+                                            }
+                                            auto world_opt = ecs->getEntityComponent<WorldTransform>(entity);
+                                            if (world_opt.has_value()) {
+                                                world_opt.value().get().dirty = true;
                                             }
                                         }
                                     },
@@ -206,8 +221,8 @@ namespace PAIN {
                     [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
 
                 // ---- Hierarchy ---- 
-                registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
-                    [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
+                //registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
+                //    [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
 
                 // ---- Physics ----
                 registerCompUIFunc<PAIN::Joint>("Joint",

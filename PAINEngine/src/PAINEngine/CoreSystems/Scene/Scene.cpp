@@ -5,6 +5,7 @@
 #include "ECS/sMetaData.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
+#include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
 #include "CoreSystems/Renderer/Light.h"
@@ -256,7 +257,9 @@ namespace PAIN {
 
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
-		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, WorldTransform{});
+		ecs->addEntityComponent(entity, Entity::Hierarchy{});
 		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
 
 		if (meta) meta->setEntityName(entity, name);

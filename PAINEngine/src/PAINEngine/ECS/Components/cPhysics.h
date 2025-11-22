@@ -73,6 +73,8 @@ namespace PAIN {
                 layer.setBodyReference(bodyID);
             }
 
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
 
 
 		};
@@ -107,6 +109,8 @@ namespace PAIN {
 			uint16_t collision_layer = 0; 
 			bool is_trigger = false;
 
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
 		};
 	}
 
@@ -123,6 +127,9 @@ namespace PAIN {
 		glm::f32 limit_max;
 		JOINT_TYPE joint_type;
 		// Entity::Type connectedEntity;
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
 	};
 }
 

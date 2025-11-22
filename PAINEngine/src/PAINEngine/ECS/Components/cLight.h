@@ -35,6 +35,9 @@ namespace PAIN {
 		//	float near_plane;
 		//	float far_plane;
 		SHADOW_TYPES shadow_type;
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
 	};
 
 #ifdef _DEBUG

@@ -56,10 +56,10 @@ namespace PAIN {
 
 
                 //Add tag popup
-                std::function<void(std::any const&)> addTagPopUp(std::string const& popup_id);
+                //std::function<void(std::any const&)> addTagPopUp(std::string const& popup_id);
 
-                //Remove tag popup
-                std::function<void(std::any const&)> removeTagPopUp(std::string const& popup_id);
+                ////Remove tag popup
+                //std::function<void(std::any const&)> removeTagPopUp(std::string const& popup_id);
 
                 //Create entity popup
                 std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
@@ -74,23 +74,23 @@ namespace PAIN {
                 bool force_refresh = false;
 
                 // Helper methods for hierarchy
-                void drawEntityNode(entt::entity entity);
-                std::vector<entt::entity> getRootEntities();
-                std::vector<entt::entity> getEntityChildren(entt::entity parent);
-                std::string getEntityName(entt::entity entity);
-                void setEntityParent(entt::entity child, entt::entity parent);
-                bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
-                void removeEntityWithChildren(entt::entity entity);
-                void cloneEntityChildren(entt::entity source, entt::entity cloned_parent);
+                //void drawEntityNode(entt::entity entity);
+                //std::vector<entt::entity> getRootEntities();
+                //std::vector<entt::entity> getEntityChildren(entt::entity parent);
+                //std::string getEntityName(entt::entity entity);
+                //void setEntityParent(entt::entity child, entt::entity parent);
+                //bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
+                //void removeEntityWithChildren(entt::entity entity);
+                //void cloneEntityChildren(entt::entity source, entt::entity cloned_parent);
 
                 // Prefab helper functions
                 std::string generateUniquePrefabName(const std::string& base_name);
                 void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
-                void ungroupEntity(entt::entity entity);
-                void unparentEntity(entt::entity entity);
+                //void ungroupEntity(entt::entity entity);
+                //void unparentEntity(entt::entity entity);
 
-                std::function<void()> createEmptyEntityPopUp(std::string const& popup_id);
-                std::function<void()> createChildEntityPopUp(std::string const& popup_id);
+                //std::function<void()> createEmptyEntityPopUp(std::string const& popup_id);
+                //std::function<void()> createChildEntityPopUp(std::string const& popup_id);
 
                 entt::entity entity_pending_delete = entt::null;
 
@@ -98,7 +98,7 @@ namespace PAIN {
                 std::vector<entt::entity> multi_selected_entities;
 
                 // Member functions
-                std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
+                //std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
 
                 void drawEntityHierarchy(entt::entity entity_id, int depth);
             };

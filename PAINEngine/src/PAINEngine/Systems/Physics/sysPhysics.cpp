@@ -262,10 +262,10 @@ namespace PAIN {
 				auto& body_interface = jolt_physics->GetBodyInterface();
 
 				// Find all entities with Transform and RigidBody3D components
-				auto view = registry.view<Transform, Physics::RigidBody3D>();
+				auto view = registry.view<LocalTransform, Physics::RigidBody3D>();
 				for (auto&& [entity, transform, rigidBody] : view.each()) {
 
-					transform = view.get<Transform>(entity);
+					transform = view.get<LocalTransform>(entity);
 					rigidBody = view.get<Physics::RigidBody3D>(entity);
 
 					// Check if layer needs updating
@@ -330,9 +330,9 @@ namespace PAIN {
 		}
 
 		void System::syncNewBodies(entt::registry& registry) {
-			auto view = registry.view<Transform, Physics::RigidBody3D>();
+			auto view = registry.view<LocalTransform, Physics::RigidBody3D>();
 			for (auto&& [entity, transform, rigidBody] : view.each()) {
-				transform = view.get<Transform>(entity);
+				transform = view.get<LocalTransform>(entity);
 				rigidBody = view.get<Physics::RigidBody3D>(entity);
 				
 				// Only create if not already created
@@ -392,11 +392,11 @@ namespace PAIN {
 
 		void System::applyBounce(entt::registry& registry, entt::entity targetEntity, float jumpImpulse)
 		{
-			auto view = registry.view<Transform, Physics::RigidBody3D, Audio::AudioSource>();
+			auto view = registry.view<LocalTransform, Physics::RigidBody3D, Audio::AudioSource>();
 			if (!view.contains(targetEntity))
 				return;
 
-			auto& transform = view.get<Transform>(targetEntity);
+			auto& transform = view.get<LocalTransform>(targetEntity);
 			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
 
 			// Ground check
@@ -430,7 +430,7 @@ namespace PAIN {
 			body_interface->AddBody(bodyID, JPH::EActivation::Activate);
 		}
 
-		void System::teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb)
+		void System::teleportBodyToTransform(entt::entity e, const LocalTransform& tr, Physics::RigidBody3D& rb)
 		{
 			if (!body_interface || rb.bodyID.IsInvalid()) return;
 
