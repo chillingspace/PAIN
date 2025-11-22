@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "pbr_preview.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17052702982427203586
+  },
+  "descriptor_version": 1,
+  "guid": "37c49916-23b6-f946-b585-7337fa486f18",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\pbr_preview.frag"
+  }
+}

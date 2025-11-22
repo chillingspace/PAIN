@@ -8,6 +8,12 @@
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 
+std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
+std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vao = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vbo = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_ebo = 0;
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -641,6 +647,155 @@ namespace PAIN {
 				}
 			}
 
+			ResourcePanel::MaterialPreview::MaterialPreview() {
+				glGenFramebuffers(1, &preview_fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+
+				glGenTextures(1, &preview_texture);
+				glBindTexture(GL_TEXTURE_2D, preview_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, preview_size.x, preview_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, preview_texture, 0);
+
+				glGenRenderbuffers(1, &preview_depth_rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, preview_depth_rbo);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, preview_size.x, preview_size.y);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, preview_depth_rbo);
+
+				assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after Binding frame buffer: {}", err);
+				}
+
+			}
+
+			void ResourcePanel::MaterialPreview::init() {
+				// Generate and bind VAO
+				glGenVertexArrays(1, &sphere_vao);
+				glGenBuffers(1, &sphere_vbo);
+				glGenBuffers(1, &sphere_ebo);
+				glBindVertexArray(sphere_vao);
+
+				glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo);
+				glBufferData(GL_ARRAY_BUFFER,
+					sphere_model->vertices.size() * sizeof(Assets::Vertex),
+					sphere_model->vertices.data(), GL_STATIC_DRAW);
+
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphere_ebo);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					sphere_model->indices.size() * sizeof(unsigned int),
+					sphere_model->indices.data(), GL_STATIC_DRAW);
+
+				// Position attribute, layout(location = 0)
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
+				glEnableVertexAttribArray(0);
+
+				// Normal attribute, layout(location = 1)
+				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
+				glEnableVertexAttribArray(1);
+
+				// texcoords attribute, layout(location = 2)
+				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
+				glEnableVertexAttribArray(2);
+
+				// Unbind VAO
+				glBindVertexArray(0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after initializing sphere vao/vbo/ebo: {}", err);
+				}
+			}
+
+			void ResourcePanel::MaterialPreview::render(std::shared_ptr<const Assets::Material> material) {
+				// Prepare preview FBO
+				glViewport(0, 0, preview_size.x, preview_size.y);
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+				glEnable(GL_DEPTH_TEST);
+				glClearColor(0.08f, 0.08f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// Setup camera (static position, orbital, whatever looks good)
+				glm::mat4 proj = glm::perspective(glm::radians(45.0f), float(preview_size.x) / float(preview_size.y), 0.1f, 10.0f);
+				glm::vec3 cam_pos = glm::vec3(0.0f, 0.0f, 2.5f);
+				glm::mat4 view = glm::lookAt(cam_pos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
+				glm::mat4 model = glm::mat4(1.0f);
+
+				//Bind shader
+				shader->Bind();
+
+				// Matrices
+				shader->SetUniform("u_M", model);
+				shader->SetUniform("u_V", view);
+				shader->SetUniform("u_P", proj);
+
+				// Camera
+				shader->SetUniform("u_CamPos", cam_pos);
+
+				// Light
+				shader->SetUniform("u_LightPos", glm::vec3(3.0f, 2.0f, 3.0f));
+				shader->SetUniform("u_LightColor", glm::vec3(20.0f));
+				shader->SetUniform("u_AmbientLight", glm::vec3(0.03f));
+
+				// Material properties (NOW THESE EXIST IN THE SHADER!)
+				shader->SetUniform("u_BaseColor", material->baseColor);
+				shader->SetUniform("u_Metallic", material->metallic);
+				shader->SetUniform("u_Roughness", material->roughness);
+
+				//Bind vertex array
+				glBindVertexArray(sphere_vao);
+
+				//Draw elements
+				for (size_t i = 0; i < sphere_model->submeshes.size(); ++i) {
+					// TEMPORARY: Only render first submesh
+					const auto& submesh = sphere_model->submeshes[i];
+
+					//// Material properties
+					//shader->SetUniform("material.rough", material->roughness);
+					//shader->SetUniform("material.metal", material->metallic);
+					//shader->SetUniform("material.color", material->baseColor);
+
+					//// Bind textures from MaterialInstance
+					//bool hasTexture = albedoTexture != 0;
+					//shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+					//shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
+
+					//if (hasTexture) {
+					//	glActiveTexture(GL_TEXTURE6);
+					//	glBindTexture(GL_TEXTURE_2D, albedoTexture);
+					//	shader->SetUniform("material.tex", 6);
+
+					//	if (aoTexture != 0) {
+					//		glActiveTexture(GL_TEXTURE7);
+					//		glBindTexture(GL_TEXTURE_2D, aoTexture);
+					//		shader->SetUniform("material.ao_map", 7);
+					//		shader->SetUniform("material.use_ao", 1.0f);
+					//	}
+					//	else {
+					//		shader->SetUniform("material.use_ao", 0.0f);
+					//	}
+					//}
+
+					// Draw this submesh
+					glDrawElements(
+						GL_TRIANGLES,
+						submesh.indexCount,
+						GL_UNSIGNED_INT,
+						(void*)(submesh.firstIndex * sizeof(unsigned int))
+					);
+				}
+
+				//Unbind shader
+				//shader->UnBind();
+
+				//Unbind frame buffer
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
 			void ResourcePanel::renderOpenFiles() {
 
 				//Local files to close
@@ -652,10 +807,27 @@ namespace PAIN {
 					//Begin window
 					ImGui::Begin(file.file_name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-					//Display icon
-					{
+					//Render asset type
+					switch (file.type) {
+					case Assets::Type::Material: {
+						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
+						if (mat_opt.has_value()) {
+							mat_preview.render(mat_opt.value());
+							ImVec2 icon_size(256, 256);
+							ImGui::Image(static_cast<ImTextureID>(mat_preview.getPreviewTexture()), icon_size);
+						}
+						else {
+							//Display icon
+							ImVec2 icon_size(256, 256);
+							ImGui::Image(file.icon, icon_size);
+						}
+						break;
+					}
+					default: {
+						//Display icon
 						ImVec2 icon_size(256, 256);
 						ImGui::Image(file.icon, icon_size);
+					}
 					}
 
 					ImGui::Spacing();
@@ -1204,6 +1376,13 @@ namespace PAIN {
 				//Set up services
 				path_service = services->get<Path::Path>();
 				asset_service = services->get<Assets::Manager>();
+
+				//Init material preview
+				auto sphere_opt = asset_service->getAsset<Assets::Model>("engine\\models\\sphere.obj");
+				mat_preview.sphere_model = sphere_opt.has_value() ? sphere_opt.value() : nullptr;
+				auto shader_opt = asset_service->getAsset<Assets::Shader>("engine\\shaders\\pbr_preview.vert");
+				mat_preview.shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+				mat_preview.init();
 
 				//Pop UP
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));

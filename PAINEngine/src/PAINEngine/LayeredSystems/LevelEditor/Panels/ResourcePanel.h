@@ -112,9 +112,6 @@ namespace PAIN {
                 //Payload
                 std::string payload_typestring;
 
-                //Vector of opened files
-                std::unordered_set<File> open_files;
-
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
                 const float AUTO_REFRESH_INTERVAL = 2.0f;
@@ -162,6 +159,44 @@ namespace PAIN {
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
 
+                // ----------------------------
+                // File Render
+                // ----------------------------
+                class MaterialPreview {
+                private:
+                    unsigned int preview_fbo = 0;
+                    unsigned int preview_texture = 0;
+                    unsigned int preview_depth_rbo = 0;
+                    glm::ivec2 preview_size{ 256, 256 };
+
+                public:
+                    //Static sphere model
+                    static std::shared_ptr<Assets::Model> sphere_model;
+
+                    //Static shader
+                    static std::shared_ptr<Assets::Shader> shader;
+
+                    //Simple sphere mesh for preview
+                    static unsigned int sphere_vao;
+                    static unsigned int sphere_vbo;
+                    static unsigned int sphere_ebo;
+
+                    //Material preview contructor
+                    MaterialPreview();
+
+                    //Called only once for statics
+                    void init();
+                    void render(std::shared_ptr<const Assets::Material> material);
+                    unsigned int getPreviewTexture() const {
+                        return preview_texture;
+                    }
+                };
+
+                //Create mat preview
+                MaterialPreview mat_preview;
+
+                //Vector of opened files
+                std::unordered_set<File> open_files;
                 void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 
