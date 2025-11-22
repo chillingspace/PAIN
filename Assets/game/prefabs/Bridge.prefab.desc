@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 2389043627247463603
+    "hash": 12889931006045194198
   },
   "descriptor_version": 1,
-  "guid": "10a06805-09bd-8e42-b489-a59831ae2760",
+  "guid": "dc43d43f-6987-fa46-ac70-be12fbfc9833",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\Bridge.prefab"

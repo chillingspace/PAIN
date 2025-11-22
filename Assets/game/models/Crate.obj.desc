@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "sphere.obj",
+    "name": "Crate.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 11280537345787077406
+    "hash": 5686559076435866987
   },
   "descriptor_version": 1,
-  "guid": "c785b686-6362-e347-a2d6-96a3b22a0a13",
+  "guid": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\sphere.obj"
+    "source_file": "game\\models\\Crate.obj"
   }
 }

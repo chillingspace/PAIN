@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rocks.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 15427427829798541440
+  },
+  "descriptor_version": 1,
+  "guid": "f9199786-8cbb-0345-bafd-db8c0a7c7eed",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Rocks.prefab"
+  }
+}
