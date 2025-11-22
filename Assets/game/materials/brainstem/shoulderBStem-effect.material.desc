@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "shoulderBStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13121830639580285694
+  },
+  "descriptor_version": 1,
+  "guid": "bffab6ee-5622-6949-b95c-25d76920e791",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\shoulderBStem-effect.material"
+  }
+}

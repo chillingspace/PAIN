@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "shockInStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9610900639479959363
+  },
+  "descriptor_version": 1,
+  "guid": "f2b3fe1c-2b35-7b4b-80ca-d346a2e571cf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\shockInStem-effect.material"
+  }
+}

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "city.obj",
+    "name": "Watertower.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 15636527070141502113
+    "hash": 12335711747018728042
   },
   "descriptor_version": 1,
-  "guid": "df7c9ed7-0f4f-a646-974c-3ece974cf161",
+  "guid": "df6238f9-5bfc-2845-a702-1fefbd84b07f",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\city.obj"
+    "source_file": "game\\models\\Watertower.obj"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "TubeStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13837676972723118210
+  },
+  "descriptor_version": 1,
+  "guid": "a6c3a40c-f56c-b74d-ba97-a61c731e8e1a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\TubeStem-effect.material"
+  }
+}

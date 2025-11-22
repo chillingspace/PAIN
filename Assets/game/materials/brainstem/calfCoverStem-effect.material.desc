@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "calfCoverStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12408115606373518788
+  },
+  "descriptor_version": 1,
+  "guid": "ce86f41d-b6b1-2741-a94e-f2cbf719167d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\calfCoverStem-effect.material"
+  }
+}

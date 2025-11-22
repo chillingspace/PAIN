@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "armBoltStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 5155057252800277653
+  },
+  "descriptor_version": 1,
+  "guid": "bc53cc2a-d49c-a442-abc9-615ef1e7db23",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\armBoltStem-effect.material"
+  }
+}

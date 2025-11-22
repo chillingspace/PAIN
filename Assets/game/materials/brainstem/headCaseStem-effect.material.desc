@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "headCaseStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17268630257085068743
+  },
+  "descriptor_version": 1,
+  "guid": "8c514c8b-b7ff-da45-a2cd-4049f24929f6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\headCaseStem-effect.material"
+  }
+}

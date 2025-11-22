@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "discStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16283855017622401972
+  },
+  "descriptor_version": 1,
+  "guid": "9c1e9ce0-3dbb-1747-8832-68b00adef002",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\discStem-effect.material"
+  }
+}

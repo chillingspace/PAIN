@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "kneeStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14036552852645277025
+  },
+  "descriptor_version": 1,
+  "guid": "bf54dbf1-2a46-3b49-aed3-5e6cac003035",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\kneeStem-effect.material"
+  }
+}

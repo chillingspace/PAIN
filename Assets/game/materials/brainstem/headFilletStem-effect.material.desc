@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "headFilletStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 3871136789862422932
+  },
+  "descriptor_version": 1,
+  "guid": "5cc9674d-81d7-7540-b237-d136eaea9edc",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\headFilletStem-effect.material"
+  }
+}

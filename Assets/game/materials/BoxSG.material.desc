@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "BoxSG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 6361441181414400984
+  },
+  "descriptor_version": 1,
+  "guid": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\BoxSG.material"
+  }
+}

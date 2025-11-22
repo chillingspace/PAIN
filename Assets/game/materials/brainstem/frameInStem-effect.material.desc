@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "frameInStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17118585929901448737
+  },
+  "descriptor_version": 1,
+  "guid": "f308f99d-36cc-334c-8f7e-bec48c183e0e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\frameInStem-effect.material"
+  }
+}

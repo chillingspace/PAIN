@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "city.obj",
+    "name": "Tire.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 15636527070141502113
+    "hash": 13379865021172494715
   },
   "descriptor_version": 1,
-  "guid": "df7c9ed7-0f4f-a646-974c-3ece974cf161",
+  "guid": "4a681d65-4b81-c141-bd2c-8b54c94c15dd",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\city.obj"
+    "source_file": "game\\models\\Tire.obj"
   }
 }

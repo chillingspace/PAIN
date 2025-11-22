@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "intestineInStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 5627182492663253492
+  },
+  "descriptor_version": 1,
+  "guid": "7d20a6e9-8c87-6647-831d-0be18548c94a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\intestineInStem-effect.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "canisterOutStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13051937364605095593
+  },
+  "descriptor_version": 1,
+  "guid": "ea6a8079-df26-e74e-b283-f94894100781",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\canisterOutStem-effect.material"
+  }
+}

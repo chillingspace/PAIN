@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "headGrillStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9988015857438387611
+  },
+  "descriptor_version": 1,
+  "guid": "83d51cbe-629a-e84e-9497-a73a106feb8f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\headGrillStem-effect.material"
+  }
+}

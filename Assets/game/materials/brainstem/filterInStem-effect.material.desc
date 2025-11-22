@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "filterInStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 6794262884224248138
+  },
+  "descriptor_version": 1,
+  "guid": "e686eb37-80f0-124e-8348-5d9b62ad1077",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\filterInStem-effect.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "boltStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 18288470415321321055
+  },
+  "descriptor_version": 1,
+  "guid": "e4b4e6ad-b3ef-0c43-ad39-1a81803970a6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\boltStem-effect.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "armTrussStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 11890072037895952603
+  },
+  "descriptor_version": 1,
+  "guid": "859430b9-75e8-4e40-b0d3-f2c96eb45248",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\armTrussStem-effect.material"
+  }
+}

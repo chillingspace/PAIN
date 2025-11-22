@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "off-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 5290656473365643284
+  },
+  "descriptor_version": 1,
+  "guid": "470f2c4b-aabe-5d46-a17c-45dcf3a92888",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\off-effect.material"
+  }
+}

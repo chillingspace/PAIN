@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "exhaustGunStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12390570682897235882
+  },
+  "descriptor_version": 1,
+  "guid": "ed064a99-513d-554f-9a1b-f5671638d7cd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\exhaustGunStem-effect.material"
+  }
+}

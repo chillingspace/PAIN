@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "armPlateStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14051055474333223159
+  },
+  "descriptor_version": 1,
+  "guid": "ea17feaf-e9d1-af44-a213-30c39f65ba36",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\armPlateStem-effect.material"
+  }
+}

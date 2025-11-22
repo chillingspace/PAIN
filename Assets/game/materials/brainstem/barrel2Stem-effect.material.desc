@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "barrel2Stem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 7921974267697378041
+  },
+  "descriptor_version": 1,
+  "guid": "f20dfbde-e26d-4c4a-87e3-d09393eed49d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\barrel2Stem-effect.material"
+  }
+}

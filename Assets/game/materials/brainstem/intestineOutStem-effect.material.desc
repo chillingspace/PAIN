@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "intestineOutStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 15929372513144277134
+  },
+  "descriptor_version": 1,
+  "guid": "5704d643-fa45-304d-b2e9-940799fb2f27",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\intestineOutStem-effect.material"
+  }
+}

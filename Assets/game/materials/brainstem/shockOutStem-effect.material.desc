@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "shockOutStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 2925919742136566301
+  },
+  "descriptor_version": 1,
+  "guid": "03fda22b-db5b-b742-b97d-8ed83bd7ae5e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\shockOutStem-effect.material"
+  }
+}

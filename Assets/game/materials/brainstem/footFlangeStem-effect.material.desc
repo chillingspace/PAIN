@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "footFlangeStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12080736381701245067
+  },
+  "descriptor_version": 1,
+  "guid": "ba02a820-c5c5-5248-aa0e-7fa8f2d5db88",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\footFlangeStem-effect.material"
+  }
+}

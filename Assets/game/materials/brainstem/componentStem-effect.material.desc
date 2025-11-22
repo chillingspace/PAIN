@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "componentStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12886817348164552802
+  },
+  "descriptor_version": 1,
+  "guid": "747633ac-651b-6b49-927e-4a8f4c3a66d8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\componentStem-effect.material"
+  }
+}
