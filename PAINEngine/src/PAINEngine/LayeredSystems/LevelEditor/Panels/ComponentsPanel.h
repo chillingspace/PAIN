@@ -53,6 +53,10 @@ namespace PAIN {
 
 				void renderEntityComponents(entt::entity entity);
 
+				// Script Loading
+				void setScriptChanged(bool is_script_changed);
+				bool getScriptChanged();
+
 				//Expose services
 				std::shared_ptr<Services> services;
 
@@ -78,6 +82,9 @@ namespace PAIN {
 
 				std::weak_ptr<EntityPanel> entities_panel;
 				std::weak_ptr<ResourcePanel> resources_panel;
+
+				// Script Loading
+				bool is_script_loaded = false;
 
 				// Transform tracking removed - now handled as static in .cpp
 			};

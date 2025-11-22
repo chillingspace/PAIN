@@ -567,7 +567,13 @@ namespace PAIN {
                 }
             }
 
+            void ComponentsPanel::setScriptChanged(bool is_script_changed) {
+                is_script_loaded = is_script_changed;
+            }
 
+            bool ComponentsPanel::getScriptChanged() {
+                return is_script_loaded;
+            }
 
             void ComponentsPanel::setCompStringRef(std::string const& to_set) {
                 comp_string_ref = to_set;
@@ -630,9 +636,49 @@ namespace PAIN {
                 entt::entity selected = entity_panel->getSelectedEntity();
                 auto selected_filepath = resource_panel->getSelectedFilePath();
 
+                // Lua Script Display
                 if (!selected_filepath.empty()) {
-                    ImGui::Text("Lua Detected");
-                    ImGui::Text("%s", selected_filepath.c_str());
+
+                    static char script_buffer[65536] = "";
+
+                    if (!getScriptChanged()) {
+                        std::ifstream file(selected_filepath, std::ios::in | std::ios::binary);
+                        if (file) {
+                            file.read(script_buffer, sizeof(script_buffer) - 1);
+                            std::streamsize count = file.gcount();
+                            script_buffer[count] = '\0';
+                            file.close();
+                        }
+                        else {
+                            script_buffer[0] = '\0';
+                            
+                            PN_CORE_WARN("Failed to open file: ", selected_filepath);
+                        }
+                        setScriptChanged(true);
+                    }
+
+                    // Editable text Input
+                    ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
+                        ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput);
+
+                    // Save button (TODO: Check if it updates real time.)
+                    if (ImGui::Button("Save Script")) {
+                        std::ofstream file(selected_filepath, std::ios::out | std::ios::binary);
+                        if (file) {
+                            file.write(script_buffer, strlen(script_buffer));
+                            file.close();
+                        }
+                        else {
+                            PN_CORE_WARN("Failed to save file: ", selected_filepath);
+                        }
+                    }
+
+                    // Open in Visual Studio Code button
+                    if (ImGui::Button("Open in VS Code")) {
+                        std::string command = "code \"" + selected_filepath + "\"";
+                        system(command.c_str());
+                    }
+
                     return;
                 }
 

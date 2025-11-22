@@ -219,6 +219,7 @@ namespace PAIN {
                 void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
 
                 std::weak_ptr<EntityPanel> entities_panel;
+                std::weak_ptr<ComponentsPanel> components_panel;
             };
 
         } // namespace Panel

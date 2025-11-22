@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "ResourcePanel.h"
 #include "EntityPanel.h"
+#include "ComponentsPanel.h"
 #include "../Editor.h"
 
 #include "Applications/AppSystem.h"
@@ -607,10 +608,11 @@ namespace PAIN {
 					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
 						setSelectedFilePath(file.path.string());
 
+						auto editor = services->get<PAIN::Editor::Editor>();
+
 						auto entity_panel = entities_panel.lock();
 						if (!entity_panel) {
 							// Recover weak_ptr if it expired (happens on panel reload/scene change)
-							auto editor = services->get<PAIN::Editor::Editor>();
 							if (editor) {
 								auto ep = editor->getPanel<Panel::EntityPanel>();
 								if (ep) {
@@ -620,7 +622,20 @@ namespace PAIN {
 							}
 						}
 
+						auto component_panel = components_panel.lock();
+						if (!component_panel) {
+							// Recover weak_ptr if it expired (happens on panel reload/scene change)
+							if (editor) {
+								auto cp = editor->getPanel<Panel::ComponentsPanel>();
+								if (cp) {
+									components_panel = cp;
+									component_panel = cp;
+								}
+							}
+						}
+
 						entity_panel->unselectEntity();
+						component_panel->setScriptChanged(false);
 
 					}
 					else if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
