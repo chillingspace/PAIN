@@ -171,15 +171,15 @@ namespace PAIN {
 
                     struct PreviewSettings {
                         // Camera
-                        float camera_distance = 3.5f;
-                        float fov = 45.0f;
+                        float camera_distance = 3.0f;
+                        float fov = 35.0f;
 
                         // Rotation
                         float rotation_y = -25.0f;
                         float rotation_x = 0.0f;
 
                         // Projection
-                        bool use_orthographic = false;
+                        bool use_orthographic = true;
                         float ortho_size = 1.1f;
 
                         // Lighting
@@ -187,8 +187,6 @@ namespace PAIN {
                         float light_intensity = 15.0f;
                         glm::vec3 light_position = glm::vec3(2.0f, 3.0f, 2.0f);
                     };
-
-                    PreviewSettings preview_settings;
 
                     //Static sphere model
                     static std::shared_ptr<Assets::Model> sphere_model;
@@ -209,6 +207,9 @@ namespace PAIN {
                     //Material preview contructor
                     MaterialPreview();
 
+                    //Set preview settings
+                    PreviewSettings preview_settings;
+
                     //Called only once for statics
                     void init(std::weak_ptr<Services> service);
                     void render(std::shared_ptr<const Assets::Material> material);
@@ -220,8 +221,13 @@ namespace PAIN {
                 //Create mat preview
                 std::unordered_map<Assets::GUID, MaterialPreview> mat_previews;
 
-                //Vector of opened files
+                //Render material file functionality
+                void renderMaterial(std::shared_ptr<Assets::Material> material, Assets::GUID id);
+
+                //Open files manager
+                const int MAX_FILES_OPEN = 5;
                 std::unordered_set<File> open_files;
+                void addFilesToOpen(File const& file);
                 void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 

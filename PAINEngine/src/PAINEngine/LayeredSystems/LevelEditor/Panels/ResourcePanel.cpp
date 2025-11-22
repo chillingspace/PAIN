@@ -300,7 +300,7 @@ namespace PAIN {
 				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
 
 					if (ImGui::MenuItem("Open##file")) {
-						if (open_files.find(file) == open_files.end())open_files.insert(file);
+						addFilesToOpen(file);
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
@@ -578,7 +578,7 @@ namespace PAIN {
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-							if (open_files.find(file) == open_files.end())open_files.insert(file);
+							addFilesToOpen(file);
 						}
 						ImGui::PopStyleColor();
 
@@ -610,7 +610,7 @@ namespace PAIN {
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-						if(open_files.find(file) == open_files.end())open_files.insert(file);
+						addFilesToOpen(file);
 					}
 					ImGui::PopStyleColor();
 
@@ -783,11 +783,11 @@ namespace PAIN {
 				// === MODEL (Rotation) ===
 				glm::mat4 model = glm::mat4(1.0f);
 
-				// Apply Y rotation
-				model = glm::rotate(model, glm::radians(preview_settings.rotation_y), glm::vec3(0, 1, 0));
-
 				// Apply X rotation
-				model = glm::rotate(model, glm::radians(preview_settings.rotation_x), glm::vec3(1, 0, 0));
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_x), glm::vec3(0, 1, 0));
+
+				// Apply Y rotation
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_y), glm::vec3(1, 0, 0));
 
 				//Bind shader
 				shader->Bind();
@@ -910,6 +910,98 @@ namespace PAIN {
 				glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3]);
 			}
 
+			void ResourcePanel::renderMaterial(std::shared_ptr<Assets::Material> material, Assets::GUID id) {
+				mat_previews[id].render(material);
+				ImVec2 icon_size(256, 256);
+				ImGui::Image(static_cast<ImTextureID>(mat_previews[id].getPreviewTexture()), icon_size);
+
+				if (ImGui::CollapsingHeader("Preview Settings")) {
+					ImGui::PushItemWidth(150);
+
+					// Projection Type
+					ImGui::Text("Projection");
+					ImGui::Checkbox("Orthographic", &mat_previews[id].preview_settings.use_orthographic);
+
+					ImGui::Separator();
+
+					// Camera Settings
+					ImGui::Text("Camera");
+					ImGui::SliderFloat("Distance", &mat_previews[id].preview_settings.camera_distance, 1.0f, 6.0f);
+
+					if (!mat_previews[id].preview_settings.use_orthographic) {
+						ImGui::SliderFloat("FOV", &mat_previews[id].preview_settings.fov, 20.0f, 90.0f);
+					}
+					else {
+						ImGui::SliderFloat("Ortho Size", &mat_previews[id].preview_settings.ortho_size, 0.5f, 2.0f);
+					}
+
+					ImGui::Separator();
+
+					// Rotation
+					ImGui::Text("Rotation");
+					ImGui::SliderFloat("Rotate Y", &mat_previews[id].preview_settings.rotation_y, -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate X", &mat_previews[id].preview_settings.rotation_x, -180.0f, 180.0f);
+
+					if (ImGui::Button("Reset Rotation")) {
+						mat_previews[id].preview_settings.rotation_y = -25.0f;
+						mat_previews[id].preview_settings.rotation_x = 0.0f;
+					}
+
+					ImGui::Separator();
+
+					// Lighting
+					ImGui::Text("Lighting");
+					ImGui::SliderFloat("Ambient", &mat_previews[id].preview_settings.ambient_intensity, 0.0f, 1.0f);
+					ImGui::SliderFloat("Light Intensity", &mat_previews[id].preview_settings.light_intensity, 1.0f, 50.0f);
+					ImGui::DragFloat3("Light Position", glm::value_ptr(mat_previews[id].preview_settings.light_position), 0.1f);
+
+					if (ImGui::Button("Reset Lighting")) {
+						mat_previews[id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[id].preview_settings.light_intensity = 15.0f;
+						mat_previews[id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+					}
+
+					ImGui::Separator();
+
+					// Presets
+					ImGui::Text("Presets");
+					if (ImGui::Button("Unity Style")) {
+						mat_previews[id].preview_settings.use_orthographic = true;
+						mat_previews[id].preview_settings.ortho_size = 1.1f;
+						mat_previews[id].preview_settings.camera_distance = 3.0f;
+						mat_previews[id].preview_settings.rotation_y = -25.0f;
+						mat_previews[id].preview_settings.rotation_x = 0.0f;
+						mat_previews[id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[id].preview_settings.light_intensity = 15.0f;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Unreal Style")) {
+						mat_previews[id].preview_settings.use_orthographic = false;
+						mat_previews[id].preview_settings.fov = 35.0f;
+						mat_previews[id].preview_settings.camera_distance = 3.2f;
+						mat_previews[id].preview_settings.rotation_y = -25.0f;
+						mat_previews[id].preview_settings.rotation_x = 10.0f;
+						mat_previews[id].preview_settings.ambient_intensity = 0.1f;
+						mat_previews[id].preview_settings.light_intensity = 20.0f;
+					}
+
+					ImGui::PopItemWidth();
+				}
+			}
+
+			void ResourcePanel::addFilesToOpen(File const& file) {
+				if (open_files.find(file) != open_files.end()) {
+					return;
+				}
+				else if (open_files.size() < 5) {
+					open_files.insert(file);
+				}
+				else {
+					std::vector<std::string> msg = { "Limit of 5 files open at a time has been hit." };
+					openPopUp("Info", std::make_shared<std::vector<std::string>>(msg));
+				}
+			}
+
 			void ResourcePanel::renderOpenFiles() {
 
 				//Local files to close
@@ -926,9 +1018,7 @@ namespace PAIN {
 					case Assets::Type::Material: {
 						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
 						if (mat_opt.has_value()) {
-							mat_previews[file.id].render(mat_opt.value());
-							ImVec2 icon_size(256, 256);
-							ImGui::Image(static_cast<ImTextureID>(mat_previews[file.id].getPreviewTexture()), icon_size);
+							renderMaterial(mat_opt.value(), file.id);
 						}
 						else {
 							//Display icon
