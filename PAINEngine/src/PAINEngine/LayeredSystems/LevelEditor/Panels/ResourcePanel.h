@@ -169,23 +169,48 @@ namespace PAIN {
                     unsigned int preview_depth_rbo = 0;
                     glm::ivec2 preview_size{ 256, 256 };
 
-                public:
+                    struct PreviewSettings {
+                        // Camera
+                        float camera_distance = 3.5f;
+                        float fov = 45.0f;
+
+                        // Rotation
+                        float rotation_y = -25.0f;
+                        float rotation_x = 0.0f;
+
+                        // Projection
+                        bool use_orthographic = false;
+                        float ortho_size = 1.1f;
+
+                        // Lighting
+                        float ambient_intensity = 0.15f;
+                        float light_intensity = 15.0f;
+                        glm::vec3 light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+                    };
+
+                    PreviewSettings preview_settings;
+
                     //Static sphere model
                     static std::shared_ptr<Assets::Model> sphere_model;
 
                     //Static shader
                     static std::shared_ptr<Assets::Shader> shader;
 
+                    //Services
+                    static std::weak_ptr<Services> services;
+
                     //Simple sphere mesh for preview
                     static unsigned int sphere_vao;
                     static unsigned int sphere_vbo;
                     static unsigned int sphere_ebo;
 
+                public:
+
                     //Material preview contructor
                     MaterialPreview();
 
                     //Called only once for statics
-                    void init();
+                    void init(std::weak_ptr<Services> service);
                     void render(std::shared_ptr<const Assets::Material> material);
                     unsigned int getPreviewTexture() const {
                         return preview_texture;
@@ -193,7 +218,7 @@ namespace PAIN {
                 };
 
                 //Create mat preview
-                MaterialPreview mat_preview;
+                std::unordered_map<Assets::GUID, MaterialPreview> mat_previews;
 
                 //Vector of opened files
                 std::unordered_set<File> open_files;

@@ -10,6 +10,7 @@
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
+std::weak_ptr<PAIN::Services> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::services;
 unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vao = 0;
 unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vbo = 0;
 unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_ebo = 0;
@@ -409,6 +410,16 @@ namespace PAIN {
 					//Get file path
 					icon_path = parent_path / (relative_path.filename());
 				}
+				else if (Assets::getAssetType(relative_path) == Assets::Type::Material) {
+
+					//Return material icon
+					auto id = services->get<Assets::Manager>()->findGUID(relative_path);
+					auto mat_opt = services->get<Assets::Manager>()->getAsset<Assets::Material>(id);
+					if (mat_opt.has_value()) {
+						mat_previews[id].render(mat_opt.value());
+						return static_cast<ImTextureID>(mat_previews[id].getPreviewTexture());
+					}
+				}
 				else {
 					//Def icon ref
 					std::string icon_ref;
@@ -673,7 +684,17 @@ namespace PAIN {
 
 			}
 
-			void ResourcePanel::MaterialPreview::init() {
+			void ResourcePanel::MaterialPreview::init(std::weak_ptr<Services> service) {
+
+				//Init services
+				services = service;
+
+				//Setup sphere and shaders
+				auto sphere_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>("engine\\models\\sphere.obj");
+				sphere_model = sphere_opt.has_value() ? sphere_opt.value() : nullptr;
+				auto shader_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Shader>("engine\\shaders\\pbr_preview.vert");
+				shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+
 				// Generate and bind VAO
 				glGenVertexArrays(1, &sphere_vao);
 				glGenBuffers(1, &sphere_vbo);
@@ -712,18 +733,61 @@ namespace PAIN {
 			}
 
 			void ResourcePanel::MaterialPreview::render(std::shared_ptr<const Assets::Material> material) {
-				// Prepare preview FBO
-				glViewport(0, 0, preview_size.x, preview_size.y);
+				if (sphere_vao == 0) {
+					PN_CORE_ERROR("Sphere VAO not initialized!");
+					return;
+				}
+
+				// Save previous state
+				GLint prev_viewport[4];
+				GLint prev_fbo;
+				glGetIntegerv(GL_VIEWPORT, prev_viewport);
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
+
+				// Bind preview FBO
 				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+				glViewport(0, 0, preview_size.x, preview_size.y);
+
 				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
+
 				glClearColor(0.08f, 0.08f, 0.1f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				// Setup camera (static position, orbital, whatever looks good)
-				glm::mat4 proj = glm::perspective(glm::radians(45.0f), float(preview_size.x) / float(preview_size.y), 0.1f, 10.0f);
-				glm::vec3 cam_pos = glm::vec3(0.0f, 0.0f, 2.5f);
-				glm::mat4 view = glm::lookAt(cam_pos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
+				// === PROJECTION (Orthographic or Perspective) ===
+				glm::mat4 proj;
+				if (preview_settings.use_orthographic) {
+					// Orthographic projection (no perspective distortion)
+					float ortho_size = preview_settings.ortho_size;
+					proj = glm::ortho(
+						-ortho_size, ortho_size,
+						-ortho_size, ortho_size,
+						0.1f, 10.0f
+					);
+				}
+				else {
+					// Perspective projection
+					proj = glm::perspective(
+						glm::radians(preview_settings.fov),
+						float(preview_size.x) / float(preview_size.y),
+						0.1f,
+						10.0f
+					);
+				}
+
+				// === VIEW (Camera) ===
+				glm::vec3 cam_pos = glm::vec3(0.0f, 0.3f, preview_settings.camera_distance);
+				glm::vec3 look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+				glm::mat4 view = glm::lookAt(cam_pos, look_at, glm::vec3(0, 1, 0));
+
+				// === MODEL (Rotation) ===
 				glm::mat4 model = glm::mat4(1.0f);
+
+				// Apply Y rotation
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_y), glm::vec3(0, 1, 0));
+
+				// Apply X rotation
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_x), glm::vec3(1, 0, 0));
 
 				//Bind shader
 				shader->Bind();
@@ -736,64 +800,114 @@ namespace PAIN {
 				// Camera
 				shader->SetUniform("u_CamPos", cam_pos);
 
-				// Light
-				shader->SetUniform("u_LightPos", glm::vec3(3.0f, 2.0f, 3.0f));
-				shader->SetUniform("u_LightColor", glm::vec3(20.0f));
-				shader->SetUniform("u_AmbientLight", glm::vec3(0.03f));
+				// Enhanced lighting for better material visualization
+				shader->SetUniform("u_AmbientLight", glm::vec3(0.15f));
+				shader->SetUniform("u_LightPos", glm::vec3(2.0f, 3.0f, 2.0f));
+				shader->SetUniform("u_LightColor", glm::vec3(15.0f));
 
-				// Material properties (NOW THESE EXIST IN THE SHADER!)
+				// Material properties
 				shader->SetUniform("u_BaseColor", material->baseColor);
 				shader->SetUniform("u_Metallic", material->metallic);
 				shader->SetUniform("u_Roughness", material->roughness);
 
+				// === LOAD AND BIND TEXTURES ===
+				
+				//Get asset service
+				auto assetManager = services.lock()->get<Assets::Manager>();
+
+				//Albedo Texture
+				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = assetManager->getAsset<Assets::Texture>(material->albedoTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_AlbedoMap", 0);
+					shader->SetUniform("u_UseAlbedoMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseAlbedoMap", false);
+				}
+
+				//Normal texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->normalTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_NormalMap", 1);
+					shader->SetUniform("u_UseNormalMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseNormalMap", false);
+				}
+
+				//Metallic texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->metallicTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_MetallicMap", 2);
+					shader->SetUniform("u_UseMetallicMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseMetallicMap", false);
+				}
+
+				//Roughness texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->roughnessTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE3);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_RoughnessMap", 3);
+					shader->SetUniform("u_UseRoughnessMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseRoughnessMap", false);
+				}
+
+				//AO texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->aoTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_AOMap", 4);
+					shader->SetUniform("u_UseAOMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseAOMap", false);
+				}
+
+				//Emissive texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->emissiveTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE5);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_EmissiveMap", 5);
+					shader->SetUniform("u_UseEmissiveMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseEmissiveMap", false);
+				}
+
 				//Bind vertex array
 				glBindVertexArray(sphere_vao);
 
-				//Draw elements
-				for (size_t i = 0; i < sphere_model->submeshes.size(); ++i) {
-					// TEMPORARY: Only render first submesh
-					const auto& submesh = sphere_model->submeshes[i];
-
-					//// Material properties
-					//shader->SetUniform("material.rough", material->roughness);
-					//shader->SetUniform("material.metal", material->metallic);
-					//shader->SetUniform("material.color", material->baseColor);
-
-					//// Bind textures from MaterialInstance
-					//bool hasTexture = albedoTexture != 0;
-					//shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
-					//shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
-
-					//if (hasTexture) {
-					//	glActiveTexture(GL_TEXTURE6);
-					//	glBindTexture(GL_TEXTURE_2D, albedoTexture);
-					//	shader->SetUniform("material.tex", 6);
-
-					//	if (aoTexture != 0) {
-					//		glActiveTexture(GL_TEXTURE7);
-					//		glBindTexture(GL_TEXTURE_2D, aoTexture);
-					//		shader->SetUniform("material.ao_map", 7);
-					//		shader->SetUniform("material.use_ao", 1.0f);
-					//	}
-					//	else {
-					//		shader->SetUniform("material.use_ao", 0.0f);
-					//	}
-					//}
-
-					// Draw this submesh
-					glDrawElements(
-						GL_TRIANGLES,
-						submesh.indexCount,
-						GL_UNSIGNED_INT,
-						(void*)(submesh.firstIndex * sizeof(unsigned int))
-					);
+				//Render sphere model
+				if (sphere_model->submeshes.empty()) {
+					glDrawElements(GL_TRIANGLES, sphere_model->indices.size(),
+						GL_UNSIGNED_INT, 0);
 				}
-
-				//Unbind shader
-				//shader->UnBind();
+				else {
+					for (const auto& submesh : sphere_model->submeshes) {
+						glDrawElements(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
+							(void*)(submesh.firstIndex * sizeof(unsigned int)));
+					}
+				}
 
 				//Unbind frame buffer
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				// Restore previous state
+				glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+				glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3]);
 			}
 
 			void ResourcePanel::renderOpenFiles() {
@@ -812,9 +926,9 @@ namespace PAIN {
 					case Assets::Type::Material: {
 						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
 						if (mat_opt.has_value()) {
-							mat_preview.render(mat_opt.value());
+							mat_previews[file.id].render(mat_opt.value());
 							ImVec2 icon_size(256, 256);
-							ImGui::Image(static_cast<ImTextureID>(mat_preview.getPreviewTexture()), icon_size);
+							ImGui::Image(static_cast<ImTextureID>(mat_previews[file.id].getPreviewTexture()), icon_size);
 						}
 						else {
 							//Display icon
@@ -1378,11 +1492,8 @@ namespace PAIN {
 				asset_service = services->get<Assets::Manager>();
 
 				//Init material preview
-				auto sphere_opt = asset_service->getAsset<Assets::Model>("engine\\models\\sphere.obj");
-				mat_preview.sphere_model = sphere_opt.has_value() ? sphere_opt.value() : nullptr;
-				auto shader_opt = asset_service->getAsset<Assets::Shader>("engine\\shaders\\pbr_preview.vert");
-				mat_preview.shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
-				mat_preview.init();
+				MaterialPreview temp_mat_prev;
+				temp_mat_prev.init(services);
 
 				//Pop UP
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));
