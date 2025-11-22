@@ -217,6 +217,8 @@ namespace PAIN {
 
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
+					ImGuizmo::BeginFrame();
+
 					auto editor = services->get<PAIN::Editor::Editor>();
 					auto scene = services->get<Scene>();
 					auto ecs = services->get<ECS::Controller>();
@@ -305,18 +307,17 @@ namespace PAIN {
 									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
 									// Setup snapping
-									bool useSnap = ImGui::GetIO().KeyCtrl; // Hold Ctrl to enable snapping
+									bool useSnap = ImGui::GetIO().KeyCtrl;
 									float snapValue = 0.5f;
 
-									// Different snap values for different operations
 									if (m_GizmoOperation == ImGuizmo::ROTATE) {
-										snapValue = 45.0f; // Snap to 45 degrees for rotation
+										snapValue = 45.0f;
 									}
 									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-										snapValue = 0.5f; // Snap to 0.5 units for translation
+										snapValue = 0.5f;
 									}
 									else if (m_GizmoOperation == ImGuizmo::SCALE) {
-										snapValue = 0.1f; // Snap to 0.1 for scale
+										snapValue = 0.1f;
 									}
 
 									float snapValues[3] = { snapValue, snapValue, snapValue };
@@ -329,10 +330,9 @@ namespace PAIN {
 										m_GizmoMode,
 										glm::value_ptr(modelMatrix),
 										nullptr,
-										useSnap ? snapValues : nullptr // Pass snap values if Ctrl is held
+										useSnap ? snapValues : nullptr
 									);
 
-									// FIXED: Cache values and only update the component being manipulated
 									static bool wasUsing = false;
 									static glm::f32vec3 cachedPosition;
 									static glm::f32quat cachedRotation;
@@ -343,26 +343,20 @@ namespace PAIN {
 
 									bool isCurrentlyUsing = ImGuizmo::IsUsing();
 
-
-									// Reset cache if entity changed
 									if (selectedEntity != lastSelectedEntity) {
 										wasUsing = false;
 										lastSelectedEntity = selectedEntity;
 									}
 
-									// Just started using - cache the original values AND matrix
 									if (isCurrentlyUsing && !wasUsing) {
 										cachedPosition = transform.position;
 										cachedRotation = transform.rotation;
 										cachedScale = transform.scale;
-
 										originalMatrix = modelMatrix;
 									}
 
-									// Get RigidBody ID for selected object if it has one
 									auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
 
-									// Currently manipulating
 									if (isCurrentlyUsing) {
 										float translation[3], rotation[3], scale[3];
 										ImGuizmo::DecomposeMatrixToComponents(
@@ -373,14 +367,12 @@ namespace PAIN {
 										);
 
 										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-
 											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
 											transform.rotation = cachedRotation;
 											transform.scale = cachedScale;
 
 											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
 
-											// If object has RigidBody3D, it is a physics object, disable physics temporarily
 											if (rbOpt.has_value()) {
 												auto& rb = rbOpt.value().get();
 												auto physics_system = ecs->getSystem<Physics::System>();
@@ -397,9 +389,8 @@ namespace PAIN {
 												}
 											}
 										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {									
-
-											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));							
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));
 											transform.position = cachedPosition;
 											transform.scale = cachedScale;
 
@@ -412,7 +403,6 @@ namespace PAIN {
 												if (physics_system) {
 													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
 
-													// Disable physics temporarily
 													body_interface.DeactivateBody(rb.bodyID);
 													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
 
@@ -423,16 +413,12 @@ namespace PAIN {
 											}
 										}
 										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-									
 											transform.position = cachedPosition;
 											transform.rotation = cachedRotation;
 											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
-
-											// Jolt does not allow run-time scale changing.
 										}
 									}
 
-									// Just released - final update
 									if (!isCurrentlyUsing && wasUsing) {
 										float translation[3], rotation[3], scale[3];
 										ImGuizmo::DecomposeMatrixToComponents(
@@ -446,32 +432,72 @@ namespace PAIN {
 											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
 										}
 										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-
 											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));
-
 										}
 										else if (m_GizmoOperation == ImGuizmo::SCALE) {
 											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
 										}
 
-										// Reactivate physics for physics object
 										if (rbOpt.has_value()) {
 											auto& rb = rbOpt.value().get();
 											auto physics_system = ecs->getSystem<Physics::System>();
 											JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
 
-											// Set back to dynamic (or whatever it was before)
 											body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
-
-											// Optional: ensure the body is awake
 											body_interface.ActivateBody(rb.bodyID);
 										}
 									}
 
 									wasUsing = isCurrentlyUsing;
-
 								}
 							}
+						}
+					}
+
+					// ========================================
+					// === ViewManipulate Camera Cube ===
+					// ========================================
+					auto camera = scene->GetActiveCamera();
+					if (camera) {
+						glm::mat4 viewMatrix = camera->view();
+
+						float cubeSize = 128.0f;
+						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+
+						// Calculate distance from camera to look-at point (origin)
+						glm::vec3 lookAtTarget = glm::vec3(0.0f);
+						float cameraDistance = glm::length(camera->pos - lookAtTarget);
+
+						// Set these before ViewManipulate
+						ImGuizmo::SetDrawlist();
+						ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+
+						ImGuizmo::ViewManipulate(
+							glm::value_ptr(viewMatrix),
+							cameraDistance,
+							cubePosition,
+							ImVec2(cubeSize, cubeSize),
+							0x10101010
+						);
+
+						// Use the specific ViewManipulate check function
+						if (ImGuizmo::IsUsingViewManipulate()) {
+							// Extract camera vectors from the modified view matrix
+							glm::mat4 inverseView = glm::inverse(viewMatrix);
+
+							// Get the camera position from inverse view matrix
+							glm::vec3 newPosition = glm::vec3(inverseView[3]);
+
+							// Get camera basis vectors from inverse view matrix
+							glm::vec3 right = glm::vec3(inverseView[0]);
+							glm::vec3 up = glm::vec3(inverseView[1]);
+							glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
+
+							// Update camera
+							camera->pos = newPosition;
+							camera->forward = glm::normalize(forward);
+							camera->up = glm::normalize(up);
+							camera->right = glm::normalize(right);
 						}
 					}
 
@@ -494,56 +520,51 @@ namespace PAIN {
 					// ========================================
 
 					ImGuiIO& io = ImGui::GetIO();
-					auto camera = services->get<sCameraController>();
+					auto cameraController = services->get<sCameraController>();
 
-					if (camera) {
+					if (cameraController) {
 
 #ifdef PN_PLATFORM_WINDOWS
 						bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
 #else
-						camera->m_vpHeight = size.y;
-						camera->m_vpWidth = size.x;
-						camera->m_vpPosX = viewportPos.x;
-						camera->m_vpPosY = viewportPos.y;
-						camera->vp_hovered = contentHovered;
+						cameraController->m_vpHeight = size.y;
+						cameraController->m_vpWidth = size.x;
+						cameraController->m_vpPosX = viewportPos.x;
+						cameraController->m_vpPosY = viewportPos.y;
+						cameraController->vp_hovered = contentHovered;
 						bool rightMouseHeld = contentHovered;
 #endif 
 
-						// Check if gizmo is active
-						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+						// Check for ANY gizmo activity (object gizmo OR view manipulate)
+						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate() || ImGuizmo::IsViewManipulateHovered();
 
-						// Camera controls ONLY work when RIGHT MOUSE is held (and conditions met)
 						if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
-							// Enable all camera movement keys
-							camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-							camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-							camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-							camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-							camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							cameraController->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+							cameraController->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+							cameraController->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+							cameraController->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+							cameraController->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							cameraController->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
-							// Enable mouse look
-							camera->mouseButtonDown = true;
+							cameraController->mouseButtonDown = true;
 
 #ifdef PN_PLATFORM_WINDOWS
-							camera->xOffset = io.MouseDelta.x;
-							camera->yOffset = -io.MouseDelta.y;
+							cameraController->xOffset = io.MouseDelta.x;
+							cameraController->yOffset = -io.MouseDelta.y;
 #endif
 						}
 						else {
-							// Reset all camera inputs when right mouse NOT held
-							camera->W_KEYDOWN = false;
-							camera->A_KEYDOWN = false;
-							camera->S_KEYDOWN = false;
-							camera->D_KEYDOWN = false;
-							camera->SPACE_KEYDOWN = false;
-							camera->LCTRL_KEYDOWN = false;
-							camera->mouseButtonDown = false;
-							camera->xOffset = 0.0f;
-							camera->yOffset = 0.0f;
+							cameraController->W_KEYDOWN = false;
+							cameraController->A_KEYDOWN = false;
+							cameraController->S_KEYDOWN = false;
+							cameraController->D_KEYDOWN = false;
+							cameraController->SPACE_KEYDOWN = false;
+							cameraController->LCTRL_KEYDOWN = false;
+							cameraController->mouseButtonDown = false;
+							cameraController->xOffset = 0.0f;
+							cameraController->yOffset = 0.0f;
 						}
 
-						// Mouse wheel zoom (works independently of right-click)
 						if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
 							float mouseWheel = io.MouseWheel;
 							float zoomSpeed = 0.1f;
@@ -565,12 +586,12 @@ namespace PAIN {
 							}
 						}
 					}
-
-
-					
 				}
 				ImGui::End();
 			}
+
+
+
 
 
 
