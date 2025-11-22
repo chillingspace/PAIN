@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "thighPadStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12643818796959323647
+  },
+  "descriptor_version": 1,
+  "guid": "486e3cda-0b61-bf4e-a33d-1d9469c685d2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\thighPadStem-effect.material"
+  }
+}

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "city.obj",
+    "name": "BrainStem.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 15636527070141502113
+    "hash": 2803774804727477201
   },
   "descriptor_version": 1,
-  "guid": "df7c9ed7-0f4f-a646-974c-3ece974cf161",
+  "guid": "109609fb-8283-1842-98a5-02d63caf9f67",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\city.obj"
+    "source_file": "game\\models\\brainstem\\BrainStem.gltf"
   }
 }
