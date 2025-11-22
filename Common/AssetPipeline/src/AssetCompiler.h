@@ -46,12 +46,12 @@ namespace PAIN {
 			Descriptor createDefaultDesc(Info& asset, std::filesystem::path const& path) const;
 
 			//Compile and ship
-			void compileAndShip(Descriptor& desc_file, Info& asset_info) const;
+			void compileAndShip(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets);
 
 			//Internal asset compilers
 			void compileTexture(Descriptor& desc_file, Info& asset_info) const;
 			void compileAudio(Descriptor& desc_file, Info& asset_info) const;
-			void compileModel(Descriptor& desc_file, Info& asset_info) const;
+			void compileModel(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets);
 			std::string GetCuttlefishExecutable() const;
 			bool CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			bool CuttlefishCompressor(float* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
@@ -70,8 +70,11 @@ namespace PAIN {
 			}
 			~Compiler() = default;
 
+			//Public export material
+			bool ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const;
+
 			//Public process asset
-			void processAsset(Info& asset_info);
+			std::optional<std::vector<IAsset>> processAsset(Info& asset_info);
 
 			//Read desc file overload, read only
 			Descriptor readDescFile(std::filesystem::path const& path) const;

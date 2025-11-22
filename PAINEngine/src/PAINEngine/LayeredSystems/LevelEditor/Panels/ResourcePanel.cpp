@@ -10,6 +10,12 @@
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 
+std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
+std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vao = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vbo = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_ebo = 0;
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -141,13 +147,9 @@ namespace PAIN {
 					//Get display icon
 					std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
-					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						temp.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						temp.icon = 0;
-					}
+					//Get Folder icon
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					temp.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Instantiate name
 					temp.file_name = relative.filename().string();
@@ -270,12 +272,8 @@ namespace PAIN {
 					static std::filesystem::path folder_path = "engine\\textures\\folder_icon.png";
 
 					//Folder icon
-					if (services->get<Assets::Manager>()->checkAssetRegistered(folder_path)) {
-						dir_copy.icon = static_cast<ImTextureID>(services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path)->gl_texture);
-					}
-					else {
-						dir_copy.icon = 0;
-					}
+					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					dir_copy.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Set drag payload with asset name
 					ImGui::SetDragDropPayload(std::string("DIR").c_str(), &dir_copy, sizeof(dir_copy) + 1);
@@ -303,10 +301,15 @@ namespace PAIN {
 				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
 
 					if (ImGui::MenuItem("Open##file")) {
-						open_files.push_back(file);
+						if (open_files.find(file) == open_files.end())open_files.insert(file);
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					if (file.type == Assets::Type::Material && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
 					}
 					if (ImGui::MenuItem("Delete##file")) {
 						openPopUp("Delete File", std::make_shared<File>(file));
@@ -362,6 +365,35 @@ namespace PAIN {
 				return b_break;
 			}
 
+			bool ResourcePanel::renderPopUpContext(std::string const& virtual_path) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(virtual_path.c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextWindow("AssetContextMenu##VirtualDirectory")) {
+					//Decide the directory it is in
+					auto relative = std::filesystem::relative(path_service->resolvePath(virtual_path), root);
+					auto engine_material = Assets::getAllEngineFolders()[Assets::Type::Material];
+					auto game_material = Assets::getAllGameFolders()[Assets::Type::Material];
+					if ((relative == engine_material || relative == game_material) && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
+					}
+					if (ImGui::MenuItem("New Folder##dir")) {
+						openPopUp("New Folder");
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
@@ -400,18 +432,18 @@ namespace PAIN {
 					//Get texture
 					auto texture = asset_service->getAsset<Assets::Texture>(icon_path);
 
+					//Folder icon
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path);
+
 					//Check and ensure texture is not a cubemap
-					if (!texture->is_cube_map) {
-						return static_cast<ImTextureID>(texture->gl_texture);
+					if (texture_opt.has_value() && !texture.value()->is_cube_map) {
+						return static_cast<ImTextureID>(texture.value()->gl_texture);
 					}
 				}
 
-				if (asset_service->checkAssetRegistered(def_icon_path)) {
-					return static_cast<ImTextureID>(asset_service->getAsset<Assets::Texture>(def_icon_path)->gl_texture);
-				}
-				else {
-					return ImTextureID(0);
-				}
+				//Folder icon
+				auto def_icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(def_icon_path);
+				return def_icon_opt.has_value() ? static_cast<ImTextureID>(def_icon_opt.value()->gl_texture) : ImTextureID(0);
 			}
 
 			void ResourcePanel::renderAssetsBrowser(std::string const& virtual_path) {
@@ -431,6 +463,9 @@ namespace PAIN {
 
 				//Local shown count
 				int shown_count = 0;
+
+				//General context
+				renderPopUpContext(virtual_path);
 
 				//Display all directories
 				for (const auto& dir : directories) {
@@ -534,7 +569,7 @@ namespace PAIN {
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-							open_files.push_back(file);
+							if (open_files.find(file) == open_files.end())open_files.insert(file);
 						}
 						ImGui::PopStyleColor();
 
@@ -566,7 +601,7 @@ namespace PAIN {
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-						open_files.push_back(file);
+						if(open_files.find(file) == open_files.end())open_files.insert(file);
 					}
 					
 					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
@@ -638,6 +673,155 @@ namespace PAIN {
 				}
 			}
 
+			ResourcePanel::MaterialPreview::MaterialPreview() {
+				glGenFramebuffers(1, &preview_fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+
+				glGenTextures(1, &preview_texture);
+				glBindTexture(GL_TEXTURE_2D, preview_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, preview_size.x, preview_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, preview_texture, 0);
+
+				glGenRenderbuffers(1, &preview_depth_rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, preview_depth_rbo);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, preview_size.x, preview_size.y);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, preview_depth_rbo);
+
+				assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after Binding frame buffer: {}", err);
+				}
+
+			}
+
+			void ResourcePanel::MaterialPreview::init() {
+				// Generate and bind VAO
+				glGenVertexArrays(1, &sphere_vao);
+				glGenBuffers(1, &sphere_vbo);
+				glGenBuffers(1, &sphere_ebo);
+				glBindVertexArray(sphere_vao);
+
+				glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo);
+				glBufferData(GL_ARRAY_BUFFER,
+					sphere_model->vertices.size() * sizeof(Assets::Vertex),
+					sphere_model->vertices.data(), GL_STATIC_DRAW);
+
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphere_ebo);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					sphere_model->indices.size() * sizeof(unsigned int),
+					sphere_model->indices.data(), GL_STATIC_DRAW);
+
+				// Position attribute, layout(location = 0)
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
+				glEnableVertexAttribArray(0);
+
+				// Normal attribute, layout(location = 1)
+				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
+				glEnableVertexAttribArray(1);
+
+				// texcoords attribute, layout(location = 2)
+				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
+				glEnableVertexAttribArray(2);
+
+				// Unbind VAO
+				glBindVertexArray(0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after initializing sphere vao/vbo/ebo: {}", err);
+				}
+			}
+
+			void ResourcePanel::MaterialPreview::render(std::shared_ptr<const Assets::Material> material) {
+				// Prepare preview FBO
+				glViewport(0, 0, preview_size.x, preview_size.y);
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+				glEnable(GL_DEPTH_TEST);
+				glClearColor(0.08f, 0.08f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// Setup camera (static position, orbital, whatever looks good)
+				glm::mat4 proj = glm::perspective(glm::radians(45.0f), float(preview_size.x) / float(preview_size.y), 0.1f, 10.0f);
+				glm::vec3 cam_pos = glm::vec3(0.0f, 0.0f, 2.5f);
+				glm::mat4 view = glm::lookAt(cam_pos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
+				glm::mat4 model = glm::mat4(1.0f);
+
+				//Bind shader
+				shader->Bind();
+
+				// Matrices
+				shader->SetUniform("u_M", model);
+				shader->SetUniform("u_V", view);
+				shader->SetUniform("u_P", proj);
+
+				// Camera
+				shader->SetUniform("u_CamPos", cam_pos);
+
+				// Light
+				shader->SetUniform("u_LightPos", glm::vec3(3.0f, 2.0f, 3.0f));
+				shader->SetUniform("u_LightColor", glm::vec3(20.0f));
+				shader->SetUniform("u_AmbientLight", glm::vec3(0.03f));
+
+				// Material properties (NOW THESE EXIST IN THE SHADER!)
+				shader->SetUniform("u_BaseColor", material->baseColor);
+				shader->SetUniform("u_Metallic", material->metallic);
+				shader->SetUniform("u_Roughness", material->roughness);
+
+				//Bind vertex array
+				glBindVertexArray(sphere_vao);
+
+				//Draw elements
+				for (size_t i = 0; i < sphere_model->submeshes.size(); ++i) {
+					// TEMPORARY: Only render first submesh
+					const auto& submesh = sphere_model->submeshes[i];
+
+					//// Material properties
+					//shader->SetUniform("material.rough", material->roughness);
+					//shader->SetUniform("material.metal", material->metallic);
+					//shader->SetUniform("material.color", material->baseColor);
+
+					//// Bind textures from MaterialInstance
+					//bool hasTexture = albedoTexture != 0;
+					//shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+					//shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
+
+					//if (hasTexture) {
+					//	glActiveTexture(GL_TEXTURE6);
+					//	glBindTexture(GL_TEXTURE_2D, albedoTexture);
+					//	shader->SetUniform("material.tex", 6);
+
+					//	if (aoTexture != 0) {
+					//		glActiveTexture(GL_TEXTURE7);
+					//		glBindTexture(GL_TEXTURE_2D, aoTexture);
+					//		shader->SetUniform("material.ao_map", 7);
+					//		shader->SetUniform("material.use_ao", 1.0f);
+					//	}
+					//	else {
+					//		shader->SetUniform("material.use_ao", 0.0f);
+					//	}
+					//}
+
+					// Draw this submesh
+					glDrawElements(
+						GL_TRIANGLES,
+						submesh.indexCount,
+						GL_UNSIGNED_INT,
+						(void*)(submesh.firstIndex * sizeof(unsigned int))
+					);
+				}
+
+				//Unbind shader
+				//shader->UnBind();
+
+				//Unbind frame buffer
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
+
 			void ResourcePanel::renderOpenFiles() {
 
 				//Local files to close
@@ -649,10 +833,27 @@ namespace PAIN {
 					//Begin window
 					ImGui::Begin(file.file_name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-					//Display icon
-					{
+					//Render asset type
+					switch (file.type) {
+					case Assets::Type::Material: {
+						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
+						if (mat_opt.has_value()) {
+							mat_preview.render(mat_opt.value());
+							ImVec2 icon_size(256, 256);
+							ImGui::Image(static_cast<ImTextureID>(mat_preview.getPreviewTexture()), icon_size);
+						}
+						else {
+							//Display icon
+							ImVec2 icon_size(256, 256);
+							ImGui::Image(file.icon, icon_size);
+						}
+						break;
+					}
+					default: {
+						//Display icon
 						ImVec2 icon_size(256, 256);
 						ImGui::Image(file.icon, icon_size);
+					}
 					}
 
 					ImGui::Spacing();
@@ -1146,6 +1347,57 @@ namespace PAIN {
 					};
 			}
 
+			std::function<void(std::any const&)> ResourcePanel::newMaterialPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Select a component to add
+					ImGui::Text("New material name without extension: ");
+
+					//New folder name
+					static std::string mat_name = "";
+					mat_name.resize(32);
+					ImGui::InputText("##Newmat_name", mat_name.data(), mat_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Create")) {
+
+						//Craft outpath
+						std::filesystem::path out_path = path_service->resolvePath(current_path);
+						out_path /= mat_name.c_str();
+						out_path.replace_extension(*Assets::getAllExtensions()[Assets::Type::Material].begin());
+
+						//Create material
+						Assets::Material def_material;
+						asset_service->createNewMaterial(def_material, out_path);
+
+						//Update directories & files
+						populateFiles(current_path);
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
 			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback) {
 
 				std::lock_guard<std::mutex> lock(file_event_mutex);
@@ -1159,12 +1411,20 @@ namespace PAIN {
 				path_service = services->get<Path::Path>();
 				asset_service = services->get<Assets::Manager>();
 
+				//Init material preview
+				auto sphere_opt = asset_service->getAsset<Assets::Model>("engine\\models\\sphere.obj");
+				mat_preview.sphere_model = sphere_opt.has_value() ? sphere_opt.value() : nullptr;
+				auto shader_opt = asset_service->getAsset<Assets::Shader>("engine\\shaders\\pbr_preview.vert");
+				mat_preview.shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+				mat_preview.init();
+
 				//Pop UP
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));
 				registerPopUp("Rename File", renameFilePopup("Rename File"));
 				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
 				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
 
 				//Initialize root and current path

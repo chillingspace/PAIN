@@ -84,13 +84,13 @@ namespace PAIN {
              if (!bvComponent) {
                  auto* modelRenderer = registry.try_get<ModelRenderer>(entity);
                  if (modelRenderer) { // Check if ModelRenderer mesh_id
-                     auto model = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->selected_model);
-                     if (model) { // Check if model was found
+                     auto model_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->modelGUID);
+                     if (model_opt.has_value()) { // Check if model was found
                         // Add cBoundingVolume component to the entity
                         bvComponent = &registry.emplace<BoundingVolume>(entity);
                         
                         // Calculate local AABB from the model's vertices
-                        bvComponent->localAABB = calculateLocalAABB(model);
+                        bvComponent->localAABB = calculateLocalAABB(model_opt.value());
                         
                         bvComponent->needsUpdate = true; // Mark for world AABB update
                      } else {

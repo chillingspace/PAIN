@@ -154,7 +154,7 @@ std::string EngineAPIAdapter::GetAssetGUID(std::string_view name, PAIN::Assets::
 }
 std::string EngineAPIAdapter::GetImageGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Texture); }
 std::string EngineAPIAdapter::GetScriptGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Script); }
-//std::string EngineAPIAdapter::GetAudioGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Audio); }
+std::string EngineAPIAdapter::GetAudioGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Audio); }
 std::string EngineAPIAdapter::GetModelGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Model); }
 std::string EngineAPIAdapter::GetFontGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Font); }
 std::string EngineAPIAdapter::GetScenesGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Scenes); }
@@ -234,8 +234,11 @@ glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
 }
 
 void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
-    auto& t = ensure<PAIN::Transform>(entityId);
-    t.scale = { s.x, s.y, s.z };
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+
+    auto& t = reg.get<PAIN::Transform>(entityId);
+    t.scale = s;
 }
 
 glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
@@ -251,7 +254,10 @@ glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
 
 void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
 {
-    auto& t = ensure<PAIN::Transform>(entityId);
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+
+    auto& t = reg.get<PAIN::Transform>(entityId);
     t.rotation = glm::quat(r); // euler to quat
 }
 
@@ -266,7 +272,10 @@ glm::vec3 EngineAPIAdapter::GetVelocity(entt::entity entityId) {
 }
 
 void EngineAPIAdapter::SetVelocity(entt::entity entityId, glm::vec3 v) {
-    auto& ph = ensure<PAIN::Physics::RigidBody3D>(entityId);
+    auto& reg = ecs_.getRegistry();
+    if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return;
+
+    auto& ph = reg.get<PAIN::Physics::RigidBody3D>(entityId);
     ph.velocity = v;
 }
 

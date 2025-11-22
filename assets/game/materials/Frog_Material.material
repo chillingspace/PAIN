@@ -1,0 +1,25 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\.\\frog_diffuse.png",
+        "metallic": "game\\textures\\.\\frog_roughness.png",
+        "roughness": "game\\textures\\.\\frog_roughness.png"
+    }
+}

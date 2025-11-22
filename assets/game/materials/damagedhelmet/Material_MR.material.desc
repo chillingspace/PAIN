@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Material_MR.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14828595730959492559
+  },
+  "descriptor_version": 1,
+  "guid": "a8e7f637-646c-d746-b1d4-baefff90d632",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\damagedhelmet\\Material_MR.material"
+  }
+}

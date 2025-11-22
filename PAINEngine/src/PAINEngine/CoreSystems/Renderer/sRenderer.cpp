@@ -46,6 +46,82 @@ namespace PAIN {
 
 	}
 
+	void sRenderer::InitializeModelRenderer(entt::entity entity, ModelRenderer& component) {
+
+		auto assetManager = services->get<Assets::Manager>();
+
+		//Check for valid GUID
+		if (!component.modelGUID.IsValid()) return;
+
+		//optional material asset
+		auto model_opt = assetManager->getAsset<Assets::Model>(component.modelGUID);
+
+		// Load model asset
+		component.cachedModelAsset = model_opt.has_value() ? model_opt.value() : nullptr;
+
+		if (!component.cachedModelAsset) {
+			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
+			return;
+		}
+
+		//Set prev GUID
+		component.prevModelGUID = component.modelGUID;
+
+		//Cache model
+		const auto& modelAsset = component.cachedModelAsset;
+
+		// Initialize materials
+		if (!component.materials.empty()) {
+			component.materials.clear();
+		}
+
+		component.materials.reserve(modelAsset->materials.size());
+
+		for (const auto& materialPath : modelAsset->materials) {
+			MaterialInstance matInstance;
+
+			//optional material asset
+			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
+
+			// Load material asset
+			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+			//Check valid material asset
+			if (materialAsset) {
+				matInstance.materialGUID = materialAsset->guid;
+
+				//Init material overrides
+				matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
+				matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
+				matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
+				matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
+				matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
+				matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
+				matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
+				matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
+				matInstance.baseColorOverride = materialAsset->baseColor;
+				matInstance.metallicOverride = materialAsset->metallic;
+				matInstance.roughnessOverride = materialAsset->roughness;
+				matInstance.emissiveOverride = materialAsset->emissive;
+			}
+
+			component.materials.push_back(std::move(matInstance));
+		}
+
+		// Initialize bone transforms if animated
+		if (!modelAsset->skeleton.empty() && component.boneTransforms.empty()) {
+			component.boneTransforms.resize(modelAsset->skeleton.size(), glm::mat4(1.0f));
+		}
+
+		// Initialize morph weights
+		if (!modelAsset->morphTargets.empty() && component.morphWeights.empty()) {
+			component.morphWeights.resize(modelAsset->morphTargets.size(), 0.0f);
+		}
+
+		PN_CORE_INFO("Initialized ModelRenderer for entity {} with {} submeshes",
+			(uint32_t)entity, component.materials.size());
+	}
+
 	void sRenderer::shadowPass()
 	{
 		// populate shadow map first
@@ -77,14 +153,9 @@ namespace PAIN {
 					model_xform = transform.value().get().getMatrix();
 				}
 
-				if (mdl.has_value())
+				if (mdl.has_value() && mdl->get().castShadows)
 				{
-					//Get model asset
-					auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-					mdl_ptr->materials[0].baseColor = mdl->get().baseColor;
-					mdl_ptr->materials[0].metallic = mdl->get().metallic;
-					mdl_ptr->materials[0].roughness = mdl->get().roughness;
-					w_renderer->DrawShadows(*mdl_ptr.get(), model_xform, l); // uses shadow_shader
+					w_renderer->DrawShadows(mdl->get(), model_xform, l); // uses shadow_shader
 
 				}
 
@@ -113,6 +184,7 @@ namespace PAIN {
 
   			auto transform = ecs->getEntityComponent<Transform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
@@ -120,24 +192,20 @@ namespace PAIN {
 			}
 			if (mdl.has_value())
 			{
-				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-				
-				if (mdl->get().selected_diff_tex.IsValid()) {
-					auto diff_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(mdl->get().selected_diff_tex);
-					mdl_ptr->materials[0].gl_diffuse_tex = diff_tex->gl_texture;
-				}
-				if (mdl->get().selected_ao_tex.IsValid()) {
-					auto ao_tex = services->get<Assets::Manager>()->getAsset<Assets::Texture>(mdl->get().selected_ao_tex);
-					mdl_ptr->materials[0].gl_ao_tex = ao_tex->gl_texture;
+				//Init component if not ready or if model GUID has been updated
+				if (mdl->get().modelGUID != mdl->get().prevModelGUID) {
+					InitializeModelRenderer(e, mdl->get());
 				}
 
-				mdl_ptr->materials[0].baseColor = mdl->get().baseColor;
-				mdl_ptr->materials[0].metallic = mdl->get().metallic;
-				mdl_ptr->materials[0].roughness = mdl->get().roughness;
+				// Skip if not visible or not ready
+				if (!mdl->get().visible) {
+					continue;
+				}
 
-
-				w_renderer->DrawGeometry(m_Scene, *mdl_ptr, model_xform);
+				//Draw geo
+				w_renderer->DrawGeometry(m_Scene, mdl->get(), model_xform);
 			}
+			
 
 		}
 		w_renderer->EndGeometryPass();
@@ -168,8 +236,7 @@ namespace PAIN {
 			}
 			if (mdl.has_value())
 			{
-				auto mdl_ptr = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl->get().selected_model);
-				w_renderer->ReflectionPass(*mdl_ptr);
+				w_renderer->ReflectionPass(mdl->get());
 			}
 
 		}

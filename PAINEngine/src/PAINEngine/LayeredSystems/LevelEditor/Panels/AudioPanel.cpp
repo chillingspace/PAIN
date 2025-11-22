@@ -185,10 +185,12 @@ namespace PAIN {
 					}
 
 					if (ImGui::Button("Play Sound")) {
-						if(asset_service->checkAssetRegistered(audio_ptr->selected_audio))
-							audio->play(asset_service->getAsset<Sound>(audio_ptr->selected_audio), audio_ptr->group_name,
-								audio_ptr->volumeDb, audio_ptr->pitchDb, audio_ptr->looping, audio_ptr->is3D,
-								audio_ptr->pos, audio_ptr->minDistance, audio_ptr->maxDistance);
+						auto sound_opt = asset_service->getAsset<Sound>(audio_ptr->selected_audio);
+						if(sound_opt.has_value()) 
+							
+							audio->play(sound_opt.value(), audio_ptr->group_name,
+							audio_ptr->volumeDb, audio_ptr->pitchDb, audio_ptr->looping, audio_ptr->is3D,
+							audio_ptr->pos, audio_ptr->minDistance, audio_ptr->maxDistance);
 					}
 
 					ImGui::SeparatorText("Group");

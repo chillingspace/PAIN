@@ -125,11 +125,61 @@ namespace PAIN {
                         }
                     });
 
-
-
                 // ---- ModelRenderer ---- (UNCHANGED)
-                registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
-                    [this](ComponentsPanel&, PAIN::ModelRenderer& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
+                    registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
+                        [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
+                            // Model GUID selector (using reflection)
+                            bool changed = false;
+
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                            // Model Asset Selection
+                            if (DrawAssetSelectorField("Select A Model",
+                                renderer.modelGUID,
+                                PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
+                                panel)) {
+                                changed = true;
+                            }
+
+                            ImGui::Spacing();
+                            ImGui::Separator();
+                            ImGui::Spacing();
+
+                            // Rendering Options
+                            if (ImGui::CollapsingHeader("Rendering Options")) {
+                                ImGui::Indent(10.0f);
+                                changed |= ImGui::Checkbox("Visible", &renderer.visible);
+                                changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
+                                changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
+                                ImGui::Unindent(10.0f);
+                            }
+
+                            ImGui::Spacing();
+                            ImGui::Separator();
+                            ImGui::Spacing();
+
+                            // MATERIALS SECTION - This is where the magic happens!
+                            if (DrawField("Materials", renderer.materials, &panel)) {
+                                changed = true;
+                            }
+
+                            ImGui::PopStyleVar();
+
+                            // Optional: Add animation info if present
+                            if (renderer.currentAnimationIndex >= 0) {
+                                ImGui::Spacing();
+                                ImGui::Separator();
+                                ImGui::Spacing();
+
+                                if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
+                                    ImGui::BeginDisabled();
+                                    ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
+                                    ImGui::Text("Animation Time: %.2f", renderer.animationTime);
+                                    ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
+                                    ImGui::EndDisabled();
+                                }
+                            }
+                        });
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
@@ -170,8 +220,12 @@ namespace PAIN {
                 // Register Add Component popup
                 registerPopUp("AddComponent", addComponentPopUp("AddComponent"));
 
+
                 // Register Remove Component popup
                 registerPopUp("RemoveComponent", removeComponentPopUp("RemoveComponent"));
+
+				// Register RigidBody3D Config popup
+                registerPopUp("AddRigidBody3DConfig", addRigidBodyConfigPopUp("AddRigidBody3DConfig"));
             }
 
 
@@ -246,9 +300,16 @@ namespace PAIN {
                         found_any = true;
 
                         if (ImGui::Selectable(comp_name.c_str(), false)) {
-                            ecs->addComponentByName(selected_entity, comp_name);
-                            search_filter[0] = '\0';
-                            closePopUp(popup_id);
+                            if (comp_name == "RigidBody3D") {
+                                openPopUp("AddRigidBody3DConfig");
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
+                            else {
+                                ecs->addComponentByName(selected_entity, comp_name);
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
                         }
                     }
 
@@ -362,6 +423,38 @@ namespace PAIN {
                         closePopUp(popup_id);
                     }
                 };
+            }
+
+            std::function<void(std::any const&)> ComponentsPanel::addRigidBodyConfigPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+                    auto ecs = services->get<ECS::Controller>();
+                    auto entity_panel = entities_panel.lock();
+                    if (!entity_panel) return;
+
+                    entt::entity selected_entity = entity_panel->getSelectedEntity();
+                    if (!ecs->checkEntity(selected_entity)) return;
+
+                    static int motion_type_idx = 1; // Default to Dynamic
+                    const char* motion_names[] = { "Static", "Dynamic", "Kinematic" };
+
+                    ImGui::Text("Select Motion Type:");
+                    ImGui::Combo("Motion Type", &motion_type_idx, motion_names, IM_ARRAYSIZE(motion_names));
+
+                    ImGui::Spacing();
+                    if (ImGui::Button("Add RigidBody3D", ImVec2(-1, 0))) {
+                        // Add the component
+
+                        if (!ecs->hasComponentByName(selected_entity, "RigidBody3D")) {
+                            Physics::RigidBody3D rb;
+                            rb.motion_type = static_cast<PAIN::Physics::MotionType>(motion_type_idx);
+                            ecs->addEntityComponent<PAIN::Physics::RigidBody3D>(selected_entity, std::move(rb));
+                        }
+                        closePopUp(popup_id);
+                    }
+                    if (ImGui::Button("Cancel", ImVec2(-1, 0))) {
+                        closePopUp(popup_id);
+                    }
+                    };
             }
 
             void ComponentsPanel::renderEntityComponents(entt::entity entity) {

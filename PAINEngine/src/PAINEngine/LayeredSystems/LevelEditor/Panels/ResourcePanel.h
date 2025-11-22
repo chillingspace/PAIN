@@ -9,23 +9,42 @@
 
 #include <chrono>
 
+namespace PAIN::Editor::Panel {
+
+    //Global files and directories for payload
+    struct Dir {
+        std::filesystem::path path;
+        ImTextureID icon;
+        std::string file_name;
+    };
+
+    struct File {
+        std::filesystem::path path;
+        Assets::GUID id;
+        Assets::Type type;
+        ImTextureID icon;
+        std::string file_name;
+
+        // Use GUID for equality (most efficient)
+        bool operator==(const File& other) const {
+            return id == other.id;
+        }
+    };
+}
+
+namespace std {
+    template<>
+    struct hash<PAIN::Editor::Panel::File> {
+        size_t operator()(const PAIN::Editor::Panel::File& file) const noexcept {
+            // Assuming GUID already has a hash function
+            return std::hash<PAIN::Assets::GUID>{}(file.id);
+        }
+    };
+}
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
-
-            //Global files and directories for payload
-            struct Dir {
-                std::filesystem::path path;
-                ImTextureID icon;
-                std::string file_name;
-            };
-            struct File {
-                std::filesystem::path path;
-                Assets::GUID id;
-                Assets::Type type;
-                ImTextureID icon;
-                std::string file_name;
-            };
 
             class ResourcePanel : public IPanel {
             public:
@@ -97,9 +116,6 @@ namespace PAIN {
                 //Payload
                 std::string payload_typestring;
 
-                //Vector of opened files
-                std::vector<File> open_files;
-
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
                 const float AUTO_REFRESH_INTERVAL = 2.0f;
@@ -142,9 +158,48 @@ namespace PAIN {
                 void DrawDirectoryTree(std::filesystem::path const& path);
                 bool renderPopUpContext(File const& file);
                 bool renderPopUpContext(Dir const& file);
+                bool renderPopUpContext(std::string const& virtual_path);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
 
+                // ----------------------------
+                // File Render
+                // ----------------------------
+                class MaterialPreview {
+                private:
+                    unsigned int preview_fbo = 0;
+                    unsigned int preview_texture = 0;
+                    unsigned int preview_depth_rbo = 0;
+                    glm::ivec2 preview_size{ 256, 256 };
+
+                public:
+                    //Static sphere model
+                    static std::shared_ptr<Assets::Model> sphere_model;
+
+                    //Static shader
+                    static std::shared_ptr<Assets::Shader> shader;
+
+                    //Simple sphere mesh for preview
+                    static unsigned int sphere_vao;
+                    static unsigned int sphere_vbo;
+                    static unsigned int sphere_ebo;
+
+                    //Material preview contructor
+                    MaterialPreview();
+
+                    //Called only once for statics
+                    void init();
+                    void render(std::shared_ptr<const Assets::Material> material);
+                    unsigned int getPreviewTexture() const {
+                        return preview_texture;
+                    }
+                };
+
+                //Create mat preview
+                MaterialPreview mat_preview;
+
+                //Vector of opened files
+                std::unordered_set<File> open_files;
                 void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 
@@ -156,7 +211,7 @@ namespace PAIN {
                 std::function<void(std::any const&)> deleteFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
-
+                std::function<void(std::any const&)> newMaterialPopup(std::string const& popup_id);
 
                 // ----------------------------
                 // File Operations

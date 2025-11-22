@@ -69,6 +69,8 @@ namespace PAIN {
 
 				std::function<void(std::any const&)> removeComponentPopUp(std::string const& popup_id);
 
+				std::function<void(std::any const&)> addRigidBodyConfigPopUp(std::string const& popup_id);
+
 				bool should_open_remove_popup = false;
 
 				//Components to UI Function map

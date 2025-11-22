@@ -52,10 +52,11 @@ namespace PAIN {
                     }
 
                     //Chjeck for valid id
-                    if (asset_service->checkAssetRegistered(audioSrc.selected_audio)) {
+                    auto audio_opt = asset_service->getAsset<Sound>(audioSrc.selected_audio);
+                    if (audio_opt.has_value()) {
                         // Play the sound
                         auto channelOpt = audioService->play(
-                            asset_service->getAsset<Sound>(audioSrc.selected_audio),
+                            audio_opt.value(),
                             audioSrc.group_name,
                             audioSrc.volumeDb,
                             audioSrc.pitchDb,

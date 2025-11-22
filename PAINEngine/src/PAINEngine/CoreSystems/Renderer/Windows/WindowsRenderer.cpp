@@ -68,7 +68,8 @@ namespace PAIN {
 		auto assets_loader = services->get<Assets::Manager>();
 
 		//PBR Shader
-		pbr_shader = assets_loader->getAsset<Assets::Shader>(pbr_path);
+		auto shader_opt = assets_loader->getAsset<Assets::Shader>(pbr_path);
+		pbr_shader = shader_opt.has_value() ? shader_opt.value() : pbr_shader;
 
 		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -76,7 +77,8 @@ namespace PAIN {
 		}
 
 		//Geometry shader
-		geometry_shader = assets_loader->getAsset<Assets::Shader>(geometry_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(geometry_path);
+		geometry_shader = shader_opt.has_value() ? shader_opt.value() : geometry_shader;
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -84,7 +86,8 @@ namespace PAIN {
 		}
 
 		//FLoor shader
-		floor_shader = assets_loader->getAsset<Assets::Shader>(floor_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(floor_path);
+		floor_shader = shader_opt.has_value() ? shader_opt.value() : floor_shader;
 
 		if (!floor_shader || floor_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -92,7 +95,8 @@ namespace PAIN {
 		}
 
 		//Pass through shader
-		passthrough_shader = assets_loader->getAsset<Assets::Shader>(passthrough_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(passthrough_path);
+		passthrough_shader = shader_opt.has_value() ? shader_opt.value() : passthrough_shader;
 
 		if (!passthrough_shader || passthrough_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -100,7 +104,8 @@ namespace PAIN {
 		}
 
 		//Shadow shader
-		shadow_shader = assets_loader->getAsset<Assets::Shader>(shadow_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(shadow_path);
+		shadow_shader = shader_opt.has_value() ? shader_opt.value() : shadow_shader;
 
 		if (!shadow_shader || shadow_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -108,7 +113,8 @@ namespace PAIN {
 		}
 
 		//Texture shader
-		texture2d_shader = assets_loader->getAsset<Assets::Shader>(texture2d_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(texture2d_path);
+		texture2d_shader = shader_opt.has_value() ? shader_opt.value() : texture2d_shader;
 
 		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -116,35 +122,44 @@ namespace PAIN {
 		}
 
 		//Tone mapping shader
-		tone_shader = assets_loader->getAsset<Assets::Shader>(tone_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(tone_path);
+		tone_shader = shader_opt.has_value() ? shader_opt.value() : tone_shader;
+
 		if (!tone_shader || tone_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
 
 		//Bloom shader
-		bloom_shader = assets_loader->getAsset<Assets::Shader>(bloom_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(bloom_path);
+		bloom_shader = shader_opt.has_value() ? shader_opt.value() : bloom_shader;
+
 		if (!bloom_shader || bloom_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
 
 		// Bloom blend shader
-		bloom_blend_shader = assets_loader->getAsset<Assets::Shader>(bloom_blend_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(bloom_blend_path);
+		bloom_blend_shader = shader_opt.has_value() ? shader_opt.value() : bloom_blend_shader;
+
 		if (!bloom_blend_shader || bloom_blend_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
 
 		// Blur shader
-		blur_shader = assets_loader->getAsset<Assets::Shader>(blur_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(blur_path);
+		blur_shader = shader_opt.has_value() ? shader_opt.value() : blur_shader;
+
 		if (!blur_shader || blur_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
 			return;
 		}
 
 		//Gamma shader
-		gamma_shader = assets_loader->getAsset<Assets::Shader>(gamma_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(gamma_path);
+		gamma_shader = shader_opt.has_value() ? shader_opt.value() : gamma_shader;
 
 		if (!gamma_shader || gamma_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -152,7 +167,8 @@ namespace PAIN {
 		}
 
 		//Debug shader
-		debug_shader = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
+		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
 		if (!debug_shader || debug_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program");
@@ -447,32 +463,44 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawShadows(const Assets::Model& mdl, const glm::mat4& M, const Light& l)
+	void WindowsRenderer::DrawShadows(const ModelRenderer& component, const glm::mat4& M, const Light& l)
 	{
-		if (!shadow_shader) return;
+		if (!shadow_shader || !component.cachedModelAsset || !component.castShadows) {
+			return;
+		}
 
 		shadow_shader->Bind();
-
 		shadow_shader->SetUniform("u_M", M);
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		//mesh->Draw(geometry_vao, geometry_vbo, geometry_ebo);
-
 		glBindVertexArray(geometry_vao);
-
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
-
+		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
-		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		if (component.cachedModelAsset->submeshes.empty()) {
+			// No submeshes - draw entire model
+			glDrawElements(GL_TRIANGLES, component.cachedModelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+		}
+		else {
+			// Draw each submesh with correct offset
+			for (const auto& submesh : component.cachedModelAsset->submeshes) {
+				glDrawElements(
+					GL_TRIANGLES,
+					submesh.indexCount,
+					GL_UNSIGNED_INT,
+					(void*)(submesh.firstIndex * sizeof(unsigned int))
+				);
+			}
+		}
+
 		glBindVertexArray(0);
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, mdl.vpath);;
+			PN_CORE_ERROR("OpenGL error in DrawShadows: {} on mesh {}", err, component.cachedModelAsset->vpath);
 		}
 	}
 
@@ -536,58 +564,184 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, const Assets::Model& mdl, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
 		}
 
-		if (!geometry_shader) return;
+		if (!geometry_shader || !component.cachedModelAsset) {
+			return;
+		}
+
+		auto assetManager = services->get<Assets::Manager>();
+
+		const auto& modelAsset = component.cachedModelAsset;
 
 		geometry_shader->SetUniform("u_M", M);
-
-		geometry_shader->SetUniform("material.rough", mdl.materials[0].roughness);
-		geometry_shader->SetUniform("material.metal", mdl.materials[0].metallic);
-		geometry_shader->SetUniform("material.color", mdl.materials[0].baseColor);
-		geometry_shader->SetUniform("material.useTex", mdl.materials[0].gl_diffuse_tex ? 1.f : 0.f);
-		geometry_shader->SetUniform("material.alwaysLit", mdl.materials[0].gl_emissive_tex ? 1.f : 0.f);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
-		if (mdl.materials[0].gl_diffuse_tex) {
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_diffuse_tex);
-			geometry_shader->SetUniform("material.tex", 6);
-
-			if (GraphicsSettings::get().ao && mdl.materials[0].gl_ao_tex) {
-				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, mdl.materials[0].gl_ao_tex);
-				geometry_shader->SetUniform("material.ao_map", 7);
-				geometry_shader->SetUniform("material.use_ao", 1.f);
-			}
-			else {
-				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				geometry_shader->SetUniform("material.use_ao", 0.f);
-			}
-		}
-		else {
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE7);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		//mdl.Draw(geometry_vao, geometry_vbo, geometry_ebo);
-
+		// Bind component's VAO (already has vertex data uploaded)
 		glBindVertexArray(geometry_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, mdl.vertices.size() * sizeof(Assets::Vertex), mdl.vertices.data());
-
+		glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mdl.indices.size() * sizeof(unsigned int), mdl.indices.data());
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
 
-		glDrawElements(GL_TRIANGLES, mdl.indices.size(), GL_UNSIGNED_INT, 0);
+		// Render each submesh with its material
+		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
+			// TEMPORARY: Only render first submesh
+			const auto& submesh = modelAsset->submeshes[i];
+
+			//Check out of bounds
+			if (submesh.materialIndex >= component.materials.size()) {
+				PN_CORE_WARN("Submesh {} references material index {} but only {} materials available",
+					i, submesh.materialIndex, component.materials.size());
+				continue; // Skip this submesh
+			}
+
+			MaterialInstance* material = &component.materials[submesh.materialIndex];
+
+			// GPU texture handles (uploaded once, reused)
+			unsigned int albedoTexture = 0;
+			unsigned int normalTexture = 0;
+			unsigned int metallicTexture = 0;
+			unsigned int roughnessTexture = 0;
+			unsigned int aoTexture = 0;
+			unsigned int emissiveTexture = 0;
+			unsigned int heightTexture = 0;
+			unsigned int opacityTexture = 0;
+
+			//optional material asset
+			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(material->materialGUID);
+
+			// Load material asset
+			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+			//Check material asset
+			if (materialAsset) {
+
+				//Albedo Texture
+				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+
+				if (tex_opt.has_value()) {
+					albedoTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Normal texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+				if (tex_opt.has_value()) {
+					normalTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Metallic texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+				if (tex_opt.has_value()) {
+					metallicTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Roughness texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+				if (tex_opt.has_value()) {
+					roughnessTexture = tex_opt.value()->gl_texture;
+				}
+
+				//AO texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+				if (tex_opt.has_value()) {
+					aoTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Emissive texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+				if (tex_opt.has_value()) {
+					emissiveTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Height texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+				if (tex_opt.has_value()) {
+					heightTexture = tex_opt.value()->gl_texture;
+				}
+
+				//Opacity texture
+				tex_opt = material->useOverrides ?
+					assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
+					: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+				if (tex_opt.has_value()) {
+					opacityTexture = tex_opt.value()->gl_texture;
+				}
+
+				// Use override or asset default
+				glm::vec3 baseColor = material->useOverrides
+					? material->baseColorOverride
+					: materialAsset->baseColor;
+
+				float metallic = material->useOverrides
+					? material->metallicOverride
+					: materialAsset->metallic;
+
+				float roughness = material->useOverrides
+					? material->roughnessOverride
+					: materialAsset->roughness;
+
+				geometry_shader->SetUniform("material.rough", roughness);
+				geometry_shader->SetUniform("material.metal", metallic);
+				geometry_shader->SetUniform("material.color", baseColor);
+			}
+
+			// Bind textures from MaterialInstance
+			bool hasTexture = albedoTexture != 0;
+			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
+
+			if (hasTexture) {
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, albedoTexture);
+				geometry_shader->SetUniform("material.tex", 6);
+
+				if (GraphicsSettings::get().ao && aoTexture != 0) {
+					glActiveTexture(GL_TEXTURE7);
+					glBindTexture(GL_TEXTURE_2D, aoTexture);
+					geometry_shader->SetUniform("material.ao_map", 7);
+					geometry_shader->SetUniform("material.use_ao", 1.0f);
+				}
+				else {
+					geometry_shader->SetUniform("material.use_ao", 0.0f);
+				}
+			}
+
+			// Draw this submesh
+			glDrawElements(
+				GL_TRIANGLES,
+				submesh.indexCount,
+				GL_UNSIGNED_INT,
+				(void*)(submesh.firstIndex * sizeof(unsigned int))
+			);
+		}
+
 		glBindVertexArray(0);
 
 		err = glGetError();
@@ -601,7 +755,7 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void WindowsRenderer::ReflectionPass(const Assets::Model& m)
+	void WindowsRenderer::ReflectionPass(const ModelRenderer& component)
 	{
 		//if (m.materials[0].reflection_type == m.materials[0].REFLECTION_TYPES::NONE) {
 		//	return;
@@ -1067,9 +1221,15 @@ namespace PAIN {
 
 			// render 2D textures onto screen
 			{
+				//Get font to render
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path texture_path = "engine/textures/sunshine.png";
+#else	
+				std::filesystem::path texture_path = "engine\\textures\\sunshine.png";
+#endif
 				// !TODO: add queue and iterate through all 2D textures to be rendered last
-				auto texture = services->get<Assets::Manager>()->getAsset<Assets::Texture>(Assets::GUID("796cf7f1-0fe5-234b-b1a8-a602d3da43dc"));
-				Render2DTexture(texture->gl_texture, { 0.85f, -0.85f }, 0.1f);
+				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
+				if(texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, {0.85f, -0.85f}, 0.1f);
 			}
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -1084,9 +1244,9 @@ namespace PAIN {
 #else	
 				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
 #endif
-				auto font = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path)->getFont();
-				TextRenderer::get().renderText(font, "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
-				TextRenderer::get().debugRenderQuad();
+				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
+				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, {1.f, 1.f, 1.f});
+				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
 			}
 			err = glGetError();
 			if (err != GL_NO_ERROR) {

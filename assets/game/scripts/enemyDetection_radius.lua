@@ -25,6 +25,11 @@ registerUpdate(function(dt)
         -- player in detection range
         log("[enemyDetection_radius] I see the player!")
         
+        -- so player not detected when hiding and cooldown
+        if PlayerState and PlayerState.canBeCaught and not PlayerState.canBeCaught() then
+            return
+        end
+
         if PlayerState and PlayerState.onCaught then
             PlayerState.onCaught(player)
         end

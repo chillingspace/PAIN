@@ -121,6 +121,12 @@ namespace PAIN {
 				return audio_service->createSound(virtual_path);
 				});
 
+			//Register Material loader
+			asset_loader->RegisterLoader(Type::Material, [this](std::string const& virtual_path) {
+
+				return asset_loader->ImportMaterial(virtual_path);
+				});
+
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
@@ -471,6 +477,19 @@ namespace PAIN {
 
 			//Actually copy the file
 			std::filesystem::copy_file(file_path, destination);
+		}
+
+		void Manager::createNewMaterial(Material const& mat, std::filesystem::path const& out_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//if export succeedds
+			if (asset_compiler->ExportMaterial(mat, out_path)) {
+
+				//Register asset
+				registerAsset(std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, "")));
+			}
 		}
 #endif
 #endif

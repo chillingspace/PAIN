@@ -6,56 +6,123 @@
 
 namespace PAIN {
 
-	/******************************************************************************************
-	* Note: When creating components, try to stack them properly to properly optimise memory
-	* (Place largest type var (Double) first, then followed by smallest.
-	*****************************************************************************************/
+    //Material instance
+    struct MaterialInstance {
+        //material GUID
+        Assets::GUID materialGUID;
 
-	struct ModelRenderer {
-		std::vector<std::string> model_paths_storage;
-		Assets::GUID selected_model;
+        //Override with different textures
+        Assets::GUID albedoTextureOverride;
+        Assets::GUID normalTextureOverride;
+        Assets::GUID metallicTextureOverride;
+        Assets::GUID roughnessTextureOverride;
+        Assets::GUID aoTextureOverride;
+        Assets::GUID emissiveTextureOverride;
+        Assets::GUID heightTextureOverride;
+        Assets::GUID opacityTextureOverride;
 
-		std::vector<std::string> diff_tex_paths_storage;
-		Assets::GUID selected_diff_tex;
+        // Per-instance overrides
+        glm::vec3 baseColorOverride{ 1.0f, 1.0f, 1.0f };
+        float metallicOverride = 0.0f;
+        float roughnessOverride = 0.5f;
+        glm::vec3 emissiveOverride{ 0.0f, 0.0f, 0.0f };
 
-		std::vector<std::string> ao_tex_paths_storage;
-		Assets::GUID selected_ao_tex;
+        bool useOverrides = false;
+    };
 
-		// Material
-		glm::vec3 baseColor{ 1.f, 1.f, 1.f };
-		float metallic{ 0.f };
-		float roughness{ 1.f };
-		
-		ModelRenderer() = default;
-		ModelRenderer(Assets::GUID const& id) : selected_model{ id } {};
-		ModelRenderer(Assets::GUID const& id, Assets::GUID const& diff_id, Assets::GUID const& ao_id, glm::vec3 base_color, float metallic, float roughness) :
-			selected_model{ id }, baseColor{ base_color }, metallic{ metallic }, roughness{ roughness }, selected_diff_tex{ diff_id }, selected_ao_tex{ ao_id } {
-		};
-	};
+    struct ModelRenderer {
+        // Asset reference
+        Assets::GUID prevModelGUID;
+        Assets::GUID modelGUID;
+
+        // Per-instance materials (one per submesh)
+        std::vector<MaterialInstance> materials;
+
+        // Animation state
+        int currentAnimationIndex = -1;
+        float animationTime = 0.0f;
+        bool isPlaying = false;
+        bool loopAnimation = true;
+        float playbackSpeed = 1.0f;
+        std::vector<glm::mat4> boneTransforms;
+        std::vector<float> morphWeights;
+
+        // Rendering state
+        bool visible = true;
+        bool castShadows = true;
+        bool receiveShadows = true;
+        uint32_t renderLayer = 0;
+        int currentLOD = 0;
+
+        // Cached asset pointer (DO NOT SERIALIZE)
+        mutable std::shared_ptr<const Assets::Model> cachedModelAsset;
+
+        // Constructors
+        ModelRenderer() = default;
+        explicit ModelRenderer(const Assets::GUID& guid) : modelGUID(guid) {}
+        ~ModelRenderer() {
+            //cleanup();
+        }
+
+        MaterialInstance* GetMaterial(size_t index) {
+            return (index < materials.size()) ? &materials[index] : nullptr;
+        }
+
+        void PlayAnimation(int animIndex, bool loop = true, float speed = 1.0f) {
+            currentAnimationIndex = animIndex;
+            animationTime = 0.0f;
+            isPlaying = true;
+            loopAnimation = loop;
+            playbackSpeed = speed;
+        }
+
+        void UpdateAnimation(float deltaTime) {
+            if (!isPlaying || currentAnimationIndex < 0 || !cachedModelAsset) return;
+
+            if (currentAnimationIndex >= cachedModelAsset->animations.size()) return;
+
+            const auto& anim = cachedModelAsset->animations[currentAnimationIndex];
+            animationTime += deltaTime * playbackSpeed;
+
+            if (animationTime >= anim.duration) {
+                if (loopAnimation) {
+                    animationTime = fmod(animationTime, anim.duration);
+                    currentAnimationIndex++;
+                }
+                else {
+                    animationTime = anim.duration;
+                    isPlaying = false;
+                }
+            }
+        }
+    };
 }
 
+// ============================================
+// REFLECTION (Editor Integration)
+// ============================================
+REFL_TYPE(PAIN::MaterialInstance)
+REFL_FIELD(materialGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material))
+REFL_FIELD(useOverrides, PAIN::Editor::Attributes::Tooltip("Enable to override material properties"))
+REFL_FIELD(albedoTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(normalTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(metallicTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(roughnessTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(aoTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(emissiveTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(heightTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(opacityTextureOverride, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(baseColorOverride, PAIN::Editor::Attributes::DisplayName("Base Color"))
+REFL_FIELD(metallicOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Metallic"))
+REFL_FIELD(roughnessOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN::Editor::Attributes::DisplayName("Roughness"))
+REFL_FIELD(emissiveOverride, PAIN::Editor::Attributes::DisplayName("Emissive Color"))
+REFL_END
 
 REFL_TYPE(PAIN::ModelRenderer)
-REFL_FIELD(selected_model,
-	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
-	PAIN::Editor::Attributes::DisplayName("Model Asset"),
-	PAIN::Editor::Attributes::Tooltip("Select a 3D model asset"))
-REFL_FIELD(selected_diff_tex,
-	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-	PAIN::Editor::Attributes::DisplayName("Diffuse Texture"),
-	PAIN::Editor::Attributes::Tooltip("Select a diffuse Texture"))
-REFL_FIELD(selected_ao_tex,
-	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-	PAIN::Editor::Attributes::DisplayName("AO Texture"),
-	PAIN::Editor::Attributes::Tooltip("Select a AO Texture"))
-REFL_FIELD(baseColor,
-	PAIN::Editor::Attributes::DisplayName("Base Color"),
-	PAIN::Editor::Attributes::Tooltip("Base color of the material"))
-REFL_FIELD(metallic,
-	PAIN::Editor::Attributes::DisplayName("Metallic"),
-	PAIN::Editor::Attributes::Tooltip("Metallic factor of the material"))
-REFL_FIELD(roughness,
-	PAIN::Editor::Attributes::DisplayName("Roughness"),
-	PAIN::Editor::Attributes::Tooltip("Roughness factor of the material"))
+REFL_FIELD(modelGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
+REFL_FIELD(materials)
+REFL_FIELD(visible)
+REFL_FIELD(castShadows)
+REFL_FIELD(receiveShadows)
 REFL_END
 
