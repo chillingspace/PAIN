@@ -219,16 +219,14 @@ namespace PAIN {
             }
         }
 
-        static std::size_t fileHashing(const std::filesystem::path& path) {
-            // FNV-1a 64-bit constants
-            const std::size_t fnv_offset_basis = 14695981039346656037ULL;
-            const std::size_t fnv_prime = 1099511628211ULL;
+        static uint64_t fileHashing(const std::filesystem::path& path) {
+            const uint64_t fnv_offset_basis = 14695981039346656037ULL;
+            const uint64_t fnv_prime = 1099511628211ULL;
 
-            std::size_t hash = fnv_offset_basis;
+            uint64_t hash = fnv_offset_basis;
             std::ifstream file(path, std::ios::binary);
-
             if (!file)
-                return 0; // or handle error
+                return 0;
 
             char buffer[4096];
             while (file) {
