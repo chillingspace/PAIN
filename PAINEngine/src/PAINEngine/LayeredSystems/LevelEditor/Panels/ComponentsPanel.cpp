@@ -207,8 +207,11 @@ namespace PAIN {
                     [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });                 
                 
                 // ---- AI ----
-                registerCompUIFunc<PAIN::AI::Controller>("AIController",
-                    [](ComponentsPanel&, PAIN::AI::Controller& rb) { DrawWithReflection(rb); });
+                registerCompUIFunc<PAIN::AI::Controller>( "AIController",
+                    [](ComponentsPanel& panel, PAIN::AI::Controller& rb) { DrawWithReflection(rb, &panel);});
+
+                //registerCompUIFunc<PAIN::AI::Controller>("AIController",
+                //    [](ComponentsPanel&, PAIN::AI::Controller& rb) { DrawWithReflection(rb); });
                 
                 registerCompUIFunc<PAIN::AI::Sensors>("AISensors",
                     [](ComponentsPanel&, PAIN::AI::Sensors& rb) { DrawWithReflection(rb); });               

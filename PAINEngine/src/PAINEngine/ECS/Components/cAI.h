@@ -50,7 +50,7 @@ namespace PAIN {
 
         /*--------------------  Controller  --------------------*/
         struct Controller {
-            std::string behavior_asset_id; // e.g. "behaviors/guard_patrol.bt"
+            std::string behavior_asset; // e.g. "behaviors/guard_patrol.bt"
             bool enabled = true;
             float tick_interval = 0.1f;    // seconds between behavior ticks
             float accum_dt = 0.0f;         // internal accumulator
@@ -145,11 +145,17 @@ namespace nlohmann {
 
 // Reflections
 
+namespace PAIN::Editor::Attributes {
+    // One global/constexpr instance describing "this field selects Script assets"
+    static constexpr AssetSelector BehaviorScriptSelector{ PAIN::Assets::Type::Script };
+}
+
 // Blackboard not registered as not needed to expose to ui
 
 // Controller
 REFL_TYPE(PAIN::AI::Controller)
-    REFL_FIELD(behavior_asset_id)
+    //REFL_FIELD(behavior_asset)
+    REFL_FIELD(behavior_asset, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Script))
     REFL_FIELD(enabled)
     REFL_FIELD(tick_interval)
     REFL_FIELD(accum_dt)

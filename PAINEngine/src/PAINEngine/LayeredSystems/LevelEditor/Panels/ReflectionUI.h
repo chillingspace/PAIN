@@ -31,6 +31,7 @@
 #include "ECS/Components/cPhysics.h"
 #include "ECS/Components/cAI.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "CoreSystems/Assets/sAssets.h"  
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
@@ -796,23 +797,102 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
     return changed;
 }
 
+ //Overload for AI::Controller to draw dropdown for behavior_asset
+template<>
+inline bool DrawWithReflection<PAIN::AI::Controller>(
+    PAIN::AI::Controller& ai,
+    PAIN::Editor::Panel::ComponentsPanel* panel)
+{
+    bool changed = false;
 
-//template <typename T>
-//bool DrawWithReflection(T& obj) {
-//    bool changed = false;
-//
-//    constexpr auto type = refl::reflect<T>();         
-//    refl::util::for_each(type.members, [&](auto m) {   
-//        if constexpr (refl::descriptor::is_field(m)) {
-//            auto& field = m(obj);
-//            ImGui::PushID(m.name.c_str());
-//            changed |= DrawField(m.name.c_str(), field);
-//            ImGui::PopID();
-//        }
-//        });
-//
-//    return changed;
-//}
+    constexpr auto type = refl::reflect<PAIN::AI::Controller>();
+
+    // ----------- Custom dropdown for behavior_asset -----------
+    if (panel) {
+        auto asset_service = panel->services->get<PAIN::Assets::Manager>();
+        auto scripts = asset_service->getAllAssetDataOfType(PAIN::Assets::Type::Script);
+
+        std::vector<const char*> names;
+        names.reserve(scripts.size());
+
+        int current_index = -1;
+
+        for (int i = 0; i < (int)scripts.size(); ++i) {
+            auto& script = scripts[i];
+            names.push_back(script->name.c_str());
+
+            if (ai.behavior_asset == script->name) {
+                current_index = i;
+            }
+        }
+
+        if (!names.empty()) {
+            if (ImGui::Combo("Behavior Script", &current_index,
+                names.data(), (int)names.size())) {
+                if (current_index >= 0 && current_index < (int)scripts.size()) {
+                    ai.behavior_asset = scripts[current_index]->name;
+                    changed = true;
+                }
+            }
+        }
+        else {
+            ImGui::TextDisabled("No Script assets found");
+        }
+    }
+
+    refl::util::for_each(type.members, [&](auto m) {
+        if constexpr (refl::descriptor::is_field(m)) {
+            // ---- Disable Default Text Box ----
+            // String must be the same name as the reflected member (behavior_asset)
+            if (m.name == "behavior_asset") {
+                // don't draw the default textbox
+                return; 
+            }
+
+            auto& field = m(ai);
+            ImGui::PushID(m.name.c_str());
+
+            // ------- DisplayName -------
+            const char* display_name = m.name.c_str();
+            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::DisplayName>(m)) {
+                display_name =
+                    refl::descriptor::get_attribute<PAIN::Editor::Attributes::DisplayName>(m).name;
+            }
+
+            // ------- Tooltip -------
+            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Tooltip>(m)) {
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip(
+                        "%s",
+                        refl::descriptor::get_attribute<PAIN::Editor::Attributes::Tooltip>(m).text
+                    );
+                }
+            }
+
+            // ------- ReadOnly -------
+            bool readonly = false;
+            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)
+                || refl::descriptor::has_attribute<PAIN::Editor::Attributes::ReadOnly>(m)) {
+                readonly = true;
+            }
+
+            // ------- Default drawing logic -------
+            if (!readonly) {
+                changed |= DrawField(display_name, field);
+            }
+            else {
+                ImGui::BeginDisabled();
+                changed |= DrawField(display_name, field);
+                ImGui::EndDisabled();
+            }
+
+            ImGui::PopID();
+        }
+        });
+
+    return changed;
+}
+
 
 namespace PAIN {
     namespace Editor {
@@ -825,15 +905,6 @@ namespace PAIN {
                     DrawWithReflection(comp);
                     });
             }
-
-            //template <typename T>
-            //inline void RegisterReflected(PAIN::Editor::Panel::ComponentsPanel& panel) {
-            //    const char* ecs_key = getComponentName<T>();
-            //    panel.registerCompUIFunc<T>(ecs_key, [](auto&, T& comp) {
-            //        DrawWithReflection(comp); 
-            //        });
-            //}
-
 
             // Manual UI for collider comp
             inline void RegisterColliderUI(PAIN::Editor::Panel::ComponentsPanel& panel) {
