@@ -5,6 +5,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in mat3 TBN;
 
 out vec4 FragColor;
 
@@ -35,7 +36,7 @@ uniform vec3 u_LightPos;
 uniform vec3 u_LightColor;
 uniform vec3 u_AmbientLight;
 
-// PBR functions (keep your existing ones)
+// PBR functions
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a = roughness * roughness;
     float a2 = a * a;
@@ -68,16 +69,13 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 }
 
 // Unpack normal map
-vec3 getNormalFromMap() {
-    vec3 tangentNormal = texture(u_NormalMap, TexCoords).xyz * 2.0 - 1.0;
-    
-    // Simple normal mapping without tangent space
-    // For proper implementation, pass tangent/bitangent from vertex shader
-    return normalize(Normal);  // Fallback for now
+vec3 getNormalFromMap(vec2 uv) {
+    vec3 tangentNormal = texture(u_NormalMap, uv).xyz * 2.0 - 1.0;
+    return normalize(TBN * tangentNormal);
 }
 
 void main() {
-    // Sample textures
+    // Sample textures with TexCoords
     vec3 albedo = u_UseAlbedoMap ? 
         texture(u_AlbedoMap, TexCoords).rgb * u_BaseColor : 
         u_BaseColor;
@@ -98,8 +96,8 @@ void main() {
         texture(u_EmissiveMap, TexCoords).rgb : 
         vec3(0.0);
     
-    // Normal
-    vec3 N = u_UseNormalMap ? getNormalFromMap() : normalize(Normal);
+    // Normal (use TexCoords, not flippedUV)
+    vec3 N = u_UseNormalMap ? getNormalFromMap(TexCoords) : normalize(Normal);
     vec3 V = normalize(u_CamPos - FragPos);
     
     // Calculate reflectance at normal incidence

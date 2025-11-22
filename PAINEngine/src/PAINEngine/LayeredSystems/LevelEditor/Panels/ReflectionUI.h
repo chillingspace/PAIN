@@ -30,6 +30,7 @@
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "Applications/AppSystem.h"
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
@@ -57,11 +58,11 @@ inline bool DrawAssetSelectorField(
     const char* label,
     PAIN::Assets::GUID& guid,
     const PAIN::Editor::Attributes::AssetSelector& attr,
-    PAIN::Editor::Panel::ComponentsPanel& panel,
+    std::shared_ptr<PAIN::Services> services,
     bool readonly = false
 ) {
     bool changed = false;
-    auto asset_service = panel.services->get<PAIN::Assets::Manager>();
+    auto asset_service = services->get<PAIN::Assets::Manager>();
     auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
 
     // Find current selection
@@ -168,12 +169,127 @@ inline bool DrawAssetSelectorField(
         ImGui::Separator();
         ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(), assets.size());
 
-        ImGui::SameLine();
-        if (ImGui::SmallButton("Clear")) {
-            guid = PAIN::Assets::GUID();
-            changed = true;
-            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+
+    if (readonly) ImGui::EndDisabled();
+    return changed;
+}
+
+inline bool DrawAssetSelectorField(
+    const char* label,
+    std::filesystem::path& path,
+    const PAIN::Editor::Attributes::AssetSelector& attr,
+    std::shared_ptr<PAIN::Services> services,
+    bool readonly = false
+) {
+    bool changed = false;
+    auto asset_service = services->get<PAIN::Assets::Manager>();
+    auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+
+    // Find current selection
+    std::string current_name = "None";
+    for (auto const& asset : assets) {
+        if (!path.empty() && asset->main_relative_path == path) {
+            current_name = asset->main_relative_path.filename().string();
+            break;
         }
+    }
+
+    ImGui::Text("%s", label);
+
+    if (readonly) ImGui::BeginDisabled();
+
+    // Selector button
+    std::string button_id = current_name + "###" + std::string(label) + "_selector";
+    if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
+        ImGui::OpenPopup(label);
+    }
+
+    // Searchable popup
+    if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
+        static char search_buffer[256] = "";
+
+        // Search input
+        ImGui::SetNextItemWidth(400);
+        if (ImGui::InputTextWithHint("##search", "Type to search...",
+            search_buffer, 256, ImGuiInputTextFlags_AutoSelectAll)) {
+            // Search text changed
+        }
+
+        ImGui::Separator();
+
+        // Build filtered and sorted list
+        struct ScoredAsset {
+            std::shared_ptr<const PAIN::Assets::IAsset> asset;
+            int score;
+            std::string display_name;
+        };
+
+        std::vector<ScoredAsset> scored_assets;
+
+        for (auto const& asset : assets) {
+            std::string asset_path = asset->main_relative_path.string();
+            std::string asset_name = asset->name.empty() ? asset->main_relative_path.filename().string() : asset->name;
+
+            int score = 100;  // Default score
+
+            if (strlen(search_buffer) > 0) {
+                score = fuzzyMatchScore(search_buffer, asset_name);
+                if (score == 0) {
+                    score = fuzzyMatchScore(search_buffer, asset_path);
+                }
+                if (score == 0) continue;  // No match
+            }
+
+            scored_assets.push_back({ asset, score, asset_path });
+        }
+
+        // Sort by score (descending)
+        std::sort(scored_assets.begin(), scored_assets.end(),
+            [](const ScoredAsset& a, const ScoredAsset& b) {
+                return a.score > b.score;
+            });
+
+        // Display results
+        ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
+
+        for (auto const& scored : scored_assets) {
+            bool is_selected = (!path.empty() && scored.asset->main_relative_path == path);
+
+            // Highlight matched characters
+            if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
+                path = scored.asset->main_relative_path;
+                changed = true;
+                search_buffer[0] = '\0';  // Clear search
+                ImGui::CloseCurrentPopup();
+            }
+
+            // Tooltip with full path
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::Text("Path: %s", scored.asset->shipped_relative_path.string().c_str());
+                ImGui::Text("Type: %s", PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
+                if (strlen(search_buffer) > 0) {
+                    ImGui::Text("Match Score: %d", scored.score);
+                }
+                ImGui::EndTooltip();
+            }
+
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+
+        if (scored_assets.empty()) {
+            ImGui::TextDisabled("No matching assets");
+        }
+
+        ImGui::EndChild();
+
+        // Footer stats
+        ImGui::Separator();
+        ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(), assets.size());
 
         ImGui::EndPopup();
     }
@@ -539,7 +655,7 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
         changed |= DrawAssetSelectorField("Select A Material",
             mat.materialGUID,
             PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
-            *panel);
+            panel->services);
     }
     else {
         ImGui::Text("Material GUID: %s", mat.materialGUID.ToString().c_str());
@@ -571,42 +687,42 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
                 DrawAssetSelectorField("Albedo Texture Override",
                     mat.albedoTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Normal Texture Override",
                     mat.normalTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Metallic Texture Override",
                     mat.metallicTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Roughness Texture Override",
                     mat.roughnessTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("AO Texture Override",
                     mat.aoTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Emissive Texture Override",
                     mat.emissiveTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Height Texture Override",
                     mat.heightTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
 
                 DrawAssetSelectorField("Opacity Texture Override",
                     mat.opacityTextureOverride,
                     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    *panel);
+                    panel->services);
             }
 
             // Base Color Override
@@ -749,7 +865,7 @@ bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nu
                 if (panel) {
                     auto attr = refl::descriptor::get_attribute<PAIN::Editor::Attributes::AssetSelector>(m);
                     // Replace with your asset dropdown renderer
-                    changed |= DrawAssetSelectorField(display_name, field, attr, *panel, readonly);
+                    changed |= DrawAssetSelectorField(display_name, field, attr, panel->services, readonly);
                 }
             }
             // ------- Range, Dropdown, etc. -------

@@ -174,7 +174,7 @@ namespace PAIN {
 			void duplicateFile(std::filesystem::path const& file_path);
 
 			//Create new material function
-			void createNewMaterial(Material const& mat, std::filesystem::path const& out_path);
+			void saveMaterial(Material const& mat, std::filesystem::path const& out_path);
 #endif
 #endif
 

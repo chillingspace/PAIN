@@ -167,7 +167,7 @@ namespace PAIN {
                     unsigned int preview_fbo = 0;
                     unsigned int preview_texture = 0;
                     unsigned int preview_depth_rbo = 0;
-                    glm::ivec2 preview_size{ 256, 256 };
+                    const glm::ivec2 preview_size{ 512, 512 };
 
                     struct PreviewSettings {
                         // Camera
@@ -186,6 +186,9 @@ namespace PAIN {
                         float ambient_intensity = 0.15f;
                         float light_intensity = 15.0f;
                         glm::vec3 light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+
+                        //Preview disply size
+                        glm::ivec2 display_size{ 256, 256 };
                     };
 
                     //Static sphere model
@@ -222,7 +225,7 @@ namespace PAIN {
                 std::unordered_map<Assets::GUID, MaterialPreview> mat_previews;
 
                 //Render material file functionality
-                void renderMaterial(std::shared_ptr<Assets::Material> material, Assets::GUID id);
+                void renderMaterial(std::shared_ptr<Assets::Material> material, File const& file);
 
                 //Open files manager
                 const int MAX_FILES_OPEN = 5;

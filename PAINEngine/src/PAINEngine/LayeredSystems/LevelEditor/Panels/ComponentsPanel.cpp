@@ -136,7 +136,7 @@ namespace PAIN {
                             if (DrawAssetSelectorField("Select A Model",
                                 renderer.modelGUID,
                                 PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
-                                panel)) {
+                                panel.services)) {
                                 changed = true;
                             }
 

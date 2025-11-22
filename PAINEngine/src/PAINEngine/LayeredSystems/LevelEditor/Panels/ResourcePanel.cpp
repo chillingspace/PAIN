@@ -183,7 +183,6 @@ namespace PAIN {
 					temp.path = file;
 
 					//Get root folder path
-					
 					auto relative = std::filesystem::relative(temp.path, root);
 
 					//Find asset GUID
@@ -723,6 +722,16 @@ namespace PAIN {
 				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 				glEnableVertexAttribArray(2);
 
+				//Tangent (location = 3)
+				glEnableVertexAttribArray(3);
+				glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+					(void*)offsetof(Assets::Vertex, tangent));
+
+				//Bitangent (location = 4)
+				glEnableVertexAttribArray(4);
+				glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+					(void*)offsetof(Assets::Vertex, bitangent));
+
 				// Unbind VAO
 				glBindVertexArray(0);
 
@@ -800,17 +809,15 @@ namespace PAIN {
 				// Camera
 				shader->SetUniform("u_CamPos", cam_pos);
 
-				// Enhanced lighting for better material visualization
-				shader->SetUniform("u_AmbientLight", glm::vec3(0.15f));
-				shader->SetUniform("u_LightPos", glm::vec3(2.0f, 3.0f, 2.0f));
-				shader->SetUniform("u_LightColor", glm::vec3(15.0f));
+				//Set preview settings light intensity
+				shader->SetUniform("u_AmbientLight", glm::vec3(preview_settings.ambient_intensity));
+				shader->SetUniform("u_LightPos", preview_settings.light_position);
+				shader->SetUniform("u_LightColor", glm::vec3(preview_settings.light_intensity));
 
 				// Material properties
 				shader->SetUniform("u_BaseColor", material->baseColor);
 				shader->SetUniform("u_Metallic", material->metallic);
 				shader->SetUniform("u_Roughness", material->roughness);
-
-				// === LOAD AND BIND TEXTURES ===
 				
 				//Get asset service
 				auto assetManager = services.lock()->get<Assets::Manager>();
@@ -910,55 +917,63 @@ namespace PAIN {
 				glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3]);
 			}
 
-			void ResourcePanel::renderMaterial(std::shared_ptr<Assets::Material> material, Assets::GUID id) {
-				mat_previews[id].render(material);
-				ImVec2 icon_size(256, 256);
-				ImGui::Image(static_cast<ImTextureID>(mat_previews[id].getPreviewTexture()), icon_size);
+			void ResourcePanel::renderMaterial(std::shared_ptr<Assets::Material> material, File const& file) {
+				
+				ImVec2 icon_size(mat_previews[file.id].preview_settings.display_size.x, mat_previews[file.id].preview_settings.display_size.y);
+				ImGui::BeginChild((std::string("Material Preview##") + file.id.ToString()).c_str(), icon_size);
+				mat_previews[file.id].render(material);
+				ImGui::Image(static_cast<ImTextureID>(mat_previews[file.id].getPreviewTexture()), icon_size);
+				ImGui::EndChild();
 
+				ImGui::SameLine();
+
+				ImGui::BeginChild((std::string("Material Settings##") + file.id.ToString()).c_str(), icon_size);
+
+				//Preview settings
 				if (ImGui::CollapsingHeader("Preview Settings")) {
 					ImGui::PushItemWidth(150);
 
 					// Projection Type
 					ImGui::Text("Projection");
-					ImGui::Checkbox("Orthographic", &mat_previews[id].preview_settings.use_orthographic);
+					ImGui::Checkbox("Orthographic", &mat_previews[file.id].preview_settings.use_orthographic);
 
 					ImGui::Separator();
 
 					// Camera Settings
 					ImGui::Text("Camera");
-					ImGui::SliderFloat("Distance", &mat_previews[id].preview_settings.camera_distance, 1.0f, 6.0f);
+					ImGui::SliderFloat("Distance", &mat_previews[file.id].preview_settings.camera_distance, 1.0f, 6.0f);
 
-					if (!mat_previews[id].preview_settings.use_orthographic) {
-						ImGui::SliderFloat("FOV", &mat_previews[id].preview_settings.fov, 20.0f, 90.0f);
+					if (!mat_previews[file.id].preview_settings.use_orthographic) {
+						ImGui::SliderFloat("FOV", &mat_previews[file.id].preview_settings.fov, 20.0f, 90.0f);
 					}
 					else {
-						ImGui::SliderFloat("Ortho Size", &mat_previews[id].preview_settings.ortho_size, 0.5f, 2.0f);
+						ImGui::SliderFloat("Ortho Size", &mat_previews[file.id].preview_settings.ortho_size, 0.5f, 2.0f);
 					}
 
 					ImGui::Separator();
 
 					// Rotation
 					ImGui::Text("Rotation");
-					ImGui::SliderFloat("Rotate Y", &mat_previews[id].preview_settings.rotation_y, -180.0f, 180.0f);
-					ImGui::SliderFloat("Rotate X", &mat_previews[id].preview_settings.rotation_x, -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate Y", &mat_previews[file.id].preview_settings.rotation_y, -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate X", &mat_previews[file.id].preview_settings.rotation_x, -180.0f, 180.0f);
 
 					if (ImGui::Button("Reset Rotation")) {
-						mat_previews[id].preview_settings.rotation_y = -25.0f;
-						mat_previews[id].preview_settings.rotation_x = 0.0f;
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 0.0f;
 					}
 
 					ImGui::Separator();
 
 					// Lighting
 					ImGui::Text("Lighting");
-					ImGui::SliderFloat("Ambient", &mat_previews[id].preview_settings.ambient_intensity, 0.0f, 1.0f);
-					ImGui::SliderFloat("Light Intensity", &mat_previews[id].preview_settings.light_intensity, 1.0f, 50.0f);
-					ImGui::DragFloat3("Light Position", glm::value_ptr(mat_previews[id].preview_settings.light_position), 0.1f);
+					ImGui::SliderFloat("Ambient", &mat_previews[file.id].preview_settings.ambient_intensity, 0.0f, 1.0f);
+					ImGui::SliderFloat("Light Intensity", &mat_previews[file.id].preview_settings.light_intensity, 1.0f, 50.0f);
+					ImGui::DragFloat3("Light Position", glm::value_ptr(mat_previews[file.id].preview_settings.light_position), 0.1f);
 
 					if (ImGui::Button("Reset Lighting")) {
-						mat_previews[id].preview_settings.ambient_intensity = 0.15f;
-						mat_previews[id].preview_settings.light_intensity = 15.0f;
-						mat_previews[id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[file.id].preview_settings.light_intensity = 15.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
 					}
 
 					ImGui::Separator();
@@ -966,26 +981,121 @@ namespace PAIN {
 					// Presets
 					ImGui::Text("Presets");
 					if (ImGui::Button("Unity Style")) {
-						mat_previews[id].preview_settings.use_orthographic = true;
-						mat_previews[id].preview_settings.ortho_size = 1.1f;
-						mat_previews[id].preview_settings.camera_distance = 3.0f;
-						mat_previews[id].preview_settings.rotation_y = -25.0f;
-						mat_previews[id].preview_settings.rotation_x = 0.0f;
-						mat_previews[id].preview_settings.ambient_intensity = 0.15f;
-						mat_previews[id].preview_settings.light_intensity = 15.0f;
+						mat_previews[file.id].preview_settings.use_orthographic = true;
+						mat_previews[file.id].preview_settings.ortho_size = 1.1f;
+						mat_previews[file.id].preview_settings.camera_distance = 3.0f;
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 0.0f;
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[file.id].preview_settings.light_intensity = 15.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
 					}
 					ImGui::SameLine();
 					if (ImGui::Button("Unreal Style")) {
-						mat_previews[id].preview_settings.use_orthographic = false;
-						mat_previews[id].preview_settings.fov = 35.0f;
-						mat_previews[id].preview_settings.camera_distance = 3.2f;
-						mat_previews[id].preview_settings.rotation_y = -25.0f;
-						mat_previews[id].preview_settings.rotation_x = 10.0f;
-						mat_previews[id].preview_settings.ambient_intensity = 0.1f;
-						mat_previews[id].preview_settings.light_intensity = 20.0f;
+						mat_previews[file.id].preview_settings.use_orthographic = false;
+						mat_previews[file.id].preview_settings.fov = 35.0f;
+						mat_previews[file.id].preview_settings.camera_distance = 3.2f;
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 10.0f;
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.1f;
+						mat_previews[file.id].preview_settings.light_intensity = 20.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
 					}
 
 					ImGui::PopItemWidth();
+				}
+
+				//Material settings
+				if (ImGui::CollapsingHeader("Material Settings")) {
+					ImGui::PushItemWidth(150);
+					ImGui::Indent(10.0f);
+
+					//Textures override dropdown
+					if (ImGui::CollapsingHeader("Textures")) {
+						DrawAssetSelectorField("Albedo Texture Override",
+							material->albedoTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Normal Texture Override",
+							material->normalTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Metallic Texture Override",
+							material->metallicTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Roughness Texture Override",
+							material->roughnessTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("AO Texture Override",
+							material->aoTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Emissive Texture Override",
+							material->emissiveTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						//DrawAssetSelectorField("Height Texture Override",
+						//	material->heightTexturePath,
+						//	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+						//	services);
+
+						//DrawAssetSelectorField("Opacity Texture Override",
+						//	material->opacityTexturePath,
+						//	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+						//	services);
+					}
+
+					// Base Color Override
+					ImGui::ColorEdit3("Base Color", glm::value_ptr(material->baseColor));
+
+					// Metallic Override
+					ImGui::SliderFloat("Metallic", &material->metallic, 0.0f, 1.0f, "%.2f");
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("0 = Dielectric (non-metal), 1 = Metallic");
+					}
+
+					// Roughness Override
+					ImGui::SliderFloat("Roughness", &material->roughness, 0.0f, 1.0f, "%.2f");
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("0 = Smooth/Shiny, 1 = Rough/Matte");
+					}
+
+					// Emissive Override
+					ImGui::ColorEdit3("Emissive Color", glm::value_ptr(material->emissive));
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("Self-illumination color (HDR values supported)");
+					}
+
+					//Save material settings
+					if (ImGui::Button("Save Material")) {
+						asset_service->saveMaterial(*material.get(), file.path);
+					}
+				}
+				ImGui::EndChild();
+
+				//Preview sizing
+				ImGui::Text("Preview Sizing: "); ImGui::SameLine();
+				if (ImGui::Button("Small")) {
+					mat_previews[file.id].preview_settings.display_size.y = 256;
+					mat_previews[file.id].preview_settings.display_size.x = 256;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Medium")) {
+					mat_previews[file.id].preview_settings.display_size.y = 384;
+					mat_previews[file.id].preview_settings.display_size.x = 384;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Large")) {
+					mat_previews[file.id].preview_settings.display_size.y = 512;
+					mat_previews[file.id].preview_settings.display_size.x = 512;
 				}
 			}
 
@@ -1018,7 +1128,7 @@ namespace PAIN {
 					case Assets::Type::Material: {
 						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
 						if (mat_opt.has_value()) {
-							renderMaterial(mat_opt.value(), file.id);
+							renderMaterial(mat_opt.value(), file);
 						}
 						else {
 							//Display icon
@@ -1541,7 +1651,7 @@ namespace PAIN {
 
 						//Create material
 						Assets::Material def_material;
-						asset_service->createNewMaterial(def_material, out_path);
+						asset_service->saveMaterial(def_material, out_path);
 
 						//Update directories & files
 						populateFiles(current_path);
