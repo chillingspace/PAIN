@@ -293,7 +293,7 @@ namespace PAIN {
 				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
 
 					if (ImGui::MenuItem("Open##file")) {
-						open_files.push_back(file);
+						if (open_files.find(file) == open_files.end())open_files.insert(file);
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
@@ -561,7 +561,7 @@ namespace PAIN {
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-							open_files.push_back(file);
+							if (open_files.find(file) == open_files.end())open_files.insert(file);
 						}
 						ImGui::PopStyleColor();
 
@@ -593,7 +593,7 @@ namespace PAIN {
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-						open_files.push_back(file);
+						if(open_files.find(file) == open_files.end())open_files.insert(file);
 					}
 					ImGui::PopStyleColor();
 

@@ -6,6 +6,8 @@ local moveRight = false
 local moveUp = false
 local moveDown = false
 
+local walkingSoundPlaying = false
+
 registerKeyDown("KEY_U", function() moveUp = true end)
 registerKeyDown("KEY_D", function() moveDown = true end)
 registerKeyDown("KEY_L", function() moveLeft = true end)
@@ -21,10 +23,11 @@ local speed = 4.0
 -- grab initial rotation 
 local baseRx, baseRy, baseRz = getRotation(entityId)
 local currentYaw = baseRy or 0.0
-
 local playerStateInited = false
 
 registerUpdate(function(dt)
+    local id = entityId -- the entity script is attached to
+
     if not playerStateInited then
         if PlayerState and PlayerState.init then
             PlayerState.init(entityId)
@@ -32,13 +35,38 @@ registerUpdate(function(dt)
         playerStateInited = true
     end
 
-    local x, y, z = getPosition(entityId)
+    -- while hiding: stop movement + stop audio 
+    if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
+        if walkingSoundPlaying and audioStop then
+            audioStop(id)
+            walkingSoundPlaying = false
+        end
+        return
+    end
+
+    local x, y, z = getPosition(id)
     local dx, dz = 0.0, 0.0
 
     if moveUp    then dz = dz - 1.0 end
     if moveDown  then dz = dz + 1.0 end
     if moveLeft  then dx = dx - 1.0 end
     if moveRight then dx = dx + 1.0 end
+
+    local isMoving = (dx ~= 0.0 or dz ~= 0.0)
+
+    if isMoving then
+        if not walkingSoundPlaying and audioPlay then
+            -- optional: ensure it loops
+            if audioSetLooping then audioSetLooping(id, true) end
+            audioPlay(id)
+            walkingSoundPlaying = true
+        end
+    else
+        if walkingSoundPlaying and audioStop then
+            audioStop(id)
+            walkingSoundPlaying = false
+        end
+    end
 
     local len2 = dx*dx + dz*dz
     if len2 > 0.0001 then
@@ -61,7 +89,6 @@ registerUpdate(function(dt)
         end
 
         currentYaw = newYaw
-
         setRotation(entityId, baseRx, currentYaw, baseRz)
     end
 

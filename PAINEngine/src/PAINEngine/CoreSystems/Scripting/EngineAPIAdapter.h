@@ -47,6 +47,7 @@ public:
 
     std::string GetImageGUID(std::string_view name) override;
     std::string GetScriptGUID(std::string_view name) override;
+    std::string GetAudioGUID(std::string_view name) override;
     std::string GetModelGUID(std::string_view name) override;
     std::string GetFontGUID(std::string_view name) override;
     std::string GetScenesGUID(std::string_view name) override;

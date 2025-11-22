@@ -59,7 +59,7 @@ namespace PAIN {
 REFL_TYPE(PAIN::Audio::AudioSource)
     REFL_FIELD(selected_audio,
     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Audio),
-    PAIN::Editor::Attributes::DisplayName("Audio Asset"),
+    PAIN::Editor::Attributes::DisplayName("Select a Audio asset"),
     PAIN::Editor::Attributes::Tooltip("Select a Audio asset"))
     REFL_FIELD(group_name)
     REFL_FIELD(is3D)          // Serialized

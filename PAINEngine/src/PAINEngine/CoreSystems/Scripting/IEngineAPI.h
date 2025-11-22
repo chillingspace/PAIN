@@ -45,6 +45,7 @@ struct IEngineAPI {
 
     virtual std::string GetImageGUID(std::string_view name) = 0;
     virtual std::string GetScriptGUID(std::string_view name) = 0;
+    virtual std::string GetAudioGUID(std::string_view name) = 0;
     virtual std::string GetModelGUID(std::string_view name) = 0;
     virtual std::string GetFontGUID(std::string_view name) = 0;
     virtual std::string GetScenesGUID(std::string_view name) = 0;
