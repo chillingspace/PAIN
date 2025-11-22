@@ -1,13 +1,3 @@
-/*****************************************************************//**
- * \file   EntityPanel.h
- * \brief  Entity hierarchy panel with GUID-based parenting
- *
- * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
- * \co-author
- * \date   November 2025
- * All content © 2025 DigiPen Institute of Technology Singapore, all rights reserved.
- *********************************************************************/
-
 #pragma once
 
 #include "Panels.h"
