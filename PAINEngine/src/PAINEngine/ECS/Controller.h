@@ -10,10 +10,48 @@
 namespace PAIN {
 	namespace ECS {
 
+		class EntityGUIDRegistry {
+		private:
+
+			//Bidirectional Mapping
+			std::unordered_map<Assets::GUID, entt::entity> guid_to_entity;
+			std::unordered_map<entt::entity, Assets::GUID> entity_to_guid;
+		public:
+			EntityGUIDRegistry() = default;
+			~EntityGUIDRegistry() = default;
+
+			//Get or create a new GUID
+			Assets::GUID getOrCreateGUID(entt::entity e, entt::registry& registry);
+
+			//Resolve GUID
+			entt::entity resolveGUID(const Assets::GUID& guid) const;
+
+			//Update GUID
+			void remapGUID(const Assets::GUID& oldGuid, const Assets::GUID& newGuid);
+
+			//Register an entity
+			void registerEntity(entt::entity e, const Assets::GUID& guid);
+
+			//Unregister an entity
+			void unregisterEntity(entt::entity e);
+
+			//Check for GUID
+			bool hasGUID(const Assets::GUID& guid) const;
+
+			//Check for entity
+			bool hasEntity(entt::entity e) const;
+
+			//Clear everything
+			void clear();
+		};
+
 		class Controller : public AppSystem {
 		private:
 
 			size_t entity_count = 0;
+
+			// GUID Registry for stable entity references
+			EntityGUIDRegistry guid_registry;
 
 			entt::registry entt_registry;
 
@@ -38,6 +76,18 @@ namespace PAIN {
 		public:
 			explicit Controller(std::shared_ptr<Services> svc) {
 				services = svc;
+			}
+
+			//Public access to the GUID registry
+			EntityGUIDRegistry& getGUIDRegistry() { return guid_registry; }
+			const EntityGUIDRegistry& getGUIDRegistry() const { return guid_registry; }
+
+			Assets::GUID getOrCreateEntityGUID(entt::entity e) {
+				return guid_registry.getOrCreateGUID(e, entt_registry);
+			}
+
+			entt::entity resolveGUID(const Assets::GUID& guid) const {
+				return guid_registry.resolveGUID(guid);
 			}
 
 			int getEntitiesCount() const { return static_cast<int>(entity_count); }

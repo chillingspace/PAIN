@@ -20,6 +20,7 @@
 #include "cAudioSource.h"
 #include "cBoundingVolume.h"
 #include "cScript.h"
+#include "cEntity.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
@@ -30,6 +31,11 @@ namespace PAIN {
     * 3. Register your component in controller.cpp
     */
     using AllGameplayComponents = std::tuple <
+        //Entity components
+        Entity::GUID,
+        Entity::Name,
+        Entity::Hierarchy,
+
         // Metadata components
         MetaData::EntityName,
         MetaData::Tag,
@@ -52,6 +58,11 @@ namespace PAIN {
 
     template<typename T>
     constexpr const char* getComponentName() {
+        //Entity components
+        if constexpr (std::is_same_v<T, Entity::GUID>) return "GUID";
+        if constexpr (std::is_same_v<T, Entity::Name>) return "Name";
+        if constexpr (std::is_same_v<T, Entity::Hierarchy>) return "Hierarchy";
+
         // Metadata components
         if constexpr (std::is_same_v<T, MetaData::EntityName>) return "EntityName";
         else if constexpr (std::is_same_v<T, MetaData::Tag>) return "Tag";

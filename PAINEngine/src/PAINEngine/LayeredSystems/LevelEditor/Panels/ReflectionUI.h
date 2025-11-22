@@ -302,6 +302,9 @@ inline bool DrawAssetSelectorField(
 // Mark fields as read-only in the reflected UI
 struct ReadOnlyTag : refl::attr::usage::field {};
 
+// ---------- Asset GUID ----------
+inline bool DrawField(const char* label, PAIN::Assets::GUID& v) { ImGui::Text(v.ToString().c_str()); return true; }
+
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
 inline bool DrawField(const char* label, int& v) { return ImGui::DragInt(label, &v, 1); }

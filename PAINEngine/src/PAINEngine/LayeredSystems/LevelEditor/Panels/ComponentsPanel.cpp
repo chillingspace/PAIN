@@ -5,6 +5,7 @@
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "ECS/Components/cAudioSource.h"
+#include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
 
@@ -18,9 +19,21 @@ namespace PAIN {
             }
 
             void ComponentsPanel::onAttach() {
-                // Register component-specific UI
+                // Register component-specific 
 
-// ---- Transform ---- (FIXED: Skip detection after undo/redo)
+                // ---- Entity GUID ----
+                registerCompUIFunc<PAIN::Entity::GUID>("GUID",
+                    [](ComponentsPanel&, PAIN::Entity::GUID& as) { DrawWithReflection(as); });
+
+                // ---- Entity Name ----
+                registerCompUIFunc<PAIN::Entity::Name>("Name",
+                    [](ComponentsPanel&, PAIN::Entity::Name& as) { DrawWithReflection(as); });
+
+                // ---- Entity Hierarchy ----
+                //registerCompUIFunc<PAIN::Entity::Hierarchy>("Hierarchy",
+                //    [](ComponentsPanel&, PAIN::Entity::Hierarchy& as) { DrawWithReflection(as); });
+
+                // ---- Transform ----
                 registerCompUIFunc<PAIN::Transform>("Transform",
                     [this](ComponentsPanel& panel, PAIN::Transform& transform_ref) {
                         static struct {
@@ -124,86 +137,86 @@ namespace PAIN {
                         }
                     });
 
-                // ---- ModelRenderer ---- (UNCHANGED)
-                    registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
-                        [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
-                            // Model GUID selector (using reflection)
-                            bool changed = false;
+                // ---- ModelRenderer ----
+                registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
+                    [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
 
-                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
-                            // Model Asset Selection
-                            if (DrawAssetSelectorField("Select A Model",
-                                renderer.modelGUID,
-                                PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
-                                panel.services)) {
-                                changed = true;
-                            }
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Model",
+                            renderer.modelGUID,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
+                            panel.services)) {
+                            changed = true;
+                        }
 
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // Rendering Options
+                        if (ImGui::CollapsingHeader("Rendering Options")) {
+                            ImGui::Indent(10.0f);
+                            changed |= ImGui::Checkbox("Visible", &renderer.visible);
+                            changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
+                            changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
+                            ImGui::Unindent(10.0f);
+                        }
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // MATERIALS SECTION - This is where the magic happens!
+                        if (DrawField("Materials", renderer.materials, &panel)) {
+                            changed = true;
+                        }
+
+                        ImGui::PopStyleVar();
+
+                        // Optional: Add animation info if present
+                        if (renderer.currentAnimationIndex >= 0) {
                             ImGui::Spacing();
                             ImGui::Separator();
                             ImGui::Spacing();
 
-                            // Rendering Options
-                            if (ImGui::CollapsingHeader("Rendering Options")) {
-                                ImGui::Indent(10.0f);
-                                changed |= ImGui::Checkbox("Visible", &renderer.visible);
-                                changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
-                                changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
-                                ImGui::Unindent(10.0f);
+                            if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
+                                ImGui::BeginDisabled();
+                                ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
+                                ImGui::Text("Animation Time: %.2f", renderer.animationTime);
+                                ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
+                                ImGui::EndDisabled();
                             }
+                        }
+                    });
 
-                            ImGui::Spacing();
-                            ImGui::Separator();
-                            ImGui::Spacing();
-
-                            // MATERIALS SECTION - This is where the magic happens!
-                            if (DrawField("Materials", renderer.materials, &panel)) {
-                                changed = true;
-                            }
-
-                            ImGui::PopStyleVar();
-
-                            // Optional: Add animation info if present
-                            if (renderer.currentAnimationIndex >= 0) {
-                                ImGui::Spacing();
-                                ImGui::Separator();
-                                ImGui::Spacing();
-
-                                if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
-                                    ImGui::BeginDisabled();
-                                    ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
-                                    ImGui::Text("Animation Time: %.2f", renderer.animationTime);
-                                    ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
-                                    ImGui::EndDisabled();
-                                }
-                            }
-                        });
-
-                // ---- Light ---- (UNCHANGED)
+                // ---- Light ---- 
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
                     [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
 
-                // ---- AudioSource ---- (UNCHANGED)
+                // ---- AudioSource ---- 
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
                     [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
-                // ---- BoundingVolume ---- (UNCHANGED)
+                // ---- BoundingVolume ---- 
                 registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
                     [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
 
-                // ---- Hierarchy ---- (UNCHANGED)
+                // ---- Hierarchy ---- 
                 registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
                     [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
 
-                // ---- Physics ---- (UNCHANGED)
+                // ---- Physics ----
                 registerCompUIFunc<PAIN::Joint>("Joint",
                     [](ComponentsPanel&, PAIN::Joint& as) { DrawWithReflection(as); });
 
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
 
-                // ---- Script ---- (UNCHANGED)
+                // ---- Script ---- 
                 registerCompUIFunc<PAIN::Script>("Script",
                     [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
