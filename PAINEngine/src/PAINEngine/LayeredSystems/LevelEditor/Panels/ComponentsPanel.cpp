@@ -132,10 +132,8 @@ namespace PAIN {
 
                             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
-                            ImGui::Text("Select A Model");
-
                             // Model Asset Selection
-                            if (DrawAssetSelectorField("Model Asset",
+                            if (DrawAssetSelectorField("Select A Model",
                                 renderer.modelGUID,
                                 PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
                                 panel)) {

@@ -33,7 +33,26 @@
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
- // ---------- Asset Selector ----------
+ // Helper: Fuzzy match score
+inline int fuzzyMatchScore(const std::string& pattern, const std::string& str) {
+    int score = 0;
+    size_t pattern_idx = 0;
+
+    for (size_t str_idx = 0; str_idx < str.length() && pattern_idx < pattern.length(); ++str_idx) {
+        char p = std::tolower(pattern[pattern_idx]);
+        char s = std::tolower(str[str_idx]);
+
+        if (p == s) {
+            score += (str_idx == pattern_idx) ? 2 : 1;  // Bonus for consecutive matches
+            pattern_idx++;
+        }
+    }
+
+    // Return score only if all pattern chars matched
+    return (pattern_idx == pattern.length()) ? score : 0;
+}
+
+// ---------- Asset Selector with Fuzzy Search ----------
 inline bool DrawAssetSelectorField(
     const char* label,
     PAIN::Assets::GUID& guid,
@@ -44,23 +63,119 @@ inline bool DrawAssetSelectorField(
     bool changed = false;
     auto asset_service = panel.services->get<PAIN::Assets::Manager>();
     auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
-    std::vector<std::string> asset_names;
-    std::vector<const char*> asset_names_cstr;
-    int selected_idx = -1;
 
+    // Find current selection
+    std::string current_name = "None";
     for (auto const& asset : assets) {
-        asset_names.push_back(asset->shipped_relative_path.string());
-        asset_names_cstr.push_back(asset_names.back().c_str());
-        if (guid.IsValid() && asset->guid == guid) selected_idx = asset_names.size() - 1;
+        if (guid.IsValid() && asset->guid == guid) {
+            current_name = asset->main_relative_path.filename().string();
+            break;
+        }
     }
+
+    ImGui::Text("%s", label);
 
     if (readonly) ImGui::BeginDisabled();
 
-    if (ImGui::Combo(label, &selected_idx, asset_names_cstr.data(), (int)asset_names_cstr.size())) {
-        if (selected_idx >= 0 && selected_idx < (int)assets.size()) {
-            guid = assets[selected_idx]->guid;
-            changed = true;
+    // Selector button
+    std::string button_id = current_name + "###" + std::string(label) + "_selector";
+    if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
+        ImGui::OpenPopup(label);
+    }
+
+    // Searchable popup
+    if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
+        static char search_buffer[256] = "";
+
+        // Search input
+        ImGui::SetNextItemWidth(400);
+        if (ImGui::InputTextWithHint("##search", "Type to search...",
+            search_buffer, 256, ImGuiInputTextFlags_AutoSelectAll)) {
+            // Search text changed
         }
+
+        ImGui::Separator();
+
+        // Build filtered and sorted list
+        struct ScoredAsset {
+            std::shared_ptr<const PAIN::Assets::IAsset> asset;
+            int score;
+            std::string display_name;
+        };
+
+        std::vector<ScoredAsset> scored_assets;
+
+        for (auto const& asset : assets) {
+            std::string asset_path = asset->main_relative_path.string();
+            std::string asset_name = asset->name.empty() ? asset->main_relative_path.filename().string() : asset->name;
+
+            int score = 100;  // Default score
+
+            if (strlen(search_buffer) > 0) {
+                score = fuzzyMatchScore(search_buffer, asset_name);
+                if (score == 0) {
+                    score = fuzzyMatchScore(search_buffer, asset_path);
+                }
+                if (score == 0) continue;  // No match
+            }
+
+            scored_assets.push_back({ asset, score, asset_path });
+        }
+
+        // Sort by score (descending)
+        std::sort(scored_assets.begin(), scored_assets.end(),
+            [](const ScoredAsset& a, const ScoredAsset& b) {
+                return a.score > b.score;
+            });
+
+        // Display results
+        ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
+
+        for (auto const& scored : scored_assets) {
+            bool is_selected = (guid.IsValid() && scored.asset->guid == guid);
+
+            // Highlight matched characters
+            if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
+                guid = scored.asset->guid;
+                changed = true;
+                search_buffer[0] = '\0';  // Clear search
+                ImGui::CloseCurrentPopup();
+            }
+
+            // Tooltip with full path
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                ImGui::Text("Path: %s", scored.asset->shipped_relative_path.string().c_str());
+                ImGui::Text("Type: %s", PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
+                if (strlen(search_buffer) > 0) {
+                    ImGui::Text("Match Score: %d", scored.score);
+                }
+                ImGui::EndTooltip();
+            }
+
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+
+        if (scored_assets.empty()) {
+            ImGui::TextDisabled("No matching assets");
+        }
+
+        ImGui::EndChild();
+
+        // Footer stats
+        ImGui::Separator();
+        ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(), assets.size());
+
+        ImGui::SameLine();
+        if (ImGui::SmallButton("Clear")) {
+            guid = PAIN::Assets::GUID();
+            changed = true;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
 
     if (readonly) ImGui::EndDisabled();
@@ -419,12 +534,9 @@ inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Edit
 
     ImGui::PushID(&mat); // Use pointer as unique ID
 
-    //Render text
-    ImGui::Text("Select A Material");
-
     // Material Asset Selector
     if (panel) {
-        changed |= DrawAssetSelectorField("Material Asset",
+        changed |= DrawAssetSelectorField("Select A Material",
             mat.materialGUID,
             PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
             *panel);
