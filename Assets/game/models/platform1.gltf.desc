@@ -4,14 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-<<<<<<< Updated upstream:Assets/game/models/Platform1.obj.desc
-    "hash": 7266981329003433946
-=======
     "hash": 9950073950614376517
->>>>>>> Stashed changes:Assets/game/models/platform1.gltf.desc
   },
   "descriptor_version": 1,
-  "guid": "cad5370b-6cc9-4f46-832f-67e000ffc79a",
+  "guid": "adf751e1-ac1a-4a44-9aee-6f1fcf950ade",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

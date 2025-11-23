@@ -4,14 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-<<<<<<< Updated upstream:Assets/game/models/Crate.obj.desc
-    "hash": 8799402838513939720
-=======
     "hash": 4242152871303848001
->>>>>>> Stashed changes:Assets/game/models/Crate.gltf.desc
   },
   "descriptor_version": 1,
-  "guid": "200d0b9f-71a6-4241-9929-dbf5f8a37ee5",
+  "guid": "868018ea-2483-b147-afe3-da3d8102b26c",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

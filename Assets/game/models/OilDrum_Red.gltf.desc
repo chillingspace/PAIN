@@ -4,14 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-<<<<<<< Updated upstream:Assets/game/models/ContainerRed.obj.desc
-    "hash": 18118812823547415904
-=======
     "hash": 6781682408810202398
->>>>>>> Stashed changes:Assets/game/models/OilDrum_Red.gltf.desc
   },
   "descriptor_version": 1,
-  "guid": "2eacd47d-850d-e84e-9790-ecc51b3acb9d",
+  "guid": "fe28c80b-f6ca-4940-8f73-bcd80cccac5a",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

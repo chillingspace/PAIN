@@ -4,14 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-<<<<<<< Updated upstream:Assets/game/models/Rock6.obj.desc
-    "hash": 10790736899849776699
-=======
     "hash": 7425668397442568815
->>>>>>> Stashed changes:Assets/game/models/Tire.gltf.desc
   },
   "descriptor_version": 1,
-  "guid": "3c988684-0ce9-ef40-8585-da24b4eebb6d",
+  "guid": "3a4e770e-940e-334a-a533-3b17f8fd1df8",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

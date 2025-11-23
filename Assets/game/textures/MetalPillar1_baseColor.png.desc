@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear_normal.png",
+    "name": "MetalPillar1_baseColor.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 11831381846774522749
+    "hash": 3708608361590352281
   },
   "descriptor_version": 1,
-  "guid": "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
+  "guid": "256aaf03-37ee-654a-947b-dba5e889cb54",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Gear_Normal.png"
+    "source_file": "game\\textures\\MetalPillar1_baseColor.png"
   }
 }

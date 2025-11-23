@@ -4,14 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-<<<<<<< Updated upstream
-    "hash": 6214727545352777499
-=======
-    "hash": 11801444464434419651
->>>>>>> Stashed changes
+    "hash": 7672330456992242365
   },
   "descriptor_version": 1,
-  "guid": "57161e6f-69fd-6c4f-ac34-db7c8fbcfe01",
+  "guid": "56a6bc8b-f62e-b446-9026-d8f3c2e7a6a8",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\ContainerRed.prefab"

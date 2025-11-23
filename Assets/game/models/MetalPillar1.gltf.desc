@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Watertower.obj",
+    "name": "MetalPillar1.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 4648697641776394434
+    "hash": 13288083225470286774
   },
   "descriptor_version": 1,
-  "guid": "df6238f9-5bfc-2845-a702-1fefbd84b07f",
+  "guid": "607c385b-e549-db42-a889-a52d15733999",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Watertower.obj"
+    "source_file": "game\\models\\MetalPillar1.gltf"
   }
 }

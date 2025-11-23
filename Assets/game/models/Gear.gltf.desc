@@ -4,14 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-<<<<<<< Updated upstream:Assets/game/models/Rock5.obj.desc
-    "hash": 2702584294300046391
-=======
     "hash": 15841739210205110720
->>>>>>> Stashed changes:Assets/game/models/Gear.gltf.desc
   },
   "descriptor_version": 1,
-  "guid": "a46e46bd-95fe-8a4b-a6c2-0e233a3e37fc",
+  "guid": "3064e936-e863-5f42-8fb8-cb4588a36090",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

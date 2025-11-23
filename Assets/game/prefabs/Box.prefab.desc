@@ -4,14 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-<<<<<<< Updated upstream
-    "hash": 5308686156096817907
-=======
-    "hash": 7904320578599486229
->>>>>>> Stashed changes
+    "hash": 5233786435240419253
   },
   "descriptor_version": 1,
-  "guid": "5040e62f-c9ff-e147-8cfb-0b46ff6eb011",
+  "guid": "78ceb58f-4b3a-e146-b857-3a8be5dd5ddc",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\Box.prefab"
