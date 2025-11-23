@@ -17,7 +17,7 @@ namespace PAIN {
 
             std::string getSysName() const override { return "Transform System"; }
 
-            void onUpdate(AppTiming timing,entt::registry& registry) override;
+            void onUpdate(AppTiming timing, entt::registry& registry) override;
             void markDirty(entt::entity e, entt::registry& registry);
 
             // Hierarchy API
@@ -27,6 +27,7 @@ namespace PAIN {
         private:
             void updateRecursive(entt::entity e, const glm::mat4& parentWorld, entt::registry& registry);
             void propagateDirty(entt::entity e, entt::registry& registry);
+            void markAncestorsDirty(entt::entity e, entt::registry& registry);
         };
 
     }

@@ -18,8 +18,9 @@ namespace PAIN {
         void System::updateRecursive(entt::entity e, const glm::mat4& parentWorld, entt::registry& registry) {
             auto& local = registry.get<LocalTransform>(e);
             auto& world = registry.get<WorldTransform>(e);
+            auto* hierarchy = registry.try_get<Entity::Hierarchy>(e);
 
-            // Only update if dirty
+            //Only update if world or child is dirty
             if (!world.dirty)
                 return;
 
@@ -31,7 +32,7 @@ namespace PAIN {
             world.dirty = false;
 
             // Recursively update children
-            if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(e)) {
+            if (hierarchy) {
                 for (const auto& childGUID : hierarchy->childrenGUIDs) {
                     entt::entity childEntity = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(childGUID);
                     if (childEntity != entt::null && registry.valid(childEntity)) {
@@ -45,6 +46,8 @@ namespace PAIN {
             auto* world = registry.try_get<WorldTransform>(e);
             if (world)
                 world->dirty = true;
+
+            markAncestorsDirty(e, registry);
 
             if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(e)) {
                 for (const auto& childGUID : hierarchy->childrenGUIDs) {
@@ -123,6 +126,27 @@ namespace PAIN {
                     }
                 }
             }
+        }
+
+        void System::markAncestorsDirty(entt::entity e, entt::registry& registry) {
+            auto* hierarchy = registry.try_get<Entity::Hierarchy>(e);
+            if (!hierarchy || !hierarchy->parentGUID.IsValid()) {
+                return; // No parent, stop
+            }
+
+            entt::entity parent = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(hierarchy->parentGUID);
+            if (parent == entt::null || !registry.valid(parent)) {
+                return; // Invalid parent
+            }
+
+            // Mark parent dirty
+            auto* parent_world = registry.try_get<WorldTransform>(parent);
+            if (parent_world) {
+                parent_world->dirty = true;
+            }
+
+            // Recursively mark grandparents, great-grandparents, etc.
+            markAncestorsDirty(parent, registry);
         }
     } 
 } 

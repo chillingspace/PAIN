@@ -6,6 +6,7 @@
 #include "ECS/sMetaData.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/AllComponents.h"
+#include "Systems/Transform/sysTransform.h"
 
 #ifdef _DEBUG
 
@@ -84,6 +85,7 @@ namespace PAIN {
 
                         //ECS controller
                         auto ecs = services->get<ECS::Controller>();
+                        auto transformSystem = ecs->getSystem<Transform::System>();
 
                         // Detect if transform changed this frame
                         if (state.is_editing) {
@@ -92,9 +94,9 @@ namespace PAIN {
                                 state.last_frame_transform.scale != transform_ref.scale) {
                                 state.last_frame_transform = transform_ref;
 
-                                auto world_opt = ecs->getEntityComponent<WorldTransform>(selected);
-                                if (world_opt.has_value()) {
-                                    world_opt.value().get().dirty = true;
+                                // Mark dirty
+                                if (transformSystem) {
+                                    transformSystem->markDirty(selected, ecs->getRegistry());
                                 }
                             }
                         }
@@ -119,27 +121,27 @@ namespace PAIN {
                                 }
 
                                 command_manager->executeAction(Action{
-                                    [ecs, entity, final_transform]() {
+                                    [ecs, entity, final_transform, transformSystem]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = final_transform;
                                             }
-                                            auto world_opt = ecs->getEntityComponent<WorldTransform>(entity);
-                                            if (world_opt.has_value()) {
-                                                world_opt.value().get().dirty = true;
+                                            // Mark dirty
+                                            if (transformSystem) {
+                                                transformSystem->markDirty(entity, ecs->getRegistry());
                                             }
                                         }
                                     },
-                                    [ecs, entity, old_transform]() {
+                                    [ecs, entity, old_transform, transformSystem]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = old_transform;
                                             }
-                                            auto world_opt = ecs->getEntityComponent<WorldTransform>(entity);
-                                            if (world_opt.has_value()) {
-                                                world_opt.value().get().dirty = true;
+                                            // Mark dirty
+                                            if (transformSystem) {
+                                                transformSystem->markDirty(entity, ecs->getRegistry());
                                             }
                                         }
                                     },
