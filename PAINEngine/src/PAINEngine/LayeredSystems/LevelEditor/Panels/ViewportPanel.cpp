@@ -1,4 +1,4 @@
-﻿#ifdef _DEBUG
+#ifdef _DEBUG
 
 #include "pch.h"
 #ifdef max
@@ -219,6 +219,8 @@ namespace PAIN {
 				ImGui::SetNextWindowSize(initialSize, ImGuiCond_FirstUseEver);
 
 				if (ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+
+					ImGuizmo::BeginFrame();
 
 					auto editor = services->get<PAIN::Editor::Editor>();
 					auto scene = services->get<Scene>();
@@ -514,6 +516,53 @@ namespace PAIN {
 					}
 
 					// ========================================
+					// === ViewManipulate Camera Cube ===
+					// ========================================
+					auto camera = scene->GetActiveCamera();
+					if (camera) {
+						glm::mat4 viewMatrix = camera->view();
+
+						float cubeSize = 128.0f;
+						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+
+						// Calculate distance from camera to look-at point (origin)
+						glm::vec3 lookAtTarget = glm::vec3(0.0f);
+						float cameraDistance = glm::length(camera->pos - lookAtTarget);
+
+						// Set these before ViewManipulate
+						ImGuizmo::SetDrawlist();
+						ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+
+						ImGuizmo::ViewManipulate(
+							glm::value_ptr(viewMatrix),
+							cameraDistance,
+							cubePosition,
+							ImVec2(cubeSize, cubeSize),
+							0x10101010
+						);
+
+						// Use the specific ViewManipulate check function
+						if (ImGuizmo::IsUsingViewManipulate()) {
+							// Extract camera vectors from the modified view matrix
+							glm::mat4 inverseView = glm::inverse(viewMatrix);
+
+							// Get the camera position from inverse view matrix
+							glm::vec3 newPosition = glm::vec3(inverseView[3]);
+
+							// Get camera basis vectors from inverse view matrix
+							glm::vec3 right = glm::vec3(inverseView[0]);
+							glm::vec3 up = glm::vec3(inverseView[1]);
+							glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
+
+							// Update camera
+							camera->pos = newPosition;
+							camera->forward = glm::normalize(forward);
+							camera->up = glm::normalize(up);
+							camera->right = glm::normalize(right);
+						}
+					}
+
+					// ========================================
 					// === Mouse Picking - AFTER GIZMO ===
 					// ========================================
 					if (contentHovered
@@ -532,56 +581,51 @@ namespace PAIN {
 					// ========================================
 
 					ImGuiIO& io = ImGui::GetIO();
-					auto camera = services->get<sCameraController>();
+					auto cameraController = services->get<sCameraController>();
 
-					if (camera) {
+					if (cameraController) {
 
 #ifdef PN_PLATFORM_WINDOWS
 						bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
 #else
-						camera->m_vpHeight = size.y;
-						camera->m_vpWidth = size.x;
-						camera->m_vpPosX = viewportPos.x;
-						camera->m_vpPosY = viewportPos.y;
-						camera->vp_hovered = contentHovered;
+						cameraController->m_vpHeight = size.y;
+						cameraController->m_vpWidth = size.x;
+						cameraController->m_vpPosX = viewportPos.x;
+						cameraController->m_vpPosY = viewportPos.y;
+						cameraController->vp_hovered = contentHovered;
 						bool rightMouseHeld = contentHovered;
 #endif 
 
-						// Check if gizmo is active
-						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+						// Check for ANY gizmo activity (object gizmo OR view manipulate)
+						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate() || ImGuizmo::IsViewManipulateHovered();
 
-						// Camera controls ONLY work when RIGHT MOUSE is held (and conditions met)
 						if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
-							// Enable all camera movement keys
-							camera->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-							camera->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-							camera->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-							camera->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							camera->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-							camera->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							cameraController->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+							cameraController->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+							cameraController->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+							cameraController->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+							cameraController->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							cameraController->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
-							// Enable mouse look
-							camera->mouseButtonDown = true;
+							cameraController->mouseButtonDown = true;
 
 #ifdef PN_PLATFORM_WINDOWS
-							camera->xOffset = io.MouseDelta.x;
-							camera->yOffset = -io.MouseDelta.y;
+							cameraController->xOffset = io.MouseDelta.x;
+							cameraController->yOffset = -io.MouseDelta.y;
 #endif
 						}
 						else {
-							// Reset all camera inputs when right mouse NOT held
-							camera->W_KEYDOWN = false;
-							camera->A_KEYDOWN = false;
-							camera->S_KEYDOWN = false;
-							camera->D_KEYDOWN = false;
-							camera->SPACE_KEYDOWN = false;
-							camera->LCTRL_KEYDOWN = false;
-							camera->mouseButtonDown = false;
-							camera->xOffset = 0.0f;
-							camera->yOffset = 0.0f;
+							cameraController->W_KEYDOWN = false;
+							cameraController->A_KEYDOWN = false;
+							cameraController->S_KEYDOWN = false;
+							cameraController->D_KEYDOWN = false;
+							cameraController->SPACE_KEYDOWN = false;
+							cameraController->LCTRL_KEYDOWN = false;
+							cameraController->mouseButtonDown = false;
+							cameraController->xOffset = 0.0f;
+							cameraController->yOffset = 0.0f;
 						}
 
-						// Mouse wheel zoom (works independently of right-click)
 						if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
 							float mouseWheel = io.MouseWheel;
 							float zoomSpeed = 0.1f;
@@ -603,12 +647,12 @@ namespace PAIN {
 							}
 						}
 					}
-
-
-					
 				}
 				ImGui::End();
 			}
+
+
+
 
 
 

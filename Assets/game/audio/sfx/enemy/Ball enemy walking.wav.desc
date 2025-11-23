@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Ball enemy walking.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 7250241802685921959
+  },
+  "descriptor_version": 1,
+  "guid": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": true,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\enemy\\Ball enemy walking.wav"
+  }
+}

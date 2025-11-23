@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "thighStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13702724815857871550
+  },
+  "descriptor_version": 1,
+  "guid": "ecbe0cc4-0ec4-7948-b1eb-b26d71ea129c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\thighStem-effect.material"
+  }
+}

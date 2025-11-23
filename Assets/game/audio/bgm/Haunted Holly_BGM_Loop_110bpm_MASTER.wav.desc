@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Haunted Holly_BGM_Loop_110bpm_MASTER.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 12292806426189298114
+  },
+  "descriptor_version": 1,
+  "guid": "e87054db-0ef8-f34b-96a0-e2fede943a49",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": true,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\Haunted Holly_BGM_Loop_110bpm_MASTER.wav"
+  }
+}

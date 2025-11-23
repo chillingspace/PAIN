@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Container_BlueSG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13940605511605624023
+  },
+  "descriptor_version": 1,
+  "guid": "3bbe4251-48ff-4b4e-a8ae-84ff95be4cc6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Container_BlueSG.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Car_Tire_01SG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13940605511605624023
+  },
+  "descriptor_version": 1,
+  "guid": "b531a00c-467e-5447-bd7a-03e8958d37ce",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Car_Tire_01SG.material"
+  }
+}
