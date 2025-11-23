@@ -20,6 +20,7 @@
 #include "cBoundingVolume.h"
 #include "cScript.h"
 #include "cEntity.h"
+#include "cPrefab.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
@@ -34,6 +35,9 @@ namespace PAIN {
         Entity::GUID,
         Entity::Name,
         Entity::Hierarchy,
+
+        //prefan comps
+        Prefab::PrefabInstance,
 
         // Metadata components
         MetaData::EntityName,
@@ -61,6 +65,9 @@ namespace PAIN {
         if constexpr (std::is_same_v<T, Entity::GUID>) return "GUID";
         if constexpr (std::is_same_v<T, Entity::Name>) return "Name";
         if constexpr (std::is_same_v<T, Entity::Hierarchy>) return "Hierarchy";
+
+        //Prefab components
+        if constexpr (std::is_same_v<T, Prefab::PrefabInstance>) return "PrefabInstance";
 
         // Metadata components
         if constexpr (std::is_same_v<T, MetaData::EntityName>) return "EntityName";

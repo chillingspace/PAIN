@@ -4,7 +4,6 @@
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
-#include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/AllComponents.h"
 #include "Systems/Transform/sysTransform.h"
 
@@ -33,6 +32,10 @@ namespace PAIN {
                 // ---- Entity Hierarchy ----
                 registerCompUIFunc<PAIN::Entity::Hierarchy>("Hierarchy",
                     [](ComponentsPanel&, PAIN::Entity::Hierarchy& as) { DrawWithReflection(as); });
+
+                // ---- Prefab Instance ----
+                registerCompUIFunc<PAIN::Prefab::PrefabInstance>("PrefabInstance",
+                    [](ComponentsPanel&, PAIN::Prefab::PrefabInstance& as) { DrawWithReflection(as); });
 
                 // ---- Transform ----
                 registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",

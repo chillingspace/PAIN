@@ -179,6 +179,9 @@ namespace PAIN {
             //registerComponent<Entity::Name>("Name");
             registerComponent<Entity::Hierarchy>("Hierarchy");
 
+            //Register prefab instance
+            registerComponent<Prefab::PrefabInstance>("PrefabInstance");
+
             // Core components
             registerComponent<LocalTransform>("LocalTransform");
             registerComponent<WorldTransform>("WorldTransform");
