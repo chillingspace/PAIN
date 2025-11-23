@@ -114,7 +114,7 @@ namespace PAIN {
             bool createDirectory(const std::string& virtualPath) const override;
 
             //Create file stream
-            std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) override;
+            std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode, bool bin = true) override;
 
             // Android-specific asset methods
             bool isAssetPath(const std::string& virtualPath) const;

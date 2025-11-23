@@ -1,0 +1,192 @@
+{
+    "entities": [
+        [
+            {
+                "components": {
+                    "BoundingVolume": {
+                        "bvhNodeIndex": 11,
+                        "localAABB": {
+                            "max": [
+                                0.5279759764671326,
+                                0.5271880030632019,
+                                0.7911700010299683
+                            ],
+                            "min": [
+                                -0.5279759764671326,
+                                -0.6600509881973267,
+                                -0.39153599739074707
+                            ]
+                        },
+                        "needsUpdate": false,
+                        "worldAABB": {
+                            "max": [
+                                2.5279760360717773,
+                                1.5271880626678467,
+                                0.7911700010299683
+                            ],
+                            "min": [
+                                1.4720239639282227,
+                                0.33994901180267334,
+                                -0.39153599739074707
+                            ]
+                        }
+                    },
+                    "EntityName": {
+                        "name": "ogre_right"
+                    },
+                    "Hierarchy": {
+                        "childrenGUIDs": [
+                            "bcf31caf-6ee6-0e49-b3b6-1549cadd8ed2"
+                        ],
+                        "parentGUID": "00000000-0000-0000-0000-000000000000",
+                        "siblingIndex": 0
+                    },
+                    "LocalTransform": {
+                        "position": [
+                            2.0,
+                            1.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "ModelRenderer": {
+                        "castShadows": true,
+                        "materials": [
+                            {
+                                "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "baseColorOverride": [
+                                    0.6000000238418579,
+                                    0.6000000238418579,
+                                    0.6000000238418579
+                                ],
+                                "emissiveOverride": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
+                                "metallicOverride": 0.0,
+                                "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "roughnessOverride": 0.5,
+                                "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "useOverrides": false
+                            }
+                        ],
+                        "modelGUID": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d",
+                        "receiveShadows": true,
+                        "visible": true
+                    }
+                },
+                "entityGUID": "d22feaf0-4bbe-2e49-8b7d-bcd2ddf902f1"
+            },
+            {
+                "components": {
+                    "BoundingVolume": {
+                        "bvhNodeIndex": 9,
+                        "localAABB": {
+                            "max": [
+                                0.5279759764671326,
+                                0.5271880030632019,
+                                0.7911700010299683
+                            ],
+                            "min": [
+                                -0.5279759764671326,
+                                -0.6600509881973267,
+                                -0.39153599739074707
+                            ]
+                        },
+                        "needsUpdate": false,
+                        "worldAABB": {
+                            "max": [
+                                0.5279759764671326,
+                                2.5271880626678467,
+                                0.7911700010299683
+                            ],
+                            "min": [
+                                -0.5279759764671326,
+                                1.3399490118026733,
+                                -0.39153599739074707
+                            ]
+                        }
+                    },
+                    "EntityName": {
+                        "name": "ogre_left"
+                    },
+                    "Hierarchy": {
+                        "childrenGUIDs": [],
+                        "parentGUID": "d22feaf0-4bbe-2e49-8b7d-bcd2ddf902f1",
+                        "siblingIndex": 0
+                    },
+                    "LocalTransform": {
+                        "position": [
+                            -2.0,
+                            1.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "ModelRenderer": {
+                        "castShadows": true,
+                        "materials": [
+                            {
+                                "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "baseColorOverride": [
+                                    0.6000000238418579,
+                                    0.6000000238418579,
+                                    0.6000000238418579
+                                ],
+                                "emissiveOverride": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
+                                "metallicOverride": 0.0,
+                                "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "roughnessOverride": 0.5,
+                                "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                "useOverrides": false
+                            }
+                        ],
+                        "modelGUID": "0f8d5053-e799-004e-9035-1c7ba7a9fc5d",
+                        "receiveShadows": true,
+                        "visible": true
+                    }
+                },
+                "entityGUID": "bcf31caf-6ee6-0e49-b3b6-1549cadd8ed2"
+            }
+        ]
+    ],
+    "prefabName": "ogre_right",
+    "rootEntityGUID": "d22feaf0-4bbe-2e49-8b7d-bcd2ddf902f1"
+}

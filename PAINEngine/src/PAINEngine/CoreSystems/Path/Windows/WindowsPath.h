@@ -14,16 +14,19 @@ namespace PAIN {
 			std::fstream file;
 			size_t fileSize = 0;
 		public:
-			WinFileStream(const std::string& path, FileMode mode) {
-				std::ios_base::openmode fmode = std::ios::binary;
+			WinFileStream(const std::string& path, FileMode mode, bool bin = true) {
+				std::ios_base::openmode fmode = bin ? std::ios::binary : 0;
 				if (mode == FileMode::Read) fmode |= std::ios::in;
 				else if (mode == FileMode::Write) fmode |= std::ios::out | std::ios::trunc;
 				else if (mode == FileMode::ReadWrite) fmode |= std::ios::in | std::ios::out;
 				file.open(path, fmode);
-				if (file) {
+				if (file && mode != FileMode::Write) {
 					file.seekg(0, std::ios::end);
 					fileSize = static_cast<size_t>(file.tellg());
 					file.seekg(0, std::ios::beg);
+				}
+				else if (file && mode == FileMode::Write) {
+					fileSize = 0;
 				}
 			}
 			~WinFileStream() override {
@@ -85,7 +88,7 @@ namespace PAIN {
 			bool pathExists(const std::string& virtualPath) const override;
 			bool createDirectory(const std::string& virtualPath) const override;
 
-			std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) override;
+			std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode, bool bin = true) override;
 
 			//Watch directory
 			void watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) override;

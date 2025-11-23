@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ogre_right.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7055719369610312701
+  },
+  "descriptor_version": 1,
+  "guid": "bdfea28c-f0fa-804a-88b2-816f0cead685",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\ogre_right.prefab"
+  }
+}

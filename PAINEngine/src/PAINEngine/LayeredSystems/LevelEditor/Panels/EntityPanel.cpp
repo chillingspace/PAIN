@@ -16,6 +16,7 @@
 #include "ECS/Components/cEntity.h"
 #include "Systems/Transform/sysTransform.h"
 #include "CoreSystems/Serialization/sSerialization.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
 
 #ifdef _DEBUG
 
@@ -407,12 +408,19 @@ namespace PAIN {
                         openPopUp("Clone Entity");
                     }
 
-                    if (ImGui::MenuItem("Create Prefab")) {
-                        std::string prefab_name = generateUniquePrefabName(entity_name);
-                        std::vector<entt::entity> entities_to_save;
-                        collectEntityHierarchy(entity, entities_to_save);
-                        PN_SERI_SERVICE->savePrefabToFile(prefab_name, entities_to_save);
-                        PN_CORE_INFO("Created prefab '{}' with {} entities", prefab_name, entities_to_save.size());
+                    if (ImGui::MenuItem("Create Prefab from Entity")) {
+                        if (selected_entity != entt::null) {
+                            // Get prefab service
+                            auto prefab_service = services->get<Prefab::Service>();
+
+                            // Generate unique name
+                            std::string prefab_name = generateUniquePrefabName(getEntityName(selected_entity));
+
+                            // Create prefab
+                            prefab_service->createPrefab(selected_entity, prefab_name, ecs->getRegistry());
+
+                            PN_CORE_INFO("Created prefab: {}", prefab_name);
+                        }
                     }
 
                     ImGui::Separator();

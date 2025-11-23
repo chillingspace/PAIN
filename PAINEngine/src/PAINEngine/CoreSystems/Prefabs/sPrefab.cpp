@@ -65,8 +65,9 @@ namespace PAIN {
 
             //Craft path to prefab assets
             auto path_service = services.lock()->get<Path::Path>();
+            auto prefab_ext = *Assets::getAllExtensions()[Assets::Type::Prefabs].begin();
             auto prefab_folder = Assets::getAllGameFolders()[Assets::Type::Prefabs];
-            std::string virt_path_to_prefab = path_service->aliasCombineRelative(Path::main_assets_alias, prefab_folder.string());
+            std::string virt_path_to_prefab = path_service->aliasCombineRelative(Path::main_assets_alias, prefab_folder.string() + "/" + prefabName + prefab_ext);
 
             //Save prefab to file
             savePrefabToFile(prefab_asset, virt_path_to_prefab, registry);
@@ -94,15 +95,18 @@ namespace PAIN {
                 nlohmann::json prefabJson = serializePrefab(prefab_asset, registry);
                 auto path_service = services.lock()->get<Path::Path>();
 
-                auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Write);
+                auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Write, false);
                 if (!stream) return false;
 
                 //Write prefab json
                 stream->write(prefabJson);
+
+                PN_CORE_INFO("Prefab saved at: {}", virtual_path);
             }
             catch (...) {
                 return false;
             }
+            return false;
         }
 
         Prefab::PrefabAsset Service::deserializePrefab(const nlohmann::json& prefabJson) {

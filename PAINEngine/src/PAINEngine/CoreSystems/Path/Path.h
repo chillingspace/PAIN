@@ -61,12 +61,12 @@ namespace PAIN {
 			bool write(nlohmann::json const& json, int indent = 4) {
 				std::string jsonText = json.dump(indent);
 
-				size_t total = 0;
-				while (total < jsonText.size()) {
-					size_t written = write(jsonText.data() + total, jsonText.size() - total);
-					if (!good() || written == 0)
-						return false;
-					total += written;
+				// Single write call - no need for chunking with ofstream
+				write(jsonText.data(), jsonText.size());
+
+				if (!good()) {
+					PN_CORE_ERROR("Failed to write JSON to file");
+					return false;
 				}
 
 				flush();
@@ -144,7 +144,7 @@ namespace PAIN {
 			virtual bool createDirectory(const std::string& virtualPath) const = 0;
 
 			//Create custom file stream
-			virtual std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) = 0;
+			virtual std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode, bool bin = true) = 0;
 
 			std::string getAlias(const std::string& virtualPath) const {
 				auto [alias, relativePath] = parseVirtualPath(virtualPath);
