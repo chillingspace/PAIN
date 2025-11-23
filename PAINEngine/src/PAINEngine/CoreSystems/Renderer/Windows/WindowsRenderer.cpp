@@ -733,6 +733,42 @@ namespace PAIN {
 				}
 			}
 
+			// animation
+			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
+			if (component.isPlaying) {
+
+				// each track controls a single bone's animation
+				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
+					// use binary search to find keyframe corresponding to current time
+					//static auto findKeyframe = [](const std::vector<Assets::AnimationKey>& keyframes, const float t) {
+					//	size_t left = 0;
+					//	size_t right = keyframes.size() - 1;
+
+					//	while (left < right) {
+					//		size_t mid = (right - left) / 2;
+					//		if (keyframes[mid].time < t) {
+					//			left = mid + 1;
+					//		}
+					//		else {
+					//			right = mid;
+					//		}
+					//	}
+					//};
+
+					auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+
+					// update bone xform
+					auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
+				}
+
+				// populate bone xforms
+				for (size_t i{}; i < modelAsset->skeleton.size(); ++i) {
+					const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
+					geometry_shader->SetUniform(uniform_name, modelAsset->skeleton[i].bindPose);
+				}
+
+			}
+
 			// Draw this submesh
 			glDrawElements(
 				GL_TRIANGLES,
@@ -1229,7 +1265,7 @@ namespace PAIN {
 #endif
 				// !TODO: add queue and iterate through all 2D textures to be rendered last
 				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if(texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, {0.85f, -0.85f}, 0.1f);
+				if (texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, { 0.85f, -0.85f }, 0.1f);
 			}
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -1245,7 +1281,7 @@ namespace PAIN {
 				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
 #endif
 				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
-				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, {1.f, 1.f, 1.f});
+				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
 				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
 			}
 			err = glGetError();

@@ -150,18 +150,37 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
+		std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
 #else	
-		std::filesystem::path crumpled_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
+		std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
 #endif
 		//Get model
-		mdl_opt = asset_manager->getAsset<Assets::Model>(crumpled_path);
+		mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
 			//mdl->materials[0].metallic = 0.f;
 			//mdl->materials[0].roughness = 1.f;
 			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
 			auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+		}
+
+
+#ifdef PN_PLATFORM_WINDOWS
+		std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
+#else	
+		std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
+#endif
+		//Get model
+		mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
+		if (mdl_opt.has_value()) {
+			mdl = mdl_opt.value();
+			//mdl->materials[0].metallic = 0.f;
+			//mdl->materials[0].roughness = 1.f;
+			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+			auto e = AddObject(mdl, "bs", { 0.f, 5.f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+		}
+		else {
+			throw std::runtime_error("brainstem err");
 		}
 
 

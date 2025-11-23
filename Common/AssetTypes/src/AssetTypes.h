@@ -91,6 +91,11 @@ namespace PAIN {
             glm::mat4 bindPose;
         };
 
+        //struct Skeleton {
+        //    std::vector<Bone> bones;
+        //    std::vector<glm::mat4> bone_xforms;     // for access speed. will need to access all Bone::bindPose every frame
+        //};
+
         struct AnimationKey {
             float time;
             glm::vec3 translation;
@@ -99,15 +104,15 @@ namespace PAIN {
             std::vector<float> morphTargetWeights; // Support for blend shapes
         };
 
-        struct AnimationTrack {
-            std::string boneName;
-            std::vector<AnimationKey> keys;
-        };
+        //struct AnimationTrack {
+        //    std::string boneName;
+        //    std::vector<AnimationKey> keys;
+        //};
 
         struct AnimationClip {
             std::string name;
             float duration;
-            std::vector<AnimationTrack> tracks;
+            std::unordered_map<std::string, std::vector<AnimationKey>> track_map;     // key: bone name, value: track
             bool isAdditive; // For blending, layering
         };
 

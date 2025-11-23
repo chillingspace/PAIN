@@ -486,16 +486,20 @@ namespace PAIN {
 
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
-                anim.tracks.resize(trackCount);
-                for (AnimationTrack& track : anim.tracks) {
+                //anim.tracks.resize(trackCount);
+                for (size_t i{}; i < trackCount; ++i) {
                     uint32_t boneLen = 0, keyCount = 0;
                     readMem(&boneLen, sizeof(boneLen));
-                    track.boneName.resize(boneLen);
-                    readMem(track.boneName.data(), boneLen);
+                    //track.boneName.resize(boneLen);
+                    //readMem(track.boneName.data(), boneLen);
+                    static std::string boneName;
+                    boneName.resize(boneLen);
+                    readMem(boneName.data(), boneLen);
+                    auto& track = anim.track_map[boneName];
 
                     readMem(&keyCount, sizeof(keyCount));
-                    track.keys.resize(keyCount);
-                    for (AnimationKey& key : track.keys) {
+                    track.resize(keyCount);
+                    for (AnimationKey& key : track) {
                         readMem(&key.time, sizeof(key.time));
                         readMem(&key.translation, sizeof(key.translation));
                         readMem(&key.rotation, sizeof(key.rotation));
