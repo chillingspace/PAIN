@@ -714,28 +714,44 @@ namespace PAIN {
 					}
 
 					// ========================================
-					// === Mouse Picking - AFTER GIZMO ===
+					 // === Mouse Picking - AFTER GIZMO ===
+					 // ========================================
+
+					// Track if we were using the gizmo in the previous frame
+					static bool wasUsingGizmo = false;
+					// REMOVE THIS LINE: bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+					// Reuse the variable declared above
+
+					if (contentHovered) {
+						// Only pick on click if gizmo is NOT being used
+						bool shouldPick = false;
+
+						// Case 1: Direct click (no drag)
+						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isUsingGizmo) {
+							shouldPick = true;
+						}
+
+						// Case 2: Mouse released after dragging (but NOT on gizmo)
+						if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
+							&& !isUsingGizmo
+							&& !wasUsingGizmo
+							&& !ImGui::IsMouseDragging(ImGuiMouseButton_Left, 1.0f)) {
+							shouldPick = true;
+						}
+
+						if (shouldPick) {
+							ImVec2 mousePos = ImGui::GetMousePos();
+							ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+							performMousePicking(localMousePos, size);
+						}
+					}
+
+					wasUsingGizmo = isUsingGizmo;
+
+
 					// ========================================
-					if (contentHovered
-						&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)
-						&& !ImGuizmo::IsUsing()
-						&& !ImGuizmo::IsOver()) {
-
-						ImVec2 mousePos = ImGui::GetMousePos();
-						ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
-
-                            // Get camera basis vectors from inverse view matrix
-                            glm::vec3 right = glm::vec3(inverseView[0]);
-                            glm::vec3 globalUp(0.0f, 1.0f, 0.0f);
-                            glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
-
-                            // Update camera
-                            camera->pos = newPosition;
-                            camera->forward = glm::normalize(forward);
-                            camera->up = glm::normalize(globalUp);
-                            camera->right = glm::normalize(right);
-                        }
-                    }
+					// === Camera Controls ===
+					// ========================================
 
 					ImGuiIO& io = ImGui::GetIO();
 					auto cameraController = services->get<sCameraController>();
@@ -807,12 +823,6 @@ namespace PAIN {
                 }
                 ImGui::End();
             }
-
-
-
-
-
-
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN

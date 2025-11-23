@@ -11,7 +11,7 @@
 #pragma once
 
 // To include all components excluding metadata
-#include "pch.h"
+#include "Core.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)

@@ -12,5 +12,6 @@
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cAI.h"
 #include "ECS/Components/cCamera.h"
-#include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cBoundingVolume.h"
+#include "ECS/Components/cEntity.h"
+#include "ECS/Components/cPrefab.h"

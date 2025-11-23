@@ -19,7 +19,7 @@ namespace PAIN {
 
                 void onAttach() override;
                 void onUpdate(PAIN::AppTiming timing) override;
-                void nextWindowSettings() override;
+                void nextWindowSettings() override {}
 
                 // Core API
                 entt::entity getSelectedEntity() const;
@@ -57,18 +57,9 @@ namespace PAIN {
                 //Remove tag popup
                 std::function<void(std::any const&)> removeTagPopUp(std::string const& popup_id);
 
-                //Create entity popup
-                std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
-
-                std::function<void(std::any const&)> removeEntityPopUp(std::string const& popup_id);
-
-                //Clone entity popup
-                std::function<void(std::any const&)> cloneEntityPopUp(std::string const& popup_id);
-
                 char search_buffer[256] = "";
                 bool sort_alphabetically = false;
                 bool force_refresh = false;
-                char search_buffer[256] = "";
 
                 // Popup functions
                 std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
