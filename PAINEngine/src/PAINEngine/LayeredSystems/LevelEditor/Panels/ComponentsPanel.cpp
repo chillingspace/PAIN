@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
+#include "ResourcePanel.h"
 
 #ifdef _DEBUG
 
@@ -123,7 +124,7 @@ namespace PAIN {
                         }
                     });
 
-                    // ---- ModelRenderer ---- (UNCHANGED)
+                    // ---- ModelRenderer ---- (UPDATED WITH DRAG-DROP)
                     registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
                         [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
                             // Model GUID selector (using reflection)
@@ -156,10 +157,106 @@ namespace PAIN {
                             ImGui::Separator();
                             ImGui::Spacing();
 
-                            // MATERIALS SECTION - This is where the magic happens!
-                            if (DrawField("Materials", renderer.materials, &panel)) {
-                                changed = true;
+                            // ========================================
+                            // === MATERIALS SECTION WITH DRAG-DROP ===
+                            // ========================================
+
+                            if (ImGui::CollapsingHeader("Materials", ImGuiTreeNodeFlags_DefaultOpen)) {
+                                ImGui::Indent(10.0f);
+
+                                // Display existing materials
+                                for (size_t i = 0; i < renderer.materials.size(); ++i) {
+                                    ImGui::PushID(static_cast<int>(i));
+
+                                    std::string material_label = "Material " + std::to_string(i);
+                                    ImGui::Text("%s", material_label.c_str());
+                                    ImGui::SameLine();
+
+                                    // Draw the material field
+                                    if (DrawAssetSelectorField(
+                                        ("##Material" + std::to_string(i)).c_str(),
+                                        renderer.materials[i].materialGUID,
+                                        PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
+                                        panel.services)) {
+                                        changed = true;
+                                    }
+
+                                    // ========================================
+                                    // === DRAG-DROP TARGET FOR THIS MATERIAL SLOT ===
+                                    // ========================================
+                                    if (ImGui::BeginDragDropTarget()) {
+                                        // Accept material files from Resource Panel
+                                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
+                                            File* droppedFile = static_cast<File*>(payload->Data);
+
+                                            if (droppedFile) {
+                                                // Apply material to this slot
+                                                renderer.materials[i].materialGUID = droppedFile->id;
+                                                changed = true;
+
+                                                PN_CORE_INFO("Applied material '{}' to material slot {}",
+                                                    droppedFile->file_name, i);
+                                            }
+                                        }
+                                        ImGui::EndDragDropTarget();
+                                    }
+
+                                    ImGui::PopID();
+                                    ImGui::Spacing();
+                                }
+
+                                // ========================================
+                                // === ADD NEW MATERIAL SLOT (DRAG-DROP ZONE) ===
+                                // ========================================
+
+                                ImGui::Spacing();
+                                ImGui::Separator();
+                                ImGui::Spacing();
+
+                                // Create a button that also serves as a drop target
+                                bool add_clicked = ImGui::Button("+ Add Material Slot", ImVec2(-1, 30));
+
+                                // Make the button a drag-drop target
+                                if (ImGui::BeginDragDropTarget()) {
+                                    if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
+                                        if (strcmp(payload->DataType, "Materials_FILE") == 0) {
+                                            // Visual feedback during drag
+                                            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                                        }
+                                    }
+
+                                    // Accept the drop
+                                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
+                                        File* droppedFile = static_cast<File*>(payload->Data);
+
+                                        if (droppedFile) {
+                                            // Create new material instance and add to list
+                                            MaterialInstance newMaterial;
+                                            newMaterial.materialGUID = droppedFile->id;
+                                            renderer.materials.push_back(newMaterial);
+                                            changed = true;
+
+                                            PN_CORE_INFO("Added new material '{}' to material list",
+                                                droppedFile->file_name);
+                                        }
+                                    }
+                                    ImGui::EndDragDropTarget();
+                                }
+
+                                // Also allow manual add without drag-drop
+                                if (add_clicked) {
+                                    MaterialInstance newMaterial;
+                                    renderer.materials.push_back(newMaterial);
+                                    changed = true;
+                                }
+
+                                ImGui::Unindent(10.0f);
                             }
+
+                            // Alternative: Keep original reflection-based rendering with drag-drop overlay
+                            // if (DrawField("Materials", renderer.materials, &panel)) {
+                            //     changed = true;
+                            // }
 
                             ImGui::PopStyleVar();
 
@@ -178,6 +275,7 @@ namespace PAIN {
                                 }
                             }
                         });
+
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
