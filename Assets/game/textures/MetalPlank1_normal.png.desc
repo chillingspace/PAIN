@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Robot_baseColor.png",
+    "name": "MetalPlank1_normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 7552812841751400139
+    "hash": 3022647763405639649
   },
   "descriptor_version": 1,
-  "guid": "37972f40-f1cb-3242-8269-8f0b4536d929",
+  "guid": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Robot_baseColor.png"
+    "source_file": "game\\textures\\MetalPlank1_normal.png"
   }
 }

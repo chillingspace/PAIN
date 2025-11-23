@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "robot.gltf",
+    "name": "Fence1.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 4719835251893759502
+    "hash": 354040667111602858
   },
   "descriptor_version": 1,
-  "guid": "95571374-7df7-894d-90fa-19c4d6f3df1c",
+  "guid": "45fa720b-bdbf-b249-9c9b-961773316633",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\robot.gltf"
+    "source_file": "game\\models\\Fence1.gltf"
   }
 }

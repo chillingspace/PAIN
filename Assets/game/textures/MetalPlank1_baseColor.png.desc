@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "MetalPlank1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7597083455504739012
+  },
+  "descriptor_version": 1,
+  "guid": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\MetalPlank1_baseColor.png"
+  }
+}

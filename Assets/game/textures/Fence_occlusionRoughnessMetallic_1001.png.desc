@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Robot_occlusionRoughnessMetallic.png",
+    "name": "Fence_occlusionRoughnessMetallic_1001.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 10597738646389752483
+    "hash": 10864640640736405885
   },
   "descriptor_version": 1,
-  "guid": "5ac71235-824c-1245-a61e-ffd666a0a100",
+  "guid": "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Robot_occlusionRoughnessMetallic.png"
+    "source_file": "game\\textures\\Fence_occlusionRoughnessMetallic_1001.png"
   }
 }

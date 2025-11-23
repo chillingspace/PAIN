@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Robot_emissive.png",
+    "name": "MetalPlank1_occlusionRoughnessMetallic.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 15375646789020531513
+    "hash": 17396844084867397911
   },
   "descriptor_version": 1,
-  "guid": "c8eb9545-1200-c640-b9d7-19ae004c2ebb",
+  "guid": "090f5424-a7e5-a44c-adf1-bf54ac246837",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Robot_emissive.png"
+    "source_file": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png"
   }
 }
