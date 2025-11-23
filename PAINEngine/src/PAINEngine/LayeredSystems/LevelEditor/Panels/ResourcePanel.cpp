@@ -7,6 +7,8 @@
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
+#include "ECS/Controller.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
@@ -308,6 +310,19 @@ namespace PAIN {
 
 						//Create new default material
 						openPopUp("New Material");
+					}
+					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Entity")) {
+						// Instantiate prefab in scene
+						auto prefab_service = services->get<Prefab::Service>();
+						auto& registry = services->get<ECS::Controller>()->getRegistry();
+
+						//Create instance
+						entt::entity instance = prefab_service->instantiatePrefab(file.id, registry);
+
+						//Check for null instance
+						if (instance != entt::null) {
+							PN_CORE_INFO("Instantiated prefab: {}", file.file_name);
+						}
 					}
 					if (ImGui::MenuItem("Delete##file")) {
 						openPopUp("Delete File", std::make_shared<File>(file));

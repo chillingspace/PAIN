@@ -16,7 +16,7 @@ namespace PAIN {
 
             PrefabAsset() = default;
 
-            PrefabAsset(const std::string& name, const Assets::GUID& root, std::vector<nlohmann::json> entities)
+            PrefabAsset(const std::string& name, const Assets::GUID& root, std::vector<nlohmann::json>&& entities)
                 : prefabName(name), rootEntityGUID(root), entities{ entities } {
             }
         };

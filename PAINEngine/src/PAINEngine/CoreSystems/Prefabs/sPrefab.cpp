@@ -52,16 +52,15 @@ namespace PAIN {
             std::vector<entt::entity> hierarchyEntities;
             collectHierarchy(rootEntity, registry, hierarchyEntities);
 
-            // Create PrefabAsset on root
-            std::vector<nlohmann::json> entities;
+            //Create prefab
+            Prefab::PrefabAsset prefab_asset;
+            prefab_asset.rootEntityGUID = registry.get<Entity::GUID>(rootEntity).guid;
+            prefab_asset.name = prefabName;
+
+            //Add entities into prefab
             for (auto e : hierarchyEntities) {
-                entities.push_back(serializeEntity(e, registry));
+                prefab_asset.entities.push_back(serializeEntity(e, registry));
             }
-            Prefab::PrefabAsset prefab_asset{
-                prefabName,
-                registry.get<Entity::GUID>(rootEntity).guid,
-                entities
-            };
 
             //Craft path to prefab assets
             auto path_service = services.lock()->get<Path::Path>();
@@ -82,11 +81,10 @@ namespace PAIN {
             nlohmann::json prefabJson;
             prefabJson["prefabName"] = prefab_asset.prefabName;
             prefabJson["rootEntityGUID"] = prefab_asset.rootEntityGUID.ToString();
+            prefabJson["entities"] = prefab_asset.entities;
 
-            // Entities
-            for (auto e : prefab_asset.entities) {
-                prefabJson["entities"].push_back(e);
-            }
+            std::string parsedJson = prefabJson["entities"].dump(4);
+
             return prefabJson;
         }
 
@@ -178,18 +176,11 @@ namespace PAIN {
             Assets::GUID newGUID = guidRemap.at(oldGUID);
 
             //Create the entity and assign its GUID
-            auto entity = registry.create();
-            registry.emplace<Entity::GUID>(entity, newGUID);
+            auto entity = ecs_controller->createEntity(newGUID);
 
             //Add all components except WorldTransform and any instance components
             const auto& componentsJson = entityData["components"];
-            for (auto it = componentsJson.begin(); it != componentsJson.end(); ++it) {
-                const std::string compName = it.key();
-                if (compName == getComponentName<Entity::GUID>() || compName == getComponentName<Prefab::PrefabInstance>())
-                    continue;
-
-               ecs_controller->loadAllComponentsFromJson(entity, it.value());
-            }
+            ecs_controller->loadAllComponentsFromJson(entity, componentsJson);
 
             //Fix up hierarchy GUIDs using remap
             if (registry.any_of<Entity::Hierarchy>(entity)) {

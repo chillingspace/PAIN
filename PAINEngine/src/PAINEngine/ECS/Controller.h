@@ -88,13 +88,19 @@ namespace PAIN {
 		}
 
 		template<typename... Components>
-		void deserializeComponentsImpl(
+		void deserializeAllComponentsImpl(
 			entt::entity entity,
 			entt::registry& registry,
-			const nlohmann::json& comps,
+			const nlohmann::json& components,
 			std::tuple<Components...>,
 			const std::unordered_set<std::string>& filter = {}
 		) {
+			// Validate input
+			if (!components.is_object()) {
+				PN_CORE_WARN("deserializeAllComponentsImpl: Expected JSON object, got {}", components.type_name());
+				return;
+			}
+
 			auto expand = [&](auto type_tag) {
 				using T = typename decltype(type_tag)::type;
 
@@ -105,28 +111,42 @@ namespace PAIN {
 				if constexpr (type_should_deserialize) {
 					std::string comp_name = getComponentName<T>();
 
-					// Runtime checks
+					// Runtime check: is this component filtered out?
 					const bool is_filtered = !filter.empty() && filter.count(comp_name) > 0;
 
-					if (!is_filtered && comps.contains(comp_name)) {
+					// Check if component exists in JSON
+					if (!is_filtered && components.contains(comp_name)) {
 						try {
 							T comp;
 
 							// Try reflection first, then fallback to JSON
 							if constexpr (refl::trait::is_reflectable_v<T>) {
-								PAIN::Serialization::from_json_reflected(comp, comps[comp_name]);
+								try {
+									PAIN::Serialization::from_json_reflected(comp, components[comp_name]);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_ERROR("Failed to deserialize {} using reflection: {}", comp_name, e.what());
+									return; // Skip this component
+								}
 							}
 							else {
 								// Only compile this if type is convertible from JSON
 								if constexpr (std::is_constructible_v<T, nlohmann::json>) {
-									comp = comps[comp_name].get<T>();
+									try {
+										comp = components[comp_name].get<T>();
+									}
+									catch (const std::exception& e) {
+										PN_CORE_WARN("Failed to deserialize {}: {}", comp_name, e.what());
+										return; // Skip this component
+									}
 								}
 								else {
-									PN_CORE_WARN("Component {} cannot be deserialized from JSON", comp_name);
-									return;
+									PN_CORE_WARN("Component {} is not deserializable (no reflection or JSON converter)", comp_name);
+									return; // Skip this component
 								}
 							}
 
+							// Successfully deserialized - now emplace or replace
 							if (registry.template all_of<T>(entity)) {
 								registry.template replace<T>(entity, std::move(comp));
 							}
@@ -134,11 +154,8 @@ namespace PAIN {
 								registry.template emplace<T>(entity, std::move(comp));
 							}
 						}
-						catch (const nlohmann::json::exception& e) {
-							PN_CORE_ERROR("Failed to deserialize {} (JSON error): {}", comp_name, e.what());
-						}
 						catch (const std::exception& e) {
-							PN_CORE_ERROR("Failed to deserialize {} (runtime error): {}", comp_name, e.what());
+							PN_CORE_ERROR("Unexpected error deserializing {}: {}", comp_name, e.what());
 						}
 					}
 				}
@@ -250,6 +267,9 @@ namespace PAIN {
 
 			//Create Entity
 			entt::entity createEntity();
+
+			//Create Entity
+			entt::entity createEntity(Assets::GUID const& e_id);
 
 			//Clone entity ( ID of clone returned )
 			entt::entity cloneEntity(entt::entity copy);

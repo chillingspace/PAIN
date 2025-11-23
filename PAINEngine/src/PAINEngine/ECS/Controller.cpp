@@ -226,6 +226,20 @@ namespace PAIN {
 
         }
 
+        entt::entity Controller::createEntity(Assets::GUID const& e_id) {
+            entt::entity new_entity = entt_registry.create();
+            entity_count++;
+
+            entt_registry.emplace<Entity::GUID>(new_entity, e_id);
+            guid_registry.registerEntity(new_entity, e_id);
+
+            PN_CORE_INFO("Created entity {} with GUID {}",
+                static_cast<uint32_t>(new_entity),
+                e_id.ToString());
+
+            return new_entity;
+        }
+
         entt::entity Controller::cloneEntity(entt::entity copy) {
             if (!checkEntity(copy)) {
                 PN_CORE_ERROR("Cannot clone invalid entity: {}", static_cast<uint32_t>(copy));
@@ -310,7 +324,7 @@ namespace PAIN {
                 return;
             }
 
-            deserializeComponentsImpl(entity, entt_registry, comps, AllGameplayComponents{});
+            deserializeAllComponentsImpl(entity, entt_registry, comps, AllGameplayComponents{});
         }
 
         nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity) const {
