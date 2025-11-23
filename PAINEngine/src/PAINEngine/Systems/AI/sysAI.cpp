@@ -13,20 +13,30 @@
 
 
 static IEngineAPI* GetEngineAPI(std::shared_ptr<PAIN::Services> svc) {
-	return svc->get<IEngineAPI>().get();
+    if (!svc) return nullptr;
+    auto api = svc->get<IEngineAPI>();
+    return api ? api.get() : nullptr;
+}
+
+static PAIN::Physics::System* GetPhysicsSystem(std::shared_ptr<PAIN::Services> svc) {
+	if (!svc) return nullptr;
+
+	// get ECS controller from Services
+	auto ecs = svc->get<PAIN::ECS::Controller>();
+	if (!ecs) return nullptr;
+
+	// ask the controller for Physics::System
+	auto physSys = ecs->getSystem<PAIN::Physics::System>();
+	return physSys ? physSys.get() : nullptr;
 }
 
 namespace PAIN {
 	namespace AI {
 		/*======================== Perception ========================*/
-		PerceptionSystem::PerceptionSystem(std::shared_ptr<PAIN::Services> services)
-			: services_(std::move(services)) {
-			ensureCache();
-		}
-
-		bool PerceptionSystem::ensureCache() {
-			if (!phys_) phys_ = services_->get<PAIN::Physics::System>();
-			return (bool)phys_;
+		PerceptionSystem::PerceptionSystem(Physics::System* physics)
+			: physics_(physics)
+		{
+			 if (!physics_) PN_CORE_WARN("PerceptionSystem created with null Physics::System");
 		}
 
 		static glm::vec3 forward_of(entt::registry& reg, entt::entity e) {
@@ -49,7 +59,7 @@ namespace PAIN {
 			float fovCos = std::cos(glm::radians(fovDeg * 0.5f));
 			if (cosang < fovCos) return false;
 
-			if (requireLOS && phys_) {
+			if (requireLOS && physics_) {
 				// Raycast: if hit something before 'other', LOS blocked
 				// Pseudocode: phys_->raycast(ts.position, to.position, mask);
 				// Return true if only hits 'other' collider or nothing blocks.
@@ -94,8 +104,10 @@ namespace PAIN {
 		}
 
 		/*======================== Behavior Runtime ========================*/
-		BehaviorRuntimeSystem::BehaviorRuntimeSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
-			: services_(std::move(services)), api_(api) {
+		BehaviorRuntimeSystem::BehaviorRuntimeSystem(IEngineAPI* api)
+			: api_(api)
+		{
+			 //if (!api_) PN_CORE_WARN("BehaviorRuntimeSystem created with null IEngineAPI");
 		}
 
 		void BehaviorRuntimeSystem::onUpdate(float dt, entt::registry& reg) {
@@ -159,9 +171,13 @@ namespace PAIN {
 		}
 
 		/*======================== Navigation ========================*/
-		NavigationSystem::NavigationSystem(std::shared_ptr<PAIN::Services> services)
-			: services_(std::move(services)) {
+		NavigationSystem::NavigationSystem(Physics::System* physics)
+			: physics_(physics)
+		{
+			if (!physics_) PN_CORE_WARN("NavigationSystem created with null Physics::System");
+			// might use physics_ later (for navmesh queries, raycasts or something idk)
 		}
+
 
 		void NavigationSystem::startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal) {
 			auto& agent = reg.get<NavAgent>(e);
@@ -218,8 +234,12 @@ namespace PAIN {
 		}
 
 		/*======================== Steering / Motion ========================*/
-		SteeringSystem::SteeringSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api) : services_(std::move(services)), api_(api) {
+		SteeringSystem::SteeringSystem(IEngineAPI* api)
+			: api_(api)
+		{
+			//if (!api_) PN_CORE_WARN("SteeringSystem created with null IEngineAPI");
 		}
+
 
 		void SteeringSystem::applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt) {
 			// Option A: kinematic integration + physics teleport (keeps Transform/Physics in sync):
@@ -245,9 +265,12 @@ namespace PAIN {
 		}
 
 		/*======================== Command Flush ========================*/
-		AICommandFlushSystem::AICommandFlushSystem(std::shared_ptr<PAIN::Services> services, IEngineAPI* api)
-			: services_(std::move(services)), api_(api) {
+		AICommandFlushSystem::AICommandFlushSystem(IEngineAPI* api)
+			: api_(api)
+		{
+			//if (!api_) PN_CORE_WARN("AICommandFlushSystem created with null IEngineAPI");
 		}
+
 
 		void AICommandFlushSystem::execute(entt::entity e, entt::registry& reg) {
 			auto& q = reg.get<CommandQueue>(e);
@@ -288,20 +311,62 @@ namespace PAIN {
 			for (auto e : view) execute(e, reg);
 		}
 
+		void System::refreshDependencies() {
+			if (auto svc = services.lock()) {
 
-		System::System(std::shared_ptr<Services> svc): ECS::System::ISystem(svc)
-			, services_(svc)
-			, perception_(svc)
-			, behavior_(svc, GetEngineAPI(svc))
-			, navigation_(svc)
-			, steering_(svc, GetEngineAPI(svc))
-			, commandFlush_(svc, GetEngineAPI(svc))
-		{}
+				// Try to find Physics system
+				if (!physics_) {
+					if (auto ecs = svc->get<ECS::Controller>()) {
+						if (auto physSys = ecs->getSystem<Physics::System>()) {
+							physics_ = physSys.get();
+							PN_CORE_TRACE("AI::System bound Physics::System");
+						}
+					}
+				}
+
+				// Try to find Engine API
+				// !TODO: Fix IEngineAPI not registering
+				if (!engineApi_) {
+					//if (auto api = svc->get<IEngineAPI>()) {
+					//	engineApi_ = api.get();
+					//	PN_CORE_TRACE("AI::System bound IEngineAPI");
+					//}
+				}
+			}
+
+			// Update sub-systems with the latest pointers
+			perception_ = PerceptionSystem{ physics_ };
+			behavior_ = BehaviorRuntimeSystem{ engineApi_ };
+			navigation_ = NavigationSystem{ physics_ };
+			steering_ = SteeringSystem{ engineApi_ };
+			commandFlush_ = AICommandFlushSystem{ engineApi_ };
+		}
+
+
+		System::System(std::shared_ptr<Services> svc)
+			: ECS::System::ISystem(svc)
+			, physics_(nullptr)
+			, engineApi_(nullptr)
+			, perception_(nullptr)
+			, behavior_(nullptr)
+			, navigation_(nullptr)
+			, steering_(nullptr)
+			, commandFlush_(nullptr)
+		{
+			refreshDependencies();
+
+			PN_CORE_TRACE("AI::System constructed. physics_={} engineApi_={}",
+				physics_ ? "ok" : "null",
+				engineApi_ ? "ok" : "null");
+		}
 
 
 		void System::onUpdate(AppTiming timing, entt::registry& reg) {
 			if (!b_ai_enabled)
 				return;
+
+			// bind dependencies if they were null at startup
+			refreshDependencies();
 
 			float dt = timing.dt;
 
