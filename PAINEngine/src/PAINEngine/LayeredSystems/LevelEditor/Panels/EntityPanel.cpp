@@ -630,12 +630,21 @@ namespace PAIN {
             }
 
             std::string EntityPanel::generateUniquePrefabName(const std::string& base_name) {
-                auto seri = PN_SERI_SERVICE;
-                std::string prefab_name = base_name;
-                int counter = 1;
+                auto path_service = services->get<Path::Path>();
+                auto prefab_folder = Assets::getAllGameFolders()[Assets::Type::Prefabs];
+                std::filesystem::path full_path = path_service->resolvePath(Path::main_assets_alias, prefab_folder.string());
 
-                while (std::filesystem::exists(seri->resolvePrefabPath(prefab_name))) {
-                    prefab_name = base_name + " (" + std::to_string(counter++) + ")";
+                //Prefab ext
+                auto prefab_ext = *Assets::getAllExtensions()[Assets::Type::Prefabs].begin();
+
+                int counter = 1;
+                std::string prefab_name = base_name;
+                full_path /= (prefab_name + prefab_ext);
+
+                // Check if file exists and increment counter
+                while (std::filesystem::exists(full_path)) {
+                    prefab_name = base_name + "_" + std::to_string(counter++);
+                    full_path.replace_filename(prefab_name + prefab_ext);
                 }
 
                 return prefab_name;
