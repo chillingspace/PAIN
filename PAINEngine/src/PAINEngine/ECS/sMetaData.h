@@ -79,14 +79,14 @@ namespace PAIN {
             void setEntityTag(entt::entity entity, const std::string& new_tag);
 
             // === Hierarchy System ===
-            void setParent(entt::entity child, entt::entity parent);
-            void addChild(entt::entity parent, entt::entity child);
-            void removeChild(entt::entity parent, entt::entity child);
-            bool hasChildren(entt::entity entity) const;
-            bool hasParent(entt::entity entity) const;
-            void detachFromParent(entt::entity entity);
-            std::optional<entt::entity> getParent(entt::entity entity) const;
-            std::vector<entt::entity> getChildren(entt::entity entity) const;
+            //void setParent(entt::entity child, entt::entity parent);
+            //void addChild(entt::entity parent, entt::entity child);
+            //void removeChild(entt::entity parent, entt::entity child);
+            //bool hasChildren(entt::entity entity) const;
+            //bool hasParent(entt::entity entity) const;
+            //void detachFromParent(entt::entity entity);
+            //std::optional<entt::entity> getParent(entt::entity entity) const;
+            //std::vector<entt::entity> getChildren(entt::entity entity) const;
 
             // === Editor Visibility ===
             void setVisible(entt::entity entity, bool visible);
@@ -95,15 +95,15 @@ namespace PAIN {
             bool isLocked(entt::entity entity) const;
 
             // === Group System ===
-            bool createGroup(std::string const& group_name,
-                std::optional<std::string> parent_group = std::nullopt);
-            bool deleteGroup(std::string const& group_name, bool remove_entities = false);
-            void assignToGroup(entt::entity entity, std::string const& group_name);
-            void unassignFromGroup(entt::entity entity);
-            std::optional<std::string> getEntityGroup(entt::entity entity) const;
+            //bool createGroup(std::string const& group_name,
+            //    std::optional<std::string> parent_group = std::nullopt);
+            //bool deleteGroup(std::string const& group_name, bool remove_entities = false);
+            //void assignToGroup(entt::entity entity, std::string const& group_name);
+            //void unassignFromGroup(entt::entity entity);
+            //std::optional<std::string> getEntityGroup(entt::entity entity) const;
 
-            std::set<std::string> getAllGroups() const;
-            std::set<std::string> getRootGroups() const;
+            //std::set<std::string> getAllGroups() const;
+            //std::set<std::string> getRootGroups() const;
 
             // === Serialization ===
             nlohmann::json serializeServiceState() const;

@@ -189,7 +189,7 @@ namespace PAIN {
         {
             // Entity components
             registerComponent<Entity::GUID>("GUID");
-            //registerComponent<Entity::Name>("Name");
+            registerComponent<Entity::Name>("Name");
             registerComponent<Entity::Hierarchy>("Hierarchy");
 
             //Register prefab instance
@@ -219,11 +219,8 @@ namespace PAIN {
             registerComponent<AI::CommandQueue>("AICommandQueue");
 
             // Metadata components
-            registerComponent<MetaData::EntityName>("Name");
             registerComponent<MetaData::Tag>("Tag");
-            registerComponent<MetaData::Relation>("Relation");
             registerComponent<MetaData::EditorVisible>("Editor Visiblity");
-            registerComponent<MetaData::Group>("Group");
 
             // UI components
             registerComponent<UIRectTransform>("UIRectTransform");

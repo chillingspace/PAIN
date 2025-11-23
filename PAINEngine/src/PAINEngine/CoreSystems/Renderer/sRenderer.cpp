@@ -130,7 +130,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
 
@@ -172,7 +172,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -223,7 +223,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		for (auto e : view) {
 
@@ -246,7 +246,7 @@ namespace PAIN {
 	{
 		auto ecs = services->get<ECS::Controller>();
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		// Cache to track which lights are still active this frame
 		std::unordered_set<std::string> activeLightNames;

@@ -56,7 +56,7 @@ namespace PAIN {
                                 entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
 
                                 // Add core components
-                                ecs->addEntityComponent(entity, MetaData::EntityName{ final_name });
+                                ecs->addEntityComponent(entity, Entity::Name{ final_name });
                                 ecs->addEntityComponent(entity, LocalTransform{});
                                 ecs->addEntityComponent(entity, WorldTransform{});
                                 ecs->addEntityComponent(entity, Entity::Hierarchy{});
@@ -79,10 +79,10 @@ namespace PAIN {
                                 // Undo: find and delete by name
                                 auto ecs = PN_ECS_SERVICE;
                                 auto& registry = ecs->getRegistry();
-                                auto view = registry.view<MetaData::EntityName>();
+                                auto view = registry.view<Entity::Name>();
 
                                 for (auto entity : view) {
-                                    if (view.get<MetaData::EntityName>(entity).name == final_name) {
+                                    if (view.get<Entity::Name>(entity).name == final_name) {
                                         ecs->destroyEntity(entity);
                                         break;
                                     }
@@ -168,7 +168,7 @@ namespace PAIN {
                                     entt::entity new_entity = ecs->cloneEntity(clone_source);
 
                                     // Set name
-                                    if (auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(new_entity)) {
+                                    if (auto name_comp = ecs->getEntityComponent<Entity::Name>(new_entity)) {
                                         name_comp.value().get().name = final_name;
                                     }
 
@@ -185,10 +185,10 @@ namespace PAIN {
                             [this, final_name]() {
                                 auto ecs = PN_ECS_SERVICE;
                                 auto& registry = ecs->getRegistry();
-                                auto view = registry.view<MetaData::EntityName>();
+                                auto view = registry.view<Entity::Name>();
 
                                 for (auto entity : view) {
-                                    if (view.get<MetaData::EntityName>(entity).name == final_name) {
+                                    if (view.get<Entity::Name>(entity).name == final_name) {
                                         removeEntityWithChildren(entity);
                                         break;
                                     }
@@ -257,7 +257,7 @@ namespace PAIN {
                 auto& registry = ecs->getRegistry();
 
                 // Auto-add required components to all entities
-                auto view_all = registry.view<MetaData::EntityName>();
+                auto view_all = registry.view<Entity::Name>();
                 for (auto entity : view_all) {
                     if (!registry.all_of<Entity::Hierarchy>(entity)) {
                         ecs->addEntityComponent(entity, Entity::Hierarchy{});
@@ -287,9 +287,9 @@ namespace PAIN {
                     editor_entities.clear();
                     force_refresh = false;
 
-                    auto view = registry.view<MetaData::EntityName>();
+                    auto view = registry.view<Entity::Name>();
                     for (auto entity : view) {
-                        auto& name_comp = view.get<MetaData::EntityName>(entity);
+                        auto& name_comp = view.get<Entity::Name>(entity);
                         editor_entities.push_back({ entity, name_comp.name });
                     }
                 }
@@ -642,7 +642,7 @@ namespace PAIN {
 
             std::string EntityPanel::getEntityName(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
-                auto name_comp = ecs->getEntityComponent<MetaData::EntityName>(entity);
+                auto name_comp = ecs->getEntityComponent<Entity::Name>(entity);
                 return name_comp ? name_comp.value().get().name : "Unnamed";
             }
 

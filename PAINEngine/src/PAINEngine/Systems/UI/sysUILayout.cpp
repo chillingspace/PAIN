@@ -42,18 +42,18 @@ namespace PAIN {
             auto canvas_view = registry.view<UICanvas, UIRectTransform>();
 
             for (auto&& [entity, ui_canvas, ui_rect_trans] : canvas_view.each()) {
-                if (!metadata_service->hasParent(entity)) {
+                //if (!metadata_service->hasParent(entity)) {
 
-                    if (ui_canvas.render_mode == CanvasRenderMode::ScreenSpaceOverlay) {
-                        // Current implementation (2D screen space)
-                        glm::vec2 screen_size = window_service->getFrameBuffer();
-                        processHierarchy(entity, registry, screen_size, glm::vec2(0));
-                    }
-                    else if (ui_canvas.render_mode == CanvasRenderMode::WorldSpace) {
-                        // New: World-space UI
-                        processWorldSpaceHierarchy(entity, registry, view, projection, viewport);
-                    }
-                }
+                //    if (ui_canvas.render_mode == CanvasRenderMode::ScreenSpaceOverlay) {
+                //        // Current implementation (2D screen space)
+                //        glm::vec2 screen_size = window_service->getFrameBuffer();
+                //        processHierarchy(entity, registry, screen_size, glm::vec2(0));
+                //    }
+                //    else if (ui_canvas.render_mode == CanvasRenderMode::WorldSpace) {
+                //        // New: World-space UI
+                //        processWorldSpaceHierarchy(entity, registry, view, projection, viewport);
+                //    }
+                //}
             }
         }
 
@@ -102,11 +102,11 @@ namespace PAIN {
             rect.calculated_world_size = current_size;
             rect.calculated_world_position = current_pos;
 
-            // Process children recursively
-            auto children = metadata_service->getChildren(entity);
-            for (auto child : children) {
-                processHierarchy(child, registry, current_size, current_pos);
-            }
+            //// Process children recursively
+            //auto children = metadata_service->getChildren(entity);
+            //for (auto child : children) {
+            //    processHierarchy(child, registry, current_size, current_pos);
+            //}
         }
 
         glm::vec2 LayoutSystem::getParentSize(entt::entity entity, entt::registry& registry) {
@@ -114,12 +114,12 @@ namespace PAIN {
             auto metadata_service = svc->get<MetaData::Service>();
             auto window_service = svc->get<Window::Window>();
 
-            auto parent_opt = metadata_service->getParent(entity);
+            //auto parent_opt = metadata_service->getParent(entity);
 
-            if (parent_opt.has_value() && registry.all_of<UIRectTransform>(parent_opt.value())) {
-                auto& parent_rect = registry.get<UIRectTransform>(parent_opt.value());
-                return parent_rect.size_delta;
-            }
+            //if (parent_opt.has_value() && registry.all_of<UIRectTransform>(parent_opt.value())) {
+            //    auto& parent_rect = registry.get<UIRectTransform>(parent_opt.value());
+            //    return parent_rect.size_delta;
+            //}
 
             return glm::vec2(window_service->getFrameBuffer());
         }
@@ -166,10 +166,10 @@ namespace PAIN {
             rect.calculated_world_size = screen_size;
 
             // Process children
-            auto children = metadata_service->getChildren(entity);
-            for (auto child : children) {
-                processWorldSpaceHierarchy(child, registry, view, projection, viewport);
-            }
+            //auto children = metadata_service->getChildren(entity);
+            //for (auto child : children) {
+            //    processWorldSpaceHierarchy(child, registry, view, projection, viewport);
+            //}
         }
     }
 }

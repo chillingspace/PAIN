@@ -33,11 +33,8 @@ namespace PAIN {
         Prefab::PrefabInstance,
 
         // Metadata components
-        MetaData::EntityName,
         MetaData::Tag,
         MetaData::EditorVisible,
-        MetaData::Relation,
-        MetaData::Group,
 
         // Gameplay
         Cam,
@@ -78,11 +75,8 @@ namespace PAIN {
         if constexpr (std::is_same_v<T, Prefab::PrefabInstance>) return "PrefabInstance";
 
         // Metadata components
-        if constexpr (std::is_same_v<T, MetaData::EntityName>) return "EntityName";
         else if constexpr (std::is_same_v<T, MetaData::Tag>) return "Tag";
         else if constexpr (std::is_same_v<T, MetaData::EditorVisible>) return "EditorVisible";
-        else if constexpr (std::is_same_v<T, MetaData::Relation>) return "Relation";
-        else if constexpr (std::is_same_v<T, MetaData::Group>) return "Group";
 
         // Gameplay components
         else if constexpr (std::is_same_v<T, Cam>) return "Camera";

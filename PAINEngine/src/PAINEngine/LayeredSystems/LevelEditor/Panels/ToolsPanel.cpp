@@ -302,7 +302,7 @@ namespace PAIN {
                                 glm::vec3 scale = { 1.f, 1.f, 1.f };
 
                                 entt::entity entity = ecs->createEntity();
-                                ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
+                                ecs->addEntityComponent(entity, Entity::Name{ *shared_id });
                                 ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
                                 ecs->addEntityComponent(entity, WorldTransform{});
                                 ecs->addEntityComponent(entity, Entity::Hierarchy{});

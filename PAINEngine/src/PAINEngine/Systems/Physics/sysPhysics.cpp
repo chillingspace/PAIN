@@ -315,8 +315,8 @@ namespace PAIN {
 						body_interface.SetMotionType(rigidBody.bodyID, desired_motion_type, JPH::EActivation::Activate);
 					}
 
-					if (registry.all_of<Audio::AudioSource, MetaData::EntityName>(entity)) {
-						auto& name = registry.get<MetaData::EntityName>(entity);
+					if (registry.all_of<Audio::AudioSource, Entity::Name>(entity)) {
+						auto& name = registry.get<Entity::Name>(entity);
 						if (name.name == "screen") {
 							applyBounce(registry, entity, 50.f);
 						}

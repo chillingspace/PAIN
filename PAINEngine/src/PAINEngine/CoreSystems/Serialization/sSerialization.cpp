@@ -214,9 +214,9 @@ namespace PAIN {
 
                             // Name
                             if (auto n = E.find("Name"); n != E.end() && n->is_string())
-                                controller->addEntityComponent(e, MetaData::EntityName{ n->get<std::string>() });
+                                controller->addEntityComponent(e, Entity::Name{ n->get<std::string>() });
                             else
-                                controller->addEntityComponent(e, MetaData::EntityName{ "Entity " + std::to_string((int)e) });
+                                controller->addEntityComponent(e, Entity::Name{ "Entity " + std::to_string((int)e) });
 
                             // Deserialize all components using their adl_serializer or refl-cpp
                             if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
@@ -364,7 +364,7 @@ namespace PAIN {
                 }
 
                 // Change entity name to be known that it is created from prefab
-                if (controller->getEntityComponent<MetaData::EntityName>(e).has_value()) { controller->getEntityComponent<MetaData::EntityName>(e).value().get().name += "_prefab"; }
+                if (controller->getEntityComponent<Entity::Name>(e).has_value()) { controller->getEntityComponent<Entity::Name>(e).value().get().name += "_prefab"; }
             }
 
             PN_CORE_INFO("Loaded prefab with {} entities from virtual path: {}", entities.size(), prefab_virtual_filepath);
@@ -505,13 +505,13 @@ namespace PAIN {
             if (auto controller = services->get<PAIN::ECS::Controller>()) {
                 // Use EnTT view to iterate all entities with EntityName component
                 auto& registry = controller->getRegistry();
-                auto view = registry.view<MetaData::EntityName>();
+                auto view = registry.view<Entity::Name>();
                 for (auto e : view) {
 
                     nlohmann::json E = nlohmann::json::object();
 
                     // Name
-                    if (auto name = controller->getEntityComponent<MetaData::EntityName>(e);
+                    if (auto name = controller->getEntityComponent<Entity::Name>(e);
                         name.has_value()) {
                         E["Name"] = name->get().name;
                     }
