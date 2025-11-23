@@ -13,7 +13,6 @@ namespace PAIN {
 
 		enum MOVE_MODES {
 			FPS,
-			ORBIT_ORIGIN,
 			NUM_MOVE_MODES,
 		};
 

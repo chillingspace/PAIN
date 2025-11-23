@@ -50,10 +50,10 @@ namespace PAIN {
 		float yOffset = 0.0f;
 
 		enum MOVE_MODES {
-			CAMERA,
-			NUM_MOVE_MODES
+			FREE_FLY,
+			FIRST_PERSON
 		};
-		MOVE_MODES move_mode = CAMERA;
+		MOVE_MODES move_mode = FREE_FLY;
 
 	private:
 		Camera* camera;

@@ -490,13 +490,13 @@ namespace PAIN {
 
 							// Get camera basis vectors from inverse view matrix
 							glm::vec3 right = glm::vec3(inverseView[0]);
-							glm::vec3 up = glm::vec3(inverseView[1]);
+							glm::vec3 globalUp(0.0f, 1.0f, 0.0f);
 							glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
 
 							// Update camera
 							camera->pos = newPosition;
 							camera->forward = glm::normalize(forward);
-							camera->up = glm::normalize(up);
+							camera->up = glm::normalize(globalUp);
 							camera->right = glm::normalize(right);
 						}
 					}
