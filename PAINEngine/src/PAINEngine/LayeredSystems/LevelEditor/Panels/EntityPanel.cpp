@@ -363,8 +363,15 @@ namespace PAIN {
                 std::string display_label = indent + prefix + entity_name;
                 std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
 
-                // Apply color for child entities
-                if (depth > 0) {
+                // Check if entity is a prefab instance
+                bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry().any_of<Prefab::PrefabInstance>(entity);
+
+                // Add icon or indicator for prefab instances
+                if (is_prefab_instance) {
+                    unique_label = "[P] " + unique_label;
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                }
+                else if (depth > 0) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
                 }
 
@@ -375,7 +382,7 @@ namespace PAIN {
                     b_entity_changed = true;
                 }
 
-                if (depth > 0) {
+                if (depth > 0 || is_prefab_instance) {
                     ImGui::PopStyleColor();
                 }
 
