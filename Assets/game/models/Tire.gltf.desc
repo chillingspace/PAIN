@@ -4,7 +4,7 @@
     "type": "Model"
   },
   "build_data": {
-    "hash": 10790736899849776699
+    "hash": 7425668397442568815
   },
   "descriptor_version": 1,
   "guid": "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Rock6.obj"
+    "source_file": "game\\models\\Tire.gltf"
   }
 }

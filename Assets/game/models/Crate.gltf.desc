@@ -4,7 +4,7 @@
     "type": "Model"
   },
   "build_data": {
-    "hash": 8799402838513939720
+    "hash": 4242152871303848001
   },
   "descriptor_version": 1,
   "guid": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Crate.obj"
+    "source_file": "game\\models\\Crate.gltf"
   }
 }

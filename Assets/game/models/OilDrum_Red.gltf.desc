@@ -4,7 +4,7 @@
     "type": "Model"
   },
   "build_data": {
-    "hash": 18118812823547415904
+    "hash": 6781682408810202398
   },
   "descriptor_version": 1,
   "guid": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\ContainerRed.obj"
+    "source_file": "game\\models\\OilDrum_Red.gltf"
   }
 }

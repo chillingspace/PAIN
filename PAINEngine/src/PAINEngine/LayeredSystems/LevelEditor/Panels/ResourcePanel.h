@@ -6,6 +6,7 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 #include <chrono>
+#include <queue>
 
 // ========================================
 // Move File and Dir structs OUTSIDE platform guards

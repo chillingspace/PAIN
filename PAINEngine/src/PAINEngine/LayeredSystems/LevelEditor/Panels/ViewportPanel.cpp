@@ -169,14 +169,14 @@ namespace PAIN {
 				return tMin >= 0.0f;
 			}
 
-			// ImGuizmo picking logic
-			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
+			// Helper method to find entity at mouse position - IMPROVED VERSION
+			entt::entity ViewportPanel::findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize) {
 				auto scene = services->get<Scene>();
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 
-				if (!camera || !ecs || !m_EntityPanel) {
-					return;
+				if (!camera || !ecs) {
+					return entt::null;
 				}
 
 				// Get camera matrices
@@ -191,10 +191,15 @@ namespace PAIN {
 				entt::entity closestEntity = entt::null;
 				float closestDistance = (std::numeric_limits<float>::max)();
 
-				// Iterate through all entities with transforms
-				auto view = ecs->getRegistry().view<LocalTransform, WorldTransform>();
+				// Iterate through entities with ModelRenderer (more precise than just Transform)
+				auto view = ecs->getRegistry().view<LocalTransform, WorldTransform, ModelRenderer>();
 
-				for (auto [entity, local, world] : view.each()) {
+				for (auto [entity, local, world, model] : view.each()) {
+
+					// Skip invisible objects
+					if (!model.visible) {
+						continue;
+					}
 
 					// Skip very large objects (likely background/floor)
 					if (local.scale.x > 10.0f || local.scale.y > 10.0f || local.scale.z > 10.0f) {
@@ -203,20 +208,44 @@ namespace PAIN {
 
 					float distance;
 
-					// Use AABB only for accurate picking
-					if (rayIntersectsAABB(rayOrigin, rayDirection, world.matrix, local.scale, distance)) {
-						if (distance < closestDistance) {
-							closestDistance = distance;
+					// First do a quick AABB test
+					if (!rayIntersectsAABB(rayOrigin, rayDirection, world.matrix, local.scale, distance)) {
+						continue;
+					}
+
+					// For more precision, use a tighter bounding sphere based on model scale
+					glm::vec3 sphereCenter = local.position;
+					float sphereRadius = glm::length(local.scale) * 0.5f; // More conservative radius
+
+					float sphereDistance;
+					if (rayIntersectsSphere(rayOrigin, rayDirection, sphereCenter, sphereRadius, sphereDistance)) {
+						// Use the sphere distance for more accurate sorting
+						if (sphereDistance < closestDistance) {
+							closestDistance = sphereDistance;
 							closestEntity = entity;
 						}
 					}
 				}
 
+				return entt::null;
+			}
+
+			// ImGuizmo picking logic
+			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
+				auto scene = services->get<Scene>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!camera || !ecs || !m_EntityPanel) {
+					return;
+				}
+
+				entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
+
 				// Update EntityPanel selection
 				m_EntityPanel->setSelectedEntity(closestEntity);
 			}
 
-            
             void ViewportPanel::handleMaterialDrop(File* materialFile,
                 ImVec2 localMousePos,
                 ImVec2 viewportSize) {
@@ -343,10 +372,11 @@ namespace PAIN {
                         ImGui::SetCursorScreenPos(viewportPos);
                         ImGui::InvisibleButton("##ViewportDropZone", size);
 
+						auto filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Material);
                         if (ImGui::BeginDragDropTarget()) {
                             // Check what payload is available
                             if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
-                                if (strcmp(payload->DataType, "Materials_FILE") == 0) {
+                                if (strcmp(payload->DataType, std::string(filetype_string + "_FILE").c_str()) == 0) {
                                     m_DragHoveredEntity = findEntityAtMousePos(
                                         ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
                                         size
@@ -358,7 +388,7 @@ namespace PAIN {
                                 }
                             }
 
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
                                 PN_CORE_INFO("Material payload accepted!");
                                 File* droppedFile = (File*)payload->Data;
 
