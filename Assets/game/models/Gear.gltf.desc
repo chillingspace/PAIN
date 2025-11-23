@@ -1,0 +1,39 @@
+{
+  "asset_info": {
+    "name": "Gear.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+<<<<<<< Updated upstream:Assets/game/models/Rock5.obj.desc
+    "hash": 2702584294300046391
+=======
+    "hash": 15841739210205110720
+>>>>>>> Stashed changes:Assets/game/models/Gear.gltf.desc
+  },
+  "descriptor_version": 1,
+  "guid": "a46e46bd-95fe-8a4b-a6c2-0e233a3e37fc",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": true,
+    "import_skeleton": true,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Gear.gltf"
+  }
+}

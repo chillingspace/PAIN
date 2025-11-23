@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear_Normal.png",
+    "name": "Gear_normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 17129472332215384284
+    "hash": 11831381846774522749
   },
   "descriptor_version": 1,
-  "guid": "fc176e9f-2f9b-7f48-acdb-f99a9d7c959b",
+  "guid": "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Gear_Normal.png"
+    "source_file": "game\\textures\\Gear_normal.png"
   }
 }

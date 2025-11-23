@@ -3,7 +3,7 @@
         {
             "Components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 5,
+                    "bvhNodeIndex": 65,
                     "localAABB": {
                         "max": [
                             135.75128173828125,
@@ -35,37 +35,37 @@
                 },
                 "Hierarchy": {
                     "children": [],
-                    "parent": 4294967295
+                    "parent": 43
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
                             "baseColorOverride": [
-                                0.6000000238418579,
-                                0.6000000238418579,
-                                0.6000000238418579
+                                1.0,
+                                1.0,
+                                1.0
                             ],
                             "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
+                                1.0,
+                                1.0,
+                                1.0
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "ae7b1255-69bd-4844-99b0-c5b4112e393c",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
                     "receiveShadows": true,
                     "visible": true
                 },

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Platform1_Normal.png",
+    "name": "Platform1_normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 17940242066969979822
+    "hash": 9634369962174783156
   },
   "descriptor_version": 1,
-  "guid": "f557b40c-d963-1148-afd2-c837807cbca0",
+  "guid": "6fc0ccbc-ae9d-a948-9557-6140470621c4",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Platform1_Normal.png"
+    "source_file": "game\\textures\\Platform1_normal.png"
   }
 }

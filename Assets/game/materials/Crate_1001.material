@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\.\\Crate_baseColor_1001.png",
+        "ao": "game\\textures\\.\\Crate_occlusionRoughnessMetallic_1001.png",
+        "emissive": "game\\textures\\.\\Crate_emissive_1001.png",
+        "lightmap": "game\\textures\\.\\Crate_occlusionRoughnessMetallic_1001.png",
+        "metallic": "game\\textures\\.\\Crate_occlusionRoughnessMetallic_1001.png",
+        "normal": "game\\textures\\.\\Crate_normal_1001.png",
+        "roughness": "game\\textures\\.\\Crate_occlusionRoughnessMetallic_1001.png"
+    }
+}

@@ -4,10 +4,14 @@
     "type": "Prefabs"
   },
   "build_data": {
+<<<<<<< Updated upstream
     "hash": 17563727817366935853
+=======
+    "hash": 9901030535923339700
+>>>>>>> Stashed changes
   },
   "descriptor_version": 1,
-  "guid": "31449556-1e8b-9c47-8a0e-7dd8c1edaac1",
+  "guid": "04350789-5153-bc49-8fd3-15aba1436767",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\ContainerBlue.prefab"

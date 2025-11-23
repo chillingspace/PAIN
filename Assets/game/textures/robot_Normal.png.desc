@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "robot_Normal.png",
+    "name": "Robot_normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 2787858613436374735
+    "hash": 6263501626040723922
   },
   "descriptor_version": 1,
-  "guid": "9772a578-93d9-8641-8100-97d6c5bdbea7",
+  "guid": "1e358f84-c752-7544-aa59-186b4a322e4f",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\robot_Normal.png"
+    "source_file": "game\\textures\\Robot_normal.png"
   }
 }

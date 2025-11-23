@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ContainerRed.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12837816695716807589
+  },
+  "descriptor_version": 1,
+  "guid": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\ContainerRed.material"
+  }
+}

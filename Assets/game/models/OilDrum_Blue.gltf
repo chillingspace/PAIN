@@ -1,0 +1,203 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 5184,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1315,
+      "max": [
+        35.8180923461914,
+        97.5758056640625,
+        35.8180999755859
+      ],
+      "min": [
+        -35.8180961608887,
+        0.0,
+        -35.8180923461914
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1315,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 1315,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 1315,
+      "type": "VEC2"
+    }
+  ],
+  "asset": {
+    "generator": "Adobe Substance 3D Painter 11.0.3",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 20736,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 15780,
+      "byteOffset": 20736,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 15780,
+      "byteOffset": 36516,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 21040,
+      "byteOffset": 52296,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 10520,
+      "byteOffset": 73336,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 83856,
+      "uri": "OilDrum_Blue.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "OilDrumBlue_baseColor_1001.png"
+    },
+    {
+      "uri": "OilDrumBlue_occlusionRoughnessMetallic_1001.png"
+    },
+    {
+      "uri": "OilDrumBlue_normal_1001.png"
+    },
+    {
+      "uri": "OilDrumBlue_emissive_1001.png"
+    }
+  ],
+  "materials": [
+    {
+      "alphaMode": "BLEND",
+      "emissiveFactor": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emissiveTexture": {
+        "index": 3
+      },
+      "name": "OilDrumBlue_1001",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Oil_Drum",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 2,
+            "POSITION": 1,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "name": "RootNode",
+      "scale": [
+        0.00999999977648258,
+        0.00999999977648258,
+        0.00999999977648258
+      ]
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "Oil_Drum"
+    },
+    {
+      "mesh": 0,
+      "name": "Oil_Drum"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9985,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    }
+  ]
+}

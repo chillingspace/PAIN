@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "OilDrumRed_baseColor_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12859035387539222452
+  },
+  "descriptor_version": 1,
+  "guid": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\OilDrumRed_baseColor_1001.png"
+  }
+}
