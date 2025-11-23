@@ -646,6 +646,11 @@ namespace PAIN {
                 entt::entity selected = entity_panel->getSelectedEntity();
                 auto selected_filepath = resource_panel->getSelectedFilePath();
 
+                if (entity_panel->isEntityAndScriptSwitched()) {
+                    resource_panel->setSelectedFilePath("");
+                    entity_panel->setEntityAndScriptSwitched(false);
+                }
+
                 // Lua Script Display
                 if (!selected_filepath.empty()) {
 

@@ -35,6 +35,9 @@ namespace PAIN {
                 //Check entity changed
                 bool isEntityChanged() const;
 
+                bool isEntityAndScriptSwitched() const;
+                void setEntityAndScriptSwitched(bool is_switched);
+
             private:
                 std::vector<std::pair<entt::entity, std::string>> editor_entities;
 
@@ -49,7 +52,7 @@ namespace PAIN {
 
                 //Entity changed event boolean
                 bool b_entity_changed;
-
+                bool b_entity_script_switched = false;
 
                 int total_entities;
                 int selectedEntityIndex = -1;       // Selected entity index
@@ -101,8 +104,6 @@ namespace PAIN {
                 std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
 
                 void drawEntityHierarchy(entt::entity entity_id, int depth);
-
-                std::weak_ptr<ResourcePanel> resources_panel;
             };
 
         } // namespace Panel

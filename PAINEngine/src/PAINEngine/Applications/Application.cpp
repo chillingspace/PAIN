@@ -144,9 +144,11 @@ namespace PAIN {
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS	
 		// !NOTE: IMGUI eats events
 		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
 		addLayerSystem(editor);
+#endif
 #endif
 
 
@@ -198,7 +200,8 @@ namespace PAIN {
 			);
 		}
 #endif
-	
+
+#ifdef PN_PLATFORM_WINDOWS	
 #ifdef _DEBUG
 		if (services->get<Editor::Editor>()->isPaused()) {
 			timing.dt = 0.0f;
@@ -207,6 +210,7 @@ namespace PAIN {
 		else {
 			services->get<Audio::Audio>()->resumeAll();
 		}
+#endif
 #endif
 
 		//Accumulate for fixed updates (use scaled time)
