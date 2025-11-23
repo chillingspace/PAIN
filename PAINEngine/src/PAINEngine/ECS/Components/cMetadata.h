@@ -12,45 +12,60 @@
 
 #include "pch.h"
 
-namespace PAIN {
+ namespace PAIN {
+ 
+	 namespace MetaData {
+		 /******************************************************************************************
+		 * Note: When creating components, try to stack them properly to properly optimise memory
+		 * (Place largest type var (Double) first, then followed by smallest.
+		 *****************************************************************************************/
+ 
+		 // Core identity component (always present)
+		 struct EntityName {
+			 std::string name;
+			 EntityName(std::string const& n = "entity_") : name(n) {}
 
-	namespace MetaData {
-		/******************************************************************************************
-		* Note: When creating components, try to stack them properly to properly optimise memory
-		* (Place largest type var (Double) first, then followed by smallest.
-		*****************************************************************************************/
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
+		 };
+ 
+		 // Tag component for categorization
+		 struct Tag {
+			 std::set<std::string> tags;
 
-		// Core identity component (always present)
-		struct EntityName {
-			std::string name;
-			EntityName(std::string const& n = "entity_") : name(n) {}
-		};
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
+		 };
+ 
+		 // Editor-only visibility component
+		 struct EditorVisible {
+			 bool visible;
+			 bool locked;
+			 EditorVisible() : visible(true), locked(false) {}
 
-		// Tag component for categorization
-		struct Tag {
-			std::set<std::string> tags;
-		};
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
+		 };
+ 
+		 struct Relation {
+			 std::vector<entt::entity> children;
+			 entt::entity parent;
 
-		// Editor-only visibility component
-		struct EditorVisible {
-			bool visible;
-			bool locked;
-			EditorVisible() : visible(true), locked(false) {}
-		};
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
+		 };
+ 
+		 // Group assignment component
+		 struct Group {
+			 std::string group_name;
+			 Group(std::string const& name = "") : group_name(name) {}
 
-		struct Relation {
-			std::vector<entt::entity> children;
-			entt::entity parent;
-		};
-
-		// Group assignment component
-		struct Group {
-			std::string group_name;
-			Group(std::string const& name = "") : group_name(name) {}
-		};
-	}
-
-}
+			 //Serialization flag
+			 static constexpr bool ShouldSerialize = true;
+		 };
+	 }
+ 
+ }
 
 REFL_TYPE(PAIN::MetaData::EntityName)
 REFL_FIELD(name)

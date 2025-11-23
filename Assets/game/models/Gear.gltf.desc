@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear.gltf",
+    "name": "Rock5.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 15841739210205110720
   },
   "descriptor_version": 1,
-  "guid": "3064e936-e863-5f42-8fb8-cb4588a36090",
+  "guid": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

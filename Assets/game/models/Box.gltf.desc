@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Box.gltf",
+    "name": "Box.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 2935611137373291237
   },
   "descriptor_version": 1,
-  "guid": "2620df8c-1c84-544a-9ec5-2a65644d947d",
+  "guid": "e65e4858-d371-c142-8857-4f39f5d654fb",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Crate.gltf",
+    "name": "Crate.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 4242152871303848001
   },
   "descriptor_version": 1,
-  "guid": "868018ea-2483-b147-afe3-da3d8102b26c",
+  "guid": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

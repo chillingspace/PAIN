@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Tire.gltf",
+    "name": "Rock6.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 7425668397442568815
   },
   "descriptor_version": 1,
-  "guid": "3a4e770e-940e-334a-a533-3b17f8fd1df8",
+  "guid": "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

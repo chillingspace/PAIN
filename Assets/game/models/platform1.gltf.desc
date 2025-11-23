@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "platform1.gltf",
+    "name": "Platform1.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 9950073950614376517
   },
   "descriptor_version": 1,
-  "guid": "adf751e1-ac1a-4a44-9aee-6f1fcf950ade",
+  "guid": "510e3ede-f637-c448-99e8-7dc200d60c8f",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

@@ -15,6 +15,9 @@ namespace PAIN {
         Assets::GUID script_asset;
         bool enabled = true; // active or not
         bool loaded = false; // runtime flag
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
     };
 
 } 

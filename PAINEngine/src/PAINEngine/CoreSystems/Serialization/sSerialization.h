@@ -12,7 +12,7 @@
 #define SERIALIZATION_SERVICE_H
 #include "pch.h"
 #include "Applications/AppSystem.h"
-#include "PAINEngine/ECS/Controller.h"
+//#include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/Components/cTransform.h"
 
 #include "AssetData.h"

@@ -13,6 +13,7 @@
 #include "ECS/sMetaData.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Path/Android/AndroidPath.h"
+#include "ECS/Controller.h"
 
 
  // Fail at compile time if reflection didn't bind

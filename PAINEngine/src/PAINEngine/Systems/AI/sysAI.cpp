@@ -40,15 +40,16 @@ namespace PAIN {
 		}
 
 		static glm::vec3 forward_of(entt::registry& reg, entt::entity e) {
-			auto& t = reg.get<PAIN::Transform>(e);
-			return t.forward();
+			//auto& t = reg.get<PAIN::LocalTransform>(e);
+			//return t.forward();
+			return glm::vec3(0);
 		}
 
 		bool PerceptionSystem::canSee(entt::entity self, entt::entity other, entt::registry& reg,
 			float fovDeg, float range, bool requireLOS)
 		{
-			auto& ts = reg.get<PAIN::Transform>(self);
-			auto& to = reg.get<PAIN::Transform>(other);
+			auto& ts = reg.get<PAIN::LocalTransform>(self);
+			auto& to = reg.get<PAIN::LocalTransform>(other);
 			glm::vec3 delta = to.position - ts.position;
 			float dist2 = glm::dot(delta, delta);
 
@@ -70,17 +71,17 @@ namespace PAIN {
 		void PerceptionSystem::onUpdate(float dt, entt::registry& reg) {
 			(void)dt;
 
-			auto sensorView = reg.view<Sensors, PAIN::Transform>();
-			auto transformView = reg.view<PAIN::Transform>();
+			auto sensorView = reg.view<Sensors, PAIN::LocalTransform>();
+			auto transformView = reg.view<PAIN::LocalTransform>();
 
 			// !TODO: naive N^2 sample; replace with spatial query later
 			
 			// Iterate all entities that have Sensors + Transform
-			sensorView.each([&](entt::entity e, Sensors& sens, PAIN::Transform& ts) {
+			sensorView.each([&](entt::entity e, Sensors& sens, PAIN::LocalTransform& ts) {
 				sens.visible_targets.clear();
 
 				// Iterate all entities that have Transform
-				transformView.each([&](entt::entity other, PAIN::Transform& to) {
+				transformView.each([&](entt::entity other, PAIN::LocalTransform& to) {
 					if (other == e) return; // skip self
 
 					if (canSee(e, other, reg,
@@ -145,7 +146,7 @@ namespace PAIN {
 				auto& nav = reg.get_or_emplace<NavAgent>(e);
 				if (!nav.move_target.has_value()) {
 					// Pick a dummy local waypoint; plug patrol system here.
-					auto& t = reg.get<PAIN::Transform>(e);
+					auto& t = reg.get<PAIN::LocalTransform>(e);
 					nav.move_target = t.position + glm::vec3{ 3.0f, 0.0f, 0.0f };
 					auto& cq = reg.get_or_emplace<CommandQueue>(e);
 					cq.push({ CommandType::SetMoveTarget, *nav.move_target });
@@ -185,7 +186,7 @@ namespace PAIN {
 
 			// !TODO: Integrate navmesh/path service. For now, synthesize a tiny path:
 			agent.path.clear();
-			auto& t = reg.get<PAIN::Transform>(e);
+			auto& t = reg.get<PAIN::LocalTransform>(e);
 			agent.path.push_back(goal);
 			agent.path_index = 0;
 			agent.arrived = false;
@@ -196,7 +197,7 @@ namespace PAIN {
 			auto& agent = reg.get<NavAgent>(e);
 			if (agent.path.empty()) return;
 
-			auto& t = reg.get<PAIN::Transform>(e);
+			auto& t = reg.get<PAIN::LocalTransform>(e);
 			glm::vec3 target = agent.path[agent.path_index];
 			glm::vec3 delta = target - t.position;
 			float dist = glm::length(delta);
@@ -215,9 +216,9 @@ namespace PAIN {
 		}
 
 		void NavigationSystem::onUpdate(float dt, entt::registry& reg) {
-			auto navView = reg.view<NavAgent, PAIN::Transform>();
+			auto navView = reg.view<NavAgent, PAIN::LocalTransform>();
 
-			navView.each([&](entt::entity e, NavAgent& agent, PAIN::Transform&) {
+			navView.each([&](entt::entity e, NavAgent& agent, PAIN::LocalTransform&) {
 
 				if (!agent.move_target.has_value())
 					return;
@@ -243,7 +244,7 @@ namespace PAIN {
 
 		void SteeringSystem::applyMotion(entt::entity e, entt::registry& reg, const glm::vec3& vel, float dt) {
 			// Option A: kinematic integration + physics teleport (keeps Transform/Physics in sync):
-			auto& t = reg.get<PAIN::Transform>(e);
+			auto& t = reg.get<PAIN::LocalTransform>(e);
 			t.position += vel * dt;
 
 			// If entity has RigidBody3D, use your physics sync helper from EngineAPIAdapter:

@@ -8,6 +8,7 @@
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Windows/Window.h"
 
+#include "ECS/Components/cEntity.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -302,8 +303,9 @@ namespace PAIN {
 
                                 entt::entity entity = ecs->createEntity();
                                 ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
-                                ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-                                //ecs->addEntityComponent(entity, Hierarchy{});
+                                ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+                                ecs->addEntityComponent(entity, WorldTransform{});
+                                ecs->addEntityComponent(entity, Entity::Hierarchy{});
                                 //if (scene) {
                                 //    ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
                                 //}

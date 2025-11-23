@@ -202,7 +202,7 @@ std::vector<entt::entity> EngineAPIAdapter::GetEntitiesByTag(const std::string& 
 /*                                Transform                                    */
 /* =========================================================================== */
 glm::vec3 EngineAPIAdapter::GetPosition(entt::entity entityId) {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         return opt->get().position;
     }
     return { 0.f, 0.f, 0.f };
@@ -213,9 +213,9 @@ void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
     t.position = { p.x, p.y, p.z };*/
 
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.position = p;
 
     if (reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
@@ -227,7 +227,7 @@ void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
 }
 
 glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         return opt->get().scale;
     }
     return { 1.f, 1.f, 1.f };
@@ -235,15 +235,15 @@ glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
 
 void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.scale = s;
 }
 
 glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
 {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         const auto& t = opt->get();
         // convert quaternion -> euler angles, in rad
         glm::vec3 euler = glm::eulerAngles(t.rotation);
@@ -255,9 +255,9 @@ glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
 void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
 {
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.rotation = glm::quat(r); // euler to quat
 }
 
