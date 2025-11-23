@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
 #include "EntityPanel.h"
-#include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 
@@ -178,6 +177,9 @@ namespace PAIN {
                                 }
                             }
                         });
+                // ---- Camera ----
+                registerCompUIFunc<PAIN::Cam>("Camera",
+                    [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

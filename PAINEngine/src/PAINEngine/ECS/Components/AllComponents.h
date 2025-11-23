@@ -11,24 +11,18 @@
 #pragma once
 
 // To include all components excluding metadata
-#include "cTransform.h"
-#include "cHierarchy.h"
-#include "cMeshRenderer.h"
-#include "cLight.h"
-#include "cPhysics.h"
-#include "cMetadata.h"
-#include "cAudioSource.h"
-#include "cBoundingVolume.h"
-#include "cScript.h"
-#include "cAI.h"
+#include "pch.h"
+
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
     /*
-    * Some component pipeliens to take note for now: 
+    * Some component pipeline to take note for now: 
     * 1. When creating a component, follow one of the component files to add in the seri stuff
-    * 2. Add in this file your component
-    * 3. Register your component in controller.cpp
+    * 2. Include your component in Core.h
+    * 3. Add in your component to this file 
+    * 4. Register your component in controller.cpp
+    * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on enum)
     */
     using AllGameplayComponents = std::tuple <
         // Metadata components
@@ -40,6 +34,7 @@ namespace PAIN {
         Hierarchy,
 
         // Gameplay
+        Cam,
         Transform,
         ModelRenderer,
         Lighting,
@@ -70,6 +65,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, Hierarchy>) return "Hierarchy";
 
         // Gameplay components
+        else if constexpr (std::is_same_v<T, Cam>) return "Camera";
         else if constexpr (std::is_same_v<T, Transform>) return "Transform";
         else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";

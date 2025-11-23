@@ -11,3 +11,6 @@
 #include "ECS/Components/cScript.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cAI.h"
+#include "ECS/Components/cCamera.h"
+#include "ECS/Components/cHierarchy.h"
+#include "ECS/Components/cBoundingVolume.h"
