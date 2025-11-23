@@ -19,6 +19,7 @@
 #include "Systems/Audio/sysAudio.h"
 #include "Systems/Collision/sBVHSystem.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
+#include "Systems/Transform/sysTransform.h"
 
 // UI Systems
 #include "Systems/UI/sysUILayout.h"
@@ -233,6 +234,8 @@ namespace PAIN {
 
         void Controller::registerAllSystems()
         {
+            registerSystem<Transform::System>();
+
             // Physics system cross platform
             registerSystem<Physics::System>();
 

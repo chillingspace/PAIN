@@ -133,13 +133,9 @@ namespace PAIN {
 
 			// AABB ray intersect for picking
 			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const glm::mat4& worldMatrix, const glm::vec3& scale,  float& distance) {
-
-				// Extract world position from matrix
-				glm::vec3 worldPosition = glm::vec3(worldMatrix[3]);
-
-				glm::vec3 minBound = worldPosition - scale * 0.5f;
-				glm::vec3 maxBound = worldPosition + scale * 0.5f;
+				const LocalTransform& transform, float& distance) {
+				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
+				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
 
 				float tMin = 0.0f;
 				float tMax = (std::numeric_limits<float>::max)();
@@ -209,7 +205,7 @@ namespace PAIN {
 					float distance;
 
 					// First do a quick AABB test
-					if (!rayIntersectsAABB(rayOrigin, rayDirection, world.matrix, local.scale, distance)) {
+					if (!rayIntersectsAABB(rayOrigin, rayDirection, local, distance)) {
 						continue;
 					}
 
@@ -227,8 +223,36 @@ namespace PAIN {
 					}
 				}
 
-				return entt::null;
+				// Fallback to entities with just Transform (in case some don't have ModelRenderer)
+				if (closestEntity == entt::null) {
+					auto transformOnlyView = ecs->getRegistry().view<LocalTransform>();
+
+					for (auto entity : transformOnlyView) {
+						// Skip if we already checked this entity
+						if (ecs->getRegistry().all_of<ModelRenderer>(entity)) {
+							continue;
+						}
+
+						auto& transform = transformOnlyView.get<LocalTransform>(entity);
+
+						// Skip very large objects
+						if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
+							continue;
+						}
+
+						float distance;
+						if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
+							if (distance < closestDistance) {
+								closestDistance = distance;
+								closestEntity = entity;
+							}
+						}
+					}
+				}
+
+				return closestEntity;
 			}
+
 
 			// ImGuizmo picking logic
 			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
@@ -246,51 +270,51 @@ namespace PAIN {
 				m_EntityPanel->setSelectedEntity(closestEntity);
 			}
 
-            void ViewportPanel::handleMaterialDrop(File* materialFile,
-                ImVec2 localMousePos,
-                ImVec2 viewportSize) {
-                auto scene = services->get<Scene>();
-                auto camera = scene->GetActiveCamera();
-                auto ecs = services->get<ECS::Controller>();
-                auto assetService = services->get<Assets::Manager>();
+			void ViewportPanel::handleMaterialDrop(File* materialFile,
+				ImVec2 localMousePos,
+				ImVec2 viewportSize) {
+				auto scene = services->get<Scene>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+				auto assetService = services->get<Assets::Manager>();
 
-                if (!camera || !ecs || !materialFile || !assetService) {
-                    return;
-                }
+				if (!camera || !ecs || !materialFile || !assetService) {
+					return;
+				}
 
-                // Find entity at drop location
-                entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
+				// Find entity at drop location
+				entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
 
-                // Apply material to the closest entity
-                if (closestEntity != entt::null) {
-                    // Check if entity has a ModelRenderer component
-                    if (ecs->getRegistry().all_of<ModelRenderer>(closestEntity)) {
-                        auto& modelRenderer = ecs->getRegistry().get<ModelRenderer>(closestEntity);
+				// Apply material to the closest entity
+				if (closestEntity != entt::null) {
+					// Check if entity has a ModelRenderer component
+					if (ecs->getRegistry().all_of<ModelRenderer>(closestEntity)) {
+						auto& modelRenderer = ecs->getRegistry().get<ModelRenderer>(closestEntity);
 
-                        // Apply the material to all submeshes (you can modify this logic)
-                        if (modelRenderer.materials.empty()) {
-                            // If no materials exist, create one
-                            MaterialInstance matInstance;
-                            matInstance.materialGUID = materialFile->id;
-                            modelRenderer.materials.push_back(matInstance);
+						// Apply the material to all submeshes (you can modify this logic)
+						if (modelRenderer.materials.empty()) {
+							// If no materials exist, create one
+							MaterialInstance matInstance;
+							matInstance.materialGUID = materialFile->id;
+							modelRenderer.materials.push_back(matInstance);
 
-                            PN_CORE_INFO("Applied material '{}' to entity (new material instance)", materialFile->file_name);
-                        }
-                        else {
-                            // Apply to first material (or you could apply to all)
-                            modelRenderer.materials[0].materialGUID = materialFile->id;
+							PN_CORE_INFO("Applied material '{}' to entity (new material instance)", materialFile->file_name);
+						}
+						else {
+							// Apply to first material (or you could apply to all)
+							modelRenderer.materials[0].materialGUID = materialFile->id;
 
-                            PN_CORE_INFO("Applied material '{}' to entity (replaced first material)", materialFile->file_name);
-                        }
-                    }
-                    else {
-                        PN_CORE_WARN("Entity does not have a ModelRenderer component");
-                    }
-                }
-                else {
-                    PN_CORE_INFO("No entity found at drop location");
-                }
-            }
+							PN_CORE_INFO("Applied material '{}' to entity (replaced first material)", materialFile->file_name);
+						}
+					}
+					else {
+						PN_CORE_WARN("Entity does not have a ModelRenderer component");
+					}
+				}
+				else {
+					PN_CORE_INFO("No entity found at drop location");
+				}
+			}
 
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
