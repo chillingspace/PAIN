@@ -109,15 +109,20 @@ namespace PAIN {
 
         Prefab::PrefabAsset Service::deserializePrefab(const nlohmann::json& prefabJson) {
             Prefab::PrefabAsset prefab_asset;
+            try {
 
-            prefab_asset.prefabName = prefabJson.at("prefabName").get<std::string>();
-            prefab_asset.rootEntityGUID = Assets::GUID(prefabJson.at("rootEntityGUID").get<std::string>());
+                prefab_asset.prefabName = prefabJson.at("prefabName").get<std::string>();
+                prefab_asset.rootEntityGUID = Assets::GUID(prefabJson.at("rootEntityGUID").get<std::string>());
 
-            prefab_asset.entities.clear();
-            if (prefabJson.contains("entities")) {
-                for (const auto& entityJson : prefabJson["entities"]) {
-                    prefab_asset.entities.push_back(entityJson);
+                prefab_asset.entities.clear();
+                if (prefabJson.contains("entities")) {
+                    for (const auto& entityJson : prefabJson["entities"]) {
+                        prefab_asset.entities.push_back(entityJson);
+                    }
                 }
+            }
+            catch (...) {
+                PN_CORE_WARN("Invalid Prefab file. Unable to load it");
             }
 
             return prefab_asset;
