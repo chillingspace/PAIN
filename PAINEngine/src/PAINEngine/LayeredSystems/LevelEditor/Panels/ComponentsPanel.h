@@ -11,7 +11,9 @@ namespace PAIN {
 
 		namespace Panel {
 			class EntityPanel;
+#ifdef PN_PLATFORM_WINDOWS
 			class ResourcePanel;
+#endif
 
 			class ComponentsPanel : public IPanel {
 			public:
@@ -84,7 +86,10 @@ namespace PAIN {
 				std::unordered_map<std::string, std::function<void(ComponentsPanel&, void*)>> comps_ui;
 
 				std::weak_ptr<EntityPanel> entities_panel;
+
+#ifdef PN_PLATFORM_WINDOWS
 				std::weak_ptr<ResourcePanel> resources_panel;
+#endif
 
 				// Script Loading
 				bool is_script_loaded = false;

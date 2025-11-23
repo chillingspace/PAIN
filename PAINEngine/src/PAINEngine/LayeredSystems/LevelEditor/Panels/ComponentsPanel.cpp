@@ -1,7 +1,11 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
-#include "EntityPanel.h"
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "ResourcePanel.h"
+#endif
+
+#include "EntityPanel.h"
 #include "Core.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
@@ -214,7 +218,9 @@ namespace PAIN {
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {
                     entities_panel = editor->getPanel<EntityPanel>();
+#ifdef PN_PLATFORM_WINDOWS
                     resources_panel = editor->getPanel<ResourcePanel>();
+#endif
                 }
 
                 // Register Add Component popup
@@ -622,6 +628,7 @@ namespace PAIN {
                     }
                 }
 
+#ifdef PN_PLATFORM_WINDOWS
                 // Ensure resource panel reference is valid
                 auto resource_panel = resources_panel.lock();
                 if (!resource_panel) {
@@ -634,6 +641,7 @@ namespace PAIN {
                         }
                     }
                 }
+#endif
 
 
                 if (!entity_panel) {
@@ -641,14 +649,30 @@ namespace PAIN {
                     ImGui::TextDisabled("Entity Panel not available");
                     return;
                 }
-
                 // Get selected entity
                 entt::entity selected = entity_panel->getSelectedEntity();
+
+#ifdef PN_PLATFORM_WINDOWS
+                if (!resource_panel) {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Resource Panel not available");
+                    return;
+                }
+
                 auto selected_filepath = resource_panel->getSelectedFilePath();
 
+                //Switching to a Entity
                 if (entity_panel->isEntityAndScriptSwitched()) {
                     resource_panel->setSelectedFilePath("");
                     entity_panel->setEntityAndScriptSwitched(false);
+                }
+
+                // Switching to a script
+                if (resource_panel->isScriptAndEntitySwitched()) {
+                    setScriptChanged(false); // Reset Script Change
+                    setScriptSaved(true);
+                    entity_panel->unselectEntity();
+                    resource_panel->setScriptAndEntitySwitched(false);
                 }
 
                 // Lua Script Display
@@ -708,6 +732,7 @@ namespace PAIN {
 
                     return;
                 }
+#endif
 
                 // No entity selected - show placeholder
                 if (selected == entt::null || !ecs->checkEntity(selected)) {

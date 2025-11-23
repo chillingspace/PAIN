@@ -85,6 +85,10 @@ namespace PAIN {
                 void setSelectedFilePath(std::string filepath);
                 std::string selected_filepath;
 
+                bool isScriptAndEntitySwitched() const;
+                void setScriptAndEntitySwitched(bool is_switched);
+                bool b_script_entity_switched = false;
+
             private:
 
                 // ----------------------------
