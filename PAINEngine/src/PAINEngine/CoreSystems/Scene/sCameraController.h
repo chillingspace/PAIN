@@ -30,6 +30,10 @@ namespace PAIN {
         void updateTouchControls(int pointerId, float x, float y);
         void endTouchControls(int pointerId);
 
+		glm::mat4 getViewMatrix() const;
+		glm::mat4 getProjectionMatrix() const;
+
+
 		float m_vpWidth = 0.f;
 		float m_vpHeight = 0.f;
 		float m_vpPosX = 0.f;

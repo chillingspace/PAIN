@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Tires_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4518918427369880620
+  },
+  "descriptor_version": 1,
+  "guid": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Tires_baseColor.png"
+  }
+}

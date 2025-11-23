@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Tire_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15224327916946096696
+  },
+  "descriptor_version": 1,
+  "guid": "91e02ba2-c6b8-184f-bd48-b59674946972",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Tire_normal.png"
+  }
+}

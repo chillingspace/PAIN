@@ -1,14 +1,16 @@
-#ifdef PN_PLATFORM_WINDOWS
+#pragma once
+
 #ifdef _DEBUG
 
-#pragma once
 #include "Panels.h"
-
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
-
 #include <chrono>
 
+// ========================================
+// Move File and Dir structs OUTSIDE platform guards
+// so they're accessible to other headers
+// ========================================
 namespace PAIN::Editor::Panel {
 
     //Global files and directories for payload
@@ -41,6 +43,11 @@ namespace std {
         }
     };
 }
+
+// ========================================
+// Platform-specific ResourcePanel class
+// ========================================
+#ifdef PN_PLATFORM_WINDOWS
 
 namespace PAIN {
     namespace Editor {
@@ -254,5 +261,5 @@ namespace PAIN {
     } // namespace Editor
 } // namespace PAIN
 
-#endif
-#endif
+#endif // PN_PLATFORM_WINDOWS
+#endif // _DEBUG

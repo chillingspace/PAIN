@@ -45,6 +45,12 @@ namespace PAIN {
         Audio::AudioSource,
         Script,
 
+        // UI comps
+        UIRectTransform,
+        UIButton,
+        UIElement,
+        UICanvas,
+        UIAnimation,
         // AI
         //AI::Blackboard,
         AI::Controller,
@@ -76,6 +82,12 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, Audio::AudioSource>) return "AudioSource";
         else if constexpr (std::is_same_v<T, Script>) return "Script";
 
+        // UI comps
+		else if constexpr (std::is_same_v<T, UIRectTransform>) return "UIRectTransform";
+        else if constexpr (std::is_same_v<T, UIButton>) return "UIButton";
+        else if constexpr (std::is_same_v<T, UIElement>) return "UIElement";
+        else if constexpr (std::is_same_v<T, UICanvas>) return "UICanvas";
+        else if constexpr (std::is_same_v<T, UIAnimation>) return "UIAnimation";
         // AI components
         //else if constexpr (std::is_same_v<T, AI::Blackboard>) return "AIBlackboard";
         else if constexpr (std::is_same_v<T, AI::Controller>) return "AIController";

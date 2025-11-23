@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Container_Red.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 9346808787636924123
+  },
+  "descriptor_version": 1,
+  "guid": "52740f63-961d-9c49-b85a-553777cd8be9",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Container_Red.glb"
+  }
+}

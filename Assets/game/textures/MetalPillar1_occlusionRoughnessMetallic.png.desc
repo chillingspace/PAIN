@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "MetalPillar1_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14185782706096215714
+  },
+  "descriptor_version": 1,
+  "guid": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\MetalPillar1_occlusionRoughnessMetallic.png"
+  }
+}

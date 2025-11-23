@@ -53,6 +53,8 @@ namespace PAIN {
 
 			void registerAllComponents();
 
+			void registerAllSystems();
+
 			//Event callback
 			void onEvent(Event::Event& e) override;
 

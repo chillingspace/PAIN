@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Box.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 12193405037420255221
+  },
+  "descriptor_version": 1,
+  "guid": "2620df8c-1c84-544a-9ec5-2a65644d947d",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": true,
+    "import_skeleton": true,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Box.gltf"
+  }
+}

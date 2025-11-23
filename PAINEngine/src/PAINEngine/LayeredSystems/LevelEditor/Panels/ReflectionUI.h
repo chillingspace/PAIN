@@ -29,6 +29,7 @@
 #include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
+#include "ECS/Components/cUIComps.h"
 #include "ECS/Components/cAI.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "CoreSystems/Assets/sAssets.h"  
@@ -383,6 +384,51 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
             if (ImGui::Selectable(names[i], selected)) {
                 idx = i;
                 v = static_cast<PAIN::SHADOW_TYPES>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+// ----- UI Comps Enums -----
+inline bool DrawField(const char* label, PAIN::UIButtonState& v) {
+    const char* names[] = { "Normal", "Highlighted", "Pressed", "Disabled"};
+    int idx = static_cast<int>(v);
+    const int count = 4; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::UIButtonState>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+inline bool DrawField(const char* label, PAIN::CanvasRenderMode& v) {
+    const char* names[] = { "ScreenSpaceOverlay", "ScreenSpaceCamera", "WorldSpace" };
+    int idx = static_cast<int>(v);
+    const int count = 3; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::CanvasRenderMode>(i);
                 changed = true;
             }
             if (selected) ImGui::SetItemDefaultFocus();

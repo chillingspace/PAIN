@@ -78,4 +78,6 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     // These will be default-initialized when the component is loaded
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::Audio::AudioSource>);
+
 #endif // C_AUDIO_SOURCE_H

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "WaterTower_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17728812234880782761
+  },
+  "descriptor_version": 1,
+  "guid": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\WaterTower_occlusionRoughnessMetallic.png"
+  }
+}

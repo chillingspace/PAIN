@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Tire_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11051525125766171721
+  },
+  "descriptor_version": 1,
+  "guid": "df12f04f-34c5-644d-980a-c8251d57cd55",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Tire_occlusionRoughnessMetallic.png"
+  }
+}
