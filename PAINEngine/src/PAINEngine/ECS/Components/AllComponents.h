@@ -11,8 +11,7 @@
 #pragma once
 
 // To include all components excluding metadata
-#include "pch.h"
-
+#include "Core.h"
 
 namespace PAIN {
     // All gameplay components (NOT metadata components)
@@ -25,17 +24,22 @@ namespace PAIN {
     * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on enum)
     */
     using AllGameplayComponents = std::tuple <
+        //Entity components
+        Entity::GUID,
+        Entity::Name,
+        Entity::Hierarchy,
+
+        //prefan comps
+        Prefab::PrefabInstance,
+
         // Metadata components
-        MetaData::EntityName,
         MetaData::Tag,
         MetaData::EditorVisible,
-        MetaData::Relation,
-        MetaData::Group,
-        Hierarchy,
 
         // Gameplay
         Cam,
-        Transform,
+        LocalTransform,
+        WorldTransform,
         ModelRenderer,
         Lighting,
         Physics::RigidBody3D,
@@ -62,17 +66,22 @@ namespace PAIN {
 
     template<typename T>
     constexpr const char* getComponentName() {
+        //Entity components
+        if constexpr (std::is_same_v<T, Entity::GUID>) return "GUID";
+        if constexpr (std::is_same_v<T, Entity::Name>) return "Name";
+        if constexpr (std::is_same_v<T, Entity::Hierarchy>) return "Hierarchy";
+
+        //Prefab components
+        if constexpr (std::is_same_v<T, Prefab::PrefabInstance>) return "PrefabInstance";
+
         // Metadata components
-        if constexpr (std::is_same_v<T, MetaData::EntityName>) return "EntityName";
         else if constexpr (std::is_same_v<T, MetaData::Tag>) return "Tag";
         else if constexpr (std::is_same_v<T, MetaData::EditorVisible>) return "EditorVisible";
-        else if constexpr (std::is_same_v<T, MetaData::Relation>) return "Relation";
-        else if constexpr (std::is_same_v<T, MetaData::Group>) return "Group";
-        else if constexpr (std::is_same_v<T, Hierarchy>) return "Hierarchy";
 
         // Gameplay components
         else if constexpr (std::is_same_v<T, Cam>) return "Camera";
-        else if constexpr (std::is_same_v<T, Transform>) return "Transform";
+        else if constexpr (std::is_same_v<T, LocalTransform>) return "LocalTransform";
+        else if constexpr (std::is_same_v<T, WorldTransform>) return "WorldTransform";
         else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";

@@ -266,30 +266,30 @@ namespace PAIN {
 				glm::vec2 rect_max = pos + size;
 
 				if (isPointInRect(mouse_pos, rect_min, rect_max)) {
-					// Get canvas sort order by traversing up hierarchy
-					int canvas_sort = 0;
-					auto parent = entity;
-					while (parent != entt::null) {
-						if (registry.all_of<UICanvas>(parent)) {
-							canvas_sort = registry.get<UICanvas>(parent).sort_order;
-							break;
-						}
-						auto parent_opt = metadata_service->getParent(parent);
-						parent = parent_opt.has_value() ? parent_opt.value() : entt::null;
-					}
+					//// Get canvas sort order by traversing up hierarchy
+					//int canvas_sort = 0;
+					//auto parent = entity;
+					//while (parent != entt::null) {
+					//	if (registry.all_of<UICanvas>(parent)) {
+					//		canvas_sort = registry.get<UICanvas>(parent).sort_order;
+					//		break;
+					//	}
+					//	auto parent_opt = metadata_service->getParent(parent);
+					//	parent = parent_opt.has_value() ? parent_opt.value() : entt::null;
+					//}
 
-					// Get sibling index (hierarchy order)
-					int sibling_index = 0;
-					auto parent_opt = metadata_service->getParent(entity);
-					if (parent_opt.has_value()) {
-						auto siblings = metadata_service->getChildren(parent_opt.value());
-						auto it = std::find(siblings.begin(), siblings.end(), entity);
-						if (it != siblings.end()) {
-							sibling_index = std::distance(siblings.begin(), it);
-						}
-					}
+					//// Get sibling index (hierarchy order)
+					//int sibling_index = 0;
+					//auto parent_opt = metadata_service->getParent(entity);
+					//if (parent_opt.has_value()) {
+					//	auto siblings = metadata_service->getChildren(parent_opt.value());
+					//	auto it = std::find(siblings.begin(), siblings.end(), entity);
+					//	if (it != siblings.end()) {
+					//		sibling_index = std::distance(siblings.begin(), it);
+					//	}
+					//}
 
-					candidates.push_back({ entity, canvas_sort, sibling_index });
+					//candidates.push_back({ entity, canvas_sort, sibling_index });
 				}
 			}
 

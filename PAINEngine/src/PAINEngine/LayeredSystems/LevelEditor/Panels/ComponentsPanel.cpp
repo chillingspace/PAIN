@@ -1,9 +1,14 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
+
+#ifdef PN_PLATFORM_WINDOWS
+#include "ResourcePanel.h"
+#endif
+
 #include "EntityPanel.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
-#include "ResourcePanel.h"
+#include "Systems/Transform/sysTransform.h"
 #include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
@@ -18,15 +23,31 @@ namespace PAIN {
             }
 
             void ComponentsPanel::onAttach() {
-                // Register component-specific UI
+                // Register component-specific 
 
-                // ---- Transform ---- (FIXED: Skip detection after undo/redo)
-                registerCompUIFunc<PAIN::Transform>("Transform",
-                    [this](ComponentsPanel& panel, PAIN::Transform& transform_ref) {
+                // ---- Entity GUID ----
+                registerCompUIFunc<PAIN::Entity::GUID>("GUID",
+                    [](ComponentsPanel&, PAIN::Entity::GUID& as) { DrawWithReflection(as); });
+
+                // ---- Entity Name ----
+                registerCompUIFunc<PAIN::Entity::Name>("Name",
+                    [](ComponentsPanel&, PAIN::Entity::Name& as) { DrawWithReflection(as); });
+
+                // ---- Entity Hierarchy ----
+                registerCompUIFunc<PAIN::Entity::Hierarchy>("Hierarchy",
+                    [](ComponentsPanel&, PAIN::Entity::Hierarchy& as) { DrawWithReflection(as); });
+
+                // ---- Prefab Instance ----
+                registerCompUIFunc<PAIN::Prefab::PrefabInstance>("PrefabInstance",
+                    [](ComponentsPanel&, PAIN::Prefab::PrefabInstance& as) { DrawWithReflection(as); });
+
+                // ---- Transform ----
+                registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",
+                    [this](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
                         static struct {
                             entt::entity entity = entt::null;
-                            Transform original_transform;
-                            Transform last_frame_transform;
+                            LocalTransform original_transform;
+                            LocalTransform last_frame_transform;
                             bool is_editing = false;
                             int skip_frames = 0;  // NEW: Skip detection for N frames
                         } state;
@@ -69,12 +90,21 @@ namespace PAIN {
                         // Draw the reflection UI
                         DrawWithReflection(transform_ref);
 
+                        //ECS controller
+                        auto ecs = services->get<ECS::Controller>();
+                        auto transformSystem = ecs->getSystem<Transform::System>();
+
                         // Detect if transform changed this frame
                         if (state.is_editing) {
                             if (state.last_frame_transform.position != transform_ref.position ||
                                 state.last_frame_transform.rotation != transform_ref.rotation ||
                                 state.last_frame_transform.scale != transform_ref.scale) {
                                 state.last_frame_transform = transform_ref;
+
+                                // Mark dirty
+                                if (transformSystem) {
+                                    transformSystem->markDirty(selected, ecs->getRegistry());
+                                }
                             }
                         }
 
@@ -86,11 +116,10 @@ namespace PAIN {
                                 state.original_transform.scale != transform_ref.scale) {
 
                                 // Create undo/redo action
-                                Transform final_transform = transform_ref;
-                                Transform old_transform = state.original_transform;
+                                LocalTransform final_transform = transform_ref;
+                                LocalTransform old_transform = state.original_transform;
                                 entt::entity entity = selected;
 
-                                auto ecs = services->get<ECS::Controller>();
                                 auto metadata = services->get<MetaData::Service>();
 
                                 std::string entity_name = "Entity";
@@ -99,19 +128,27 @@ namespace PAIN {
                                 }
 
                                 command_manager->executeAction(Action{
-                                    [ecs, entity, final_transform]() {
+                                    [ecs, entity, final_transform, transformSystem]() {
                                         if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = final_transform;
                                             }
+                                            // Mark dirty
+                                            if (transformSystem) {
+                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                            }
                                         }
                                     },
-                                    [ecs, entity, old_transform]() {
+                                    [ecs, entity, old_transform, transformSystem]() {
                                         if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<Transform>(entity);
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = old_transform;
+                                            }
+                                            // Mark dirty
+                                            if (transformSystem) {
+                                                transformSystem->markDirty(entity, ecs->getRegistry());
                                             }
                                         }
                                     },
@@ -124,186 +161,82 @@ namespace PAIN {
                         }
                     });
 
-                    // ---- ModelRenderer ---- (UPDATED WITH DRAG-DROP)
-                    registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
-                        [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
-                            // Model GUID selector (using reflection)
-                            bool changed = false;
+                // ---- ModelRenderer ----
+                registerCompUIFunc<PAIN::ModelRenderer>("ModelRenderer",
+                    [this](ComponentsPanel& panel, PAIN::ModelRenderer& renderer) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
 
-                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
-                            // Model Asset Selection
-                            if (DrawAssetSelectorField("Select A Model",
-                                renderer.modelGUID,
-                                PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
-                                panel.services)) {
-                                changed = true;
-                            }
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Model",
+                            renderer.modelGUID,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model),
+                            panel.services)) {
+                            changed = true;
+                        }
 
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // Rendering Options
+                        if (ImGui::CollapsingHeader("Rendering Options")) {
+                            ImGui::Indent(10.0f);
+                            changed |= ImGui::Checkbox("Visible", &renderer.visible);
+                            changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
+                            changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
+                            ImGui::Unindent(10.0f);
+                        }
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // MATERIALS SECTION - This is where the magic happens!
+                        if (DrawField("Materials", renderer.materials, &panel)) {
+                            changed = true;
+                        }
+
+                        ImGui::PopStyleVar();
+
+                        // Optional: Add animation info if present
+                        if (renderer.currentAnimationIndex >= 0) {
                             ImGui::Spacing();
                             ImGui::Separator();
                             ImGui::Spacing();
 
-                            // Rendering Options
-                            if (ImGui::CollapsingHeader("Rendering Options")) {
-                                ImGui::Indent(10.0f);
-                                changed |= ImGui::Checkbox("Visible", &renderer.visible);
-                                changed |= ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
-                                changed |= ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
-                                ImGui::Unindent(10.0f);
+                            if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
+                                ImGui::BeginDisabled();
+                                ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
+                                ImGui::Text("Animation Time: %.2f", renderer.animationTime);
+                                ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
+                                ImGui::EndDisabled();
                             }
-
-                            ImGui::Spacing();
-                            ImGui::Separator();
-                            ImGui::Spacing();
-
-                            // ========================================
-                            // === MATERIALS SECTION WITH DRAG-DROP ===
-                            // ========================================
-
-                            if (ImGui::CollapsingHeader("Materials", ImGuiTreeNodeFlags_DefaultOpen)) {
-                                ImGui::Indent(10.0f);
-
-                                // Display existing materials
-                                for (size_t i = 0; i < renderer.materials.size(); ++i) {
-                                    ImGui::PushID(static_cast<int>(i));
-
-                                    std::string material_label = "Material " + std::to_string(i);
-                                    ImGui::Text("%s", material_label.c_str());
-                                    ImGui::SameLine();
-
-                                    // Draw the material field
-                                    if (DrawAssetSelectorField(
-                                        ("##Material" + std::to_string(i)).c_str(),
-                                        renderer.materials[i].materialGUID,
-                                        PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
-                                        panel.services)) {
-                                        changed = true;
-                                    }
-
-                                    // ========================================
-                                    // === DRAG-DROP TARGET FOR THIS MATERIAL SLOT ===
-                                    // ========================================
-                                    if (ImGui::BeginDragDropTarget()) {
-                                        // Accept material files from Resource Panel
-                                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
-                                            File* droppedFile = static_cast<File*>(payload->Data);
-
-                                            if (droppedFile) {
-                                                // Apply material to this slot
-                                                renderer.materials[i].materialGUID = droppedFile->id;
-                                                changed = true;
-
-                                                PN_CORE_INFO("Applied material '{}' to material slot {}",
-                                                    droppedFile->file_name, i);
-                                            }
-                                        }
-                                        ImGui::EndDragDropTarget();
-                                    }
-
-                                    ImGui::PopID();
-                                    ImGui::Spacing();
-                                }
-
-                                // ========================================
-                                // === ADD NEW MATERIAL SLOT (DRAG-DROP ZONE) ===
-                                // ========================================
-
-                                ImGui::Spacing();
-                                ImGui::Separator();
-                                ImGui::Spacing();
-
-                                // Create a button that also serves as a drop target
-                                bool add_clicked = ImGui::Button("+ Add Material Slot", ImVec2(-1, 30));
-
-                                // Make the button a drag-drop target
-                                if (ImGui::BeginDragDropTarget()) {
-                                    if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
-                                        if (strcmp(payload->DataType, "Materials_FILE") == 0) {
-                                            // Visual feedback during drag
-                                            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                                        }
-                                    }
-
-                                    // Accept the drop
-                                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
-                                        File* droppedFile = static_cast<File*>(payload->Data);
-
-                                        if (droppedFile) {
-                                            // Create new material instance and add to list
-                                            MaterialInstance newMaterial;
-                                            newMaterial.materialGUID = droppedFile->id;
-                                            renderer.materials.push_back(newMaterial);
-                                            changed = true;
-
-                                            PN_CORE_INFO("Added new material '{}' to material list",
-                                                droppedFile->file_name);
-                                        }
-                                    }
-                                    ImGui::EndDragDropTarget();
-                                }
-
-                                // Also allow manual add without drag-drop
-                                if (add_clicked) {
-                                    MaterialInstance newMaterial;
-                                    renderer.materials.push_back(newMaterial);
-                                    changed = true;
-                                }
-
-                                ImGui::Unindent(10.0f);
-                            }
-
-                            // Alternative: Keep original reflection-based rendering with drag-drop overlay
-                            // if (DrawField("Materials", renderer.materials, &panel)) {
-                            //     changed = true;
-                            // }
-
-                            ImGui::PopStyleVar();
-
-                            // Optional: Add animation info if present
-                            if (renderer.currentAnimationIndex >= 0) {
-                                ImGui::Spacing();
-                                ImGui::Separator();
-                                ImGui::Spacing();
-
-                                if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
-                                    ImGui::BeginDisabled();
-                                    ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
-                                    ImGui::Text("Animation Time: %.2f", renderer.animationTime);
-                                    ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
-                                    ImGui::EndDisabled();
-                                }
-                            }
-                        });
-                // ---- Camera ----
-                registerCompUIFunc<PAIN::Cam>("Camera",
-                    [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
-
+                        }
+                    });
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
                     [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
 
-                // ---- AudioSource ---- (UNCHANGED)
+                // ---- AudioSource ---- 
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
                     [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });
 
-                // ---- BoundingVolume ---- (UNCHANGED)
+                // ---- BoundingVolume ---- 
                 registerCompUIFunc<PAIN::BoundingVolume>("BoundingVolume",
                     [](ComponentsPanel&, PAIN::BoundingVolume& as) { DrawWithReflection(as); });
 
-                // ---- Hierarchy ---- (UNCHANGED)
-                registerCompUIFunc<PAIN::Hierarchy>("Hierarchy",
-                    [](ComponentsPanel&, PAIN::Hierarchy& as) { DrawWithReflection(as); });
-
-                // ---- Physics ---- (UNCHANGED)
+                // ---- Physics ----
                 registerCompUIFunc<PAIN::Joint>("Joint",
                     [](ComponentsPanel&, PAIN::Joint& as) { DrawWithReflection(as); });
 
                 registerCompUIFunc<Physics::RigidBody3D>("RigidBody3D",
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
 
-                // ---- Script ---- (UNCHANGED)
+                // ---- Script ---- 
                 registerCompUIFunc<PAIN::Script>("Script",
                     [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });                 
                 
@@ -347,6 +280,9 @@ namespace PAIN {
                 auto editor = services->get<PAIN::Editor::Editor>();
                 if (editor) {
                     entities_panel = editor->getPanel<EntityPanel>();
+#ifdef PN_PLATFORM_WINDOWS
+                    resources_panel = editor->getPanel<ResourcePanel>();
+#endif
                 }
 
                 // Register Add Component popup
@@ -598,6 +534,8 @@ namespace PAIN {
                     return;
                 }
 
+                // if lua script active.
+
                 // Get all component names for this entity
                 auto component_names = ecs->getEntityComponentNames(entity);
 
@@ -697,6 +635,22 @@ namespace PAIN {
                 }
             }
 
+            void ComponentsPanel::setScriptChanged(bool is_script_changed) {
+                is_script_loaded = is_script_changed;
+            }
+
+            bool ComponentsPanel::getScriptChanged() {
+                return is_script_loaded;
+            }
+
+
+            void ComponentsPanel::setScriptSaved(bool is_script_saved_) {
+                is_script_saved = is_script_saved_;
+            }
+
+            bool ComponentsPanel::getScriptSaved() {
+                return is_script_saved;
+            }
 
 
             void ComponentsPanel::setCompStringRef(std::string const& to_set) {
@@ -704,6 +658,7 @@ namespace PAIN {
             }
 
             void ComponentsPanel::onUpdate(AppTiming timing) {
+
                 auto ecs = services->get<ECS::Controller>();
                 if (!ecs) {
                     ImGui::Spacing();
@@ -735,17 +690,115 @@ namespace PAIN {
                     }
                 }
 
+#ifdef PN_PLATFORM_WINDOWS
+                // Ensure resource panel reference is valid
+                auto resource_panel = resources_panel.lock();
+                if (!resource_panel) {
+                    auto editor = services->get<PAIN::Editor::Editor>();
+                    if (editor) {
+                        auto rp = editor->getPanel<Panel::ResourcePanel>();
+                        if (rp) {
+                            resources_panel = rp;
+                            resource_panel = rp;
+                        }
+                    }
+                }
+#endif
+
+
                 if (!entity_panel) {
                     ImGui::Spacing();
                     ImGui::TextDisabled("Entity Panel not available");
                     return;
                 }
-
                 // Get selected entity
                 entt::entity selected = entity_panel->getSelectedEntity();
 
+#ifdef PN_PLATFORM_WINDOWS
+                if (!resource_panel) {
+                    ImGui::Spacing();
+                    ImGui::TextDisabled("Resource Panel not available");
+                    return;
+                }
+
+                auto selected_filepath = resource_panel->getSelectedFilePath();
+
+                //Switching to a Entity
+                if (entity_panel->isEntityAndScriptSwitched()) {
+                    resource_panel->setSelectedFilePath("");
+                    entity_panel->setEntityAndScriptSwitched(false);
+                }
+
+                // Switching to a script
+                if (resource_panel->isScriptAndEntitySwitched()) {
+                    setScriptChanged(false); // Reset Script Change
+                    setScriptSaved(true);
+                    entity_panel->unselectEntity();
+                    resource_panel->setScriptAndEntitySwitched(false);
+                }
+
+                // Lua Script Display
+                if (!selected_filepath.empty()) {
+
+                    static char script_buffer[65536] = "";
+
+                    if (!getScriptChanged()) {
+                        std::ifstream file(selected_filepath, std::ios::in | std::ios::binary);
+                        if (file) {
+                            file.read(script_buffer, sizeof(script_buffer) - 1);
+                            std::streamsize count = file.gcount();
+                            script_buffer[count] = '\0';
+                            file.close();
+                        }
+                        else {
+                            script_buffer[0] = '\0';
+                            
+                            PN_CORE_WARN("Failed to open file: ", selected_filepath);
+                        }
+                        setScriptChanged(true);
+                    }
+
+                    // Editable text Input
+                    if (ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
+                        ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput)) {
+                        setScriptSaved(false);
+                    }
+
+                    // Save button (TODO: Check if it updates real time.)
+                    if (!getScriptSaved()) {
+                        if (ImGui::Button("Save Script")) {
+                            std::ofstream file(selected_filepath, std::ios::out | std::ios::binary);
+                            if (file) {
+                                file.write(script_buffer, strlen(script_buffer));
+                                file.close();
+                                setScriptSaved(true);
+                            }
+                            else {
+                                PN_CORE_WARN("Failed to save file: ", selected_filepath);
+                            }
+                        }
+                    }
+                    else {
+                        ImGui::BeginDisabled();
+                        ImGui::Button("Save Script");
+                        ImGui::EndDisabled();
+                    }
+
+                    ImGui::SameLine();
+
+                    // Open in Visual Studio Code button
+                    if (ImGui::Button("Open in VS Code")) {
+                        std::string command = "code \"" + selected_filepath + "\"";
+                        system(command.c_str());
+                    }
+
+                    return;
+                }
+#endif
+
                 // No entity selected - show placeholder
                 if (selected == entt::null || !ecs->checkEntity(selected)) {
+
                     ImGui::Spacing();
                     ImGui::Spacing();
 

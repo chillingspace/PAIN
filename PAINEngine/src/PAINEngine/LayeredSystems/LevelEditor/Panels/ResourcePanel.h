@@ -6,6 +6,7 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 #include <chrono>
+#include <queue>
 
 // ========================================
 // Move File and Dir structs OUTSIDE platform guards
@@ -88,6 +89,14 @@ namespace PAIN {
                 void pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback); //Thread safe insertion for file event queue
                 void onEvent(Event::Event& event) override;
 
+                std::string getSelectedFilePath();
+                void setSelectedFilePath(std::string filepath);
+                std::string selected_filepath;
+
+                bool isScriptAndEntitySwitched() const;
+                void setScriptAndEntitySwitched(bool is_switched);
+                bool b_script_entity_switched = false;
+
             private:
 
                 // ----------------------------
@@ -150,7 +159,6 @@ namespace PAIN {
                 static int TextCallback(ImGuiInputTextCallbackData* data); //Text callback
                 void extractCurrentWord(std::string const& content, size_t cursor_pos, std::string& buffer); //Extract current word being edited
                 void showLuaIntellisense(std::string& content, size_t cursor_pos, std::string& buffer); //Lua intellisense
-
 
                 // ----------------------------
                 // Internal Helpers
@@ -255,6 +263,9 @@ namespace PAIN {
                 // File Operations
                 // ----------------------------
                 void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
+
+                std::weak_ptr<EntityPanel> entities_panel;
+                std::weak_ptr<ComponentsPanel> components_panel;
             };
 
         } // namespace Panel

@@ -31,6 +31,10 @@ namespace PAIN {
     };
 
     struct ModelRenderer {
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
+
         // Asset reference
         Assets::GUID prevModelGUID;
         Assets::GUID modelGUID;

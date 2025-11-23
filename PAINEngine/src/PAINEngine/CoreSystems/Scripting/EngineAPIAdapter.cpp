@@ -97,9 +97,6 @@ entt::entity EngineAPIAdapter::CreatePrefabInstance(std::string prefab, std::str
     if (!name.empty())
         meta_.setEntityName(e, name);
 
-    if (!layer.empty())
-        ecs_.addEntityComponent<PAIN::MetaData::Group>(e, PAIN::MetaData::Group{ layer });
-
     // deserialize components
     try {
         const nlohmann::json* comps = &j;
@@ -126,20 +123,20 @@ std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
         return asInt(*opt);
     }
 
-    // 2) Fallback: scan the registry for MetaData::EntityName
+    // 2) Fallback: scan the registry for Entity::Name
     auto& reg = ecs_.getRegistry();
     PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}",
         (void*)&reg,
-        reg.view<PAIN::MetaData::EntityName>().size());
-    auto view = reg.view<PAIN::MetaData::EntityName>();
+        reg.view<PAIN::Entity::Name>().size());
+    auto view = reg.view<PAIN::Entity::Name>();
     for (auto e : view) {
-        const auto& n = view.get<PAIN::MetaData::EntityName>(e).name;
+        const auto& n = view.get<PAIN::Entity::Name>(e).name;
         if (n == name) {
             // seed the meta index so future lookups are O(1)
             meta_.setEntityName(e, std::string{ name });
             return asInt(e);
         }
-        PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::MetaData::EntityName>(e).name);
+        PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);
     }
 
     return std::nullopt;
@@ -193,16 +190,16 @@ void EngineAPIAdapter::SetEntityName(entt::entity entityId, std::string name) { 
 void EngineAPIAdapter::AddTag(entt::entity entityId, std::string tag) { meta_.addTag(entityId, tag); }
 void EngineAPIAdapter::RemoveTag(entt::entity entityId, std::string tag) { meta_.removeTag(entityId, tag); }
 bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return meta_.hasTag(entityId, tag); }
-void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
-void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
-std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }
+//void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
+//void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
+//std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }
 std::vector<entt::entity> EngineAPIAdapter::GetEntitiesByTag(const std::string& tag) { return meta_.getEntitiesByTag(tag); }
 
 /* =========================================================================== */
 /*                                Transform                                    */
 /* =========================================================================== */
 glm::vec3 EngineAPIAdapter::GetPosition(entt::entity entityId) {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         return opt->get().position;
     }
     return { 0.f, 0.f, 0.f };
@@ -213,9 +210,9 @@ void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
     t.position = { p.x, p.y, p.z };*/
 
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.position = p;
 
     if (reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
@@ -227,7 +224,7 @@ void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
 }
 
 glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         return opt->get().scale;
     }
     return { 1.f, 1.f, 1.f };
@@ -235,15 +232,15 @@ glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
 
 void EngineAPIAdapter::SetScale(entt::entity entityId, glm::vec3 s) {
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.scale = s;
 }
 
 glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
 {
-    if (auto opt = ecs_.getEntityComponent<PAIN::Transform>(entityId)) {
+    if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
         const auto& t = opt->get();
         // convert quaternion -> euler angles, in rad
         glm::vec3 euler = glm::eulerAngles(t.rotation);
@@ -255,9 +252,9 @@ glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
 void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
 {
     auto& reg = ecs_.getRegistry();
-    if (!reg.all_of<PAIN::Transform>(entityId)) return;
+    if (!reg.all_of<PAIN::LocalTransform>(entityId)) return;
 
-    auto& t = reg.get<PAIN::Transform>(entityId);
+    auto& t = reg.get<PAIN::LocalTransform>(entityId);
     t.rotation = glm::quat(r); // euler to quat
 }
 

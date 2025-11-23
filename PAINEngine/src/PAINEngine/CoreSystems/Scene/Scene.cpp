@@ -5,6 +5,7 @@
 #include "ECS/sMetaData.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
+#include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
 #include "CoreSystems/Renderer/Light.h"
@@ -174,7 +175,7 @@ namespace PAIN {
 		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("ogre_right.prefab");
 		//for (auto e : loaded_entities) {
 		//	// Info: Print entity names, transforms, etc.
-		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<MetaData::EntityName>(e);
+		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(e);
 		//	std::string name = nameOpt ? nameOpt->get().name : "<no name>";
 		//}
 
@@ -237,8 +238,10 @@ namespace PAIN {
 		auto meta = services->get<MetaData::Service>();
 
 		entt::entity entity = ecs->createEntity();
-		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
-		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, Entity::Name{ name });
+		ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, WorldTransform{});
+		ecs->addEntityComponent(entity, Entity::Hierarchy{});
 		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
 
 		if (meta) meta->setEntityName(entity, name);

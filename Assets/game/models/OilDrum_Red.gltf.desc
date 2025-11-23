@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "OilDrum_Red.gltf",
+    "name": "ContainerRed.obj",
     "type": "Model"
   },
   "build_data": {
     "hash": 6781682408810202398
   },
   "descriptor_version": 1,
-  "guid": "fe28c80b-f6ca-4940-8f73-bcd80cccac5a",
+  "guid": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

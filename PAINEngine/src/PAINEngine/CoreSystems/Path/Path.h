@@ -56,6 +56,35 @@ namespace PAIN {
 			virtual bool eof() const = 0;
 			virtual size_t size() const = 0;
 			virtual bool good() const = 0;
+
+			//Write json files
+			bool write(nlohmann::json const& json, int indent = 4) {
+				std::string jsonText = json.dump(indent);
+
+				// Single write call - no need for chunking with ofstream
+				write(jsonText.data(), jsonText.size());
+
+				if (!good()) {
+					PN_CORE_ERROR("Failed to write JSON to file");
+					return false;
+				}
+
+				flush();
+				return true;
+			}
+
+			//Read json files
+			nlohmann::json read() {
+				std::vector<uint8_t> data(size());
+				size_t read_size = read(data.data(), data.size());
+				if (read_size != data.size()) {
+					PN_CORE_ERROR("Failed to read full model file, returning empty json obj");
+					return nlohmann::json();
+				}
+
+				std::string jsonString(data.begin(), data.end());
+				return nlohmann::json::parse(jsonString);
+			}
 		};
 
 		//Path class
@@ -115,7 +144,7 @@ namespace PAIN {
 			virtual bool createDirectory(const std::string& virtualPath) const = 0;
 
 			//Create custom file stream
-			virtual std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode) = 0;
+			virtual std::unique_ptr<IFileStream> createFileStream(const std::string& virtualPath, FileMode mode, bool bin = true) = 0;
 
 			std::string getAlias(const std::string& virtualPath) const {
 				auto [alias, relativePath] = parseVirtualPath(virtualPath);

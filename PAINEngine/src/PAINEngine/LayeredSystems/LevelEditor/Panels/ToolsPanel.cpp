@@ -8,6 +8,7 @@
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Windows/Window.h"
 
+#include "ECS/Components/cEntity.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -266,7 +267,15 @@ namespace PAIN {
                         if (ImGui::MenuItem("Save As...")) { openPopUp("Save As..."); }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Settings")) { openPopUp("Settings"); }
-                        if (ImGui::MenuItem("Exit")) {/*TODO*/ }
+                        if (ImGui::MenuItem("Exit")) {
+                        
+                            auto win = services->get<Window::Window>();
+                            win->safeShutdown();
+
+                            // TO DO:
+                            //unsavedChangesPopUp("Unsaved Changes");
+                            //unsavedScenePopUp("Unsaved Scene");
+                        }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Edit")) {
@@ -293,9 +302,10 @@ namespace PAIN {
                                 glm::vec3 scale = { 1.f, 1.f, 1.f };
 
                                 entt::entity entity = ecs->createEntity();
-                                ecs->addEntityComponent(entity, MetaData::EntityName{ *shared_id });
-                                ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-                                //ecs->addEntityComponent(entity, Hierarchy{});
+                                ecs->addEntityComponent(entity, Entity::Name{ *shared_id });
+                                ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+                                ecs->addEntityComponent(entity, WorldTransform{});
+                                ecs->addEntityComponent(entity, Entity::Hierarchy{});
                                 //if (scene) {
                                 //    ecs->addEntityComponent(entity, MeshRenderer{ scene->getMeshId("") });
                                 //}

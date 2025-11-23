@@ -130,7 +130,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
 
@@ -143,14 +143,14 @@ namespace PAIN {
 
 			for (auto e : view) {
 
-				auto transform = ecs->getEntityComponent<Transform>(e);
+				auto transform = ecs->getEntityComponent<WorldTransform>(e);
 
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 				glm::mat4 model_xform;
 				if (transform.has_value())
 				{
-					model_xform = transform.value().get().getMatrix();
+					model_xform = transform.value().get().matrix;
 				}
 
 				if (mdl.has_value() && mdl->get().castShadows)
@@ -172,7 +172,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -182,13 +182,13 @@ namespace PAIN {
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
-  			auto transform = ecs->getEntityComponent<Transform>(e);
+  			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -223,16 +223,16 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		for (auto e : view) {
 
-			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -246,7 +246,7 @@ namespace PAIN {
 	{
 		auto ecs = services->get<ECS::Controller>();
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		// Cache to track which lights are still active this frame
 		std::unordered_set<std::string> activeLightNames;
@@ -254,7 +254,7 @@ namespace PAIN {
 
 		for (auto entity : view) {
 			auto light_comp = ecs->getEntityComponent<Lighting>(entity);
-			auto trans_comp = ecs->getEntityComponent<Transform>(entity);
+			auto trans_comp = ecs->getEntityComponent<LocalTransform>(entity);
 
 			if (!light_comp.has_value() || !trans_comp.has_value())
 				continue;
