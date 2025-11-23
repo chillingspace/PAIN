@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "OilDrumBlue_baseColor_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15674510785766790688
+  },
+  "descriptor_version": 1,
+  "guid": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\OilDrumBlue_baseColor_1001.png"
+  }
+}

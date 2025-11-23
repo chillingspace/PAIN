@@ -30,7 +30,6 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
-			//boom
 			template<typename ...Components>
 			void deserializeComponentsImpl(entt::entity entity, const nlohmann::json& comps, std::tuple<Components...>);
 
@@ -53,6 +52,8 @@ namespace PAIN {
 			void onUpdate(AppTiming timing) override;
 
 			void registerAllComponents();
+
+			void registerAllSystems();
 
 			//Event callback
 			void onEvent(Event::Event& e) override;

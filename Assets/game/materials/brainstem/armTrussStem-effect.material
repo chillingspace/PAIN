@@ -1,0 +1,20 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            0.513725996017456,
+            0.4549019932746887,
+            0.37254899740219116
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+    }
+}

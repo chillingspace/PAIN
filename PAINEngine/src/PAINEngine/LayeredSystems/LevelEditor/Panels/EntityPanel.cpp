@@ -397,19 +397,6 @@ namespace PAIN {
                     openPopUp("Create Entity");
                 }
 
-                // Show Ungroup button when entity with children is selected
-                if (ecs->checkEntity(selected_entity)) {
-                    std::vector<entt::entity> children = getEntityChildren(selected_entity);
-                    if (!children.empty()) {
-                        ImGui::Spacing();
-                        ImGui::Separator();
-                        ImGui::Spacing();
-
-                        if (ImGui::Button("Ungroup Children", ImVec2(-1, 0))) {
-                            ungroupEntity(selected_entity);
-                        }
-                    }
-                }
 
                 // Render any open popups
                 renderPopUps();
@@ -564,13 +551,13 @@ namespace PAIN {
 
                     ImGui::Separator();
 
-                    if (has_children) {
+                    /*if (has_children) {
                         if (ImGui::MenuItem("Ungroup")) {
                             PN_CORE_INFO("[EntityPanel] Ungrouping entity {}", static_cast<uint32_t>(entity_id));
                             ungroupEntity(entity_id);
                             ImGui::CloseCurrentPopup();
                         }
-                    }
+                    }*/
 
                     if (ecs->hasEntityComponent<Hierarchy>(entity_id)) {
                         auto hierarchy = ecs->getEntityComponent<Hierarchy>(entity_id);

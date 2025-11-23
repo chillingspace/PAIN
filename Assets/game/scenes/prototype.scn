@@ -7,35 +7,35 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 0,
+                            "bvhNodeIndex": 12,
                             "localAABB": {
                                 "max": [
-                                    0.49837300181388855,
-                                    0.7077509760856628,
-                                    1.302780032157898
+                                    123.53994750976563,
+                                    242.99429321289063,
+                                    28.976987838745117
                                 ],
                                 "min": [
-                                    -0.2137649953365326,
-                                    0.028404299169778824,
-                                    -1.2722200155258179
+                                    -123.53994750976563,
+                                    7.62939453125e-06,
+                                    -28.97698974609375
                                 ]
                             },
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.49837300181388855,
-                                    0.7077509760856628,
-                                    1.302780032157898
+                                    -0.0665922611951828,
+                                    0.24299432337284088,
+                                    -0.2283499538898468
                                 ],
                                 "min": [
-                                    -0.2137649953365326,
-                                    0.028404299169778824,
-                                    -1.2722200155258179
+                                    -0.1341581493616104,
+                                    -9.292379310466004e-09,
+                                    -0.47750604152679443
                                 ]
                             }
                         },
                         "EntityName": {
-                            "name": "player"
+                            "name": "Fence"
                         },
                         "Hierarchy": {
                             "children": [],
@@ -45,12 +45,656 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "albedoTextureOverride": "bd0a49e9-5411-cf4a-ab01-33d1b318e15d",
+                                    "aoTextureOverride": "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
                                         1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "0233de13-3dfd-6c46-af5c-7dcff632346d",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c",
+                                    "normalTextureOverride": "d2d544d5-3f80-c846-8d02-b2a94dd961ce",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "45fa720b-bdbf-b249-9c9b-961773316633",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.1003752052783966,
+                                0.0,
+                                -0.3529279828071594
+                            ],
+                            "rotation": [
+                                -4.8215838432952296e-08,
+                                -0.7207916378974915,
+                                4.8215838432952296e-08,
+                                0.6931517720222473
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Fence"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 47,
+                            "localAABB": {
+                                "max": [
+                                    57.97823715209961,
+                                    211.10305786132813,
+                                    5.444207191467285
+                                ],
+                                "min": [
+                                    -57.97823715209961,
+                                    0.0,
+                                    -0.7065536975860596
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.05797823891043663,
+                                    0.21110306680202484,
+                                    0.513630747795105
+                                ],
+                                "min": [
+                                    -0.05797823891043663,
+                                    0.0,
+                                    0.5074799656867981
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPlank1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+                                    "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.5081865191459656
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPlank1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 25,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.5447235107422,
+                                    45.83308792114258
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308792114258
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.039673302322626114,
+                                    0.22154472768306732,
+                                    0.04583308845758438
+                                ],
+                                "min": [
+                                    -0.039673302322626114,
+                                    0.0,
+                                    -0.04583308845758438
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar1 (Clone) (Clone)"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 41
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                                    "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar1 (Clone) (Clone)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 27,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.5447235107422,
+                                    45.83308792114258
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308792114258
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.039673302322626114,
+                                    0.22154472768306732,
+                                    0.14778107404708862
+                                ],
+                                "min": [
+                                    -0.039673302322626114,
+                                    0.0,
+                                    0.05611490458250046
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar1 (Clone 1)"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 41
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                                    "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.10194799304008484
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar1 (Clone 1)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 13,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.5447235107422,
+                                    45.83308792114258
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308792114258
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -0.25881150364875793,
+                                    0.22154472768306732,
+                                    0.04583308845758438
+                                ],
+                                "min": [
+                                    -0.33815810084342957,
+                                    0.0,
+                                    -0.04583308845758438
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar1 (Clone)"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 41
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                                    "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.29848480224609375,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar1 (Clone)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 45,
+                            "localAABB": {
+                                "max": [
+                                    24.514007568359375,
+                                    32.07780456542969,
+                                    24.514009475708008
+                                ],
+                                "min": [
+                                    -35.56291198730469,
+                                    0.6818561553955078,
+                                    -24.514009475708008
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0089287757873535,
+                                    0.04234270378947258,
+                                    0.6623541116714478
+                                ],
+                                "min": [
+                                    -1.0882303714752197,
+                                    0.0009000501595437527,
+                                    0.5976371765136719
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Box"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+                                    "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "2620df8c-1c84-544a-9ec5-2a65644d947d",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.0412873029708862,
+                                0.0,
+                                0.6299956440925598
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0013200000394135714,
+                                0.0013200000394135714,
+                                0.0013200000394135714
+                            ]
+                        }
+                    },
+                    "Name": "Box"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 18,
+                            "localAABB": {
+                                "max": [
+                                    199.99998474121094,
+                                    90.56856536865234,
+                                    100.0
+                                ],
+                                "min": [
+                                    -200.00001525878906,
+                                    0.0,
+                                    -100.0
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.06293907761573792,
+                                    0.3042716979980469,
+                                    0.15493366122245789
+                                ],
+                                "min": [
+                                    -0.33706092834472656,
+                                    0.21370312571525574,
+                                    -0.045066334307193756
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Platform1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 41
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+                                    "aoTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adf751e1-ac1a-4a44-9aee-6f1fcf950ade",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.13706091046333313,
+                                0.21370312571525574,
+                                0.05493366718292236
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Platform1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 67,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.54470825195313,
+                                    45.83308410644531
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308410644531
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.1851455122232437,
+                                    0.22154471278190613,
+                                    4.3435282707214355
+                                ],
+                                "min": [
+                                    0.10579891502857208,
+                                    0.0,
+                                    4.251862049102783
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar (Clone)"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
                                     ],
                                     "emissiveOverride": [
                                         0.0,
@@ -59,7 +703,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "25d87724-a979-2e4a-ba23-db0ad9e97b60",
                                     "metallicOverride": 0.0,
                                     "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
@@ -69,9 +713,412 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "063dd5ad-0b73-5a43-865b-9f2d328749c9",
+                            "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
                             "receiveShadows": true,
                             "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.1454722136259079,
+                                0.0,
+                                4.297695159912109
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar (Clone)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 70,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.54470825195313,
+                                    45.83308410644531
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308410644531
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.1851455122232437,
+                                    0.22154471278190613,
+                                    4.4333815574646
+                                ],
+                                "min": [
+                                    0.10579891502857208,
+                                    0.0,
+                                    4.341715335845947
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "25d87724-a979-2e4a-ba23-db0ad9e97b60",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.1454722136259079,
+                                0.0,
+                                4.387548446655273
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 31,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.0230633020401,
+                                    0.30859532952308655,
+                                    0.2763349413871765
+                                ],
+                                "min": [
+                                    0.4654509127140045,
+                                    0.0,
+                                    0.004832342267036438
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerBlue10"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.7442570924758911,
+                                0.0,
+                                0.14058363437652588
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerBlue10"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 64,
+                            "localAABB": {
+                                "max": [
+                                    24.514009475708008,
+                                    32.07780456542969,
+                                    24.514009475708008
+                                ],
+                                "min": [
+                                    -35.56291198730469,
+                                    0.6818580031394958,
+                                    -24.514009475708008
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -0.7194119691848755,
+                                    0.046833597123622894,
+                                    1.0540531873703003
+                                ],
+                                "min": [
+                                    -0.8071242570877075,
+                                    0.0009955127025023103,
+                                    0.98247230052948
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Box"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048587
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+                                    "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "2ce8ed13-9409-1748-b022-cc1de4c82972",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.7552024126052856,
+                                0.0,
+                                1.0182627439498901
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0014600000577047467,
+                                0.0014600000577047467,
+                                0.0014600000577047467
+                            ]
+                        }
+                    },
+                    "Name": "Box"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 52,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.5626767873764038,
+                                    0.30859532952308655,
+                                    0.9903640747070313
+                                ],
+                                "min": [
+                                    1.0050643682479858,
+                                    0.0,
+                                    0.7188615798950195
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerBlue8"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.2838705778121948,
+                                0.0,
+                                0.8546128273010254
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerBlue8"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EntityName": {
+                            "name": "OilDrums"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                1048577,
+                                22
+                            ],
+                            "parent": 4294967295
                         },
                         "Transform": {
                             "position": [
@@ -92,7 +1139,2612 @@
                             ]
                         }
                     },
-                    "Name": "player"
+                    "Name": "OilDrums"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EntityName": {
+                            "name": "Bridge"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                38,
+                                40,
+                                39,
+                                37,
+                                36
+                            ],
+                            "parent": 4294967295
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.29848480224609375,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Bridge"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 61,
+                            "localAABB": {
+                                "max": [
+                                    34.337738037109375,
+                                    23.61958885192871,
+                                    34.33773422241211
+                                ],
+                                "min": [
+                                    -34.337738037109375,
+                                    0.0,
+                                    -34.33773422241211
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.17307189106941223,
+                                    0.06400909274816513,
+                                    1.0434205532073975
+                                ],
+                                "min": [
+                                    -0.013038665056228638,
+                                    0.0,
+                                    0.8573100566864014
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Tire"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+                                    "aoTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "normalTextureOverride": "91e02ba2-c6b8-184f-bd48-b59674946972",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "3a4e770e-940e-334a-a533-3b17f8fd1df8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0800166130065918,
+                                0.0,
+                                0.9503653049468994
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0027100001461803913,
+                                0.0027100001461803913,
+                                0.0027100001461803913
+                            ]
+                        }
+                    },
+                    "Name": "Tire"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 48,
+                            "localAABB": {
+                                "max": [
+                                    69.66659545898438,
+                                    69.85763549804688,
+                                    40.19990921020508
+                                ],
+                                "min": [
+                                    -34.33774185180664,
+                                    -0.5009422302246094,
+                                    -71.30400085449219
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.18178968131542206,
+                                    0.08802062273025513,
+                                    0.8069671392440796
+                                ],
+                                "min": [
+                                    0.05074420943856239,
+                                    -0.0006311872275546193,
+                                    0.6664721965789795
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Tires"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.09400976449251175,
+                                0.0,
+                                0.7563152313232422
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0012600000482052565,
+                                0.0012600000482052565,
+                                0.0012600000482052565
+                            ]
+                        }
+                    },
+                    "Name": "Tires"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 75,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.54470825195313,
+                                    45.83308410644531
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308410644531
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.8874415755271912,
+                                    0.22154471278190613,
+                                    4.4333815574646
+                                ],
+                                "min": [
+                                    0.8080949187278748,
+                                    0.0,
+                                    4.341715335845947
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "25d87724-a979-2e4a-ba23-db0ad9e97b60",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.847768247127533,
+                                0.0,
+                                4.387548446655273
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 76,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.54470825195313,
+                                    45.83308410644531
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308410644531
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.9140645861625671,
+                                    0.22154471278190613,
+                                    4.3435282707214355
+                                ],
+                                "min": [
+                                    0.8347179293632507,
+                                    0.0,
+                                    4.251862049102783
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar (Clone)"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "25d87724-a979-2e4a-ba23-db0ad9e97b60",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.8743912577629089,
+                                0.0,
+                                4.297695159912109
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar (Clone)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 28,
+                            "localAABB": {
+                                "max": [
+                                    24.514009475708008,
+                                    32.07780456542969,
+                                    24.514009475708008
+                                ],
+                                "min": [
+                                    -35.56291198730469,
+                                    0.6818580031394958,
+                                    -24.514009475708008
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.6111782789230347,
+                                    0.06415561586618423,
+                                    0.4787115752696991
+                                ],
+                                "min": [
+                                    0.45837652683258057,
+                                    0.0013637160882353783,
+                                    0.3236943483352661
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Box"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048587
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "e65e4858-d371-c142-8857-4f39f5d654fb",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.5420166254043579,
+                                0.0,
+                                0.39285600185394287
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.4152110517024994,
+                                0.0,
+                                0.9097251296043396
+                            ],
+                            "scale": [
+                                0.0020000000949949026,
+                                0.0020000000949949026,
+                                0.0020000000949949026
+                            ]
+                        }
+                    },
+                    "Name": "Box"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 32,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.2852354049682617,
+                                    0.30859532952308655,
+                                    0.28353995084762573
+                                ],
+                                "min": [
+                                    1.01373291015625,
+                                    0.0,
+                                    -0.274072527885437
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerBlue"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.1494841575622559,
+                                0.0,
+                                0.00473371148109436
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 57,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.497769832611084,
+                                    0.09757581353187561,
+                                    0.7031891345977783
+                                ],
+                                "min": [
+                                    1.426133632659912,
+                                    0.0,
+                                    0.6315529346466064
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "OilDrumRed"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 42
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "fe28c80b-f6ca-4940-8f73-bcd80cccac5a",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.461951732635498,
+                                0.0,
+                                0.6673710346221924
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 71,
+                            "localAABB": {
+                                "max": [
+                                    199.99998474121094,
+                                    90.56856536865234,
+                                    100.00000762939453
+                                ],
+                                "min": [
+                                    -200.00001525878906,
+                                    -0.0,
+                                    -100.00000762939453
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.5060473680496216,
+                                    0.3061288595199585,
+                                    4.4313178062438965
+                                ],
+                                "min": [
+                                    0.10604733228683472,
+                                    0.21556028723716736,
+                                    4.23131799697876
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Platform1 (Clone)"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                15,
+                                16
+                            ],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "4b27a579-5e9f-a04e-b4c3-e0e592c1b2dd",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.30604735016822815,
+                                0.21556028723716736,
+                                4.331317901611328
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Platform1 (Clone)"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 51,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.0092008113861084,
+                                    0.30859532952308655,
+                                    0.988640546798706
+                                ],
+                                "min": [
+                                    0.4515884220600128,
+                                    0.0,
+                                    0.7171380519866943
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerRed"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.7303946018218994,
+                                0.0,
+                                0.8528892993927002
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 73,
+                            "localAABB": {
+                                "max": [
+                                    199.99998474121094,
+                                    90.56856536865234,
+                                    100.00000762939453
+                                ],
+                                "min": [
+                                    -200.00001525878906,
+                                    -0.0,
+                                    -100.00000762939453
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.9061942100524902,
+                                    0.3061288595199585,
+                                    4.4313178062438965
+                                ],
+                                "min": [
+                                    0.5061942338943481,
+                                    0.21556028723716736,
+                                    4.23131799697876
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Platform1.2"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                15,
+                                16,
+                                18,
+                                19,
+                                17
+                            ],
+                            "parent": 25
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "4b27a579-5e9f-a04e-b4c3-e0e592c1b2dd",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.7061942219734192,
+                                0.21556028723716736,
+                                4.331317901611328
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Platform1.2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 54,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.5626767873764038,
+                                    0.30859532952308655,
+                                    0.9903640747070313
+                                ],
+                                "min": [
+                                    1.0050643682479858,
+                                    0.0,
+                                    0.7188615798950195
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerBlue9"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.2838705778121948,
+                                0.0,
+                                0.8546128273010254
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerBlue9"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 5,
+                            "localAABB": {
+                                "max": [
+                                    30.851573944091797,
+                                    59.703147888183594,
+                                    30.851573944091797
+                                ],
+                                "min": [
+                                    -30.851573944091797,
+                                    0.0,
+                                    -30.851573944091797
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0935300588607788,
+                                    0.059703148901462555,
+                                    0.49885889887809753
+                                ],
+                                "min": [
+                                    -1.1704171895980835,
+                                    0.0,
+                                    0.4219718277454376
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Crate1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 17
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "868018ea-2483-b147-afe3-da3d8102b26c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.1319736242294312,
+                                0.0,
+                                0.4604153633117676
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.14588263630867004,
+                                0.0,
+                                0.9893019199371338
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Crate1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EntityName": {
+                            "name": "Crates"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                26,
+                                18,
+                                16,
+                                15,
+                                14
+                            ],
+                            "parent": 4294967295
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.9830066561698914,
+                                0.0,
+                                0.15440940856933594
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "Crates"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 6,
+                            "localAABB": {
+                                "max": [
+                                    30.851573944091797,
+                                    59.703147888183594,
+                                    30.851573944091797
+                                ],
+                                "min": [
+                                    -30.851573944091797,
+                                    0.0,
+                                    -30.851573944091797
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0679758787155151,
+                                    0.12135527282953262,
+                                    0.4952462613582611
+                                ],
+                                "min": [
+                                    -1.1296790838241577,
+                                    0.06165212392807007,
+                                    0.4335431158542633
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Crate2"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 17
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "868018ea-2483-b147-afe3-da3d8102b26c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.0988274812698364,
+                                0.06165212392807007,
+                                0.4643946886062622
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Crate2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 42,
+                            "localAABB": {
+                                "max": [
+                                    30.851573944091797,
+                                    59.703147888183594,
+                                    30.851573944091797
+                                ],
+                                "min": [
+                                    -30.851573944091797,
+                                    0.0,
+                                    -30.851573944091797
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0426592826843262,
+                                    0.059703148901462555,
+                                    0.524947464466095
+                                ],
+                                "min": [
+                                    -1.1043624877929688,
+                                    0.0,
+                                    0.4632442891597748
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Crate3"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 17
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "868018ea-2483-b147-afe3-da3d8102b26c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.0735108852386475,
+                                0.0,
+                                0.4940958619117737
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Crate3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 8,
+                            "localAABB": {
+                                "max": [
+                                    30.851573944091797,
+                                    59.703147888183594,
+                                    30.851573944091797
+                                ],
+                                "min": [
+                                    -30.851573944091797,
+                                    0.0,
+                                    -30.851573944091797
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0426592826843262,
+                                    0.059703148901462555,
+                                    0.45026710629463196
+                                ],
+                                "min": [
+                                    -1.1043624877929688,
+                                    0.0,
+                                    0.38856396079063416
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Crate4"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 17
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "868018ea-2483-b147-afe3-da3d8102b26c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.0735108852386475,
+                                0.0,
+                                0.41941553354263306
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Crate4"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 9,
+                            "localAABB": {
+                                "max": [
+                                    14.130575180053711,
+                                    13.110713958740234,
+                                    14.458041191101074
+                                ],
+                                "min": [
+                                    -14.130575180053711,
+                                    0.0,
+                                    -14.458041191101074
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -0.24361710250377655,
+                                    -0.06390255689620972,
+                                    0.38245272636413574
+                                ],
+                                "min": [
+                                    -0.8115493059158325,
+                                    -0.2777317762374878,
+                                    -0.19300821423530579
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Rock5"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048607
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "740cc0c6-7ff8-3a47-9121-5adcdce57515",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.5275830626487732,
+                                -0.27772849798202515,
+                                0.0947234034538269
+                            ],
+                            "rotation": [
+                                -1.3526951079256833e-06,
+                                0.9913142919540405,
+                                -5.234390755504137e-06,
+                                0.13151398301124573
+                            ],
+                            "scale": [
+                                0.016309000551700592,
+                                0.016309000551700592,
+                                0.016309000551700592
+                            ]
+                        }
+                    },
+                    "Name": "Rock5"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 15,
+                            "localAABB": {
+                                "max": [
+                                    14.130575180053711,
+                                    13.110713958740234,
+                                    14.458041191101074
+                                ],
+                                "min": [
+                                    -14.130575180053711,
+                                    0.0,
+                                    -14.458041191101074
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -0.2668106257915497,
+                                    0.0548027865588665,
+                                    0.19249045848846436
+                                ],
+                                "min": [
+                                    -0.38494226336479187,
+                                    0.0,
+                                    0.07162123918533325
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Rock2"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048607
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "0a04abe3-b196-f140-bd8b-5260eefcce6e",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "9333cc6b-f38d-d94a-8350-ae0e2be91c4c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.3258764445781708,
+                                0.0,
+                                0.1320558488368988
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.00418000016361475,
+                                0.00418000016361475,
+                                0.00418000016361475
+                            ]
+                        }
+                    },
+                    "Name": "Rock2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 23,
+                            "localAABB": {
+                                "max": [
+                                    14.130575180053711,
+                                    13.110713958740234,
+                                    14.458041191101074
+                                ],
+                                "min": [
+                                    -14.130575180053711,
+                                    0.0,
+                                    -14.458041191101074
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.12317053228616714,
+                                    0.25050288438796997,
+                                    0.22245122492313385
+                                ],
+                                "min": [
+                                    -0.260492205619812,
+                                    -0.11770428717136383,
+                                    -0.1696212887763977
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Rock1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048607
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "0a04abe3-b196-f140-bd8b-5260eefcce6e",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "1912fd6a-dc9e-2245-936b-57786d177f47",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.06298625469207764,
+                                0.0,
+                                -0.019575774669647217
+                            ],
+                            "rotation": [
+                                0.043890032917261124,
+                                -0.9536740779876709,
+                                -0.2967354953289032,
+                                0.022968903183937073
+                            ],
+                            "scale": [
+                                0.012351801618933678,
+                                0.012351801618933678,
+                                0.012351801618933678
+                            ]
+                        }
+                    },
+                    "Name": "Rock1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 22,
+                            "localAABB": {
+                                "max": [
+                                    14.130575180053711,
+                                    13.110713958740234,
+                                    14.458041191101074
+                                ],
+                                "min": [
+                                    -14.130575180053711,
+                                    0.0,
+                                    -14.458041191101074
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.031939104199409485,
+                                    0.06162036582827568,
+                                    0.058028146624565125
+                                ],
+                                "min": [
+                                    -0.15791161358356476,
+                                    -1.2824832751334725e-08,
+                                    -0.13196462392807007
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Rock2"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 1048607
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "0a04abe3-b196-f140-bd8b-5260eefcce6e",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "9333cc6b-f38d-d94a-8350-ae0e2be91c4c",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.06298625469207764,
+                                0.0,
+                                -0.036968231201171875
+                            ],
+                            "rotation": [
+                                -3.4697183792786745e-08,
+                                0.36755678057670593,
+                                -8.944017793055536e-08,
+                                0.9300010800361633
+                            ],
+                            "scale": [
+                                0.004699999932199717,
+                                0.004699999932199717,
+                                0.004699999932199717
+                            ]
+                        }
+                    },
+                    "Name": "Rock2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 17,
+                            "localAABB": {
+                                "max": [
+                                    39.673301696777344,
+                                    221.5447235107422,
+                                    45.83308792114258
+                                ],
+                                "min": [
+                                    -39.673301696777344,
+                                    0.0,
+                                    -45.83308792114258
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -0.2590353488922119,
+                                    0.22154472768306732,
+                                    0.14778107404708862
+                                ],
+                                "min": [
+                                    -0.33838194608688354,
+                                    0.0,
+                                    0.05611490458250046
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "MetalPillar1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 41
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                                    "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -0.29870864748954773,
+                                0.0,
+                                0.10194799304008484
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 66,
+                            "localAABB": {
+                                "max": [
+                                    73.85037994384766,
+                                    473.1723937988281,
+                                    66.01360321044922
+                                ],
+                                "min": [
+                                    -73.85037994384766,
+                                    0.0,
+                                    -66.01360321044922
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.9933903217315674,
+                                    1.419517159461975,
+                                    1.3423320055007935
+                                ],
+                                "min": [
+                                    1.5502879619598389,
+                                    0.0,
+                                    0.946250319480896
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "WaterTower"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "164de26f-1403-e146-8a76-735d5dc42155",
+                                    "aoTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "14377587-a8fe-2b47-9f46-dad6bdad2753",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "normalTextureOverride": "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "29b3ff60-33f4-4b44-8a57-277cad0a3ca9",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.7718391418457031,
+                                0.0,
+                                1.1442911624908447
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.003000000026077032,
+                                0.003000000026077032,
+                                0.003000000026077032
+                            ]
+                        }
+                    },
+                    "Name": "WaterTower"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 56,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.4129685163497925,
+                                    0.09757581353187561,
+                                    0.701322078704834
+                                ],
+                                "min": [
+                                    1.3413323163986206,
+                                    0.0,
+                                    0.6296858787536621
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "OilDrumRed"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 42
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "fe28c80b-f6ca-4940-8f73-bcd80cccac5a",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.3771504163742065,
+                                0.0,
+                                0.665503978729248
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 62,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.4545447826385498,
+                                    0.30859607458114624,
+                                    1.2693753242492676
+                                ],
+                                "min": [
+                                    0.18304161727428436,
+                                    -7.544639402112807e-07,
+                                    0.7117623090744019
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "ContainerRed1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 43
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                0.3187929093837738,
+                                0.0,
+                                0.9905685186386108
+                            ],
+                            "rotation": [
+                                9.099629210140847e-07,
+                                1.0,
+                                9.099629210140847e-07,
+                                8.280325210219264e-13
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "ContainerRed1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 43,
+                            "localAABB": {
+                                "max": [
+                                    11.66467571258545,
+                                    8.725449562072754,
+                                    11.37221908569336
+                                ],
+                                "min": [
+                                    -11.66467571258545,
+                                    0.0,
+                                    -11.37221908569336
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -1.0865663290023804,
+                                    0.008725450374186039,
+                                    0.8493990898132324
+                                ],
+                                "min": [
+                                    -1.1098955869674683,
+                                    0.0,
+                                    0.8266546726226807
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "Gear"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 4294967295
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "25c6e2c3-b701-4c43-b049-8c9b21a29441",
+                                    "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                                    "normalTextureOverride": "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "3064e936-e863-5f42-8fb8-cb4588a36090",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                -1.0982309579849243,
+                                0.0,
+                                0.8380268812179565
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "Gear"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 37,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.4344502687454224,
+                                    0.09757581353187561,
+                                    0.3202399015426636
+                                ],
+                                "min": [
+                                    1.3382867574691772,
+                                    0.0,
+                                    0.22407639026641846
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "OilDrumBlue"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 42
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+                                    "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.3863685131072998,
+                                0.0,
+                                0.272158145904541
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.5250188112258911,
+                                0.0,
+                                0.8510906100273132
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 34,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.3605048656463623,
+                                    0.09757589548826218,
+                                    0.3294166326522827
+                                ],
+                                "min": [
+                                    1.2610749006271362,
+                                    -8.285896058168873e-08,
+                                    0.22998659312725067
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "OilDrumBlue1"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 42
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+                                    "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.3107898235321045,
+                                0.0,
+                                0.2797015309333801
+                            ],
+                            "rotation": [
+                                6.046724365660339e-07,
+                                0.9564379453659058,
+                                6.046724365660339e-07,
+                                0.29193568229675293
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumBlue1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 36,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.395398497581482,
+                                    0.09757581353187561,
+                                    0.25074514746665955
+                                ],
+                                "min": [
+                                    1.3010576963424683,
+                                    0.0,
+                                    0.15640434622764587
+                                ]
+                            }
+                        },
+                        "EntityName": {
+                            "name": "OilDrumBlue"
+                        },
+                        "Hierarchy": {
+                            "children": [],
+                            "parent": 42
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Transform": {
+                            "position": [
+                                1.348228096961975,
+                                0.0,
+                                0.2035747468471527
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.5473754405975342,
+                                0.0,
+                                0.8368871808052063
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EntityName": {
+                            "name": "Containers"
+                        },
+                        "Hierarchy": {
+                            "children": [
+                                38,
+                                23,
+                                20
+                            ],
+                            "parent": 4294967295
+                        },
+                        "Transform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    },
+                    "Name": "Containers"
                 }
             }
         ]
@@ -107,7 +3759,13 @@
             "Enemy",
             "Environment",
             "Player",
-            "Untagged"
+            "Untagged",
+            "enemy_patrol_end",
+            "enemy_patrol_start",
+            "hiding_spot",
+            "letter_carried",
+            "letter_collectible",
+            "letter_collection"
         ]
     }
 }

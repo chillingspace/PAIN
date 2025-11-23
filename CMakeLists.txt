@@ -48,6 +48,7 @@ endif()
 # Use /MD in Release and /MDd in Debug for all MSVC targets
 if (MSVC)
   add_compile_options(/MP)
+  add_compile_options(/bigobj)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
@@ -108,4 +109,5 @@ endif()
 if (MSVC)
   set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
   add_compile_options(/MP)
+  add_compile_options(/bigobj)
 endif()

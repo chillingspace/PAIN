@@ -1,0 +1,93 @@
+{
+    "Entities": [
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 74,
+                    "localAABB": {
+                        "max": [
+                            35.818092346191406,
+                            97.5758056640625,
+                            35.81809997558594
+                        ],
+                        "min": [
+                            -35.81809616088867,
+                            0.0,
+                            -35.818092346191406
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            1.4160126447677612,
+                            0.09757581353187561,
+                            0.6999739408493042
+                        ],
+                        "min": [
+                            1.3443764448165894,
+                            0.0,
+                            0.6283377408981323
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "OilDrumBlue"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 4294967295
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                            "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        1.3801945447921753,
+                        0.0,
+                        0.6641558408737183
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "OilDrum_Blue.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 14393835108840894609
+  },
+  "descriptor_version": 1,
+  "guid": "5df6242d-fe1e-8a4f-990a-c6539d0d730c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\OilDrum_Blue.glb"
+  }
+}

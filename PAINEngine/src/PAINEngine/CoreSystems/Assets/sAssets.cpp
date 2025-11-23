@@ -479,7 +479,7 @@ namespace PAIN {
 			std::filesystem::copy_file(file_path, destination);
 		}
 
-		void Manager::createNewMaterial(Material const& mat, std::filesystem::path const& out_path) {
+		void Manager::saveMaterial(Material const& mat, std::filesystem::path const& out_path) {
 
 			//Get path service
 			auto path_service = services->get<Path::Path>();
@@ -487,8 +487,11 @@ namespace PAIN {
 			//if export succeedds
 			if (asset_compiler->ExportMaterial(mat, out_path)) {
 
+				//Get relative
+				auto relative = std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, ""));
+
 				//Register asset
-				registerAsset(std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, "")));
+				if(checkAssetRegistered(relative))registerAsset(relative);
 			}
 		}
 #endif

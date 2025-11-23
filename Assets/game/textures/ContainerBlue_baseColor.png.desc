@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "ContainerBlue_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4544710432163528963
+  },
+  "descriptor_version": 1,
+  "guid": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ContainerBlue_baseColor.png"
+  }
+}

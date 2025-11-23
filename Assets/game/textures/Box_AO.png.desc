@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Box_AO.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2310657232269655565
+  },
+  "descriptor_version": 1,
+  "guid": "54f9e5c6-e976-fe4d-beb9-0d08d8662f83",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Box_AO.png"
+  }
+}

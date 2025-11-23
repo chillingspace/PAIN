@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Bridge.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2270883889742536660
+  },
+  "descriptor_version": 1,
+  "guid": "5b8a1b2a-3e78-c245-86e5-a7e01025f533",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Bridge.prefab"
+  }
+}

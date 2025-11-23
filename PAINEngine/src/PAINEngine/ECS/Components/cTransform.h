@@ -1,6 +1,6 @@
 /*****************************************************************//**
- * \file   components.h
- * \brief  All data components
+ * \file   cTransform.h
+ * \brief  Transform
  *
  * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
  * \co-author 
@@ -30,6 +30,21 @@ namespace PAIN {
 		glm::f32quat rotation;
 		glm::f32vec3 scale{ 1, 1, 1 };
 
+		// Direction in world-space that the entity is currently facing
+		glm::vec3 forward() const {
+			const glm::vec3 localForward{ 0, 0, 1 };
+			glm::vec3 f = rotation * localForward;
+
+			if (glm::dot(f, f) < 1e-6f)
+				return localForward;
+
+			return glm::normalize(f);
+		}
+
+		glm::vec3 right() const { return glm::normalize(rotation * glm::vec3(1, 0, 0)); }
+		glm::vec3 up() const { return glm::normalize(rotation * glm::vec3(0, 1, 0)); }
+		glm::vec3 backward() const { return -forward(); }
+
 		glm::mat4 getMatrix() const {
 			glm::mat4 T = glm::translate(glm::mat4(1.0f), position);
 			glm::mat4 R = glm::mat4_cast(rotation);
@@ -44,22 +59,22 @@ namespace PAIN {
 
 // This is needed as json still does not now how to handle seri for the custom comps,
 // These types not supported by refl, so we need add struct-level seri 
-namespace nlohmann {
-	template<>
-	struct adl_serializer<PAIN::Transform> {
-		static void to_json(json& j, const PAIN::Transform& t) {
-			j["position"] = t.position;
-			j["rotation"] = t.rotation;
-			j["scale"] = t.scale;
-		}
-
-		static void from_json(const json& j, PAIN::Transform& t) {
-			t.position = j["position"].get<glm::vec3>();
-			t.rotation = j["rotation"].get<glm::quat>();
-			t.scale = j["scale"].get<glm::vec3>();
-		}
-	};
-}
+//namespace nlohmann {
+//	template<>
+//	struct adl_serializer<PAIN::Transform> {
+//		static void to_json(json& j, const PAIN::Transform& t) {
+//			j["position"] = t.position;
+//			j["rotation"] = t.rotation;
+//			j["scale"] = t.scale;
+//		}
+//
+//		static void from_json(const json& j, PAIN::Transform& t) {
+//			t.position = j["position"].get<glm::vec3>();
+//			t.rotation = j["rotation"].get<glm::quat>();
+//			t.scale = j["scale"].get<glm::vec3>();
+//		}
+//	};
+//}
 
 // Register type & fields for refl-cpp
 REFL_TYPE(PAIN::Transform)

@@ -170,33 +170,38 @@ namespace PAIN {
         camera = m_Scene->GetActiveCamera();
 
         switch (move_mode) {
-        case CAMERA:
-            if (camera->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
-                // spherical
-                float radius = glm::length(camera->pos);
-                float theta = atan2(camera->pos.z, camera->pos.x);
-                float phi = acos(camera->pos.y / radius);
-
-                if (W_KEYDOWN) radius -= camera->speed * dt;
-                if (S_KEYDOWN) radius += camera->speed * dt;
-                if (A_KEYDOWN) theta += 1.5f * dt;
-                if (D_KEYDOWN) theta -= 1.5f * dt;
-                if (SPACE_KEYDOWN) phi -= 1.5f * dt;
-                if (LCTRL_KEYDOWN) phi += 1.5f * dt;
-
-                // clamp phi
-                phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
-
-                // cartesian
-                camera->pos.x = radius * sin(phi) * cos(theta);
-                camera->pos.y = radius * cos(phi);
-                camera->pos.z = radius * sin(phi) * sin(theta);
-
-                // look at origin
-                camera->forward = -glm::normalize(camera->pos);
+        case FREE_FLY:
+            // Move forward/backward directly in camera forward direction
+            if (W_KEYDOWN) {
+                glm::vec3 offset = camera->forward * camera->speed * dt;
+                camera->pos += offset;
+            }
+            if (S_KEYDOWN) {
+                glm::vec3 offset = camera->forward * camera->speed * dt;
+                camera->pos -= offset;
             }
 
-        case NUM_MOVE_MODES:
+            // Move left/right based on cross product of forward and up vectors
+            glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
+            if (A_KEYDOWN) {
+                camera->pos -= right * camera->speed * dt;
+            }
+            if (D_KEYDOWN) {
+                camera->pos += right * camera->speed * dt;
+            }
+
+            // Move up/down along camera up vector
+            if (SPACE_KEYDOWN) {
+                camera->pos += camera->up * camera->speed * dt;
+            }
+            if (LCTRL_KEYDOWN) {
+                camera->pos -= camera->up * camera->speed * dt;
+            }
+
+
+            break;
+
+        case FIRST_PERSON:
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
             if (W_KEYDOWN) {
                 glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
@@ -223,7 +228,35 @@ namespace PAIN {
                 camera->pos -= offset;
             }
             break;
+        //case ORBIT:
+            //if (camera->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
+            //    // spherical
+            //    float radius = glm::length(camera->pos);
+            //    float theta = atan2(camera->pos.z, camera->pos.x);
+            //    float phi = acos(camera->pos.y / radius);
+
+            //    if (W_KEYDOWN) radius -= camera->speed * dt;
+            //    if (S_KEYDOWN) radius += camera->speed * dt;
+            //    if (A_KEYDOWN) theta += 1.5f * dt;
+            //    if (D_KEYDOWN) theta -= 1.5f * dt;
+            //    if (SPACE_KEYDOWN) phi -= 1.5f * dt;
+            //    if (LCTRL_KEYDOWN) phi += 1.5f * dt;
+
+            //    // clamp phi
+            //    phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
+
+            //    // cartesian
+            //    camera->pos.x = radius * sin(phi) * cos(theta);
+            //    camera->pos.y = radius * cos(phi);
+            //    camera->pos.z = radius * sin(phi) * sin(theta);
+
+            //    // look at origin
+            //    camera->forward = -glm::normalize(camera->pos);
+            //}
         }
+
+      
+
 
         if (m_move.active && camera) {
             // Project forward to XZ like you already do
@@ -360,12 +393,7 @@ namespace PAIN {
         // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
             switch (e.getKeyCode()) {
-            case PAIN_KEY_TAB:
-                move_mode = static_cast<MOVE_MODES>((move_mode + 1) % NUM_MOVE_MODES);
-                break;
-            case PAIN_KEY_O:
-                camera->move_mode = static_cast<Camera::MOVE_MODES>((camera->move_mode + 1) % Camera::MOVE_MODES::NUM_MOVE_MODES);
-                break;
+
             case PAIN_KEY_M:
             {
                 m_isMuted = !m_isMuted;
@@ -381,6 +409,24 @@ namespace PAIN {
                 }
                 break;
             }
+            case PAIN_KEY_EQUAL: // '+' key in many layouts (with shift)
+            case PAIN_KEY_KP_ADD: // Numpad +
+                if (camera) {
+                    camera->speed += 0.5f; // Increase speed by 0.5 (adjust as needed)
+                    if (camera->speed > 20.f) camera->speed = 20.f; // Clamp max speed
+                }
+                PN_CORE_INFO("CAMERA SPEED +0.5f, SPEED: {}", camera->speed);
+                break;
+
+            case PAIN_KEY_MINUS: // '-' key
+            case PAIN_KEY_KP_SUBTRACT: // Numpad -
+                if (camera) {
+                    camera->speed -= 0.5f; // Decrease speed by 0.5
+                    if (camera->speed < 0.1f) camera->speed = 0.1f; // Clamp min speed
+                }
+                PN_CORE_INFO("CAMERA SPEED -0.5f, SPEED: {}", camera->speed);
+                break;
+
             default:
                 break;
             }
@@ -420,5 +466,20 @@ namespace PAIN {
             return false;
             });
 #endif
+    }
+
+    glm::mat4 sCameraController::getViewMatrix() const
+    {
+        if (camera) {
+            return camera->view();
+        }
+        return glm::mat4(1.0f);
+    }
+    glm::mat4 sCameraController::getProjectionMatrix() const
+    {
+        if (camera) {
+            return camera->projection();
+        }
+        return glm::mat4(1.0f);
     }
 }

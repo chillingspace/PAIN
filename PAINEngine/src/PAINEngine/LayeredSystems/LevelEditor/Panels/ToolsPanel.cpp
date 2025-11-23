@@ -126,6 +126,9 @@ namespace PAIN {
 
                         // Daytime Toggle
                         if (ImGui::Checkbox("Daytime", &gfx.daytime)) {}
+                        
+                        // Draw Floor
+                        if (ImGui::Checkbox("Draw Floor", &gfx.draw_floor)) {}
 
                         // Field of View slider
                         if (ImGui::SliderFloat("FOV", &gfx.fov, 30.0f, 120.0f)) {}

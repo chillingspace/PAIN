@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "barStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17201714385161629335
+  },
+  "descriptor_version": 1,
+  "guid": "90300ff3-4619-e148-a760-8207ca3ae381",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\barStem-effect.material"
+  }
+}

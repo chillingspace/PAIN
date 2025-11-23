@@ -8,68 +8,78 @@
  * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
- #pragma once
+#pragma once
 
 #include "pch.h"
 
- namespace PAIN {
- 
-	 namespace MetaData {
-		 /******************************************************************************************
-		 * Note: When creating components, try to stack them properly to properly optimise memory
-		 * (Place largest type var (Double) first, then followed by smallest.
-		 *****************************************************************************************/
- 
-		 // Core identity component (always present)
-		 struct EntityName {
-			 std::string name;
-			 EntityName(std::string const& n = "entity_") : name(n) {}
-		 };
- 
-		 // Tag component for categorization
-		 struct Tag {
-			 std::set<std::string> tags;
-		 };
- 
-		 // Editor-only visibility component
-		 struct EditorVisible {
-			 bool visible;
-			 bool locked;
-			 EditorVisible() : visible(true), locked(false) {}
-		 };
- 
-		 struct Relation {
-			 std::vector<entt::entity> children;
-			 entt::entity parent;
-		 };
- 
-		 // Group assignment component
-		 struct Group {
-			 std::string group_name;
-			 Group(std::string const& name = "") : group_name(name) {}
-		 };
-	 }
- 
- }
+namespace PAIN {
 
- REFL_TYPE(PAIN::MetaData::EntityName)
-	 REFL_FIELD(name)
-	 REFL_END
+	namespace MetaData {
+		/******************************************************************************************
+		* Note: When creating components, try to stack them properly to properly optimise memory
+		* (Place largest type var (Double) first, then followed by smallest.
+		*****************************************************************************************/
 
-	 REFL_TYPE(PAIN::MetaData::Tag)
-	 REFL_FIELD(tags)
-	 REFL_END
+		// Core identity component (always present)
+		struct EntityName {
+			std::string name;
+			EntityName(std::string const& n = "entity_") : name(n) {}
+		};
 
-	 REFL_TYPE(PAIN::MetaData::EditorVisible)
-	 REFL_FIELD(visible)
-	 REFL_FIELD(locked)
-	 REFL_END
+		// Tag component for categorization
+		struct Tag {
+			std::set<std::string> tags;
+		};
 
-	 REFL_TYPE(PAIN::MetaData::Relation)
-	 REFL_FIELD(children)
-	 REFL_FIELD(parent)
-	 REFL_END
+		// Editor-only visibility component
+		struct EditorVisible {
+			bool visible;
+			bool locked;
+			EditorVisible() : visible(true), locked(false) {}
+		};
 
-	 REFL_TYPE(PAIN::MetaData::Group)
-	 REFL_FIELD(group_name)
-	 REFL_END
+		struct Relation {
+			std::vector<entt::entity> children;
+			entt::entity parent;
+		};
+
+		// Group assignment component
+		struct Group {
+			std::string group_name;
+			Group(std::string const& name = "") : group_name(name) {}
+		};
+	}
+
+}
+
+REFL_TYPE(PAIN::MetaData::EntityName)
+REFL_FIELD(name)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::EntityName>);
+
+REFL_TYPE(PAIN::MetaData::Tag)
+REFL_FIELD(tags)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Tag>);
+
+REFL_TYPE(PAIN::MetaData::EditorVisible)
+REFL_FIELD(visible)
+REFL_FIELD(locked)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::EditorVisible>);
+
+REFL_TYPE(PAIN::MetaData::Relation)
+REFL_FIELD(children)
+REFL_FIELD(parent)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Relation>);
+
+REFL_TYPE(PAIN::MetaData::Group)
+REFL_FIELD(group_name)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Group>);

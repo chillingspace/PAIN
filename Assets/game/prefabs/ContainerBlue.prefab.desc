@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ContainerBlue.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 14454149535598216118
+  },
+  "descriptor_version": 1,
+  "guid": "5092d5a6-6109-9848-9af7-eb3ca324fb08",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\ContainerBlue.prefab"
+  }
+}

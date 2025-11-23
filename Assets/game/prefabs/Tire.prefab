@@ -1,0 +1,93 @@
+{
+    "Entities": [
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 56,
+                    "localAABB": {
+                        "max": [
+                            34.337738037109375,
+                            23.61958885192871,
+                            34.33773422241211
+                        ],
+                        "min": [
+                            -34.337738037109375,
+                            0.0,
+                            -34.33773422241211
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.17307189106941223,
+                            0.06400909274816513,
+                            1.0434205532073975
+                        ],
+                        "min": [
+                            -0.013038665056228638,
+                            0.0,
+                            0.8573100566864014
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "Tire"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 4294967295
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+                            "aoTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                            "normalTextureOverride": "91e02ba2-c6b8-184f-bd48-b59674946972",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "3c988684-0ce9-ef40-8585-da24b4eebb6d",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        0.0800166130065918,
+                        0.0,
+                        0.9503653049468994
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0027100001461803913,
+                        0.0027100001461803913,
+                        0.0027100001461803913
+                    ]
+                }
+            }
+        }
+    ]
+}
