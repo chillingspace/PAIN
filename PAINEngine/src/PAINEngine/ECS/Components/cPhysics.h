@@ -147,25 +147,25 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
 	})
 
 	namespace nlohmann {
-    // RigidBody3D serializer
-    template<>
-    struct adl_serializer<PAIN::Physics::RigidBody3D> {
-        static void to_json(json& j, const PAIN::Physics::RigidBody3D& rb) {
-			// There is no need to serialize BodyID directly, as it is managed by Jolt internally. A new one will be created upon loading
-            j["velocity"] = rb.velocity;
-            j["angular_velocity"] = rb.angular_velocity;
-            j["mass"] = rb.mass;
-            j["is_dynamic"] = rb.b_is_dynamic;
-        }
-        
-        static void from_json(const json& j, PAIN::Physics::RigidBody3D& rb) {
-			// Likewise, no need to read BodyID here as Jolt will create a new one
-            rb.velocity = j["velocity"].get<glm::vec3>();
-            rb.angular_velocity = j["angular_velocity"].get<glm::vec3>();
-            rb.mass = j["mass"].get<float>();
-            rb.b_is_dynamic = j["is_dynamic"].get<bool>();
-        }
-    };
+   // // RigidBody3D serializer
+   // template<>
+   // struct adl_serializer<PAIN::Physics::RigidBody3D> {
+   //     static void to_json(json& j, const PAIN::Physics::RigidBody3D& rb) {
+			//// There is no need to serialize BodyID directly, as it is managed by Jolt internally. A new one will be created upon loading
+   //         j["velocity"] = rb.velocity;
+   //         j["angular_velocity"] = rb.angular_velocity;
+   //         j["mass"] = rb.mass;
+   //         j["is_dynamic"] = rb.b_is_dynamic;
+   //     }
+   //     
+   //     static void from_json(const json& j, PAIN::Physics::RigidBody3D& rb) {
+			//// Likewise, no need to read BodyID here as Jolt will create a new one
+   //         rb.velocity = j["velocity"].get<glm::vec3>();
+   //         rb.angular_velocity = j["angular_velocity"].get<glm::vec3>();
+   //         rb.mass = j["mass"].get<float>();
+   //         rb.b_is_dynamic = j["is_dynamic"].get<bool>();
+   //     }
+   // };
 
     // Collider serializer (handles union carefully)
     template<>
@@ -222,25 +222,25 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::JOINT_TYPE, {
         }
     };
 
-    // Joint serializer
-    template<>
-    struct adl_serializer<PAIN::Joint> {
-        static void to_json(json& j, const PAIN::Joint& joint) {
-            j["anchor"] = joint.anchor;
-            j["axis"] = joint.axis;
-            j["limit_min"] = joint.limit_min;
-            j["limit_max"] = joint.limit_max;
-            j["joint_type"] = joint.joint_type;
-        }
-        
-        static void from_json(const json& j, PAIN::Joint& joint) {
-            joint.anchor = j["anchor"].get<glm::vec3>();
-            joint.axis = j["axis"].get<glm::vec3>();
-            joint.limit_min = j["limit_min"].get<float>();
-            joint.limit_max = j["limit_max"].get<float>();
-            joint.joint_type = j["joint_type"].get<PAIN::JOINT_TYPE>();
-        }
-    };
+    //// Joint serializer
+    //template<>
+    //struct adl_serializer<PAIN::Joint> {
+    //    static void to_json(json& j, const PAIN::Joint& joint) {
+    //        j["anchor"] = joint.anchor;
+    //        j["axis"] = joint.axis;
+    //        j["limit_min"] = joint.limit_min;
+    //        j["limit_max"] = joint.limit_max;
+    //        j["joint_type"] = joint.joint_type;
+    //    }
+    //    
+    //    static void from_json(const json& j, PAIN::Joint& joint) {
+    //        joint.anchor = j["anchor"].get<glm::vec3>();
+    //        joint.axis = j["axis"].get<glm::vec3>();
+    //        joint.limit_min = j["limit_min"].get<float>();
+    //        joint.limit_max = j["limit_max"].get<float>();
+    //        joint.joint_type = j["joint_type"].get<PAIN::JOINT_TYPE>();
+    //    }
+    //};
 }
 
 // Reflections

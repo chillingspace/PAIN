@@ -1,6 +1,6 @@
 /*****************************************************************//**
- * \file   components.h
- * \brief  All data components
+ * \file   cTransform.h
+ * \brief  Transform
  *
  * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
  * \co-author 

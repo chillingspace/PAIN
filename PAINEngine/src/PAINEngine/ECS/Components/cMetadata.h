@@ -8,7 +8,7 @@
  * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
- #pragma once
+#pragma once
 
 #include "pch.h"
 
@@ -67,24 +67,34 @@
  
  }
 
- REFL_TYPE(PAIN::MetaData::EntityName)
-	 REFL_FIELD(name)
-	 REFL_END
+REFL_TYPE(PAIN::MetaData::EntityName)
+REFL_FIELD(name)
+REFL_END
 
-	 REFL_TYPE(PAIN::MetaData::Tag)
-	 REFL_FIELD(tags)
-	 REFL_END
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::EntityName>);
 
-	 REFL_TYPE(PAIN::MetaData::EditorVisible)
-	 REFL_FIELD(visible)
-	 REFL_FIELD(locked)
-	 REFL_END
+REFL_TYPE(PAIN::MetaData::Tag)
+REFL_FIELD(tags)
+REFL_END
 
-	 REFL_TYPE(PAIN::MetaData::Relation)
-	 REFL_FIELD(children)
-	 REFL_FIELD(parent)
-	 REFL_END
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Tag>);
 
-	 REFL_TYPE(PAIN::MetaData::Group)
-	 REFL_FIELD(group_name)
-	 REFL_END
+REFL_TYPE(PAIN::MetaData::EditorVisible)
+REFL_FIELD(visible)
+REFL_FIELD(locked)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::EditorVisible>);
+
+REFL_TYPE(PAIN::MetaData::Relation)
+REFL_FIELD(children)
+REFL_FIELD(parent)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Relation>);
+
+REFL_TYPE(PAIN::MetaData::Group)
+REFL_FIELD(group_name)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::MetaData::Group>);

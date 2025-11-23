@@ -11,6 +11,20 @@
 #include "Controller.h"
 #include "ECS/Components/GLMSerialization.h"
 
+ // Systems
+#include "Systems/Physics/sysPhysics.h"
+#include "Systems/AI/sysAI.h" 
+#include "Systems/Animation/sysAnimation.h" 
+#include "Systems/Logic/sysLogic.h"
+#include "Systems/Audio/sysAudio.h"
+#include "Systems/Collision/sBVHSystem.h"
+#include "Systems/Scripting/GameScriptingSystem.h"
+
+// UI Systems
+#include "Systems/UI/sysUILayout.h"
+#include "Systems/UI/sysUIInput.h"
+#include "Systems/UI/sysUIAnimation.h"
+
 namespace PAIN {
 	namespace ECS {
 
@@ -194,12 +208,49 @@ namespace PAIN {
             registerComponent<Audio::AudioSource>("AudioSource");
             registerComponent<Script>("Script");
 
+            // AI Components
+            registerComponent<AI::Blackboard>("AIBlackboard");
+            registerComponent<AI::Controller>("AIController");
+            registerComponent<AI::Sensors>("AISensors");
+            registerComponent<AI::NavAgent>("AINavAgent");
+            registerComponent<AI::Steering>("AISteering");
+            registerComponent<AI::CommandQueue>("AICommandQueue");
+
             // Metadata components
             registerComponent<MetaData::EntityName>("Name");
             registerComponent<MetaData::Tag>("Tag");
             registerComponent<MetaData::Relation>("Relation");
             registerComponent<MetaData::EditorVisible>("Editor Visiblity");
             registerComponent<MetaData::Group>("Group");
+
+            // UI components
+            registerComponent<UIRectTransform>("UIRectTransform");
+            registerComponent<UIButton>("UIButton");
+            registerComponent<UIElement>("UIElement");
+            registerComponent<UICanvas>("UICanvas");
+            registerComponent<UIAnimation>("UIAnimation");
+        }
+
+        void Controller::registerAllSystems()
+        {
+            // Physics system cross platform
+            registerSystem<Physics::System>();
+
+            registerSystem<PAIN::Scripting::GameScriptingSystem>();
+
+            //registerSystem<AI::System>();
+
+#ifdef PN_PLATFORM_WINDOWS	
+            registerSystem<Animation::System>();
+            registerSystem<Audio::System>();
+#endif
+            registerSystem<sBVHSystem>();
+
+            // UI Systems reg
+            registerSystem<UI::LayoutSystem>();
+            registerSystem<UI::InputSystem>();
+            registerSystem<UI::AnimationSystem>();
+
         }
 
 		void Controller::onEvent(Event::Event& e) {

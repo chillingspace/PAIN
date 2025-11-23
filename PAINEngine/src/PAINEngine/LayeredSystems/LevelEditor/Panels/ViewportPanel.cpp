@@ -18,6 +18,8 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "EntityPanel.h"
+#include "ResourcePanel.h"
+#include "ECS/Components/cMeshRenderer.h"
 
 #include "Systems/Physics/sysPhysics.h"
 #include "ECS/Components/cEntity.h"
@@ -214,6 +216,52 @@ namespace PAIN {
 				m_EntityPanel->setSelectedEntity(closestEntity);
 			}
 
+            
+            void ViewportPanel::handleMaterialDrop(File* materialFile,
+                ImVec2 localMousePos,
+                ImVec2 viewportSize) {
+                auto scene = services->get<Scene>();
+                auto camera = scene->GetActiveCamera();
+                auto ecs = services->get<ECS::Controller>();
+                auto assetService = services->get<Assets::Manager>();
+
+                if (!camera || !ecs || !materialFile || !assetService) {
+                    return;
+                }
+
+                // Find entity at drop location
+                entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
+
+                // Apply material to the closest entity
+                if (closestEntity != entt::null) {
+                    // Check if entity has a ModelRenderer component
+                    if (ecs->getRegistry().all_of<ModelRenderer>(closestEntity)) {
+                        auto& modelRenderer = ecs->getRegistry().get<ModelRenderer>(closestEntity);
+
+                        // Apply the material to all submeshes (you can modify this logic)
+                        if (modelRenderer.materials.empty()) {
+                            // If no materials exist, create one
+                            MaterialInstance matInstance;
+                            matInstance.materialGUID = materialFile->id;
+                            modelRenderer.materials.push_back(matInstance);
+
+                            PN_CORE_INFO("Applied material '{}' to entity (new material instance)", materialFile->file_name);
+                        }
+                        else {
+                            // Apply to first material (or you could apply to all)
+                            modelRenderer.materials[0].materialGUID = materialFile->id;
+
+                            PN_CORE_INFO("Applied material '{}' to entity (replaced first material)", materialFile->file_name);
+                        }
+                    }
+                    else {
+                        PN_CORE_WARN("Entity does not have a ModelRenderer component");
+                    }
+                }
+                else {
+                    PN_CORE_INFO("No entity found at drop location");
+                }
+            }
 
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
@@ -279,6 +327,52 @@ namespace PAIN {
 					contentHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup
 						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+
+                    // ========================================
+                    // === DRAG & DROP TARGET FOR MATERIALS ===
+                    // ========================================
+
+                    // Reset drag hover entity
+                    m_DragHoveredEntity = entt::null;
+
+                    // Declare isUsingGizmo once at the top
+                    bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+
+                    if (!isUsingGizmo) {
+                        // Use invisible button overlay for reliable drag-drop
+                        ImGui::SetCursorScreenPos(viewportPos);
+                        ImGui::InvisibleButton("##ViewportDropZone", size);
+
+                        if (ImGui::BeginDragDropTarget()) {
+                            // Check what payload is available
+                            if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
+                                if (strcmp(payload->DataType, "Materials_FILE") == 0) {
+                                    m_DragHoveredEntity = findEntityAtMousePos(
+                                        ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
+                                        size
+                                    );
+
+                                    if (m_DragHoveredEntity != entt::null) {
+                                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                                    }
+                                }
+                            }
+
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
+                                PN_CORE_INFO("Material payload accepted!");
+                                File* droppedFile = (File*)payload->Data;
+
+                                ImVec2 mousePos = ImGui::GetMousePos();
+                                ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+                                handleMaterialDrop(droppedFile, localMousePos, size);
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+
+                        // Update hover state from invisible button
+                        contentHovered = contentHovered || ImGui::IsItemHovered();
+                    }
 
 					// ========================================
 					// === ImGuizmo - RENDER FIRST ===
@@ -589,78 +683,78 @@ namespace PAIN {
 					if (cameraController) {
 
 #ifdef PN_PLATFORM_WINDOWS
-						bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+                        bool rightMouseHeld = ImGui::IsMouseDown(ImGuiMouseButton_Right);
 #else
-						cameraController->m_vpHeight = size.y;
-						cameraController->m_vpWidth = size.x;
-						cameraController->m_vpPosX = viewportPos.x;
-						cameraController->m_vpPosY = viewportPos.y;
-						cameraController->vp_hovered = contentHovered;
-						bool rightMouseHeld = contentHovered;
+                        cameraController->m_vpHeight = size.y;
+                        cameraController->m_vpWidth = size.x;
+                        cameraController->m_vpPosX = viewportPos.x;
+                        cameraController->m_vpPosY = viewportPos.y;
+                        cameraController->vp_hovered = contentHovered;
+                        bool rightMouseHeld = contentHovered;
 #endif 
 
-						// Check for ANY gizmo activity (object gizmo OR view manipulate)
-						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate() || ImGuizmo::IsViewManipulateHovered();
+                        // Check for ANY gizmo activity (object gizmo OR view manipulate)
+                        bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate() || ImGuizmo::IsViewManipulateHovered();
 
-						if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
-							cameraController->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
-							cameraController->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
-							cameraController->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
-							cameraController->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							cameraController->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
-							cameraController->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+                        if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
+                            cameraController->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
+                            cameraController->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
+                            cameraController->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
+                            cameraController->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
+                            cameraController->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+                            cameraController->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
 
-							cameraController->mouseButtonDown = true;
+                            cameraController->mouseButtonDown = true;
 
 #ifdef PN_PLATFORM_WINDOWS
-							cameraController->xOffset = io.MouseDelta.x;
-							cameraController->yOffset = -io.MouseDelta.y;
+                            cameraController->xOffset = io.MouseDelta.x;
+                            cameraController->yOffset = -io.MouseDelta.y;
 #endif
-						}
-						else {
-							cameraController->W_KEYDOWN = false;
-							cameraController->A_KEYDOWN = false;
-							cameraController->S_KEYDOWN = false;
-							cameraController->D_KEYDOWN = false;
-							cameraController->SPACE_KEYDOWN = false;
-							cameraController->LCTRL_KEYDOWN = false;
-							cameraController->mouseButtonDown = false;
-							cameraController->xOffset = 0.0f;
-							cameraController->yOffset = 0.0f;
-						}
+                        }
+                        else {
+                            cameraController->W_KEYDOWN = false;
+                            cameraController->A_KEYDOWN = false;
+                            cameraController->S_KEYDOWN = false;
+                            cameraController->D_KEYDOWN = false;
+                            cameraController->SPACE_KEYDOWN = false;
+                            cameraController->LCTRL_KEYDOWN = false;
+                            cameraController->mouseButtonDown = false;
+                            cameraController->xOffset = 0.0f;
+                            cameraController->yOffset = 0.0f;
+                        }
 
-						if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
-							float mouseWheel = io.MouseWheel;
-							float zoomSpeed = 0.1f;
-							auto activeCamera = scene->GetActiveCamera();
+                        if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
+                            float mouseWheel = io.MouseWheel;
+                            float zoomSpeed = 0.1f;
+                            auto activeCamera = scene->GetActiveCamera();
 
-							if (activeCamera) {
-								glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
+                            if (activeCamera) {
+                                glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 
-								if (mouseWheel > 0.0f) {
-									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-										* activeCamera->speed * zoomSpeed * mouseWheel;
-									activeCamera->pos += offset;
-								}
-								else if (mouseWheel < 0.0f) {
-									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-										* activeCamera->speed * zoomSpeed * abs(mouseWheel);
-									activeCamera->pos -= offset;
-								}
-							}
-						}
-					}
-				}
-				ImGui::End();
-			}
-
-
+                                if (mouseWheel > 0.0f) {
+                                    glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+                                        * activeCamera->speed * zoomSpeed * mouseWheel;
+                                    activeCamera->pos += offset;
+                                }
+                                else if (mouseWheel < 0.0f) {
+                                    glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
+                                        * activeCamera->speed * zoomSpeed * abs(mouseWheel);
+                                    activeCamera->pos -= offset;
+                                }
+                            }
+                        }
+                    }
+                }
+                ImGui::End();
+            }
 
 
 
 
-		} // namespace Panel
-	} // namespace Editor
+
+
+        } // namespace Panel
+    } // namespace Editor
 } // namespace PAIN
 
 #endif

@@ -1,0 +1,93 @@
+{
+    "Entities": [
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 14,
+                    "localAABB": {
+                        "max": [
+                            30.851573944091797,
+                            59.703147888183594,
+                            30.851573944091797
+                        ],
+                        "min": [
+                            -30.851573944091797,
+                            0.0,
+                            -30.851573944091797
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -1.0935300588607788,
+                            0.059703148901462555,
+                            0.49885889887809753
+                        ],
+                        "min": [
+                            -1.1704171895980835,
+                            0.0,
+                            0.4219718277454376
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "Crate1"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 17
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "868018ea-2483-b147-afe3-da3d8102b26c",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        -1.1319736242294312,
+                        0.0,
+                        0.4604153633117676
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.14588263630867004,
+                        0.0,
+                        0.9893019199371338
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        }
+    ]
+}

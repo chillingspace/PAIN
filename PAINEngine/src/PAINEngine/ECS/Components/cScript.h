@@ -32,4 +32,6 @@ REFL_TYPE(PAIN::Script)
     //REFL_FIELD(loaded)
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::Script>);
+
 #endif

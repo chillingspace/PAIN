@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "MetalPillar1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 15982438641080231250
+  },
+  "descriptor_version": 1,
+  "guid": "646cd13b-bbcb-2f45-be64-51867ea39369",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\MetalPillar1.glb"
+  }
+}

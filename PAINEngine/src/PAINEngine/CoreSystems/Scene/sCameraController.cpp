@@ -421,4 +421,19 @@ namespace PAIN {
             });
 #endif
     }
+
+    glm::mat4 sCameraController::getViewMatrix() const
+    {
+        if (camera) {
+            return camera->view();
+        }
+        return glm::mat4(1.0f);
+    }
+    glm::mat4 sCameraController::getProjectionMatrix() const
+    {
+        if (camera) {
+            return camera->projection();
+        }
+        return glm::mat4(1.0f);
+    }
 }
