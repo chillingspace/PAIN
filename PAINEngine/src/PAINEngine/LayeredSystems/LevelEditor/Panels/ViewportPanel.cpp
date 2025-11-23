@@ -382,47 +382,53 @@ namespace PAIN {
                         | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
                     isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
+
                     // ========================================
                     // === DRAG & DROP TARGET FOR MATERIALS ===
                     // ========================================
-                    // Use invisible button overlay for reliable drag-drop
-                    ImGui::SetCursorScreenPos(viewportPos); // Reset position to overlay on image
-                    ImGui::InvisibleButton("##ViewportDropZone", size);
 
                     // Reset drag hover entity
                     m_DragHoveredEntity = entt::null;
 
-                    if (ImGui::BeginDragDropTarget()) {
-                        // Check what payload is available
-                        if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
-                            // CHANGE: "Material_FILE" -> "Materials_FILE"
-                            if (strcmp(payload->DataType, "Materials_FILE") == 0) {
-                                m_DragHoveredEntity = findEntityAtMousePos(
-                                    ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
-                                    size
-                                );
+                    // Declare isUsingGizmo once at the top
+                    bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
 
-                                if (m_DragHoveredEntity != entt::null) {
-                                    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                    if (!isUsingGizmo) {
+                        // Use invisible button overlay for reliable drag-drop
+                        ImGui::SetCursorScreenPos(viewportPos);
+                        ImGui::InvisibleButton("##ViewportDropZone", size);
+
+                        if (ImGui::BeginDragDropTarget()) {
+                            // Check what payload is available
+                            if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
+                                if (strcmp(payload->DataType, "Materials_FILE") == 0) {
+                                    m_DragHoveredEntity = findEntityAtMousePos(
+                                        ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
+                                        size
+                                    );
+
+                                    if (m_DragHoveredEntity != entt::null) {
+                                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                                    }
                                 }
                             }
+
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
+                                PN_CORE_INFO("Material payload accepted!");
+                                File* droppedFile = (File*)payload->Data;
+
+                                ImVec2 mousePos = ImGui::GetMousePos();
+                                ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+                                handleMaterialDrop(droppedFile, localMousePos, size);
+                            }
+                            ImGui::EndDragDropTarget();
                         }
 
-                        // CHANGE: "Material_FILE" -> "Materials_FILE"
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Materials_FILE")) {
-                            PN_CORE_INFO("Material payload accepted!");
-                            File* droppedFile = (File*)payload->Data;
-
-                            ImVec2 mousePos = ImGui::GetMousePos();
-                            ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
-
-                            handleMaterialDrop(droppedFile, localMousePos, size);
-                        }
-                        ImGui::EndDragDropTarget();
+                        // Update hover state from invisible button
+                        contentHovered = contentHovered || ImGui::IsItemHovered();
                     }
 
-                    // Update hover state from invisible button
-                    contentHovered = contentHovered || ImGui::IsItemHovered();
 
 
                     // ========================================
@@ -653,18 +659,40 @@ namespace PAIN {
                     }
 
                     // ========================================
-                    // === Mouse Picking - AFTER GIZMO ===
-                    // ========================================
-                    if (contentHovered
-                        && ImGui::IsMouseClicked(ImGuiMouseButton_Left)
-                        && !ImGuizmo::IsUsing()
-                        && !ImGuizmo::IsOver()) {
+ // === Mouse Picking - AFTER GIZMO ===
+ // ========================================
 
-                        ImVec2 mousePos = ImGui::GetMousePos();
-                        ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+ // Track if we were using the gizmo in the previous frame
+                    static bool wasUsingGizmo = false;
+                    // REMOVE THIS LINE: bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+                    // Reuse the variable declared above
 
-                        performMousePicking(localMousePos, size);
+                    if (contentHovered) {
+                        // Only pick on click if gizmo is NOT being used
+                        bool shouldPick = false;
+
+                        // Case 1: Direct click (no drag)
+                        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isUsingGizmo) {
+                            shouldPick = true;
+                        }
+
+                        // Case 2: Mouse released after dragging (but NOT on gizmo)
+                        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
+                            && !isUsingGizmo
+                            && !wasUsingGizmo
+                            && !ImGui::IsMouseDragging(ImGuiMouseButton_Left, 1.0f)) {
+                            shouldPick = true;
+                        }
+
+                        if (shouldPick) {
+                            ImVec2 mousePos = ImGui::GetMousePos();
+                            ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+                            performMousePicking(localMousePos, size);
+                        }
                     }
+
+                    wasUsingGizmo = isUsingGizmo;
+
 
                     // ========================================
                     // === Camera Controls ===
