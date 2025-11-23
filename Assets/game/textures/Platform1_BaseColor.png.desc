@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Platform1_BaseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14767090779635024411
+  },
+  "descriptor_version": 1,
+  "guid": "00815094-4e02-8248-a1b0-c5667c6c9e4f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Platform1_BaseColor.png"
+  }
+}

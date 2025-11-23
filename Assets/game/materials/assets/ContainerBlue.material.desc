@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ContainerBlue.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9606683830165243428
+  },
+  "descriptor_version": 1,
+  "guid": "f11acc25-de0a-4e45-86f6-0ac09d757ad2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\assets\\ContainerBlue.material"
+  }
+}

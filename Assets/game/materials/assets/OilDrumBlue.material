@@ -1,0 +1,27 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 0.5
+    },
+    "textures": {
+        "albedo": "game\\textures\\OilDrumBlue_BaseColor.1001.png",
+        "ao": "game\\textures\\OilDrumBlue_AO.1001.png",
+        "metallic": "game\\textures\\OilDrumBlue_Metallic.1001.png",
+        "normal": "game\\textures\\OilDrumBlue_Normal.1001.png",
+        "roughness": "game\\textures\\OilDrumBlue_Roughness.1001.png"
+    }
+}

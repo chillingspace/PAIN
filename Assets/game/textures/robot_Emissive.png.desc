@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot_Emissive.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15375646789020531513
+  },
+  "descriptor_version": 1,
+  "guid": "754d0d81-5d3d-d14a-8d41-b9cde6d6e039",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\robot_Emissive.png"
+  }
+}

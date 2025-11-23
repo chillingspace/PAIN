@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Crate_Height.1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3492211356084041514
+  },
+  "descriptor_version": 1,
+  "guid": "6758b8c2-421d-5f4c-9db1-2461e164060f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Crate_Height.1001.png"
+  }
+}

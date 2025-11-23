@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot_Height.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 750200505247652648
+  },
+  "descriptor_version": 1,
+  "guid": "b06f2b85-072f-9448-aa42-0400ec95f0eb",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\robot_Height.png"
+  }
+}

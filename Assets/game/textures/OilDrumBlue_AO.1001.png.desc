@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "OilDrumBlue_AO.1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8484687958222812463
+  },
+  "descriptor_version": 1,
+  "guid": "a258d843-816e-9145-8e0e-4936deb0e64d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\OilDrumBlue_AO.1001.png"
+  }
+}

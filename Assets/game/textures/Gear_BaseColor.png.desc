@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Gear_BaseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3448607518396702955
+  },
+  "descriptor_version": 1,
+  "guid": "3195a733-5e67-d845-972c-bc2c8f901489",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Gear_BaseColor.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Box.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16386706578099490679
+  },
+  "descriptor_version": 1,
+  "guid": "618a832f-6615-de4b-b28c-4b77c93ccd93",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\assets\\Box.material"
+  }
+}

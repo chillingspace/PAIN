@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Container_Blue_1001_Metallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18074749854945215268
+  },
+  "descriptor_version": 1,
+  "guid": "2809701d-1f44-434d-9e8c-cbe01bc4e5fa",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Container_Blue_1001_Metallic.png"
+  }
+}

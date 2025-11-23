@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "MetalPillar1_Metallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18158146059392236726
+  },
+  "descriptor_version": 1,
+  "guid": "8dedc14b-512e-664c-a0c2-c845a5ec8660",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\MetalPillar1_Metallic.png"
+  }
+}

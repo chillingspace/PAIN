@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Gear_Roughness.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16344921820314635863
+  },
+  "descriptor_version": 1,
+  "guid": "7c622c1f-0f33-d24b-9091-2e17267bddce",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Gear_Roughness.png"
+  }
+}

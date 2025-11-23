@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Watertower_Normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14168098436450924665
+  },
+  "descriptor_version": 1,
+  "guid": "364b0641-63c5-5149-ba10-4ade9ceeda8e",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Watertower_Normal.png"
+  }
+}

@@ -1,0 +1,26 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 0.5
+    },
+    "textures": {
+        "albedo": "game\\textures\\Box_BaseColor.png",
+        "ao": "game\\textures\\Box_AO.png",
+        "metallic": "game\\textures\\Box_Metallic.png",
+        "normal": "game\\textures\\Box_Normal.png"
+    }
+}

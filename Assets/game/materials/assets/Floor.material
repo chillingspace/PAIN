@@ -1,0 +1,26 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 0.5
+    },
+    "textures": {
+        "albedo": "game\\textures\\Floor_BaseColor.png",
+        "ao": "game\\textures\\Floor_AO.png",
+        "normal": "game\\textures\\Floor_Normal.png",
+        "roughness": "game\\textures\\Floor_Roughness.png"
+    }
+}

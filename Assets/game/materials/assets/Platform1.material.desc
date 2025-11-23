@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Platform1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17507641170364725604
+  },
+  "descriptor_version": 1,
+  "guid": "b0e4718c-c50f-3541-bfd5-fe5682043d1e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\assets\\Platform1.material"
+  }
+}
