@@ -8,11 +8,12 @@
 #include "CoreSystems/Scene/sCameraController.h"
 #include "ImGuizmo.h"
 
-// Forward declaration
+// Forward declarations - no include needed
 namespace PAIN {
     namespace Editor {
         namespace Panel {
             class EntityPanel;
+            struct File;  // Forward declare File here
         }
     }
 }
@@ -54,15 +55,23 @@ namespace PAIN {
                 ImGuizmo::MODE m_GizmoMode;
 
                 entt::entity m_HoveredEntity = entt::null;
-                entt::entity findEntityUnderMouse(ImVec2 localMousePos, ImVec2 viewportSize);
 
                 std::shared_ptr<EntityPanel> m_EntityPanel;
+
+                entt::entity m_DragHoveredEntity = entt::null;  // Add this
+                entt::entity findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize);
 
                 // Ray casting methods
                 glm::vec3 screenToWorldRay(ImVec2 mousePos, ImVec2 viewportSize,
                     const glm::mat4& view, const glm::mat4& projection);
                 glm::vec3 getCameraPosition(const glm::mat4& viewMatrix);
                 void performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize);
+
+                // Use forward declared File struct
+                void handleMaterialDrop(File* materialFile,
+                    ImVec2 localMousePos,
+                    ImVec2 viewportSize);
+
                 bool rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
                     const glm::vec3& sphereCenter, float sphereRadius,
                     float& distance);
