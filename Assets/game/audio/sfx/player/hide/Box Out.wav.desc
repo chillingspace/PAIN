@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Box Out.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 11851080124799768690
+  },
+  "descriptor_version": 1,
+  "guid": "11f20ced-0a55-f344-a74e-7a57022bd83e",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\hide\\Box Out.wav"
+  }
+}

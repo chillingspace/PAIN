@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Box In.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 18434641291265002295
+  },
+  "descriptor_version": 1,
+  "guid": "b5f33fbe-eadf-bf46-9329-26bbad7a5e72",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\hide\\Box In.wav"
+  }
+}

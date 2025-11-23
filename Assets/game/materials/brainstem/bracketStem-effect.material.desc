@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "bracketStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 18221439547327588191
+  },
+  "descriptor_version": 1,
+  "guid": "74a9c580-38c3-6d4c-9248-4fe78020061d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\bracketStem-effect.material"
+  }
+}

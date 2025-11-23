@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "hipSphereStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 11574875881395300988
+  },
+  "descriptor_version": 1,
+  "guid": "514ec937-7a2b-c949-8d8d-6a6e2fde6a5e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\hipSphereStem-effect.material"
+  }
+}

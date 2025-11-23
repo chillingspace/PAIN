@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock11SG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13940605511605624023
+  },
+  "descriptor_version": 1,
+  "guid": "05eb47b5-8669-514d-b6c8-1b34e2a491f1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Rock11SG.material"
+  }
+}

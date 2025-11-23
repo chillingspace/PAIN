@@ -112,9 +112,6 @@ namespace PAIN {
                 //Payload
                 std::string payload_typestring;
 
-                //Vector of opened files
-                std::unordered_set<File> open_files;
-
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
                 const float AUTO_REFRESH_INTERVAL = 2.0f;
@@ -162,6 +159,78 @@ namespace PAIN {
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
 
+                // ----------------------------
+                // File Render
+                // ----------------------------
+                class MaterialPreview {
+                private:
+                    unsigned int preview_fbo = 0;
+                    unsigned int preview_texture = 0;
+                    unsigned int preview_depth_rbo = 0;
+                    const glm::ivec2 preview_size{ 512, 512 };
+
+                    struct PreviewSettings {
+                        // Camera
+                        float camera_distance = 3.0f;
+                        float fov = 35.0f;
+
+                        // Rotation
+                        float rotation_y = -25.0f;
+                        float rotation_x = 0.0f;
+
+                        // Projection
+                        bool use_orthographic = true;
+                        float ortho_size = 1.1f;
+
+                        // Lighting
+                        float ambient_intensity = 0.15f;
+                        float light_intensity = 15.0f;
+                        glm::vec3 light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+
+                        //Preview disply size
+                        glm::ivec2 display_size{ 256, 256 };
+                    };
+
+                    //Static sphere model
+                    static std::shared_ptr<Assets::Model> sphere_model;
+
+                    //Static shader
+                    static std::shared_ptr<Assets::Shader> shader;
+
+                    //Services
+                    static std::weak_ptr<Services> services;
+
+                    //Simple sphere mesh for preview
+                    static unsigned int sphere_vao;
+                    static unsigned int sphere_vbo;
+                    static unsigned int sphere_ebo;
+
+                public:
+
+                    //Material preview contructor
+                    MaterialPreview();
+
+                    //Set preview settings
+                    PreviewSettings preview_settings;
+
+                    //Called only once for statics
+                    void init(std::weak_ptr<Services> service);
+                    void render(std::shared_ptr<const Assets::Material> material);
+                    unsigned int getPreviewTexture() const {
+                        return preview_texture;
+                    }
+                };
+
+                //Create mat preview
+                std::unordered_map<Assets::GUID, MaterialPreview> mat_previews;
+
+                //Render material file functionality
+                void renderMaterial(std::shared_ptr<Assets::Material> material, File const& file);
+
+                //Open files manager
+                const int MAX_FILES_OPEN = 5;
+                std::unordered_set<File> open_files;
+                void addFilesToOpen(File const& file);
                 void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 

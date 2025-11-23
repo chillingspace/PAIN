@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Player_Respawn_01.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 2856002222694323623
+  },
+  "descriptor_version": 1,
+  "guid": "d581ecc8-3155-e543-9438-5e38ba0956d3",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\Player_Respawn_01.wav"
+  }
+}

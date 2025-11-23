@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock12SG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13940605511605624023
+  },
+  "descriptor_version": 1,
+  "guid": "740cc0c6-7ff8-3a47-9121-5adcdce57515",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Rock12SG.material"
+  }
+}

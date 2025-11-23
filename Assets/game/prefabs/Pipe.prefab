@@ -1,0 +1,274 @@
+{
+    "Entities": [
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 12,
+                    "localAABB": {
+                        "max": [
+                            123.89671325683594,
+                            80.76731872558594,
+                            40.38367462158203
+                        ],
+                        "min": [
+                            -123.896728515625,
+                            0.0,
+                            -40.38367462158203
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -0.8782906532287598,
+                            0.6690961122512817,
+                            -0.21216394007205963
+                        ],
+                        "min": [
+                            -1.1260840892791748,
+                            0.5883287787437439,
+                            -0.29293128848075867
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "Pipe"
+                },
+                "Hierarchy": {
+                    "children": [
+                        23,
+                        22
+                    ],
+                    "parent": 4294967295
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "00000000-0000-0000-0000-000000000000",
+                            "metallicOverride": 0.0,
+                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 0.5,
+                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "9d5c968f-7a3d-6049-b9d3-6993fbb3d7cf",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        -1.0021873712539673,
+                        0.5883287787437439,
+                        -0.25254762172698975
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        },
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 7,
+                    "localAABB": {
+                        "max": [
+                            123.89671325683594,
+                            80.76731872558594,
+                            40.38367462158203
+                        ],
+                        "min": [
+                            -123.896728515625,
+                            0.0,
+                            -40.38367462158203
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -1.1848870515823364,
+                            0.3904808759689331,
+                            -0.21216394007205963
+                        ],
+                        "min": [
+                            -1.2656543254852295,
+                            0.14268743991851807,
+                            -0.29293128848075867
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "Pipe2 (Clone)"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 21
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "00000000-0000-0000-0000-000000000000",
+                            "metallicOverride": 0.0,
+                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 0.5,
+                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "9ec692b7-bb4f-8b4d-a2b5-b4594750c876",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        -1.1848870515823364,
+                        0.2665841579437256,
+                        -0.25254762172698975
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.7071067690849304,
+                        0.7071067690849304
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        },
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 11,
+                    "localAABB": {
+                        "max": [
+                            123.89671325683594,
+                            80.76731872558594,
+                            40.38367462158203
+                        ],
+                        "min": [
+                            -123.896728515625,
+                            0.0,
+                            -40.38367462158203
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -1.0721101760864258,
+                            0.6079554557800293,
+                            -0.21216394007205963
+                        ],
+                        "min": [
+                            -1.3199036121368408,
+                            0.5271881222724915,
+                            -0.29293128848075867
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "Pipe2"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 21
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "00000000-0000-0000-0000-000000000000",
+                            "metallicOverride": 0.0,
+                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 0.5,
+                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "8fd78c6a-9f53-b941-9cd6-4a4f7a9418c5",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        -1.1960068941116333,
+                        0.5271881222724915,
+                        -0.25254762172698975
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        }
+    ]
+}
