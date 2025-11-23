@@ -57,26 +57,26 @@ namespace PAIN {
 // --- THIS IS THE FIX ---
 // The nlohmann namespace block MUST be outside the PAIN namespace
 //
-namespace nlohmann {
-    template<>
-    struct adl_serializer<PAIN::BoundingVolume> {
-        static void to_json(json& j, const PAIN::BoundingVolume& bv) {
-            j = json{
-                {"localAABB", bv.localAABB},
-                {"worldAABB", bv.worldAABB},
-                {"bvhNodeIndex", bv.bvhNodeIndex},
-                {"needsUpdate", bv.needsUpdate}
-            };
-        }
-
-        static void from_json(const json& j, PAIN::BoundingVolume& bv) {
-            j.at("localAABB").get_to(bv.localAABB);
-            j.at("worldAABB").get_to(bv.worldAABB);
-            j.at("bvhNodeIndex").get_to(bv.bvhNodeIndex);
-            j.at("needsUpdate").get_to(bv.needsUpdate);
-        }
-    };
-}
+//namespace nlohmann {
+//    template<>
+//    struct adl_serializer<PAIN::BoundingVolume> {
+//        static void to_json(json& j, const PAIN::BoundingVolume& bv) {
+//            j = json{
+//                {"localAABB", bv.localAABB},
+//                {"worldAABB", bv.worldAABB},
+//                {"bvhNodeIndex", bv.bvhNodeIndex},
+//                {"needsUpdate", bv.needsUpdate}
+//            };
+//        }
+//
+//        static void from_json(const json& j, PAIN::BoundingVolume& bv) {
+//            j.at("localAABB").get_to(bv.localAABB);
+//            j.at("worldAABB").get_to(bv.worldAABB);
+//            j.at("bvhNodeIndex").get_to(bv.bvhNodeIndex);
+//            j.at("needsUpdate").get_to(bv.needsUpdate);
+//        }
+//    };
+//}
 
 // Reflection
 REFL_TYPE(PAIN::BoundingVolume)

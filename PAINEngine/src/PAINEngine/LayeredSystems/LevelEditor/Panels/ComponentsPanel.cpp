@@ -5,6 +5,7 @@
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "ResourcePanel.h"
+#include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
 
@@ -319,6 +320,24 @@ namespace PAIN {
                 
                 registerCompUIFunc<PAIN::AI::Steering>("AISteering",
                     [](ComponentsPanel&, PAIN::AI::Steering& rb) { DrawWithReflection(rb); });
+
+                /*******************************************
+                *  UI comps
+                *******************************************/
+                registerCompUIFunc<PAIN::UIRectTransform>("UIRectTransform",
+                    [this](ComponentsPanel&, PAIN::UIRectTransform& transform_ui) { DrawWithReflection(transform_ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UIButton>("UIButton",
+                    [this](ComponentsPanel&, PAIN::UIButton& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UIElement>("UIElement",
+                    [this](ComponentsPanel&, PAIN::UIElement& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UICanvas>("UICanvas",
+                    [this](ComponentsPanel&, PAIN::UICanvas& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UIAnimation>("UIAnimation",
+                    [this](ComponentsPanel&, PAIN::UIAnimation& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this);
 

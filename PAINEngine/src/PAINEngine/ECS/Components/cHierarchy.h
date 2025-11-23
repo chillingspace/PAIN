@@ -43,4 +43,6 @@ REFL_FIELD(parent)
 REFL_FIELD(children)
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::Hierarchy>);
+
 #endif // C_HIERARCHY_H
