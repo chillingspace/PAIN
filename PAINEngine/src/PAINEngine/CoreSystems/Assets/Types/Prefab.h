@@ -6,24 +6,20 @@
 #include "AssetTypes.h"
 
 namespace PAIN {
-	namespace Assets {
-		namespace Prefabs {
+	namespace Prefab {
 
-            //Prefab asset class
-            struct PrefabAsset : IAsset {
-                Assets::GUID prefabGUID;
-                std::string prefabName;
-                Assets::GUID rootEntityGUID;
-                std::vector<Assets::GUID> entityGUIDs;
+        //Prefab asset class
+        struct PrefabAsset : Assets::IAsset {
+            std::string prefabName;
+            Assets::GUID rootEntityGUID;
+            std::vector<nlohmann::json> entities;
 
-                PrefabAsset() = default;
+            PrefabAsset() = default;
 
-                PrefabAsset(const Assets::GUID& guid, const std::string& name, const Assets::GUID& root)
-                    : prefabGUID(guid), prefabName(name), rootEntityGUID(root) {
-                }
-            };
-
-		}
+            PrefabAsset(const std::string& name, const Assets::GUID& root, std::vector<nlohmann::json> entities)
+                : prefabName(name), rootEntityGUID(root), entities{ entities } {
+            }
+        };
 	}
 }
 

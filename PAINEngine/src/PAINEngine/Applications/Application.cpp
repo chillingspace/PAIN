@@ -7,6 +7,7 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -113,9 +114,11 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
+		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
 
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
+
 
 		// Physics system cross platform
 		services->get<ECS::Controller>()->registerSystem<Transform::System>();

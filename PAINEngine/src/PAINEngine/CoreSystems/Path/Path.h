@@ -56,6 +56,35 @@ namespace PAIN {
 			virtual bool eof() const = 0;
 			virtual size_t size() const = 0;
 			virtual bool good() const = 0;
+
+			//Write json files
+			bool write(nlohmann::json const& json, int indent = 4) {
+				std::string jsonText = json.dump(indent);
+
+				size_t total = 0;
+				while (total < jsonText.size()) {
+					size_t written = write(jsonText.data() + total, jsonText.size() - total);
+					if (!good() || written == 0)
+						return false;
+					total += written;
+				}
+
+				flush();
+				return true;
+			}
+
+			//Read json files
+			nlohmann::json read() {
+				std::vector<uint8_t> data(size());
+				size_t read_size = read(data.data(), data.size());
+				if (read_size != data.size()) {
+					PN_CORE_ERROR("Failed to read full model file, returning empty json obj");
+					return nlohmann::json();
+				}
+
+				std::string jsonString(data.begin(), data.end());
+				return nlohmann::json::parse(jsonString);
+			}
 		};
 
 		//Path class

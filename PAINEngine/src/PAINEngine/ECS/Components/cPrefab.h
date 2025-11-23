@@ -17,8 +17,8 @@ namespace PAIN {
             std::unordered_map<std::string, nlohmann::json> componentOverrides;
 
             PrefabInstance() = default;
-            PrefabInstance(const Assets::GUID& prefabGUID, const Assets::GUID& rootGUID)
-                : sourcePrefabGUID(prefabGUID), instanceRootGUID(rootGUID) {
+            PrefabInstance(const Assets::GUID& prefabGUID, const Assets::GUID& rootGUID, Assets::GUID const& correspondingPrefabEntityGUID)
+                : sourcePrefabGUID(prefabGUID), instanceRootGUID(rootGUID), correspondingPrefabEntityGUID{ correspondingPrefabEntityGUID } {
             }
 
             //Serialization flag

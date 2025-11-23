@@ -5,6 +5,18 @@ namespace PAIN {
     namespace Transform {
 
         void System::onUpdate(AppTiming timing, entt::registry& registry) {
+            //Ensure local with world
+            auto localOnly = registry.view<LocalTransform>(entt::exclude<WorldTransform>);
+            for (auto entity : localOnly) {
+                registry.emplace<WorldTransform>(entity);
+            }
+
+            //Ensure world with local
+            auto worldOnly = registry.view<WorldTransform>(entt::exclude<LocalTransform>);
+            for (auto entity : worldOnly) {
+                registry.emplace<LocalTransform>(entity); // Default-initialized
+            }
+
             auto view = registry.view<WorldTransform, LocalTransform, Entity::GUID, Entity::Hierarchy>();
 
             //View each entity to update
