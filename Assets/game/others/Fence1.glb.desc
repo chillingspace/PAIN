@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Fence1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 2122769018935962766
+  },
+  "descriptor_version": 1,
+  "guid": "c24f240c-2c8f-e747-afa2-21cd4f69b366",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Fence1.glb"
+  }
+}

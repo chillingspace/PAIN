@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "MetalPlank1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 3253829354761940509
+  },
+  "descriptor_version": 1,
+  "guid": "4229e570-db3e-f248-97ad-5ad7ae05bb7a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\MetalPlank1.glb"
+  }
+}

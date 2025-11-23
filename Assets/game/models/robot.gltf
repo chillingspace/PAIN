@@ -3,6 +3,9 @@
 		"generator":"Khronos glTF Blender I/O v4.5.48",
 		"version":"2.0"
 	},
+	"extensionsUsed":[
+		"KHR_materials_emissive_strength"
+	],
 	"scene":0,
 	"scenes":[
 		{
@@ -976,6 +979,36 @@
 			]
 		}
 	],
+	"materials":[
+		{
+			"doubleSided":true,
+			"emissiveFactor":[
+				1,
+				1,
+				1
+			],
+			"emissiveTexture":{
+				"index":0
+			},
+			"extensions":{
+				"KHR_materials_emissive_strength":{
+					"emissiveStrength":4.099997520446777
+				}
+			},
+			"name":"Material",
+			"normalTexture":{
+				"index":1
+			},
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":2
+				},
+				"metallicRoughnessTexture":{
+					"index":3
+				}
+			}
+		}
+	],
 	"meshes":[
 		{
 			"name":"Robot_Mesh",
@@ -988,9 +1021,50 @@
 						"JOINTS_0":3,
 						"WEIGHTS_0":4
 					},
-					"indices":5
+					"indices":5,
+					"material":0
 				}
 			]
+		}
+	],
+	"textures":[
+		{
+			"sampler":0,
+			"source":0
+		},
+		{
+			"sampler":0,
+			"source":1
+		},
+		{
+			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
+			"source":3
+		}
+	],
+	"images":[
+		{
+			"mimeType":"image/png",
+			"name":"robot_Robot_Emissive",
+			"uri":"robot_Robot_Emissive.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"robot_Robot_Height",
+			"uri":"robot_Robot_Height.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"robot_Robot_BaseColor",
+			"uri":"robot_Robot_BaseColor.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"robot_Robot_Metallic-robot_Robot_Roughness",
+			"uri":"robot_Robot_Metallic-robot_Robot_Roughness.png"
 		}
 	],
 	"skins":[
@@ -1149,6 +1223,12 @@
 			"buffer":0,
 			"byteLength":3392,
 			"byteOffset":880988
+		}
+	],
+	"samplers":[
+		{
+			"magFilter":9729,
+			"minFilter":9987
 		}
 	],
 	"buffers":[
