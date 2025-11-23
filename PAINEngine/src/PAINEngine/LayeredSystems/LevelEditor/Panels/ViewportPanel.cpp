@@ -131,9 +131,13 @@ namespace PAIN {
 
 			// AABB ray intersect for picking
 			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const LocalTransform& transform, float& distance) {
-				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
-				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
+				const glm::mat4& worldMatrix, const glm::vec3& scale,  float& distance) {
+
+				// Extract world position from matrix
+				glm::vec3 worldPosition = glm::vec3(worldMatrix[3]);
+
+				glm::vec3 minBound = worldPosition - scale * 0.5f;
+				glm::vec3 maxBound = worldPosition + scale * 0.5f;
 
 				float tMin = 0.0f;
 				float tMax = (std::numeric_limits<float>::max)();
@@ -186,20 +190,19 @@ namespace PAIN {
 				float closestDistance = (std::numeric_limits<float>::max)();
 
 				// Iterate through all entities with transforms
-				auto view = ecs->getRegistry().view<LocalTransform>();
+				auto view = ecs->getRegistry().view<LocalTransform, WorldTransform>();
 
-				for (auto entity : view) {
-					auto& transform = view.get<LocalTransform>(entity);
+				for (auto [entity, local, world] : view.each()) {
 
 					// Skip very large objects (likely background/floor)
-					if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
+					if (local.scale.x > 10.0f || local.scale.y > 10.0f || local.scale.z > 10.0f) {
 						continue;
 					}
 
 					float distance;
 
 					// Use AABB only for accurate picking
-					if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
+					if (rayIntersectsAABB(rayOrigin, rayDirection, world.matrix, local.scale, distance)) {
 						if (distance < closestDistance) {
 							closestDistance = distance;
 							closestEntity = entity;

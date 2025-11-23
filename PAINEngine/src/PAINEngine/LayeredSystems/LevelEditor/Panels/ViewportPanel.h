@@ -67,7 +67,7 @@ namespace PAIN {
                     const glm::vec3& sphereCenter, float sphereRadius,
                     float& distance);
                 bool rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-                    const LocalTransform& transform, float& distance);
+                    const glm::mat4& worldMatrix, const glm::vec3& scale, float& distance);
             };
 
         } // namespace Panel
