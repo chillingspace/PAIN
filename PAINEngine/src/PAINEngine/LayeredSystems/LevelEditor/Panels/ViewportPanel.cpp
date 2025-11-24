@@ -1,4 +1,4 @@
-﻿#ifdef _DEBUG
+#ifdef _DEBUG
 
 #include "pch.h"
 #ifdef max
@@ -18,8 +18,13 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "EntityPanel.h"
+#include "ResourcePanel.h"
+#include "ECS/Components/cMeshRenderer.h"
 
 #include "Systems/Physics/sysPhysics.h"
+#include "ECS/Components/cEntity.h"
+#include "Systems/Transform/sysTransform.h"
+
 
 namespace PAIN {
 
@@ -27,7 +32,7 @@ namespace PAIN {
 	static void SyncBodyToTransform(
 		entt::entity e,
 		ECS::Controller* ecs,
-		const Transform& t,
+		const LocalTransform& t,
 		bool dragging // true while gizmo is moving, false on release
 	) {
 		if (!ecs) return;
@@ -128,7 +133,7 @@ namespace PAIN {
 
 			// AABB ray intersect for picking
 			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const Transform& transform, float& distance) {
+				const LocalTransform& transform, float& distance) {
 				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
 				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
 
@@ -160,14 +165,14 @@ namespace PAIN {
 				return tMin >= 0.0f;
 			}
 
-			// ImGuizmo picking logic
-			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
+			// Helper method to find entity at mouse position - IMPROVED VERSION
+			entt::entity ViewportPanel::findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize) {
 				auto scene = services->get<Scene>();
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 
-				if (!camera || !ecs || !m_EntityPanel) {
-					return;
+				if (!camera || !ecs) {
+					return entt::null;
 				}
 
 				// Get camera matrices
@@ -182,32 +187,139 @@ namespace PAIN {
 				entt::entity closestEntity = entt::null;
 				float closestDistance = (std::numeric_limits<float>::max)();
 
-				// Iterate through all entities with transforms
-				auto view = ecs->getRegistry().view<Transform>();
+				// Iterate through entities with ModelRenderer (more precise than just Transform)
+				auto view = ecs->getRegistry().view<LocalTransform, WorldTransform, ModelRenderer>();
 
-				for (auto entity : view) {
-					auto& transform = view.get<Transform>(entity);
+				for (auto [entity, local, world, model] : view.each()) {
+
+					// Skip invisible objects
+					if (!model.visible) {
+						continue;
+					}
 
 					// Skip very large objects (likely background/floor)
-					if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
+					if (local.scale.x > 10.0f || local.scale.y > 10.0f || local.scale.z > 10.0f) {
 						continue;
 					}
 
 					float distance;
 
-					// Use AABB only for accurate picking
-					if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
-						if (distance < closestDistance) {
-							closestDistance = distance;
+					// First do a quick AABB test
+					if (!rayIntersectsAABB(rayOrigin, rayDirection, local, distance)) {
+						continue;
+					}
+
+					// For more precision, use a tighter bounding sphere based on model scale
+					glm::vec3 sphereCenter = local.position;
+					float sphereRadius = glm::length(local.scale) * 0.5f; // More conservative radius
+
+					float sphereDistance;
+					if (rayIntersectsSphere(rayOrigin, rayDirection, sphereCenter, sphereRadius, sphereDistance)) {
+						// Use the sphere distance for more accurate sorting
+						if (sphereDistance < closestDistance) {
+							closestDistance = sphereDistance;
 							closestEntity = entity;
 						}
 					}
 				}
 
+				// Fallback to entities with just Transform (in case some don't have ModelRenderer)
+				if (closestEntity == entt::null) {
+					auto transformOnlyView = ecs->getRegistry().view<LocalTransform>();
+
+					for (auto entity : transformOnlyView) {
+						// Skip if we already checked this entity
+						if (ecs->getRegistry().all_of<ModelRenderer>(entity)) {
+							continue;
+						}
+
+						auto& transform = transformOnlyView.get<LocalTransform>(entity);
+
+						// Skip very large objects
+						if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
+							continue;
+						}
+
+						float distance;
+						if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
+							if (distance < closestDistance) {
+								closestDistance = distance;
+								closestEntity = entity;
+							}
+						}
+					}
+				}
+
+				return closestEntity;
+			}
+
+
+			// ImGuizmo picking logic
+			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
+				auto scene = services->get<Scene>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!camera || !ecs || !m_EntityPanel) {
+					return;
+				}
+
+				entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
+
 				// Update EntityPanel selection
 				m_EntityPanel->setSelectedEntity(closestEntity);
 			}
 
+			void ViewportPanel::handleMaterialDrop(File* materialFile,
+				ImVec2 localMousePos,
+				ImVec2 viewportSize) {
+				auto scene = services->get<Scene>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+				auto assetService = services->get<Assets::Manager>();
+
+				if (!camera || !ecs || !materialFile || !assetService) {
+					return;
+				}
+
+				// Find entity at drop location
+				entt::entity closestEntity = findEntityAtMousePos(localMousePos, viewportSize);
+
+				// Apply material to the closest entity
+				if (closestEntity != entt::null) {
+					// Check if entity has a ModelRenderer component
+					if (ecs->getRegistry().all_of<ModelRenderer>(closestEntity)) {
+						auto& modelRenderer = ecs->getRegistry().get<ModelRenderer>(closestEntity);
+
+						// Apply the material to all submeshes (you can modify this logic)
+						if (modelRenderer.materials.empty()) {
+							// If no materials exist, create one
+							MaterialInstance matInstance;
+							matInstance.materialGUID = materialFile->id;
+							modelRenderer.materials.push_back(matInstance);
+
+							PN_CORE_INFO("Applied material '{}' to entity (new material instance)", materialFile->file_name);
+						}
+						else {
+							// Apply to first material (or you could apply to all)
+							modelRenderer.materials[0].materialGUID = materialFile->id;
+
+							PN_CORE_INFO("Applied material '{}' to entity (replaced first material)", materialFile->file_name);
+						}
+					}
+					else {
+						PN_CORE_WARN("Entity does not have a ModelRenderer component");
+					}
+				}
+				else {
+					PN_CORE_INFO("No entity found at drop location");
+				}
+			}
+
+			bool isPointInsideRect(const ImVec2& point, const ImVec2& rectMin, const ImVec2& rectMax) {
+				return point.x >= rectMin.x && point.x <= rectMax.x &&
+					point.y >= rectMin.y && point.y <= rectMax.y;
+			}
 
 			void ViewportPanel::onUpdate(AppTiming timing) {
 				if (!renderTexture) return;
@@ -274,246 +386,6 @@ namespace PAIN {
 						| ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
 
-					// ========================================
-					// === ImGuizmo - RENDER FIRST ===
-					// ========================================
-					if (m_EntityPanel) {
-						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
-
-						if (selectedEntity != entt::null) {
-							auto transformOpt = ecs->getEntityComponent<Transform>(selectedEntity);
-
-							if (transformOpt.has_value()) {
-								Transform& transform = transformOpt.value().get();
-								auto camera = scene->GetActiveCamera();
-
-								if (camera) {
-									glm::mat4 viewMatrix = camera->view();
-									glm::mat4 projectionMatrix = camera->projection();
-									glm::mat4 modelMatrix = transform.getMatrix();
-
-									ImGuizmo::SetOrthographic(false);
-									ImGuizmo::SetDrawlist();
-									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
-
-									// Hotkeys
-									if (ImGui::IsKeyPressed(ImGuiKey_T))
-										m_GizmoOperation = ImGuizmo::TRANSLATE;
-									if (ImGui::IsKeyPressed(ImGuiKey_R))
-										m_GizmoOperation = ImGuizmo::ROTATE;
-									if (ImGui::IsKeyPressed(ImGuiKey_Y))
-										m_GizmoOperation = ImGuizmo::SCALE;
-
-									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
-
-									// Setup snapping
-									bool useSnap = ImGui::GetIO().KeyCtrl;
-									float snapValue = 0.5f;
-
-									if (m_GizmoOperation == ImGuizmo::ROTATE) {
-										snapValue = 45.0f;
-									}
-									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-										snapValue = 0.5f;
-									}
-									else if (m_GizmoOperation == ImGuizmo::SCALE) {
-										snapValue = 0.1f;
-									}
-
-									float snapValues[3] = { snapValue, snapValue, snapValue };
-
-									// Draw the gizmo
-									ImGuizmo::Manipulate(
-										glm::value_ptr(viewMatrix),
-										glm::value_ptr(projectionMatrix),
-										m_GizmoOperation,
-										m_GizmoMode,
-										glm::value_ptr(modelMatrix),
-										nullptr,
-										useSnap ? snapValues : nullptr
-									);
-
-									static bool wasUsing = false;
-									static glm::f32vec3 cachedPosition;
-									static glm::f32quat cachedRotation;
-									static glm::f32vec3 cachedScale;
-
-									static entt::entity lastSelectedEntity = entt::null;
-									static glm::mat4 originalMatrix = glm::mat4(1.0f);
-
-									bool isCurrentlyUsing = ImGuizmo::IsUsing();
-
-									if (selectedEntity != lastSelectedEntity) {
-										wasUsing = false;
-										lastSelectedEntity = selectedEntity;
-									}
-
-									if (isCurrentlyUsing && !wasUsing) {
-										cachedPosition = transform.position;
-										cachedRotation = transform.rotation;
-										cachedScale = transform.scale;
-										originalMatrix = modelMatrix;
-									}
-
-									auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
-
-									if (isCurrentlyUsing) {
-										float translation[3], rotation[3], scale[3];
-										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(modelMatrix),
-											translation,
-											rotation,
-											scale
-										);
-
-										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
-											transform.rotation = cachedRotation;
-											transform.scale = cachedScale;
-
-											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
-
-											if (rbOpt.has_value()) {
-												auto& rb = rbOpt.value().get();
-												auto physics_system = ecs->getSystem<Physics::System>();
-
-												if (physics_system) {
-													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-													body_interface.DeactivateBody(rb.bodyID);
-													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
-
-													JPH::RVec3 pos(transform.position.x, transform.position.y, transform.position.z);
-
-													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
-												}
-											}
-										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));
-											transform.position = cachedPosition;
-											transform.scale = cachedScale;
-
-											SyncBodyToTransform(selectedEntity, ecs.get(), transform, /*dragging=*/true);
-
-											if (rbOpt.has_value()) {
-												auto& rb = rbOpt.value().get();
-												auto physics_system = ecs->getSystem<Physics::System>();
-
-												if (physics_system) {
-													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-													body_interface.DeactivateBody(rb.bodyID);
-													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
-
-													JPH::Quat rot(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
-
-													body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
-												}
-											}
-										}
-										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-											transform.position = cachedPosition;
-											transform.rotation = cachedRotation;
-											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
-										}
-									}
-
-									if (!isCurrentlyUsing && wasUsing) {
-										float translation[3], rotation[3], scale[3];
-										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(modelMatrix),
-											translation,
-											rotation,
-											scale
-										);
-
-										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-											transform.position = glm::vec3(translation[0], translation[1], translation[2]);
-										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-											transform.rotation = glm::quat(glm::radians(glm::vec3(rotation[0], rotation[1], rotation[2])));
-										}
-										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-											transform.scale = glm::vec3(scale[0], scale[1], scale[2]);
-										}
-
-										if (rbOpt.has_value()) {
-											auto& rb = rbOpt.value().get();
-											auto physics_system = ecs->getSystem<Physics::System>();
-											JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-											body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
-											body_interface.ActivateBody(rb.bodyID);
-										}
-									}
-
-									wasUsing = isCurrentlyUsing;
-								}
-							}
-						}
-					}
-
-					// ========================================
-					// === ViewManipulate Camera Cube ===
-					// ========================================
-					auto camera = scene->GetActiveCamera();
-					if (camera) {
-						glm::mat4 viewMatrix = camera->view();
-
-						float cubeSize = 128.0f;
-						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
-
-						// Calculate distance from camera to look-at point (origin)
-						glm::vec3 lookAtTarget = glm::vec3(0.0f);
-						float cameraDistance = glm::length(camera->pos - lookAtTarget);
-
-						// Set these before ViewManipulate
-						ImGuizmo::SetDrawlist();
-						ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
-
-						ImGuizmo::ViewManipulate(
-							glm::value_ptr(viewMatrix),
-							cameraDistance,
-							cubePosition,
-							ImVec2(cubeSize, cubeSize),
-							0x10101010
-						);
-
-						// Use the specific ViewManipulate check function
-						if (ImGuizmo::IsUsingViewManipulate()) {
-							// Extract camera vectors from the modified view matrix
-							glm::mat4 inverseView = glm::inverse(viewMatrix);
-
-							// Get the camera position from inverse view matrix
-							glm::vec3 newPosition = glm::vec3(inverseView[3]);
-
-							// Get camera basis vectors from inverse view matrix
-							glm::vec3 right = glm::vec3(inverseView[0]);
-							glm::vec3 up = glm::vec3(inverseView[1]);
-							glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
-
-							// Update camera
-							camera->pos = newPosition;
-							camera->forward = glm::normalize(forward);
-							camera->up = glm::normalize(up);
-							camera->right = glm::normalize(right);
-						}
-					}
-
-					// ========================================
-					// === Mouse Picking - AFTER GIZMO ===
-					// ========================================
-					if (contentHovered
-						&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)
-						&& !ImGuizmo::IsUsing()
-						&& !ImGuizmo::IsOver()) {
-
-						ImVec2 mousePos = ImGui::GetMousePos();
-						ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
-
-						performMousePicking(localMousePos, size);
-					}
 
 					// ========================================
 					// === Camera Controls ===
@@ -535,8 +407,8 @@ namespace PAIN {
 						bool rightMouseHeld = contentHovered;
 #endif 
 
-						// Check for ANY gizmo activity (object gizmo OR view manipulate)
-						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate() || ImGuizmo::IsViewManipulateHovered();
+						// Check if gizmo is currently being manipulated (object gizmo OR view manipulate)
+						bool gizmoActive = ImGuizmo::IsUsing() || ImGuizmo::IsUsingViewManipulate();
 
 						if (!isSimulationPaused && contentHovered && !gizmoActive && rightMouseHeld) {
 							cameraController->W_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_W);
@@ -586,17 +458,395 @@ namespace PAIN {
 							}
 						}
 					}
-				}
-				ImGui::End();
-			}
 
+                    // ========================================
+                    // === DRAG & DROP TARGET FOR MATERIALS ===
+                    // ========================================
 
+                    // Reset drag hover entity
+                    m_DragHoveredEntity = entt::null;
 
+                    // Declare isUsingGizmo once at the top
+					bool isUsingGizmo = false;
 
+					if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+						isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver() || ImGuizmo::IsUsingViewManipulate();
 
+					}
 
-		} // namespace Panel
-	} // namespace Editor
+                    if (!isUsingGizmo) {
+                        // Use invisible button overlay for reliable drag-drop
+                        ImGui::SetCursorScreenPos(viewportPos);
+
+						// Define cube rect
+						float cubeSize = 128.0f;
+						ImVec2 cubePos(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+						ImVec2 cubeRectMin = cubePos;
+						ImVec2 cubeRectMax = ImVec2(cubePos.x + cubeSize, cubePos.y + cubeSize);
+
+						// Only create drag-drop target if mouse NOT over cube rect to avoid blocking cube's mouse events
+						if (!isPointInsideRect(ImGui::GetMousePos(), cubeRectMin, cubeRectMax)) {
+							ImGui::SetCursorScreenPos(viewportPos);
+							ImGui::InvisibleButton("##ViewportDropZone", size);
+
+							auto filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Material);
+							if (ImGui::BeginDragDropTarget()) {
+								// Check what payload is available
+								if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
+									if (strcmp(payload->DataType, std::string(filetype_string + "_FILE").c_str()) == 0) {
+										m_DragHoveredEntity = findEntityAtMousePos(
+											ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
+											size
+										);
+
+										if (m_DragHoveredEntity != entt::null) {
+											ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+										}
+									}
+								}
+
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
+									PN_CORE_INFO("Material payload accepted!");
+									File* droppedFile = (File*)payload->Data;
+
+									ImVec2 mousePos = ImGui::GetMousePos();
+									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+									handleMaterialDrop(droppedFile, localMousePos, size);
+								}
+								ImGui::EndDragDropTarget();
+							}
+						}
+
+                        // Update hover state from invisible button
+                        contentHovered = contentHovered || ImGui::IsItemHovered();
+                    }
+
+					// ========================================
+					// === ImGuizmo - RENDER FIRST ===
+					// ========================================
+					if (m_EntityPanel) {
+						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+
+						if (selectedEntity != entt::null) {
+							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity);
+							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity);
+
+							if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
+								LocalTransform& localTransform = localTransformOpt.value().get();
+								WorldTransform& worldTransform = worldTransformOpt.value().get();
+								auto camera = scene->GetActiveCamera();
+
+								if (camera) {
+									glm::mat4 viewMatrix = camera->view();
+									glm::mat4 projectionMatrix = camera->projection();
+									glm::mat4 modelMatrix = worldTransform.matrix;
+
+									ImGuizmo::SetOrthographic(false);
+									ImGuizmo::SetDrawlist();
+									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+
+									// Hotkeys
+									if (ImGui::IsKeyPressed(ImGuiKey_T))
+										m_GizmoOperation = ImGuizmo::TRANSLATE;
+									if (ImGui::IsKeyPressed(ImGuiKey_R))
+										m_GizmoOperation = ImGuizmo::ROTATE;
+									if (ImGui::IsKeyPressed(ImGuiKey_Y))
+										m_GizmoOperation = ImGuizmo::SCALE;
+
+									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
+
+									// Setup snapping
+									bool useSnap = ImGui::GetIO().KeyCtrl;
+									float snapValue = 0.5f;
+
+									if (m_GizmoOperation == ImGuizmo::ROTATE) {
+										snapValue = 45.0f;
+									}
+									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+										snapValue = 0.5f;
+									}
+									else if (m_GizmoOperation == ImGuizmo::SCALE) {
+										snapValue = 0.1f;
+									}
+
+									float snapValues[3] = { snapValue, snapValue, snapValue };
+
+									// Draw the gizmo (manipulates modelMatrix)
+									ImGuizmo::Manipulate(
+										glm::value_ptr(viewMatrix),
+										glm::value_ptr(projectionMatrix),
+										m_GizmoOperation,
+										m_GizmoMode,
+										glm::value_ptr(modelMatrix),
+										nullptr,
+										useSnap ? snapValues : nullptr
+									);
+
+									// Cache management
+									static bool wasUsing = false;
+									static glm::vec3 cachedPosition;
+									static glm::quat cachedRotation;
+									static glm::vec3 cachedScale;
+									static entt::entity lastSelectedEntity = entt::null;
+
+									bool isCurrentlyUsing = ImGuizmo::IsUsing();
+
+									// Reset cache if entity changed
+									if (selectedEntity != lastSelectedEntity) {
+										wasUsing = false;
+										lastSelectedEntity = selectedEntity;
+									}
+
+									// Just started using - cache original values
+									if (isCurrentlyUsing && !wasUsing) {
+										cachedPosition = localTransform.position;
+										cachedRotation = localTransform.rotation;
+										cachedScale = localTransform.scale;
+									}
+
+									// Currently manipulating
+									if (isCurrentlyUsing) {
+										// ===================================================
+										// STEP 1: Get parent's world matrix (if exists)
+										// ===================================================
+										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
+
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										if (hierarchyOpt.has_value()) {
+											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+											if (hierarchy.parentGUID.IsValid()) {
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												if (parentEntity != entt::null) {
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													if (parentWorldOpt.has_value()) {
+														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+													}
+												}
+											}
+										}
+
+										// ===================================================
+										// STEP 2: Convert world matrix to local space
+										// ===================================================
+										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+
+										// ===================================================
+										// STEP 3: Decompose local matrix
+										// ===================================================
+										float localTranslation[3], localRotation[3], localScale[3];
+										ImGuizmo::DecomposeMatrixToComponents(
+											glm::value_ptr(newLocalMatrix),
+											localTranslation,
+											localRotation,
+											localScale
+										);
+
+										// ===================================================
+										// STEP 4: Update LocalTransform based on gizmo operation
+										// ===================================================
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
+											localTransform.rotation = cachedRotation;
+											localTransform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											localTransform.position = cachedPosition;
+											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
+											localTransform.scale = cachedScale;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											localTransform.position = cachedPosition;
+											localTransform.rotation = cachedRotation;
+											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
+										}
+
+										// ===================================================
+										// STEP 5: Mark transform dirty & sync physics
+										// ===================================================
+										auto transformSystem = ecs->getSystem<Transform::System>();
+										if (transformSystem) {
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+										}
+
+										// Physics sync
+										SyncBodyToTransform(selectedEntity, ecs.get(), localTransform, /*dragging=*/true);
+
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+										if (rbOpt.has_value()) {
+											auto& rb = rbOpt.value().get();
+											auto physics_system = ecs->getSystem<Physics::System>();
+
+											if (physics_system) {
+												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+												// Disable physics temporarily during manipulation
+												body_interface.DeactivateBody(rb.bodyID);
+												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+
+												if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+													JPH::RVec3 pos(localTransform.position.x, localTransform.position.y, localTransform.position.z);
+													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
+												}
+												else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+													JPH::Quat rot(localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z, localTransform.rotation.w);
+													body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
+												}
+											}
+										}
+									}
+
+									// Just released - reactivate physics
+									if (!isCurrentlyUsing && wasUsing) {
+										// Final decompose (same logic as above)
+										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
+
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										if (hierarchyOpt.has_value()) {
+											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+											if (hierarchy.parentGUID.IsValid()) {
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												if (parentEntity != entt::null) {
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													if (parentWorldOpt.has_value()) {
+														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+													}
+												}
+											}
+										}
+
+										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+
+										float localTranslation[3], localRotation[3], localScale[3];
+										ImGuizmo::DecomposeMatrixToComponents(
+											glm::value_ptr(newLocalMatrix),
+											localTranslation,
+											localRotation,
+											localScale
+										);
+
+										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
+										}
+										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
+										}
+
+										// Mark dirty
+										auto transformSystem = ecs->getSystem<Transform::System>();
+										if (transformSystem) {
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+										}
+
+										// Reactivate physics
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+										if (rbOpt.has_value()) {
+											auto& rb = rbOpt.value().get();
+											auto physics_system = ecs->getSystem<Physics::System>();
+											if (physics_system) {
+												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
+												body_interface.ActivateBody(rb.bodyID);
+											}
+										}
+									}
+
+									wasUsing = isCurrentlyUsing;
+								}
+							}
+						}
+					}
+
+					// ========================================
+					// === ViewManipulate Camera Cube ===
+					// ========================================
+					auto camera = scene->GetActiveCamera();
+					if (camera) {
+						glm::mat4 viewMatrix = camera->view();
+
+						float cubeSize = 128.0f;
+						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+
+						// Calculate distance from camera to look-at point (origin)
+						glm::vec3 lookAtTarget = glm::vec3(0.0f);
+						float cameraDistance = glm::length(camera->pos - lookAtTarget);
+
+						// Set these before ViewManipulate
+						ImGuizmo::SetDrawlist();
+						ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+
+						ImGuizmo::ViewManipulate(
+							glm::value_ptr(viewMatrix),
+							cameraDistance,
+							cubePosition,
+							ImVec2(cubeSize, cubeSize),
+							0x10101010
+						);
+
+						// Check if view is being manipulated and not using imguizmo
+						if (ImGuizmo::IsUsingViewManipulate() && !ImGuizmo::IsUsing() && isUsingGizmo) {
+							// Extract camera vectors from the modified view matrix
+							glm::mat4 inverseView = glm::inverse(viewMatrix);
+
+							// Get the camera position from inverse view matrix
+							glm::vec3 newPosition = glm::vec3(inverseView[3]);
+
+							// Get camera basis vectors from inverse view matrix
+							glm::vec3 right = glm::vec3(inverseView[0]);
+							glm::vec3 up = glm::vec3(0.f, 1.f, 0.f);
+							glm::vec3 forward = -glm::vec3(inverseView[2]); // Negative because OpenGL looks down -Z
+
+							// Update camera
+							camera->pos = newPosition;
+							camera->forward = glm::normalize(forward);
+							camera->up = glm::normalize(up);
+							camera->right = glm::normalize(right);
+						}
+					}
+
+					// ========================================
+					 // === Mouse Picking - AFTER GIZMO ===
+					 // ========================================
+
+					// Track if we were using the gizmo in the previous frame
+					static bool wasUsingGizmo = false;
+					// REMOVE THIS LINE: bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
+					// Reuse the variable declared above
+
+					if (contentHovered) {
+						// Only pick on click if gizmo is NOT being used
+						bool shouldPick = false;
+
+						// Case 1: Direct click (no drag)
+						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isUsingGizmo) {
+							shouldPick = true;
+						}
+
+						// Case 2: Mouse released after dragging (but NOT on gizmo)
+						if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
+							&& !isUsingGizmo
+							&& !wasUsingGizmo
+							&& !ImGui::IsMouseDragging(ImGuiMouseButton_Left, 1.0f)) {
+							shouldPick = true;
+						}
+
+						if (shouldPick) {
+							ImVec2 mousePos = ImGui::GetMousePos();
+							ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+							performMousePicking(localMousePos, size);
+						}
+					}
+
+					wasUsingGizmo = isUsingGizmo;
+		
+                }
+                ImGui::End();
+            }
+        } // namespace Panel
+    } // namespace Editor
 } // namespace PAIN
 
 #endif

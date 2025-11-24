@@ -57,7 +57,7 @@ namespace PAIN {
 
 			void updateBodyLayer(JPH::BodyID bodyID, JPH::ObjectLayer newLayer);
 
-			void teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb);
+			void teleportBodyToTransform(entt::entity e, const LocalTransform& tr, Physics::RigidBody3D& rb);
 
 		private:
 			struct LuaContactListener; // fwd decl for jolt lua bridge

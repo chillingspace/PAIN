@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Crate_1001.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 1142250141439819743
+  },
+  "descriptor_version": 1,
+  "guid": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Crate_1001.material"
+  }
+}

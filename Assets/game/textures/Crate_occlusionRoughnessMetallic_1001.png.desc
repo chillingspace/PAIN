@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Crate_occlusionRoughnessMetallic_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15402497242064388323
+  },
+  "descriptor_version": 1,
+  "guid": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Crate_occlusionRoughnessMetallic_1001.png"
+  }
+}

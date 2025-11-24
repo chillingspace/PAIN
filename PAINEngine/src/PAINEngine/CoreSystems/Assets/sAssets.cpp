@@ -3,6 +3,8 @@
 #include "Applications/Application.h"
 #include "sAssets.h"
 
+#include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {
@@ -118,13 +120,33 @@ namespace PAIN {
 
 				//Get audio service
 				auto audio_service = services->get<Audio::Audio>();
-				return audio_service->createSound(virtual_path);
+				if (audio_service) {
+					return audio_service->createSound(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Audio service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::Audio::Sound>();
+				}
 				});
 
 			//Register Material loader
 			asset_loader->RegisterLoader(Type::Material, [this](std::string const& virtual_path) {
 
 				return asset_loader->ImportMaterial(virtual_path);
+				});
+
+			//Register Prefab loader
+			asset_loader->RegisterLoader(Type::Prefabs, [this](std::string const& virtual_path) {
+
+				auto prefab_service = services->get<Prefab::Service>();
+
+				if (prefab_service) {
+					return prefab_service->loadPrefabFromFile(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Prefab service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::Prefab::PrefabAsset>();
+				}
 				});
 
 			//Import asset registry

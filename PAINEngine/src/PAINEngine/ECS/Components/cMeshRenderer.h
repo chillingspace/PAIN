@@ -31,6 +31,10 @@ namespace PAIN {
     };
 
     struct ModelRenderer {
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
+
         // Asset reference
         Assets::GUID prevModelGUID;
         Assets::GUID modelGUID;
@@ -118,6 +122,8 @@ REFL_FIELD(roughnessOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN:
 REFL_FIELD(emissiveOverride, PAIN::Editor::Attributes::DisplayName("Emissive Color"))
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::MaterialInstance>);
+
 REFL_TYPE(PAIN::ModelRenderer)
 REFL_FIELD(modelGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
 REFL_FIELD(materials)
@@ -125,4 +131,6 @@ REFL_FIELD(visible)
 REFL_FIELD(castShadows)
 REFL_FIELD(receiveShadows)
 REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);
 

@@ -30,6 +30,10 @@ namespace PAIN {
         void updateTouchControls(int pointerId, float x, float y);
         void endTouchControls(int pointerId);
 
+		glm::mat4 getViewMatrix() const;
+		glm::mat4 getProjectionMatrix() const;
+
+
 		float m_vpWidth = 0.f;
 		float m_vpHeight = 0.f;
 		float m_vpPosX = 0.f;
@@ -50,10 +54,10 @@ namespace PAIN {
 		float yOffset = 0.0f;
 
 		enum MOVE_MODES {
-			CAMERA,
-			NUM_MOVE_MODES
+			FREE_FLY,
+			FIRST_PERSON
 		};
-		MOVE_MODES move_mode = CAMERA;
+		MOVE_MODES move_mode = FREE_FLY;
 
 	private:
 		Camera* camera;

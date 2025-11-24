@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tires.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 3881512475123574326
+  },
+  "descriptor_version": 1,
+  "guid": "5b5bb6db-b292-b941-9897-0b1744c738b1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Tires.glb"
+  }
+}

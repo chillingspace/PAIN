@@ -50,6 +50,8 @@ namespace PAIN {
 		}
 
 		// actual settings
+		bool draw_floor = false;
+
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);

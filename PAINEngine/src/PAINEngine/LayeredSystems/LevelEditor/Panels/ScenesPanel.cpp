@@ -3,6 +3,7 @@
 
 #ifdef _DEBUG
 #include "CoreSystems/Serialization/sSerialization.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
     namespace Editor {

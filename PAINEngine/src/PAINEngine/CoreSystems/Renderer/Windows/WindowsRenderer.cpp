@@ -546,6 +546,7 @@ namespace PAIN {
 		//}
 
 		// draw floor
+		if (GraphicsSettings::get().draw_floor)
 		{
 			if (!floor_shader) {
 				PN_CORE_ERROR("Unable to find floor_shader");

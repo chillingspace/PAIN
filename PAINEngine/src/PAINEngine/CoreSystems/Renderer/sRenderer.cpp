@@ -42,70 +42,73 @@ namespace PAIN {
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after sRenderer attach: {}", err);
 		}
-
-
 	}
 
 	void sRenderer::InitializeModelRenderer(entt::entity entity, ModelRenderer& component) {
 
+		//Get asset manager
 		auto assetManager = services->get<Assets::Manager>();
 
 		//Check for valid GUID
 		if (!component.modelGUID.IsValid()) return;
+
+		//Set prev GUID
+		component.prevModelGUID = component.modelGUID;
+
+		//Boolean for checking for material updates
+		bool material_updates = false;
+		if (component.cachedModelAsset || component.materials.empty()) material_updates = true;
 
 		//optional material asset
 		auto model_opt = assetManager->getAsset<Assets::Model>(component.modelGUID);
 
 		// Load model asset
 		component.cachedModelAsset = model_opt.has_value() ? model_opt.value() : nullptr;
-
 		if (!component.cachedModelAsset) {
 			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 			return;
 		}
 
-		//Set prev GUID
-		component.prevModelGUID = component.modelGUID;
-
 		//Cache model
 		const auto& modelAsset = component.cachedModelAsset;
 
-		// Initialize materials
-		if (!component.materials.empty()) {
+		//Update material list only when needed
+		if (material_updates) {
+			
+			//Update new materials
 			component.materials.clear();
-		}
+			component.materials.reserve(modelAsset->materials.size());
+			for (const auto& materialPath : modelAsset->materials) {
+				MaterialInstance matInstance;
 
-		component.materials.reserve(modelAsset->materials.size());
+				//optional material asset
+				auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
 
-		for (const auto& materialPath : modelAsset->materials) {
-			MaterialInstance matInstance;
+				// Load material asset
+				auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
 
-			//optional material asset
-			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
+				//Check valid material asset
+				if (materialAsset) {
+					matInstance.materialGUID = materialAsset->guid;
 
-			// Load material asset
-			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+					//Init material overrides
+					matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
+					matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
+					matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
+					matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
+					matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
+					matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
+					matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
+					matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
+					matInstance.baseColorOverride = materialAsset->baseColor;
+					matInstance.metallicOverride = materialAsset->metallic;
+					matInstance.roughnessOverride = materialAsset->roughness;
+					matInstance.emissiveOverride = materialAsset->emissive;
+				}
 
-			//Check valid material asset
-			if (materialAsset) {
-				matInstance.materialGUID = materialAsset->guid;
-
-				//Init material overrides
-				matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
-				matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
-				matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
-				matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
-				matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
-				matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
-				matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
-				matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
-				matInstance.baseColorOverride = materialAsset->baseColor;
-				matInstance.metallicOverride = materialAsset->metallic;
-				matInstance.roughnessOverride = materialAsset->roughness;
-				matInstance.emissiveOverride = materialAsset->emissive;
+				component.materials.push_back(std::move(matInstance));
 			}
 
-			component.materials.push_back(std::move(matInstance));
 		}
 
 		// Initialize bone transforms if animated
@@ -130,7 +133,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), GraphicsSettings::get().getShadowMapWidth());
 
@@ -143,14 +146,14 @@ namespace PAIN {
 
 			for (auto e : view) {
 
-				auto transform = ecs->getEntityComponent<Transform>(e);
+				auto transform = ecs->getEntityComponent<WorldTransform>(e);
 
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 				glm::mat4 model_xform;
 				if (transform.has_value())
 				{
-					model_xform = transform.value().get().getMatrix();
+					model_xform = transform.value().get().matrix;
 				}
 
 				if (mdl.has_value() && mdl->get().castShadows)
@@ -172,7 +175,7 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -182,13 +185,13 @@ namespace PAIN {
 		w_renderer->BeginGeometryPass(scene);
 		for (auto e : view) {
 
-  			auto transform = ecs->getEntityComponent<Transform>(e);
+  			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -223,16 +226,16 @@ namespace PAIN {
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		for (auto e : view) {
 
-			auto transform = ecs->getEntityComponent<Transform>(e);
+			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			glm::mat4 model_xform;
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().getMatrix();
+				model_xform = transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{
@@ -246,7 +249,7 @@ namespace PAIN {
 	{
 		auto ecs = services->get<ECS::Controller>();
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<MetaData::EntityName>();
+		auto view = registry.view<Entity::Name>();
 
 		// Cache to track which lights are still active this frame
 		std::unordered_set<std::string> activeLightNames;
@@ -254,7 +257,7 @@ namespace PAIN {
 
 		for (auto entity : view) {
 			auto light_comp = ecs->getEntityComponent<Lighting>(entity);
-			auto trans_comp = ecs->getEntityComponent<Transform>(entity);
+			auto trans_comp = ecs->getEntityComponent<LocalTransform>(entity);
 
 			if (!light_comp.has_value() || !trans_comp.has_value())
 				continue;

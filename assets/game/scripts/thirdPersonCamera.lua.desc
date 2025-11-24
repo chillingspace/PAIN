@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "thirdPersonCamera.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 1629568801770064703
+  },
+  "descriptor_version": 1,
+  "guid": "ac24e4a9-a066-254a-8a85-e5bdd9189197",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\thirdPersonCamera.lua"
+  }
+}

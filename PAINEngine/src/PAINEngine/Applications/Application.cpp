@@ -7,6 +7,10 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
+
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+#include "CoreSystems/Renderer/text.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -21,18 +25,9 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
-// Systems
-#include "Systems/Physics/sysPhysics.h"
-#include "Systems/AI/sysAI.h" 
-#include "Systems/Animation/sysAnimation.h" 
-#include "Systems/Logic/sysLogic.h"
-#include "Systems/Audio/sysAudio.h"
-#include "Systems/Collision/sBVHSystem.h"
-#include "Systems/Scripting/GameScriptingSystem.h"
 
-#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 
-#include "CoreSystems/Renderer/text.h"
+
 
 namespace PAIN {
 
@@ -112,26 +107,15 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
+		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
 
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
-		// Physics system cross platform
-		services->get<ECS::Controller>()->registerSystem<Physics::System>();
-
-		services->get<ECS::Controller>()->registerSystem<PAIN::Scripting::GameScriptingSystem>();
-
-		services->get<ECS::Controller>()->registerSystem<AI::System>();
-
-#ifdef PN_PLATFORM_WINDOWS	
-		services->get<ECS::Controller>()->registerSystem<Animation::System>();
-		services->get<ECS::Controller>()->registerSystem<Logic::System>();
-		services->get<ECS::Controller>()->registerSystem<Audio::System>();
-#endif
-		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
-
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
+		// Register all systems here
+		services->get<ECS::Controller>()->registerAllSystems();
 
 		// Scenes
 		addCoreSystem(std::make_shared<Scene>());
@@ -199,7 +183,6 @@ namespace PAIN {
 			);
 		}
 #endif
-	
 #ifdef _DEBUG
 		if (services->get<Editor::Editor>()->isPaused()) {
 			timing.dt = 0.0f;

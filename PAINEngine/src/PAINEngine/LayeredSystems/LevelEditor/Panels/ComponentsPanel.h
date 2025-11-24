@@ -11,6 +11,9 @@ namespace PAIN {
 
 		namespace Panel {
 			class EntityPanel;
+#ifdef PN_PLATFORM_WINDOWS
+			class ResourcePanel;
+#endif
 
 			class ComponentsPanel : public IPanel {
 			public:
@@ -52,6 +55,13 @@ namespace PAIN {
 
 				void renderEntityComponents(entt::entity entity);
 
+				// Script Loading
+				void setScriptChanged(bool is_script_changed);
+				bool getScriptChanged();
+
+				void setScriptSaved(bool is_script_saved);
+				bool getScriptSaved();
+
 				//Expose services
 				std::shared_ptr<Services> services;
 
@@ -76,6 +86,14 @@ namespace PAIN {
 				std::unordered_map<std::string, std::function<void(ComponentsPanel&, void*)>> comps_ui;
 
 				std::weak_ptr<EntityPanel> entities_panel;
+
+#ifdef PN_PLATFORM_WINDOWS
+				std::weak_ptr<ResourcePanel> resources_panel;
+#endif
+
+				// Script Loading
+				bool is_script_loaded = false;
+				bool is_script_saved = true;
 
 				// Transform tracking removed - now handled as static in .cpp
 			};

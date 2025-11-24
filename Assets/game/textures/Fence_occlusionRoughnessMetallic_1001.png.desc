@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Fence_occlusionRoughnessMetallic_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10864640640736405885
+  },
+  "descriptor_version": 1,
+  "guid": "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Fence_occlusionRoughnessMetallic_1001.png"
+  }
+}

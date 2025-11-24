@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - ci_cpp_analysis
+      - UI-impl
   pull_request:
     branches: 
       - main

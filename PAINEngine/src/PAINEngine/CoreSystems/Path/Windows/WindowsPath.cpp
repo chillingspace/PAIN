@@ -270,7 +270,7 @@ namespace PAIN {
             }
         }
 
-        std::unique_ptr<IFileStream> WindowsPath::createFileStream(const std::string& virtualPath, FileMode mode) {
+        std::unique_ptr<IFileStream> WindowsPath::createFileStream(const std::string& virtualPath, FileMode mode, bool bin) {
 
             auto path = resolvePath(virtualPath);
 
@@ -294,7 +294,7 @@ namespace PAIN {
             }
 #endif
 
-            return std::make_unique<WinFileStream>(path, mode);
+            return std::make_unique<WinFileStream>(path, mode, bin);
         }
 
         void WindowsPath::watchDirectory(std::string const& virtual_path, FileWatchEventCallback callback) {

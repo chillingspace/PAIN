@@ -71,13 +71,13 @@ namespace PAIN {
         std::vector<std::pair<entt::entity, AABB>> bvhItems;
         
         // Estimate reservation based on the number of entities with a Transform component
-        bvhItems.reserve(registry.storage<Transform>().size());
+        bvhItems.reserve(registry.storage<WorldTransform>().size());
 
         // Create a view for entities having a Transform component
-        auto view = registry.view<Transform>();
+        auto view = registry.view<WorldTransform>();
 
         for (auto entity : view) {
-             auto& transform = view.get<Transform>(entity); // Get transform component
+             auto& transform = view.get<WorldTransform>(entity); // Get transform component
              BoundingVolume* bvComponent = registry.try_get<BoundingVolume>(entity); // Try to get existing BV component
 
              // If no BV component, try to create one from ModelRenderer
@@ -111,7 +111,7 @@ namespace PAIN {
 
             // Recalculate world AABB if marked for update
             if (bvComponent->needsUpdate) {
-                glm::mat4 worldMatrix = transform.getMatrix();
+                glm::mat4 worldMatrix = transform.matrix;
                 // Transform the local AABB to world space
                 bvComponent->worldAABB = bvComponent->localAABB.transform(worldMatrix);
                 bvComponent->needsUpdate = false; // Reset flag

@@ -64,6 +64,12 @@ function S.init(player)
         S.checkpointPos = { x = x, y = y, z = z }
         -- log("[PlayerState] Init at start position:", x, y, z)
     end
+
+    -- cache the original scale 
+    if not S.playerBaseScale then
+        local sx, sy, sz = getScale(player)
+        S.playerBaseScale = { x = sx, y = sy, z = sz }
+    end
 end
 
 function S.update(dt)

@@ -7,20 +7,19 @@
                 },
                 "Hierarchy": {
                     "children": [
-                        7,
-                        8,
-                        1048582,
-                        1048581,
-                        9,
-                        24
+                        38,
+                        40,
+                        39,
+                        37,
+                        36
                     ],
                     "parent": 4294967295
                 },
                 "Transform": {
                     "position": [
-                        0.5362170934677124,
                         0.0,
-                        4.331659317016602
+                        0.0,
+                        0.0
                     ],
                     "rotation": [
                         0.0,
@@ -39,172 +38,344 @@
         {
             "Components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 45,
+                    "bvhNodeIndex": 27,
+                    "localAABB": {
+                        "max": [
+                            39.673301696777344,
+                            221.5447235107422,
+                            45.83308792114258
+                        ],
+                        "min": [
+                            -39.673301696777344,
+                            0.0,
+                            -45.83308792114258
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.039673302322626114,
+                            0.22154472768306732,
+                            0.04583308845758438
+                        ],
+                        "min": [
+                            -0.039673302322626114,
+                            0.0,
+                            -0.04583308845758438
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "MetalPillar1 (Clone) (Clone)"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 41
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        },
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 31,
+                    "localAABB": {
+                        "max": [
+                            39.673301696777344,
+                            221.5447235107422,
+                            45.83308792114258
+                        ],
+                        "min": [
+                            -39.673301696777344,
+                            0.0,
+                            -45.83308792114258
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.039673302322626114,
+                            0.22154472768306732,
+                            0.14778107404708862
+                        ],
+                        "min": [
+                            -0.039673302322626114,
+                            0.0,
+                            0.05611490458250046
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "MetalPillar1 (Clone 1)"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 41
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.10194799304008484
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        },
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 22,
+                    "localAABB": {
+                        "max": [
+                            39.673301696777344,
+                            221.5447235107422,
+                            45.83308792114258
+                        ],
+                        "min": [
+                            -39.673301696777344,
+                            0.0,
+                            -45.83308792114258
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -0.25881150364875793,
+                            0.22154472768306732,
+                            0.04583308845758438
+                        ],
+                        "min": [
+                            -0.33815810084342957,
+                            0.0,
+                            -0.04583308845758438
+                        ]
+                    }
+                },
+                "EntityName": {
+                    "name": "MetalPillar1 (Clone)"
+                },
+                "Hierarchy": {
+                    "children": [],
+                    "parent": 41
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Transform": {
+                    "position": [
+                        -0.29848480224609375,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                }
+            }
+        },
+        {
+            "Components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 23,
                     "localAABB": {
                         "max": [
                             199.99998474121094,
                             90.56856536865234,
-                            100.00000762939453
+                            100.0
                         ],
                         "min": [
                             -200.00001525878906,
-                            -0.0,
-                            -100.00000762939453
+                            0.0,
+                            -100.0
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            0.9061942100524902,
-                            0.3061288595199585,
-                            4.4313178062438965
+                            0.06293907761573792,
+                            0.3042716979980469,
+                            0.15493366122245789
                         ],
                         "min": [
-                            0.5061942338943481,
-                            0.21556028723716736,
-                            4.23131799697876
+                            -0.33706092834472656,
+                            0.21370312571525574,
+                            -0.045066334307193756
                         ]
                     }
                 },
                 "EntityName": {
-                    "name": "Platform1.2"
-                },
-                "Hierarchy": {
-                    "children": [
-                        15,
-                        16,
-                        18,
-                        19,
-                        17
-                    ],
-                    "parent": 25
-                },
-                "ModelRenderer": {
-                    "castShadows": true,
-                    "materials": [
-                        {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "baseColorOverride": [
-                                0.6000000238418579,
-                                0.6000000238418579,
-                                0.6000000238418579
-                            ],
-                            "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "4b27a579-5e9f-a04e-b4c3-e0e592c1b2dd",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "useOverrides": false
-                        }
-                    ],
-                    "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
-                    "receiveShadows": true,
-                    "visible": true
-                },
-                "Transform": {
-                    "position": [
-                        0.7061942219734192,
-                        0.21556028723716736,
-                        4.331317901611328
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
-                }
-            }
-        },
-        {
-            "Components": {
-                "BoundingVolume": {
-                    "bvhNodeIndex": 35,
-                    "localAABB": {
-                        "max": [
-                            39.673301696777344,
-                            221.54470825195313,
-                            45.83308410644531
-                        ],
-                        "min": [
-                            -39.673301696777344,
-                            0.0,
-                            -45.83308410644531
-                        ]
-                    },
-                    "needsUpdate": false,
-                    "worldAABB": {
-                        "max": [
-                            0.1851455122232437,
-                            0.22154471278190613,
-                            4.4333815574646
-                        ],
-                        "min": [
-                            0.10579891502857208,
-                            0.0,
-                            4.341715335845947
-                        ]
-                    }
-                },
-                "EntityName": {
-                    "name": "MetalPillar"
+                    "name": "Platform1"
                 },
                 "Hierarchy": {
                     "children": [],
-                    "parent": 25
+                    "parent": 41
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "albedoTextureOverride": "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+                            "aoTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
                                 1.0
                             ],
                             "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
+                                1.0,
+                                1.0,
+                                1.0
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "00000000-0000-0000-0000-000000000000",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
                             "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
+                    "modelGUID": "adf751e1-ac1a-4a44-9aee-6f1fcf950ade",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Transform": {
                     "position": [
-                        0.1454722136259079,
-                        0.0,
-                        4.387548446655273
+                        -0.13706091046333313,
+                        0.21370312571525574,
+                        0.05493366718292236
                     ],
                     "rotation": [
                         0.0,
@@ -223,347 +394,77 @@
         {
             "Components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 34,
+                    "bvhNodeIndex": 18,
                     "localAABB": {
                         "max": [
                             39.673301696777344,
-                            221.54470825195313,
-                            45.83308410644531
+                            221.5447235107422,
+                            45.83308792114258
                         ],
                         "min": [
                             -39.673301696777344,
                             0.0,
-                            -45.83308410644531
+                            -45.83308792114258
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            0.1851455122232437,
-                            0.22154471278190613,
-                            4.3435282707214355
+                            -0.2590353488922119,
+                            0.22154472768306732,
+                            0.14778107404708862
                         ],
                         "min": [
-                            0.10579891502857208,
+                            -0.33838194608688354,
                             0.0,
-                            4.251862049102783
+                            0.05611490458250046
                         ]
                     }
                 },
                 "EntityName": {
-                    "name": "MetalPillar (Clone)"
+                    "name": "MetalPillar1"
                 },
                 "Hierarchy": {
                     "children": [],
-                    "parent": 25
+                    "parent": 41
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
                                 1.0
                             ],
                             "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "00000000-0000-0000-0000-000000000000",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "useOverrides": false
-                        }
-                    ],
-                    "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
-                    "receiveShadows": true,
-                    "visible": true
-                },
-                "Transform": {
-                    "position": [
-                        0.1454722136259079,
-                        0.0,
-                        4.297695159912109
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
-                }
-            }
-        },
-        {
-            "Components": {
-                "BoundingVolume": {
-                    "bvhNodeIndex": 44,
-                    "localAABB": {
-                        "max": [
-                            199.99998474121094,
-                            90.56856536865234,
-                            100.00000762939453
-                        ],
-                        "min": [
-                            -200.00001525878906,
-                            -0.0,
-                            -100.00000762939453
-                        ]
-                    },
-                    "needsUpdate": false,
-                    "worldAABB": {
-                        "max": [
-                            0.5060473680496216,
-                            0.3061288595199585,
-                            4.4313178062438965
-                        ],
-                        "min": [
-                            0.10604733228683472,
-                            0.21556028723716736,
-                            4.23131799697876
-                        ]
-                    }
-                },
-                "EntityName": {
-                    "name": "Platform1 (Clone)"
-                },
-                "Hierarchy": {
-                    "children": [
-                        15,
-                        16
-                    ],
-                    "parent": 25
-                },
-                "ModelRenderer": {
-                    "castShadows": true,
-                    "materials": [
-                        {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "baseColorOverride": [
-                                0.6000000238418579,
-                                0.6000000238418579,
-                                0.6000000238418579
-                            ],
-                            "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "4b27a579-5e9f-a04e-b4c3-e0e592c1b2dd",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "useOverrides": false
-                        }
-                    ],
-                    "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
-                    "receiveShadows": true,
-                    "visible": true
-                },
-                "Transform": {
-                    "position": [
-                        0.30604735016822815,
-                        0.21556028723716736,
-                        4.331317901611328
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
-                }
-            }
-        },
-        {
-            "Components": {
-                "BoundingVolume": {
-                    "bvhNodeIndex": 48,
-                    "localAABB": {
-                        "max": [
-                            39.673301696777344,
-                            221.54470825195313,
-                            45.83308410644531
-                        ],
-                        "min": [
-                            -39.673301696777344,
-                            0.0,
-                            -45.83308410644531
-                        ]
-                    },
-                    "needsUpdate": false,
-                    "worldAABB": {
-                        "max": [
-                            0.9140645861625671,
-                            0.22154471278190613,
-                            4.3435282707214355
-                        ],
-                        "min": [
-                            0.8347179293632507,
-                            0.0,
-                            4.251862049102783
-                        ]
-                    }
-                },
-                "EntityName": {
-                    "name": "MetalPillar (Clone)"
-                },
-                "Hierarchy": {
-                    "children": [],
-                    "parent": 25
-                },
-                "ModelRenderer": {
-                    "castShadows": true,
-                    "materials": [
-                        {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "baseColorOverride": [
                                 1.0,
                                 1.0,
                                 1.0
                             ],
-                            "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "00000000-0000-0000-0000-000000000000",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
+                    "modelGUID": "607c385b-e549-db42-a889-a52d15733999",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Transform": {
                     "position": [
-                        0.8743912577629089,
+                        -0.29870864748954773,
                         0.0,
-                        4.297695159912109
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
-                }
-            }
-        },
-        {
-            "Components": {
-                "BoundingVolume": {
-                    "bvhNodeIndex": 47,
-                    "localAABB": {
-                        "max": [
-                            39.673301696777344,
-                            221.54470825195313,
-                            45.83308410644531
-                        ],
-                        "min": [
-                            -39.673301696777344,
-                            0.0,
-                            -45.83308410644531
-                        ]
-                    },
-                    "needsUpdate": false,
-                    "worldAABB": {
-                        "max": [
-                            0.8874415755271912,
-                            0.22154471278190613,
-                            4.4333815574646
-                        ],
-                        "min": [
-                            0.8080949187278748,
-                            0.0,
-                            4.341715335845947
-                        ]
-                    }
-                },
-                "EntityName": {
-                    "name": "MetalPillar"
-                },
-                "Hierarchy": {
-                    "children": [],
-                    "parent": 25
-                },
-                "ModelRenderer": {
-                    "castShadows": true,
-                    "materials": [
-                        {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "baseColorOverride": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "emissiveOverride": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "00000000-0000-0000-0000-000000000000",
-                            "metallicOverride": 0.0,
-                            "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "roughnessOverride": 0.5,
-                            "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "useOverrides": false
-                        }
-                    ],
-                    "modelGUID": "11ca746d-25dc-6f41-97f1-46d9cff3aadd",
-                    "receiveShadows": true,
-                    "visible": true
-                },
-                "Transform": {
-                    "position": [
-                        0.847768247127533,
-                        0.0,
-                        4.387548446655273
+                        0.10194799304008484
                     ],
                     "rotation": [
                         0.0,

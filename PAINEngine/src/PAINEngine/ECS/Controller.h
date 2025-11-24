@@ -7,13 +7,206 @@
 #include "Applications/AppSystem.h"
 #include "System/ISystem.h"
 
+#include "CoreSystems/Serialization/sSerialization.h"
+#include "ECS/Components/AllComponents.h"
+
 namespace PAIN {
 	namespace ECS {
+
+		 // Trait detection for ShouldSerialize flag
+		template <typename T, typename = void>
+		struct has_should_serialize : std::false_type {};
+
+		template <typename T>
+		struct has_should_serialize<T, std::void_t<decltype(T::ShouldSerialize)>> : std::true_type {};
+
+		// Safe compile-time accessor for ShouldSerialize
+		template<typename T>
+		constexpr bool getShouldSerialize() {
+			if constexpr (has_should_serialize<T>::value) {
+				return T::ShouldSerialize;
+			}
+			else {
+				return true; // Default: serialize unless explicitly disabled
+			}
+		}
+
+		template<typename... Components>
+		nlohmann::json serializeAllComponentsImpl(
+			entt::entity entity,
+			const entt::registry& registry,
+			std::tuple<Components...>,
+			const std::unordered_set<std::string>& filter = {}
+		) {
+			nlohmann::json components;
+
+			auto expand = [&](auto type_tag) {
+				using T = typename decltype(type_tag)::type;
+
+				// Compile-time check: should this type be serialized?
+				constexpr bool type_should_serialize = getShouldSerialize<T>();
+
+				// CRITICAL: Wrap entire serialization logic in if constexpr
+				if constexpr (type_should_serialize) {
+					std::string comp_name = getComponentName<T>();
+
+					// Runtime check: is this component filtered out?
+					const bool is_filtered = !filter.empty() && filter.count(comp_name) > 0;
+
+					if (!is_filtered && registry.template all_of<T>(entity)) {
+						const auto& comp = registry.template get<T>(entity);
+
+						// Try reflection first, then fallback to JSON
+						if constexpr (refl::trait::is_reflectable_v<T>) {
+							try {
+								components[comp_name] = PAIN::Serialization::to_json_reflected(comp);
+							}
+							catch (const std::exception& e) {
+								PN_CORE_ERROR("Failed to serialize {} using reflection: {}", comp_name, e.what());
+							}
+						}
+						else {
+							// Only compile this if type is convertible to JSON
+							if constexpr (std::is_constructible_v<nlohmann::json, T>) {
+								try {
+									components[comp_name] = nlohmann::json(comp);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_WARN("Failed to serialize {}: {}", comp_name, e.what());
+								}
+							}
+							else {
+								PN_CORE_WARN("Component {} is not serializable (no reflection or JSON converter)", comp_name);
+							}
+						}
+					}
+				}
+				};
+
+			(expand(entt::type_identity<Components>{}), ...);
+			return components;
+		}
+
+		template<typename... Components>
+		void deserializeAllComponentsImpl(
+			entt::entity entity,
+			entt::registry& registry,
+			const nlohmann::json& components,
+			std::tuple<Components...>,
+			const std::unordered_set<std::string>& filter = {}
+		) {
+			// Validate input
+			if (!components.is_object()) {
+				PN_CORE_WARN("deserializeAllComponentsImpl: Expected JSON object, got {}", components.type_name());
+				return;
+			}
+
+			auto expand = [&](auto type_tag) {
+				using T = typename decltype(type_tag)::type;
+
+				// Compile-time check: should this type be deserialized?
+				constexpr bool type_should_deserialize = getShouldSerialize<T>();
+
+				// CRITICAL: Wrap entire deserialization logic in if constexpr
+				if constexpr (type_should_deserialize) {
+					std::string comp_name = getComponentName<T>();
+
+					// Runtime check: is this component filtered out?
+					const bool is_filtered = !filter.empty() && filter.count(comp_name) > 0;
+
+					// Check if component exists in JSON
+					if (!is_filtered && components.contains(comp_name)) {
+						try {
+							T comp;
+
+							// Try reflection first, then fallback to JSON
+							if constexpr (refl::trait::is_reflectable_v<T>) {
+								try {
+									PAIN::Serialization::from_json_reflected(comp, components[comp_name]);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_ERROR("Failed to deserialize {} using reflection: {}", comp_name, e.what());
+									return; // Skip this component
+								}
+							}
+							else {
+								// Only compile this if type is convertible from JSON
+								if constexpr (std::is_constructible_v<T, nlohmann::json>) {
+									try {
+										comp = components[comp_name].get<T>();
+									}
+									catch (const std::exception& e) {
+										PN_CORE_WARN("Failed to deserialize {}: {}", comp_name, e.what());
+										return; // Skip this component
+									}
+								}
+								else {
+									PN_CORE_WARN("Component {} is not deserializable (no reflection or JSON converter)", comp_name);
+									return; // Skip this component
+								}
+							}
+
+							// Successfully deserialized - now emplace or replace
+							if (registry.template all_of<T>(entity)) {
+								registry.template replace<T>(entity, std::move(comp));
+							}
+							else {
+								registry.template emplace<T>(entity, std::move(comp));
+							}
+						}
+						catch (const std::exception& e) {
+							PN_CORE_ERROR("Unexpected error deserializing {}: {}", comp_name, e.what());
+						}
+					}
+				}
+				};
+
+			(expand(entt::type_identity<Components>{}), ...);
+		}
+
+
+		class EntityGUIDRegistry {
+		private:
+
+			//Bidirectional Mapping
+			std::unordered_map<Assets::GUID, entt::entity> guid_to_entity;
+			std::unordered_map<entt::entity, Assets::GUID> entity_to_guid;
+		public:
+			EntityGUIDRegistry() = default;
+			~EntityGUIDRegistry() = default;
+
+			//Get or create a new GUID
+			Assets::GUID getOrCreateGUID(entt::entity e, entt::registry& registry);
+
+			//Resolve GUID
+			entt::entity resolveGUID(const Assets::GUID& guid) const;
+
+			//Update GUID
+			void remapGUID(const Assets::GUID& oldGuid, const Assets::GUID& newGuid);
+
+			//Register an entity
+			void registerEntity(entt::entity e, const Assets::GUID& guid);
+
+			//Unregister an entity
+			void unregisterEntity(entt::entity e);
+
+			//Check for GUID
+			bool hasGUID(const Assets::GUID& guid) const;
+
+			//Check for entity
+			bool hasEntity(entt::entity e) const;
+
+			//Clear everything
+			void clear();
+		};
 
 		class Controller : public AppSystem {
 		private:
 
 			size_t entity_count = 0;
+
+			// GUID Registry for stable entity references
+			EntityGUIDRegistry guid_registry;
 
 			entt::registry entt_registry;
 
@@ -30,13 +223,21 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
-			template<typename ...Components>
-			void deserializeComponentsImpl(entt::entity entity, const nlohmann::json& comps, std::tuple<Components...>);
-
-
 		public:
 			explicit Controller(std::shared_ptr<Services> svc) {
 				services = svc;
+			}
+
+			//Public access to the GUID registry
+			EntityGUIDRegistry& getGUIDRegistry() { return guid_registry; }
+			const EntityGUIDRegistry& getGUIDRegistry() const { return guid_registry; }
+
+			Assets::GUID getOrCreateEntityGUID(entt::entity e) {
+				return guid_registry.getOrCreateGUID(e, entt_registry);
+			}
+
+			entt::entity resolveGUID(const Assets::GUID& guid) const {
+				return guid_registry.resolveGUID(guid);
 			}
 
 			int getEntitiesCount() const { return static_cast<int>(entity_count); }
@@ -53,6 +254,8 @@ namespace PAIN {
 
 			void registerAllComponents();
 
+			void registerAllSystems();
+
 			//Event callback
 			void onEvent(Event::Event& e) override;
 
@@ -66,6 +269,9 @@ namespace PAIN {
 
 			//Create Entity
 			entt::entity createEntity();
+
+			//Create Entity
+			entt::entity createEntity(Assets::GUID const& e_id);
 
 			//Clone entity ( ID of clone returned )
 			entt::entity cloneEntity(entt::entity copy);
@@ -234,9 +440,8 @@ namespace PAIN {
 			const std::vector<std::shared_ptr<System::ISystem>>& getAllSystems() const {
 				return systems;
 			}
-};
-
-		}
+		};
+	}
 }
 
 #endif

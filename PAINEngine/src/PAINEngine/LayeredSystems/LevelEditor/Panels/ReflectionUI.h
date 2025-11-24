@@ -27,12 +27,17 @@
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cBoundingVolume.h"
-#include "ECS/Components/cHierarchy.h"
 #include "ECS/Components/cPhysics.h"
+#include "ECS/Components/cUIComps.h"
 #include "ECS/Components/cAI.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "CoreSystems/Assets/sAssets.h"  
+#include "ECS/Components/cScript.h"
 #include "Applications/AppSystem.h"
+
+#include "ResourcePanel.h"
+#include "AssetData.h"
+#include "CoreSystems/Path/Path.h"
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
@@ -84,6 +89,25 @@ inline bool DrawAssetSelectorField(
     std::string button_id = current_name + "###" + std::string(label) + "_selector";
     if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
         ImGui::OpenPopup(label);
+    }
+
+    //Create file drag drop for any asset
+    auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
+    if (ImGui::BeginDragDropTarget()) {
+        // Accept material files from Resource Panel
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
+            PAIN::Editor::Panel::File* droppedFile = static_cast<PAIN::Editor::Panel::File*>(payload->Data);
+
+            if (droppedFile) {
+
+                //Update with new GUID
+                guid = droppedFile->id;
+
+                //Set change flag to true
+                changed = true;
+            }
+        }
+        ImGui::EndDragDropTarget();
     }
 
     // Searchable popup
@@ -208,6 +232,27 @@ inline bool DrawAssetSelectorField(
         ImGui::OpenPopup(label);
     }
 
+    //Create file drag drop for any asset (Only in windows)
+#ifdef PN_PLATFORM_WINDOWS
+    auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
+    if (ImGui::BeginDragDropTarget()) {
+        // Accept material files from Resource Panel
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
+            PAIN::Editor::Panel::File* droppedFile = static_cast<PAIN::Editor::Panel::File*>(payload->Data);
+
+            if (droppedFile) {
+
+                //Update with new GUID
+                path = std::filesystem::relative(services->get<PAIN::Path::Path>()->resolvePath(PAIN::Path::main_assets_alias, ""), droppedFile->path);
+
+                //Set change flag to true
+                changed = true;
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+#endif
+
     // Searchable popup
     if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
         static char search_buffer[256] = "";
@@ -304,6 +349,9 @@ inline bool DrawAssetSelectorField(
 // Mark fields as read-only in the reflected UI
 struct ReadOnlyTag : refl::attr::usage::field {};
 
+// ---------- Asset GUID ----------
+inline bool DrawField(const char* label, PAIN::Assets::GUID& v) { ImGui::Text("%s", v.ToString().c_str()); return true; }
+
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
 inline bool DrawField(const char* label, int& v) { return ImGui::DragInt(label, &v, 1); }
@@ -383,6 +431,51 @@ inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
             if (ImGui::Selectable(names[i], selected)) {
                 idx = i;
                 v = static_cast<PAIN::SHADOW_TYPES>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+// ----- UI Comps Enums -----
+inline bool DrawField(const char* label, PAIN::UIButtonState& v) {
+    const char* names[] = { "Normal", "Highlighted", "Pressed", "Disabled"};
+    int idx = static_cast<int>(v);
+    const int count = 4; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::UIButtonState>(i);
+                changed = true;
+            }
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+inline bool DrawField(const char* label, PAIN::CanvasRenderMode& v) {
+    const char* names[] = { "ScreenSpaceOverlay", "ScreenSpaceCamera", "WorldSpace" };
+    int idx = static_cast<int>(v);
+    const int count = 3; // keep in sync
+    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+    bool changed = false;
+
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            bool selected = (i == idx);
+            if (ImGui::Selectable(names[i], selected)) {
+                idx = i;
+                v = static_cast<PAIN::CanvasRenderMode>(i);
                 changed = true;
             }
             if (selected) ImGui::SetItemDefaultFocus();

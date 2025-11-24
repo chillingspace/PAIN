@@ -12,7 +12,7 @@
 #define SERIALIZATION_SERVICE_H
 #include "pch.h"
 #include "Applications/AppSystem.h"
-#include "PAINEngine/ECS/Controller.h"
+//#include "PAINEngine/ECS/Controller.h"
 #include "PAINEngine/ECS/Components/cTransform.h"
 
 #include "AssetData.h"
@@ -47,11 +47,6 @@ namespace PAIN {
             std::vector<std::vector<bool>> mask_matrix;
             bool dirty = false;
         };
-
-        struct EntityPrefab {
-            std::string name;
-            std::vector<nlohmann::json> entities;
-        };  
             
         // ----------------------------
         // Service (inherits AppSystem)

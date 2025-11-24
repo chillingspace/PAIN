@@ -7,6 +7,8 @@
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
 #include "PAINEngine/CoreSystems/Path/Path.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
+#include "PAINEngine/CoreSystems/Scene/Scene.h"
+#include "PAINEngine/CoreSystems/Scene/Camera.h"
 
 #ifdef PN_PLATFORM_ANDROID
 #include "PAINEngine/CoreSystems/Events/Android/TouchEvents.h"
@@ -53,28 +55,38 @@ namespace PAIN {
             auto assets = services_ptr->get<Assets::Manager>();
             auto fs = services_ptr->get<Path::Path>();
 
-            auto view = reg.view<PAIN::Script>();
+            auto view = reg.view<PAIN::Scripts>();
 
             for (auto e : view) {
-                auto& sc = view.get<PAIN::Script>(e);
+                auto& scriptsComp = view.get<PAIN::Scripts>(e);
 
-                if (sc.loaded || !sc.enabled) continue;
-                if (!assets || !fs) continue;
-                if (!sc.script_asset.IsValid()) continue;
+                if (!assets || !fs)
+                    continue;
 
-                // look up asset metadata
-                auto meta = assets->getAssetData(sc.script_asset);
-                if (!meta) continue;
-                std::string vpath =
-                    fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
+                for (auto& sc : scriptsComp.scripts) {
+                    // per-script gatekeeping
+                    if (sc.loaded || !sc.enabled)
+                        continue;
+                    if (!sc.script_asset.IsValid())
+                        continue;
 
-                std::string realPath = fs->resolvePath(vpath);
-                attachScript(e, realPath);
-                sc.loaded = true;
+                    // look up asset metadata
+                    auto meta = assets->getAssetData(sc.script_asset);
+                    if (!meta)
+                        continue;
+
+                    std::string vpath =
+                        fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
+                    std::string realPath = fs->resolvePath(vpath);
+
+                    // attach this script to this entity
+                    attachScript(e, realPath);
+
+                    // mark this particular script as loaded
+                    sc.loaded = true;
+                }
             }
 
-
-            //luaManager_.setRegistry(&reg);
             luaManager_.tick(timing.dt);
             luaManager_.Input_EndFrame();
 
@@ -222,6 +234,7 @@ namespace PAIN {
             auto meta_ptr = services_ptr->get<MetaData::Service>();
             auto assets_ptr = services_ptr->get<Assets::Manager>();
             auto path_ptr = services_ptr->get<Path::Path>();
+            auto scene_ptr = services_ptr->get<Scene>();
 
             if (!ecs_ptr || !meta_ptr) {
                 PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
@@ -232,7 +245,8 @@ namespace PAIN {
                 *ecs_ptr,
                 *meta_ptr,
                 assets_ptr.get(),
-                path_ptr.get()
+                path_ptr.get(),
+                scene_ptr.get()
             );
 
 #ifdef _DEBUG

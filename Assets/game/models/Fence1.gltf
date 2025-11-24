@@ -1,0 +1,203 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 4116,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 997,
+      "max": [
+        123.539947509766,
+        242.994293212891,
+        28.9769878387451
+      ],
+      "min": [
+        -123.539947509766,
+        7.62939453125e-06,
+        -28.9769897460938
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 997,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 997,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 997,
+      "type": "VEC2"
+    }
+  ],
+  "asset": {
+    "generator": "Adobe Substance 3D Painter 11.0.3",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 16464,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 11964,
+      "byteOffset": 16464,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 11964,
+      "byteOffset": 28428,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 15952,
+      "byteOffset": 40392,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 7976,
+      "byteOffset": 56344,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 64320,
+      "uri": "Fence1.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "Fence_baseColor_1001.png"
+    },
+    {
+      "uri": "Fence_occlusionRoughnessMetallic_1001.png"
+    },
+    {
+      "uri": "Fence_normal_1001.png"
+    },
+    {
+      "uri": "Fence_emissive_1001.png"
+    }
+  ],
+  "materials": [
+    {
+      "alphaMode": "BLEND",
+      "emissiveFactor": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emissiveTexture": {
+        "index": 3
+      },
+      "name": "Fence_1001",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Grilled_Fence2",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 2,
+            "POSITION": 1,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "name": "RootNode",
+      "scale": [
+        0.00999999977648258,
+        0.00999999977648258,
+        0.00999999977648258
+      ]
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "Grilled_Fence2"
+    },
+    {
+      "mesh": 0,
+      "name": "Grilled_Fence2"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9985,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    }
+  ]
+}

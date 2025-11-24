@@ -15,8 +15,14 @@ namespace PAIN {
         Assets::GUID script_asset;
         bool enabled = true; // active or not
         bool loaded = false; // runtime flag
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
     };
 
+    struct Scripts {
+        std::vector<Script> scripts;
+    };
 } 
 
 
@@ -26,7 +32,11 @@ REFL_TYPE(PAIN::Script)
         PAIN::Editor::Attributes::DisplayName("Script Asset"),
         PAIN::Editor::Attributes::Tooltip("Select a Lua script"))
     REFL_FIELD(enabled)
-    //REFL_FIELD(loaded)
 REFL_END
+
+REFL_TYPE(PAIN::Scripts)
+    REFL_FIELD(scripts)
+REFL_END
+
 
 #endif

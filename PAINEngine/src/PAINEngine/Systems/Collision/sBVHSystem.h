@@ -17,7 +17,7 @@
 namespace PAIN {
     class Scene;
     namespace Assets { class Model; } // Forward-declare Assets::Model
-    struct Transform;
+    struct LocalTransform;
     struct ModelRenderer;
     struct cBoundingVolume;
     namespace MetaData { struct EditorVisible; }

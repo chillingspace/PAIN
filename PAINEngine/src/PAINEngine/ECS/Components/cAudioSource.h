@@ -50,6 +50,9 @@ namespace PAIN {
             // --- RUNTIME (Internal handle) ---
             // Do not serialize or edit
             PAIN::Audio::AudioChannelId channelId{ -1 };
+
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
         };
 
     } // namespace Audio
@@ -77,5 +80,7 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     // - channelId
     // These will be default-initialized when the component is loaded
 REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Audio::AudioSource>);
 
 #endif // C_AUDIO_SOURCE_H

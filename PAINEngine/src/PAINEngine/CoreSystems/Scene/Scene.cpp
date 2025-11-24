@@ -5,6 +5,7 @@
 #include "ECS/sMetaData.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cTransform.h"
+#include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
 #include "CoreSystems/Renderer/Light.h"
@@ -77,12 +78,6 @@ namespace PAIN {
 			if (mdl_opt.has_value()) {
 				mdl = mdl_opt.value();
 
-				//mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
-				//mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
-				//mdl->materials[0].metallic = 0.f;
-				//mdl->materials[0].roughness = 1.f;
-				//mdl->materials[0].baseColor = { 1, 0, 1 };
-
 				// logging to check data
 				{
 					PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", mdl->vpath, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
@@ -102,11 +97,7 @@ namespace PAIN {
 		mdl_opt = asset_manager->getAsset<Assets::Model>(ogre_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
-			//mdl->materials[0].gl_diffuse_tex = ogre_diffuse_tex->gl_texture;
-			//mdl->materials[0].gl_ao_tex = ogre_smile_ao_map->gl_texture;
-			//mdl->materials[0].metallic = 0.f;
-			//mdl->materials[0].roughness = 1.f;
-			//mdl->materials[0].baseColor = { 1, 0, 1 };
+
 			AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
 
 			AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
@@ -124,10 +115,7 @@ namespace PAIN {
 		mdl_opt = asset_manager->getAsset<Assets::Model>(sdcc_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
-			//mdl->materials[0].gl_diffuse_tex = sdcc_tex->gl_texture;
-			//mdl->materials[0].metallic = 1.f;
-			//mdl->materials[0].roughness = 0.f;
-			//mdl->materials[0].baseColor = { 1, 0, 1 };
+
 			AddObject(mdl, "sdcc", { 5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 		}
 
@@ -142,10 +130,7 @@ namespace PAIN {
 		mdl_opt = asset_manager->getAsset<Assets::Model>(city_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
-			//mdl->materials[0].gl_diffuse_tex = city_tex->gl_texture;
-			//mdl->materials[0].metallic = 0.f;
-			//mdl->materials[0].roughness = 1.f;
-			//mdl->materials[0].baseColor = { 0, 1, 0 };
+
 			AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
 		}
 
@@ -158,9 +143,7 @@ namespace PAIN {
 		mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
-			//mdl->materials[0].metallic = 0.f;
-			//mdl->materials[0].roughness = 1.f;
-			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+
 			auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 		}
 
@@ -211,7 +194,7 @@ namespace PAIN {
 		//std::vector<entt::entity> loaded_entities = services->get<Serialization::Service>()->loadPrefabFromFile("ogre_right.prefab");
 		//for (auto e : loaded_entities) {
 		//	// Info: Print entity names, transforms, etc.
-		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<MetaData::EntityName>(e);
+		//	auto nameOpt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(e);
 		//	std::string name = nameOpt ? nameOpt->get().name : "<no name>";
 		//}
 
@@ -274,8 +257,11 @@ namespace PAIN {
 		auto meta = services->get<MetaData::Service>();
 
 		entt::entity entity = ecs->createEntity();
-		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
-		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, Entity::Name{ name });
+		ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+		ecs->addEntityComponent(entity, WorldTransform{});
+		ecs->addEntityComponent(entity, Entity::Hierarchy{});
+		// ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		
 		ModelRenderer mr = ModelRenderer{ mdl->guid };
 		if (mdl->animations.size()) {

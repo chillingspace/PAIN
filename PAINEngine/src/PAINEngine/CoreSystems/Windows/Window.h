@@ -65,6 +65,7 @@ namespace PAIN {
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
+
 		};
 	}
 }

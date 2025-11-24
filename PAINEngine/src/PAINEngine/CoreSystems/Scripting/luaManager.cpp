@@ -1,7 +1,6 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
 #include "Utility/Log.h"
-#include "CoreSystems/Path/Path.h"
 
 #include <fstream>
 #include <chrono>
@@ -146,698 +145,715 @@ namespace {
 // LuaManager
 // ============================================================================
 
-void LuaManager::init(std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
-    api_ = api;
-    shipping_ = shipping;
+namespace PAIN {
 
-    openLibs(shipping_); // choose which lua std libs are avail
-    bindUsertypes(); // expose c++ types to lua
-    bindRegistration(); // expose registration functions
-    bindEngineAPI(); // expose engine actions
+    void LuaManager::init(std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
+        api_ = api;
+        shipping_ = shipping;
 
-    // helper printlog from lua prints to stdout
-    lua_["printLog"] = [](const std::string& s) {
-        PN_INFO("[Lua] {}", s);
-        };
-}
+        openLibs(shipping_); // choose which lua std libs are avail
+        bindUsertypes(); // expose c++ types to lua
+        bindRegistration(); // expose registration functions
+        bindEngineAPI(); // expose engine actions
 
-bool LuaManager::loadAllScriptsForEntityFromVDir(entt::entity entity, const std::string& alias, const std::string& relativeRoot, bool recursive, bool runWhenPaused)
-{
-    if (!fs_) {
-        PN_ERROR("[LuaManager] Path service not set. Call setPathService() first");
-        return false;
+        // helper printlog from lua prints to stdout
+        lua_["printLog"] = [](const std::string& s) {
+            PN_INFO("[Lua] {}", s);
+            };
     }
 
-    const std::string rootVPath = fs_->aliasCombineRelative(alias, relativeRoot);
-    if (!fs_->pathExists(rootVPath)) {
-        PN_INFO("[LuaManager] no scripts at {}", rootVPath);
-        return true; 
-    }
-
-    std::vector<std::string> vpaths;
-    collectLuaVPaths(*fs_, rootVPath, recursive, vpaths);
-    std::sort(vpaths.begin(), vpaths.end());
-    vpaths.erase(std::unique(vpaths.begin(), vpaths.end()), vpaths.end());
-
-    bool allOk = true;
-    for (const auto& vpath : vpaths) {
-        // resolve to a readable path for our existing loader
-        const std::string real = fs_->resolvePath(vpath);
-        allOk &= loadScriptForEntity(entity, real, {}, runWhenPaused);
-    }
-    return allOk;
-}
-
-void LuaManager::Input_OnEvent(PAIN::Event::Event& e) {
-    if (api_) {
-        api_->Input_OnEvent(e); // forward to the adapter which tracks the state
-    }
-}
-
-void LuaManager::Input_EndFrame() {
-    if (api_) {
-        api_->Input_EndFrame();
-    }
-}
-
-void LuaManager::onDetach() {
-    // clear script environments, timers, and callback vectors
-    updates_.clear();
-    keyDown_.clear();
-    keyUp_.clear();
-    onClick_.clear();
-    onCollision_.clear();
-    pauseHandlers_.clear();
-    timeouts_.clear();
-
-    inputQueue_.clear();
-    collisionQueue_.clear();
-    mouseInOut_.clear();
-    collisionInterests_.clear();
-    delayedOps_.clear();
-    while (!timeoutHeap_.empty()) timeoutHeap_.pop();
-    pendingSceneChange_.reset();
-
-    api_.reset();
-}
-
-void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {
-    instantiatePrefab_ = std::move(fn);
-}
-
-
-void LuaManager::openLibs(bool shipping) { // decides which lua standard lib to open
-#if SCRIPT_SHIPPING_SANDBOX
-    (void)shipping; // always sandbox in shipping
-    lua_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::table, sol::lib::utf8);
-#ifndef NDEBUG
-    lua_.open_libraries(sol::lib::debug);
-#endif
-    // DO NOT open: io, os, package, ffi (keeps runtime safe on Android/shipping)
-#else
-    // Dev mode can open more, still prefer to keep it tight
-    lua_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string,
-        sol::lib::table, sol::lib::utf8
-#ifndef NDEBUG
-        , sol::lib::debug
-#endif
-    );
-    if (!shipping) {
-        // Optional in dev only:
-        lua_.open_libraries(sol::lib::package);
-        // Avoid io/os unless really need them:
-        // lua_.open_libraries(sol::lib::io, sol::lib::os);
-    }
-#endif
-}
-
-void LuaManager::bindUsertypes() {
-    // expose glm::vec2 to lua with getter/setters coz android dont like glm types
-    lua_.new_usertype<glm::vec2>("vec2",
-        sol::constructors<glm::vec2(), glm::vec2(float, float)>(),
-        "x", sol::property(
-            [](const glm::vec2& v) { return v.x; },
-            [](glm::vec2& v, float x) { v.x = x; }
-        ),
-        "y", sol::property(
-            [](const glm::vec2& v) { return v.y; },
-            [](glm::vec2& v, float y) { v.y = y; }
-        )
-    );
-
-    // expose gom::vec3
-    lua_.new_usertype<glm::vec3>("vec3",
-        sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(),
-        "x", sol::property(
-            [](const glm::vec3& v) { return v.x; },
-            [](glm::vec3& v, float x) { v.x = x; }
-        ),
-        "y", sol::property(
-            [](const glm::vec3& v) { return v.y; },
-            [](glm::vec3& v, float y) { v.y = y; }
-        ),
-        "z", sol::property(
-            [](const glm::vec3& v) { return v.z; },
-            [](glm::vec3& v, float z) { v.z = z; }
-        )
-    );
-}
-
-void LuaManager::bindRegistration() {
-
-    lua_["registerUpdate"] = [this](sol::protected_function fn) {
-        updates_.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
-        };
-
-    lua_["registerKeyDown"] = [this](std::string name, sol::protected_function fn) {
-        //keyDown_[name].push_back({ currentEntity_, fn, currentRunWhenPaused_ });
-
-
-        auto& vec = keyDown_[name];
-        vec.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
-        //PN_CORE_INFO("[Lua] registerKeyDown '{}' ({} handlers)", name, (int)vec.size());
-        };
-
-    lua_["registerKeyUp"] = [this](std::string name, sol::protected_function fn) {
-        keyUp_[name].push_back({ currentEntity_, fn, currentRunWhenPaused_ });
-        };
-
-    lua_["registerOnClick"] = [this](sol::protected_function fn) {
-        onClick_.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
-        };
-
-    lua_["registerOnCollision"] = [this](sol::protected_function fn, sol::object t) {
-        /*onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false, currentRunWhenPaused_ });
-        collisionInterests_.push_back({ currentEntity_, entityToCheck });*/
-
-        // target: nil => listen to any; number => entt entity id
-        entt::entity target = entt::null;
-
-        if (t.valid()) {
-            if (t.get_type() == sol::type::number) {
-                uint32_t id = t.as<uint32_t>();
-                target = static_cast<entt::entity>(id);
-            }
-            else if (t.get_type() != sol::type::nil) {
-                PN_CORE_WARN("[Lua] registerOnCollision: expected entity id or nil, got {}", (int)t.get_type());
-            }
+    bool LuaManager::loadAllScriptsForEntityFromVDir(entt::entity entity, const std::string& alias, const std::string& relativeRoot, bool recursive, bool runWhenPaused)
+    {
+        if (!fs_) {
+            PN_ERROR("[LuaManager] Path service not set. Call setPathService() first");
+            return false;
         }
 
-        PN_CORE_INFO("[Lua] registerOnCollision: self={} target={}", (uint32_t)currentEntity_, (uint32_t)target);
+        const std::string rootVPath = fs_->aliasCombineRelative(alias, relativeRoot);
+        if (!fs_->pathExists(rootVPath)) {
+            PN_INFO("[LuaManager] no scripts at {}", rootVPath);
+            return true;
+        }
 
-        // store under the registering entity (self), target is used only as a filter
-        onCollision_[currentEntity_].push_back(
-            { currentEntity_, target, std::move(fn), /*once*/ false, currentRunWhenPaused_ }
+        std::vector<std::string> vpaths;
+        collectLuaVPaths(*fs_, rootVPath, recursive, vpaths);
+        std::sort(vpaths.begin(), vpaths.end());
+        vpaths.erase(std::unique(vpaths.begin(), vpaths.end()), vpaths.end());
+
+        bool allOk = true;
+        for (const auto& vpath : vpaths) {
+            // resolve to a readable path for our existing loader
+            const std::string real = fs_->resolvePath(vpath);
+            allOk &= loadScriptForEntity(entity, real, {}, runWhenPaused);
+        }
+        return allOk;
+    }
+
+    void LuaManager::Input_OnEvent(PAIN::Event::Event& e) {
+        if (api_) {
+            api_->Input_OnEvent(e); // forward to the adapter which tracks the state
+        }
+    }
+
+    void LuaManager::Input_EndFrame() {
+        if (api_) {
+            api_->Input_EndFrame();
+        }
+    }
+
+    void LuaManager::onDetach() {
+        // clear script environments, timers, and callback vectors
+        updates_.clear();
+        keyDown_.clear();
+        keyUp_.clear();
+        onClick_.clear();
+        onCollision_.clear();
+        pauseHandlers_.clear();
+        timeouts_.clear();
+
+        inputQueue_.clear();
+        collisionQueue_.clear();
+        mouseInOut_.clear();
+        collisionInterests_.clear();
+        delayedOps_.clear();
+        while (!timeoutHeap_.empty()) timeoutHeap_.pop();
+        pendingSceneChange_.reset();
+
+        api_.reset();
+    }
+
+    void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {
+        instantiatePrefab_ = std::move(fn);
+    }
+
+
+    void LuaManager::openLibs(bool shipping) { // decides which lua standard lib to open
+#if SCRIPT_SHIPPING_SANDBOX
+        (void)shipping; // always sandbox in shipping
+        lua_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::table, sol::lib::utf8);
+#ifndef NDEBUG
+        lua_.open_libraries(sol::lib::debug);
+#endif
+        // DO NOT open: io, os, package, ffi (keeps runtime safe on Android/shipping)
+#else
+        // Dev mode can open more, still prefer to keep it tight
+        lua_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string,
+            sol::lib::table, sol::lib::utf8
+#ifndef NDEBUG
+            , sol::lib::debug
+#endif
         );
-    };
+        if (!shipping) {
+            // Optional in dev only:
+            lua_.open_libraries(sol::lib::package);
+            // Avoid io/os unless really need them:
+            // lua_.open_libraries(sol::lib::io, sol::lib::os);
+        }
+#endif
+    }
 
-    lua_["registerPauseHandler"] = [this](sol::protected_function fn) {
-        pauseHandlers_.push_back({ currentEntity_, fn, /*runWhenPaused*/ true });
-        };
+    void LuaManager::bindUsertypes() {
+        // expose glm::vec2 to lua with getter/setters coz android dont like glm types
+        lua_.new_usertype<glm::vec2>("vec2",
+            sol::constructors<glm::vec2(), glm::vec2(float, float)>(),
+            "x", sol::property(
+                [](const glm::vec2& v) { return v.x; },
+                [](glm::vec2& v, float x) { v.x = x; }
+            ),
+            "y", sol::property(
+                [](const glm::vec2& v) { return v.y; },
+                [](glm::vec2& v, float y) { v.y = y; }
+            )
+        );
 
-    lua_["setTimeout"] = [this](sol::protected_function fn, float delay) {
-        timeouts_.push_back({ fn, delay });
-        };
+        // expose gom::vec3
+        lua_.new_usertype<glm::vec3>("vec3",
+            sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(),
+            "x", sol::property(
+                [](const glm::vec3& v) { return v.x; },
+                [](glm::vec3& v, float x) { v.x = x; }
+            ),
+            "y", sol::property(
+                [](const glm::vec3& v) { return v.y; },
+                [](glm::vec3& v, float y) { v.y = y; }
+            ),
+            "z", sol::property(
+                [](const glm::vec3& v) { return v.z; },
+                [](glm::vec3& v, float z) { v.z = z; }
+            )
+        );
+    }
 
-    lua_["getMousePos"] = [this]() {
-        if (!api_) return std::make_tuple(0.0f, 0.0f);
-        auto pos = api_->Input_GetMousePos();
-        return std::make_tuple(pos.x, pos.y);
-        };
+    void LuaManager::bindRegistration() {
+
+        lua_["registerUpdate"] = [this](sol::protected_function fn) {
+            updates_.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
+            };
+
+        lua_["registerKeyDown"] = [this](std::string name, sol::protected_function fn) {
+            //keyDown_[name].push_back({ currentEntity_, fn, currentRunWhenPaused_ });
+
+
+            auto& vec = keyDown_[name];
+            vec.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
+            //PN_CORE_INFO("[Lua] registerKeyDown '{}' ({} handlers)", name, (int)vec.size());
+            };
+
+        lua_["registerKeyUp"] = [this](std::string name, sol::protected_function fn) {
+            keyUp_[name].push_back({ currentEntity_, fn, currentRunWhenPaused_ });
+            };
+
+        lua_["registerOnClick"] = [this](sol::protected_function fn) {
+            onClick_.push_back({ currentEntity_, fn, currentRunWhenPaused_ });
+            };
+
+        lua_["registerOnCollision"] = [this](sol::protected_function fn, sol::object t) {
+            /*onCollision_[currentEntity_].push_back({ currentEntity_, entityToCheck, fn, false, currentRunWhenPaused_ });
+            collisionInterests_.push_back({ currentEntity_, entityToCheck });*/
+
+            // target: nil => listen to any; number => entt entity id
+            entt::entity target = entt::null;
+
+            if (t.valid()) {
+                if (t.get_type() == sol::type::number) {
+                    uint32_t id = t.as<uint32_t>();
+                    target = static_cast<entt::entity>(id);
+                }
+                else if (t.get_type() != sol::type::nil) {
+                    PN_CORE_WARN("[Lua] registerOnCollision: expected entity id or nil, got {}", (int)t.get_type());
+                }
+            }
+
+            PN_CORE_INFO("[Lua] registerOnCollision: self={} target={}", (uint32_t)currentEntity_, (uint32_t)target);
+
+            // store under the registering entity (self), target is used only as a filter
+            onCollision_[currentEntity_].push_back(
+                { currentEntity_, target, std::move(fn), /*once*/ false, currentRunWhenPaused_ }
+            );
+            };
+
+        lua_["registerPauseHandler"] = [this](sol::protected_function fn) {
+            pauseHandlers_.push_back({ currentEntity_, fn, /*runWhenPaused*/ true });
+            };
+
+        lua_["setTimeout"] = [this](sol::protected_function fn, float delay) {
+            timeouts_.push_back({ fn, delay });
+            };
+
+        lua_["getMousePos"] = [this]() {
+            if (!api_) return std::make_tuple(0.0f, 0.0f);
+            auto pos = api_->Input_GetMousePos();
+            return std::make_tuple(pos.x, pos.y);
+            };
 
 
 #if SCRIPT_ENABLE_DEBUG_TOOLS
-    // Example: only in debug builds, allow dangerous actions
-    lua_["shutdownApplication"] = [] {
-        logMsg("shutdownApplication called (debug only)");
-        // Your engine shutdown here if you really want to expose it.
-        };
+        // Example: only in debug builds, allow dangerous actions
+        lua_["shutdownApplication"] = [] {
+            logMsg("shutdownApplication called (debug only)");
+            // Your engine shutdown here if you really want to expose it.
+            };
 #endif
-}
+    }
 
-void LuaManager::bindEngineAPI() {  
+    void LuaManager::bindEngineAPI() {
 
-    auto is_api_ready = [this]() -> bool {
-        if (!api_) {
-            PN_ERROR("[LuaManager] IEngineAPI not set.");
-            return false;
-        }
-        return true;
-        };
+        auto is_api_ready = [this]() -> bool {
+            if (!api_) {
+                PN_ERROR("[LuaManager] IEngineAPI not set.");
+                return false;
+            }
+            return true;
+            };
 
-    lua_.set_function("engineAvailable", [this] {
-        return api_ != nullptr;
-        });
+        lua_.set_function("engineAvailable", [this] {
+            return api_ != nullptr;
+            });
 
-    // ---------- logging / print ----------
-    lua_.set_function("log", [this](sol::variadic_args va, sol::this_state ts) {
-        sol::state_view L(ts);
-        sol::protected_function tostring = L["tostring"];
+        // ---------- logging / print ----------
+        lua_.set_function("log", [this](sol::variadic_args va, sol::this_state ts) {
+            sol::state_view L(ts);
+            sol::protected_function tostring = L["tostring"];
 
-        std::string out;
-        out.reserve(256);
+            std::string out;
+            out.reserve(256);
 
-        bool first = true;
-        for (sol::object v : va) {
-            if (!first) out += ' ';
-            first = false;
+            bool first = true;
+            for (sol::object v : va) {
+                if (!first) out += ' ';
+                first = false;
 
-            sol::protected_function_result r = tostring(v);
-            if (r.valid()) out += r.get<std::string>();
-            else           out += "<tostring-error>";
-        }
+                sol::protected_function_result r = tostring(v);
+                if (r.valid()) out += r.get<std::string>();
+                else           out += "<tostring-error>";
+            }
 
 #ifdef PN_PLATFORM_ANDROID
-        __android_log_print(ANDROID_LOG_INFO, "LUA", "%s", out.c_str());
+            __android_log_print(ANDROID_LOG_INFO, "LUA", "%s", out.c_str());
 #else
-        std::fputs(("[LUA] " + out + "\n").c_str(), stdout);
-        std::fflush(stdout);
+            std::fputs(("[LUA] " + out + "\n").c_str(), stdout);
+            std::fflush(stdout);
 #endif
-        });
+            });
 
-    lua_.set_function("print", [this](sol::variadic_args va, sol::this_state ts) {
-        sol::state_view L(ts);
-        sol::function log = L["log"];
-        log(sol::as_args(va));
-        });
+        lua_.set_function("print", [this](sol::variadic_args va, sol::this_state ts) {
+            sol::state_view L(ts);
+            sol::function log = L["log"];
+            log(sol::as_args(va));
+            });
 
 
-    /* =========================================================================== */
-    /*                            Entities / Prefabs                               */
-    /* =========================================================================== */
-    lua_.set_function("createEntity",
-        [this, is_api_ready](std::string layer, std::string name) -> int {
-            if (!is_api_ready()) return -1;
-            entt::entity e = api_->CreateEntity(std::move(layer), std::move(name));
-            return static_cast<int>(entt::to_integral(e));
-        }
-    );
-
-    lua_.set_function("deleteEntity",
-        [this, is_api_ready](int id) {
-            if (!is_api_ready()) return;
-            api_->DeleteEntity(toEntity(id));
-        }
-    );
-
-    lua_.set_function("createPrefabInstance",
-        [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
-            if (!is_api_ready()) return -1;
-
-            //ask the engine to instantiate the prefab
-            entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
-            if (e != entt::null) {
+        /* =========================================================================== */
+        /*                            Entities / Prefabs                               */
+        /* =========================================================================== */
+        lua_.set_function("createEntity",
+            [this, is_api_ready](std::string layer, std::string name) -> int {
+                if (!is_api_ready()) return -1;
+                entt::entity e = api_->CreateEntity(std::move(layer), std::move(name));
                 return static_cast<int>(entt::to_integral(e));
             }
+        );
 
-            // fallback hook 
-            if (instantiatePrefab_) {
-                entt::entity f = instantiatePrefab_(prefab, layer, name);
-                if (f != entt::null) {
-                    return static_cast<int>(entt::to_integral(f));
+        lua_.set_function("deleteEntity",
+            [this, is_api_ready](int id) {
+                if (!is_api_ready()) return;
+                api_->DeleteEntity(toEntity(id));
+            }
+        );
+
+        lua_.set_function("createPrefabInstance",
+            [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
+                if (!is_api_ready()) return -1;
+
+                //ask the engine to instantiate the prefab
+                entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
+                if (e != entt::null) {
+                    return static_cast<int>(entt::to_integral(e));
                 }
-                PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
+
+                // fallback hook 
+                if (instantiatePrefab_) {
+                    entt::entity f = instantiatePrefab_(prefab, layer, name);
+                    if (f != entt::null) {
+                        return static_cast<int>(entt::to_integral(f));
+                    }
+                    PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
+                }
+
+                // create an empty entity so scripts dont break
+                entt::entity empty = api_->CreateEntity({}, {});
+                PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
+                return static_cast<int>(entt::to_integral(empty));
             }
+        );
 
-            // create an empty entity so scripts dont break
-            entt::entity empty = api_->CreateEntity({}, {});
-            PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
-            return static_cast<int>(entt::to_integral(empty));
-        }
-    );
+        /* =========================================================================== */
+        /*                                  Lookup                                     */
+        /* =========================================================================== */
+        lua_.set_function("findEntity", [this](std::string name)->sol::object {
+            if (!api_) return sol::make_object(lua_, sol::nil);
+            auto id = api_->FindEntity(name);
+            return id ? sol::make_object(lua_, *id) : sol::make_object(lua_, sol::nil);
+            });
+        lua_.set_function("getImageID", [this](const std::string name) { return api_ ? api_->GetImageGUID(name) : std::string{};   });
+        lua_.set_function("getScriptID", [this](const std::string name) { return api_ ? api_->GetScriptGUID(name) : std::string{};  });
+        lua_.set_function("getAudioID", [this](const std::string name) { return api_ ? api_->GetAudioGUID(name) : std::string{};   });
+        lua_.set_function("getModelID", [this](const std::string name) { return api_ ? api_->GetModelGUID(name) : std::string{};   });
+        lua_.set_function("getFontID", [this](const std::string name) { return api_ ? api_->GetFontGUID(name) : std::string{};    });
+        lua_.set_function("getScenesID", [this](const std::string name) { return api_ ? api_->GetScenesGUID(name) : std::string{};  });
+        lua_.set_function("getPrefabsID", [this](const std::string name) { return api_ ? api_->GetPrefabsGUID(name) : std::string{}; });
+        lua_.set_function("getDataID", [this](const std::string name) { return api_ ? api_->GetDataGUID(name) : std::string{};    });
+        lua_.set_function("getShaderID", [this](const std::string name) { return api_ ? api_->GetShaderGUID(name) : std::string{};  });
 
-    /* =========================================================================== */
-    /*                                  Lookup                                     */
-    /* =========================================================================== */
-    lua_.set_function("findEntity", [this](std::string name)->sol::object {
-        if (!api_) return sol::make_object(lua_, sol::nil);
-        auto id = api_->FindEntity(name);
-        return id ? sol::make_object(lua_, *id) : sol::make_object(lua_, sol::nil);
-        }); 
-    lua_.set_function("getImageID",   [this](const std::string name) { return api_ ? api_->GetImageGUID(name) : std::string{};   });
-    lua_.set_function("getScriptID",  [this](const std::string name) { return api_ ? api_->GetScriptGUID(name) : std::string{};  });
-    lua_.set_function("getAudioID",   [this](const std::string name) { return api_ ? api_->GetAudioGUID(name) : std::string{};   });
-    lua_.set_function("getModelID",   [this](const std::string name) { return api_ ? api_->GetModelGUID(name) : std::string{};   });
-    lua_.set_function("getFontID",    [this](const std::string name) { return api_ ? api_->GetFontGUID(name) : std::string{};    });
-    lua_.set_function("getScenesID",  [this](const std::string name) { return api_ ? api_->GetScenesGUID(name) : std::string{};  });
-    lua_.set_function("getPrefabsID", [this](const std::string name) { return api_ ? api_->GetPrefabsGUID(name) : std::string{}; });
-    lua_.set_function("getDataID",    [this](const std::string name) { return api_ ? api_->GetDataGUID(name) : std::string{};    });
-    lua_.set_function("getShaderID",  [this](const std::string name) { return api_ ? api_->GetShaderGUID(name) : std::string{};  });
-
-    /* =========================================================================== */
-    /*                     Metadata (name / tags / groups)                         */
-    /* =========================================================================== */
-    lua_.set_function("setEntityName", [this](entt::entity entityId, std::string name) { if (api_) api_->SetEntityName(entityId, name); });
-    lua_.set_function("getEntityName", [this](entt::entity entityId)->sol::object {
-        if (!api_) return sol::make_object(lua_, sol::nil);
-        auto s = api_->GetEntityName(entityId);
-        return s ? sol::make_object(lua_, *s) : sol::make_object(lua_, sol::nil);
-        });
-    lua_.set_function("addTag", [this](entt::entity entityId, std::string tag) { if (api_) api_->AddTag(entityId, tag); });
-    lua_.set_function("removeTag", [this](entt::entity entityId, std::string tag) { if (api_) api_->RemoveTag(entityId, tag); });
-    lua_.set_function("hasTag", [this](entt::entity entityId, std::string tag) { return api_ ? api_->HasTag(entityId, tag) : false; });
-    lua_.set_function("assignGroup", [this](entt::entity entityId, std::string g) { if (api_) api_->AssignGroup(entityId, g); });
-    lua_.set_function("unassignGroup", [this](entt::entity entityId) { if (api_) api_->UnassignGroup(entityId); });
-    lua_.set_function("getGroup", [this](entt::entity entityId)->sol::object {
-        if (!api_) return sol::make_object(lua_, sol::nil);
-        auto g = api_->GetGroup(entityId);
-        return g ? sol::make_object(lua_, *g) : sol::make_object(lua_, sol::nil);
-        });
-    lua_.set_function("getEntitiesByTag", [this](const std::string& tag) {
-        if (!api_) return std::vector<entt::entity>{};
-        return api_->GetEntitiesByTag(tag);
-        });
+        /* =========================================================================== */
+        /*                     Metadata (name / tags / groups)                         */
+        /* =========================================================================== */
+        lua_.set_function("setEntityName", [this](entt::entity entityId, std::string name) { if (api_) api_->SetEntityName(entityId, name); });
+        lua_.set_function("getEntityName", [this](entt::entity entityId)->sol::object {
+            if (!api_) return sol::make_object(lua_, sol::nil);
+            auto s = api_->GetEntityName(entityId);
+            return s ? sol::make_object(lua_, *s) : sol::make_object(lua_, sol::nil);
+            });
+        lua_.set_function("addTag", [this](entt::entity entityId, std::string tag) { if (api_) api_->AddTag(entityId, tag); });
+        lua_.set_function("removeTag", [this](entt::entity entityId, std::string tag) { if (api_) api_->RemoveTag(entityId, tag); });
+        lua_.set_function("hasTag", [this](entt::entity entityId, std::string tag) { return api_ ? api_->HasTag(entityId, tag) : false; });
+        /*lua_.set_function("assignGroup", [this](entt::entity entityId, std::string g) { if (api_) api_->AssignGroup(entityId, g); });
+        lua_.set_function("unassignGroup", [this](entt::entity entityId) { if (api_) api_->UnassignGroup(entityId); });
+        lua_.set_function("getGroup", [this](entt::entity entityId)->sol::object {
+            if (!api_) return sol::make_object(lua_, sol::nil);
+            auto g = api_->GetGroup(entityId);
+            return g ? sol::make_object(lua_, *g) : sol::make_object(lua_, sol::nil);
+            });*/
+        lua_.set_function("getEntitiesByTag", [this](const std::string& tag) {
+            if (!api_) return std::vector<entt::entity>{};
+            return api_->GetEntitiesByTag(tag);
+            });
 
 
-    /* =========================================================================== */
-    /*                                Transform                                    */
-    /* =========================================================================== */
-    lua_.set_function("getPosition", [this](entt::entity entityId) {
-        if (!api_) { 
-            PN_ERROR("[LuaManager] API not initialized!");
-            return std::make_tuple(0.f, 0.f, 0.f); 
-        }
-        auto p = api_->GetPosition(entityId);
-        return std::make_tuple(p.x, p.y, p.z);
-        });
-    lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
-    lua_.set_function("getScale", [this](entt::entity entityId) {
-        if (!api_) return std::make_tuple(1.f, 1.f, 1.f);
-        auto s = api_->GetScale(entityId);
-        return std::make_tuple(s.x, s.y, s.z);
-        });
-    lua_.set_function("setScale", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetScale(entityId, { x,y,z }); });
-    lua_.set_function("getRotation", [this](entt::entity entityId) {
-        if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
-        auto r = api_->GetRotation(entityId);
-        return std::make_tuple(r.x, r.y, r.z);   
-        });
+        /* =========================================================================== */
+        /*                                Transform                                    */
+        /* =========================================================================== */
+        lua_.set_function("getPosition", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                return std::make_tuple(0.f, 0.f, 0.f);
+            }
+            auto p = api_->GetPosition(entityId);
+            return std::make_tuple(p.x, p.y, p.z);
+            });
+        lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
+        lua_.set_function("getScale", [this](entt::entity entityId) {
+            if (!api_) return std::make_tuple(1.f, 1.f, 1.f);
+            auto s = api_->GetScale(entityId);
+            return std::make_tuple(s.x, s.y, s.z);
+            });
+        lua_.set_function("setScale", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetScale(entityId, { x,y,z }); });
+        lua_.set_function("getRotation", [this](entt::entity entityId) {
+            if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
+            auto r = api_->GetRotation(entityId);
+            return std::make_tuple(r.x, r.y, r.z);
+            });
 
-    lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
-        if (!api_) return;
-        api_->SetRotation(entityId, { x, y, z });   
-        });
-
-
-    /* =========================================================================== */
-    /*                                  Physics                                    */
-    /* =========================================================================== */
-    lua_.set_function("getVelocity", [this](entt::entity entityId) {
-        if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
-        auto v = api_->GetVelocity(entityId);
-        return std::make_tuple(v.x, v.y, v.z);
-        });
-    lua_.set_function("setVelocity", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetVelocity(entityId, { x,y,z }); });
-
-    /* =========================================================================== */
-    /*                                   Audio                                     */
-    /* =========================================================================== */
-    //lua_.set_function("audioPlayAt", [this](std::string vpath, float x, float y, float z, float volumeDb) { return api_ ? api_->Audio_Play(vpath, x, y, z, volumeDb) : -1; }); // play a sound at a world position
-    //lua_.set_function("audioPlay", [this](std::string vpath, float volumeDb) { return api_ ? api_->Audio_Play(vpath, 0.f, 0.f, 0.f, volumeDb) : -1; }); // play at origin 
-    //lua_.set_function("audioPlayRandomFrom", [this](std::string playlist, float x, float y, float z, float volumeDb) { return api_ ? api_->Audio_PlayRandomFrom(playlist, x, y, z, volumeDb) : -1; });
-    //lua_.set_function("audioStop", [this](int ch) { return api_ && api_->Audio_Stop(ch); });
-    //lua_.set_function("audioPause", [this](int ch) { return api_ && api_->Audio_Pause(ch); });
-    //lua_.set_function("audioResume", [this](int ch) { return api_ && api_->Audio_Resume(ch); });
-    //lua_.set_function("audioSetVolumeDb", [this](int ch, float db) { return api_ && api_->Audio_SetChannelVolumeDb(ch, db); });
-    //lua_.set_function("audioSetPos", [this](int ch, float x, float y, float z) { return api_ && api_->Audio_SetChannelPosition(ch, x, y, z); });
-    //lua_.set_function("audioStopAll", [this] { if (api_) api_->Audio_StopAll(); });
-    //lua_.set_function("audioPauseAll", [this] { if (api_) api_->Audio_PauseAll(); });
-    //lua_.set_function("audioResumeAll", [this] { if (api_) api_->Audio_ResumeAll(); });
-    //lua_.set_function("audioSetMuteAll", [this](bool m) { return api_ && api_->Audio_SetMuteAll(m); });
-    //lua_.set_function("audioSetListener", [this](float px, float py, float pz, float vx, float vy, float vz, float fx, float fy, float fz, float ux, float uy, float uz) { if (api_) api_->Audio_SetListener(px, py, pz, vx, vy, vz, fx, fy, fz, ux, uy, uz); });
-    //lua_.set_function("audioSetGroupVolumeDb", [this](std::string group, float db) { return api_ && api_->Audio_SetGroupVolumeDb(group, db); });
-    //lua_.set_function("audioFadeGroupToDb", [this](std::string group, float targetDb, float seconds) { return api_ && api_->Audio_FadeGroupToDb(group, targetDb, seconds); });
-
-    lua_.set_function("audioPlay", [this](entt::entity entityId) {
-        if (!api_) return;
-        api_->Audio_Play(entityId);
-        });
-
-    lua_.set_function("audioStop", [this](entt::entity entityId) {
-        if (!api_) return;
-        api_->Audio_Stop(entityId);
-        });
-
-    lua_.set_function("audioSetVolumeDb", [this](entt::entity entityId, float db) {
-        if (!api_) return;
-        api_->Audio_SetVolumeDb(entityId, db);
-        });
-
-    lua_.set_function("audioSetGroup", [this](entt::entity entityId, std::string group) {
-        if (!api_) return;
-        api_->Audio_SetGroup(entityId, std::move(group));
-        });
-
-    lua_.set_function("audioSetLooping", [this](entt::entity entityId, bool looping) {
-        if (!api_) return;
-        api_->Audio_SetLooping(entityId, looping);
-        });
+        lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
+            if (!api_) return;
+            api_->SetRotation(entityId, { x, y, z });
+            });
 
 
-    /* =========================================================================== */
-    /*                           Scene / System state                              */
-    /* =========================================================================== */
-    lua_.set_function("changeScene", [this](std::string name) {
-        if (!api_ || pendingSceneChange_) return;
-        setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
-        });
-    lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
-    lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
-    lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
-    lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
-    lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
+        /* =========================================================================== */
+        /*                                  Physics                                    */
+        /* =========================================================================== */
+        lua_.set_function("getVelocity", [this](entt::entity entityId) {
+            if (!api_) return std::make_tuple(0.f, 0.f, 0.f);
+            auto v = api_->GetVelocity(entityId);
+            return std::make_tuple(v.x, v.y, v.z);
+            });
+        lua_.set_function("setVelocity", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetVelocity(entityId, { x,y,z }); });
 
-    /* =========================================================================== */
-    /*                              Graphics / FX                                  */
-    /* =========================================================================== */
-    lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
+        /* =========================================================================== */
+        /*                                   Audio                                     */
+        /* =========================================================================== */
+        //lua_.set_function("audioPlayAt", [this](std::string vpath, float x, float y, float z, float volumeDb) { return api_ ? api_->Audio_Play(vpath, x, y, z, volumeDb) : -1; }); // play a sound at a world position
+        //lua_.set_function("audioPlay", [this](std::string vpath, float volumeDb) { return api_ ? api_->Audio_Play(vpath, 0.f, 0.f, 0.f, volumeDb) : -1; }); // play at origin 
+        //lua_.set_function("audioPlayRandomFrom", [this](std::string playlist, float x, float y, float z, float volumeDb) { return api_ ? api_->Audio_PlayRandomFrom(playlist, x, y, z, volumeDb) : -1; });
+        //lua_.set_function("audioStop", [this](int ch) { return api_ && api_->Audio_Stop(ch); });
+        //lua_.set_function("audioPause", [this](int ch) { return api_ && api_->Audio_Pause(ch); });
+        //lua_.set_function("audioResume", [this](int ch) { return api_ && api_->Audio_Resume(ch); });
+        //lua_.set_function("audioSetVolumeDb", [this](int ch, float db) { return api_ && api_->Audio_SetChannelVolumeDb(ch, db); });
+        //lua_.set_function("audioSetPos", [this](int ch, float x, float y, float z) { return api_ && api_->Audio_SetChannelPosition(ch, x, y, z); });
+        //lua_.set_function("audioStopAll", [this] { if (api_) api_->Audio_StopAll(); });
+        //lua_.set_function("audioPauseAll", [this] { if (api_) api_->Audio_PauseAll(); });
+        //lua_.set_function("audioResumeAll", [this] { if (api_) api_->Audio_ResumeAll(); });
+        //lua_.set_function("audioSetMuteAll", [this](bool m) { return api_ && api_->Audio_SetMuteAll(m); });
+        //lua_.set_function("audioSetListener", [this](float px, float py, float pz, float vx, float vy, float vz, float fx, float fy, float fz, float ux, float uy, float uz) { if (api_) api_->Audio_SetListener(px, py, pz, vx, vy, vz, fx, fy, fz, ux, uy, uz); });
+        //lua_.set_function("audioSetGroupVolumeDb", [this](std::string group, float db) { return api_ && api_->Audio_SetGroupVolumeDb(group, db); });
+        //lua_.set_function("audioFadeGroupToDb", [this](std::string group, float targetDb, float seconds) { return api_ && api_->Audio_FadeGroupToDb(group, targetDb, seconds); });
 
-    /* =========================================================================== */
-    /*                                Particles                                    */
-    /* =========================================================================== */
-    lua_.set_function("spawnParticles", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, false); });
-    lua_.set_function("spawnParticlesIgnoreRotation", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, true); });
+        lua_.set_function("audioPlay", [this](entt::entity entityId) {
+            if (!api_) return;
+            api_->Audio_Play(entityId);
+            });
 
-    /* =========================================================================== */
-    /*                              Input Helpers                                  */
-    /* =========================================================================== */
-    lua_.set_function("isKeyDown",        [this](int k) { return api_ && api_->Input_IsKeyDown(k); });
-    lua_.set_function("wasKeyPressed",    [this](int k) { return api_ && api_->Input_WasKeyPressed(k); });
-    lua_.set_function("wasKeyReleased",   [this](int k) { return api_ && api_->Input_WasKeyReleased(k); });
-    lua_.set_function("isMouseDown",      [this](int b) { return api_ && api_->Input_IsMouseDown(b); });
-    lua_.set_function("wasMousePressed",  [this](int b) { return api_ && api_->Input_WasMousePressed(b); });
-    lua_.set_function("wasMouseReleased", [this](int b) { return api_ && api_->Input_WasMouseReleased(b); });
-    lua_.set_function("mousePos",         [this] { return api_ ? api_->Input_GetMousePos() : glm::vec2{ 0 }; });
-    lua_.set_function("mouseScroll",      [this] { return api_ ? api_->Input_GetScrollDelta() : glm::vec2{ 0 }; });
-    lua_.set_function("cursorInWindow",   [this] { return api_ && api_->Input_IsCursorInWindow(); });
+        lua_.set_function("audioStop", [this](entt::entity entityId) {
+            if (!api_) return;
+            api_->Audio_Stop(entityId);
+            });
 
-    /* =========================================================================== */
-    /*                                ModelRenderer                                 */
-    /* =========================================================================== */
-    lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {
-        if (!api_) return sol::make_object(lua_, sol::nil);
-        auto m = api_->GetMeshId(entityId);
-        return m ? sol::make_object(lua_, static_cast<int>(*m))   
-            : sol::make_object(lua_, sol::nil);
-        });
-    lua_.set_function("setMeshId", [this](entt::entity entityId, int meshId) { if (api_) api_->SetMeshId(entityId, static_cast<uint32_t>(meshId)); });
+        lua_.set_function("audioSetVolumeDb", [this](entt::entity entityId, float db) {
+            if (!api_) return;
+            api_->Audio_SetVolumeDb(entityId, db);
+            });
 
+        lua_.set_function("audioSetGroup", [this](entt::entity entityId, std::string group) {
+            if (!api_) return;
+            api_->Audio_SetGroup(entityId, std::move(group));
+            });
 
-    /* =========================================================================== */
-    /*                                  Lighting                                   */
-    /* =========================================================================== */
-    lua_.set_function("hasLight",          [this](entt::entity entityId) {return api_ && api_->HasLight(entityId); });
-    lua_.set_function("addLight",          [this](entt::entity entityId) {if (api_) api_->AddLight(entityId); });
-    lua_.set_function("removeLight",       [this](entt::entity entityId) {if (api_) api_->RemoveLight(entityId); });
-    lua_.set_function("setLightPosition",  [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightPosition(entityId, x, y, z); });
-    lua_.set_function("setLightIntensity", [this](entt::entity entityId, float r, float g, float b) {if (api_) api_->SetLightIntensity(entityId, r, g, b); });
-    lua_.set_function("setLightType",      [this](entt::entity entityId, int typeInt) {if (api_) api_->SetLightType(entityId, typeInt);});
-    lua_.set_function("setLightForward",   [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightForward(entityId, x, y, z); });
-    lua_.set_function("setShadowType",     [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
-
-}
+        lua_.set_function("audioSetLooping", [this](entt::entity entityId, bool looping) {
+            if (!api_) return;
+            api_->Audio_SetLooping(entityId, looping);
+            });
 
 
-bool LuaManager::loadScriptForEntity(entt::entity entity,
-                                     const std::string& filePath,
-                                     const std::vector<ScriptExternalVar>& vars,
-                                     bool runWhenPaused) {
-    currentEntity_ = entity;
-    currentRunWhenPaused_ = runWhenPaused;
+        /* =========================================================================== */
+        /*                           Scene / System state                              */
+        /* =========================================================================== */
+        lua_.set_function("changeScene", [this](std::string name) {
+            if (!api_ || pendingSceneChange_) return;
+            setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
+            });
+        lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
+        lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
+        lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
+        lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
+        lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
-    bool ok = runFileIntoEnv(filePath, entity, vars, runWhenPaused);
+        /* =========================================================================== */
+        /*                              Graphics / FX                                  */
+        /* =========================================================================== */
+        lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
 
-    currentEntity_ = entt::null;
-    currentRunWhenPaused_ = false;
-    return ok;
-}
+        lua_.set_function("cameraSetTransform",
+            [this](float px, float py, float pz,
+                   float tx, float ty, float tz,
+                   float ux, float uy, float uz)
+                  {
+                      if (!api_) return;
+                      api_->Camera_SetTransform(
+                          glm::vec3{ px, py, pz },
+                          glm::vec3{ tx, ty, tz },
+                          glm::vec3{ ux, uy, uz }
+                      );
+                  });
 
-bool LuaManager::runFileIntoEnv(const std::string& path, entt::entity entity,
-    const std::vector<ScriptExternalVar>& vars,
-    bool /*runWhenPaused*/) {
-    std::string code = readFileText(path);
-    if (code.empty()) {
-        PN_ERROR("[LuaManager] Failed to read script: {}", path);
-        return false;
+        /* =========================================================================== */
+        /*                                Particles                                    */
+        /* =========================================================================== */
+        lua_.set_function("spawnParticles", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, false); });
+        lua_.set_function("spawnParticlesIgnoreRotation", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, true); });
+
+        /* =========================================================================== */
+        /*                              Input Helpers                                  */
+        /* =========================================================================== */
+        lua_.set_function("isKeyDown", [this](int k) { return api_ && api_->Input_IsKeyDown(k); });
+        lua_.set_function("wasKeyPressed", [this](int k) { return api_ && api_->Input_WasKeyPressed(k); });
+        lua_.set_function("wasKeyReleased", [this](int k) { return api_ && api_->Input_WasKeyReleased(k); });
+        lua_.set_function("isMouseDown", [this](int b) { return api_ && api_->Input_IsMouseDown(b); });
+        lua_.set_function("wasMousePressed", [this](int b) { return api_ && api_->Input_WasMousePressed(b); });
+        lua_.set_function("wasMouseReleased", [this](int b) { return api_ && api_->Input_WasMouseReleased(b); });
+        lua_.set_function("mousePos", [this] { return api_ ? api_->Input_GetMousePos() : glm::vec2{ 0 }; });
+        lua_.set_function("mouseScroll", [this] { return api_ ? api_->Input_GetScrollDelta() : glm::vec2{ 0 }; });
+        lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
+
+        /* =========================================================================== */
+        /*                                ModelRenderer                                 */
+        /* =========================================================================== */
+        lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {
+            if (!api_) return sol::make_object(lua_, sol::nil);
+            auto m = api_->GetMeshId(entityId);
+            return m ? sol::make_object(lua_, static_cast<int>(*m))
+                : sol::make_object(lua_, sol::nil);
+            });
+        lua_.set_function("setMeshId", [this](entt::entity entityId, int meshId) { if (api_) api_->SetMeshId(entityId, static_cast<uint32_t>(meshId)); });
+
+
+        /* =========================================================================== */
+        /*                                  Lighting                                   */
+        /* =========================================================================== */
+        lua_.set_function("hasLight", [this](entt::entity entityId) {return api_ && api_->HasLight(entityId); });
+        lua_.set_function("addLight", [this](entt::entity entityId) {if (api_) api_->AddLight(entityId); });
+        lua_.set_function("removeLight", [this](entt::entity entityId) {if (api_) api_->RemoveLight(entityId); });
+        lua_.set_function("setLightPosition", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightPosition(entityId, x, y, z); });
+        lua_.set_function("setLightIntensity", [this](entt::entity entityId, float r, float g, float b) {if (api_) api_->SetLightIntensity(entityId, r, g, b); });
+        lua_.set_function("setLightType", [this](entt::entity entityId, int typeInt) {if (api_) api_->SetLightType(entityId, typeInt);});
+        lua_.set_function("setLightForward", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightForward(entityId, x, y, z); });
+        lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
+
     }
 
-    // Per-script sandbox inheriting from globals
-    sol::environment env(lua_, sol::create, lua_.globals());
-    env["entityId"] = entity;
 
-    // Inject external vars
-    for (const auto& v : vars) {
-        std::visit([&](auto&& value) { env[v.id] = value; }, v.val);
+    bool LuaManager::loadScriptForEntity(entt::entity entity,
+        const std::string& filePath,
+        const std::vector<ScriptExternalVar>& vars,
+        bool runWhenPaused) {
+        currentEntity_ = entity;
+        currentRunWhenPaused_ = runWhenPaused;
+
+        bool ok = runFileIntoEnv(filePath, entity, vars, runWhenPaused);
+
+        currentEntity_ = entt::null;
+        currentRunWhenPaused_ = false;
+        return ok;
     }
 
-    return runLuaInEnv(lua_, code, env, path);
-}
-
-entt::entity LuaManager::toEntity(int id)
-{
-    return static_cast<entt::entity>(id);
-}
-
-// ----------------------------------------------------------------------------
-// Tick & Event processing
-// ----------------------------------------------------------------------------
-
-namespace {
-    
-}
-
-void LuaManager::tick(double dt) {
-    // 1) Move any newly scheduled timeouts into the heap with absolute times
-    if (!timeouts_.empty()) {
-        const double base = nowSeconds();
-        for (auto& t : timeouts_) {
-            timeoutHeap_.push(TimeoutNode{ base + static_cast<double>(t.remaining), t.fn });
+    bool LuaManager::runFileIntoEnv(const std::string& path, entt::entity entity,
+        const std::vector<ScriptExternalVar>& vars,
+        bool /*runWhenPaused*/) {
+        std::string code = readFileText(path);
+        if (code.empty()) {
+            PN_ERROR("[LuaManager] Failed to read script: {}", path);
+            return false;
         }
-        timeouts_.clear();
-    }
 
-    // 2) Pump due timeouts
-    const double now = nowSeconds();
-    while (!timeoutHeap_.empty() && timeoutHeap_.top().wake <= now) {
-        auto node = timeoutHeap_.top();
-        timeoutHeap_.pop();
-        sol::protected_function_result r = node.fn();
-        if (!r.valid()) {
-            sol::error e = r;
-            logError("Timeout", e);
+        // Per-script sandbox inheriting from globals
+        sol::environment env(lua_, sol::create, lua_.globals());
+        env["entityId"] = entity;
+
+        // Inject external vars
+        for (const auto& v : vars) {
+            std::visit([&](auto&& value) { env[v.id] = value; }, v.val);
         }
+
+        return runLuaInEnv(lua_, code, env, path);
     }
 
-    // 3) Execute queued input callbacks
-    for (auto& cb : inputQueue_) {
-        if (!gamePaused_ || cb.runWhenPaused) {
-            sol::protected_function_result r = cb.fn();
+    entt::entity LuaManager::toEntity(int id)
+    {
+        return static_cast<entt::entity>(id);
+    }
+
+    // ----------------------------------------------------------------------------
+    // Tick & Event processing
+    // ----------------------------------------------------------------------------
+
+    namespace {
+
+    }
+
+    void LuaManager::tick(double dt) {
+        // 1) Move any newly scheduled timeouts into the heap with absolute times
+        if (!timeouts_.empty()) {
+            const double base = nowSeconds();
+            for (auto& t : timeouts_) {
+                timeoutHeap_.push(TimeoutNode{ base + static_cast<double>(t.remaining), t.fn });
+            }
+            timeouts_.clear();
+        }
+
+        // 2) Pump due timeouts
+        const double now = nowSeconds();
+        while (!timeoutHeap_.empty() && timeoutHeap_.top().wake <= now) {
+            auto node = timeoutHeap_.top();
+            timeoutHeap_.pop();
+            sol::protected_function_result r = node.fn();
             if (!r.valid()) {
                 sol::error e = r;
-                logError("Input callback", e);
+                logError("Timeout", e);
+            }
+        }
+
+        // 3) Execute queued input callbacks
+        for (auto& cb : inputQueue_) {
+            if (!gamePaused_ || cb.runWhenPaused) {
+                sol::protected_function_result r = cb.fn();
+                if (!r.valid()) {
+                    sol::error e = r;
+                    logError("Input callback", e);
+                }
+            }
+        }
+        inputQueue_.clear();
+
+        // 4) Execute collision callbacks
+        for (auto& cb : collisionQueue_) {
+            if (!gamePaused_ || cb.runWhenPaused) {
+                sol::protected_function_result r = cb.fn(cb.currentEntityId, cb.collidedEntityId);
+                if (!r.valid()) {
+                    // try calling without args
+                    r = cb.fn();
+                }
+                if (!r.valid()) {
+                    sol::error e = r;
+                    logError("Collision callback", e);
+                }
+            }
+        }
+        collisionQueue_.clear();
+
+        // 5) Per-frame updates
+        for (auto& cb : updates_) {
+            if (!gamePaused_ || cb.runWhenPaused) {
+                sol::protected_function_result r = cb.fn(dt);
+                if (!r.valid()) {
+                    sol::error e = r;
+                    logError("Update", e);
+                }
+            }
+        }
+
+        // 6) Run any queued C++ operations 
+        for (auto& op : delayedOps_) op();
+        delayedOps_.clear();
+
+        // 7) Apply pending scene change once per frame
+        if (pendingSceneChange_ && !sceneChangeQueued_) {
+            sceneChangeQueued_ = true;
+            (*pendingSceneChange_)();
+            pendingSceneChange_.reset();
+            sceneChangeQueued_ = false;
+        }
+    }
+
+    void LuaManager::onKeyDown(const std::string& name) {
+        if (auto it = keyDown_.find(name); it != keyDown_.end()) {
+            for (auto& fn : it->second) inputQueue_.push_back(fn);
+        }
+    }
+
+    void LuaManager::onKeyUp(const std::string& name) {
+        if (auto it = keyUp_.find(name); it != keyUp_.end()) {
+            for (auto& fn : it->second) inputQueue_.push_back(fn);
+        }
+    }
+
+    void LuaManager::onClick() {
+        for (auto& fn : onClick_) inputQueue_.push_back(fn);
+    }
+
+    void LuaManager::onMouseInOut() {
+        // no engine-side hit-testing here, just alternating states for now
+
+        for (auto& m : mouseInOut_) {
+            if (m.state == MouseInOutLuaFunction::State::MouseOut) {
+                inputQueue_.push_back(m.mouseIn);
+                m.state = MouseInOutLuaFunction::State::MouseIn;
+            }
+            else {
+                inputQueue_.push_back(m.mouseOut);
+                m.state = MouseInOutLuaFunction::State::MouseOut;
             }
         }
     }
-    inputQueue_.clear();
 
-    // 4) Execute collision callbacks
-    for (auto& cb : collisionQueue_) {
-        if (!gamePaused_ || cb.runWhenPaused) {                  
-            sol::protected_function_result r = cb.fn(cb.currentEntityId, cb.collidedEntityId);
-            if (!r.valid()) {
-                // try calling without args
-                r = cb.fn();
+    void LuaManager::onCollision(entt::entity a, entt::entity b) {
+        //// Look up callbacks registered on entity 'a'
+        //if (auto it = onCollision_.find(a); it != onCollision_.end()) {
+        //    for (const auto& cb : it->second) {
+        //        if (cb.collidedEntityId == b || cb.collidedEntityId == entt::null) {
+        //            collisionQueue_.push_back(cb);
+        //        }
+        //    }
+        //}
+        //// also check callbacks registered on entity 'b' 
+        //if (auto it = onCollision_.find(b); it != onCollision_.end()) {
+        //    for (const auto& cb : it->second) {
+        //        if (cb.collidedEntityId == a || cb.collidedEntityId == entt::null) {
+        //            collisionQueue_.push_back(cb);
+        //        }
+        //    }
+        //}
+
+        auto deliver = [&](entt::entity self, entt::entity other) {
+            auto it = onCollision_.find(self);
+            if (it == onCollision_.end()) return;
+            //PN_CORE_INFO("[Lua] onCollision deliver: self={} other={} handlers={}", (uint32_t)self, (uint32_t)other, (int)it->second.size());
+
+            for (auto& h : it->second) {
+                if (h.collidedEntityId == entt::null || h.collidedEntityId == other) {
+                    sol::protected_function_result r = h.fn(self, other);
+                    if (!r.valid()) { sol::error e = r; logError("onCollision", e); }
+                }
             }
-            if (!r.valid()) {
-                sol::error e = r;
-                logError("Collision callback", e);
-            }
-        }
-    }
-    collisionQueue_.clear();
+            };
 
-    // 5) Per-frame updates
-    for (auto& cb : updates_) {
-        if (!gamePaused_ || cb.runWhenPaused) {
-            sol::protected_function_result r = cb.fn(dt);
-            if (!r.valid()) {
-                sol::error e = r;
-                logError("Update", e);
-            }
+        deliver(a, b); // handlers registered by 'a'
+        deliver(b, a); // handlers registered by 'b'
+    }
+
+    void LuaManager::onPauseChanged(bool paused) {
+        gamePaused_ = paused;
+        for (auto& cb : pauseHandlers_) {
+            sol::protected_function_result r = cb.fn(paused);
+            if (!r.valid()) { sol::error e = r; logError("PauseHandler", e); }
         }
     }
 
-    // 6) Run any queued C++ operations 
-    for (auto& op : delayedOps_) op();
-    delayedOps_.clear();
-
-    // 7) Apply pending scene change once per frame
-    if (pendingSceneChange_ && !sceneChangeQueued_) {
-        sceneChangeQueued_ = true;
-        (*pendingSceneChange_)();
-        pendingSceneChange_.reset();
-        sceneChangeQueued_ = false;
+    void LuaManager::callGlobal(const std::string& name) {
+        sol::object obj = lua_[name];
+        if (!obj.valid() || obj.get_type() != sol::type::function) return;
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn();
+        if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
     }
-}
 
-void LuaManager::onKeyDown(const std::string& name) {
-    if (auto it = keyDown_.find(name); it != keyDown_.end()) {
-        for (auto& fn : it->second) inputQueue_.push_back(fn);
-    }
-}
-
-void LuaManager::onKeyUp(const std::string& name) {
-    if (auto it = keyUp_.find(name); it != keyUp_.end()) {
-        for (auto& fn : it->second) inputQueue_.push_back(fn);
-    }
-}
-
-void LuaManager::onClick() {
-    for (auto& fn : onClick_) inputQueue_.push_back(fn);
-}
-
-void LuaManager::onMouseInOut() {
-    // no engine-side hit-testing here, just alternating states for now
-
-    for (auto& m : mouseInOut_) {
-        if (m.state == MouseInOutLuaFunction::State::MouseOut) {
-            inputQueue_.push_back(m.mouseIn);
-            m.state = MouseInOutLuaFunction::State::MouseIn;
-        }
-        else {
-            inputQueue_.push_back(m.mouseOut);
-            m.state = MouseInOutLuaFunction::State::MouseOut;
-        }
-    }
-}
-
-void LuaManager::onCollision(entt::entity a, entt::entity b) {
-    //// Look up callbacks registered on entity 'a'
-    //if (auto it = onCollision_.find(a); it != onCollision_.end()) {
-    //    for (const auto& cb : it->second) {
-    //        if (cb.collidedEntityId == b || cb.collidedEntityId == entt::null) {
-    //            collisionQueue_.push_back(cb);
-    //        }
-    //    }
-    //}
-    //// also check callbacks registered on entity 'b' 
-    //if (auto it = onCollision_.find(b); it != onCollision_.end()) {
-    //    for (const auto& cb : it->second) {
-    //        if (cb.collidedEntityId == a || cb.collidedEntityId == entt::null) {
-    //            collisionQueue_.push_back(cb);
-    //        }
-    //    }
-    //}
-
-    auto deliver = [&](entt::entity self, entt::entity other) {
-        auto it = onCollision_.find(self);
-        if (it == onCollision_.end()) return;
-        //PN_CORE_INFO("[Lua] onCollision deliver: self={} other={} handlers={}", (uint32_t)self, (uint32_t)other, (int)it->second.size());
-
-        for (auto& h : it->second) {
-            if (h.collidedEntityId == entt::null || h.collidedEntityId == other) {
-                sol::protected_function_result r = h.fn(self, other);
-                if (!r.valid()) { sol::error e = r; logError("onCollision", e); }
-            }
-        }
-        };
-
-    deliver(a, b); // handlers registered by 'a'
-    deliver(b, a); // handlers registered by 'b'
-}
-
-void LuaManager::onPauseChanged(bool paused) {
-    gamePaused_ = paused;
-    for (auto& cb : pauseHandlers_) {
-        sol::protected_function_result r = cb.fn(paused);
-        if (!r.valid()) { sol::error e = r; logError("PauseHandler", e); }
-    }
-}
-
-void LuaManager::callGlobal(const std::string& name) {
-    sol::object obj = lua_[name];
-    if (!obj.valid() || obj.get_type() != sol::type::function) return;
-    sol::protected_function fn = obj.as<sol::protected_function>();
-    sol::protected_function_result r = fn();
-    if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
 }
