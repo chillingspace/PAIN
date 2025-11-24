@@ -358,6 +358,7 @@ namespace PAIN {
         }
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
+            PN_CORE_INFO("ImportModel {}", virtual_path);
 
             //Check if virtual path has valid extension
             if (std::filesystem::path(path_service->resolvePath(virtual_path)).extension() != ".mesh") {

@@ -71,8 +71,8 @@ namespace PAIN {
             glm::vec2 uv;
             glm::vec3 tangent;    // For normal mapping/PBR
             glm::vec3 bitangent;  // For normal mapping/PBR
-            uint8_t boneIndices[4]; // Supports 4 bone influences per vertex
-            float boneWeights[4];   // Matches bone indices, sum to 1
+            glm::ivec4 boneIndices; // Supports 4 bone influences per vertex
+            glm::vec4 boneWeights;   // Matches bone indices, sum to 1
             glm::vec3 color;        // (optional) for vertex color
         };
 
