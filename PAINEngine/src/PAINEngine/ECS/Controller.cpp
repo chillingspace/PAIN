@@ -228,6 +228,7 @@ namespace PAIN {
             registerComponent<UIElement>("UIElement");
             registerComponent<UICanvas>("UICanvas");
             registerComponent<UIAnimation>("UIAnimation");
+            registerComponent<UIText>("UIText");
         }
 
         void Controller::registerAllSystems()
