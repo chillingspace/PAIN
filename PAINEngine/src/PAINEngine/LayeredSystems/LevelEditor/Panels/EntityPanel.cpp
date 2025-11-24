@@ -441,6 +441,7 @@ namespace PAIN {
                         openPopUp("Clone Entity");
                     }
 
+#ifdef PN_PLATFORM_WINDOWS
                     if (ImGui::MenuItem("Create Prefab from Entity")) {
                         if (selected_entity != entt::null) {
                             // Get prefab service
@@ -455,6 +456,7 @@ namespace PAIN {
                             PN_CORE_INFO("Created prefab: {}", prefab_name);
                         }
                     }
+#endif
 
                     ImGui::Separator();
 
@@ -662,6 +664,7 @@ namespace PAIN {
                 return name_comp ? name_comp.value().get().name : "Unnamed";
             }
 
+#ifdef PN_PLATFORM_WINDOWS
             std::string EntityPanel::generateUniquePrefabName(const std::string& base_name) {
                 auto path_service = services->get<Path::Path>();
                 auto prefab_folder = Assets::getAllGameFolders()[Assets::Type::Prefabs];
@@ -682,6 +685,7 @@ namespace PAIN {
 
                 return prefab_name;
             }
+#endif
 
             void EntityPanel::collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities) {
                 out_entities.push_back(entity);

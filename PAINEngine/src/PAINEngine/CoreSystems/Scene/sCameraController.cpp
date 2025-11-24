@@ -169,6 +169,9 @@ namespace PAIN {
         const float dt = timing.dt;
         camera = m_Scene->GetActiveCamera();
 
+        // Move left/right based on cross product of forward and up vectors
+        glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
+
         switch (move_mode) {
         case FREE_FLY:
             // Move forward/backward directly in camera forward direction
@@ -180,9 +183,6 @@ namespace PAIN {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
                 camera->pos -= offset;
             }
-
-            // Move left/right based on cross product of forward and up vectors
-            glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
             if (A_KEYDOWN) {
                 camera->pos -= right * camera->speed * dt;
             }

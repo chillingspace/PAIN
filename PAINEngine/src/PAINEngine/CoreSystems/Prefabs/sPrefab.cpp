@@ -46,7 +46,8 @@ namespace PAIN {
 
             return entityJson;
         }
-
+#ifdef PN_PLATFORM_WINDOWS
+        // Creation of prefabs should oly be done in windows, think of release build when running in android
         void Service::createPrefab(entt::entity rootEntity, const std::string& prefabName, entt::registry& registry) {
             // Gather hierarchy
             std::vector<entt::entity> hierarchyEntities;
@@ -71,6 +72,7 @@ namespace PAIN {
             //Save prefab to file
             savePrefabToFile(prefab_asset, virt_path_to_prefab, registry);
         }
+#endif
 
         nlohmann::json Service::serializePrefab(Prefab::PrefabAsset const& prefab_asset, entt::registry& registry) {
             auto ecs_controller = services.lock()->get<ECS::Controller>();

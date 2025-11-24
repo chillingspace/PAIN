@@ -83,7 +83,7 @@ namespace PAIN {
 				}
 				};
 
-			(expand(std::type_identity<Components>{}), ...);
+			(expand(entt::type_identity<Components>{}), ...);
 			return components;
 		}
 
@@ -161,7 +161,7 @@ namespace PAIN {
 				}
 				};
 
-			(expand(std::type_identity<Components>{}), ...);
+			(expand(entt::type_identity<Components>{}), ...);
 		}
 
 

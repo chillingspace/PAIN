@@ -1,7 +1,6 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
 #include "Utility/Log.h"
-#include "CoreSystems/Path/Path.h"
 
 #include <fstream>
 #include <chrono>

@@ -8,6 +8,7 @@
 #include "PAINEngine/CoreSystems/Events/Event.h"
 #include "PAINEngine/ECS/System/ISystem.h"
 #include <entt/entity/entity.hpp>
+#include "PAINEngine/CoreSystems/Path/Path.h"
 
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 

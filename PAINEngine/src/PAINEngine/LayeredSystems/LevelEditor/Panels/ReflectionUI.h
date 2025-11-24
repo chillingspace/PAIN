@@ -232,7 +232,8 @@ inline bool DrawAssetSelectorField(
         ImGui::OpenPopup(label);
     }
 
-    //Create file drag drop for any asset
+    //Create file drag drop for any asset (Only in windows)
+#ifdef PN_PLATFORM_WINDOWS
     auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
     if (ImGui::BeginDragDropTarget()) {
         // Accept material files from Resource Panel
@@ -250,6 +251,7 @@ inline bool DrawAssetSelectorField(
         }
         ImGui::EndDragDropTarget();
     }
+#endif
 
     // Searchable popup
     if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -348,7 +350,7 @@ inline bool DrawAssetSelectorField(
 struct ReadOnlyTag : refl::attr::usage::field {};
 
 // ---------- Asset GUID ----------
-inline bool DrawField(const char* label, PAIN::Assets::GUID& v) { ImGui::Text(v.ToString().c_str()); return true; }
+inline bool DrawField(const char* label, PAIN::Assets::GUID& v) { ImGui::Text("%s", v.ToString().c_str()); return true; }
 
 // ---------- Primitive + std types ----------
 inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
