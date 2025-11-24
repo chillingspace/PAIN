@@ -20,6 +20,9 @@ namespace PAIN {
         static constexpr bool ShouldSerialize = true;
     };
 
+    struct Scripts {
+        std::vector<Script> scripts;
+    };
 } 
 
 
@@ -29,9 +32,11 @@ REFL_TYPE(PAIN::Script)
         PAIN::Editor::Attributes::DisplayName("Script Asset"),
         PAIN::Editor::Attributes::Tooltip("Select a Lua script"))
     REFL_FIELD(enabled)
-    //REFL_FIELD(loaded)
 REFL_END
 
-static_assert(refl::trait::is_reflectable_v<PAIN::Script>);
+REFL_TYPE(PAIN::Scripts)
+    REFL_FIELD(scripts)
+REFL_END
+
 
 #endif

@@ -47,7 +47,7 @@ namespace PAIN {
         Joint,
         BoundingVolume,
         Audio::AudioSource,
-        Script,
+        Scripts,
 
         // UI comps
         UIRectTransform,
@@ -89,7 +89,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, Joint>) return "Joint";
         else if constexpr (std::is_same_v<T, BoundingVolume>) return "BoundingVolume";
         else if constexpr (std::is_same_v<T, Audio::AudioSource>) return "AudioSource";
-        else if constexpr (std::is_same_v<T, Script>) return "Script";
+        else if constexpr (std::is_same_v<T, Script>) return "Scripts";
 
         // UI comps
 		else if constexpr (std::is_same_v<T, UIRectTransform>) return "UIRectTransform";
@@ -102,7 +102,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, AI::Controller>) return "AIController";
         else if constexpr (std::is_same_v<T, AI::Sensors>) return "AISensors";
         
-
+        
         else return "Unknown";
     }
 }

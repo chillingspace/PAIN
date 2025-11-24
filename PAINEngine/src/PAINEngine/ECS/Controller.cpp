@@ -208,7 +208,7 @@ namespace PAIN {
             registerComponent<Joint>("Joint");
             registerComponent<BoundingVolume>("BoundingVolume");
             registerComponent<Audio::AudioSource>("AudioSource");
-            registerComponent<Script>("Script");
+            registerComponent<Scripts>("Scripts");
 
             // AI Components
             registerComponent<AI::Blackboard>("AIBlackboard");

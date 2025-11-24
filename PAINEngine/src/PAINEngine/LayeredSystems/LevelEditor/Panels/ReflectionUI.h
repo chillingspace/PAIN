@@ -32,6 +32,7 @@
 #include "ECS/Components/cAI.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "CoreSystems/Assets/sAssets.h"  
+#include "ECS/Components/cScript.h"
 #include "Applications/AppSystem.h"
 
 #include "ResourcePanel.h"

@@ -12,11 +12,11 @@
 #include "sysAI.h"
 
 
-static IEngineAPI* GetEngineAPI(std::shared_ptr<PAIN::Services> svc) {
-    if (!svc) return nullptr;
-    auto api = svc->get<IEngineAPI>();
-    return api ? api.get() : nullptr;
-}
+//static IEngineAPI* GetEngineAPI(std::shared_ptr<PAIN::Services> svc) {
+//    if (!svc) return nullptr;
+//    auto api = svc->get<IEngineAPI>();
+//    return api ? api.get() : nullptr;
+//}
 
 static PAIN::Physics::System* GetPhysicsSystem(std::shared_ptr<PAIN::Services> svc) {
 	if (!svc) return nullptr;

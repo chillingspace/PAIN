@@ -237,8 +237,8 @@ namespace PAIN {
                     [](ComponentsPanel&, Physics::RigidBody3D& rb) { DrawWithReflection(rb); });
 
                 // ---- Script ---- 
-                registerCompUIFunc<PAIN::Script>("Script",
-                    [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });                 
+                // registerCompUIFunc<PAIN::Script>("Script",
+                //     [this](ComponentsPanel&, PAIN::Script& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });                 
                 
                 // ---- AI ----
                 registerCompUIFunc<PAIN::AI::Controller>( "AIController",
@@ -273,6 +273,68 @@ namespace PAIN {
 
                 registerCompUIFunc<PAIN::UIAnimation>("UIAnimation",
                     [this](ComponentsPanel&, PAIN::UIAnimation& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+                // ---- Script ---- (UNCHANGED)
+                /*registerCompUIFunc<PAIN::Scripts>("Scripts",
+                    [this](ComponentsPanel&, PAIN::Scripts& as) { DrawWithReflection(as, this); });*/
+
+                registerCompUIFunc<PAIN::Scripts>("Scripts",
+                    [this](ComponentsPanel& panel, PAIN::Scripts& comp)
+                    {
+                        auto services = panel.services;
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::TextUnformatted("Attached Scripts");
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        auto& scripts = comp.scripts;
+
+                        for (size_t i = 0; i < scripts.size(); /* manual increment */) {
+                            auto& s = scripts[i];
+
+                            ImGui::PushID(static_cast<int>(i));
+
+                            if (DrawAssetSelectorField(
+                                "Script Asset",
+                                s.script_asset,
+                                PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Script),
+                                services))
+                            {
+                                s.loaded = false; // force reload on next run
+                            }
+
+                            ImGui::SameLine();
+                            ImGui::Checkbox("Enabled", &s.enabled);
+
+                            // show Loaded as read-only
+                            ImGui::SameLine();
+                            ImGui::BeginDisabled();
+                            ImGui::Checkbox("Loaded", &s.loaded);
+                            ImGui::EndDisabled();
+
+                            ImGui::SameLine();
+                            if (ImGui::Button("Remove")) {
+                                scripts.erase(scripts.begin() + static_cast<std::ptrdiff_t>(i));
+                                ImGui::PopID();
+                                continue;
+                            }
+
+                            ImGui::PopID();
+                            ++i;
+                            ImGui::Spacing();
+                        }
+
+                        if (ImGui::Button("+ Add Script")) {
+                            PAIN::Script s{};
+                            s.enabled = true;
+                            s.loaded = false;
+                            comp.scripts.push_back(s);
+                        }
+
+                        ImGui::Spacing();
+                    });
+
 
                 PAIN::Editor::Panel::RegisterColliderUI(*this);
 
