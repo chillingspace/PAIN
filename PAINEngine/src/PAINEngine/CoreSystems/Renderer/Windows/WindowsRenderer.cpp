@@ -796,11 +796,13 @@ namespace PAIN {
 
 					// account for parent's xform
 					poses[i] = poses[modelAsset->skeleton[i].parent] * relative_poses[i];
+					//poses[i] = relative_poses[i] * poses[modelAsset->skeleton[i].parent];
 				}
 
 				// apply to bind pose (T pose)
 				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
-					boneMatrices[i] = poses[i] * glm::inverse(modelAsset->skeleton[i].bindPose);
+					boneMatrices[i] = poses[i] * modelAsset->skeleton[i].bindPose;
+					//boneMatrices[i] = glm::inverse(modelAsset->skeleton[i].bindPose) * poses[i];
 				}
 
 				// populate animated bone xforms in shader
