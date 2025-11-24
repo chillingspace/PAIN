@@ -75,5 +75,8 @@ namespace PAIN {
 
 		// image based lighting
 		bool ibl = true;
+
+		// animation
+		bool interpolate_animation{ true };		// smoother animations at the expense of performance
 	};
 }

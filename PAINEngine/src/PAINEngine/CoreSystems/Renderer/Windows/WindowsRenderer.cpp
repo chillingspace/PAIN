@@ -777,7 +777,28 @@ namespace PAIN {
 					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
 					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
 					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
-					const glm::mat4 animated_pose = translate * rotate * scale;
+					glm::mat4 animated_pose;
+
+					if (GraphicsSettings::get().interpolate_animation) {
+						auto next_key_it = std::next(key_it);
+						if (next_key_it != track.end()) {							
+							// interpolate between current keyframe pose and next keyframe pose
+							const float t = (component.animationTime - key_it->time) / (next_key_it->time - key_it->time);
+							const glm::vec3 i_scale = glm::mix(key_it->scale, next_key_it->scale, t);
+							const glm::quat i_rotate = glm::slerp(key_it->rotation, next_key_it->rotation, t);
+							const glm::vec3 i_translate = glm::mix(key_it->translation, next_key_it->translation, t);
+
+							const glm::mat4 i_scale_mtx = glm::scale(glm::mat4(1.f), i_scale);
+							const glm::mat4 i_rotate_mtx = glm::mat4_cast(i_rotate);
+							const glm::mat4 i_translate_mtx = glm::translate(glm::mat4(1.f), i_translate);
+
+							// update interpolated matrix
+							animated_pose = i_translate_mtx * i_rotate_mtx * i_scale_mtx;
+						}
+					}
+					else {
+						animated_pose = translate * rotate * scale;
+					}
 
 					relative_poses[bone_idx] = animated_pose;
 
