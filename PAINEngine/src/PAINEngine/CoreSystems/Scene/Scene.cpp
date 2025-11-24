@@ -28,7 +28,8 @@ namespace PAIN {
 
 		// Camera and Scene Setup
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
-		glm::vec3 forward{ -glm::normalize(pos) };
+		//glm::vec3 forward{-glm::normalize(pos)};
+		glm::vec3 forward{ 0.f, 0.f, -1.f };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 		float near_plane{ 0.1f };
 		float far_plane{ 100.f };
