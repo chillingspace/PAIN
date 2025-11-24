@@ -68,9 +68,9 @@ namespace PAIN {
         void AddTag(entt::entity entityId, std::string tag) override;
         void RemoveTag(entt::entity entityId, std::string tag) override;
         bool HasTag(entt::entity entityId, std::string tag) override;
-        /*void AssignGroup(entt::entity entityId, std::string group) override;
-        void UnassignGroup(entt::entity entityId) override;
-        std::optional<std::string> GetGroup(entt::entity entityId) override;*/
+        /*void AssignGroup(entt::entity entityId, std::string group) override {}
+        void UnassignGroup(entt::entity entityId) override {}
+        std::optional<std::string> GetGroup(entt::entity entityId) override {}*/
         std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) override;
 
         /* =========================================================================== */

@@ -9,6 +9,7 @@
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cEntity.h"
+#include "Systems/Transform/sysTransform.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
 #include <glm/gtx/quaternion.hpp>   // for glm::eulerAngles, glm::quat(vec3)
@@ -225,6 +226,10 @@ namespace PAIN {
         auto& t = reg.get<PAIN::LocalTransform>(entityId);
         t.position = p;
 
+        if (auto ts = ecs_.getSystem<PAIN::Transform::System>()) { //recompute worldtransform
+            ts->markDirty(entityId, reg);
+        }
+
         if (reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
             auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);
             if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
@@ -246,6 +251,10 @@ namespace PAIN {
 
         auto& t = reg.get<PAIN::LocalTransform>(entityId);
         t.scale = s;
+
+        if (auto ts = ecs_.getSystem<PAIN::Transform::System>()) {
+            ts->markDirty(entityId, reg);
+        }
     }
 
     glm::vec3 EngineAPIAdapter::GetRotation(entt::entity entityId)
@@ -266,6 +275,10 @@ namespace PAIN {
 
         auto& t = reg.get<PAIN::LocalTransform>(entityId);
         t.rotation = glm::quat(r); // euler to quat
+
+        if (auto ts = ecs_.getSystem<PAIN::Transform::System>()) {
+            ts->markDirty(entityId, reg);
+        }
     }
 
     /* =========================================================================== */
