@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "CrumpledDevelopable.obj",
+    "name": "AnimatedTriangle.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 2887935722601323971
+    "hash": 4436067720714930968
   },
   "descriptor_version": 1,
-  "guid": "bd95ca8e-40a8-1241-afc9-6c7c818fffd1",
+  "guid": "5247a57c-9aa7-9840-9796-1ad71757bd01",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\CrumpledDevelopable.obj"
+    "source_file": "game\\models\\at\\AnimatedTriangle.gltf"
   }
 }

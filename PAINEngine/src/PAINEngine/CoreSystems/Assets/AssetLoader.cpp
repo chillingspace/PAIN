@@ -358,6 +358,7 @@ namespace PAIN {
         }
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
+            PN_CORE_INFO("ImportModel {}", virtual_path);
 
             //Check if virtual path has valid extension
             if (std::filesystem::path(path_service->resolvePath(virtual_path)).extension() != ".mesh") {
@@ -472,6 +473,22 @@ namespace PAIN {
                 readMem(&b.bindPose, sizeof(glm::mat4));
             }
 
+            // check if bones are well or poorly ordered
+            {
+                // parents should come before children in vector order
+                // if not, could cause issues/require a lot more work in transforming vertices for animation
+                bool ok = true;
+                for (int i{}; i < asset.skeleton.size(); ++i) {
+                    if (asset.skeleton[i].parent > i) {
+                        PN_CORE_WARN("Malformed bone order in {}", virtual_path);
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) PN_CORE_INFO("Bone order OK: {}", virtual_path);
+                else PN_CORE_WARN("Bone order malformed: {}", virtual_path);
+            }
+
             // Animations
             uint32_t animCount = 0;
             readMem(&animCount, sizeof(animCount));
@@ -486,16 +503,35 @@ namespace PAIN {
 
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
-                anim.tracks.resize(trackCount);
-                for (AnimationTrack& track : anim.tracks) {
+                //anim.tracks.resize(trackCount);
+
+                int no_bone_tracks{};
+                for (size_t i{}; i < trackCount; ++i) {
                     uint32_t boneLen = 0, keyCount = 0;
                     readMem(&boneLen, sizeof(boneLen));
-                    track.boneName.resize(boneLen);
-                    readMem(track.boneName.data(), boneLen);
+                    //track.boneName.resize(boneLen);
+                    //readMem(track.boneName.data(), boneLen);
+
+                    static std::string boneName;
+                    boneName.resize(boneLen);
+                    readMem(boneName.data(), boneLen);
+                    
+                    // unnamed bones suck tf, but i guess this could cause more problems
+                    // if bone doesn't exist, store as root xform or scene xform
+                    //auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
+                    //if (it == asset.skeleton.end()) {
+                    //    if (no_bone_tracks > 0) {
+                    //        PN_CORE_ERROR("Error with loading model. Too many tracks for skeleton size");
+                    //        throw std::runtime_error("");
+                    //    }
+                    //    boneName = "root" + std::to_string(no_bone_tracks++);
+                    //}
+
+                    auto& track = anim.track_map[boneName];
 
                     readMem(&keyCount, sizeof(keyCount));
-                    track.keys.resize(keyCount);
-                    for (AnimationKey& key : track.keys) {
+                    track.resize(keyCount);
+                    for (AnimationKey& key : track) {
                         readMem(&key.time, sizeof(key.time));
                         readMem(&key.translation, sizeof(key.translation));
                         readMem(&key.rotation, sizeof(key.rotation));
