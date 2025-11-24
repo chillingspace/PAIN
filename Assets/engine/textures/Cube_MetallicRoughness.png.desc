@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Cube_MetallicRoughness.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4405908482040764151
+  },
+  "descriptor_version": 1,
+  "guid": "359c11cc-32c8-184e-bc39-45a579620d60",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\Cube_MetallicRoughness.png"
+  }
+}

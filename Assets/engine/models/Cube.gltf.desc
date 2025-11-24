@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "quad.obj",
+    "name": "Cube.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 1585656440093847986
+    "hash": 13489141898285819278
   },
   "descriptor_version": 1,
-  "guid": "1e3b332d-92a0-d547-b525-5dcac2f90db3",
+  "guid": "cff4914f-5fb7-ae4e-9d22-814985ca8a66",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\quad.obj"
+    "source_file": "engine\\models\\Cube.gltf"
   }
 }

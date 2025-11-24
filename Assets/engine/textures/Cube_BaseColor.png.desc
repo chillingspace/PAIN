@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Cube_BaseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2708982833041611497
+  },
+  "descriptor_version": 1,
+  "guid": "2b6519b3-ce38-2742-832f-770f9cd47346",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\Cube_BaseColor.png"
+  }
+}
