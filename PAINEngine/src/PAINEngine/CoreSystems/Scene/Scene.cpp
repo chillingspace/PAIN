@@ -28,7 +28,8 @@ namespace PAIN {
 
 		// Camera and Scene Setup
 		glm::vec3 pos{ 0.f, 2.f, 4.f };
-		glm::vec3 forward{ -glm::normalize(pos) };
+		//glm::vec3 forward{-glm::normalize(pos)};
+		glm::vec3 forward{ 0.f, 0.f, -1.f };
 		glm::vec3 up{ 0.f, 1.f, 0.f };
 		float near_plane{ 0.1f };
 		float far_plane{ 100.f };
@@ -136,16 +137,35 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path crumpled_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
+		std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
 #else	
-		std::filesystem::path crumpled_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
+		std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
 #endif
 		//Get model
-		mdl_opt = asset_manager->getAsset<Assets::Model>(crumpled_path);
+		mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
 		if (mdl_opt.has_value()) {
 			mdl = mdl_opt.value();
 
 			auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+		}
+
+
+#ifdef PN_PLATFORM_WINDOWS
+		std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
+#else	
+		std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
+#endif
+		//Get model
+		mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
+		if (mdl_opt.has_value()) {
+			mdl = mdl_opt.value();
+			//mdl->materials[0].metallic = 0.f;
+			//mdl->materials[0].roughness = 1.f;
+			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+			auto e = AddObject(mdl, "bs", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
+		}
+		else {
+			throw std::runtime_error("animation obj err");
 		}
 
 
@@ -277,6 +297,14 @@ namespace PAIN {
 			break;
 		}
 
+		// animation
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<Entity::Name>();
+		for (auto e : view) {
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			mdl->get().UpdateAnimation(timing.dt);
+		}
 	}
 
 	void Scene::onEvent(Event::Event& e) {}
@@ -286,12 +314,49 @@ namespace PAIN {
 		auto ecs = services->get<ECS::Controller>();
 		auto meta = services->get<MetaData::Service>();
 
+		// if animated object, may be in T pose. must find root xform
+		glm::vec3 root_scale = glm::vec3(1.f);
+		glm::quat root_rot= glm::quat(1.f, 0.f, 0.f, 0.f);
+		glm::vec3 root_trans = glm::vec3(0.f);
+
+		if (mdl->animations.size()) {
+			auto anim = mdl->animations[0];
+			for (const auto& [bone_name, track] : anim.track_map) {
+				const auto it = std::find_if(mdl->skeleton.begin(), mdl->skeleton.end(), [&bone_name](const Assets::Bone& b) { return bone_name == b.name; });
+				if (it == mdl->skeleton.end()) {
+					root_scale = track[0].scale;
+					root_rot = track[0].rotation;
+					root_trans = track[0].translation;
+					break;
+				}
+			}
+		}
+
+		// i suppose i shouldnt bake the root xform into LocalTransform here. so
+		//glm::mat4 root_xform = 
+		//	glm::translate(glm::mat4(1.f), root_trans) * 
+		//	glm::mat4_cast(root_rot) *
+		//	glm::scale(glm::mat4(1.f), root_scale);
+
+
+
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, Entity::Name{ name });
+		ecs->addEntityComponent(entity, RootTransform(root_scale, root_rot, root_trans));
 		ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, WorldTransform{});
 		ecs->addEntityComponent(entity, Entity::Hierarchy{});
-		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
+		// ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
+		
+		ModelRenderer mr = ModelRenderer{ mdl->guid };
+		if (mdl->animations.size()) {
+			//mr.isPlaying = true;
+			//mr.currentAnimationIndex = 0;
+
+			mr.PlayAnimation(0);
+		}
+
+		ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
 
 		if (meta) meta->setEntityName(entity, name);
 

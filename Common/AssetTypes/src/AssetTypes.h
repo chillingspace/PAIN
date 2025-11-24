@@ -71,8 +71,9 @@ namespace PAIN {
             glm::vec2 uv;
             glm::vec3 tangent;    // For normal mapping/PBR
             glm::vec3 bitangent;  // For normal mapping/PBR
-            uint8_t boneIndices[4]; // Supports 4 bone influences per vertex
-            float boneWeights[4];   // Matches bone indices, sum to 1
+            glm::ivec4 boneIndices{ -1 }; // Supports 4 bone influences per vertex
+            glm::vec4 boneIndices_f{ -1.f };
+            glm::vec4 boneWeights{ -1.f };   // Matches bone indices, sum to 1
             glm::vec3 color;        // (optional) for vertex color
         };
 
@@ -91,6 +92,11 @@ namespace PAIN {
             glm::mat4 bindPose;
         };
 
+        //struct Skeleton {
+        //    std::vector<Bone> bones;
+        //    std::vector<glm::mat4> bone_xforms;     // for access speed. will need to access all Bone::bindPose every frame
+        //};
+
         struct AnimationKey {
             float time;
             glm::vec3 translation;
@@ -99,15 +105,15 @@ namespace PAIN {
             std::vector<float> morphTargetWeights; // Support for blend shapes
         };
 
-        struct AnimationTrack {
-            std::string boneName;
-            std::vector<AnimationKey> keys;
-        };
+        //struct AnimationTrack {
+        //    std::string boneName;
+        //    std::vector<AnimationKey> keys;
+        //};
 
         struct AnimationClip {
             std::string name;
             float duration;
-            std::vector<AnimationTrack> tracks;
+            std::unordered_map<std::string, std::vector<AnimationKey>> track_map;     // key: bone name, value: track
             bool isAdditive; // For blending, layering
         };
 

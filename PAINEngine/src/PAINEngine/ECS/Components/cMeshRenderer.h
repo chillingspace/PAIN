@@ -91,7 +91,7 @@ namespace PAIN {
             if (animationTime >= anim.duration) {
                 if (loopAnimation) {
                     animationTime = fmod(animationTime, anim.duration);
-                    currentAnimationIndex++;
+                    // currentAnimationIndex++;             // don't change animation type, is a loop
                 }
                 else {
                     animationTime = anim.duration;

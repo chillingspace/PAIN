@@ -371,6 +371,14 @@ namespace PAIN {
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
 
+			// bone indices
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices_f));
+			glEnableVertexAttribArray(3);
+
+			// bone weights
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
+			glEnableVertexAttribArray(4);
+
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
@@ -732,6 +740,77 @@ namespace PAIN {
 				else {
 					geometry_shader->SetUniform("material.use_ao", 0.0f);
 				}
+			}
+
+			// animation
+			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
+			int bones_skipped{};
+			if (component.isPlaying) {
+				//PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
+
+				static std::vector<glm::mat4> boneMatrices;
+				static constexpr int MAX_BONES = 100;
+				boneMatrices.resize(MAX_BONES, glm::mat4(1.f));
+
+				// find local bone xforms relative to parent
+				// these mtx move this particular bone the specific amount RELATIVE to it's parent
+				// eg. how much a finger moves relative to the hand bone (not absolute positioning)
+				std::vector<glm::mat4> relative_poses(modelAsset->skeleton.size(), glm::mat4(1.f));
+
+				// each track controls a single bone's animation
+				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
+					// find the animation keyframe corresponding to current animation time
+					const auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+					if (key_it == track.end())	PN_CORE_ERROR("Invalid iterator key_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+
+					// find the bone idx affected by current track
+					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
+					if (bone_it == modelAsset->skeleton.end()) {
+						//PN_CORE_WARN("Bone does not exist for animation track {} for model {}. Skipped: {}", component.currentAnimationIndex, modelAsset->vpath, ++bones_skipped);
+						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+						continue;
+
+					}
+					const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
+
+					// get the xform matrix that applies to current vertex from current animation key
+					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
+					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
+					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
+					const glm::mat4 animated_pose = translate * rotate * scale;
+
+					relative_poses[bone_idx] = animated_pose;
+
+					// multiply with bind pose mtx(the T shape thingy) for final xform matrix
+					//boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
+				}
+
+				// account for parent bone transformation
+				std::vector<glm::mat4> poses(modelAsset->skeleton.size());
+				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+					// if is parent, no need
+					if (modelAsset->skeleton[i].parent == -1) {
+						poses[i] = relative_poses[i];
+						continue;
+					}
+
+					// account for parent's xform
+					poses[i] = poses[modelAsset->skeleton[i].parent] * relative_poses[i];
+					//poses[i] = relative_poses[i] * poses[modelAsset->skeleton[i].parent];
+				}
+
+				// apply to bind pose (T pose)
+				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+					boneMatrices[i] = poses[i] * modelAsset->skeleton[i].bindPose;
+					//boneMatrices[i] = glm::inverse(modelAsset->skeleton[i].bindPose) * poses[i];
+				}
+
+				// populate animated bone xforms in shader
+				for (size_t i{}; i < boneMatrices.size(); ++i) {
+					const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
+					geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
+				}
+
 			}
 
 			// Draw this submesh
@@ -1230,7 +1309,7 @@ namespace PAIN {
 #endif
 				// !TODO: add queue and iterate through all 2D textures to be rendered last
 				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if(texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, {0.85f, -0.85f}, 0.1f);
+				if (texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, { 0.85f, -0.85f }, 0.1f);
 			}
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -1246,7 +1325,7 @@ namespace PAIN {
 				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
 #endif
 				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
-				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, {1.f, 1.f, 1.f});
+				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
 				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
 			}
 			err = glGetError();
