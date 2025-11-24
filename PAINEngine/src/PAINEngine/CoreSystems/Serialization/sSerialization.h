@@ -47,11 +47,6 @@ namespace PAIN {
             std::vector<std::vector<bool>> mask_matrix;
             bool dirty = false;
         };
-
-        struct EntityPrefab {
-            std::string name;
-            std::vector<nlohmann::json> entities;
-        };  
             
         // ----------------------------
         // Service (inherits AppSystem)

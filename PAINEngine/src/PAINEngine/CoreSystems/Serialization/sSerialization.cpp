@@ -166,6 +166,7 @@ namespace PAIN {
             if (ok) { curr_scene_file_ = file_path; isModifiedScene = false; }
             return ok;
         }
+
         bool Service::loadSceneFromFile(const std::string& file_path) {
             auto path_service = services->get<Path::Path>();
             std::string virtPath = file_path;
@@ -196,7 +197,6 @@ namespace PAIN {
                     metadata_service->deserializeServiceState(j["metadata_service"]);
                 }
             }
-
 
             // Rebuild ECS from the new bolt on section if present
             if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
@@ -280,7 +280,6 @@ namespace PAIN {
             return true;
         }
 
-
         std::string Service::getCurrSceneId() const
         {
             // Find the last '/' in the path to get the base filename
@@ -352,85 +351,6 @@ namespace PAIN {
 #elif PN_PLATFORM_ANDROID
             return "game_assets://scenes/" + b;
 #endif
-        }
-
-        /*************************
-        * Prefab Seri
-        *************************/
-
-        void Service::savePrefabToFile(const std::string& filepath, const std::vector<entt::entity>& entities)
-        {
-            auto controller = services->get<PAIN::ECS::Controller>();
-            auto metadata_service = services->get<PAIN::MetaData::Service>();
-
-            nlohmann::json prefab_json;
-            nlohmann::json ents = nlohmann::json::array();
-
-            for (auto entity : entities) {
-                nlohmann::json E;
-                E["Components"] = controller->getAllComponentsAsJson(entity);  
-                ents.push_back(E);
-            }
-
-            prefab_json["Entities"] = std::move(ents);
-
-            std::string prefab_filepath = resolvePrefabPath(filepath);
-        
-            saveJsonFile(prefab_filepath, prefab_json);
-        }
-
-        std::vector<entt::entity> PAIN::Serialization::Service::loadPrefabFromFile(const std::string& filepath)
-        {
-            auto controller = services->get<PAIN::ECS::Controller>();
-            auto metadata_service = services->get<PAIN::MetaData::Service>();
-            auto path_service = services->get<PAIN::Path::Path>();
-
-            std::vector<entt::entity> entities;
-
-            std::string prefab_virtual_filepath = resolvePrefabPath(filepath);
-
-#ifdef PN_PLATFORM_WINDOWS
-            // Debugging purposes
-            std::string prefab_abs_path = path_service->resolvePath(prefab_virtual_filepath);
-            assert(std::filesystem::exists(prefab_abs_path) && "Prefab file does not exist or path is invalid!");
-#endif
-
-            nlohmann::json prefab_json = loadJsonFile(prefab_virtual_filepath);
-            if (!prefab_json.is_object() || !prefab_json.contains("Entities")) return entities;
-
-            for (const auto& E : prefab_json["Entities"]) {
-                // Create new entity
-                entt::entity e = controller->createEntity();
-                entities.push_back(e);
-
-                // Deserialize Components using adl_serializer or refl cpp
-                if (E.contains("Components")) {
-                    controller->loadAllComponentsFromJson(e, E["Components"]);
-                }
-
-                // Change entity name to be known that it is created from prefab
-                if (controller->getEntityComponent<Entity::Name>(e).has_value()) { controller->getEntityComponent<Entity::Name>(e).value().get().name += "_prefab"; }
-            }
-
-            PN_CORE_INFO("Loaded prefab with {} entities from virtual path: {}", entities.size(), prefab_virtual_filepath);
-            return entities;
-        }
-
-        std::string Service::resolvePrefabPath(std::string const& prefab)
-        {
-            auto path_service = services->get<Path::Path>();
-
-            std::string prefab_with_ext = prefab;
-
-            // If do not have the .prefab extension, add it in
-            if (prefab.rfind(".prefab") == std::string::npos) prefab_with_ext += ".prefab";
-
-            #ifdef PN_PLATFORM_WINDOWS
-                        // Windows file path
-                        return "main_game_assets://prefabs/" + prefab_with_ext;
-            #elif PN_PLATFORM_ANDROID
-                        return "game_assets://prefabs/" + prefab_with_ext;
-            #endif
         }
 
         bool Service::createNewScene(std::string_view baseName)
