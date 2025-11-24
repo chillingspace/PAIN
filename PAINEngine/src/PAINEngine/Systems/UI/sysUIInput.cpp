@@ -249,58 +249,64 @@ namespace PAIN {
 		}
 
 		std::optional<entt::entity> InputSystem::raycastUI(const glm::vec2& mouse_pos, entt::registry& registry) {
-			auto metadata_service = services.lock()->get<MetaData::Service>();
+			auto ecs = services.lock()->get<ECS::Controller>();
 			auto view = registry.view<UIRectTransform, UIElement>();
 
-			// Collect candidates with canvas sort order and hierarchy depth
-			// entity, canvas_sort, sibling_index
-			std::vector <std::tuple<entt::entity, int, int>> candidates;
+			// Each candidate: entity, canvas_sort, sibling_index
+			std::vector<std::tuple<entt::entity, int, int>> candidates;
 
 			for (auto&& [entity, rect, element] : view.each()) {
 				if (!element.b_is_enabled || !element.b_is_interactable) continue;
 
-				// Use calculated world position and size from layout system
 				glm::vec2 pos = rect.calculated_world_position;
 				glm::vec2 size = rect.calculated_world_size;
 				glm::vec2 rect_min = pos;
 				glm::vec2 rect_max = pos + size;
 
 				if (isPointInRect(mouse_pos, rect_min, rect_max)) {
-					//// Get canvas sort order by traversing up hierarchy
-					//int canvas_sort = 0;
-					//auto parent = entity;
-					//while (parent != entt::null) {
-					//	if (registry.all_of<UICanvas>(parent)) {
-					//		canvas_sort = registry.get<UICanvas>(parent).sort_order;
-					//		break;
-					//	}
-					//	auto parent_opt = metadata_service->getParent(parent);
-					//	parent = parent_opt.has_value() ? parent_opt.value() : entt::null;
-					//}
+					// Canvas sort order by traversing up the hierarchy
+					int canvas_sort = 0;
+					entt::entity parent = entity;
+					while (parent != entt::null && registry.all_of<Entity::Hierarchy>(parent)) {
+						const auto& parentHierarchy = registry.get<Entity::Hierarchy>(parent);
+						if (registry.all_of<UICanvas>(parent)) {
+							canvas_sort = registry.get<UICanvas>(parent).sort_order;
+							break;
+						}
+						if (!parentHierarchy.parentGUID.IsValid())
+							break;
+						parent = ecs->resolveGUID(parentHierarchy.parentGUID);
+					}
 
-					//// Get sibling index (hierarchy order)
-					//int sibling_index = 0;
-					//auto parent_opt = metadata_service->getParent(entity);
-					//if (parent_opt.has_value()) {
-					//	auto siblings = metadata_service->getChildren(parent_opt.value());
-					//	auto it = std::find(siblings.begin(), siblings.end(), entity);
-					//	if (it != siblings.end()) {
-					//		sibling_index = std::distance(siblings.begin(), it);
-					//	}
-					//}
+					// Sibling index (in parent's children list)
+					int sibling_index = 0;
+					if (registry.all_of<Entity::Hierarchy>(entity) && registry.all_of<Entity::GUID>(entity)) {
+						const auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
+						const auto& entity_guid = registry.get<Entity::GUID>(entity); 
+						if (hierarchy.parentGUID.IsValid()) {
+							entt::entity parent_entity = ecs->resolveGUID(hierarchy.parentGUID);
+							if (parent_entity != entt::null && registry.all_of<Entity::Hierarchy>(parent_entity)) {
+								const auto& parentHierarchy = registry.get<Entity::Hierarchy>(parent_entity);
+								auto it = std::find(parentHierarchy.childrenGUIDs.begin(), parentHierarchy.childrenGUIDs.end(), entity_guid.guid);
+								// Find current entity guid in parent guid vector
+								if (it != parentHierarchy.childrenGUIDs.end()) {
+									sibling_index = static_cast<int>(std::distance(parentHierarchy.childrenGUIDs.begin(), it));
+								}
+							}
+						}
+					}
 
-					//candidates.push_back({ entity, canvas_sort, sibling_index });
+
+					candidates.push_back({ entity, canvas_sort, sibling_index });
 				}
 			}
 
-			// Sort by canvas first (higher = front), then sibling index (higher = front)
+			// Sort top-most first: canvas_sort DESC, sibling_index DESC (larger sibling = "front")
 			if (!candidates.empty()) {
 				std::sort(candidates.begin(), candidates.end(),
 					[](const auto& a, const auto& b) {
 						if (std::get<1>(a) != std::get<1>(b))
-							// Canvas sort order
 							return std::get<1>(a) > std::get<1>(b);
-						// Last child rendered on top
 						return std::get<2>(a) > std::get<2>(b);
 					});
 				return std::get<0>(candidates.front());
@@ -308,6 +314,7 @@ namespace PAIN {
 
 			return std::nullopt;
 		}
+
 
 
 		bool InputSystem::isPointInRect(const glm::vec2& point, const glm::vec2& rect_min,
