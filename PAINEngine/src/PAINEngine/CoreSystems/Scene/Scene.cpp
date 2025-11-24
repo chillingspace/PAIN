@@ -276,7 +276,14 @@ namespace PAIN {
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, MetaData::EntityName{ name });
 		ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
-		ecs->addEntityComponent(entity, ModelRenderer{ mdl->guid });
+		
+		ModelRenderer mr = ModelRenderer{ mdl->guid };
+		if (mdl->animations.size()) {
+			mr.isPlaying = true;
+			mr.currentAnimationIndex = 0;
+		}
+
+		ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
 
 		if (meta) meta->setEntityName(entity, name);
 

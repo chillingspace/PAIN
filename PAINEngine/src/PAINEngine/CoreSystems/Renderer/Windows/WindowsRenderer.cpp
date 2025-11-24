@@ -757,7 +757,12 @@ namespace PAIN {
 
 					// find the bone idx affected by current track
 					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
-					if (bone_it == modelAsset->skeleton.end())	PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+					if (bone_it == modelAsset->skeleton.end()) {
+						PN_CORE_WARN("Bone does not exist for animation track. Skipping..");
+						continue;
+
+						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+					}
 					const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
 
 					// get the xform matrix that applies to current vertex from current animation key
