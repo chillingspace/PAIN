@@ -65,7 +65,23 @@ namespace PAIN {
                                 if (scene) {
                                     auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
                                     if (!models.empty()) {
-                                        ecs->addEntityComponent(entity, ModelRenderer{ models.front()->guid });
+                                        auto asset_service = services->get<Assets::Manager>();
+
+                                        //Default obj paths
+                                        std::filesystem::path quad_path = "engine\\models\\quad.obj";
+                                        std::filesystem::path sphere_path = "engine\\models\\sphere.obj";
+
+                                        //3 Fallbacks incase
+                                        Assets::GUID base_model_id = asset_service->findGUID(quad_path);
+                                        if (!base_model_id.IsValid()) {
+                                            base_model_id = asset_service->findGUID(sphere_path);
+                                        }
+                                        if (!base_model_id.IsValid()) {
+                                            base_model_id = models.front()->guid;
+                                        }
+
+                                        //Add default model renderer
+                                        ecs->addEntityComponent(entity, ModelRenderer{ base_model_id });
                                     }
                                 }
 
