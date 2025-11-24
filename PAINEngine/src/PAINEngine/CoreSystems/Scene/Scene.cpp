@@ -247,6 +247,14 @@ namespace PAIN {
 			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
 		}
 
+		// animation
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<Entity::Name>();
+		for (auto e : view) {
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			mdl->get().UpdateAnimation(timing.dt);
+		}
 	}
 
 	void Scene::onEvent(Event::Event& e) {}
@@ -292,8 +300,10 @@ namespace PAIN {
 		
 		ModelRenderer mr = ModelRenderer{ mdl->guid };
 		if (mdl->animations.size()) {
-			mr.isPlaying = true;
-			mr.currentAnimationIndex = 0;
+			//mr.isPlaying = true;
+			//mr.currentAnimationIndex = 0;
+
+			mr.PlayAnimation(0);
 		}
 
 		ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
