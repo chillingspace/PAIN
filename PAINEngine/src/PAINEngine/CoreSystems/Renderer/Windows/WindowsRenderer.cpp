@@ -737,34 +737,35 @@ namespace PAIN {
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
 			if (component.isPlaying) {
 
+				static std::vector<glm::mat4> boneMatrices;
+				static constexpr int MAX_BONES = 100;
+				boneMatrices.resize(MAX_BONES);
+
 				// each track controls a single bone's animation
 				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
-					// use binary search to find keyframe corresponding to current time
-					//static auto findKeyframe = [](const std::vector<Assets::AnimationKey>& keyframes, const float t) {
-					//	size_t left = 0;
-					//	size_t right = keyframes.size() - 1;
+					// find the animation keyframe corresponding to current animation time
+					const auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+					if (key_it == track.end())	PN_CORE_ERROR("Invalid iterator key_it in animation block in DrawGeometry in WindowsRenderer.cpp");
 
-					//	while (left < right) {
-					//		size_t mid = (right - left) / 2;
-					//		if (keyframes[mid].time < t) {
-					//			left = mid + 1;
-					//		}
-					//		else {
-					//			right = mid;
-					//		}
-					//	}
-					//};
+					// find the bone idx affected by current track
+					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
+					if (bone_it == modelAsset->skeleton.end())	PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+					const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
 
-					auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+					// get the xform matrix that applies to current vertex from current animation key
+					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
+					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
+					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
+					const glm::mat4 animated_pose = translate * rotate * scale;
 
-					// update bone xform
-					auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
+					// multiply with bind pose mtx(the T shape thingy) for final xform matrix
+					boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
 				}
 
-				// populate bone xforms
-				for (size_t i{}; i < modelAsset->skeleton.size(); ++i) {
+				// populate animated bone xforms in shader
+				for (size_t i{}; i < boneMatrices.size(); ++i) {
 					const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
-					geometry_shader->SetUniform(uniform_name, modelAsset->skeleton[i].bindPose);
+					geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
 				}
 
 			}
