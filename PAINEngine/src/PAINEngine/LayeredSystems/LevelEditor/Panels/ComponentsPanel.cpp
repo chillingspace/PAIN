@@ -821,7 +821,8 @@ namespace PAIN {
                 // Display entity name from metadata
                 auto metadata = services->get<MetaData::Service>();
                 if (metadata) {
-                    std::string entity_name = metadata->getEntityName(selected);
+                    auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
+                    std::string entity_name = name_comp_opt.has_value() ? name_comp_opt->get().name : "";
 
                     ImGui::SameLine(0, 20);
 
@@ -842,9 +843,7 @@ namespace PAIN {
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
                     if (ImGui::InputText("##entityName", name_buf, sizeof(name_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
                         std::string new_name(name_buf);
-                        if (!new_name.empty() && metadata->isNameValid(new_name)) {
-                            metadata->setEntityName(selected, new_name);
-                        }
+                        if(name_comp_opt.has_value()) name_comp_opt.value().get().name = new_name;
                     }
 
                     // Tag Dropdown
