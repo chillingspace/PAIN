@@ -160,7 +160,7 @@ namespace PAIN {
 			//mdl->materials[0].metallic = 0.f;
 			//mdl->materials[0].roughness = 1.f;
 			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-			auto e = AddObject(mdl, "bs", { 0.f, 5.f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+			auto e = AddObject(mdl, "bs", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
 		}
 		else {
 			throw std::runtime_error("animation obj err");
