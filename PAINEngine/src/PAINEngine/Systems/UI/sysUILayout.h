@@ -29,11 +29,7 @@ namespace PAIN {
             std::string getSysName() const override { return "UI Layout System"; }
 
         private:
-            void processHierarchy(entt::entity entity, entt::registry& registry,
-                const glm::vec2& parent_size, const glm::vec2& parent_pos);
-            glm::vec2 getParentSize(entt::entity entity, entt::registry& registry);
-            glm::vec2 worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& projection, const glm::vec2& viewport_size);
-            void processWorldSpaceHierarchy(entt::entity entity, entt::registry& registry, const glm::mat4& view, const glm::mat4& projection, const glm::vec2& viewport);
+            void processHierarchy(entt::entity entity, entt::registry& registry, const glm::vec2& parent_size, const glm::vec2& parent_pos);
         };
     }
 
