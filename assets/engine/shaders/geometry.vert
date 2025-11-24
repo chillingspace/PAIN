@@ -7,7 +7,9 @@
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoords;
-layout(location=3) in ivec4 aBoneIndices;       // the indices of the bones that affect this particular vertex
+
+// int because opengl has beef with ints istg
+layout(location=3) in vec4 aBoneIndices;       // the indices of the bones that affect this particular vertex
 layout(location=4) in vec4 aBoneWeights;        // how much effect does this bone have on this vertex.
 // in this case, there are a max of 4 bones that can affect a vertex. all 4 bones must add up to 1
 
@@ -32,10 +34,18 @@ void main() {
     vec3 localNormal;
     
     if (u_Animated > 0.5) {
-        mat4 skin = u_BoneMatrices[aBoneIndices[0]] * aBoneWeights[0]
-                  + u_BoneMatrices[aBoneIndices[1]] * aBoneWeights[1]
-                  + u_BoneMatrices[aBoneIndices[2]] * aBoneWeights[2]
-                  + u_BoneMatrices[aBoneIndices[3]] * aBoneWeights[3];
+        mat4 skin = u_BoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x
+                  + u_BoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y
+                  + u_BoneMatrices[int(aBoneIndices.z)] * aBoneWeights.z
+                  + u_BoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w;
+
+        // vec4 hardcodedWeights = vec4(0.25, 0.25, 0.25, 0.25);
+        // ivec4 hardcodedIndices = ivec4(0, 0, 0, 0);  // All bone 0
+        
+        // skin = u_BoneMatrices[hardcodedIndices[0]] * hardcodedWeights[0]
+        //           + u_BoneMatrices[hardcodedIndices[1]] * hardcodedWeights[1]
+        //           + u_BoneMatrices[hardcodedIndices[2]] * hardcodedWeights[2]
+        //           + u_BoneMatrices[hardcodedIndices[3]] * hardcodedWeights[3];
         
         localPos = skin * vec4(aPos, 1.0);
         localNormal = mat3(skin) * aNormal;

@@ -149,9 +149,9 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
-		std::filesystem::path bs_path = "game/models/at/AnimatedTriangle.mesh";
+		std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
-		std::filesystem::path bs_path = "game\\models\\animatedcube\\AnimatedCube.mesh";
+		std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
 #endif
 		//Get model
 		mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
@@ -160,7 +160,7 @@ namespace PAIN {
 			//mdl->materials[0].metallic = 0.f;
 			//mdl->materials[0].roughness = 1.f;
 			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-			auto e = AddObject(mdl, "bs", { 0.f, 5.f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+			auto e = AddObject(mdl, "bs", { 0.f, 5.f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 		}
 		else {
 			throw std::runtime_error("animation obj err");
@@ -292,7 +292,7 @@ namespace PAIN {
 		
 		ModelRenderer mr = ModelRenderer{ mdl->guid };
 		if (mdl->animations.size()) {
-			//mr.isPlaying = true;
+			mr.isPlaying = true;
 			mr.currentAnimationIndex = 0;
 		}
 

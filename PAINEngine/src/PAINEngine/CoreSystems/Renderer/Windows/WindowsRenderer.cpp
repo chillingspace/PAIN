@@ -372,11 +372,11 @@ namespace PAIN {
 			glEnableVertexAttribArray(2);
 
 			// bone indices
-			glVertexAttribPointer(3, 4, GL_INT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
 			glEnableVertexAttribArray(3);
 
 			// bone weights
-			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
 			glEnableVertexAttribArray(4);
 
 			// Unbind VAO
@@ -746,10 +746,11 @@ namespace PAIN {
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
 			int bones_skipped{};
 			if (component.isPlaying) {
+				PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
 
 				static std::vector<glm::mat4> boneMatrices;
 				static constexpr int MAX_BONES = 100;
-				boneMatrices.resize(MAX_BONES);
+				boneMatrices.resize(MAX_BONES, glm::mat4(1.f));
 
 				// find local bone xforms relative to parent
 				// these mtx move this particular bone the specific amount RELATIVE to it's parent

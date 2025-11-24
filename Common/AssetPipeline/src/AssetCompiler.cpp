@@ -721,6 +721,7 @@ namespace PAIN {
 
                     for (int i = 0; i < max_bone_weights; ++i) {
                         vert.boneIndices[i] = weights[i].first;
+                        vert.boneIndices_f[i] = static_cast<float>(weights[i].first);
                         vert.boneWeights[i] = weights[i].second;
                     }
 
