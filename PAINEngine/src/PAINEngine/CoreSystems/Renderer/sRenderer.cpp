@@ -42,66 +42,73 @@ namespace PAIN {
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after sRenderer attach: {}", err);
 		}
-
-
 	}
 
 	void sRenderer::InitializeModelRenderer(entt::entity entity, ModelRenderer& component) {
 
+		//Get asset manager
 		auto assetManager = services->get<Assets::Manager>();
 
 		//Check for valid GUID
 		if (!component.modelGUID.IsValid()) return;
+
+		//Set prev GUID
+		component.prevModelGUID = component.modelGUID;
+
+		//Boolean for checking for material updates
+		bool material_updates = false;
+		if (component.cachedModelAsset || component.materials.empty()) material_updates = true;
 
 		//optional material asset
 		auto model_opt = assetManager->getAsset<Assets::Model>(component.modelGUID);
 
 		// Load model asset
 		component.cachedModelAsset = model_opt.has_value() ? model_opt.value() : nullptr;
-
 		if (!component.cachedModelAsset) {
 			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 			return;
 		}
 
-		//Set prev GUID
-		component.prevModelGUID = component.modelGUID;
-
 		//Cache model
 		const auto& modelAsset = component.cachedModelAsset;
 
-		//Reset materials
-		component.materials.clear();
-		component.materials.reserve(modelAsset->materials.size());
-		for (const auto& materialPath : modelAsset->materials) {
-			MaterialInstance matInstance;
+		//Update material list only when needed
+		if (material_updates) {
+			
+			//Update new materials
+			component.materials.clear();
+			component.materials.reserve(modelAsset->materials.size());
+			for (const auto& materialPath : modelAsset->materials) {
+				MaterialInstance matInstance;
 
-			//optional material asset
-			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
+				//optional material asset
+				auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialPath);
 
-			// Load material asset
-			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+				// Load material asset
+				auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
 
-			//Check valid material asset
-			if (materialAsset) {
-				matInstance.materialGUID = materialAsset->guid;
+				//Check valid material asset
+				if (materialAsset) {
+					matInstance.materialGUID = materialAsset->guid;
 
-				//Init material overrides
-				matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
-				matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
-				matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
-				matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
-				matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
-				matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
-				matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
-				matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
-				matInstance.baseColorOverride = materialAsset->baseColor;
-				matInstance.metallicOverride = materialAsset->metallic;
-				matInstance.roughnessOverride = materialAsset->roughness;
-				matInstance.emissiveOverride = materialAsset->emissive;
+					//Init material overrides
+					matInstance.albedoTextureOverride = assetManager->findGUID(materialAsset->albedoTexturePath);
+					matInstance.normalTextureOverride = assetManager->findGUID(materialAsset->normalTexturePath);
+					matInstance.metallicTextureOverride = assetManager->findGUID(materialAsset->metallicTexturePath);
+					matInstance.roughnessTextureOverride = assetManager->findGUID(materialAsset->roughnessTexturePath);
+					matInstance.aoTextureOverride = assetManager->findGUID(materialAsset->aoTexturePath);
+					matInstance.emissiveTextureOverride = assetManager->findGUID(materialAsset->emissiveTexturePath);
+					matInstance.heightTextureOverride = assetManager->findGUID(materialAsset->heightTexturePath);
+					matInstance.opacityTextureOverride = assetManager->findGUID(materialAsset->opacityTexturePath);
+					matInstance.baseColorOverride = materialAsset->baseColor;
+					matInstance.metallicOverride = materialAsset->metallic;
+					matInstance.roughnessOverride = materialAsset->roughness;
+					matInstance.emissiveOverride = materialAsset->emissive;
+				}
+
+				component.materials.push_back(std::move(matInstance));
 			}
 
-			component.materials.push_back(std::move(matInstance));
 		}
 
 		// Initialize bone transforms if animated
