@@ -167,6 +167,24 @@ namespace PAIN {
 			throw std::runtime_error("animation obj err");
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
+		std::filesystem::path fh_path = "game/models/Frog_Hopping.mesh";
+#else	
+		std::filesystem::path fh_path = "game\\models\\Frog_Hopping.mesh";
+#endif
+		//Get model
+		mdl_opt = asset_manager->getAsset<Assets::Model>(fh_path);
+		if (mdl_opt.has_value()) {
+			mdl = mdl_opt.value();
+			//mdl->materials[0].metallic = 0.f;
+			//mdl->materials[0].roughness = 1.f;
+			//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+			auto e = AddObject(mdl, "fh", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+		}
+		else {
+			throw std::runtime_error("animation obj err");
+		}
+
 
 
 		// gltf testing
@@ -270,7 +288,9 @@ namespace PAIN {
 		glm::quat root_rot= glm::quat(1.f, 0.f, 0.f, 0.f);
 		glm::vec3 root_trans = glm::vec3(0.f);
 
+		PN_CORE_INFO("Model {} has {} animations", mdl->vpath, mdl->animations.size());
 		if (mdl->animations.size()) {
+
 			auto anim = mdl->animations[0];
 			for (const auto& [bone_name, track] : anim.track_map) {
 				const auto it = std::find_if(mdl->skeleton.begin(), mdl->skeleton.end(), [&bone_name](const Assets::Bone& b) { return bone_name == b.name; });
