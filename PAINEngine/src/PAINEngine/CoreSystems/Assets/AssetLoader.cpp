@@ -500,15 +500,16 @@ namespace PAIN {
                     boneName.resize(boneLen);
                     readMem(boneName.data(), boneLen);
                     
+                    // unnamed bones suck tf, but i guess this could cause more problems
                     // if bone doesn't exist, store as root xform or scene xform
-                    auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
-                    if (it == asset.skeleton.end()) {
-                        if (no_bone_tracks > 0) {
-                            PN_CORE_ERROR("Error with loading model. Too many tracks for skeleton size");
-                            throw std::runtime_error("");
-                        }
-                        boneName = "root" + std::to_string(no_bone_tracks++);
-                    }
+                    //auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
+                    //if (it == asset.skeleton.end()) {
+                    //    if (no_bone_tracks > 0) {
+                    //        PN_CORE_ERROR("Error with loading model. Too many tracks for skeleton size");
+                    //        throw std::runtime_error("");
+                    //    }
+                    //    boneName = "root" + std::to_string(no_bone_tracks++);
+                    //}
 
                     auto& track = anim.track_map[boneName];
 

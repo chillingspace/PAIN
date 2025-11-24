@@ -660,6 +660,23 @@ namespace PAIN {
                 }
             }
 
+            // resolve bone parents
+            for (size_t i = 0; i < asset.skeleton.size(); ++i) {
+                // get bone
+                aiNode* boneNode = scene->mRootNode->FindNode(asset.skeleton[i].name.c_str());
+
+                //
+                if (boneNode && boneNode->mParent) {
+                    std::string parentName = boneNode->mParent->mName.C_Str();
+
+                    // check if parent is bone
+                    auto it = boneNameToIndex.find(parentName);
+                    if (it != boneNameToIndex.end()) {
+                        asset.skeleton[i].parent = it->second;
+                    }
+                }
+            }
+
             size_t vertexBase = 0;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
                 aiMesh* mesh = scene->mMeshes[m];
