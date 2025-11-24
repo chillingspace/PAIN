@@ -371,6 +371,14 @@ namespace PAIN {
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
 
+			// bone indices
+			glVertexAttribPointer(3, 4, GL_INT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
+			glEnableVertexAttribArray(3);
+
+			// bone weights
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
+			glEnableVertexAttribArray(4);
+
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
