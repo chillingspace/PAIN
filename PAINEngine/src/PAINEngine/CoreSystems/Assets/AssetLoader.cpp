@@ -473,6 +473,22 @@ namespace PAIN {
                 readMem(&b.bindPose, sizeof(glm::mat4));
             }
 
+            // check if bones are well or poorly ordered
+            {
+                // parents should come before children in vector order
+                // if not, could cause issues/require a lot more work in transforming vertices for animation
+                bool ok = true;
+                for (int i{}; i < asset.skeleton.size(); ++i) {
+                    if (asset.skeleton[i].parent > i) {
+                        PN_CORE_WARN("Malformed bone order in {}", virtual_path);
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) PN_CORE_INFO("Bone order OK: {}", virtual_path);
+                else PN_CORE_WARN("Bone order malformed: {}", virtual_path);
+            }
+
             // Animations
             uint32_t animCount = 0;
             readMem(&animCount, sizeof(animCount));
