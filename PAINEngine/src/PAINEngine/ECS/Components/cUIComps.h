@@ -108,6 +108,26 @@ namespace PAIN {
 		glm::vec4 end_color{ 1 };
 	};
 
+	enum class TextAlignment { Left, Center, Right };
+
+	struct UIText {
+		std::string display_text;
+		glm::vec4 color{ 1 };
+		Assets::GUID font_guid;
+		float font_size = 18.0f;
+		TextAlignment alignment = TextAlignment::Left;
+		bool word_wrap = true;
+		float line_height = 1.0f;
+		// 0 means no outline
+		float outline_thickness = 0.0f; 
+		glm::vec4 outline_color{ 0,0,0,1 };
+		glm::vec2 shadow_offset{ 0 };
+		glm::vec4 shadow_color{ 0,0,0,0 };
+		bool rich_text = false;
+		// 0 = unlimited
+		int max_length = 0; 
+	};
+
 }
 
 #endif
@@ -132,6 +152,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::AnimationType, {
 {PAIN::AnimationType::Color, "Color"},
 {PAIN::AnimationType::Rotation, "Rotation"}
 	})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
+{PAIN::TextAlignment::Left, "Left"},
+{PAIN::TextAlignment::Center, "Center"},
+{PAIN::TextAlignment::Right, "Right"}})
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)
@@ -187,3 +212,21 @@ REFL_FIELD(end_color)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIAnimation>);
+
+REFL_TYPE(PAIN::UIText)
+REFL_FIELD(display_text)
+REFL_FIELD(color)
+REFL_FIELD(font_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Font))
+REFL_FIELD(font_size)
+REFL_FIELD(alignment)
+REFL_FIELD(word_wrap)
+REFL_FIELD(line_height)
+REFL_FIELD(outline_thickness)
+REFL_FIELD(outline_color)
+REFL_FIELD(shadow_offset)
+REFL_FIELD(shadow_color)
+REFL_FIELD(rich_text)
+REFL_FIELD(max_length)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);
