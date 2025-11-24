@@ -42,38 +42,42 @@ namespace PAIN {
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after sRenderer attach: {}", err);
 		}
-
-
 	}
 
 	void sRenderer::InitializeModelRenderer(entt::entity entity, ModelRenderer& component) {
 
+		//Get asset manager
 		auto assetManager = services->get<Assets::Manager>();
 
 		//Check for valid GUID
 		if (!component.modelGUID.IsValid()) return;
+
+		//Set prev GUID
+		component.prevModelGUID = component.modelGUID;
+
+		//Boolean for checking for material updates
+		bool material_updates = false;
+		if (component.cachedModelAsset || component.materials.empty()) material_updates = true;
 
 		//optional material asset
 		auto model_opt = assetManager->getAsset<Assets::Model>(component.modelGUID);
 
 		// Load model asset
 		component.cachedModelAsset = model_opt.has_value() ? model_opt.value() : nullptr;
-
 		if (!component.cachedModelAsset) {
 			PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 			return;
 		}
 
-		//Set prev GUID
-		component.prevModelGUID = component.modelGUID;
-
 		//Cache model
 		const auto& modelAsset = component.cachedModelAsset;
 
-		// Initialize materials
-		if (component.materials.empty()) {
+		//Update material list only when needed
+		if (material_updates) {
+			
+			//Update new materials
+			component.materials.clear();
 			component.materials.reserve(modelAsset->materials.size());
-
 			for (const auto& materialPath : modelAsset->materials) {
 				MaterialInstance matInstance;
 
@@ -104,9 +108,8 @@ namespace PAIN {
 
 				component.materials.push_back(std::move(matInstance));
 			}
+
 		}
-
-
 
 		// Initialize bone transforms if animated
 		if (!modelAsset->skeleton.empty() && component.boneTransforms.empty()) {
