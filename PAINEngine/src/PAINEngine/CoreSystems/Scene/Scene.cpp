@@ -34,7 +34,8 @@ namespace PAIN {
 		float far_plane{ 100.f };
 		float width_ratio{ 16.f };
 		float height_ratio{ 9.f };
-		camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
+		editor_camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
+		SetActiveCamera(editor_camera.get());
 
 		// Init light sources (REQUIRED TO FUNCTION)
 		LightSources::get().create("cam");
@@ -179,6 +180,15 @@ namespace PAIN {
 		//	std::string name = nameOpt ? nameOpt->get().name : "<no name>";
 		//}
 
+
+
+
+
+		
+
+		if (!game_camera) {
+			game_camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
+		}
 	}
 
 	void Scene::onUpdate(AppTiming timing)
@@ -228,6 +238,45 @@ namespace PAIN {
 			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
 		}
 
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<Entity::Name>();
+
+		for (auto e : view) {
+
+			auto cam = ecs->getEntityComponent<Cam>(e);
+
+			if (!cam.has_value()) {
+				continue;
+			}
+			auto trans = ecs->getEntityComponent<LocalTransform>(e);
+
+			glm::vec3 entity_pos = { 0.f,0.f,0.f };
+			glm::quat entity_rot = glm::quat({ 0.f,0.f,0.f });
+			glm::vec3 entity_scale = { 0.f,0.f,0.f };
+
+			if (trans.has_value()) {
+
+				entity_pos = trans->get().position;
+				entity_rot = trans->get().rotation;
+				entity_scale = trans->get().scale;
+
+			}
+
+			glm::vec3 offset_world = entity_rot * (cam->get().trans_offset * entity_scale);
+			glm::vec3 cam_pos = entity_pos + offset_world;
+			glm::vec3 forward{ glm::normalize(entity_pos - cam_pos) };
+			glm::vec3 up{ 0.f, 1.f, 0.f };
+			float near_plane = cam->get().near_plane;
+			float far_plane = cam->get().far_plane;
+			float width_ratio = cam->get().width_ratio;
+			float height_ratio = cam->get().height_ratio;
+
+			game_camera = std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
+
+			break;
+		}
+
 	}
 
 	void Scene::onEvent(Event::Event& e) {}
@@ -251,6 +300,21 @@ namespace PAIN {
 
 	Camera* Scene::GetActiveCamera()
 	{
-		return camera.get();
+		return active_camera;
+	}
+
+	void Scene::SetActiveCamera(Camera* cam) {
+		active_camera = cam;
+	}
+
+	void Scene::SetEditorCamera() {
+		SetActiveCamera(editor_camera.get());
+
+		
+	}
+	void Scene::SetGameCamera()
+	{
+		SetActiveCamera(game_camera.get());
+
 	}
 }

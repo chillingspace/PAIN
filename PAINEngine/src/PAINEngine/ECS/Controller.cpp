@@ -202,7 +202,7 @@ namespace PAIN {
             registerComponent<ModelRenderer>("ModelRenderer");
             registerComponent<Lighting>("Lighting");
             //registerComponent<Hierarchy>("Hierarchy");
-            //registerComponent<Camera>("Camera");
+
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collider");
             registerComponent<Joint>("Joint");

@@ -22,9 +22,17 @@ namespace PAIN {
 		entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
 
 		Camera* GetActiveCamera();
+		void SetActiveCamera(Camera* cam);
+
+		void SetEditorCamera();
+
+		void SetGameCamera();
+
 
 	private:
-		std::unique_ptr<Camera> camera;
+		Camera* active_camera = nullptr;
+		std::unique_ptr<Camera> editor_camera;
+		std::unique_ptr<Camera> game_camera;
 
 		// Audio Demo State Variables
 		entt::entity m_audioSourceEntity = entt::null;
