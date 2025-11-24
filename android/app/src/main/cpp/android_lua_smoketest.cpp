@@ -6,7 +6,7 @@
 extern AAssetManager* g_AssetMgr;
 
 //static std::optional<PAIN::Scripting::EngineWiring> gWiring;
-static LuaManager gLua;
+static PAIN::LuaManager gLua;
 
 //-----------------------------------------------
 // Basic sol2 LuaState test (no LuaManager)
