@@ -262,8 +262,8 @@ namespace PAIN {
 				auto& body_interface = jolt_physics->GetBodyInterface();
 
 				// Find all entities with Transform and RigidBody3D components
-				auto view = registry.view<LocalTransform, Physics::RigidBody3D>();
-				for (auto&& [entity, transform, rigidBody] : view.each()) {
+				auto view = registry.view<LocalTransform, WorldTransform, Physics::RigidBody3D>();
+				for (auto&& [entity, transform, world, rigidBody] : view.each()) {
 
 					transform = view.get<LocalTransform>(entity);
 					rigidBody = view.get<Physics::RigidBody3D>(entity);
@@ -303,6 +303,7 @@ namespace PAIN {
 
 							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
+							world.dirty = true;
 						}
 						else {
 							PN_CORE_ERROR("Failed to lock body for reading");
