@@ -488,14 +488,28 @@ namespace PAIN {
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
                 //anim.tracks.resize(trackCount);
+
+                int no_bone_tracks{};
                 for (size_t i{}; i < trackCount; ++i) {
                     uint32_t boneLen = 0, keyCount = 0;
                     readMem(&boneLen, sizeof(boneLen));
                     //track.boneName.resize(boneLen);
                     //readMem(track.boneName.data(), boneLen);
+
                     static std::string boneName;
                     boneName.resize(boneLen);
                     readMem(boneName.data(), boneLen);
+                    
+                    // if bone doesn't exist, store as root xform or scene xform
+                    auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
+                    if (it == asset.skeleton.end()) {
+                        if (no_bone_tracks > 0) {
+                            PN_CORE_ERROR("Error with loading model. Too many tracks for skeleton size");
+                            throw std::runtime_error("");
+                        }
+                        boneName = "root" + std::to_string(no_bone_tracks++);
+                    }
+
                     auto& track = anim.track_map[boneName];
 
                     readMem(&keyCount, sizeof(keyCount));

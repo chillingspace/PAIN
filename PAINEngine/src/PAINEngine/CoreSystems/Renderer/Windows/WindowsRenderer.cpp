@@ -743,11 +743,14 @@ namespace PAIN {
 
 			// animation
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
+			int bones_skipped{};
 			if (component.isPlaying) {
 
 				static std::vector<glm::mat4> boneMatrices;
 				static constexpr int MAX_BONES = 100;
 				boneMatrices.resize(MAX_BONES);
+
+				glm::mat4 root_xform = glm::mat4(1.f);
 
 				// each track controls a single bone's animation
 				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
@@ -758,10 +761,10 @@ namespace PAIN {
 					// find the bone idx affected by current track
 					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
 					if (bone_it == modelAsset->skeleton.end()) {
-						PN_CORE_WARN("Bone does not exist for animation track. Skipping..");
+						//PN_CORE_WARN("Bone does not exist for animation track {} for model {}. Skipped: {}", component.currentAnimationIndex, modelAsset->vpath, ++bones_skipped);
+						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
 						continue;
 
-						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
 					}
 					const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
 
