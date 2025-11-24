@@ -750,7 +750,10 @@ namespace PAIN {
 				static constexpr int MAX_BONES = 100;
 				boneMatrices.resize(MAX_BONES);
 
-				glm::mat4 root_xform = glm::mat4(1.f);
+				// find local bone xforms relative to parent
+				// these mtx move this particular bone the specific amount RELATIVE to it's parent
+				// eg. how much a finger moves relative to the hand bone (not absolute positioning)
+				std::vector<glm::mat4> relative_poses(modelAsset->skeleton.size());
 
 				// each track controls a single bone's animation
 				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
@@ -774,9 +777,18 @@ namespace PAIN {
 					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
 					const glm::mat4 animated_pose = translate * rotate * scale;
 
+					relative_poses[bone_idx] = animated_pose;
+
 					// multiply with bind pose mtx(the T shape thingy) for final xform matrix
-					boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
+					//boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
 				}
+
+				// account for parent bone transformation
+				//std::vector<glm::mat4> poses(modelAsset->skeleton.size());
+
+				//for (int i{}; i < relative_poses.size(); ++i) {
+				//	poses
+				//}
 
 				// populate animated bone xforms in shader
 				for (size_t i{}; i < boneMatrices.size(); ++i) {
