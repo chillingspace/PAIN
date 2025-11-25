@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 2496005050069388574
+    "hash": 14057581437237007914
   },
   "descriptor_version": 1,
-  "guid": "f4489d3e-cc84-564e-ab9d-2fe582b7c810",
+  "guid": "088b2b68-e158-6047-aa81-a0d12e9c768c",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\Tires.prefab"

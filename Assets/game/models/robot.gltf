@@ -31,6 +31,10 @@
 			]
 		},
 		{
+			"mesh":0,
+			"name":"Robot"
+		},
+		{
 			"name":"Finger_3_L",
 			"rotation":[
 				1.1570176484974186e-30,
@@ -46,7 +50,7 @@
 		},
 		{
 			"children":[
-				1
+				2
 			],
 			"name":"Finger_2_L",
 			"rotation":[
@@ -63,7 +67,7 @@
 		},
 		{
 			"children":[
-				2
+				3
 			],
 			"name":"Finger_1_L",
 			"rotation":[
@@ -94,7 +98,7 @@
 		},
 		{
 			"children":[
-				4
+				5
 			],
 			"name":"Finger_5_L",
 			"rotation":[
@@ -111,7 +115,7 @@
 		},
 		{
 			"children":[
-				5
+				6
 			],
 			"name":"Finger_4_L",
 			"rotation":[
@@ -128,8 +132,8 @@
 		},
 		{
 			"children":[
-				3,
-				6
+				4,
+				7
 			],
 			"name":"Hand_L",
 			"rotation":[
@@ -165,7 +169,7 @@
 		},
 		{
 			"children":[
-				8
+				9
 			],
 			"name":"Thumb_1_L",
 			"rotation":[
@@ -187,8 +191,8 @@
 		},
 		{
 			"children":[
-				7,
-				9
+				8,
+				10
 			],
 			"name":"LowerArm_L",
 			"rotation":[
@@ -224,8 +228,8 @@
 		},
 		{
 			"children":[
-				10,
-				11
+				11,
+				12
 			],
 			"name":"UpperArm_L",
 			"rotation":[
@@ -247,7 +251,7 @@
 		},
 		{
 			"children":[
-				12
+				13
 			],
 			"name":"Shoulder_l",
 			"rotation":[
@@ -272,7 +276,7 @@
 		},
 		{
 			"children":[
-				14
+				15
 			],
 			"name":"Neck",
 			"translation":[
@@ -302,7 +306,7 @@
 		},
 		{
 			"children":[
-				16
+				17
 			],
 			"name":"Thumb_1_R",
 			"rotation":[
@@ -338,7 +342,7 @@
 		},
 		{
 			"children":[
-				18
+				19
 			],
 			"name":"Finger_2_R",
 			"rotation":[
@@ -355,7 +359,7 @@
 		},
 		{
 			"children":[
-				19
+				20
 			],
 			"name":"Finger_1_R",
 			"rotation":[
@@ -386,7 +390,7 @@
 		},
 		{
 			"children":[
-				21
+				22
 			],
 			"name":"Finger_5_R",
 			"rotation":[
@@ -403,7 +407,7 @@
 		},
 		{
 			"children":[
-				22
+				23
 			],
 			"name":"Finger_4_R",
 			"rotation":[
@@ -420,8 +424,8 @@
 		},
 		{
 			"children":[
-				20,
-				23
+				21,
+				24
 			],
 			"name":"Hand_R",
 			"rotation":[
@@ -438,8 +442,8 @@
 		},
 		{
 			"children":[
-				17,
-				24
+				18,
+				25
 			],
 			"name":"LowerArm_R",
 			"rotation":[
@@ -475,8 +479,8 @@
 		},
 		{
 			"children":[
-				25,
-				26
+				26,
+				27
 			],
 			"name":"UpperArm_R",
 			"rotation":[
@@ -498,7 +502,7 @@
 		},
 		{
 			"children":[
-				27
+				28
 			],
 			"name":"Shoulder_r",
 			"rotation":[
@@ -515,9 +519,9 @@
 		},
 		{
 			"children":[
-				13,
-				15,
-				28
+				14,
+				16,
+				29
 			],
 			"name":"Body",
 			"translation":[
@@ -528,7 +532,7 @@
 		},
 		{
 			"children":[
-				29
+				30
 			],
 			"name":"Pelvis",
 			"translation":[
@@ -558,7 +562,7 @@
 		},
 		{
 			"children":[
-				31
+				32
 			],
 			"name":"Toe_3_L",
 			"rotation":[
@@ -594,7 +598,7 @@
 		},
 		{
 			"children":[
-				33
+				34
 			],
 			"name":"Toe_1_L",
 			"rotation":[
@@ -630,7 +634,7 @@
 		},
 		{
 			"children":[
-				35
+				36
 			],
 			"name":"Toe_5_L",
 			"rotation":[
@@ -666,7 +670,7 @@
 		},
 		{
 			"children":[
-				37
+				38
 			],
 			"name":"Toe_7_L",
 			"rotation":[
@@ -688,10 +692,10 @@
 		},
 		{
 			"children":[
-				32,
-				34,
-				36,
-				38
+				33,
+				35,
+				37,
+				39
 			],
 			"name":"LowerLeg_L",
 			"rotation":[
@@ -708,7 +712,7 @@
 		},
 		{
 			"children":[
-				39
+				40
 			],
 			"name":"UpperLeg_L",
 			"rotation":[
@@ -730,7 +734,7 @@
 		},
 		{
 			"children":[
-				40
+				41
 			],
 			"name":"Hip_L",
 			"rotation":[
@@ -766,7 +770,7 @@
 		},
 		{
 			"children":[
-				42
+				43
 			],
 			"name":"Toe_3_R",
 			"rotation":[
@@ -802,7 +806,7 @@
 		},
 		{
 			"children":[
-				44
+				45
 			],
 			"name":"Toe_1_R",
 			"rotation":[
@@ -838,7 +842,7 @@
 		},
 		{
 			"children":[
-				46
+				47
 			],
 			"name":"Toe_5_R",
 			"rotation":[
@@ -874,7 +878,7 @@
 		},
 		{
 			"children":[
-				48
+				49
 			],
 			"name":"Toe_7_R",
 			"rotation":[
@@ -896,10 +900,10 @@
 		},
 		{
 			"children":[
-				43,
-				45,
-				47,
-				49
+				44,
+				46,
+				48,
+				50
 			],
 			"name":"LowerLeg_R",
 			"rotation":[
@@ -916,7 +920,7 @@
 		},
 		{
 			"children":[
-				50
+				51
 			],
 			"name":"UpperLeg_R",
 			"rotation":[
@@ -938,7 +942,7 @@
 		},
 		{
 			"children":[
-				51
+				52
 			],
 			"name":"Hip_R",
 			"rotation":[
@@ -955,21 +959,16 @@
 		},
 		{
 			"children":[
-				30,
-				41,
-				52
+				31,
+				42,
+				53
 			],
 			"name":"Root"
 		},
 		{
-			"mesh":0,
-			"name":"Robot",
-			"skin":0
-		},
-		{
 			"children":[
-				54,
-				53
+				1,
+				54
 			],
 			"name":"Robot_Rig",
 			"translation":[
@@ -1017,11 +1016,9 @@
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2,
-						"JOINTS_0":3,
-						"WEIGHTS_0":4
+						"TEXCOORD_0":2
 					},
-					"indices":5,
+					"indices":3,
 					"material":0
 				}
 			]
@@ -1069,61 +1066,61 @@
 	],
 	"skins":[
 		{
-			"inverseBindMatrices":6,
+			"inverseBindMatrices":4,
 			"joints":[
-				53,
+				54,
+				31,
 				30,
-				29,
+				14,
 				13,
-				12,
-				10,
-				7,
+				11,
+				8,
+				4,
 				3,
 				2,
-				1,
+				7,
 				6,
 				5,
-				4,
+				10,
 				9,
-				8,
-				11,
-				15,
-				14,
-				28,
-				27,
-				25,
-				17,
+				12,
 				16,
-				24,
+				15,
+				29,
+				28,
+				26,
+				18,
+				17,
+				25,
+				21,
 				20,
 				19,
-				18,
+				24,
 				23,
 				22,
-				21,
-				26,
+				27,
+				42,
 				41,
 				40,
-				39,
-				32,
-				31,
-				34,
 				33,
-				36,
+				32,
 				35,
-				38,
+				34,
 				37,
+				36,
+				39,
+				38,
+				53,
 				52,
 				51,
-				50,
-				43,
-				42,
-				45,
 				44,
-				47,
+				43,
 				46,
-				49,
-				48
+				45,
+				48,
+				47,
+				50,
+				49
 			],
 			"name":"Robot_Rig"
 		}
@@ -1134,14 +1131,14 @@
 			"componentType":5126,
 			"count":15011,
 			"max":[
-				2.117285966873169,
-				3.555619239807129,
-				1.0295311212539673
+				1.7023191452026367,
+				4.572196960449219,
+				2.754788637161255
 			],
 			"min":[
-				-2.117285966873169,
-				-1.8492275476455688,
-				-1.1747710704803467
+				-1.6643412113189697,
+				0.620154619216919,
+				-0.9306185245513916
 			],
 			"type":"VEC3"
 		},
@@ -1159,24 +1156,12 @@
 		},
 		{
 			"bufferView":3,
-			"componentType":5121,
-			"count":15011,
-			"type":"VEC4"
-		},
-		{
-			"bufferView":4,
-			"componentType":5126,
-			"count":15011,
-			"type":"VEC4"
-		},
-		{
-			"bufferView":5,
 			"componentType":5123,
 			"count":50208,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":6,
+			"bufferView":4,
 			"componentType":5126,
 			"count":53,
 			"type":"MAT4"
@@ -1203,26 +1188,14 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":60044,
-			"byteOffset":480352,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":240176,
-			"byteOffset":540396,
-			"target":34962
-		},
-		{
-			"buffer":0,
 			"byteLength":100416,
-			"byteOffset":780572,
+			"byteOffset":480352,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":3392,
-			"byteOffset":880988
+			"byteOffset":580768
 		}
 	],
 	"samplers":[
@@ -1233,7 +1206,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":884380,
+			"byteLength":584160,
 			"uri":"robot.bin"
 		}
 	]

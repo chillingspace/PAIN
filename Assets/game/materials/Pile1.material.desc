@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pile1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12037200227305663834
+  },
+  "descriptor_version": 1,
+  "guid": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Pile1.material"
+  }
+}

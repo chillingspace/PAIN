@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pile1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 5005988829247178340
+  },
+  "descriptor_version": 1,
+  "guid": "6df15c02-4436-c748-a14f-1a088e984d2f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Pile1.glb"
+  }
+}
