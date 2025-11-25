@@ -1,4 +1,6 @@
 #include "sRenderer.h"
+#include "Core.h"
+#include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
@@ -393,8 +395,56 @@ namespace PAIN {
 
 	void sRenderer::postProcessPass()
 	{
+		//textPass();
 		w_renderer->PostProcessPass();
 	}
+
+	void sRenderer::textPass()
+	{
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+
+		// Get all entities with LocalTransform and UIText
+		auto text_entity_view = registry.view<UIText>();
+
+		for (auto entity : text_entity_view) {
+
+			// Get components
+			auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
+
+			// Both do not exist
+			if (!text_comp_opt.has_value()) { continue; }
+
+			auto& text_comp = text_comp_opt.value().get();
+
+			// If you use WorldTransform, prefer its world position:
+			// auto& world_comp = registry.get<WorldTransform>(entity);
+			// glm::vec3 position = glm::vec3(world_comp.matrix[3]);
+
+			//std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
+
+			// Retrieve font asset
+			auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+			if (!font_opt.has_value()) { continue; }
+
+			// Debug: Log what would be rendered
+			//PN_CORE_INFO("Rendering text: '{}', at ({},{}) with font, size {}",
+			//	text_comp.display_text, text_comp.text_pos.x, text_comp.text_pos.y,
+			//	text_comp.font_size);
+
+			TextRenderer::get().renderText(font_opt.value()->getFont(), text_comp.display_text, text_comp.text_pos.x, text_comp.text_pos.y,
+				text_comp.font_size, text_comp.color);
+
+
+			//TextRenderer::get().renderText(font_opt.value()->getFont(), text_comp.display_text, 100, 100,
+			//	1, text_comp.color);
+			
+
+			// Optionally, call debugRenderQuad if you need to visualize text bounds/quads
+			TextRenderer::get().debugRenderQuad();
+		}
+	}
+
 
 	void sRenderer::onUpdate(AppTiming timing) {
 

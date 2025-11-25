@@ -32,6 +32,8 @@ namespace PAIN {
 		void postProcessPass();
 		void uiPass();
 
+		void textPass();
+
         void onUpdate(AppTiming timing) override;
 
 
