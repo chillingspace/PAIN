@@ -170,11 +170,11 @@ namespace PAIN {
         const float dt = timing.dt;
 
 #ifdef _DEBUG
-        auto editor = services->get<Editor::Editor>();
+        auto editor_visible = services->get<Editor::Editor>()->isVisible();
 #else
-        auto editor = false;
+        auto editor_visible = false;
 #endif 
-        if (editor->isVisible()) {
+        if (editor_visible) {
             m_Scene->SetEditorCamera();
 
         }
@@ -191,12 +191,10 @@ namespace PAIN {
             // Move forward/backward directly in camera forward direction
             if (W_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos += offset;
             }
             if (S_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos -= offset;
             }
             if (A_KEYDOWN) {
