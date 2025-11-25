@@ -722,38 +722,8 @@ namespace PAIN {
             }
         }
 
-        // Cleanup: Remove callbacks for entities that are no longer valid or active
-        // This prevents memory leaks of closures for deleted entities/scripts
-        if (api_) {
-            auto is_dead = [this](const LuaFunction& f) { return !api_->IsScriptActive(f.entityId); };
-            
-            // Update list
-            std::erase_if(updates_, is_dead);
-
-            // Event lists
-            std::erase_if(onClick_, is_dead);
-            std::erase_if(pauseHandlers_, is_dead);
-            
-            // Key maps (vectors inside maps)
-            for (auto& [key, vec] : keyDown_) std::erase_if(vec, is_dead);
-            for (auto& [key, vec] : keyUp_) std::erase_if(vec, is_dead);
-
-            // Mouse In/Out (struct has int ID, needs cast)
-            std::erase_if(mouseInOut_, [this](const MouseInOutLuaFunction& f) {
-                return !api_->IsScriptActive((entt::entity)f.entityId);
-            });
-
-            // Collision Map (Key is the entity itself)
-            std::erase_if(onCollision_, [this](const auto& item) {
-                return !api_->IsScriptActive(item.first);
-            });
-        }
-
         // 3) Execute queued input callbacks
         for (auto& cb : inputQueue_) {
-            // Double check validity (in case it was queued before cleanup or by another script)
-            if (api_ && !api_->IsScriptActive(cb.entityId)) continue;
-
             if (!gamePaused_ || cb.runWhenPaused) {
                 sol::protected_function_result r = cb.fn();
                 if (!r.valid()) {
@@ -766,9 +736,6 @@ namespace PAIN {
 
         // 4) Execute collision callbacks
         for (auto& cb : collisionQueue_) {
-            // Skip if script component was removed
-            if (api_ && !api_->IsScriptActive(cb.currentEntityId)) continue;
-
             if (!gamePaused_ || cb.runWhenPaused) {
                 sol::protected_function_result r = cb.fn(cb.currentEntityId, cb.collidedEntityId);
                 if (!r.valid()) {
@@ -784,12 +751,7 @@ namespace PAIN {
         collisionQueue_.clear();
 
         // 5) Per-frame updates
-        size_t count = updates_.size();
-        for (size_t i = 0; i < count; ++i) {
-            // Double check validity
-            if (api_ && !api_->IsScriptActive(updates_[i].entityId)) continue;
-
-            auto& cb = updates_[i];
+        for (auto& cb : updates_) {
             if (!gamePaused_ || cb.runWhenPaused) {
                 sol::protected_function_result r = cb.fn(dt);
                 if (!r.valid()) {
