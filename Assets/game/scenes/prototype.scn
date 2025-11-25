@@ -7,7 +7,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 28,
+                            "bvhNodeIndex": 39,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -23,14 +23,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    1.1996690034866333,
+                                    0.6302930116653442,
                                     0.30859532952308655,
-                                    0.34561270475387573
+                                    1.7670470476150513
                                 ],
                                 "min": [
-                                    0.6420565843582153,
+                                    0.010573096573352814,
                                     0.0,
-                                    0.07411013543605804
+                                    1.2642017602920532
                                 ]
                             }
                         },
@@ -47,115 +47,7 @@
                             "shape": 0
                         },
                         "GUID": {
-                            "guid": "2c6594f5-d020-e84c-a2de-20e17b656841"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.9208627939224243,
-                                0.0,
-                                0.20986142754554749
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.7071067690849304,
-                                0.0,
-                                0.7071067690849304
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerRed"
-                        }
-                    },
-                    "Name": "ContainerRed"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 23,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.13575132191181183,
-                                    0.30859532952308655,
-                                    0.7170239686965942
-                                ],
-                                "min": [
-                                    -0.13575126230716705,
-                                    0.0,
-                                    0.1594114899635315
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "d9629bea-f672-694a-8b04-3f939be588f6"
+                            "guid": "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -164,15 +56,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                2.9802322387695313e-08,
+                                0.3204330503940582,
                                 0.0,
-                                0.43821772933006287
+                                1.5156244039535522
                             ],
                             "rotation": [
                                 0.0,
+                                0.5134599208831787,
                                 0.0,
-                                0.0,
-                                1.0
+                                0.8581135869026184
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -218,7 +110,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {},
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "d9629bea-f672-694a-8b04-3f939be588f6",
+                            "instanceRootGUID": "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd",
                             "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
                         }
                     },
@@ -229,301 +121,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 10,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.8846736550331116,
-                                    0.30859532952308655,
-                                    0.07612955570220947
-                                ],
-                                "min": [
-                                    0.6131710410118103,
-                                    0.0,
-                                    -0.48148292303085327
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "2d614323-6206-884f-966c-83ea4390f3b9"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.7489223480224609,
-                                0.0,
-                                -0.2026766836643219
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
-                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerBlue"
-                        }
-                    },
-                    "Name": "ContainerBlue"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "224ead94-cd56-b044-9049-d25b577908a7"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "2c6594f5-d020-e84c-a2de-20e17b656841",
-                                "2d614323-6206-884f-966c-83ea4390f3b9",
-                                "5ca2c6b5-7526-be46-b481-2e79da77202a",
-                                "f6cf30e1-ff3f-f247-afbc-9582d46a85ba",
-                                "623b193d-a4d0-684d-bf12-d30bbadfabfc",
-                                "46cdc014-de87-0848-b490-9817e8c6cc5e"
-                            ],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "MainPrefab"
-                        }
-                    },
-                    "Name": "MainPrefab"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 9,
-                            "localAABB": {
-                                "max": [
-                                    1.7023191452026367,
-                                    4.572196960449219,
-                                    2.754788637161255
-                                ],
-                                "min": [
-                                    -1.6643412113189697,
-                                    0.620154619216919,
-                                    -0.9306185245513916
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.4905897080898285,
-                                    0.27851811051368713,
-                                    -0.037758685648441315
-                                ],
-                                "min": [
-                                    0.10027367621660233,
-                                    -0.04446837306022644,
-                                    -0.43718671798706055
-                                ]
-                            }
-                        },
-                        "GUID": {
-                            "guid": "7c755151-da16-0b4c-8bde-b144bb2ed1c4"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.256062775850296,
-                                -0.09515142440795898,
-                                -0.3007888197898865
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.2645461857318878,
-                                0.0,
-                                0.964372992515564
-                            ],
-                            "scale": [
-                                0.08172647655010223,
-                                0.08172647655010223,
-                                0.08172647655010223
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
-                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        4.099997520446777,
-                                        4.099997520446777,
-                                        4.099997520446777
-                                    ],
-                                    "emissiveTextureOverride": "3a5c03f0-d776-2a44-ba91-1b088c4a4bb5",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "30cd3b32-bce1-564e-8046-1204bbfee443",
-                                    "normalTextureOverride": "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "30cd3b32-bce1-564e-8046-1204bbfee443",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Robot"
-                        }
-                    },
-                    "Name": "Robot"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "88b7d550-9958-4e42-802f-e0776459a796"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "d9629bea-f672-694a-8b04-3f939be588f6",
-                                "a1aea2b3-2aad-bc47-b105-134a88de0c8a",
-                                "79545481-3503-ae4e-a365-ebaa3f1e6387",
-                                "de0d6b51-3af2-6445-a9b7-5dd31e5204a7",
-                                "de095e3e-3131-ac49-9232-bc8dad8640d4",
-                                "718c3b6a-573f-b14c-9714-d5fcb59806d0",
-                                "d5fde0dc-e9b8-fd40-8895-acb175941bbe",
-                                "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6",
-                                "ca010332-3f5f-8241-92a3-ad87de88aa9d",
-                                "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd"
-                            ],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "Prefab"
-                        }
-                    },
-                    "Name": "Prefab"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 7,
+                            "bvhNodeIndex": 32,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -540,13 +138,13 @@
                             "worldAABB": {
                                 "max": [
                                     0.13575129210948944,
-                                    0.30859532952308655,
-                                    0.16134721040725708
+                                    0.6175702810287476,
+                                    1.0269585847854614
                                 ],
                                 "min": [
                                     -0.13575129210948944,
-                                    0.0,
-                                    -0.39626526832580566
+                                    0.3089749217033386,
+                                    0.4693460762500763
                                 ]
                             }
                         },
@@ -563,7 +161,7 @@
                             "shape": 0
                         },
                         "GUID": {
-                            "guid": "a1aea2b3-2aad-bc47-b105-134a88de0c8a"
+                            "guid": "ca010332-3f5f-8241-92a3-ad87de88aa9d"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -573,777 +171,8 @@
                         "LocalTransform": {
                             "position": [
                                 0.0,
-                                0.0,
-                                -0.11745902895927429
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
-                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerBlue"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
-                            "instanceRootGUID": "a1aea2b3-2aad-bc47-b105-134a88de0c8a",
-                            "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
-                        }
-                    },
-                    "Name": "ContainerBlue"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 4,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.6189544200897217,
-                                    0.30859532952308655,
-                                    -0.3978746831417084
-                                ],
-                                "min": [
-                                    0.0613420233130455,
-                                    0.0,
-                                    -0.6693772077560425
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "79545481-3503-ae4e-a365-ebaa3f1e6387"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.3401482105255127,
-                                0.0,
-                                -0.5336259603500366
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.7071067690849304,
-                                0.0,
-                                0.7071067690849304
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
-                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerBlue"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
-                            "instanceRootGUID": "79545481-3503-ae4e-a365-ebaa3f1e6387",
-                            "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
-                        }
-                    },
-                    "Name": "ContainerBlue"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 19,
-                            "localAABB": {
-                                "max": [
-                                    35.818092346191406,
-                                    97.5758056640625,
-                                    35.81809997558594
-                                ],
-                                "min": [
-                                    -35.81809616088867,
-                                    0.0,
-                                    -35.818092346191406
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.629583477973938,
-                                    0.09757581353187561,
-                                    0.13504602015018463
-                                ],
-                                "min": [
-                                    0.5579472780227661,
-                                    0.0,
-                                    0.06340982764959335
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "5ca2c6b5-7526-be46-b481-2e79da77202a"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.593765377998352,
-                                0.0,
-                                0.0992279201745987
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
-                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "OilDrumRed"
-                        }
-                    },
-                    "Name": "OilDrumRed"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 14,
-                            "localAABB": {
-                                "max": [
-                                    35.818092346191406,
-                                    97.5758056640625,
-                                    35.81809997558594
-                                ],
-                                "min": [
-                                    -35.81809616088867,
-                                    0.0,
-                                    -35.818092346191406
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.6176774501800537,
-                                    0.09757581353187561,
-                                    0.03581809997558594
-                                ],
-                                "min": [
-                                    0.5460412502288818,
-                                    0.0,
-                                    -0.03581809252500534
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.5818593502044678,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
-                                    "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
-                                    "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "OilDrumBlue"
-                        }
-                    },
-                    "Name": "OilDrumBlue"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 16,
-                            "localAABB": {
-                                "max": [
-                                    35.818092346191406,
-                                    97.5758056640625,
-                                    35.81809997558594
-                                ],
-                                "min": [
-                                    -35.81809616088867,
-                                    0.0,
-                                    -35.818092346191406
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.20755678415298462,
-                                    0.09757581353187561,
-                                    0.20676036179065704
-                                ],
-                                "min": [
-                                    0.13592058420181274,
-                                    0.0,
-                                    0.13512417674064636
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "de0d6b51-3af2-6445-a9b7-5dd31e5204a7"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.17173868417739868,
-                                0.0,
-                                0.1709422618150711
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
-                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "OilDrumRed"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a",
-                            "instanceRootGUID": "de0d6b51-3af2-6445-a9b7-5dd31e5204a7",
-                            "sourcePrefabGUID": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b"
-                        }
-                    },
-                    "Name": "OilDrumRed"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 18,
-                            "localAABB": {
-                                "max": [
-                                    24.514007568359375,
-                                    32.07780456542969,
-                                    24.514009475708008
-                                ],
-                                "min": [
-                                    -35.56291198730469,
-                                    0.6818561553955078,
-                                    -24.514009475708008
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.5309016108512878,
-                                    0.048758264631032944,
-                                    0.22152294218540192
-                                ],
-                                "min": [
-                                    0.41304609179496765,
-                                    0.0010364213958382607,
-                                    0.10637515038251877
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "81d7f475-5f23-5f45-a182-bcf8928fcd87"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.4785497784614563,
-                                0.0,
-                                0.1587270051240921
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.32930871844291687,
-                                0.0,
-                                0.9442223310470581
-                            ],
-                            "scale": [
-                                0.0015200000489130616,
-                                0.0015200000489130616,
-                                0.0015200000489130616
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
-                                    "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-                                    "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "e65e4858-d371-c142-8857-4f39f5d654fb",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Box"
-                        }
-                    },
-                    "Name": "Box"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 26,
-                            "localAABB": {
-                                "max": [
-                                    9.290358543395996,
-                                    7.747631072998047,
-                                    9.775418281555176
-                                ],
-                                "min": [
-                                    -9.290358543395996,
-                                    -2.384185791015625e-07,
-                                    -9.775418281555176
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    1.1098458766937256,
-                                    0.2423025220632553,
-                                    0.9360253214836121
-                                ],
-                                "min": [
-                                    0.4412212371826172,
-                                    -7.456398165572864e-09,
-                                    0.24211485683918
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 3
-                        },
-                        "GUID": {
-                            "guid": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.7755335569381714,
-                                0.0,
-                                0.5890700817108154
-                            ],
-                            "rotation": [
-                                0.0,
-                                -0.07751553505659103,
-                                0.0,
-                                0.9969911575317383
-                            ],
-                            "scale": [
-                                0.031274400651454926,
-                                0.031274400651454926,
-                                0.031274400651454926
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                    "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                    "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Pile1"
-                        }
-                    },
-                    "Name": "Pile1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 29,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    1.3239785432815552,
-                                    0.30859532952308655,
-                                    0.9090211391448975
-                                ],
-                                "min": [
-                                    1.0524760484695435,
-                                    0.0,
-                                    0.3514086902141571
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "de095e3e-3131-ac49-9232-bc8dad8640d4"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                1.1882272958755493,
-                                0.0,
-                                0.6302149295806885
+                                0.3089749217033386,
+                                0.7481523156166077
                             ],
                             "rotation": [
                                 0.0,
@@ -1395,668 +224,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {},
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "de095e3e-3131-ac49-9232-bc8dad8640d4",
-                            "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
-                        }
-                    },
-                    "Name": "ContainerRed"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 5,
-                            "localAABB": {
-                                "max": [
-                                    73.85037994384766,
-                                    473.1723937988281,
-                                    66.01360321044922
-                                ],
-                                "min": [
-                                    -73.85037994384766,
-                                    0.0,
-                                    -66.01360321044922
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.46402299404144287,
-                                    1.1403454542160034,
-                                    -0.8658607006072998
-                                ],
-                                "min": [
-                                    0.10806417465209961,
-                                    0.0,
-                                    -1.1840462684631348
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 3
-                        },
-                        "GUID": {
-                            "guid": "f0b4e155-badb-6040-8f07-680c3852a1c3"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.28604358434677124,
-                                0.0,
-                                -1.0249534845352173
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.002409999957308173,
-                                0.002409999957308173,
-                                0.002409999957308173
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "14377587-a8fe-2b47-9f46-dad6bdad2753",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "a77749e3-6c15-7446-a792-5609dd96b391",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "WaterTower"
-                        }
-                    },
-                    "Name": "WaterTower"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 24,
-                            "localAABB": {
-                                "max": [
-                                    69.66659545898438,
-                                    69.85763549804688,
-                                    40.19990921020508
-                                ],
-                                "min": [
-                                    -34.33774185180664,
-                                    -0.5009422302246094,
-                                    -71.30400085449219
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.2984395921230316,
-                                    0.10548503696918488,
-                                    0.7133870124816895
-                                ],
-                                "min": [
-                                    0.1413930356502533,
-                                    -0.0007564228144474328,
-                                    0.5450161099433899
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.19324302673339844,
-                                0.0,
-                                0.6526851654052734
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0015100000891834497,
-                                0.0015100000891834497,
-                                0.0015100000891834497
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
-                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
-                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Tires"
-                        }
-                    },
-                    "Name": "Tires"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 34,
-                            "localAABB": {
-                                "max": [
-                                    57.97823715209961,
-                                    211.10305786132813,
-                                    5.444207191467285
-                                ],
-                                "min": [
-                                    -57.97823715209961,
-                                    0.0,
-                                    -0.7065536975860596
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.2541748881340027,
-                                    0.21110306680202484,
-                                    0.7221170663833618
-                                ],
-                                "min": [
-                                    0.13821841776371002,
-                                    0.0,
-                                    0.7159662842750549
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "46cdc014-de87-0848-b490-9817e8c6cc5e"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.19619666039943695,
-                                0.0,
-                                0.7166728377342224
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
-                                    "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "MetalPlank1"
-                        }
-                    },
-                    "Name": "MetalPlank1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 37,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.13575129210948944,
-                                    0.30859532952308655,
-                                    1.2708271741867065
-                                ],
-                                "min": [
-                                    -0.13575129210948944,
-                                    0.0,
-                                    0.7132147550582886
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "d5fde0dc-e9b8-fd40-8895-acb175941bbe"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.9920209646224976
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerRed"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "d5fde0dc-e9b8-fd40-8895-acb175941bbe",
-                            "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
-                        }
-                    },
-                    "Name": "ContainerRed"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 35,
-                            "localAABB": {
-                                "max": [
-                                    57.97823715209961,
-                                    211.10305786132813,
-                                    5.444207191467285
-                                ],
-                                "min": [
-                                    -57.97823715209961,
-                                    0.0,
-                                    -0.7065536975860596
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.5889564156532288,
-                                    0.21110306680202484,
-                                    0.9323102831840515
-                                ],
-                                "min": [
-                                    0.48004817962646484,
-                                    0.0,
-                                    0.8807318806648254
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "718c3b6a-573f-b14c-9714-d5fcb59806d0"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.5335639715194702,
-                                0.0,
-                                0.9043459892272949
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.20223022997379303,
-                                0.0,
-                                0.9793379902839661
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
-                                    "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "MetalPlank1"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e",
-                            "instanceRootGUID": "718c3b6a-573f-b14c-9714-d5fcb59806d0",
-                            "sourcePrefabGUID": "40444285-5787-df4f-a3b0-18b0a2d6ae3d"
-                        }
-                    },
-                    "Name": "MetalPlank1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": 40,
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    1.1601109504699707,
-                                    0.30859532952308655,
-                                    1.1768807172775269
-                                ],
-                                "min": [
-                                    0.6024985313415527,
-                                    0.0,
-                                    0.9053782224655151
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "box_size": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 0
-                        },
-                        "GUID": {
-                            "guid": "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
-                            "siblingIndex": 0
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.8813047409057617,
-                                0.0,
-                                1.041129469871521
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.7071067690849304,
-                                0.0,
-                                0.7071067690849304
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "ContainerRed"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {},
-                            "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6",
+                            "instanceRootGUID": "ca010332-3f5f-8241-92a3-ad87de88aa9d",
                             "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
                         }
                     },
@@ -2181,7 +349,235 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 32,
+                            "bvhNodeIndex": 40,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.1601109504699707,
+                                    0.30859532952308655,
+                                    1.1768807172775269
+                                ],
+                                "min": [
+                                    0.6024985313415527,
+                                    0.0,
+                                    0.9053782224655151
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.8813047409057617,
+                                0.0,
+                                1.041129469871521
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerRed"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
+                            "instanceRootGUID": "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6",
+                            "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
+                        }
+                    },
+                    "Name": "ContainerRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 35,
+                            "localAABB": {
+                                "max": [
+                                    57.97823715209961,
+                                    211.10305786132813,
+                                    5.444207191467285
+                                ],
+                                "min": [
+                                    -57.97823715209961,
+                                    0.0,
+                                    -0.7065536975860596
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.5889564156532288,
+                                    0.21110306680202484,
+                                    0.9323102831840515
+                                ],
+                                "min": [
+                                    0.48004817962646484,
+                                    0.0,
+                                    0.8807318806648254
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "718c3b6a-573f-b14c-9714-d5fcb59806d0"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.5335639715194702,
+                                0.0,
+                                0.9043459892272949
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.20223022997379303,
+                                0.0,
+                                0.9793379902839661
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+                                    "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "MetalPlank1"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e",
+                            "instanceRootGUID": "718c3b6a-573f-b14c-9714-d5fcb59806d0",
+                            "sourcePrefabGUID": "40444285-5787-df4f-a3b0-18b0a2d6ae3d"
+                        }
+                    },
+                    "Name": "MetalPlank1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 37,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2198,13 +594,13 @@
                             "worldAABB": {
                                 "max": [
                                     0.13575129210948944,
-                                    0.6175702810287476,
-                                    1.0269585847854614
+                                    0.30859532952308655,
+                                    1.2708271741867065
                                 ],
                                 "min": [
                                     -0.13575129210948944,
-                                    0.3089749217033386,
-                                    0.4693460762500763
+                                    0.0,
+                                    0.7132147550582886
                                 ]
                             }
                         },
@@ -2221,7 +617,7 @@
                             "shape": 0
                         },
                         "GUID": {
-                            "guid": "ca010332-3f5f-8241-92a3-ad87de88aa9d"
+                            "guid": "d5fde0dc-e9b8-fd40-8895-acb175941bbe"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -2231,8 +627,8 @@
                         "LocalTransform": {
                             "position": [
                                 0.0,
-                                0.3089749217033386,
-                                0.7481523156166077
+                                0.0,
+                                0.9920209646224976
                             ],
                             "rotation": [
                                 0.0,
@@ -2284,7 +680,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {},
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "ca010332-3f5f-8241-92a3-ad87de88aa9d",
+                            "instanceRootGUID": "d5fde0dc-e9b8-fd40-8895-acb175941bbe",
                             "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
                         }
                     },
@@ -2295,7 +691,326 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 39,
+                            "bvhNodeIndex": 34,
+                            "localAABB": {
+                                "max": [
+                                    57.97823715209961,
+                                    211.10305786132813,
+                                    5.444207191467285
+                                ],
+                                "min": [
+                                    -57.97823715209961,
+                                    0.0,
+                                    -0.7065536975860596
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.2541748881340027,
+                                    0.21110306680202484,
+                                    0.7221170663833618
+                                ],
+                                "min": [
+                                    0.13821841776371002,
+                                    0.0,
+                                    0.7159662842750549
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "46cdc014-de87-0848-b490-9817e8c6cc5e"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.19619666039943695,
+                                0.0,
+                                0.7166728377342224
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+                                    "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "MetalPlank1"
+                        }
+                    },
+                    "Name": "MetalPlank1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 24,
+                            "localAABB": {
+                                "max": [
+                                    69.66659545898438,
+                                    69.85763549804688,
+                                    40.19990921020508
+                                ],
+                                "min": [
+                                    -34.33774185180664,
+                                    -0.5009422302246094,
+                                    -71.30400085449219
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.2984395921230316,
+                                    0.10548503696918488,
+                                    0.7133870124816895
+                                ],
+                                "min": [
+                                    0.1413930356502533,
+                                    -0.0007564228144474328,
+                                    0.5450161099433899
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.19324302673339844,
+                                0.0,
+                                0.6526851654052734
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0015100000891834497,
+                                0.0015100000891834497,
+                                0.0015100000891834497
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tires"
+                        }
+                    },
+                    "Name": "Tires"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 5,
+                            "localAABB": {
+                                "max": [
+                                    73.85037994384766,
+                                    473.1723937988281,
+                                    66.01360321044922
+                                ],
+                                "min": [
+                                    -73.85037994384766,
+                                    0.0,
+                                    -66.01360321044922
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.46402299404144287,
+                                    1.1403454542160034,
+                                    -0.8658607006072998
+                                ],
+                                "min": [
+                                    0.10806417465209961,
+                                    0.0,
+                                    -1.1840462684631348
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 3
+                        },
+                        "GUID": {
+                            "guid": "f0b4e155-badb-6040-8f07-680c3852a1c3"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.28604358434677124,
+                                0.0,
+                                -1.0249534845352173
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.002409999957308173,
+                                0.002409999957308173,
+                                0.002409999957308173
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "14377587-a8fe-2b47-9f46-dad6bdad2753",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "a77749e3-6c15-7446-a792-5609dd96b391",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "WaterTower"
+                        }
+                    },
+                    "Name": "WaterTower"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 29,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2311,14 +1026,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.6302930116653442,
+                                    1.3239785432815552,
                                     0.30859532952308655,
-                                    1.7670470476150513
+                                    0.9090211391448975
                                 ],
                                 "min": [
-                                    0.010573096573352814,
+                                    1.0524760484695435,
                                     0.0,
-                                    1.2642017602920532
+                                    0.3514086902141571
                                 ]
                             }
                         },
@@ -2335,7 +1050,7 @@
                             "shape": 0
                         },
                         "GUID": {
-                            "guid": "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd"
+                            "guid": "de095e3e-3131-ac49-9232-bc8dad8640d4"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -2344,15 +1059,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.3204330503940582,
+                                1.1882272958755493,
                                 0.0,
-                                1.5156244039535522
+                                0.6302149295806885
                             ],
                             "rotation": [
                                 0.0,
-                                0.5134599208831787,
                                 0.0,
-                                0.8581135869026184
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -2398,8 +1113,1294 @@
                         "PrefabInstance": {
                             "componentOverrides": {},
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
-                            "instanceRootGUID": "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd",
+                            "instanceRootGUID": "de095e3e-3131-ac49-9232-bc8dad8640d4",
                             "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
+                        }
+                    },
+                    "Name": "ContainerRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 26,
+                            "localAABB": {
+                                "max": [
+                                    9.290358543395996,
+                                    7.747631072998047,
+                                    9.775418281555176
+                                ],
+                                "min": [
+                                    -9.290358543395996,
+                                    -2.384185791015625e-07,
+                                    -9.775418281555176
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.1098458766937256,
+                                    0.2423025220632553,
+                                    0.9360253214836121
+                                ],
+                                "min": [
+                                    0.4412212371826172,
+                                    -7.456398165572864e-09,
+                                    0.24211485683918
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 3
+                        },
+                        "GUID": {
+                            "guid": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.7755335569381714,
+                                0.0,
+                                0.5890700817108154
+                            ],
+                            "rotation": [
+                                0.0,
+                                -0.07751553505659103,
+                                0.0,
+                                0.9969911575317383
+                            ],
+                            "scale": [
+                                0.031274400651454926,
+                                0.031274400651454926,
+                                0.031274400651454926
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+                                    "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Pile1"
+                        }
+                    },
+                    "Name": "Pile1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 18,
+                            "localAABB": {
+                                "max": [
+                                    24.514007568359375,
+                                    32.07780456542969,
+                                    24.514009475708008
+                                ],
+                                "min": [
+                                    -35.56291198730469,
+                                    0.6818561553955078,
+                                    -24.514009475708008
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.5309016108512878,
+                                    0.048758264631032944,
+                                    0.22152294218540192
+                                ],
+                                "min": [
+                                    0.41304609179496765,
+                                    0.0010364213958382607,
+                                    0.10637515038251877
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "81d7f475-5f23-5f45-a182-bcf8928fcd87"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.4785497784614563,
+                                0.0,
+                                0.1587270051240921
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.32930871844291687,
+                                0.0,
+                                0.9442223310470581
+                            ],
+                            "scale": [
+                                0.0015200000489130616,
+                                0.0015200000489130616,
+                                0.0015200000489130616
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+                                    "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "e65e4858-d371-c142-8857-4f39f5d654fb",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Box"
+                        }
+                    },
+                    "Name": "Box"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 16,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.20755678415298462,
+                                    0.09757581353187561,
+                                    0.20676036179065704
+                                ],
+                                "min": [
+                                    0.13592058420181274,
+                                    0.0,
+                                    0.13512417674064636
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "de0d6b51-3af2-6445-a9b7-5dd31e5204a7"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.17173868417739868,
+                                0.0,
+                                0.1709422618150711
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "OilDrumRed"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a",
+                            "instanceRootGUID": "de0d6b51-3af2-6445-a9b7-5dd31e5204a7",
+                            "sourcePrefabGUID": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b"
+                        }
+                    },
+                    "Name": "OilDrumRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 14,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.6176774501800537,
+                                    0.09757581353187561,
+                                    0.03581809997558594
+                                ],
+                                "min": [
+                                    0.5460412502288818,
+                                    0.0,
+                                    -0.03581809252500534
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.5818593502044678,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+                                    "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "OilDrumBlue"
+                        }
+                    },
+                    "Name": "OilDrumBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 19,
+                            "localAABB": {
+                                "max": [
+                                    35.818092346191406,
+                                    97.5758056640625,
+                                    35.81809997558594
+                                ],
+                                "min": [
+                                    -35.81809616088867,
+                                    0.0,
+                                    -35.818092346191406
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.629583477973938,
+                                    0.09757581353187561,
+                                    0.13504602015018463
+                                ],
+                                "min": [
+                                    0.5579472780227661,
+                                    0.0,
+                                    0.06340982764959335
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "5ca2c6b5-7526-be46-b481-2e79da77202a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.593765377998352,
+                                0.0,
+                                0.0992279201745987
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "OilDrumRed"
+                        }
+                    },
+                    "Name": "OilDrumRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 4,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.6189544200897217,
+                                    0.30859532952308655,
+                                    -0.3978746831417084
+                                ],
+                                "min": [
+                                    0.0613420233130455,
+                                    0.0,
+                                    -0.6693772077560425
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "79545481-3503-ae4e-a365-ebaa3f1e6387"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.3401482105255127,
+                                0.0,
+                                -0.5336259603500366
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerBlue"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
+                            "instanceRootGUID": "79545481-3503-ae4e-a365-ebaa3f1e6387",
+                            "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        }
+                    },
+                    "Name": "ContainerBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 7,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.13575129210948944,
+                                    0.30859532952308655,
+                                    0.16134721040725708
+                                ],
+                                "min": [
+                                    -0.13575129210948944,
+                                    0.0,
+                                    -0.39626526832580566
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "a1aea2b3-2aad-bc47-b105-134a88de0c8a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                -0.11745902895927429
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerBlue"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
+                            "instanceRootGUID": "a1aea2b3-2aad-bc47-b105-134a88de0c8a",
+                            "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        }
+                    },
+                    "Name": "ContainerBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "88b7d550-9958-4e42-802f-e0776459a796"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "d9629bea-f672-694a-8b04-3f939be588f6",
+                                "a1aea2b3-2aad-bc47-b105-134a88de0c8a",
+                                "79545481-3503-ae4e-a365-ebaa3f1e6387",
+                                "de0d6b51-3af2-6445-a9b7-5dd31e5204a7",
+                                "de095e3e-3131-ac49-9232-bc8dad8640d4",
+                                "718c3b6a-573f-b14c-9714-d5fcb59806d0",
+                                "d5fde0dc-e9b8-fd40-8895-acb175941bbe",
+                                "ff1ba587-bd31-7543-8ba6-8ae26fd0d0a6",
+                                "ca010332-3f5f-8241-92a3-ad87de88aa9d",
+                                "bc00ea33-76f2-6a4b-9d4c-624d69f3cffd",
+                                "73489be2-6277-c64e-9e70-449e94bcce23"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "Prefab"
+                        }
+                    },
+                    "Name": "Prefab"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 9,
+                            "localAABB": {
+                                "max": [
+                                    1.7023191452026367,
+                                    4.572196960449219,
+                                    2.754788637161255
+                                ],
+                                "min": [
+                                    -1.6643412113189697,
+                                    0.620154619216919,
+                                    -0.9306185245513916
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.4905897080898285,
+                                    0.27851811051368713,
+                                    -0.037758685648441315
+                                ],
+                                "min": [
+                                    0.10027367621660233,
+                                    -0.04446837306022644,
+                                    -0.43718671798706055
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "7c755151-da16-0b4c-8bde-b144bb2ed1c4"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.256062775850296,
+                                -0.09515142440795898,
+                                -0.3007888197898865
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.2645461857318878,
+                                0.0,
+                                0.964372992515564
+                            ],
+                            "scale": [
+                                0.08172647655010223,
+                                0.08172647655010223,
+                                0.08172647655010223
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        4.099997520446777,
+                                        4.099997520446777,
+                                        4.099997520446777
+                                    ],
+                                    "emissiveTextureOverride": "3a5c03f0-d776-2a44-ba91-1b088c4a4bb5",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "30cd3b32-bce1-564e-8046-1204bbfee443",
+                                    "normalTextureOverride": "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "30cd3b32-bce1-564e-8046-1204bbfee443",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Robot"
+                        }
+                    },
+                    "Name": "Robot"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "224ead94-cd56-b044-9049-d25b577908a7"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "2c6594f5-d020-e84c-a2de-20e17b656841",
+                                "2d614323-6206-884f-966c-83ea4390f3b9",
+                                "5ca2c6b5-7526-be46-b481-2e79da77202a",
+                                "f6cf30e1-ff3f-f247-afbc-9582d46a85ba",
+                                "623b193d-a4d0-684d-bf12-d30bbadfabfc",
+                                "46cdc014-de87-0848-b490-9817e8c6cc5e"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "MainPrefab"
+                        }
+                    },
+                    "Name": "MainPrefab"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 10,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.8846736550331116,
+                                    0.30859532952308655,
+                                    0.07612955570220947
+                                ],
+                                "min": [
+                                    0.6131710410118103,
+                                    0.0,
+                                    -0.48148292303085327
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "2d614323-6206-884f-966c-83ea4390f3b9"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.7489223480224609,
+                                0.0,
+                                -0.2026766836643219
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                    "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerBlue"
+                        }
+                    },
+                    "Name": "ContainerBlue"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 23,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    0.13575132191181183,
+                                    0.30859532952308655,
+                                    0.7170239686965942
+                                ],
+                                "min": [
+                                    -0.13575126230716705,
+                                    0.0,
+                                    0.1594114899635315
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "d9629bea-f672-694a-8b04-3f939be588f6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.9802322387695313e-08,
+                                0.0,
+                                0.43821772933006287
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerRed"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {},
+                            "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
+                            "instanceRootGUID": "d9629bea-f672-694a-8b04-3f939be588f6",
+                            "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
+                        }
+                    },
+                    "Name": "ContainerRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 28,
+                            "localAABB": {
+                                "max": [
+                                    135.75128173828125,
+                                    308.5953063964844,
+                                    278.80621337890625
+                                ],
+                                "min": [
+                                    -135.75128173828125,
+                                    0.0,
+                                    -278.80621337890625
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.1996690034866333,
+                                    0.30859532952308655,
+                                    0.34561270475387573
+                                ],
+                                "min": [
+                                    0.6420565843582153,
+                                    0.0,
+                                    0.07411013543605804
+                                ]
+                            }
+                        },
+                        "Collider": {
+                            "box_size": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
+                        "GUID": {
+                            "guid": "2c6594f5-d020-e84c-a2de-20e17b656841"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.9208627939224243,
+                                0.0,
+                                0.20986142754554749
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.7071067690849304,
+                                0.0,
+                                0.7071067690849304
+                            ],
+                            "scale": [
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                    "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "ContainerRed"
                         }
                     },
                     "Name": "ContainerRed"

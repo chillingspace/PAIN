@@ -278,6 +278,7 @@ namespace PAIN {
             updateSystemsForRegistry(id, timing, true);
         }
         void Controller::onFixedUpdate(AppTiming timing) {
+
             // Update main registry (existing behavior)
             updateSystemsForRegistry(MAIN_REGISTRY_ID, timing, true);
 

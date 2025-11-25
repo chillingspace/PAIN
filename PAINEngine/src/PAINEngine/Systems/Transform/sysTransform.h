@@ -28,6 +28,7 @@ namespace PAIN {
             void updateRecursive(entt::entity e, const glm::mat4& parentWorld, entt::registry& registry);
             void propagateDirty(entt::entity e, entt::registry& registry);
             void markAncestorsDirty(entt::entity e, entt::registry& registry);
+            void findOrphansAHome(entt::entity e, Entity::GUID const& guid, Entity::Hierarchy& hierarchy, entt::registry& registry);
         };
 
     }
