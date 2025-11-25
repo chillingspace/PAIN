@@ -7,7 +7,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 39,
+                            "bvhNodeIndex": 41,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -121,7 +121,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 32,
+                            "bvhNodeIndex": 21,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -235,7 +235,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 13,
+                            "bvhNodeIndex": 10,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -251,14 +251,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
+                                    0.13575129210948944,
+                                    0.30859532952308655,
+                                    1.2708271741867065
                                 ],
                                 "min": [
-                                    -135.75128173828125,
+                                    -0.13575129210948944,
                                     0.0,
-                                    -278.80621337890625
+                                    0.7132147550582886
                                 ]
                             }
                         },
@@ -349,7 +349,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 40,
+                            "bvhNodeIndex": 44,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -463,7 +463,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 35,
+                            "bvhNodeIndex": 43,
                             "localAABB": {
                                 "max": [
                                     57.97823715209961,
@@ -577,7 +577,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 37,
+                            "bvhNodeIndex": 9,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -691,7 +691,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 34,
+                            "bvhNodeIndex": 20,
                             "localAABB": {
                                 "max": [
                                     57.97823715209961,
@@ -799,7 +799,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 24,
+                            "bvhNodeIndex": 18,
                             "localAABB": {
                                 "max": [
                                     69.66659545898438,
@@ -907,7 +907,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 5,
+                            "bvhNodeIndex": 13,
                             "localAABB": {
                                 "max": [
                                     73.85037994384766,
@@ -1010,7 +1010,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 29,
+                            "bvhNodeIndex": 39,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -1124,7 +1124,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 26,
+                            "bvhNodeIndex": 36,
                             "localAABB": {
                                 "max": [
                                     9.290358543395996,
@@ -1227,7 +1227,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 18,
+                            "bvhNodeIndex": 32,
                             "localAABB": {
                                 "max": [
                                     24.514007568359375,
@@ -1335,7 +1335,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 16,
+                            "bvhNodeIndex": 15,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -1449,7 +1449,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 14,
+                            "bvhNodeIndex": 30,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -1557,7 +1557,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 19,
+                            "bvhNodeIndex": 33,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -1665,7 +1665,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 4,
+                            "bvhNodeIndex": 27,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -1941,7 +1941,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 9,
+                            "bvhNodeIndex": 25,
                             "localAABB": {
                                 "max": [
                                     1.7023191452026367,
@@ -2080,7 +2080,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 10,
+                            "bvhNodeIndex": 28,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2188,7 +2188,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 23,
+                            "bvhNodeIndex": 16,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2302,7 +2302,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 28,
+                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2404,6 +2404,200 @@
                         }
                     },
                     "Name": "ContainerRed"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 4,
+                            "localAABB": {
+                                "max": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "min": [
+                                    -1.0,
+                                    -1.0,
+                                    -1.0
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    -3.4948418140411377,
+                                    1.4994242191314697,
+                                    2.1492223739624023
+                                ],
+                                "min": [
+                                    -5.509153366088867,
+                                    -0.5010853409767151,
+                                    0.1350884735584259
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "296f2f9a-4861-1a4f-a674-5539df01282e"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -4.501997470855713,
+                                0.4991694390773773,
+                                1.142155408859253
+                            ],
+                            "rotation": [
+                                4.1329334635520354e-05,
+                                0.0035041412338614464,
+                                8.62118395161815e-05,
+                                0.9999938607215881
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "3e8dc653-3d17-ab42-bb53-da040f01f965",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "player"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "b_is_dynamic": true,
+                            "layer": {
+                                "value": 5
+                            },
+                            "mass": -107374176.0,
+                            "motion_type": 1,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a03aa1fd-1d3b-ae4b-b48f-b4c06d7aa1c6"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "player"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "bvhNodeIndex": 5,
+                            "localAABB": {
+                                "max": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "min": [
+                                    -1.0,
+                                    -1.0,
+                                    -1.0
+                                ]
+                            },
+                            "needsUpdate": false,
+                            "worldAABB": {
+                                "max": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "min": [
+                                    -1.0,
+                                    -1.0,
+                                    -1.0
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "game manager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "game manager"
                 }
             }
         ]
