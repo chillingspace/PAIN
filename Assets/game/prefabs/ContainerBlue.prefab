@@ -1,9 +1,9 @@
 {
-    "Entities": [
+    "entities": [
         {
-            "Components": {
+            "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 38,
+                    "bvhNodeIndex": 1,
                     "localAABB": {
                         "max": [
                             135.75128173828125,
@@ -19,23 +19,51 @@
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.2852354049682617,
+                            0.9147800207138062,
                             0.30859532952308655,
-                            0.28353995084762573
+                            0.27880623936653137
                         ],
                         "min": [
-                            1.01373291015625,
+                            0.6432774066925049,
                             0.0,
-                            -0.274072527885437
+                            -0.27880623936653137
                         ]
                     }
                 },
-                "EntityName": {
-                    "name": "ContainerBlue"
+                "Collider": {
+                    "box_size": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 0
                 },
                 "Hierarchy": {
-                    "children": [],
-                    "parent": 43
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.7790287137031555,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
@@ -69,25 +97,13 @@
                     "receiveShadows": true,
                     "visible": true
                 },
-                "Transform": {
-                    "position": [
-                        1.1494841575622559,
-                        0.0,
-                        0.00473371148109436
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
+                "Name": {
+                    "name": "ContainerBlue"
                 }
-            }
+            },
+            "entityGUID": "2d614323-6206-884f-966c-83ea4390f3b9"
         }
-    ]
+    ],
+    "prefabName": "",
+    "rootEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9"
 }
