@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Cube.gltf",
+    "name": "AnimatedTriangle.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 12099118809149533521
+    "hash": 11758374438502736790
   },
   "descriptor_version": 1,
-  "guid": "cff4914f-5fb7-ae4e-9d22-814985ca8a66",
+  "guid": "5247a57c-9aa7-9840-9796-1ad71757bd01",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\Cube.gltf"
+    "source_file": "game\\models\\at\\AnimatedTriangle.gltf"
   }
 }

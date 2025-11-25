@@ -216,6 +216,80 @@ namespace PAIN {
                             }
                         }
                     });
+                
+                // UItext comp ui
+                registerCompUIFunc<PAIN::UIText>("UIText",
+                    [this](ComponentsPanel& panel, PAIN::UIText& text) {
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Editable text string
+                        char text_buffer[1024];
+                        std::strncpy(text_buffer, text.display_text.c_str(), sizeof(text_buffer));
+                        text_buffer[sizeof(text_buffer) - 1] = '\0';
+                        if (ImGui::InputTextMultiline("Text", text_buffer, sizeof(text_buffer), ImVec2(-1, 0), ImGuiInputTextFlags_AllowTabInput)) {
+                            text.display_text = text_buffer;
+                            changed = true;
+                        }
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // Font selection                 
+                        if (DrawAssetSelectorField("Select A Font",
+                            text.font_guid,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Font),
+                            panel.services)) {
+                            changed = true;
+                        }
+
+                        // Font size
+                        changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");
+
+                        // Alignment
+                        static const char* alignment_items[] = { "Left", "Center", "Right" };
+                        int align_idx = static_cast<int>(text.alignment);
+                        if (ImGui::Combo("Alignment", &align_idx, alignment_items, IM_ARRAYSIZE(alignment_items))) {
+                            text.alignment = static_cast<PAIN::TextAlignment>(align_idx);
+                            changed = true;
+                        }
+
+                        ImGui::Spacing();
+
+                        // Color edit
+                        changed |= ImGui::ColorEdit4("Text Color", &text.color.x);
+
+                        // Outline
+                        ImGui::Separator();
+                        ImGui::Text("Outline");
+                        changed |= ImGui::DragFloat("Thickness", &text.outline_thickness, 0.05f, 0.0f, 16.0f, "%.2f");
+                        changed |= ImGui::ColorEdit4("Outline Color", &text.outline_color.x);
+
+                        // Shadow
+                        ImGui::Separator();
+                        ImGui::Text("Shadow");
+                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, -32, 32, "%.1f");
+                        changed |= ImGui::ColorEdit4("Shadow Color", &text.shadow_color.x);
+
+                        ImGui::Spacing();
+
+                        // Word wrap & Rich Text
+                        changed |= ImGui::Checkbox("Word Wrap", &text.word_wrap);
+                        changed |= ImGui::Checkbox("Rich Text", &text.rich_text);
+
+                        changed |= ImGui::DragFloat("Line Height", &text.line_height, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        // Max length (for input fields, optional)
+                        changed |= ImGui::DragInt("Max Length", &text.max_length, 1, 0, 4096);
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    }
+                );
+
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

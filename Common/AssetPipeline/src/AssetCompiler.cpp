@@ -607,7 +607,10 @@ namespace PAIN {
             bool triangulate = desc_file.import_settings.value("triangulate", true);
             bool import_animations = desc_file.import_settings.value("import_animations", true);
             bool import_skeleton = desc_file.import_settings.value("import_skeleton", true);
-            int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+
+            // dont get from settings. needs to match shader.
+            //int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+            const int max_bone_weights = 4;
 
             // Configure Assimp post-processing flags
             unsigned int ppFlags = 0;
@@ -657,6 +660,23 @@ namespace PAIN {
                 }
             }
 
+            // resolve bone parents
+            for (size_t i = 0; i < asset.skeleton.size(); ++i) {
+                // get bone
+                aiNode* boneNode = scene->mRootNode->FindNode(asset.skeleton[i].name.c_str());
+
+                //
+                if (boneNode && boneNode->mParent) {
+                    std::string parentName = boneNode->mParent->mName.C_Str();
+
+                    // check if parent is bone
+                    auto it = boneNameToIndex.find(parentName);
+                    if (it != boneNameToIndex.end()) {
+                        asset.skeleton[i].parent = it->second;
+                    }
+                }
+            }
+
             size_t vertexBase = 0;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
                 aiMesh* mesh = scene->mMeshes[m];
@@ -700,7 +720,8 @@ namespace PAIN {
                     if (weights.size() > max_bone_weights) weights.resize(max_bone_weights);
 
                     for (int i = 0; i < max_bone_weights; ++i) {
-                        vert.boneIndices[i] = (uint8_t)weights[i].first;
+                        vert.boneIndices[i] = weights[i].first;
+                        vert.boneIndices_f[i] = static_cast<float>(weights[i].first);
                         vert.boneWeights[i] = weights[i].second;
                     }
 
@@ -763,8 +784,11 @@ namespace PAIN {
                     clip.duration = static_cast<float>(anim->mDuration) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
                     for (unsigned int c = 0; c < anim->mNumChannels; ++c) {
                         aiNodeAnim* chan = anim->mChannels[c];
-                        AnimationTrack track;
-                        track.boneName = chan->mNodeName.C_Str();
+                        //AnimationTrack track;
+
+                        const std::string boneName = chan->mNodeName.C_Str();
+                        auto& track = clip.track_map[boneName];
+
                         for (unsigned int k = 0; k < chan->mNumPositionKeys; ++k) {
                             AnimationKey key;
                             key.time = static_cast<float>(chan->mPositionKeys[k].mTime) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
@@ -780,9 +804,9 @@ namespace PAIN {
                                 key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
                             }
                             // Morph target weights can be set here if you support animated blend shapes
-                            track.keys.push_back(key);
+                            track.push_back(key);
                         }
-                        clip.tracks.push_back(track);
+                        //clip.tracks.push_back(track);
                     }
                     asset.animations.push_back(clip);
                 }
@@ -1344,16 +1368,16 @@ namespace PAIN {
                 out.write((char*)&anim.duration, sizeof(anim.duration));
                 out.write((char*)&anim.isAdditive, sizeof(anim.isAdditive));
 
-                uint32_t trackCount = (uint32_t)anim.tracks.size();
+                uint32_t trackCount = (uint32_t)anim.track_map.size();
                 out.write((char*)&trackCount, sizeof(trackCount));
-                for (const AnimationTrack& track : anim.tracks) {
-                    uint32_t boneLen = (uint32_t)track.boneName.size();
+                for (const auto& [bone_name, track] : anim.track_map) {
+                    uint32_t boneLen = (uint32_t)bone_name.size();
                     out.write((char*)&boneLen, sizeof(boneLen));
-                    out.write(track.boneName.data(), boneLen);
+                    out.write(bone_name.data(), boneLen);
 
-                    uint32_t keyCount = (uint32_t)track.keys.size();
+                    uint32_t keyCount = (uint32_t)track.size();
                     out.write((char*)&keyCount, sizeof(keyCount));
-                    for (const AnimationKey& key : track.keys) {
+                    for (const AnimationKey& key : track) {
                         out.write((char*)&key.time, sizeof(key.time));
                         out.write((char*)&key.translation, sizeof(key.translation));
                         out.write((char*)&key.rotation, sizeof(key.rotation));

@@ -188,10 +188,10 @@ namespace PAIN {
   			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
-			glm::mat4 model_xform;
+			glm::mat4 model_xform{ 1.f };
 			if (transform.has_value())
 			{
-				model_xform = transform.value().get().matrix;
+				model_xform *= transform.value().get().matrix;
 			}
 			if (mdl.has_value())
 			{

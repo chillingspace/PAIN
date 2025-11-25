@@ -26,7 +26,7 @@ namespace PAIN {
 	*****************************************************************************************/
 
 	struct LocalTransform {
-		glm::vec3 position{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 position{ 0.0f, 0.0f, 0.0f };		// note that this is in parent space. so essentially this is translate, not pos
 		glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
 
@@ -34,6 +34,7 @@ namespace PAIN {
 		static constexpr bool ShouldSerialize = true;
 	};
 
+	// sysTransform.cpp handles init
 	struct WorldTransform {
 		glm::mat4 matrix{ 1.0f };
 		bool dirty = true;
@@ -61,22 +62,22 @@ namespace PAIN {
 
  //This is needed as json still does not now how to handle seri for the custom comps,
  //These types not supported by refl, so we need add struct-level seri 
-namespace nlohmann {
-	template<>
-	struct adl_serializer<PAIN::LocalTransform> {
-		static void to_json(json& j, const PAIN::LocalTransform& t) {
-			j["position"] = t.position;
-			j["rotation"] = t.rotation;
-			j["scale"] = t.scale;
-		}
-
-		static void from_json(const json& j, PAIN::LocalTransform& t) {
-			t.position = j["position"].get<glm::vec3>();
-			t.rotation = j["rotation"].get<glm::quat>();
-			t.scale = j["scale"].get<glm::vec3>();
-		}
-	};
-}
+//namespace nlohmann {
+//	template<>
+//	struct adl_serializer<PAIN::LocalTransform> {
+//		static void to_json(json& j, const PAIN::LocalTransform& t) {
+//			j["position"] = t.position;
+//			j["rotation"] = t.rotation;
+//			j["scale"] = t.scale;
+//		}
+//
+//		static void from_json(const json& j, PAIN::LocalTransform& t) {
+//			t.position = j["position"].get<glm::vec3>();
+//			t.rotation = j["rotation"].get<glm::quat>();
+//			t.scale = j["scale"].get<glm::vec3>();
+//		}
+//	};
+//}
 
 REFL_TYPE(PAIN::LocalTransform)
 REFL_FIELD(position)
