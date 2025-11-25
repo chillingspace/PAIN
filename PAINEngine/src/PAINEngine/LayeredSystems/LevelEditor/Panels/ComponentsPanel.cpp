@@ -246,7 +246,7 @@ namespace PAIN {
                         }
 
                         // Font position
-                        changed |= ImGui::DragFloat2("Text Position", &text.text_pos.x, 1.0f, -32, 32, "%.1f");
+                        ImGui::DragFloat2("Text Position", &text.text_pos.x, 1.0f, 0.0f, 0.0f, "%.1f");
 
                         // Font size
                         changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");

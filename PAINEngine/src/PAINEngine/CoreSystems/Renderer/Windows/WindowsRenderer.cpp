@@ -1348,7 +1348,7 @@ namespace PAIN {
 					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
 					if (!font_opt.has_value()) continue;
 
-					TextRenderer::get().renderText(font_opt.value()->getFont(), text_comp.display_text, text_comp.text_pos.x, text_comp.text_pos.y, text_comp.font_size, text_comp.color);
+					TextRenderer::get().renderText(text_comp);
 					TextRenderer::get().debugRenderQuad();
 				}
 			}
