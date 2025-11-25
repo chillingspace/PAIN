@@ -224,34 +224,21 @@ namespace PAIN {
             const uint64_t fnv_offset_basis = 14695981039346656037ULL;
             const uint64_t fnv_prime = 1099511628211ULL;
 
-            // Retry parameters
-            const int max_attempts = 10;
-            const auto retry_delay = std::chrono::milliseconds(10);
+            uint64_t hash = fnv_offset_basis;
+            std::ifstream file(path, std::ios::binary);
+            if (!file)
+                return 0;
 
-            for (int attempt = 0; attempt < max_attempts; ++attempt) {
-                std::ifstream file(path, std::ios::binary);
-                
-                if (file.is_open()) {
-                    uint64_t hash = fnv_offset_basis;
-                    char buffer[4096];
-                    while (file) {
-                        file.read(buffer, sizeof(buffer));
-                        std::streamsize count = file.gcount();
-                        for (std::streamsize i = 0; i < count; ++i) {
-                            hash ^= static_cast<unsigned char>(buffer[i]);
-                            hash *= fnv_prime;
-                        }
-                    }
-                    return hash;
+            char buffer[4096];
+            while (file) {
+                file.read(buffer, sizeof(buffer));
+                std::streamsize count = file.gcount();
+                for (std::streamsize i = 0; i < count; ++i) {
+                    hash ^= static_cast<unsigned char>(buffer[i]);
+                    hash *= fnv_prime;
                 }
-
-                // File failed to open (likely locked by antivirus or build process). Wait and retry.
-                std::this_thread::sleep_for(retry_delay);
             }
-
-            // If we get here, the file is genuinely inaccessible
-            std::cerr << "[Warning] fileHashing failed to open file after retries: " << path << std::endl;
-            return 0;
+            return hash;
         }
 
         static bool deleteFile(std::filesystem::path const& file_path) {
