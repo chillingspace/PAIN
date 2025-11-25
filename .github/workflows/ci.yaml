@@ -48,7 +48,7 @@ jobs:
       - name: Build Windows (build.bat)
         run: .\build.bat  
         env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 6
+          CMAKE_BUILD_PARALLEL_LEVEL: 8
       - name: Build Debug solution
         run: |
           cd build
@@ -100,7 +100,7 @@ jobs:
       - name: Run build.bat first
         run: .\build.bat
         env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 6
+          CMAKE_BUILD_PARALLEL_LEVEL: 8
       - name: Build Android app (x86_64)
         working-directory: android
         env:

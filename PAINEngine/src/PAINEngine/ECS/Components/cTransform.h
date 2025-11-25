@@ -25,25 +25,6 @@ namespace PAIN {
 	* (Place largest type var (Double) first, then followed by smallest.
 	*****************************************************************************************/
 
-	// for animated objects
-	struct RootTransform {
-		glm::vec3 scale{ 1.f };
-		glm::quat rotation{ 1.f, 0.f, 0.f, 0.f };
-		glm::vec3 translate{ 1.f };
-
-		//glm::mat4 xform;
-
-		static constexpr bool shouldSerialize = false;
-
-		//RootTransform(glm::vec3 s, glm::quat r, glm::vec3 t) : scale(s), rotation(r), translate(t) {
-		//	xform =
-		//		glm::translate(glm::mat4(1.f), t) *
-		//		glm::mat4_cast(r) *
-		//		glm::scale(glm::mat4(1.f), s);
-		//}
-	};
-
-
 	struct LocalTransform {
 		glm::vec3 position{ 0.0f, 0.0f, 0.0f };		// note that this is in parent space. so essentially this is translate, not pos
 		glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f };

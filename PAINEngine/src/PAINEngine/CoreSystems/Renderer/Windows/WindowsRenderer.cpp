@@ -777,7 +777,7 @@ namespace PAIN {
 					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
 					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
 					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
-					glm::mat4 animated_pose;
+					glm::mat4 animated_pose = translate * rotate * scale;
 
 					if (GraphicsSettings::get().interpolate_animation) {
 						auto next_key_it = std::next(key_it);
@@ -795,9 +795,6 @@ namespace PAIN {
 							// update interpolated matrix
 							animated_pose = i_translate_mtx * i_rotate_mtx * i_scale_mtx;
 						}
-					}
-					else {
-						animated_pose = translate * rotate * scale;
 					}
 
 					relative_poses[bone_idx] = animated_pose;

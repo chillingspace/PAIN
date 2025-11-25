@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot_Robot_Metallic-robot_Robot_Roughness.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7849872702977243647
+  },
+  "descriptor_version": 1,
+  "guid": "30cd3b32-bce1-564e-8046-1204bbfee443",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\robot_Robot_Metallic-robot_Robot_Roughness.png"
+  }
+}

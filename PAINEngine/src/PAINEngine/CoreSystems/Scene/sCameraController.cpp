@@ -1,4 +1,5 @@
 #include "sCameraController.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 namespace PAIN {
     void sCameraController::onDetach() {}
@@ -407,6 +408,8 @@ namespace PAIN {
 
         // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+            auto& gs = GraphicsSettings::get();
+
             switch (e.getKeyCode()) {
 
             case PAIN_KEY_M:
@@ -441,6 +444,26 @@ namespace PAIN {
                 }
                 PN_CORE_INFO("CAMERA SPEED -0.5f, SPEED: {}", camera->speed);
                 break;
+
+            case PAIN_KEY_I:
+                gs.interpolate_animation = !gs.interpolate_animation;
+                PN_CORE_INFO("Toggled interpolate_animation: {}", gs.interpolate_animation);
+                break;
+
+            case PAIN_KEY_F:
+                gs.draw_floor = !gs.draw_floor;
+                PN_CORE_INFO("Toggled draw_floor: {}", gs.draw_floor);
+                break;
+
+            //case PAIN_KEY_G:
+            //    gs.gamma_correction = !gs.gamma_correction;
+            //    PN_CORE_INFO("Toggled gamma_correction: {}", gs.gamma_correction);
+            //    break;
+
+            //case PAIN_KEY_T:
+            //    gs.tone_mapping_mode = (GraphicsSettings::TONE_MAPPING_TYPES)(((int)gs.tone_mapping_mode + 1) % (int)GraphicsSettings::TONE_MAPPING_TYPES::NUM_TONE_MAPPING_TYPES);
+            //    PN_CORE_INFO("Tone mapping mode: {}", (int)gs.tone_mapping_mode);
+            //    break;
 
             default:
                 break;
