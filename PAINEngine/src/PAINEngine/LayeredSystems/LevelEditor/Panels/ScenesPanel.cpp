@@ -302,11 +302,11 @@ namespace PAIN {
                 }
 
                 //World Light intensity
-                if (ImGui::ColorEdit3("World Light Intensity", glm::value_ptr(scn_service->getWorldLight()->L_intensity))) {
+                if (scn_service->getWorldLight() && ImGui::ColorEdit3("World Light Intensity", glm::value_ptr(scn_service->getWorldLight()->L_intensity))) {
                 }
 
                 //camera Light intensity
-                if (ImGui::ColorEdit3("Camera Light Intensity", glm::value_ptr(scn_service->getCameraLight()->L_intensity))) {
+                if (scn_service->getCameraLight() && ImGui::ColorEdit3("Camera Light Intensity", glm::value_ptr(scn_service->getCameraLight()->L_intensity))) {
                 }
 
                 //Set using day

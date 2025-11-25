@@ -1866,9 +1866,15 @@ namespace PAIN {
 								//Get GUID
 								auto id = asset_service->findGUID(relative);
 
-								//Check if cached
-								if (asset_service->checkAssetCached(id)) {
-									asset_service->recacheAsset(id);
+								//Check if asset is cachable
+								if (!Assets::isAssetCacheable(Assets::getAssetType(file))) {
+									asset_service->reshipAsset(id);
+								}
+								else {
+									//Check if cached
+									if (asset_service->checkAssetCached(id)) {
+										asset_service->recacheAsset(id);
+									}
 								}
 							}
 

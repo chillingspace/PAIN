@@ -151,6 +151,7 @@ namespace PAIN {
 			void uncacheAsset(GUID const& id);
 #ifdef PN_PLATFORM_WINDOWS
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+			void reshipAsset(GUID const& id);
 #endif
 			bool checkAssetCached(GUID const& id) const;
 

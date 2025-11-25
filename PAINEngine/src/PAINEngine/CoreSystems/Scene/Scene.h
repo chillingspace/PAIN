@@ -12,8 +12,12 @@ namespace PAIN {
 	namespace Scene {
         class SceneManager : public AppSystem {
         private:
+
+            //Curr active camera
+            Camera* active_camera = nullptr;
+
             //Runtime objects
-            std::unique_ptr<Camera> camera;
+            std::unique_ptr<Camera> editor_camera;
 
             //Map of cameras
             std::unordered_map<std::string, std::unique_ptr<Camera>> game_cameras;
@@ -85,7 +89,6 @@ namespace PAIN {
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
             void setCurrSkyBoxTexture(Assets::GUID const& skybox_id);
             Assets::GUID getCurrScnID() { return curr_scene_id; }
-            Camera* GetActiveCamera() { return camera.get(); }
 
             // When you need to access the light
             Light* getCameraLight() {
@@ -100,6 +103,13 @@ namespace PAIN {
 
             bool getUsingDayTime() const { return using_day_time; }
             void setUsingDayTime(bool day_time) { using_day_time = day_time; }
+
+            Camera* GetActiveCamera();
+            void SetActiveCamera(Camera* cam);
+            void SetEditorCamera();
+            void SetGameCamera();
+            void ChangeGameCamera(std::string cam_name);
+            const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
         };
 	}
 

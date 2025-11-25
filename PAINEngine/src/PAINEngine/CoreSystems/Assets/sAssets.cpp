@@ -389,6 +389,21 @@ namespace PAIN {
 			//Cache asset
 			return cacheAsset(id);
 		}
+
+		void Manager::reshipAsset(GUID const& id) {
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Re process asset and ship
+			auto data = asset_registry[id];
+			Info asset;
+			asset.raw_path = path_service->resolvePath(Path::main_assets_alias, "");
+			asset.raw_path /= data->main_relative_path;
+			asset.name = asset.raw_path.filename().string();
+			asset.relative_folder = data->main_relative_path.parent_path();
+			asset.type = data->type;
+			asset_compiler->processAsset(asset);
+		}
 #endif
 		bool Manager::checkAssetCached(GUID const& id) const {
 			//Check asset cache

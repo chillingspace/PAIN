@@ -151,7 +151,7 @@ namespace PAIN {
 			const auto& camSettings = scene_asset.camera;
 
 			// Create or update camera
-			camera = std::make_unique<Camera>(
+			editor_camera = std::make_unique<Camera>(
 				camSettings.position,
 				camSettings.forward,
 				camSettings.up,
@@ -161,6 +161,7 @@ namespace PAIN {
 				camSettings.aspectRatioW,
 				camSettings.aspectRatioH
 			);
+			SetEditorCamera();
 
 			PN_CORE_INFO("[SceneManager] Camera setup: pos({}, {}, {}), fov={}",
 				camSettings.position.x, camSettings.position.y, camSettings.position.z,
@@ -172,12 +173,22 @@ namespace PAIN {
 			//Get environment variables
 			const auto& env = scene_asset.environment;
 
+			//Create default light sources
+			LightSources::get().create(camera_light_name);
+			PN_CORE_INFO("[SceneManager] Created cam and world light source.");
+
 			//Set up camera light intensity
+			if (!getCameraLight()) {
+				LightSources::get().create(camera_light_name);
+			} 
 			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
 			//Set up world light
 			using_day_time = env.useDaytime;
 			if (using_day_time) {
+				if (!getWorldLight()) {
+					LightSources::get().create(world_light_name);
+				}
 				getWorldLight()->L_intensity = env.worldLightIntensity;
 				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
@@ -254,20 +265,20 @@ namespace PAIN {
 		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
 
 			//Capture all camera variables
-			if (camera) {
-				scene_asset.camera.position = camera->pos;
-				scene_asset.camera.forward = camera->forward;
-				scene_asset.camera.up = camera->up;
-				scene_asset.camera.nearPlane = camera->near_plane;
-				scene_asset.camera.farPlane = camera->far_plane;
-				scene_asset.camera.fov = camera->fov;
-				scene_asset.camera.aspectRatioW = camera->width_ratio;
-				scene_asset.camera.aspectRatioH = camera->height_ratio;
+			if (active_camera) {
+				scene_asset.camera.position = active_camera->pos;
+				scene_asset.camera.forward = active_camera->forward;
+				scene_asset.camera.up = active_camera->up;
+				scene_asset.camera.nearPlane = active_camera->near_plane;
+				scene_asset.camera.farPlane = active_camera->far_plane;
+				scene_asset.camera.fov = active_camera->fov;
+				scene_asset.camera.aspectRatioW = active_camera->width_ratio;
+				scene_asset.camera.aspectRatioH = active_camera->height_ratio;
 			}
 
 			//Capture all graphics and env variables
-			scene_asset.environment.cameraLightIntensity = getCameraLight()->L_intensity;
-			scene_asset.environment.worldLightIntensity = getWorldLight()->L_intensity;
+			scene_asset.environment.cameraLightIntensity = getCameraLight() ? getCameraLight()->L_intensity : scene_asset.environment.cameraLightIntensity;
+			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
 			scene_asset.environment.useDaytime = using_day_time;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
 		}
@@ -356,11 +367,6 @@ namespace PAIN {
 
 			//Get ECS Controller
 			auto ecs = services->get<ECS::Controller>();
-
-			//Create default light sources
-			LightSources::get().create(camera_light_name);
-			LightSources::get().create(world_light_name);
-			PN_CORE_INFO("[SceneManager] Created cam and world light source.");
 
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);
@@ -522,25 +528,6 @@ namespace PAIN {
 		}
 
 		void SceneManager::onUpdate(AppTiming timing) {
-
-			// Update camera if exists
-			if (camera) {
-				// Camera update logic can go here if needed
-				// For now, the camera is controlled externally (editor, player controller, etc.)
-			}
-
-			// Update animations (if you want this here instead of in ECS systems)
-			auto ecs = services->get<ECS::Controller>();
-			if (!ecs) return;
-
-			auto& registry = ecs->getRegistry();
-			auto view = registry.view<ModelRenderer>();
-			for (auto e : view) {
-				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-				if (mdl.has_value()) {
-					mdl->get().UpdateAnimation(timing.dt);
-				}
-			}
 
 			// Get time scale from ViewportPanel (0.0 when paused, 1.0 when playing)
 			float timeScale = 1.0f;
@@ -801,6 +788,36 @@ namespace PAIN {
 		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {
 			curr_skybox_id = skybox_id;
 			Skybox::get().setTexture(curr_skybox_id);
+		}
+
+		Camera* SceneManager::GetActiveCamera()
+		{
+			return active_camera;
+		}
+
+		void SceneManager::SetActiveCamera(Camera* cam) {
+			active_camera = cam;
+		}
+
+		void SceneManager::SetEditorCamera() {
+			SetActiveCamera(editor_camera.get());
+
+
+		}
+		void SceneManager::SetGameCamera()
+		{
+			auto it = game_cameras.find(active_game_cam);
+			if (it != game_cameras.end()) {
+				SetActiveCamera(it->second.get());
+			}
+
+		}
+		void SceneManager::ChangeGameCamera(std::string cam_name)
+		{
+			active_game_cam = cam_name;
+		}
+		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
+			return game_cameras;
 		}
 	}
 
