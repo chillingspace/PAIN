@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "gear nav.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15539845431195496441
+  },
+  "descriptor_version": 1,
+  "guid": "e485d7b6-c3cf-b840-8e9c-7284b36cf0bb",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\gear nav.png"
+  }
+}

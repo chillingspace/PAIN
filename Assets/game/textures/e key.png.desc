@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "e key.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5887111899830693444
+  },
+  "descriptor_version": 1,
+  "guid": "c3d79dd1-cd12-c747-b934-05587b54f0e6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\e key.png"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "jump.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17184857301561645919
+  },
+  "descriptor_version": 1,
+  "guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\jump.png"
+  }
+}

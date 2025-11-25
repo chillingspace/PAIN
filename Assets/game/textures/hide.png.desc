@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "hide.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1540973200747592517
+  },
+  "descriptor_version": 1,
+  "guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\hide.png"
+  }
+}
