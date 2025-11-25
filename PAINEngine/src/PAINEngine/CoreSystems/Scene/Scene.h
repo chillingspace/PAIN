@@ -27,12 +27,17 @@ namespace PAIN {
 		void SetEditorCamera();
 
 		void SetGameCamera();
+		void ChangeGameCamera(std::string cam_name);
 
+
+		const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
 
 	private:
 		Camera* active_camera = nullptr;
 		std::unique_ptr<Camera> editor_camera;
-		std::unique_ptr<Camera> game_camera;
+
+		std::unordered_map< std::string, std::unique_ptr<Camera>> game_cameras;
+		std::string active_game_cam;
 
 		// Audio Demo State Variables
 		entt::entity m_audioSourceEntity = entt::null;
