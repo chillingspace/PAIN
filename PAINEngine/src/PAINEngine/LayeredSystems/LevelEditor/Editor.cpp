@@ -82,19 +82,14 @@ namespace PAIN {
                 }
                 return true;
                 };
-            //hooks.onChange = [ser](const std::string& sceneId) -> bool {
-            //    if (!ser->loadSceneById(sceneId)) {
-            //        PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
-            //        return false;
-            //    }
-            //    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-            //    return true;
-            //    };
-
-            hooks.onChange = [this](const std::string& sceneId) -> bool {
-                return this->changeScene(sceneId);
+            hooks.onChange = [ser](const std::string& sceneId) -> bool {
+                if (!ser->loadSceneById(sceneId)) {
+                    PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
+                    return false;
+                }
+                PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
+                return true;
                 };
-
             hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
             hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
                 ser->setMask(i, j, v);      
@@ -386,24 +381,6 @@ namespace PAIN {
             ImGui::End();
             ImGui::PopStyleVar(2);
         }
-
-        bool Editor::changeScene(const std::string& sceneId) {
-            auto ser = services->get<PAIN::Serialization::Service>();
-
-            // Load Fail
-            if (!ser->loadSceneById(sceneId)) {
-                PN_CORE_WARN("[Editor] Failed to load scene: {}", sceneId);
-                return false;
-            }
-
-            // TODO: notify panels, reset selection, etc.
-            // scenesPanel->setCurrentScene(sceneId);  // if you expose something like this
-
-            // Load Successful
-            PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-            return true;
-        }
-
     }
 }
 
