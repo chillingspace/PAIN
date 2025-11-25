@@ -1,4 +1,3 @@
-
 -- player movement script
 
 local moveLeft = false
@@ -8,12 +7,28 @@ local moveDown = false
 
 local walkingSoundPlaying = false
 
-registerKeyDown("KEY_U", function() moveUp = true end)
-registerKeyDown("KEY_D", function() moveDown = true end)
-registerKeyDown("KEY_L", function() moveLeft = true end)
-registerKeyDown("KEY_R", function() moveRight = true end)
+-- Input Registration with Debug Logs
+registerKeyDown("KEY_U", function() 
+    --print("DEBUG: KEY_U Pressed") 
+    moveUp = true 
+end)
+registerKeyDown("KEY_D", function() 
+    --print("DEBUG: KEY_D Pressed")
+    moveDown = true 
+end)
+registerKeyDown("KEY_L", function() 
+    --print("DEBUG: KEY_L Pressed")
+    moveLeft = true 
+end)
+registerKeyDown("KEY_R", function() 
+    --print("DEBUG: KEY_R Pressed")
+    moveRight = true 
+end)
 
-registerKeyUp("KEY_U", function() moveUp = false end)
+registerKeyUp("KEY_U", function() 
+    --print("DEBUG: KEY_U Released")
+    moveUp = false 
+end)
 registerKeyUp("KEY_D", function() moveDown = false end)
 registerKeyUp("KEY_L", function() moveLeft = false end)
 registerKeyUp("KEY_R", function() moveRight = false end)
@@ -27,6 +42,9 @@ local playerStateInited = false
 
 registerUpdate(function(dt)
     local id = entityId -- the entity script is attached to
+
+    -- Verify if the script is ticking at all
+    --print("DEBUG: Update ticking for Entity ID: " .. tostring(id))
 
     if not playerStateInited then
         if PlayerState and PlayerState.init then
@@ -55,6 +73,9 @@ registerUpdate(function(dt)
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 
     if isMoving then
+        -- Log only when trying to move to avoid console spam
+        print("DEBUG: Movement detected. dx: " .. dx .. " dz: " .. dz) 
+        
         if not walkingSoundPlaying and audioPlay then
             -- optional: ensure it loops
             if audioSetLooping then audioSetLooping(id, true) end
