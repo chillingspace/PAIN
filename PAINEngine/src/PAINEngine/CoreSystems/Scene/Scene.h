@@ -15,6 +15,10 @@ namespace PAIN {
             //Runtime objects
             std::unique_ptr<Camera> camera;
 
+            //Map of cameras
+            std::unordered_map<std::string, std::unique_ptr<Camera>> game_cameras;
+            std::string active_game_cam;
+
             //Current scene
             Assets::GUID curr_scene_id;
 
