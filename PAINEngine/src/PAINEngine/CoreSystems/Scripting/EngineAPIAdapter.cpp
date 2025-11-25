@@ -393,7 +393,21 @@ namespace PAIN {
     /* =========================================================================== */
     /*                           Scene / System state                              */
     /* =========================================================================== */
-    void EngineAPIAdapter::ChangeScene(std::string) {}
+    bool EngineAPIAdapter::ChangeScene(std::string name) {
+        if (!ser_) {
+            PN_CORE_WARN("[EngineAPI] Serialization::Service is null.");
+            return false;
+        }
+
+        if (!ser_->loadSceneById(name)) {
+            PN_CORE_WARN("[EngineAPI] Failed to load scene: {}", name);
+            return false;
+        }
+
+        PN_CORE_INFO("[EngineAPI] Loaded scene {}", name);
+        return true;
+    }
+
     void EngineAPIAdapter::PauseAllSystems(bool) {}
     bool EngineAPIAdapter::IsGamePaused() const { return false; }
     float EngineAPIAdapter::GetFps() const { return 0.0f; }

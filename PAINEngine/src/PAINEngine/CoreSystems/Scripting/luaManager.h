@@ -31,7 +31,8 @@ namespace PAIN {
         struct CollisionInterest { entt::entity entityInterested; entt::entity entityToCheck; };
 
     public:
-        void init(std::shared_ptr<Editor::Editor> editor, std::shared_ptr<IEngineAPI> api, bool shipping);
+        //void init(std::shared_ptr<Editor::Editor> editor, std::shared_ptr<IEngineAPI> api, bool shipping);
+        void init(std::shared_ptr<IEngineAPI> api, bool shipping);
         bool loadScriptForEntity(entt::entity entityId, const std::string& filePath,
             const std::vector<ScriptExternalVar>& vars = {}, bool runWhenPaused = false);
 
@@ -88,7 +89,6 @@ namespace PAIN {
 
         sol::state lua_;
         std::shared_ptr<IEngineAPI> api_;
-        std::shared_ptr<Editor::Editor> editor_;
         bool shipping_{ false };
         bool gamePaused_{ false };
 

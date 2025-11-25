@@ -147,8 +147,7 @@ namespace {
 
 namespace PAIN {
 
-    void LuaManager::init(std::shared_ptr<Editor::Editor> editor, std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
-        editor_ = editor;
+    void LuaManager::init(std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
         api_ = api;
         shipping_ = shipping;
 
@@ -347,12 +346,6 @@ namespace PAIN {
             return std::make_tuple(pos.x, pos.y);
             };
 
-        lua_["changeScene"] = [this](const std::string& name) {
-            if (!editor_) {
-                PN_CORE_WARN("[Lua] ChangeScene called but editor_ is null");
-            }
-            return editor_->changeScene(name);
-            };
 
 
 

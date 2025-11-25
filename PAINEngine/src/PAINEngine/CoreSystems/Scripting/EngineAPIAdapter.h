@@ -14,6 +14,7 @@
 #include "PAINEngine/CoreSystems/Events/Event.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
+#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
 
@@ -27,9 +28,10 @@ namespace PAIN {
             PAIN::Assets::Manager* assets,
             //PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
-            PAIN::Scene* scene)
+            PAIN::Scene* scene,
+            PAIN::Serialization::Service* ser)
             : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
-              fs_(fs), scene_(scene)
+              fs_(fs), scene_(scene), ser_(ser)
         {
             //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
             //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);
@@ -122,7 +124,7 @@ namespace PAIN {
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */
-        void  ChangeScene(std::string name) override;
+        bool  ChangeScene(std::string name) override;
         void  PauseAllSystems(bool toPause) override;
         bool  IsGamePaused() const override;
         float GetFps() const override;
@@ -208,6 +210,7 @@ namespace PAIN {
         //PAIN::Audio::Audio* audio_ = nullptr;
         PAIN::Path::Path* fs_ = nullptr;
         PAIN::Scene* scene_ = nullptr;
+        PAIN::Serialization::Service* ser_ = nullptr;
         PAIN::Assets::Manager* assets_ = nullptr;
         std::unordered_set<int> keysDown_, mouseDown_;
         std::unordered_set<int> keysPressed_, keysReleased_;
