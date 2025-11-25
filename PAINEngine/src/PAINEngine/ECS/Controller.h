@@ -213,6 +213,7 @@ namespace PAIN {
 			bool auto_simulate = false;
 		};
 
+		//Improved controller with optional registry usage
 		class Controller : public AppSystem {
 		private:
 
