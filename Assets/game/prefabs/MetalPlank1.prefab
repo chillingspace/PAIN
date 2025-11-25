@@ -3,30 +3,30 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 11,
+                    "bvhNodeIndex": 21,
                     "localAABB": {
                         "max": [
-                            35.818092346191406,
-                            97.5758056640625,
-                            35.81809997558594
+                            57.97823715209961,
+                            211.10305786132813,
+                            5.444207191467285
                         ],
                         "min": [
-                            -35.81809616088867,
+                            -57.97823715209961,
                             0.0,
-                            -35.818092346191406
+                            -0.7065536975860596
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            0.629583477973938,
-                            0.09757581353187561,
-                            0.13504602015018463
+                            0.2541748881340027,
+                            0.21110306680202484,
+                            0.7221170663833618
                         ],
                         "min": [
-                            0.5579472780227661,
+                            0.13821841776371002,
                             0.0,
-                            0.06340982764959335
+                            0.7159662842750549
                         ]
                     }
                 },
@@ -49,9 +49,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        0.593765377998352,
+                        0.19619666039943695,
                         0.0,
-                        0.0992279201745987
+                        0.7166728377342224
                     ],
                     "rotation": [
                         0.0,
@@ -69,8 +69,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
-                            "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+                            "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -83,27 +83,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                            "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                            "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                            "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                            "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                    "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "OilDrumRed"
+                    "name": "MetalPlank1"
                 }
             },
-            "entityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
+            "entityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e"
         }
     ],
     "prefabName": "",
-    "rootEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
+    "rootEntityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e"
 }

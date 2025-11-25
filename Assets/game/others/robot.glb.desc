@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "robot.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 4728721733818403633
+  },
+  "descriptor_version": 1,
+  "guid": "5a721b58-58c7-b94c-a7a1-3179ce4707ee",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\robot.glb"
+  }
+}

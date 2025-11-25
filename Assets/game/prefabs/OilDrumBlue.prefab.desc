@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 17449259929687592635
+    "hash": 7113944376504161757
   },
   "descriptor_version": 1,
-  "guid": "202bcd82-510d-264d-a51b-bb313fd9862b",
+  "guid": "6ed2160a-e832-1f4b-9ff7-1278724e2cc9",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\OilDrumBlue.prefab"

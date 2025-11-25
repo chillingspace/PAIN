@@ -1,9 +1,9 @@
 {
-    "Entities": [
+    "entities": [
         {
-            "Components": {
+            "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 55,
+                    "bvhNodeIndex": 19,
                     "localAABB": {
                         "max": [
                             69.66659545898438,
@@ -19,23 +19,51 @@
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            0.18178968131542206,
-                            0.08802062273025513,
-                            0.8069671392440796
+                            0.2984395921230316,
+                            0.10548503696918488,
+                            0.7133870124816895
                         ],
                         "min": [
-                            0.05074420943856239,
-                            -0.0006311872275546193,
-                            0.6664721965789795
+                            0.1413930356502533,
+                            -0.0007564228144474328,
+                            0.5450161099433899
                         ]
                     }
                 },
-                "EntityName": {
-                    "name": "Tires"
+                "Collider": {
+                    "box_size": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 0
                 },
                 "Hierarchy": {
-                    "children": [],
-                    "parent": 4294967295
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.19324302673339844,
+                        0.0,
+                        0.6526851654052734
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0015100000891834497,
+                        0.0015100000891834497,
+                        0.0015100000891834497
+                    ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
@@ -69,25 +97,13 @@
                     "receiveShadows": true,
                     "visible": true
                 },
-                "Transform": {
-                    "position": [
-                        0.09400976449251175,
-                        0.0,
-                        0.7563152313232422
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0012600000482052565,
-                        0.0012600000482052565,
-                        0.0012600000482052565
-                    ]
+                "Name": {
+                    "name": "Tires"
                 }
-            }
+            },
+            "entityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
         }
-    ]
+    ],
+    "prefabName": "",
+    "rootEntityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
 }

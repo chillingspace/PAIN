@@ -1,9 +1,9 @@
 {
-    "Entities": [
+    "entities": [
         {
-            "Components": {
+            "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 74,
+                    "bvhNodeIndex": 11,
                     "localAABB": {
                         "max": [
                             35.818092346191406,
@@ -19,30 +19,58 @@
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.4160126447677612,
+                            0.6176774501800537,
                             0.09757581353187561,
-                            0.6999739408493042
+                            0.03581809997558594
                         ],
                         "min": [
-                            1.3443764448165894,
+                            0.5460412502288818,
                             0.0,
-                            0.6283377408981323
+                            -0.03581809252500534
                         ]
                     }
                 },
-                "EntityName": {
-                    "name": "OilDrumBlue"
+                "Collider": {
+                    "box_size": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 0
                 },
                 "Hierarchy": {
-                    "children": [],
-                    "parent": 4294967295
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.5818593502044678,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
-                            "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+                            "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -57,11 +85,11 @@
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
-                            "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                            "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                            "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
                             "useOverrides": false
                         }
                     ],
@@ -69,25 +97,13 @@
                     "receiveShadows": true,
                     "visible": true
                 },
-                "Transform": {
-                    "position": [
-                        1.3801945447921753,
-                        0.0,
-                        0.6641558408737183
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
-                    ]
+                "Name": {
+                    "name": "OilDrumBlue"
                 }
-            }
+            },
+            "entityGUID": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba"
         }
-    ]
+    ],
+    "prefabName": "",
+    "rootEntityGUID": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba"
 }
