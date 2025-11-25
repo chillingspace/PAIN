@@ -1,9 +1,7 @@
-#include "pch.h"
+
 #include "ScenesPanel.h"
 
 #ifdef _DEBUG
-#include "CoreSystems/Serialization/sSerialization.h"
-#include "ECS/Controller.h"
 
 namespace PAIN {
     namespace Editor {
@@ -419,6 +417,26 @@ namespace PAIN {
                 }
 
                 ImGui::Separator();
+                auto scene = services->get<Scene>();
+                std::vector<const char*> camera_names;
+
+                for (const auto& camera : scene->GetAllGameCamera()) {
+                    if (!camera.first.empty()) {
+                        camera_names.push_back(camera.first.c_str());
+                    }
+                }
+
+                // Combo box for active cam selection
+                if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
+
+                    if (selected_cam_index >= 0 && selected_cam_index < camera_names.size()) {
+                        const auto& cameras = scene->GetAllGameCamera();
+                        auto it = cameras.find(camera_names[selected_cam_index]);
+                        if (it != cameras.end()) {
+                            scene->ChangeGameCamera(it->first);
+                        }
+                    }
+                }
 
                 // Graphics Settings
                 drawSkyboxSettingsPanel();

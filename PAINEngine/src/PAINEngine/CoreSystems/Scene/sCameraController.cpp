@@ -168,6 +168,19 @@ namespace PAIN {
     void sCameraController::onUpdate(AppTiming timing)
     {
         const float dt = timing.dt;
+
+#ifdef _DEBUG
+        auto editor = services->get<Editor::Editor>();
+#else
+        auto editor = false;
+#endif 
+        if (editor->isVisible()) {
+            m_Scene->SetEditorCamera();
+
+        }
+        else {
+            m_Scene->SetGameCamera();
+        }
         camera = m_Scene->GetActiveCamera();
 
         // Move left/right based on cross product of forward and up vectors

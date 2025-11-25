@@ -69,10 +69,15 @@ registerUpdate(function(dt)
     end
 
     local len2 = dx*dx + dz*dz
+    local vx, vy, vz = 0.0, 0.0, 0.0
+    
     if len2 > 0.0001 then
         local invLen = 1.0 / math.sqrt(len2)
         dx = dx * invLen
         dz = dz * invLen
+
+        vx = dx * speed
+        vz = dz * speed
 
         -- move in that direction
         x = x + dx * speed * dt
@@ -89,9 +94,9 @@ registerUpdate(function(dt)
         end
 
         currentYaw = newYaw
-        setRotation(entityId, baseRx, currentYaw, baseRz)
     end
 
+    local curr_vx, curr_vy, curr_vz = getVelocity(id)
 
-    setPosition(entityId, x, y, z)
+    setVelocity(id, vx, curr_vy, vz)
 end)

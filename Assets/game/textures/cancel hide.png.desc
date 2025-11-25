@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cancel hide.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6099139112547552016
+  },
+  "descriptor_version": 1,
+  "guid": "38f12f60-a084-3746-9d72-41632d9f14d2",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cancel hide.png"
+  }
+}

@@ -3,7 +3,11 @@
 #ifndef PAIN_EDITOR_SCENES_PANEL_HPP
 #define PAIN_EDITOR_SCENES_PANEL_HPP
 
+#include "pch.h"
 #include "Panels.h"
+#include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Serialization/sSerialization.h"
+#include "ECS/Controller.h"
 
 
 namespace PAIN {
@@ -72,6 +76,8 @@ namespace PAIN {
                 std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
 
+                // Camera 
+                int selected_cam_index = 0;
 
                 // UI 
                 bool showCreate_ = false;

@@ -291,6 +291,9 @@ namespace PAIN {
                 );
 
 
+                registerCompUIFunc<PAIN::Cam>("Camera",
+                    [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
+
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
                     [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });

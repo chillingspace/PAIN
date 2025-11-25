@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "exit.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15025880132663271238
+  },
+  "descriptor_version": 1,
+  "guid": "c1fd1311-6d3e-404d-b14d-2068225a3354",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\exit.png"
+  }
+}

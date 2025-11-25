@@ -285,9 +285,18 @@ namespace PAIN {
     /*                                  Physics                                    */
     /* =========================================================================== */
     glm::vec3 EngineAPIAdapter::GetVelocity(entt::entity entityId) {
-        if (auto opt = ecs_.getEntityComponent<PAIN::Physics::RigidBody3D>(entityId)) {
-            return opt->get().velocity;
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
+            return { 0.f, 0.f, 0.f };
         }
+
+        auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);
+
+        // Get physics system and read from Jolt
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            return phys->getVelocity(entityId);
+        }
+
         return { 0.f, 0.f, 0.f };
     }
 
@@ -297,6 +306,12 @@ namespace PAIN {
 
         auto& ph = reg.get<PAIN::Physics::RigidBody3D>(entityId);
         ph.velocity = v;
+
+        // Update the actual Jolt body velocity
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            phys->setVelocity(entityId, v);
+        }
+
     }
 
     /* =========================================================================== */
