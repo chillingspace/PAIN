@@ -118,7 +118,7 @@ namespace PAIN {
 		services->get<ECS::Controller>()->registerAllSystems();
 
 		// Scenes
-		addCoreSystem(std::make_shared<Scene>());
+		addCoreSystem(std::make_shared<Scene::SceneManager>());
 
 		// Camera System
 		addCoreSystem(std::make_shared<sCameraController>());

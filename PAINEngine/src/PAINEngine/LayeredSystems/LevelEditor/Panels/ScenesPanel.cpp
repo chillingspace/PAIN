@@ -4,6 +4,7 @@
 #ifdef _DEBUG
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Controller.h"
+#include "CoreSystems/Scene/Scene.h"
 
 namespace PAIN {
     namespace Editor {
@@ -19,15 +20,10 @@ namespace PAIN {
                 return (p == std::string::npos) ? s : s.substr(0, p);
             }
 
-            ScenesPanel::ScenesPanel(ScenesHooks hooks)
-                : hooks_(std::move(hooks)) {
+            ScenesPanel::ScenesPanel() {
 
                 name = "Scene Manager";                 // visible window title
                 flags = ImGuiWindowFlags_None;    // normal tool window
-
-                // seed with a default layer so UI is usable immediately
-                layers_.push_back(Layer{ 0, true });
-                rebuildMaskSize(layers_.size());
             }
 
             void ScenesPanel::nextWindowSettings() {
@@ -60,14 +56,7 @@ namespace PAIN {
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
                     if (create_clicked) {
-                        if (hooks_.onCreate) hooks_.onCreate(std::string{ nameBuf_ });
-                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
-                        auto ser = services->get<Serialization::Service>();
-                        ser->setGrid(0);
-                        const auto& doc = ser->doc();
-                        if (doc.layers.empty()) ser->addLayer();
-                        // F
-                        services->get<ECS::Controller>()->destroyAllEntities();
+                        services->get<Scene::SceneManager>()->createScene(std::string(nameBuf_));
                         closePopUp(popup_id);
                     }
 
@@ -105,8 +94,7 @@ namespace PAIN {
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
                     if (save_clicked) {
-                        if (hooks_.onSaveAs) hooks_.onSaveAs(std::string{ nameBuf_ });
-                        currSceneId_ = std::string{ nameBuf_ } + ".scn";
+                        services->get<Scene::SceneManager>()->saveActiveScene(selected, std::string{ nameBuf_ });
                         closePopUp(popup_id);
                     }
                     if (cancel_clicked) {
@@ -139,31 +127,13 @@ namespace PAIN {
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
                     if (delete_clicked) {
-                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
-                        currSceneId_.clear();
+                        services->get<Scene::SceneManager>()->deleteScene();
                         closePopUp(popup_id);
                     }
                     if (cancel_clicked) {
                         closePopUp(popup_id);
                     }
                     };
-            }
-
-            void ScenesPanel::ensureAtLeastOneLayer() {
-                if (layers_.empty()) {
-                    layers_.push_back(Layer{ 0, true });
-                    rebuildMaskSize(1);
-                    selectedLayerIdx_ = 0;
-                }
-            }
-
-            void ScenesPanel::rebuildMaskSize(std::size_t n) {
-                mask_.assign(n, std::vector<bool>(n, false));
-                for (std::size_t i = 0; i < n; ++i) mask_[i][i] = false; 
-            }
-
-            std::string ScenesPanel::baseNameFromId(const std::string& sceneId) {
-                return stripExt(sceneId);
             }
 
             // Modals
@@ -180,12 +150,7 @@ namespace PAIN {
 
                     const bool valid = !tmpNameBuf_.empty() && (tmpNameBuf_.find(".scn") == std::string::npos);
                     if (ImGui::Button("Ok") && valid) {
-                        // reset "scene" in our temporary model
-                        currSceneId_ = makeSceneId(tmpNameBuf_);
-
-                        // optional external hook
-                        if (hooks_.onCreate) hooks_.onCreate(tmpNameBuf_);
-                        if (hooks_.onChange) hooks_.onChange(currSceneId_);
+                        services->get<Scene::SceneManager>()->createScene(std::string(nameBuf_));
 
                         tmpNameBuf_.clear();
                         showCreate_ = false;
@@ -210,8 +175,7 @@ namespace PAIN {
                     ImGui::Spacing();
 
                     if (ImGui::Button("Confirm")) {
-                        if (hooks_.onDelete) hooks_.onDelete(currSceneId_);
-                        currSceneId_.clear();
+                        services->get<Scene::SceneManager>()->deleteScene();
                         showDelete_ = false;
                         ImGui::CloseCurrentPopup();
                     }
@@ -237,9 +201,7 @@ namespace PAIN {
 
                     const bool valid = !tmpNameBuf_.empty() && (tmpNameBuf_.find(".scn") == std::string::npos);
                     if (ImGui::Button("Ok") && valid) {
-                        if (hooks_.onSaveAs) hooks_.onSaveAs(tmpNameBuf_);
-                        currSceneId_ = makeSceneId(tmpNameBuf_);
-                        if (hooks_.onChange) hooks_.onChange(currSceneId_);
+                        services->get<Scene::SceneManager>()->saveActiveScene(selected, std::string(nameBuf_));
                         tmpNameBuf_.clear();
                         showSaveAs_ = false;
                         ImGui::CloseCurrentPopup();
@@ -300,10 +262,10 @@ namespace PAIN {
                             // unique ID per cell
                             const std::string id = "##m_" + std::to_string(i) + "_" + std::to_string(j);
                             if (ImGui::Checkbox(id.c_str(), &bit)) {
-                                // write back via service (keeps symmetry & marks dirty)
-                                ser->setMask(i, j, bit);
-                                if (hooks_.onDirty) hooks_.onDirty();
-                                if (hooks_.onMaskChanged) hooks_.onMaskChanged(i, j, bit);
+                                //// write back via service (keeps symmetry & marks dirty)
+                                //ser->setMask(i, j, bit);
+                                //if (hooks_.onDirty) hooks_.onDirty();
+                                //if (hooks_.onMaskChanged) hooks_.onMaskChanged(i, j, bit);
                             }
                         }
                     }
@@ -335,92 +297,69 @@ namespace PAIN {
 
             // ---------- Main draw ----------
             void ScenesPanel::onUpdate(AppTiming timing) {
-                auto ser = services->get<Serialization::Service>();
-                const auto& doc = ser->doc(); // read for drawing
 
-                // Title & dock are handled by IPanel
-                if (ser->consumeSceneChanged()) {
-                    currSceneId_ = ser->getCurrSceneId();
-                    ser->markSceneChanged();
-                }
+                //Get services
+                auto scn_service = services->get<Scene::SceneManager>();
+                auto asset_service = services->get<Assets::Manager>();
 
-                ImGui::Text("Scene ID: %s", currSceneId_.empty() ? "(none)" : currSceneId_.c_str());
+                ImGui::Text("Scene ID: %s", selected_scn_name.empty() ? "(none)" : selected_scn_name.c_str());
 
                 // Create New Scene
                 if (ImGui::Button("Create New Scene")) {
                     openPopUp("CreateScene");
                 }
 
-
-                std::shared_ptr<Assets::Manager> asset_service = nullptr;
-
-                // Prevent null stuff to happen
-                if(services->get<Assets::Manager>()) {
-                    asset_service = services->get<Assets::Manager>();
-                }
-
-
-                auto scenes = asset_service->getAllAssetDataOfType(Assets::Type::Scenes);
-
                 // Show dropdown of available scenes
-                if (!scenes.empty()) {
-                    std::vector<const char*> scene_names;
-                    for (const auto& scene : scenes) {
-                        if (scene) {
-                            scene_names.push_back(scene.get()->name.c_str()); 
-                        }
+                if (!asset_service->getAllAssetDataOfType(Assets::Type::Scenes).empty()) {
+                    // Model Asset Selection
+                    if (DrawAssetSelectorField("Select A Scene",
+                        selected,
+                        PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Scenes),
+                        services)) {
 
-                    }
-
-                    // Combo box for scene selection
-                    if (ImGui::Combo("Select Scene", &selected_scene_index, scene_names.data(), scene_names.size())) {
-                        // Optional: handle selection change if needed
-                        // When selection changes, update path text box
-                        if (selected_scene_index >= 0 && selected_scene_index < scene_names.size()) {
-                            selected = asset_service->findGUID(scene_names[selected_scene_index]);
-                        }
-                    }
-
-                    // Get selected scene ID (or name)
-                    auto& selected_scene = scenes[selected_scene_index]; 
-                    std::string id = selected_scene->name; // Use id or name as required
-
-                    // Button to load the selected scene
-                    if (ImGui::Button("Load Scene")) {
-                        bool success = hooks_.onChange ? hooks_.onChange(id) : false; 
-                        if (success) {
-                            currSceneId_ = id; // update panel label
-                        }
-                        else {
-                            showSceneLoadError_ = true;
-                            loadSceneErrorMsg_ = "Failed to load scene (file may not exist or be invalid):\n" + id;
-                        }
+                        //Update with new name
+                        selected_scn_name = asset_service->getAssetData(selected)->name;
                     }
                 }
                 else {
                     ImGui::TextDisabled("No scenes available!");
                 }
 
-                
+                //Check if valid scene has been selected
+                if (selected.IsValid() && !selected_scn_name.empty()) {
+                    
+                    //Load scene
+                    if (scn_service->getCurrScnID() != selected) {
+                        if (ImGui::Button("Load Scene")) {
+                            scn_service->loadScene(selected);
+                        }
 
-                if (!currSceneId_.empty()) {
-                    ImGui::SameLine();
+                        ImGui::SameLine();
+                    }
+                    //Save curr scene
+                    else {
+                        if (ImGui::Button("Save Curr Scene")) {
+                            scn_service->saveActiveScene(selected);
+                        }
+                        ImGui::SameLine();
+                    }
+
+                    //Delete scene option
                     if (ImGui::Button("Delete Scene")) {
                         openPopUp("DeleteScene");
                     }
-                    if (ImGui::Button("Save Scene As")) {
-                        openPopUp("SaveSceneAs");
-                    }
 
                     ImGui::SameLine();
-                    if (ImGui::Button("Save Curr Scene")) {
-                        if (hooks_.onSaveCurrent) hooks_.onSaveCurrent(currSceneId_);
-                    }
+                }
+
+                //Save scene as
+                if (ImGui::Button("Save Scene As")) {
+                    openPopUp("SaveSceneAs");
                 }
 
                 ImGui::Separator();
 
-                // Graphics Settings
+                //Graphics Settings
                 drawSkyboxSettingsPanel();
 
                 // Layers
@@ -462,21 +401,21 @@ namespace PAIN {
                 drawSaveAsModal();
                 drawEditMaskModal();
 
-                // Show the error popup when load scene fails
-                if (showSceneLoadError_) {
-                    ImGui::OpenPopup("Scene Load Error");
-                    showSceneLoadError_ = false;
-                }
+                //// Show the error popup when load scene fails
+                //if (showSceneLoadError_) {
+                //    ImGui::OpenPopup("Scene Load Error");
+                //    showSceneLoadError_ = false;
+                //}
 
-                // Render the modal if it's open
-                if (ImGui::BeginPopupModal("Scene Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    ImGui::TextWrapped("%s", loadSceneErrorMsg_.c_str());
-                    ImGui::Spacing();
-                    if (ImGui::Button("OK", ImVec2(120, 0))) {
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                }
+                //// Render the modal if it's open
+                //if (ImGui::BeginPopupModal("Scene Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                //    ImGui::TextWrapped("%s", loadSceneErrorMsg_.c_str());
+                //    ImGui::Spacing();
+                //    if (ImGui::Button("OK", ImVec2(120, 0))) {
+                //        ImGui::CloseCurrentPopup();
+                //    }
+                //    ImGui::EndPopup();
+                //}
 
                 renderPopUps();
             }

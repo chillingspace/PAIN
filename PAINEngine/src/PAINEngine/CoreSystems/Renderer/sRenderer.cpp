@@ -33,7 +33,7 @@ namespace PAIN {
 		w_renderer->Init(services);
 
 		//Init scene
-		m_Scene = services->get<Scene>();
+		m_Scene = services->get<Scene::SceneManager>();
 		
 		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
@@ -129,7 +129,6 @@ namespace PAIN {
 	{
 		// populate shadow map first
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -171,7 +170,6 @@ namespace PAIN {
 	void sRenderer::geometryPass()
 	{
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -182,7 +180,7 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err before geometry pass: {}", err);
 		}
 
-		w_renderer->BeginGeometryPass(scene);
+		w_renderer->BeginGeometryPass(m_Scene);
 		for (auto e : view) {
 
   			auto transform = ecs->getEntityComponent<WorldTransform>(e);
@@ -222,7 +220,6 @@ namespace PAIN {
 	void sRenderer::reflectionPass()
 	{
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -296,7 +293,7 @@ namespace PAIN {
 			}
 		}
 
-		auto scene = services->get<Scene>();
+		auto scene = services->get<Scene::SceneManager>();
 		w_renderer->LightingPass(scene, LightSources::get());
 
 		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
@@ -308,7 +305,7 @@ namespace PAIN {
 		if (debug_mode == 0) { return; }
 
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
+		auto scene = services->get<Scene::SceneManager>();
 		
 		if (!ecs || !scene || !w_renderer) {
 			PN_CORE_WARN("DebugPass skipped: Missing required services.");

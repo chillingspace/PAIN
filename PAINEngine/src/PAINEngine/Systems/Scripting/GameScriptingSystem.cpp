@@ -234,7 +234,7 @@ namespace PAIN {
             auto meta_ptr = services_ptr->get<MetaData::Service>();
             auto assets_ptr = services_ptr->get<Assets::Manager>();
             auto path_ptr = services_ptr->get<Path::Path>();
-            auto scene_ptr = services_ptr->get<Scene>();
+            auto scene_ptr = services_ptr->get<Scene::SceneManager>();
 
             if (!ecs_ptr || !meta_ptr) {
                 PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");

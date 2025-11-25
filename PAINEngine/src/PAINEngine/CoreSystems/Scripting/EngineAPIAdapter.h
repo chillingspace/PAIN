@@ -14,10 +14,11 @@
 #include "PAINEngine/CoreSystems/Events/Event.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
+#include "CoreSystems/Scene/Scene.h"
 
 namespace PAIN {
 
-    class Scene;
+    class Scene::SceneManager;
     class Camera;
 
     class EngineAPIAdapter final : public IEngineAPI {
@@ -27,7 +28,7 @@ namespace PAIN {
             PAIN::Assets::Manager* assets,
             //PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
-            PAIN::Scene* scene)
+            PAIN::Scene::SceneManager* scene)
             : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
               fs_(fs), scene_(scene)
         {
@@ -202,7 +203,7 @@ namespace PAIN {
         PAIN::MetaData::Service& meta_;
         //PAIN::Audio::Audio* audio_ = nullptr;
         PAIN::Path::Path* fs_ = nullptr;
-        PAIN::Scene* scene_ = nullptr;
+        PAIN::Scene::SceneManager* scene_ = nullptr;
         PAIN::Assets::Manager* assets_ = nullptr;
         std::unordered_set<int> keysDown_, mouseDown_;
         std::unordered_set<int> keysPressed_, keysReleased_;

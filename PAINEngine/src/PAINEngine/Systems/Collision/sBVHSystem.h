@@ -8,6 +8,7 @@
 #include "ECS/System/ISystem.h"     // Defines ECS::System::ISystem base class
 #include "CoreSystems/Events/Event.h" // Defines Event::Event
 #include "CoreSystems/Collision/BVH.h" // Defines BVH and includes BVHNode, AABB
+#include "CoreSystems/Scene/Scene.h"
 #include <vector>
 #include <utility>
 #include <memory>
@@ -15,7 +16,7 @@
 
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
-    class Scene;
+    class Scene::SceneManager;
     namespace Assets { class Model; } // Forward-declare Assets::Model
     struct LocalTransform;
     struct ModelRenderer;

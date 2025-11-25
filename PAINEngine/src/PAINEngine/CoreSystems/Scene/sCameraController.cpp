@@ -7,7 +7,7 @@ namespace PAIN {
     void sCameraController::onAttach()
     {
         //get scene
-        m_Scene = services->get<Scene>();
+        m_Scene = services->get<Scene::SceneManager>();
     }
 
 #ifdef PN_PLATFORM_ANDROID

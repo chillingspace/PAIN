@@ -149,6 +149,10 @@ namespace PAIN {
 				}
 				});
 
+			asset_loader->RegisterLoader(Type::Scenes, [this](std::string const& virtual_path) {
+				return asset_loader->ImportScene(virtual_path);
+				});
+
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 

@@ -61,7 +61,7 @@ namespace PAIN {
     void sBVHSystem::onUpdate(AppTiming timing, entt::registry& registry)
     {
          // Get required services
-         auto sceneService = getServices()->get<Scene>();
+         auto sceneService = getServices()->get<Scene::SceneManager>();
           if (!sceneService) {
              PN_CORE_WARN("Scene service not found in BVH System. Cannot process meshes.");
              return;

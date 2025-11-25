@@ -51,7 +51,7 @@ namespace PAIN {
                         command_manager->executeAction(Action{
                             [this, final_name]() {
                                 auto ecs = PN_ECS_SERVICE;
-                                auto scene = services->get<Scene>();
+                                auto scene = services->get<Scene::SceneManager>();
 
                                 entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
 

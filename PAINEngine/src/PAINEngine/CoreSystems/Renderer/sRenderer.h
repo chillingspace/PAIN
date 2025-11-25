@@ -16,7 +16,7 @@ namespace PAIN {
 		sRenderer() = default;
 		~sRenderer() = default;
 
-		std::shared_ptr<Scene> m_Scene;
+		std::shared_ptr<Scene::SceneManager> m_Scene;
 
 		void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);
 
