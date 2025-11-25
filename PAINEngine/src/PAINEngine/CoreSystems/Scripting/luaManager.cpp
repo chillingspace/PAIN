@@ -784,6 +784,7 @@ namespace PAIN {
         collisionQueue_.clear();
 
         // 5) Per-frame updates
+        // Iterate by index to handle potential vector reallocation if scripts add new updates during this loop
         size_t count = updates_.size();
         for (size_t i = 0; i < count; ++i) {
             // Double check validity
