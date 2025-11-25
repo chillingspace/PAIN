@@ -575,6 +575,8 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
 	{
+		auto& gs = GraphicsSettings::get();
+
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
@@ -636,7 +638,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_DIFFUSE_MAP) {
 					albedoTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -645,7 +647,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_NORMAL_MAP) {
 					normalTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -654,7 +656,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_ROUGHNESSMETALLIC_MAP) {
 					metallicTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -663,7 +665,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_ROUGHNESSMETALLIC_MAP) {
 					roughnessTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -672,7 +674,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_AO_MAP) {
 					aoTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -681,7 +683,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
 
-				if (tex_opt.has_value()) {
+				if (tex_opt.has_value() && gs.USE_EMISSION_MAP) {
 					emissiveTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -731,7 +733,7 @@ namespace PAIN {
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
 
-				if (GraphicsSettings::get().ao && aoTexture != 0) {
+				if (GraphicsSettings::get().USE_AO_MAP && aoTexture != 0) {
 					glActiveTexture(GL_TEXTURE7);
 					glBindTexture(GL_TEXTURE_2D, aoTexture);
 					geometry_shader->SetUniform("material.ao_map", 7);

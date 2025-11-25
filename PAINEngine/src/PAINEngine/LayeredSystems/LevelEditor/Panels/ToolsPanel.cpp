@@ -137,7 +137,7 @@ namespace PAIN {
                         ImGui::Separator();
 
                         // Ambient Occlusion toggle
-                        if (ImGui::Checkbox("Ambient Occlusion", &gfx.ao)) {}
+                        if (ImGui::Checkbox("Ambient Occlusion", &gfx.USE_AO_MAP)) {}
 
                         // Blur Quality slider (integer)
                         if (ImGui::SliderInt("Blur Quality", &gfx.blur_quality, 2, 10)) {}

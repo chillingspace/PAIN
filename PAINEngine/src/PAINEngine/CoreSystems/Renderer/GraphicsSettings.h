@@ -57,7 +57,6 @@ namespace PAIN {
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 		bool daytime = true;
 		float fov = 90.f;
-		bool ao = true;		// ambient occlusion
 		
 		int blur_quality = 4;	// number of blur passes. higher = blurrier, BUT SLOWER, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2. too high won't help. sublinear growth.
 		// using hdr, so range of [0,inf)
@@ -78,5 +77,12 @@ namespace PAIN {
 
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance
+
+		// debug settings
+		bool USE_DIFFUSE_MAP{ true };
+		bool USE_AO_MAP{ true };
+		bool USE_NORMAL_MAP{ true };
+		bool USE_ROUGHNESSMETALLIC_MAP{ true };
+		bool USE_EMISSION_MAP{ true };
 	};
 }

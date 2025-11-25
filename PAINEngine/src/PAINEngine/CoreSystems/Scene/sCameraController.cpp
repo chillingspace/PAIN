@@ -455,6 +455,27 @@ namespace PAIN {
                 PN_CORE_INFO("Toggled draw_floor: {}", gs.draw_floor);
                 break;
 
+            case PAIN_KEY_F3:
+                gs.USE_DIFFUSE_MAP = !gs.USE_DIFFUSE_MAP;
+                PN_CORE_INFO("Toggled USE_DIFFUSE_MAP: {}", gs.USE_DIFFUSE_MAP);
+                break;
+            case PAIN_KEY_F4:
+                gs.USE_AO_MAP = !gs.USE_AO_MAP;
+                PN_CORE_INFO("Toggled USE_AO_MAP: {}", gs.USE_AO_MAP);
+                break;
+            case PAIN_KEY_F5:
+                gs.USE_NORMAL_MAP = !gs.USE_NORMAL_MAP;
+                PN_CORE_INFO("Toggled USE_NORMAL_MAP: {}", gs.USE_NORMAL_MAP);
+                break;
+            case PAIN_KEY_F6:
+                gs.USE_ROUGHNESSMETALLIC_MAP = !gs.USE_ROUGHNESSMETALLIC_MAP;
+                PN_CORE_INFO("Toggled USE_ROUGHNESSMETALLIC_MAP: {}", gs.USE_ROUGHNESSMETALLIC_MAP);
+                break;
+            case PAIN_KEY_F7:
+                gs.USE_EMISSION_MAP = !gs.USE_EMISSION_MAP;
+                PN_CORE_INFO("Toggled USE_EMISSION_MAP: {}", gs.USE_EMISSION_MAP);
+                break;
+
             //case PAIN_KEY_G:
             //    gs.gamma_correction = !gs.gamma_correction;
             //    PN_CORE_INFO("Toggled gamma_correction: {}", gs.gamma_correction);
