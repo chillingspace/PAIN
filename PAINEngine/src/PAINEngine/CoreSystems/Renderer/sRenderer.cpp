@@ -186,13 +186,9 @@ namespace PAIN {
 		for (auto e : view) {
 
   			auto transform = ecs->getEntityComponent<WorldTransform>(e);
-			//auto root_xform = ecs->getEntityComponent<RootTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 
 			glm::mat4 model_xform{ 1.f };
-			//if (root_xform.has_value()) {
-			//	model_xform = root_xform.value().get().xform;
-			//}
 			if (transform.has_value())
 			{
 				model_xform *= transform.value().get().matrix;

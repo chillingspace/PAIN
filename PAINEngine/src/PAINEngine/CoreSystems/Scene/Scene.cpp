@@ -269,10 +269,10 @@ namespace PAIN {
 		// animation
 		auto ecs = services->get<ECS::Controller>();
 		auto& registry = ecs->getRegistry();
-		auto view = registry.view<Entity::Name>();
+		auto view = registry.view<ModelRenderer>();
 		for (auto e : view) {
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			mdl->get().UpdateAnimation(timing.dt);
+			if(mdl.has_value()) mdl->get().UpdateAnimation(timing.dt);
 		}
 	}
 
@@ -313,7 +313,6 @@ namespace PAIN {
 
 		entt::entity entity = ecs->createEntity();
 		ecs->addEntityComponent(entity, Entity::Name{ name });
-		ecs->addEntityComponent(entity, RootTransform(root_scale, root_rot, root_trans));
 		ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
 		ecs->addEntityComponent(entity, WorldTransform{});
 		ecs->addEntityComponent(entity, Entity::Hierarchy{});

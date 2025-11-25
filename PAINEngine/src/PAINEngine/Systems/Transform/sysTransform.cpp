@@ -30,7 +30,6 @@ namespace PAIN {
 		void System::updateRecursive(entt::entity e, const glm::mat4& parentWorld, entt::registry& registry) {
 			auto& local = registry.get<LocalTransform>(e);
 			auto& world = registry.get<WorldTransform>(e);
-			auto& root = registry.get<RootTransform>(e);
 			auto* hierarchy = registry.try_get<Entity::Hierarchy>(e);
 
 			//Only update if world or child is dirty
@@ -40,11 +39,6 @@ namespace PAIN {
 			glm::mat4 localMat = glm::translate(glm::mat4(1.0f), local.position)
 				* glm::mat4(local.rotation)
 				* glm::scale(glm::mat4(1.0f), local.scale);
-
-			glm::mat4 rootMat =
-				glm::translate(glm::mat4(1.f), root.translate) *
-				glm::mat4_cast(root.rotation) *
-				glm::scale(glm::mat4(1.f), root.scale);
 
 
 			world.matrix = parentWorld * localMat;
