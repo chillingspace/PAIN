@@ -245,6 +245,9 @@ namespace PAIN {
                             changed = true;
                         }
 
+                        // Font position
+                        ImGui::DragFloat2("Text Position", &text.text_pos.x, 1.0f, 0.0f, 0.0f, "%.1f");
+
                         // Font size
                         changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");
 
@@ -270,7 +273,7 @@ namespace PAIN {
                         // Shadow
                         ImGui::Separator();
                         ImGui::Text("Shadow");
-                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, -32, 32, "%.1f");
+                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, 0.0f, 0.0f, "%.1f");
                         changed |= ImGui::ColorEdit4("Shadow Color", &text.shadow_color.x);
 
                         ImGui::Spacing();
@@ -281,6 +284,8 @@ namespace PAIN {
 
                         changed |= ImGui::DragFloat("Line Height", &text.line_height, 0.02f, 0.2f, 4.0f, "%.2f");
 
+                        changed |= ImGui::DragFloat("Text Wrap", &text.wrap_width, 0.02f, 0.2f, 4.0f, "%.2f");
+
                         // Max length (for input fields, optional)
                         changed |= ImGui::DragInt("Max Length", &text.max_length, 1, 0, 4096);
 
@@ -290,6 +295,9 @@ namespace PAIN {
                     }
                 );
 
+
+                registerCompUIFunc<PAIN::Cam>("Camera",
+                    [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
 
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",

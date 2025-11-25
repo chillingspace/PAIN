@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "joystick.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11212865972668845139
+  },
+  "descriptor_version": 1,
+  "guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\joystick.png"
+  }
+}

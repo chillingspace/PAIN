@@ -59,6 +59,10 @@ namespace PAIN {
 
 			void teleportBodyToTransform(entt::entity e, const LocalTransform& tr, Physics::RigidBody3D& rb);
 
+			void setVelocity(entt::entity e, const glm::vec3& v);
+
+			glm::vec3 getVelocity(entt::entity e) const;
+
 		private:
 			struct LuaContactListener; // fwd decl for jolt lua bridge
 			std::unique_ptr<LuaContactListener> contact_listener;

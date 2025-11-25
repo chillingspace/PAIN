@@ -168,6 +168,19 @@ namespace PAIN {
     void sCameraController::onUpdate(AppTiming timing)
     {
         const float dt = timing.dt;
+
+#ifdef _DEBUG
+        auto editor_visible = services->get<Editor::Editor>()->isVisible();
+#else
+        auto editor_visible = false;
+#endif 
+        if (editor_visible) {
+            m_Scene->SetEditorCamera();
+
+        }
+        else {
+            m_Scene->SetGameCamera();
+        }
         camera = m_Scene->GetActiveCamera();
 
         // Move left/right based on cross product of forward and up vectors
@@ -178,12 +191,10 @@ namespace PAIN {
             // Move forward/backward directly in camera forward direction
             if (W_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos += offset;
             }
             if (S_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos -= offset;
             }
             if (A_KEYDOWN) {
