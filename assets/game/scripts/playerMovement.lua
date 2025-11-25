@@ -117,6 +117,8 @@ registerUpdate(function(dt)
         currentYaw = newYaw
     end
 
+    setRotation(id, baseRx, currentYaw, baseRz)
+
     local curr_vx, curr_vy, curr_vz = getVelocity(id)
 
     setVelocity(id, vx, curr_vy, vz)
