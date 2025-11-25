@@ -127,6 +127,7 @@ namespace PAIN {
 		bool rich_text = false;
 		// 0 = unlimited
 		int max_length = 0; 
+		float wrap_width = 0;
 	};
 
 }
@@ -229,6 +230,7 @@ REFL_FIELD(shadow_offset)
 REFL_FIELD(shadow_color)
 REFL_FIELD(rich_text)
 REFL_FIELD(max_length)
+REFL_FIELD(wrap_width)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);

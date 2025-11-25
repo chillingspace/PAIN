@@ -273,7 +273,7 @@ namespace PAIN {
                         // Shadow
                         ImGui::Separator();
                         ImGui::Text("Shadow");
-                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, -32, 32, "%.1f");
+                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, 0.0f, 0.0f, "%.1f");
                         changed |= ImGui::ColorEdit4("Shadow Color", &text.shadow_color.x);
 
                         ImGui::Spacing();
@@ -283,6 +283,8 @@ namespace PAIN {
                         changed |= ImGui::Checkbox("Rich Text", &text.rich_text);
 
                         changed |= ImGui::DragFloat("Line Height", &text.line_height, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        changed |= ImGui::DragFloat("Text Wrap", &text.wrap_width, 0.02f, 0.2f, 4.0f, "%.2f");
 
                         // Max length (for input fields, optional)
                         changed |= ImGui::DragInt("Max Length", &text.max_length, 1, 0, 4096);

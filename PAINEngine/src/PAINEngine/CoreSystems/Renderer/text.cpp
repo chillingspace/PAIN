@@ -77,31 +77,29 @@ namespace PAIN {
 
     std::vector<std::string> TextRenderer::handleTextWrap(const PAIN::UIText& text_comp)
     {
+        auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+        if (!font_opt) return {};
+        auto font = font_opt.value().get()->getFont();
+        if (!font) return {};
+
         std::vector<std::string> lines;
         std::string curr_line, curr_word;
-        float curr_width = 0.f;
-        float word_width = 0.f;
-        float wrap_limit = text_comp.word_wrap ? text_comp.max_length : FLT_MAX;
-        int length = (text_comp.max_length > 0) ? std::min<int>(text_comp.max_length, text_comp.display_text.length()) : text_comp.display_text.length();
+        float curr_width = 0.f, word_width = 0.f;
+        float wrap_limit = text_comp.word_wrap ? text_comp.wrap_width : FLT_MAX;
+        int length = (text_comp.max_length > 0) ?
+            std::min<int>(text_comp.max_length, text_comp.display_text.length()) :
+            text_comp.display_text.length();
 
         for (int i = 0; i < length; ++i) {
             char ch = text_comp.display_text[i];
             if (ch == ' ' || ch == '\n' || i == length - 1) {
                 if (i == length - 1 && ch != '\n' && ch != ' ') curr_word.push_back(ch);
 
-                auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
-
-                if (!font_opt) { continue; }
-
-                auto font = font_opt.value().get()->getFont();
-
-                if (!font) { continue; }
-
                 word_width = measureTextWidth(curr_word, font, text_comp.font_size);
 
-                if (curr_width + word_width > wrap_limit && curr_line.length() > 0) {
+                if (curr_width + word_width > wrap_limit && !curr_line.empty()) {
                     lines.push_back(curr_line);
-                    curr_line = "";
+                    curr_line.clear();
                     curr_width = 0.f;
                 }
                 curr_line += curr_word;
@@ -109,23 +107,25 @@ namespace PAIN {
 
                 if (ch == ' ' || ch == '\n') {
                     curr_line.push_back(ch);
-                    curr_width += measureTextWidth(std::string(1, ch), font, text_comp.font_size);
+                    curr_width += measureTextWidth(" ", font, text_comp.font_size);
                 }
                 if (ch == '\n') {
                     lines.push_back(curr_line);
-                    curr_line = "";
+                    curr_line.clear();
                     curr_width = 0.f;
                 }
-                curr_word = "";
+                curr_word.clear();
             }
             else {
                 curr_word.push_back(ch);
             }
         }
-        if (!curr_line.empty()) lines.push_back(curr_line);
+        if (!curr_line.empty())
+            lines.push_back(curr_line);
 
         return lines;
     }
+
 
     void TextRenderer::renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
     {
