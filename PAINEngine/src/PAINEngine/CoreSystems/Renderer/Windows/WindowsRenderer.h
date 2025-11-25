@@ -98,6 +98,7 @@ namespace PAIN {
 		unsigned int norm_texture = 0;
 		//unsigned int shadow_texture = 0;					// shadow map
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
+		unsigned int emission_texture = 0;
 
 		// === Geometry Buffers ===
 		unsigned int geometry_vao = 0;
@@ -138,11 +139,12 @@ namespace PAIN {
 			&pp2_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
-		std::array<unsigned int*, 7> texs{
+		std::array<unsigned int*, 8> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
+			&emission_texture,
 			//&shadow_texture,
 			&final_texture,
 			&pp_texture,

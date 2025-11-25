@@ -456,25 +456,38 @@ namespace PAIN {
                 break;
 
             case PAIN_KEY_F3:
-                gs.USE_DIFFUSE_MAP = !gs.USE_DIFFUSE_MAP;
-                PN_CORE_INFO("Toggled USE_DIFFUSE_MAP: {}", gs.USE_DIFFUSE_MAP);
+                gs.DEBUG_USE_DIFFUSE_MAP = !gs.DEBUG_USE_DIFFUSE_MAP;
+                PN_CORE_INFO("Toggled DEBUG_USE_DIFFUSE_MAP: {}", gs.DEBUG_USE_DIFFUSE_MAP);
                 break;
             case PAIN_KEY_F4:
-                gs.USE_AO_MAP = !gs.USE_AO_MAP;
-                PN_CORE_INFO("Toggled USE_AO_MAP: {}", gs.USE_AO_MAP);
+                gs.DEBUG_USE_AO_MAP = !gs.DEBUG_USE_AO_MAP;
+                PN_CORE_INFO("Toggled DEBUG_USE_AO_MAP: {}", gs.DEBUG_USE_AO_MAP);
                 break;
             case PAIN_KEY_F5:
-                gs.USE_NORMAL_MAP = !gs.USE_NORMAL_MAP;
-                PN_CORE_INFO("Toggled USE_NORMAL_MAP: {}", gs.USE_NORMAL_MAP);
+                gs.DEBUG_USE_NORMAL_MAP = !gs.DEBUG_USE_NORMAL_MAP;
+                PN_CORE_INFO("Toggled DEBUG_USE_NORMAL_MAP: {}", gs.DEBUG_USE_NORMAL_MAP);
                 break;
             case PAIN_KEY_F6:
-                gs.USE_ROUGHNESSMETALLIC_MAP = !gs.USE_ROUGHNESSMETALLIC_MAP;
-                PN_CORE_INFO("Toggled USE_ROUGHNESSMETALLIC_MAP: {}", gs.USE_ROUGHNESSMETALLIC_MAP);
+                gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP = !gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP;
+                PN_CORE_INFO("Toggled DEBUG_USE_ROUGHNESSMETALLIC_MAP: {}", gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP);
                 break;
             case PAIN_KEY_F7:
-                gs.USE_EMISSION_MAP = !gs.USE_EMISSION_MAP;
-                PN_CORE_INFO("Toggled USE_EMISSION_MAP: {}", gs.USE_EMISSION_MAP);
+                gs.DEBUG_USE_EMISSION_MAP = !gs.DEBUG_USE_EMISSION_MAP;
+                PN_CORE_INFO("Toggled DEBUG_USE_EMISSION_MAP: {}", gs.DEBUG_USE_EMISSION_MAP);
                 break;
+            case PAIN_KEY_F8:
+                gs.DEBUG_PBR_MAP_TYPE = (GraphicsSettings::DEBUG_PBR_MAP_TYPES)((gs.DEBUG_PBR_MAP_TYPE + 1) % GraphicsSettings::DEBUG_PBR_MAP_TYPES::NUM_PBR_MAP_TYPES);
+                PN_CORE_INFO("Toggled DEBUG_PBR_MAP_TYPE: {}", (int)gs.DEBUG_PBR_MAP_TYPE);
+                break;
+            case PAIN_KEY_F9:
+                gs.sunlight = !gs.sunlight;
+                PN_CORE_INFO("Toggled sunlight: {}", gs.sunlight);
+                break;
+            case PAIN_KEY_F10:
+                gs.ibl = !gs.ibl;
+                PN_CORE_INFO("Toggled IBL: {}", gs.ibl);
+                break;
+
 
             //case PAIN_KEY_G:
             //    gs.gamma_correction = !gs.gamma_correction;

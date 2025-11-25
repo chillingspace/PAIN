@@ -227,14 +227,18 @@ namespace PAIN {
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
 
-			unsigned int attachments[4] = {
+			static constexpr int NUM_GBUFFERS = 5;
+
+			unsigned int attachments[NUM_GBUFFERS] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3,
+				GL_COLOR_ATTACHMENT4,
 			};
-			glDrawBuffers(4, attachments);
+			glDrawBuffers(NUM_GBUFFERS, attachments);
 
 			glGenRenderbuffers(1, &ds_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
@@ -638,7 +642,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_DIFFUSE_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_DIFFUSE_MAP) {
 					albedoTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -647,7 +651,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_NORMAL_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_NORMAL_MAP) {
 					normalTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -656,7 +660,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_ROUGHNESSMETALLIC_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
 					metallicTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -665,7 +669,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_ROUGHNESSMETALLIC_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
 					roughnessTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -674,7 +678,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_AO_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_AO_MAP) {
 					aoTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -683,7 +687,7 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
 					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
 
-				if (tex_opt.has_value() && gs.USE_EMISSION_MAP) {
+				if (tex_opt.has_value() && gs.DEBUG_USE_EMISSION_MAP) {
 					emissiveTexture = tex_opt.value()->gl_texture;
 				}
 
@@ -733,7 +737,7 @@ namespace PAIN {
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
 
-				if (GraphicsSettings::get().USE_AO_MAP && aoTexture != 0) {
+				if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
 					glActiveTexture(GL_TEXTURE7);
 					glBindTexture(GL_TEXTURE_2D, aoTexture);
 					geometry_shader->SetUniform("material.ao_map", 7);
@@ -833,6 +837,9 @@ namespace PAIN {
 
 			}
 
+			// debug
+			geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
+
 			// Draw this submesh
 			glDrawElements(
 				GL_TRIANGLES,
@@ -908,24 +915,30 @@ namespace PAIN {
 
 			pbr_shader->Bind();
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
+			{
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, pos_texture);
 
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, col_texture);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, col_texture);
 
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, norm_texture);
 
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, emission_texture);
+			}
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
 
-			int tex_id = 4;
+			static constexpr int NEXT_VALID_TEXID = 5;		// increment this after adding new texture bindings above
+			int tex_id = NEXT_VALID_TEXID;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
@@ -934,9 +947,9 @@ namespace PAIN {
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
 #ifdef PN_PLATFORM_WINDOWS
-					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+					ss << "u_ShadowMaps[" << (tex_id - NEXT_VALID_TEXID) << "]";
 #else
-					ss << "u_ShadowMap" << (tex_id - 4);
+					ss << "u_ShadowMap" << (tex_id - NEXT_VALID_TEXID);
 #endif
 
 					pbr_shader->SetUniform(ss.str(), tex_id);
@@ -944,7 +957,7 @@ namespace PAIN {
 					ss.clear();
 
 					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					pbr_shader->SetUniform(ss.str(), tex_id - static_cast<float>(NEXT_VALID_TEXID));
 					ss.str("");
 					ss.clear();
 
@@ -992,12 +1005,16 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
 			}
 
-			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
+			pbr_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
+
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - NEXT_VALID_TEXID) * 1.f);
 
 			pbr_shader->SetUniform("gPos", 0);
 			pbr_shader->SetUniform("gCol", 1);
 			pbr_shader->SetUniform("gNorm", 2);
 			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("gEmission", 4);
+
 			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);

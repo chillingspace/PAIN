@@ -55,7 +55,7 @@ namespace PAIN {
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
-		bool daytime = true;
+		bool sunlight = true;
 		float fov = 90.f;
 		
 		int blur_quality = 4;	// number of blur passes. higher = blurrier, BUT SLOWER, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2. too high won't help. sublinear growth.
@@ -78,11 +78,27 @@ namespace PAIN {
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance
 
+		
 		// debug settings
-		bool USE_DIFFUSE_MAP{ true };
-		bool USE_AO_MAP{ true };
-		bool USE_NORMAL_MAP{ true };
-		bool USE_ROUGHNESSMETALLIC_MAP{ true };
-		bool USE_EMISSION_MAP{ true };
+		bool DEBUG_USE_DIFFUSE_MAP{ true };
+		bool DEBUG_USE_AO_MAP{ true };
+		bool DEBUG_USE_NORMAL_MAP{ true };
+		bool DEBUG_USE_ROUGHNESSMETALLIC_MAP{ true };
+		bool DEBUG_USE_EMISSION_MAP{ true };
+
+		enum DEBUG_PBR_MAP_TYPES {
+			NONE = 0,
+			DIFFUSE,
+			AO,
+			NORMAL,
+			ROUGHNESSMETALLIC,
+			EMISSION,
+			IBL_IRRADIANCE,
+			IBL_PREFILTER,
+			IBL_BRDFLUT,
+			NUM_PBR_MAP_TYPES,
+		};
+
+		DEBUG_PBR_MAP_TYPES DEBUG_PBR_MAP_TYPE = DEBUG_PBR_MAP_TYPES::NONE;
 	};
 }

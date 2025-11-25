@@ -44,7 +44,7 @@ namespace PAIN {
 		Light& lcam = olcam.value();
 		lcam.L_intensity = glm::vec3(0.01f);
 
-		if (GraphicsSettings::get().daytime) {
+		if (GraphicsSettings::get().sunlight) {
 			LightSources::get().create("world");
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
@@ -279,9 +279,10 @@ namespace PAIN {
 		}
 #endif
 
-		// Daytime / Nighttime setting
+		// ibl is independent from sunlight. sunlight is just a name for the big dir light. can also be moonlight
+
 		{
-			if (GraphicsSettings::get().daytime) {
+			if (GraphicsSettings::get().sunlight) {
 
 				auto olc = LightSources::get().get("world");
 
@@ -294,7 +295,6 @@ namespace PAIN {
 					lc.L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
 					lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
 					lc.type = Light::TYPES::DIRECTIONAL;
-					GraphicsSettings::get().ibl = true;
 				}
 			}
 			else {
@@ -302,12 +302,11 @@ namespace PAIN {
 
 				if (olc) {
 					LightSources::get().destroy("world");
-					GraphicsSettings::get().ibl = false;
 				}
 			}
 		}
 
-		if (GraphicsSettings::get().daytime) {
+		if (GraphicsSettings::get().sunlight) {
 			auto olc = LightSources::get().get("world");
 			Light& lc = olc.value();
 			lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;

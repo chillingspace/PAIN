@@ -13,28 +13,56 @@ layout(location = 2) in vec2 vTexCoords;
 layout(location = 0) out vec3 gPos;
 layout(location = 1) out vec3 gCol;
 layout(location = 2) out vec3 gNorm;
-layout(location = 3) out vec3 gMaterial;    // rough, metal, alwaysLit
+layout(location = 3) out vec3 gMaterial;    // rough, metal, debugging_geometry
+layout(location = 4) out vec3 gEmission;
 
 struct Material {
     float rough;
     float metal;
+
     float useTex;
     sampler2D tex;
-    vec3 color;         // fallback if there is no texture
-    float alwaysLit;    // bool
     float use_ao;
     sampler2D ao_map;
+    float use_normal;
+    sampler2D normal_map;
+    float use_emission;
+    sampler2D emission_map;
+    float use_roughnessmetallic;
+    sampler2D roughnessmetallic_map;
+
+    vec3 color;         // fallback if there is no texture
+    // float alwaysLit;    // bool
 };
 
 
 
 uniform Material material;
 
+// debug
+uniform float DEBUG_TYPE;
 
 void main() {
+    // for debugging
+    int dbg = int(DEBUG_TYPE);
+    
     gPos = vFragPos;
     gNorm = normalize(vNormal);
-    gMaterial = vec3(material.rough, material.metal, material.alwaysLit);
+    // gMaterial = vec3(material.rough, material.metal, material.alwaysLit);
+    gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < 6 ? 1.0 : 0.0);
+    gEmission = texture(material.emission_map, vTexCoords).rgb;
+
+    // 6 onwards is IBL stuff
+    if (dbg > 0 && dbg < 6) {
+        if (dbg == 1) gCol = texture(material.tex, vTexCoords).rgb;
+        else if (dbg == 2) gCol = texture(material.ao_map, vTexCoords).rgb;
+        else if (dbg == 3) gCol = texture(material.normal_map, vTexCoords).rgb;
+        else if (dbg == 4) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).rg, 1);
+        else if (dbg == 5) gCol = texture(material.emission_map, vTexCoords).rgb;
+
+        return;
+    }
+
 
     if (material.useTex == 0.0) {
         gCol = material.color;
