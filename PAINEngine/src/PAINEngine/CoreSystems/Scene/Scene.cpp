@@ -282,6 +282,11 @@ namespace PAIN {
 
 		for (auto e : view) {
 
+
+			// animation
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			if (mdl.has_value()) mdl->get().UpdateAnimation(timing.dt);
+
 			auto cam = ecs->getEntityComponent<Cam>(e);
 
 			if (!cam.has_value()) {
@@ -315,14 +320,8 @@ namespace PAIN {
 			break;
 		}
 
-		// animation
-		auto ecs = services->get<ECS::Controller>();
-		auto& registry = ecs->getRegistry();
-		auto view = registry.view<ModelRenderer>();
-		for (auto e : view) {
-			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			if(mdl.has_value()) mdl->get().UpdateAnimation(timing.dt);
-		}
+
+
 	}
 
 	void Scene::onEvent(Event::Event& e) {}
