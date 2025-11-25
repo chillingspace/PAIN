@@ -1,4 +1,6 @@
 #include "sRenderer.h"
+#include "Core.h"
+#include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
@@ -395,6 +397,7 @@ namespace PAIN {
 	{
 		w_renderer->PostProcessPass();
 	}
+
 
 	void sRenderer::onUpdate(AppTiming timing) {
 

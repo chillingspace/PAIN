@@ -171,6 +171,11 @@ namespace PAIN {
         virtual void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
         virtual void SetLightForward(entt::entity entityId, float x, float y, float z) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
+        
+        /* =========================================================================== */
+        /*                                  Scripting                                  */
+        /* =========================================================================== */
+        virtual bool IsScriptActive(entt::entity entityId) = 0; // Check if the entity is valid and has a Scripts component attached
 
     };
 

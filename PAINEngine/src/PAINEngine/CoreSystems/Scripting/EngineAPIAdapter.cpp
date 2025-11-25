@@ -649,4 +649,13 @@ namespace PAIN {
         }
         l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);*/
     }
+
+    /* =========================================================================== */
+    /*                                 Scripting                                  */
+    /* =========================================================================== */
+    bool EngineAPIAdapter::IsScriptActive(entt::entity entityId) {
+        if (!ecs_.checkEntity(entityId)) return false;
+        return ecs_.hasEntityComponent<PAIN::Scripts>(entityId);
+    }
+
 }

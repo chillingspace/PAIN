@@ -12,7 +12,7 @@
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
-
+#include "ECS/Controller.h"
 #include "CoreSystems/Windows/Window.h"
 
 
@@ -1336,19 +1336,21 @@ namespace PAIN {
 
 			// render text onto screen
 			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
-#else	
-				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
-#endif
-				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
-				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
-				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after TextRenderer in PostProcessPass: {}", err);
+				auto ecs = services->get<ECS::Controller>();
+				auto& registry = ecs->getRegistry();
+
+				auto text_entity_view = registry.view<UIText>();
+				for (auto entity : text_entity_view) {
+					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
+					if (!text_comp_opt.has_value()) continue;
+					auto& text_comp = text_comp_opt.value().get();
+
+					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+					if (!font_opt.has_value()) continue;
+
+					TextRenderer::get().renderText(text_comp);
+					TextRenderer::get().debugRenderQuad();
+				}
 			}
 
 			glEnable(GL_DEPTH_TEST);

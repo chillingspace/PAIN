@@ -170,11 +170,11 @@ namespace PAIN {
         const float dt = timing.dt;
 
 #ifdef _DEBUG
-        auto editor = services->get<Editor::Editor>();
+        auto editor_visible = services->get<Editor::Editor>()->isVisible();
 #else
-        auto editor = false;
+        auto editor_visible = false;
 #endif 
-        if (editor->isVisible()) {
+        if (editor_visible) {
             m_Scene->SetEditorCamera();
 
         }

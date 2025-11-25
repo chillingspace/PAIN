@@ -30,6 +30,12 @@ namespace PAIN {
 
 		unsigned int vao, vbo;
 		std::shared_ptr<Assets::Shader> shader;
+
+		float measureTextWidth(const std::string& text, std::shared_ptr<Assets::Fonts::FontGlyphAtlas> font, float scale);
+		std::vector<std::string> handleTextWrap(const PAIN::UIText& text_comp);
+		void renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
+		void renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
+		void renderGlyph(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
 	public:
 		// dependency injection
 		static void init(std::shared_ptr<Services> s) {
@@ -52,7 +58,7 @@ namespace PAIN {
 			return proj;
 		}
 
-		void renderText(std::shared_ptr<Assets::Fonts::FontGlyphAtlas> font, const std::string& text, float x, float y, float scale, const glm::vec3& color);
+		void renderText(UIText& text_comp);
 
 		void debugRenderQuad();
 	};
