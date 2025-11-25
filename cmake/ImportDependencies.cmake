@@ -262,12 +262,26 @@ endif()
     if(ANDROID)
 
 
+       # FetchContent_Declare(
+       #     ktx
+       #     GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
+       #     GIT_TAG        v4.4.2
+       # )
+       # FetchContent_MakeAvailable(ktx)
+
+      if(ANDROID_ABI MATCHES "x86")
+        message(WARNING "KTX not supported on x86 - skipping")
+        set(ENABLE_KTX OFF CACHE BOOL "KTX disabled for x86")
+      else()
+        set(ENABLE_KTX ON CACHE BOOL "KTX enabled")
+        
         FetchContent_Declare(
             ktx
             GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
-            GIT_TAG        v4.4.2
+            GIT_TAG v4.4.2
         )
         FetchContent_MakeAvailable(ktx)
     endif()
+  endif()
 
 endmacro()
