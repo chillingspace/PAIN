@@ -304,6 +304,11 @@ namespace PAIN {
 							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 							world.dirty = true;
+
+							const JPH::Vec3 velocity = body.GetLinearVelocity();
+							const JPH::Vec3 angVel = body.GetAngularVelocity();
+							rigidBody.velocity = glm::vec3(velocity.GetX(), velocity.GetY(), velocity.GetZ());
+							rigidBody.angular_velocity = glm::vec3(angVel.GetX(), angVel.GetY(), angVel.GetZ());
 						}
 						else {
 							PN_CORE_ERROR("Failed to lock body for reading");
@@ -384,6 +389,9 @@ namespace PAIN {
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;
 
+					body_interface->SetLinearVelocity(body_id, JPH::Vec3::sZero());
+					body_interface->SetAngularVelocity(body_id, JPH::Vec3::sZero());
+
 					PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
 								   (uint32_t)entity,
 								   rigidBody.bodyID.GetIndexAndSequenceNumber());
@@ -446,6 +454,51 @@ namespace PAIN {
 			// optional: stop any residual motion
 			body_interface->SetLinearVelocity(rb.bodyID, JPH::Vec3::sZero());
 			body_interface->SetAngularVelocity(rb.bodyID, JPH::Vec3::sZero());
+		}
+
+		// In your engine API / physics bridge
+		void System::setVelocity(entt::entity e, const glm::vec3& v) {
+			if (!body_interface) return;
+
+			// Get registry from services
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+
+			auto& registry = ecs->getRegistry();
+
+			// Safety checks
+			if (!registry.valid(e)) return;
+			if (!registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid() || !body_interface) return;
+			body_interface->SetLinearVelocity(rb.bodyID, JPH::Vec3(v.x, v.y, v.z));
+		}
+
+		glm::vec3 System::getVelocity(entt::entity e) const {
+			if (!body_interface) return { 0.f, 0.f, 0.f };
+
+			auto svc = services.lock();
+			if (!svc) return { 0.f, 0.f, 0.f };
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return { 0.f, 0.f, 0.f };
+
+			auto& registry = ecs->getRegistry();
+
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e))
+				return { 0.f, 0.f, 0.f };
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid()) return { 0.f, 0.f, 0.f };
+
+			// Read from Jolt
+			JPH::Vec3 vel = body_interface->GetLinearVelocity(rb.bodyID);
+			return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());
 		}
 
 		void System::create_floor()
