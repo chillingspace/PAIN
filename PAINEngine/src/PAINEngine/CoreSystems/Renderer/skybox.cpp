@@ -192,7 +192,7 @@ namespace PAIN {
 		//glDeleteTextures(1, &skybox_tex); // delete the original HDR
 	}
 
-	void Skybox::init(const std::shared_ptr<Services>& s, const std::filesystem::path& skybox_path) {
+	void Skybox::init(const std::shared_ptr<Services>& s) {
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before Skybox init: {}", err);
@@ -217,15 +217,6 @@ namespace PAIN {
 			PN_CORE_INFO("Equirectangular to cubemap shader compiled, ID: {}", conversionShader->GetRendererID());
 		}
 
-		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
-		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-		convertEquirectangularToCubemap();
-
-		// generate IBL textures
-		generateIrradianceMap();
-		generatePrefilterMap();
-		generateBRDFLUT();
-
 		// compile and link shader
 		{
 #ifdef PN_PLATFORM_ANDROID
@@ -241,6 +232,38 @@ namespace PAIN {
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after Skybox init: {}", err);
+		}
+	}
+
+	void Skybox::setTexture(Assets::GUID const& id) {
+		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(id);
+		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
+		convertEquirectangularToCubemap();
+
+		// generate IBL textures
+		generateIrradianceMap();
+		generatePrefilterMap();
+		generateBRDFLUT();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		}
+	}
+
+	void Skybox::setTexture(const std::filesystem::path& skybox_path) {
+		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
+		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
+		convertEquirectangularToCubemap();
+
+		// generate IBL textures
+		generateIrradianceMap();
+		generatePrefilterMap();
+		generateBRDFLUT();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
 		}
 	}
 

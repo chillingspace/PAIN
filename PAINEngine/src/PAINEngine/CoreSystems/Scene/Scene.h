@@ -3,6 +3,7 @@
 
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Renderer/Light.h"
 #include "Camera.h"
 
 #include "CoreSystems/Assets/Types/Scene.h"
@@ -17,13 +18,27 @@ namespace PAIN {
             //Current scene
             Assets::GUID curr_scene_id;
 
+            //Light sources names
+            std::string camera_light_name = "cam";
+            std::string world_light_name = "world";
+
+            //Curr Skybox texure id
+            Assets::GUID curr_skybox_id;
+
+            //Boolean for checking day time
+            bool using_day_time = true;
+
             //Internal methods
-            bool buildEntitiesFromAsset(std::shared_ptr<SceneAsset> scene_asset);
-            void setupCamera(std::shared_ptr<SceneAsset> scene_asset);
-            void setupEnvironment(std::shared_ptr<SceneAsset> scene_asset);
+            bool buildEntitiesFromAsset(SceneAsset const& scene_asset);
+            void setupCamera(SceneAsset const& scene_asset);
+            void setupEnvironment(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
+            void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
             bool saveSceneToPath(SceneAsset& scn_asset, std::filesystem::path const& relative);
+
+            //Scene configuration
+            void configScene(SceneAsset const& scn_asset);
 
             //Internal add object used for testing
             entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
@@ -63,8 +78,22 @@ namespace PAIN {
             void unloadScene();
 
             //Accessor
+            Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
+            void setCurrSkyBoxTexture(Assets::GUID const& skybox_id);
             Assets::GUID getCurrScnID() { return curr_scene_id; }
             Camera* GetActiveCamera() { return camera.get(); }
+
+            // When you need to access the light
+            Light* getCameraLight() {
+                auto light = LightSources::get().get(camera_light_name);
+                return light.has_value() ? &light->get() : nullptr;
+            }
+
+            Light* getWorldLight() {
+                auto light = LightSources::get().get(world_light_name);
+                return light.has_value() ? &light->get() : nullptr;
+            }
+
         };
 	}
 

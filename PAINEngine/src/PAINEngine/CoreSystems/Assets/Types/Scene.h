@@ -4,6 +4,8 @@
 #define SCENE_ASSET_HPP
 
 #include "AssetData.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Renderer/Light.h"
 
 namespace PAIN {
     namespace Scene {
@@ -14,7 +16,7 @@ namespace PAIN {
                 glm::vec3 position{ 0.f, 2.f, 4.f };
                 glm::vec3 forward{ 0.f, 0.f, -1.f };
                 glm::vec3 up{ 0.f, 1.f, 0.f };
-                float fov = 60.0f;
+                float fov = GraphicsSettings::get().fov;
                 float nearPlane{ 0.1f };
                 float farPlane{ 100.f };
                 float aspectRatioW{ 16.f };
@@ -23,11 +25,10 @@ namespace PAIN {
 
             //Environment settings
             struct Environment {
-                glm::vec3 ambientColor{ 0.2f, 0.2f, 0.2f };
-                float ambientIntensity = 1.0f;
                 Assets::GUID skyboxGUID;
                 bool useDaytime = true;
-                float globalLightIntensity = 1.0f;
+                glm::vec3 cameraLightIntensity{ 0.01f };
+                glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
             } environment;
 
             //Scene Layers

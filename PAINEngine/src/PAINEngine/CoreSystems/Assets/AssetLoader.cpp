@@ -907,18 +907,6 @@ namespace PAIN {
             if (sceneJson.contains("environment")) {
                 auto& env = sceneJson["environment"];
 
-                if (env.contains("ambientColor") && env["ambientColor"].is_array() && env["ambientColor"].size() >= 3) {
-                    sceneAsset->environment.ambientColor = glm::vec3(
-                        env["ambientColor"][0].get<float>(),
-                        env["ambientColor"][1].get<float>(),
-                        env["ambientColor"][2].get<float>()
-                    );
-                }
-
-                if (env.contains("ambientIntensity")) {
-                    sceneAsset->environment.ambientIntensity = env["ambientIntensity"].get<float>();
-                }
-
                 if (env.contains("skyboxGUID")) {
                     sceneAsset->environment.skyboxGUID = Assets::GUID(env["skyboxGUID"].get<std::string>());
                 }
@@ -927,8 +915,20 @@ namespace PAIN {
                     sceneAsset->environment.useDaytime = env["useDaytime"].get<bool>();
                 }
 
-                if (env.contains("globalLightIntensity")) {
-                    sceneAsset->environment.globalLightIntensity = env["globalLightIntensity"].get<float>();
+                if (env.contains("cameraLightIntensity") && env["cameraLightIntensity"].is_array() && env["cameraLightIntensity"].size() >= 3) {
+                    sceneAsset->environment.cameraLightIntensity = glm::vec3(
+                        env["cameraLightIntensity"][0].get<float>(),
+                        env["cameraLightIntensity"][1].get<float>(),
+                        env["cameraLightIntensity"][2].get<float>()
+                    );
+                }
+
+                if (env.contains("worldLightIntensity") && env["worldLightIntensity"].is_array() && env["worldLightIntensity"].size() >= 3) {
+                    sceneAsset->environment.worldLightIntensity = glm::vec3(
+                        env["worldLightIntensity"][0].get<float>(),
+                        env["worldLightIntensity"][1].get<float>(),
+                        env["worldLightIntensity"][2].get<float>()
+                    );
                 }
             }
 

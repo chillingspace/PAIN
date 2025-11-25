@@ -285,7 +285,6 @@ namespace PAIN {
 
             void ScenesPanel::drawSkyboxSettingsPanel()
             {
-             
             }
 
             void ScenesPanel::onAttach()
@@ -293,6 +292,7 @@ namespace PAIN {
                 registerPopUp("CreateScene", createScenePopup("CreateScene"));
                 registerPopUp("SaveSceneAs", saveSceneAsPopup("SaveSceneAs"));
                 registerPopUp("DeleteScene", deleteScenePopup("DeleteScene"));
+                registerPopUp("Info", defPopUp("Info"));
             }
 
             // ---------- Main draw ----------
@@ -330,7 +330,7 @@ namespace PAIN {
                     
                     //Load scene
                     if (scn_service->getCurrScnID() != selected) {
-                        if (ImGui::Button("Load Scene")) {
+                        if (ImGui::Button("Load")) {
                             scn_service->loadScene(selected);
                         }
 
@@ -338,14 +338,15 @@ namespace PAIN {
                     }
                     //Save curr scene
                     else {
-                        if (ImGui::Button("Save Curr Scene")) {
+                        if (ImGui::Button("Save")) {
                             scn_service->saveActiveScene(selected);
+                            openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
                         }
                         ImGui::SameLine();
                     }
 
                     //Delete scene option
-                    if (ImGui::Button("Delete Scene")) {
+                    if (ImGui::Button("Delete")) {
                         openPopUp("DeleteScene");
                     }
 
@@ -353,7 +354,7 @@ namespace PAIN {
                 }
 
                 //Save scene as
-                if (ImGui::Button("Save Scene As")) {
+                if (ImGui::Button("Save As")) {
                     openPopUp("SaveSceneAs");
                 }
 

@@ -8,7 +8,6 @@
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
-#include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Renderer/text.h"
@@ -26,40 +25,11 @@ namespace PAIN {
 			auto ecs = services->get<ECS::Controller>();
 			auto meta = services->get<MetaData::Service>();
 
-			//// if animated object, may be in T pose. must find root xform
-			//glm::vec3 root_scale = glm::vec3(1.f);
-			//glm::quat root_rot= glm::quat(1.f, 0.f, 0.f, 0.f);
-			//glm::vec3 root_trans = glm::vec3(0.f);
-
-			//PN_CORE_INFO("Model {} has {} animations", mdl->vpath, mdl->animations.size());
-			//if (mdl->animations.size()) {
-
-			//	auto anim = mdl->animations[0];
-			//	for (const auto& [bone_name, track] : anim.track_map) {
-			//		const auto it = std::find_if(mdl->skeleton.begin(), mdl->skeleton.end(), [&bone_name](const Assets::Bone& b) { return bone_name == b.name; });
-			//		if (it == mdl->skeleton.end()) {
-			//			root_scale = track[0].scale;
-			//			root_rot = track[0].rotation;
-			//			root_trans = track[0].translation;
-			//			break;
-			//		}
-			//	}
-			//}
-
-			//// i suppose i shouldnt bake the root xform into LocalTransform here. so
-			////glm::mat4 root_xform = 
-			////	glm::translate(glm::mat4(1.f), root_trans) * 
-			////	glm::mat4_cast(root_rot) *
-			////	glm::scale(glm::mat4(1.f), root_scale);
-
-
-
 			entt::entity entity = ecs->createEntity();
 			ecs->addEntityComponent(entity, Entity::Name{ name });
 			ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
 			ecs->addEntityComponent(entity, WorldTransform{});
 			ecs->addEntityComponent(entity, Entity::Hierarchy{});
-			// ecs->addEntityComponent(entity, Transform{ pos, rot, scale });
 		
 			ModelRenderer mr = ModelRenderer{ mdl->guid };
 			if (mdl->animations.size()) {
@@ -76,14 +46,9 @@ namespace PAIN {
 			return entity;
 		}
 
-		bool SceneManager::buildEntitiesFromAsset(std::shared_ptr<SceneAsset> scene_asset) {
+		bool SceneManager::buildEntitiesFromAsset(SceneAsset const& scene_asset) {
 
-			if (!scene_asset) {
-				PN_CORE_ERROR("[SceneManager] No scene asset loaded");
-				return false;
-			}
-
-			if (scene_asset->entityData.empty()) {
+			if (scene_asset.entityData.empty()) {
 				PN_CORE_WARN("[SceneManager] Scene has no entity data");
 				return true; // Not an error, just an empty scene
 			}
@@ -94,7 +59,7 @@ namespace PAIN {
 				return false;
 			}
 
-			const auto& ecs = scene_asset->entityData;
+			const auto& ecs = scene_asset.entityData;
 
 			// Find the Entities array
 			auto entsIt = ecs.find("Entities");
@@ -181,13 +146,9 @@ namespace PAIN {
 			return true;
 		}
 
-		void SceneManager::setupCamera(std::shared_ptr<SceneAsset> scene_asset) {
-			if (!scene_asset) {
-				PN_CORE_ERROR("[SceneManager] No scene asset to setup camera from");
-				return;
-			}
+		void SceneManager::setupCamera(SceneAsset const& scene_asset) {
 
-			const auto& camSettings = scene_asset->camera;
+			const auto& camSettings = scene_asset.camera;
 
 			// Create or update camera
 			camera = std::make_unique<Camera>(
@@ -206,55 +167,46 @@ namespace PAIN {
 				camSettings.fov);
 		}
 
-		void SceneManager::setupEnvironment(std::shared_ptr<SceneAsset> scene_asset) {
-			if (!scene_asset) {
-				PN_CORE_ERROR("[SceneManager] No scene asset to setup environment from");
-				return;
-			}
+		void SceneManager::setupEnvironment(SceneAsset const& scene_asset) {
 
-			const auto& env = scene_asset->environment;
+			//Get environment variables
+			const auto& env = scene_asset.environment;
 
-			// Setup ambient light (camera light)
-			LightSources::get().create("cam");
-			if (auto camLightOpt = LightSources::get().get("cam")) {
-				Light& camLight = camLightOpt.value();
-				camLight.L_intensity = env.ambientColor * env.ambientIntensity * 0.01f;
-			}
+			//Set up camera light intensity
+			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
-			// Setup directional light if daytime is enabled
-			if (env.useDaytime) {
-				LightSources::get().create("world");
-				if (auto worldLightOpt = LightSources::get().get("world")) {
-					Light& worldLight = worldLightOpt.value();
-					worldLight.forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-					worldLight.L_intensity = glm::vec3(env.globalLightIntensity);
-					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
-					worldLight.type = Light::TYPES::DIRECTIONAL;
-
-					PN_CORE_INFO("[SceneManager] Created directional world light");
-				}
-
+			//Set up world light
+			using_day_time = env.useDaytime;
+			if (using_day_time) {
+				getWorldLight()->L_intensity = env.worldLightIntensity;
+				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
+				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
+				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 				GraphicsSettings::get().ibl = true;
 			}
 			else {
 				GraphicsSettings::get().ibl = false;
 			}
 
-			// Load skybox if GUID is valid
+			//Load Skybox GUID
 			if (env.skyboxGUID.IsValid()) {
-				auto pathService = services->get<Path::Path>();
-				if (pathService) {
-					// TODO: Resolve skybox path from GUID and load
-					// For now, use default skybox
-#ifdef PN_PLATFORM_WINDOWS
-					std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
-#else
-					std::filesystem::path sb_path = "engine\\\\textures\\\\skybox2.hdr";
-#endif
+				curr_skybox_id = env.skyboxGUID;
+				Skybox::get().setTexture(curr_skybox_id);
+				PN_CORE_INFO("[SceneManager] Set skybox with texture of GUID: {}", curr_skybox_id.ToString());
+			}
+			else {
 
-					Skybox::get().init(services, sb_path);
-					PN_CORE_INFO("[SceneManager] Initialized skybox");
-				}
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
+#else
+				std::filesystem::path sb_path = "engine\\\\textures\\\\skybox2.hdr";
+#endif
+				//Set skybox id
+				curr_skybox_id = services->get<Assets::Manager>()->findGUID(sb_path);
+
+				//Default skybox texture
+				Skybox::get().setTexture(sb_path);
+				PN_CORE_INFO("[SceneManager] Set default skybox");
 			}
 
 			PN_CORE_INFO("[SceneManager] Environment setup complete");
@@ -299,6 +251,27 @@ namespace PAIN {
 			return ecs;
 		}
 
+		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
+
+			//Capture all camera variables
+			if (camera) {
+				scene_asset.camera.position = camera->pos;
+				scene_asset.camera.forward = camera->forward;
+				scene_asset.camera.up = camera->up;
+				scene_asset.camera.nearPlane = camera->near_plane;
+				scene_asset.camera.farPlane = camera->far_plane;
+				scene_asset.camera.fov = camera->fov;
+				scene_asset.camera.aspectRatioW = camera->width_ratio;
+				scene_asset.camera.aspectRatioH = camera->height_ratio;
+			}
+
+			//Capture all graphics and env variables
+			scene_asset.environment.cameraLightIntensity = getCameraLight()->L_intensity;
+			scene_asset.environment.worldLightIntensity = getWorldLight()->L_intensity;
+			scene_asset.environment.useDaytime = using_day_time;
+			scene_asset.environment.skyboxGUID = curr_skybox_id;
+		}
+
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
 			//Convert scene asset to JSON
 			nlohmann::json sceneJson = nlohmann::json::object();
@@ -317,11 +290,10 @@ namespace PAIN {
 
 			//Environment settings
 			sceneJson["environment"] = {
-				{"ambientColor", {scn_asset.environment.ambientColor.x, scn_asset.environment.ambientColor.y, scn_asset.environment.ambientColor.z}},
-				{"ambientIntensity", scn_asset.environment.ambientIntensity},
 				{"skyboxGUID", scn_asset.environment.skyboxGUID.ToString()},
 				{"useDaytime", scn_asset.environment.useDaytime},
-				{"globalLightIntensity", scn_asset.environment.globalLightIntensity}
+				{"cameraLightIntensity", {scn_asset.environment.cameraLightIntensity.x, scn_asset.environment.cameraLightIntensity.y, scn_asset.environment.cameraLightIntensity.z}},
+				{"worldLightIntensity", {scn_asset.environment.worldLightIntensity.x, scn_asset.environment.worldLightIntensity.y, scn_asset.environment.worldLightIntensity.z}},
 			};
 
 			// Layers
@@ -368,39 +340,37 @@ namespace PAIN {
 			return true;
 		}
 
+		void SceneManager::configScene(SceneAsset const& scn_asset) {
+			//Build new scene
+			setupCamera(scn_asset);
+			setupEnvironment(scn_asset);
+
+			//Failed to build entities
+			if (!buildEntitiesFromAsset(scn_asset)) {
+				PN_CORE_ERROR("[SceneManager] Failed to build entities from scene asset");
+				return;
+			}
+		}
+
 		void SceneManager::onAttach() {
 
+			//Get ECS Controller
 			auto ecs = services->get<ECS::Controller>();
-			
-			// Camera and Scene Setup
-			glm::vec3 pos{ 0.f, 2.f, 4.f };
-			//glm::vec3 forward{-glm::normalize(pos)};
-			glm::vec3 forward{ 0.f, 0.f, -1.f };
-			glm::vec3 up{ 0.f, 1.f, 0.f };
-			float near_plane{ 0.1f };
-			float far_plane{ 100.f };
-			float width_ratio{ 16.f };
-			float height_ratio{ 9.f };
-			camera = std::make_unique<Camera>(pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
-			
-			// Init light sources (REQUIRED TO FUNCTION)
-			LightSources::get().create("cam");
-			auto olcam = LightSources::get().get("cam");
-			Light& lcam = olcam.value();
-			lcam.L_intensity = glm::vec3(0.01f);
-			
-			if (GraphicsSettings::get().daytime) {
-				LightSources::get().create("world");
-				auto olc = LightSources::get().get("world");
-				Light& lc = olc.value();
-				lc.forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-				//lc.position = -lc.forward * 10.f;					// follows camera
-				lc.L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
-				lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-				lc.type = Light::TYPES::DIRECTIONAL;
-			}
-			//lc.far_plane = 200.f;
-			//lc.forward = -lc.position;
+
+			//Create default light sources
+			LightSources::get().create(camera_light_name);
+			LightSources::get().create(world_light_name);
+			PN_CORE_INFO("[SceneManager] Created cam and world light source.");
+
+			//Init skybox here, set texture for skybox in config scene
+			Skybox::get().init(services);
+			PN_CORE_INFO("[SceneManager] Initialized skybox");
+
+			//Create default scene asset
+			SceneAsset default_scene_config;
+
+			//Configure scene with default settings
+			configScene(default_scene_config);
 			
 			// Demo Object and Audio Setup
 			auto audioManager = services->get<Audio::Audio>();
@@ -539,9 +509,6 @@ namespace PAIN {
 	#else
 			std::filesystem::path sb_path = "engine\\textures\\skybox2.hdr";
 	#endif
-			
-			// skybox
-			Skybox::get().init(services, sb_path);
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");
@@ -641,13 +608,12 @@ namespace PAIN {
 			//Clear old scene
 			unloadScene();
 
-			//Build new scene
-			setupCamera(currentSceneAsset);
-			setupEnvironment(currentSceneAsset);
-
-			//Failed to build entities
-			if (!buildEntitiesFromAsset(currentSceneAsset)) {
-				PN_CORE_ERROR("[SceneManager] Failed to build entities from scene asset");
+			//Configure the new scene
+			if (currentSceneAsset) {
+				configScene(*currentSceneAsset);
+			}
+			else {
+				PN_CORE_INFO("[SceneManager] Failed to configure scene with GUID: {}", sceneGUID.ToString());
 				return;
 			}
 
@@ -741,17 +707,8 @@ namespace PAIN {
 			//Capture current ECS state
 			currentSceneAsset->entityData = captureCurrentEntities();
 
-			//Update camera settings from current camera
-			if (camera) {
-				currentSceneAsset->camera.position = camera->pos;
-				currentSceneAsset->camera.forward = camera->forward;
-				currentSceneAsset->camera.up = camera->up;
-				currentSceneAsset->camera.nearPlane = camera->near_plane;
-				currentSceneAsset->camera.farPlane = camera->far_plane;
-				currentSceneAsset->camera.fov = camera->fov;
-				currentSceneAsset->camera.aspectRatioW = camera->width_ratio;
-				currentSceneAsset->camera.aspectRatioH = camera->height_ratio;
-			}
+			//Capture the scene variables
+			captureSceneVariables(*currentSceneAsset);
 
 			//Check if valid name was provided
 			std::filesystem::path relative;
@@ -795,6 +752,11 @@ namespace PAIN {
 
 			// Clear scene asset reference (but keep the object if we're reloading)
 			// currentSceneAsset.reset();
+		}
+
+		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {
+			curr_skybox_id = skybox_id;
+			Skybox::get().setTexture(curr_skybox_id);
 		}
 	}
 
