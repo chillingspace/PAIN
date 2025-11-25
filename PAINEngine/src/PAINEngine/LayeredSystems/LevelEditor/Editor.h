@@ -43,6 +43,8 @@ namespace PAIN {
             void togglePause() { editor_paused = !editor_paused; }
             void toggleDebugMode() { editor_debug_mode = (editor_debug_mode + 1) % 3; } // Toggle between 0-1-2
 
+            bool changeScene(const std::string& sceneId);
+
             // Template implementations must be in header or included .inl file
             template<typename T>
             std::shared_ptr<T> getPanel() const {

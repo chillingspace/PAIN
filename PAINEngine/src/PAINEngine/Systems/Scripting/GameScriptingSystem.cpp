@@ -235,8 +235,9 @@ namespace PAIN {
             auto assets_ptr = services_ptr->get<Assets::Manager>();
             auto path_ptr = services_ptr->get<Path::Path>();
             auto scene_ptr = services_ptr->get<Scene>();
+            auto editor_ptr = services_ptr->get<Editor::Editor>();
 
-            if (!ecs_ptr || !meta_ptr) {
+            if (!ecs_ptr || !meta_ptr|| !editor_ptr) {
                 PN_CORE_ERROR("[GameScriptingSystem] Required services not available!");
                 return;
             }
@@ -255,7 +256,7 @@ namespace PAIN {
             bool shipping = true;
 #endif
 
-            luaManager_.init(adapter, shipping);
+            luaManager_.init(editor_ptr, adapter, shipping);
             PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
         }
 
