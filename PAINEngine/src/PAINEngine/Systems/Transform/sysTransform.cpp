@@ -24,6 +24,10 @@ namespace PAIN {
 				if (!hierarchy.parentGUID.IsValid()) {
 					updateRecursive(entity, glm::mat4(1.0f), registry);
 				}
+				else {
+					// Entity has a parent - try to find it and register as child
+					findOrphansAHome(entity, guid, hierarchy, registry);
+				}
 			}
 		}
 
@@ -160,6 +164,48 @@ namespace PAIN {
 
 			// Recursively mark grandparents, great-grandparents, etc.
 			markAncestorsDirty(parent, registry);
+		}
+
+		void System::findOrphansAHome(entt::entity e, Entity::GUID const& guid, Entity::Hierarchy& hierarchy, entt::registry& registry) {
+			//Get ECS controller to resolve GUID
+			auto ecs = services.lock()->get<ECS::Controller>();
+			entt::entity parentEntity = ecs->getGUIDRegistry().resolveGUID(hierarchy.parentGUID);
+
+			if (parentEntity != entt::null && registry.valid(parentEntity)) {
+				//Parent exists - check if parent knows about this child
+				auto* parentHierarchy = registry.try_get<Entity::Hierarchy>(parentEntity);
+
+				if (parentHierarchy) {
+					//Check if this entity is already in parent's children list
+					bool isRegistered = false;
+					for (const auto& childGUID : parentHierarchy->childrenGUIDs) {
+						if (childGUID == guid.guid) {
+							isRegistered = true;
+							break;
+						}
+					}
+
+					// If orphaned (parent doesn't know about child), register it
+					if (!isRegistered) {
+						parentHierarchy->childrenGUIDs.push_back(guid.guid);
+						PN_CORE_WARN("Repaired orphan entity: {} registered to parent: {}",
+							guid.guid.ToString(),
+							hierarchy.parentGUID.ToString());
+					}
+				}
+			}
+			else {
+				//arent not found - treat as root for now
+				PN_CORE_WARN("Entity {} has invalid parent GUID: {} - treating as root",
+					guid.guid.ToString(),
+					hierarchy.parentGUID.ToString());
+
+				//Clear invalid parent reference
+				hierarchy.parentGUID = Assets::GUID();
+
+				//Update as root entity
+				updateRecursive(e, glm::mat4(1.0f), registry);
+			}
 		}
 	}
 }

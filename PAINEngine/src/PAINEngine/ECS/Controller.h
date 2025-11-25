@@ -200,15 +200,26 @@ namespace PAIN {
 			void clear();
 		};
 
+		//Registry type alias
+		using RegistryID = uint32_t;
+		const RegistryID MAIN_REGISTRY_ID = 0;
+
+		//Registry context
+		struct RegistryContext {
+			std::string name;
+			entt::registry registry;
+			EntityGUIDRegistry guid_registry;
+			size_t entity_count = 0;
+			bool auto_simulate = false;
+		};
+
+		//Improved controller with optional registry usage
 		class Controller : public AppSystem {
 		private:
 
-			size_t entity_count = 0;
-
-			// GUID Registry for stable entity references
-			EntityGUIDRegistry guid_registry;
-
-			entt::registry entt_registry;
+			//Multi-registry support
+			std::unordered_map<RegistryID, RegistryContext> registries;
+			RegistryID next_registry_id = 1;
 
 			std::vector<std::shared_ptr<System::ISystem>> systems;
 
@@ -223,24 +234,46 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
 
+			// Helper methods for multi-registry support
+			RegistryContext* getRegistryContext(RegistryID id);
+			const RegistryContext* getRegistryContext(RegistryID id) const;
+			
+			// Update systems for a specific registry
+			void updateSystemsForRegistry(RegistryID id, AppTiming timing, bool isFixed);
+
 		public:
-			explicit Controller(std::shared_ptr<Services> svc) {
-				services = svc;
-			}
+			explicit Controller(std::shared_ptr<Services> svc);
 
+			/*****************************************************************//**
+			* Registry Management Methods
+			*********************************************************************/
+			//Create a new registry with optional name and auto-simulate flag
+			RegistryID createRegistry(const std::string& name = "", bool autoSimulate = false);
+			
+			//Destroy a registry (cannot destroy main registry)
+			void destroyRegistry(RegistryID id);
+
+			//Check if registry exists
+			bool hasRegistry(RegistryID id) const;
+
+			//Registry configuration
+			void setRegistryAutoSimulate(RegistryID id, bool autoSimulate);
+			bool isRegistryAutoSimulate(RegistryID id) const;
+			std::string getRegistryName(RegistryID id) const;
+
+			//Registry updates
+			void updateRegistry(RegistryID id, AppTiming timing);
+			void fixedUpdateRegistry(RegistryID id, AppTiming timing);
+
+			/*****************************************************************//**
+			* GUID Registry Methods
+			*********************************************************************/
 			//Public access to the GUID registry
-			EntityGUIDRegistry& getGUIDRegistry() { return guid_registry; }
-			const EntityGUIDRegistry& getGUIDRegistry() const { return guid_registry; }
-
-			Assets::GUID getOrCreateEntityGUID(entt::entity e) {
-				return guid_registry.getOrCreateGUID(e, entt_registry);
-			}
-
-			entt::entity resolveGUID(const Assets::GUID& guid) const {
-				return guid_registry.resolveGUID(guid);
-			}
-
-			int getEntitiesCount() const { return static_cast<int>(entity_count); }
+			EntityGUIDRegistry& getGUIDRegistry(RegistryID registryId = MAIN_REGISTRY_ID);
+			const EntityGUIDRegistry& getGUIDRegistry(RegistryID registryId = MAIN_REGISTRY_ID) const;
+			Assets::GUID getOrCreateEntityGUID(entt::entity e, RegistryID registryId = MAIN_REGISTRY_ID);
+			entt::entity resolveGUID(const Assets::GUID& guid, RegistryID registryId = MAIN_REGISTRY_ID) const;
+			int getEntitiesCount(RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			//Dispatch events to layers
 			void dispatchToLayers(Event::Event& e);
@@ -259,31 +292,31 @@ namespace PAIN {
 			//Event callback
 			void onEvent(Event::Event& e) override;
 
-			// Direct registry access for advanced use cases
-			entt::registry& getRegistry() { return entt_registry; }
-			const entt::registry& getRegistry() const { return entt_registry; }
+			//Overloaded to support multi-registry
+			entt::registry& getRegistry(RegistryID id = MAIN_REGISTRY_ID);
+			const entt::registry& getRegistry(RegistryID id = MAIN_REGISTRY_ID) const;
 
 			/*****************************************************************//**
 			* Entity Methods
 			*********************************************************************/
 
 			//Create Entity
-			entt::entity createEntity();
-
-			//Create Entity
-			entt::entity createEntity(Assets::GUID const& e_id);
-
-			//Clone entity ( ID of clone returned )
-			entt::entity cloneEntity(entt::entity copy);
-
+			entt::entity createEntity(RegistryID registryId = MAIN_REGISTRY_ID);
+			
+			//Create Entity with GUID
+			entt::entity createEntity(Assets::GUID const& e_id, RegistryID registryId = MAIN_REGISTRY_ID);
+			
+			//Clone entity (supports cross-registry cloning)
+			entt::entity cloneEntity(entt::entity copy, RegistryID srcRegistry = MAIN_REGISTRY_ID, RegistryID dstRegistry = MAIN_REGISTRY_ID);
+			
 			//Destroy Entity
-			void destroyEntity(entt::entity entity);
-
+			void destroyEntity(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID);
+			
 			//Check entity
-			bool checkEntity(entt::entity entity) const;
-
-			//Destroy Entity
-			void destroyAllEntities();
+			bool checkEntity(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
+			
+			//Destroy all entities in a registry
+			void destroyAllEntities(RegistryID registryId = MAIN_REGISTRY_ID);
 
 			template<typename Tuple, typename F>
 			void tuple_for_each(F&& f)
@@ -298,24 +331,24 @@ namespace PAIN {
 			*********************************************************************/
 			template<typename T>
 			void registerComponent(const std::string& name) {
+				// Note: These lambdas work with MAIN_REGISTRY_ID for backward compatibility
+				// For multi-registry support, use the template component methods with registryId parameter
+				
 				// Factory for creating by name
 				component_factories[name] = [this](entt::entity e) {
-					entt_registry.emplace<T>(e);
+					getRegistry(MAIN_REGISTRY_ID).emplace<T>(e);
 					};
-
 				// Checker for hasComponentByName
 				component_checkers[name] = [this](entt::entity e) {
-					return entt_registry.all_of<T>(e);
+					return getRegistry(MAIN_REGISTRY_ID).all_of<T>(e);
 					};
-
 				// Remover for removeComponentByName
 				component_removers[name] = [this](entt::entity e) {
-					entt_registry.remove<T>(e);
+					getRegistry(MAIN_REGISTRY_ID).remove<T>(e);
 					};
-
 				// Getter for editor UI (type-erased)
 				component_getters[name] = [this](entt::entity e) -> void* {
-					return static_cast<void*>(entt_registry.try_get<T>(e));
+					return static_cast<void*>(getRegistry(MAIN_REGISTRY_ID).try_get<T>(e));
 					};
 			}
 
@@ -360,17 +393,17 @@ namespace PAIN {
 
 			// Check if entity has a specific component type
 			template<typename T>
-			bool hasEntityComponent(entt::entity entity) const {
-				return entt_registry.all_of<T>(entity);
+			bool hasEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				return getRegistry(registryId).all_of<T>(entity);
 			}
 
 			// Get component (non-const version)
 			template<typename T>
-			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity) {
-				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (!checkEntity(entity, registryId) || !getRegistry(registryId).all_of<T>(entity)) {
 					return std::nullopt;
 				}
-				return std::ref(entt_registry.get<T>(entity));
+				return std::ref(getRegistry(registryId).get<T>(entity));
 			}
 
 			// Get All Entity's Component 
@@ -381,38 +414,36 @@ namespace PAIN {
 
 			// Get component (const version)
 			template<typename T>
-			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity) const {
-				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				if (!checkEntity(entity, registryId) || !getRegistry(registryId).all_of<T>(entity)) {
 					return std::nullopt;
 				}
-				return std::ref(entt_registry.get<T>(entity));
+				return std::ref(getRegistry(registryId).get<T>(entity));
 			}
 
 			// Add component to entity (move semantics for efficiency)
 			template<typename T>
-			void addEntityComponent(entt::entity entity, T&& component) {
-				// Safety checks to check for valid entity before adding comp to the entity
-				if (!checkEntity(entity)) {
+			void addEntityComponent(entt::entity entity, T&& component, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (!checkEntity(entity, registryId)) {
 					PN_CORE_ERROR("Cannot add component to invalid entity: {}",
 						static_cast<uint32_t>(entity));
 					return;
 				}
-
-				entt_registry.emplace_or_replace<T>(entity, std::forward<T>(component));
+				getRegistry(registryId).emplace_or_replace<T>(entity, std::forward<T>(component));
 			}
 
 			// Remove component from entity
 			template<typename T>
-			void removeEntityComponent(entt::entity entity) {
-				if (entt_registry.all_of<T>(entity)) {
-					entt_registry.remove<T>(entity);
+			void removeEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (getRegistry(registryId).all_of<T>(entity)) {
+					getRegistry(registryId).remove<T>(entity);
 				}
 			}
 
 			// Alternative name for consistency (checks component mesh_id)
 			template<typename T>
-			bool checkEntityComponent(entt::entity entity) const {
-				return entt_registry.all_of<T>(entity);
+			bool checkEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				return getRegistry(registryId).all_of<T>(entity);
 			}
 
 
@@ -421,7 +452,7 @@ namespace PAIN {
 			*********************************************************************/
 
 			// Register a system
-			template<typename T> void registerSystem() {
+					template<typename T> void registerSystem() {
 				systems.push_back(std::make_shared<T>(services));
 			}
 
