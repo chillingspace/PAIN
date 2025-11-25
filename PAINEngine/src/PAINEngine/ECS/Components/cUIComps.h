@@ -111,8 +111,9 @@ namespace PAIN {
 	enum class TextAlignment { Left, Center, Right };
 
 	struct UIText {
+		glm::vec2 text_pos;
 		std::string display_text;
-		glm::vec4 color{ 1 };
+		glm::vec3 color{ 1 };
 		Assets::GUID font_guid;
 		float font_size = 18.0f;
 		TextAlignment alignment = TextAlignment::Left;
@@ -126,6 +127,7 @@ namespace PAIN {
 		bool rich_text = false;
 		// 0 = unlimited
 		int max_length = 0; 
+		float wrap_width = 0;
 	};
 
 }
@@ -214,6 +216,7 @@ REFL_END
 static_assert(refl::trait::is_reflectable_v<PAIN::UIAnimation>);
 
 REFL_TYPE(PAIN::UIText)
+REFL_FIELD(text_pos)
 REFL_FIELD(display_text)
 REFL_FIELD(color)
 REFL_FIELD(font_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Font))
@@ -227,6 +230,7 @@ REFL_FIELD(shadow_offset)
 REFL_FIELD(shadow_color)
 REFL_FIELD(rich_text)
 REFL_FIELD(max_length)
+REFL_FIELD(wrap_width)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);

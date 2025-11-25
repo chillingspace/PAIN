@@ -259,7 +259,9 @@ namespace PAIN {
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.hash = build_data.value("hash", std::size_t(0));
+                
+                //Explicitly read as uint64_t to match new Descriptor struct
+                desc.hash = build_data.value("hash", (uint64_t)0);
 
                 //Verify import settings
                 if (!verifyCompileSettings(asset.type, desc.import_settings)) {
@@ -313,7 +315,9 @@ namespace PAIN {
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.hash = build_data.value("hash", std::size_t(0));
+                
+                //Explicitly read as uint64_t
+                desc.hash = build_data.value("hash", (uint64_t)0);
 
                 desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
                 desc.meta_data["source_file"] = desc.meta_data.value("source_file", "");

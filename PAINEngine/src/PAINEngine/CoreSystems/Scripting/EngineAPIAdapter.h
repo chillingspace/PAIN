@@ -178,11 +178,6 @@ namespace PAIN {
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
         void SetLightForward(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
-        
-        /* =========================================================================== */
-        /*                                  Scripting                                 */
-        /* =========================================================================== */
-        bool IsScriptActive(entt::entity entityId) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());
