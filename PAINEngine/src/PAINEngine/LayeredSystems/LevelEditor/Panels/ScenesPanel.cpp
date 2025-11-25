@@ -283,8 +283,37 @@ namespace PAIN {
                 ImGui::EndPopup();
             }
 
-            void ScenesPanel::drawSkyboxSettingsPanel()
-            {
+            void ScenesPanel::drawGraphicsSettingsPanel() {
+
+                //Get scene service
+                auto scn_service = services->get<Scene::SceneManager>();
+
+                //Get current skybox
+                Assets::GUID curr_skybox = scn_service->getCurrSkyBoxTextureID();
+
+                // Model Asset Selection
+                if (DrawAssetSelectorField("Select A Skybox",
+                    curr_skybox,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false, { ".hdr" })) {
+
+                    //Simply skybox settings
+                    if (curr_skybox != scn_service->getCurrSkyBoxTextureID()) scn_service->setCurrSkyBoxTexture(curr_skybox);
+                }
+
+                //World Light intensity
+                if (ImGui::ColorEdit3("World Light Intensity", glm::value_ptr(scn_service->getWorldLight()->L_intensity))) {
+                }
+
+                //camera Light intensity
+                if (ImGui::ColorEdit3("Camera Light Intensity", glm::value_ptr(scn_service->getCameraLight()->L_intensity))) {
+                }
+
+                //Set using day
+                bool using_day = scn_service->getUsingDayTime();
+                if (ImGui::Checkbox("Using Day Time", &using_day)) {
+                    scn_service->setUsingDayTime(using_day);
+                }
             }
 
             void ScenesPanel::onAttach()
@@ -302,7 +331,11 @@ namespace PAIN {
                 auto scn_service = services->get<Scene::SceneManager>();
                 auto asset_service = services->get<Assets::Manager>();
 
-                ImGui::Text("Scene ID: %s", selected_scn_name.empty() ? "(none)" : selected_scn_name.c_str());
+                //Get scene manager name
+                auto scn_id = scn_service->getCurrScnID();
+
+                //Render current scene ID
+                ImGui::Text("Scene ID: %s", !asset_service->checkAssetRegistered(scn_id) ? "(none)" : asset_service->getAssetData(scn_id)->name.c_str());
 
                 // Create New Scene
                 if (ImGui::Button("Create New Scene")) {
@@ -360,8 +393,17 @@ namespace PAIN {
 
                 ImGui::Separator();
 
-                //Graphics Settings
-                drawSkyboxSettingsPanel();
+                //Render graphics settings
+                if (ImGui::CollapsingHeader("Graphics Settings")) {
+                    drawGraphicsSettingsPanel();
+                }
+
+                //// Scene configuration panels
+                //drawSkyboxSettingsPanel();
+                //drawGraphicsSettingsPanel();
+                //drawEnvironmentSettingsPanel();
+                //drawCameraSettingsPanel();
+                //drawLayerManagementPanel();
 
                 // Layers
                 //ImGui::Text("Total Layers: %u", (unsigned)doc.layers.size());

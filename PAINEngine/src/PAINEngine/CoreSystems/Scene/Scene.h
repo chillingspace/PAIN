@@ -94,6 +94,8 @@ namespace PAIN {
                 return light.has_value() ? &light->get() : nullptr;
             }
 
+            bool getUsingDayTime() const { return using_day_time; }
+            void setUsingDayTime(bool day_time) { using_day_time = day_time; }
         };
 	}
 

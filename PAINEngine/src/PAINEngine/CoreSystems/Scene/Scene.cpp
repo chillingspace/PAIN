@@ -529,18 +529,18 @@ namespace PAIN {
 				// For now, the camera is controlled externally (editor, player controller, etc.)
 			}
 
-			//// Update animations (if you want this here instead of in ECS systems)
-			//auto ecs = services->get<ECS::Controller>();
-			//if (!ecs) return;
+			// Update animations (if you want this here instead of in ECS systems)
+			auto ecs = services->get<ECS::Controller>();
+			if (!ecs) return;
 
-			//auto& registry = ecs->getRegistry();
-			//auto view = registry.view<ModelRenderer>();
-			//for (auto e : view) {
-			//	auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			//	if (mdl.has_value()) {
-			//		mdl->get().UpdateAnimation(timing.dt);
-			//	}
-			//}
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<ModelRenderer>();
+			for (auto e : view) {
+				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+				if (mdl.has_value()) {
+					mdl->get().UpdateAnimation(timing.dt);
+				}
+			}
 
 			// Get time scale from ViewportPanel (0.0 when paused, 1.0 when playing)
 			float timeScale = 1.0f;
@@ -555,20 +555,20 @@ namespace PAIN {
 
 			// Daytime / Nighttime setting
 			{
-				if (GraphicsSettings::get().daytime) {
+				if (using_day_time) {
 
-					auto olc = LightSources::get().get("world");
+					auto olc = getWorldLight();
 
 					if (!olc) {
 						LightSources::get().create("world");
-						auto olc = LightSources::get().get("world");
-						Light& lc = olc.value();
-						lc.forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-						//lc.position = -lc.forward * 10.f;					// follows camera
-						lc.L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
-						lc.setShadowType(Light::SHADOW_TYPES::MAPPED);
-						lc.type = Light::TYPES::DIRECTIONAL;
+						getWorldLight()->L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
+						getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
+						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
+						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 						GraphicsSettings::get().ibl = true;
+					}
+					else {
+						olc->position = GetActiveCamera()->pos - glm::normalize(olc->forward) * olc->shadow_source_follow_distance;
 					}
 				}
 				else {
@@ -579,12 +579,6 @@ namespace PAIN {
 						GraphicsSettings::get().ibl = false;
 					}
 				}
-			}
-
-			if (GraphicsSettings::get().daytime) {
-				auto olc = LightSources::get().get("world");
-				Light& lc = olc.value();
-				lc.position = GetActiveCamera()->pos - glm::normalize(lc.forward) * lc.shadow_source_follow_distance;
 			}
 		}
 

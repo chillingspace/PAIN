@@ -66,11 +66,13 @@ inline bool DrawAssetSelectorField(
     PAIN::Assets::GUID& guid,
     const PAIN::Editor::Attributes::AssetSelector& attr,
     std::shared_ptr<PAIN::Services> services,
-    bool readonly = false
+    bool readonly = false, std::set<std::string> ext_filter = {}
 ) {
     bool changed = false;
     auto asset_service = services->get<PAIN::Assets::Manager>();
     auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+
+    if (ext_filter.empty()) ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
 
     // Find current selection
     std::string current_name = "None";
@@ -159,6 +161,7 @@ inline bool DrawAssetSelectorField(
         ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
 
         for (auto const& scored : scored_assets) {
+            if (ext_filter.find(std::filesystem::path(scored.display_name).extension().string()) == ext_filter.end()) continue;
             bool is_selected = (guid.IsValid() && scored.asset->guid == guid);
 
             // Highlight matched characters
@@ -207,11 +210,13 @@ inline bool DrawAssetSelectorField(
     std::filesystem::path& path,
     const PAIN::Editor::Attributes::AssetSelector& attr,
     std::shared_ptr<PAIN::Services> services,
-    bool readonly = false
+    bool readonly = false, std::set<std::string> ext_filter = {}
 ) {
     bool changed = false;
     auto asset_service = services->get<PAIN::Assets::Manager>();
     auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+
+    if (ext_filter.empty()) ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
 
     // Find current selection
     std::string current_name = "None";
@@ -302,6 +307,7 @@ inline bool DrawAssetSelectorField(
         ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
 
         for (auto const& scored : scored_assets) {
+            if (ext_filter.find(std::filesystem::path(scored.display_name).extension().string()) == ext_filter.end()) continue;
             bool is_selected = (!path.empty() && scored.asset->main_relative_path == path);
 
             // Highlight matched characters

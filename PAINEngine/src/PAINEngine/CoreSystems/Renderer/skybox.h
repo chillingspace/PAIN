@@ -48,8 +48,8 @@ namespace PAIN {
 
 		void renderQuad();
 
-
 	public:
+
 		static Skybox& get() {
 			static Skybox instance;
 			return instance;

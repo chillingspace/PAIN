@@ -90,6 +90,17 @@ namespace PAIN {
 	}
 
 	void Skybox::convertEquirectangularToCubemap() {
+
+		// ========================================
+		// SET CORRECT RENDER STATE FOR CONVERSION
+		// ========================================
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);  // CRITICAL: Enable depth writes
+
+		glDisable(GL_BLEND);  // CRITICAL: Disable blending
+		glDisable(GL_CULL_FACE);  // We're inside the cube
+
 		glGenTextures(1, &cubemap_tex);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
@@ -189,7 +200,7 @@ namespace PAIN {
 		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
-		//glDeleteTextures(1, &skybox_tex); // delete the original HDR
+
 	}
 
 	void Skybox::init(const std::shared_ptr<Services>& s) {
@@ -238,12 +249,21 @@ namespace PAIN {
 	void Skybox::setTexture(Assets::GUID const& id) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(id);
 		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-		convertEquirectangularToCubemap();
+
+		// Clean up old resources
+		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
+		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
+		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
+		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
 
 		// generate IBL textures
+		convertEquirectangularToCubemap();
 		generateIrradianceMap();
 		generatePrefilterMap();
 		generateBRDFLUT();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -254,12 +274,21 @@ namespace PAIN {
 	void Skybox::setTexture(const std::filesystem::path& skybox_path) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
 		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-		convertEquirectangularToCubemap();
 
-		// generate IBL textures
+		// Clean up old resources
+		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
+		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
+		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
+		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
+
+		//generate IBL textures
+		convertEquirectangularToCubemap();
 		generateIrradianceMap();
 		generatePrefilterMap();
 		generateBRDFLUT();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
