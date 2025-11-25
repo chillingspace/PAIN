@@ -191,12 +191,10 @@ namespace PAIN {
             // Move forward/backward directly in camera forward direction
             if (W_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos += offset;
             }
             if (S_KEYDOWN) {
                 glm::vec3 offset = camera->forward * camera->speed * dt;
-                offset.y = 0;
                 camera->pos -= offset;
             }
             if (A_KEYDOWN) {
