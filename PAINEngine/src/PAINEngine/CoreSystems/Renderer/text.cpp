@@ -129,7 +129,8 @@ namespace PAIN {
 
     void TextRenderer::renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
     {
-        if (text_comp.shadow_color.a == 0.f || (text_comp.shadow_offset.x == 0.f && text_comp.shadow_offset.y == 0.f))
+        if (text_comp.shadow_color.a == 0.f ||
+            (text_comp.shadow_offset.x == 0.f && text_comp.shadow_offset.y == 0.f))
             return;
 
         float font_size = text_comp.font_size;
@@ -138,9 +139,41 @@ namespace PAIN {
         float width = ch.size.x * font_size;
         float height = ch.size.y * font_size;
 
+        // Main shadow offset
         float shadow_x = x_pos + text_comp.shadow_offset.x;
         float shadow_y = y_pos + text_comp.shadow_offset.y;
 
+        // For a soft shadow, render in a 3x3 grid with faded alpha
+        float base_alpha = text_comp.shadow_color.a;
+        for (int dx = -1; dx <= 1; ++dx)
+            for (int dy = -1; dy <= 1; ++dy)
+            {
+                // Skip center (would overlap the glyph)
+                if (dx == 0 && dy == 0) continue;
+
+                float fade = (dx == 0 || dy == 0) ? 0.6f : 0.3f; // less alpha farther out
+                glm::vec4 faded = text_comp.shadow_color;
+                faded.a *= fade * base_alpha;
+
+                shader->SetUniform("textColor", glm::vec3(faded));
+                float o_x = shadow_x + dx * 1.5f; // 1.5f = extra blur/spread
+                float o_y = shadow_y + dy * 1.5f;
+                float vertices[6][4] = {
+                    { o_x, o_y + height, 0.0f, 0.0f },
+                    { o_x, o_y, 0.0f, 1.0f },
+                    { o_x + width, o_y, 1.0f, 1.0f },
+                    { o_x, o_y + height, 0.0f, 0.0f },
+                    { o_x + width, o_y, 1.0f, 1.0f },
+                    { o_x + width, o_y + height, 1.0f, 0.0f }
+                };
+                glBindTexture(GL_TEXTURE_2D, ch.tex);
+                glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+
+        // Also draw the "main" shadow, full alpha, at the intended offset:
         shader->SetUniform("textColor", glm::vec3(text_comp.shadow_color));
         float vertices[6][4] = {
             { shadow_x, shadow_y + height, 0.0f, 0.0f },
@@ -156,6 +189,8 @@ namespace PAIN {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
+
+
 
     void TextRenderer::renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
     {
