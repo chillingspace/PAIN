@@ -19,13 +19,9 @@ registerKeyUp("KEY_L", function() moveLeft = false end)
 registerKeyUp("KEY_R", function() moveRight = false end)
 
 local speed = 4.0
-
--- jump
-local verticalVel   = 0.0
-local gravity       = -18.0 -- units/sec^2 
-local jumpSpeed     = 8.0 -- initial jump vel
-local isGrounded    = true
-local groundY       = nil -- will be set from initial position
+local jumpSpeed = 5.0 
+local isGrounded = true
+local groundY = nil -- will be set from initial position
 
 local I = nil -- will be hooked to _G.Input once PlayerState has created it
 
@@ -66,14 +62,16 @@ registerUpdate(function(dt)
         return
     end
 
-    local x, y, z = getPosition(id)
-
+    -- read current transform and vel from physics
+    local x, y, z = getPosition(id) 
     if groundY == nil then
         groundY = y
     elseif isGrounded and math.abs(y - groundY) > 0.01 then -- if player gets teleported to a new floor/checkpoint
         groundY = y 
     end
+    local curr_vx, curr_vy, curr_vz = getVelocity(id)
 
+    -- input -> movement
     local dx, dz = 0.0, 0.0
 
     -- 1. PC: Arrow keys (KEY_U/D/L/R)
@@ -93,8 +91,7 @@ registerUpdate(function(dt)
 
     if isMoving then
         if not walkingSoundPlaying and audioPlay then
-            -- optional: ensure it loops
-            if audioSetLooping then audioSetLooping(id, true) end
+            if audioSetLooping then audioSetLooping(id, true) end 
             audioPlay(id)
             walkingSoundPlaying = true
         end
@@ -150,34 +147,27 @@ registerUpdate(function(dt)
         currentYaw = newYaw
     end
 
-    -- start a jump only when on the ground
+    -- ground check based on physics
+    local groundedEpsPos = 0.05
+    local groundedEpsVel = 0.1
+    isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
+
+    -- jump, modify vertical vel -> physics handle gravity
     local doubleTapJump = (I and I.doubleTapped) or false
     if (jumpPressed or doubleTapJump) and isGrounded then
-        verticalVel = jumpSpeed
+        curr_vy = jumpSpeed  
         isGrounded = false
 
-
+        -- consume jump
         jumpPressed = false
         if I then
             I.doubleTapped = false
         end
     end
 
-    -- apply gravity if in the air
-    if not isGrounded then
-        verticalVel = verticalVel + gravity * dt
-        y = y + verticalVel * dt
-
-        -- simple ground collision with a flat plane at groundY
-        if y <= groundY then
-            y = groundY
-            verticalVel = 0.0
-            isGrounded = true
-        end
-    end
-
+    -- apply rotation and phy velocity
     setRotation(id, baseRx, currentYaw, baseRz)
-    local curr_vx, curr_vy, curr_vz = getVelocity(id)
-
     setVelocity(id, vx, curr_vy, vz)
+
+    jumpPressed = false
 end)
