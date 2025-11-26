@@ -41,10 +41,66 @@ public:
 
     const BVH& getBVH() const { return m_bvh; }
 
+
+    // Query for collisions with layer filtering
+    std::vector<entt::entity> queryAABB(
+        const AABB& queryBox,
+        entt::registry& registry,
+        int queryLayerID = -1  // -1 = ignore layers
+    );
+
+    // Raycast with layer filtering
+    struct RaycastHit {
+        entt::entity entity = entt::null;
+        glm::vec3 point;
+        glm::vec3 normal;
+        float distance = std::numeric_limits<float>::max();
+        int layer = 0;
+    };
+
+    std::optional<RaycastHit> raycast(
+        const glm::vec3& origin,
+        const glm::vec3& direction,
+        float maxDistance,
+        entt::registry& registry,
+        int layerMask = -1  // -1 = all layers
+    );
+
 private:
+    // Track scene state
+    size_t m_lastEntityCount = 0;
+    bool m_needsFullRebuild = true;
+
+    // Track which entities are in BVH
+    std::unordered_set<entt::entity> m_trackedEntities;
     BVH m_bvh;
+    std::unordered_set<entt::entity> m_currentFrameEntities;
+    std::vector<std::pair<entt::entity, AABB>> m_bvhItems;
+
     // Helper to compute AABB from model vertices
     AABB calculateLocalAABB(const std::shared_ptr<Assets::Model>& model);
+
+    // Check if collision should happen based on layers
+    bool shouldCollide(
+        entt::entity entityA,
+        entt::entity entityB
+    );
+
+    bool rayAABBIntersect(
+        const glm::vec3& origin,
+        const glm::vec3& direction,
+        const AABB& aabb,
+        float& tMin,
+        float& tMax
+    );
+
+    glm::vec3 calculateAABBNormal(const AABB& aabb, const glm::vec3& point);
+
+    // Detect all collisions with layer filtering
+    std::vector<std::pair<entt::entity, entt::entity>> detectCollisions(
+        entt::registry& registry
+    );
+
 };
 
 } // namespace PAIN

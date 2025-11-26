@@ -624,19 +624,14 @@ namespace PAIN {
                         // Row 2: Layer info
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
-                        // Selected layer details (only if valid)
-                        if (selectedLayerIdx_ < layers.size()) {
-                            auto& selectedLayer = layers[selectedLayerIdx_];
-
-                            ImGui::Text("ID");
-                            ImGui::SameLine();
-                            ImGui::SetNextItemWidth(65);
-                            if (ImGui::InputInt("##LayerID", &selectedLayer.id, 1, 100, ImGuiInputTextFlags_ElideLeft)) {
-                                // Validate ID range
-                                if (selectedLayer.id < 0) selectedLayer.id = 0;
-                                if (selectedLayer.id > 31) selectedLayer.id = 31;
-                                selectedLayer.mask = 1 << selectedLayer.id;
-                            }
+                        ImGui::Text("ID");
+                        ImGui::SameLine();
+                        ImGui::SetNextItemWidth(65);
+                        if (ImGui::InputInt("##LayerID", &layer.id, 1, 100, ImGuiInputTextFlags_ElideLeft)) {
+                            // Validate ID range
+                            if (layer.id < 0) layer.id = 0;
+                            if (layer.id > 31) layer.id = 31;
+                            layer.mask = 1 << layer.id;
                         }
                         ImGui::SameLine(125);
                         ImGui::Text("Mask: 0x%08X", layer.mask);

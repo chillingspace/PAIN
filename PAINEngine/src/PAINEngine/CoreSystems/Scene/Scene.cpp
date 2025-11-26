@@ -728,6 +728,7 @@ namespace PAIN {
 			unloadScene();
 		}
 
+#ifdef _DEBUG
 		void SceneManager::deleteScene(Assets::GUID const& id) {
 
 			//Get asset manager
@@ -740,6 +741,7 @@ namespace PAIN {
 			//Delete file
 			assetManager->removeFile(id);
 		}
+#endif
 
 		void SceneManager::saveActiveScene(Assets::GUID const& scn_id, std::string const& name) {
 
