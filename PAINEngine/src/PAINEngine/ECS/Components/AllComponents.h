@@ -57,6 +57,7 @@ namespace PAIN {
         UICanvas,
         UIAnimation,
         UIText,
+        UIFollowsWorldEntity,
         // AI
         //AI::Blackboard,
         AI::Controller,
@@ -101,6 +102,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, UICanvas>) return "UICanvas";
         else if constexpr (std::is_same_v<T, UIAnimation>) return "UIAnimation";
         else if constexpr (std::is_same_v<T, UIText>) return "UIText";
+        else if constexpr (std::is_same_v<T, UIFollowsWorldEntity>) return "UIFollowsWorldEntity";
         // AI components
         //else if constexpr (std::is_same_v<T, AI::Blackboard>) return "AIBlackboard";
         else if constexpr (std::is_same_v<T, AI::Controller>) return "AIController";

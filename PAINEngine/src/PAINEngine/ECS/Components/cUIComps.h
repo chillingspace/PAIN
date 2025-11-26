@@ -130,6 +130,11 @@ namespace PAIN {
 		float wrap_width = 0;
 	};
 
+	struct UIFollowsWorldEntity {
+		std::string entity_target_string;
+		glm::vec3 world_offset; 
+	};
+
 }
 
 #endif
@@ -234,3 +239,10 @@ REFL_FIELD(wrap_width)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);
+
+REFL_TYPE(PAIN::UIFollowsWorldEntity)
+REFL_FIELD(entity_target_string)
+REFL_FIELD(world_offset)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::UIFollowsWorldEntity>);

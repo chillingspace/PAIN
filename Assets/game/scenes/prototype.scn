@@ -1,8 +1,160 @@
 {
-    "active_cam_id": "",
-    "dirty": false,
+    "camera": {
+        "aspectRatioH": 9.0,
+        "aspectRatioW": 16.0,
+        "farPlane": 100.0,
+        "forward": [
+            -0.11223310232162476,
+            -0.5105429291725159,
+            -0.8524962067604065
+        ],
+        "fov": 90.0,
+        "nearPlane": 0.10000000149011612,
+        "position": [
+            0.40571483969688416,
+            0.2870022654533386,
+            0.8937503099441528
+        ],
+        "up": [
+            0.0,
+            1.0,
+            0.0
+        ]
+    },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "5f4c99c0-a37a-4f45-8fc4-368d719a4056",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "BoxLabel"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_string": "Robot",
+                            "world_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        },
+                        "UIText": {
+                            "alignment": 1,
+                            "color": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "display_text": "Press E",
+                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
+                            "font_size": 1.0,
+                            "line_height": 1.0,
+                            "max_length": 0,
+                            "outline_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "outline_thickness": 0.0,
+                            "rich_text": false,
+                            "shadow_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "shadow_offset": [
+                                0.0,
+                                0.0
+                            ],
+                            "text_pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "word_wrap": true,
+                            "wrap_width": 1000.0
+                        }
+                    },
+                    "Name": "BoxLabel"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -70,43 +222,6 @@
                                     "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
                                 }
                             ]
-                        },
-                        "UIText": {
-                            "alignment": 2,
-                            "color": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "display_text": "GameStart",
-                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
-                            "font_size": 2.0,
-                            "line_height": 4.0,
-                            "max_length": 0,
-                            "outline_color": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "outline_thickness": 1.0,
-                            "rich_text": false,
-                            "shadow_color": [
-                                0.8549019694328308,
-                                0.1921568661928177,
-                                0.1921568661928177,
-                                0.003921568859368563
-                            ],
-                            "shadow_offset": [
-                                -5.0,
-                                -2.0
-                            ],
-                            "text_pos": [
-                                32.0,
-                                32.0
-                            ],
-                            "word_wrap": true,
-                            "wrap_width": 0.0
                         }
                     },
                     "Name": "game manager"
@@ -132,14 +247,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    -3.4954395294189453,
-                                    1.4990003108978271,
-                                    2.148688316345215
+                                    -3.3230948448181152,
+                                    1.500491976737976,
+                                    1.9636746644973755
                                 ],
                                 "min": [
-                                    -5.50859260559082,
-                                    -0.5010005235671997,
-                                    0.13553526997566223
+                                    -5.347178936004639,
+                                    -0.5014773607254028,
+                                    -0.05848312005400658
                                 ]
                             }
                         },
@@ -153,15 +268,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -4.502016067504883,
-                                0.4989998936653137,
-                                1.1421117782592773
+                                -4.335136890411377,
+                                0.49950727820396423,
+                                0.9525957703590393
                             ],
                             "rotation": [
-                                6.904834037868568e-08,
-                                0.0032990784384310246,
-                                1.3433076162527868e-07,
-                                0.9999945759773254
+                                5.349596904125065e-06,
+                                0.005562395788729191,
+                                0.0004899019259028137,
+                                0.9999843835830688
                             ],
                             "scale": [
                                 1.0,
@@ -2636,26 +2751,118 @@
                     },
                     "Name": "ContainerRed"
                 }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "5f4c99c0-a37a-4f45-8fc4-368d719a4056"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "ui_canvas"
+                        },
+                        "UICanvas": {
+                            "b_face_camera": true,
+                            "render_mode": 0,
+                            "sort_order": 0,
+                            "world_scale": 0.0010000000474974513
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "ui_canvas"
+                }
             }
         ]
     },
-    "grid_id": 0,
-    "layers": [],
-    "mask_matrix": [],
-    "meta_tags": [],
-    "metadata_service": {
-        "groups": null,
-        "registered_tags": [
-            "Enemy",
-            "Environment",
-            "Player",
-            "Untagged",
-            "enemy_patrol_end",
-            "enemy_patrol_start",
-            "hiding_spot",
-            "letter_carried",
-            "letter_collectible",
-            "letter_collection"
+    "environment": {
+        "cameraLightIntensity": [
+            0.009999999776482582,
+            0.009999999776482582,
+            0.009999999776482582
+        ],
+        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "useDaytime": true,
+        "worldLightIntensity": [
+            1.5,
+            1.5,
+            1.5
         ]
-    }
+    },
+    "layers": [],
+    "mask_matrix": []
 }
