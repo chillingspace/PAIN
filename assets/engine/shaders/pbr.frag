@@ -290,55 +290,10 @@ void main() {
     if (material.debugging_geometry > 0.5) {
         color = material.color;
     }
+
+    vec3 emission = texture(gEmission, TexCoords).rgb;
+    color += emission;
     
     // color = color / (color + vec3(1.0)); // Reinhard
     FragColor = vec4(color, 1.0);
 }
-
-
-// void main() {
-//     // vec3 vFragPosViewSpace = (u_V * vec4(vFragPos, 1.0)).xyz;
-//     // vec3 vNormalViewSpace = mat3(u_V) * normalize(vNormal);
-    
-//     // vec3 color = microfacetModel(vFragPosViewSpace, vNormalViewSpace);
-//     // FragColor = vec4(color, 1.0);
-
-//     vec3 fragPos = texture(gPos, TexCoords).rgb;
-//     material.color = texture(gCol, TexCoords).rgb;
-//     vec3 normal = texture(gNorm, TexCoords).rgb;
-//     vec3 m = texture(gMaterial, TexCoords).rgb;
-
-//     material.rough = m.r;
-//     material.metal = m.g;
-//     material.alwaysLit = m.b;
-
-//     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
-//     vec3 viewNormal = mat3(u_V) * normalize(normal);
-
-//     vec3 color = vec3(0);
-
-//     if (material.alwaysLit == 0.0) {
-//         color = material.color * u_AmbientLight;
-//         for (int i=0; i < int(u_NumLights); i++) {
-//             vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
-
-//             if (u_Lights[i].shadowMapIdx > -0.5) {
-//                 // light has shadow map
-//                 float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);   // in range [0,1]
-//                 float light_intensity = 1.0 - shadow_intensity;                 // in range [0,1]
-//                 light_contrib *= light_intensity;
-//             }
-
-//             color += light_contrib;
-//         }
-//     }
-//     else {
-//         color = material.color;
-//     }
-//     FragColor = vec4(color, 1.0);
-
-//     // FragColor = vec4(u_NumShadowMaps, u_NumShadowMaps, u_NumShadowMaps, 1.0);
-//     // FragColor = vec4(1, 0, 0, 1);
-
-//     // FragColor = vec4(material.alwaysLit, material.alwaysLit, material.alwaysLit, 1.0);
-// }

@@ -637,94 +637,97 @@ namespace PAIN {
 			//Check material asset
 			if (materialAsset) {
 
-				//Albedo Texture
-				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+				{
+					//Albedo Texture
+					std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-				if (tex_opt.has_value() && gs.DEBUG_USE_DIFFUSE_MAP) {
-					albedoTexture = tex_opt.value()->gl_texture;
+					if (tex_opt.has_value() && gs.DEBUG_USE_DIFFUSE_MAP) {
+						albedoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Normal texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_NORMAL_MAP) {
+						normalTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Metallic texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						metallicTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Roughness texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						roughnessTexture = tex_opt.value()->gl_texture;
+					}
+
+					//AO texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_AO_MAP) {
+						aoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Emissive texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_EMISSION_MAP) {
+						emissiveTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Height texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+					if (tex_opt.has_value()) {
+						heightTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Opacity texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+					if (tex_opt.has_value()) {
+						opacityTexture = tex_opt.value()->gl_texture;
+					}
+
+
+					// Use override or asset default
+					glm::vec3 baseColor = material->useOverrides
+						? material->baseColorOverride
+						: materialAsset->baseColor;
+
+					float metallic = material->useOverrides
+						? material->metallicOverride
+						: materialAsset->metallic;
+
+					float roughness = material->useOverrides
+						? material->roughnessOverride
+						: materialAsset->roughness;
+
+					geometry_shader->SetUniform("material.rough", roughness);
+					geometry_shader->SetUniform("material.metal", metallic);
+					geometry_shader->SetUniform("material.color", baseColor);
 				}
-
-				//Normal texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
-
-				if (tex_opt.has_value() && gs.DEBUG_USE_NORMAL_MAP) {
-					normalTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Metallic texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
-
-				if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
-					metallicTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Roughness texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
-
-				if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
-					roughnessTexture = tex_opt.value()->gl_texture;
-				}
-
-				//AO texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
-
-				if (tex_opt.has_value() && gs.DEBUG_USE_AO_MAP) {
-					aoTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Emissive texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
-
-				if (tex_opt.has_value() && gs.DEBUG_USE_EMISSION_MAP) {
-					emissiveTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Height texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
-
-				if (tex_opt.has_value()) {
-					heightTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Opacity texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
-
-				if (tex_opt.has_value()) {
-					opacityTexture = tex_opt.value()->gl_texture;
-				}
-
-				// Use override or asset default
-				glm::vec3 baseColor = material->useOverrides
-					? material->baseColorOverride
-					: materialAsset->baseColor;
-
-				float metallic = material->useOverrides
-					? material->metallicOverride
-					: materialAsset->metallic;
-
-				float roughness = material->useOverrides
-					? material->roughnessOverride
-					: materialAsset->roughness;
-
-				geometry_shader->SetUniform("material.rough", roughness);
-				geometry_shader->SetUniform("material.metal", metallic);
-				geometry_shader->SetUniform("material.color", baseColor);
 			}
 
 			// Bind textures from MaterialInstance
@@ -757,7 +760,7 @@ namespace PAIN {
 
 			glActiveTexture(GL_TEXTURE9);
 			glBindTexture(GL_TEXTURE_2D, roughnessTexture);
-			geometry_shader->SetUniform("material.roughnessmetallic_map",9 );
+			geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
 
 			if (gs.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
 				glActiveTexture(GL_TEXTURE10);
@@ -810,7 +813,7 @@ namespace PAIN {
 
 					if (GraphicsSettings::get().interpolate_animation) {
 						auto next_key_it = std::next(key_it);
-						if (next_key_it != track.end()) {							
+						if (next_key_it != track.end()) {
 							// interpolate between current keyframe pose and next keyframe pose
 							const float t = (component.animationTime - key_it->time) / (next_key_it->time - key_it->time);
 							const glm::vec3 i_scale = glm::mix(key_it->scale, next_key_it->scale, t);
