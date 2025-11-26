@@ -22,6 +22,8 @@
 #include "Systems/UI/sysUILayout.h"
 #include "Systems/UI/sysUIInput.h"
 #include "Systems/UI/sysUIAnimation.h"
+#include "ECS/Components/AllComponents.h"
+
 namespace PAIN {
     namespace ECS {
         /*****************************************************************//**
