@@ -9,8 +9,8 @@
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
-#include "ECS/Components/AllComponents.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
 
@@ -44,7 +44,7 @@ namespace PAIN {
 
                 // ---- Transform ----
                 registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",
-                    [this](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
+                    [&](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
                         static struct {
                             entt::entity entity = entt::null;
                             LocalTransform original_transform;
@@ -104,7 +104,7 @@ namespace PAIN {
 
                                 // Mark dirty
                                 if (transformSystem) {
-                                    transformSystem->markDirty(selected, ecs->getRegistry());
+                                    transformSystem->markDirty(selected, ecs->getRegistry(currentRegistryID));
                                 }
                             }
                         }
@@ -128,8 +128,11 @@ namespace PAIN {
                                     entity_name = metadata->getEntityName(entity);
                                 }
 
+                                //Create temp registry id
+                                auto registr_id = currentRegistryID;
+
                                 command_manager->executeAction(Action{
-                                    [ecs, entity, final_transform, transformSystem]() {
+                                    [ecs, entity, final_transform, transformSystem, registr_id]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
@@ -137,11 +140,11 @@ namespace PAIN {
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
-                                    [ecs, entity, old_transform, transformSystem]() {
+                                    [ecs, entity, old_transform, transformSystem, registr_id]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
@@ -149,7 +152,7 @@ namespace PAIN {
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
@@ -400,7 +403,7 @@ namespace PAIN {
                         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
                         // Get ECS registry and metadata service
-                        auto& registry = ecs->getRegistry();
+                        auto& registry = ecs->getRegistry(currentRegistryID);
                         auto metadata_service = panel.services->get<MetaData::Service>();
 
                         // --- Dropdown for selecting world_target entity ---
@@ -1083,7 +1086,7 @@ namespace PAIN {
                 std::string entity_name;
                 auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
                 if (!name_comp_opt.has_value()) {
-                    entity_name = services->get<ECS::Controller>()->getRegistry().emplace<Entity::Name>(selected).name;
+                    entity_name = services->get<ECS::Controller>()->getRegistry(currentRegistryID).emplace<Entity::Name>(selected).name;
 
                 }
                 else {
@@ -1172,17 +1175,17 @@ namespace PAIN {
                                     std::function<void(entt::entity)> propogate_layer_tag = [&](entt::entity entity) {
 
                                         //Mark world transform as dirty
-                                        if (auto* layer = controller->getRegistry().try_get<Entity::Layer>(entity)) {
+                                        if (auto* layer = controller->getRegistry(currentRegistryID).try_get<Entity::Layer>(entity)) {
                                             layer->layer_id = i;
                                             layer->layer_mask = 1 << i;
                                             layer->layerName = layers[i].name;
                                         }
 
                                         //Get hierarchy and propagate to children if exists
-                                        if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(entity)) {
+                                        if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(entity)) {
                                             for (const auto& childGUID : hierarchy->childrenGUIDs) {
                                                 entt::entity child = controller->getGUIDRegistry().resolveGUID(childGUID);
-                                                if (child != entt::null && controller->getRegistry().valid(child)) {
+                                                if (child != entt::null && controller->getRegistry(currentRegistryID).valid(child)) {
                                                     propogate_layer_tag(child);
                                                 }
                                             }
@@ -1191,12 +1194,12 @@ namespace PAIN {
 
                                     //Root entity
                                     entt::entity root_entity = selected;
-                                    if (auto* id = controller->getRegistry().try_get<Entity::GUID>(root_entity)) {
+                                    if (auto* id = controller->getRegistry(currentRegistryID).try_get<Entity::GUID>(root_entity)) {
                                         Assets::GUID root_id = id->guid;
 
                                         //Identify absolute root
                                         while (root_id.IsValid()) {
-                                            if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(root_entity)) {
+                                            if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(root_entity)) {
                                                 root_entity = controller->resolveGUID(root_id);
                                                 root_id = hierarchy->parentGUID;
                                             }

@@ -29,10 +29,10 @@ namespace PAIN {
             PAIN::Assets::Manager* assets,
             //PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
-            PAIN::Scene::SceneManager* scene,
-            PAIN::Serialization::Service* ser)
+            PAIN::Scene::SceneManager* scene)
+            //PAIN::Serialization::Service* ser)
             : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
-              fs_(fs), scene_(scene), ser_(ser)
+              fs_(fs), scene_(scene)
         {
             //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
             //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);

@@ -393,18 +393,41 @@ namespace PAIN {
     /* =========================================================================== */
     /*                           Scene / System state                              */
     /* =========================================================================== */
+
     bool EngineAPIAdapter::ChangeScene(std::string name) {
-        if (!ser_) {
-            PN_CORE_WARN("[EngineAPI] Serialization::Service is null.");
+        if (!scene_ || !assets_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager or Assets::Manager; cannot change scene '{}'", name);
             return false;
         }
 
-        if (!ser_->loadSceneById(name)) {
-            PN_CORE_WARN("[EngineAPI] Failed to load scene: {}", name);
+        // Invalid default
+        PAIN::Assets::GUID targetGuid; 
+
+        // Get asset metadata
+        auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
+
+        for (const auto& info : sceneInfos) {
+            if (info->name == name) {     
+                // e.g "prototype.scn"
+                targetGuid = info->guid;
+                break;
+            }
+        }
+
+        if (!targetGuid.IsValid()) {
+            PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
+
+            for (const auto& info : sceneInfos) {
+                PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
+            }
+
             return false;
         }
 
-        PN_CORE_INFO("[EngineAPI] Loaded scene {}", name);
+        PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
+            name, targetGuid.ToString());
+
+        scene_->loadScene(targetGuid);
         return true;
     }
 
