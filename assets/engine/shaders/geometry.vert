@@ -13,10 +13,14 @@ layout(location=3) in vec4 aBoneIndices;       // the indices of the bones that 
 layout(location=4) in vec4 aBoneWeights;        // how much effect does this bone have on this vertex.
 // in this case, there are a max of 4 bones that can affect a vertex. all 4 bones must add up to 1
 
+// normal map stuff
+layout(location=5) in vec3 aTangent;
+layout(location=6) in vec3 aBitangent;
 
 layout(location = 0) out vec3 vNormal;
 layout(location = 1) out vec3 vFragPos;
 layout(location = 2) out vec2 vTexCoords;
+layout(location = 3) out mat3 TBN;
 
 layout(location = 0) uniform mat4 u_M;
 layout(location = 1) uniform mat4 u_V;
@@ -67,4 +71,9 @@ void main() {
 
     mat4 MVP = u_P * u_V * u_M;
     gl_Position = MVP * localPos;
+
+    vec3 T = normalize(vec3(u_M * vec4(aTangent, 0.0)));
+    vec3 B = normalize(vec3(u_M * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(u_M * vec4(aNormal, 0.0)));
+    TBN = mat3(T, B, N);
 }

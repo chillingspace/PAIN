@@ -383,6 +383,14 @@ namespace PAIN {
 			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
 			glEnableVertexAttribArray(4);
 
+			// tangent
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, tangent));
+			glEnableVertexAttribArray(5);
+
+			// bitangent
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
+			glEnableVertexAttribArray(6);
+
 			// Unbind VAO
 			glBindVertexArray(0);
 		}
