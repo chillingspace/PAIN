@@ -50,7 +50,13 @@ void main() {
     gNorm = normalize(vNormal);
     // gMaterial = vec3(material.rough, material.metal, material.alwaysLit);
     gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < 6 ? 1.0 : 0.0);
-    gEmission = texture(material.emission_map, vTexCoords).rgb;
+
+    if (material.use_emission > 0.5) {
+        gEmission = texture(material.emission_map, vTexCoords).rgb;
+    }
+    else {
+        gEmission = vec3(0.0, 0.0, 0.0);
+    }
 
     // 6 onwards is IBL stuff
     if (dbg > 0 && dbg < 6) {

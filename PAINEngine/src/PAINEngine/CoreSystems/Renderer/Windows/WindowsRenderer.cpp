@@ -732,21 +732,44 @@ namespace PAIN {
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
 			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
 
-			if (hasTexture) {
+			if (hasTexture && gs.DEBUG_USE_DIFFUSE_MAP) {
 				glActiveTexture(GL_TEXTURE6);
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
-
-				if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
-					glActiveTexture(GL_TEXTURE7);
-					glBindTexture(GL_TEXTURE_2D, aoTexture);
-					geometry_shader->SetUniform("material.ao_map", 7);
-					geometry_shader->SetUniform("material.use_ao", 1.0f);
-				}
-				else {
-					geometry_shader->SetUniform("material.use_ao", 0.0f);
-				}
 			}
+			else {
+				geometry_shader->SetUniform("material.useTex", 0.f);
+			}
+
+			if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, aoTexture);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.0f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.0f);
+			}
+
+			glActiveTexture(GL_TEXTURE8);
+			glBindTexture(GL_TEXTURE_2D, normalTexture);
+			geometry_shader->SetUniform("material.normal_map", 8);
+
+			glActiveTexture(GL_TEXTURE9);
+			glBindTexture(GL_TEXTURE_2D, roughnessTexture);
+			geometry_shader->SetUniform("material.roughnessmetallic_map",9 );
+
+			if (gs.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, emissiveTexture);
+				geometry_shader->SetUniform("material.use_emission", 1.f);
+				geometry_shader->SetUniform("material.emission_map", 10);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_emission", 0.f);
+			}
+
+
 
 			// animation
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
