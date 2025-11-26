@@ -118,7 +118,7 @@ namespace PAIN {
 
             for (auto&& [entity, follows, rect] : view_floating.each()) {
 
-                // Entity here is invalid !!!!!!!!!!!!!!!!!!!~
+                // Entity here is invalid !!!!!!!!!!!!!!!!!!!
                 auto ent_opt = metadata_service->getEntityByName(follows.entity_target_string);
 
                 if (!ent_opt) continue;

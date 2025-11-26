@@ -217,6 +217,40 @@ namespace PAIN {
                             }
                         }
                     });
+
+                // ---- Texture2D ----
+                registerCompUIFunc<PAIN::Texture2D>("Texture2D",
+                    [this](ComponentsPanel& panel, PAIN::Texture2D& texture_comp) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Texture",
+                            texture_comp.texture_guid,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                            panel.services)) {
+                            changed = true;
+                        }
+
+                        changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // Rendering Options
+                        if (ImGui::CollapsingHeader("Rendering Options")) {
+                            ImGui::Indent(10.0f);
+                            changed |= ImGui::Checkbox("Visible", &texture_comp.b_visible);
+                            ImGui::Unindent(10.0f);
+                        }
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    });
                 
                 // UItext comp ui
                 registerCompUIFunc<PAIN::UIText>("UIText",

@@ -1319,19 +1319,25 @@ namespace PAIN {
 
 			// render 2D textures onto screen
 			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path texture_path = "engine/textures/sunshine.png";
-#else	
-				std::filesystem::path texture_path = "engine\\textures\\sunshine.png";
-#endif
-				// !TODO: add queue and iterate through all 2D textures to be rendered last
-				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if (texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, { 0.85f, -0.85f }, 0.1f);
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after Render2DTexture in PostProcessPass: {}", err);
+				auto ecs = services->get<ECS::Controller>();
+				auto& registry = ecs->getRegistry();
+
+				auto texture_entity_view = registry.view<Texture2D, LocalTransform>();
+				for (auto&& [entity, texture_comp, trans_comp] : texture_entity_view.each()) {
+					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
+					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
+
+					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value()) continue;
+
+					auto& texture_comp = texture_comp_opt.value().get();
+					auto& transform_comp = transform_comp_opt.value().get();
+
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
+					if (!texture_opt.has_value()) continue;
+
+					if (texture_comp.b_visible) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
+
+				}
 			}
 
 			// render text onto screen
@@ -1339,17 +1345,23 @@ namespace PAIN {
 				auto ecs = services->get<ECS::Controller>();
 				auto& registry = ecs->getRegistry();
 
-				auto text_entity_view = registry.view<UIText>();
-				for (auto entity : text_entity_view) {
+				auto text_entity_view = registry.view<UIText, UIElement>();
+				for (auto&& [entity, text_comp, elem_comp] : text_entity_view.each()) {
 					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
-					if (!text_comp_opt.has_value()) continue;
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+
+					if (!text_comp_opt.has_value() || elem_comp_opt.has_value()) continue;
+
 					auto& text_comp = text_comp_opt.value().get();
+					auto& elem_comp = elem_comp_opt.value().get();
 
 					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+
 					if (!font_opt.has_value()) continue;
 
-					TextRenderer::get().renderText(text_comp);
-					TextRenderer::get().debugRenderQuad();
+					if (elem_comp.b_is_enabled) { TextRenderer::get().renderText(text_comp); }
+
+					//TextRenderer::get().debugRenderQuad();
 				}
 			}
 

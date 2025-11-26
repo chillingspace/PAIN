@@ -318,6 +318,7 @@ namespace PAIN {
             registerComponent<LocalTransform>("LocalTransform");
             registerComponent<WorldTransform>("WorldTransform");
             registerComponent<ModelRenderer>("ModelRenderer");
+            registerComponent<Texture2D>("Texture2D");
             registerComponent<Lighting>("Lighting");
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collider");
