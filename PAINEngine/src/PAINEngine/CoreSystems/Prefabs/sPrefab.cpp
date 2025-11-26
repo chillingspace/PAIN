@@ -49,7 +49,6 @@ namespace PAIN {
             }
         }
 
-
         nlohmann::json Service::serializeEntity(entt::entity entity, const entt::registry& registry) {
             nlohmann::json entityJson;
             // Serialize GUID at top-level
@@ -224,12 +223,15 @@ namespace PAIN {
 
         entt::entity Service::instantiateEntity(
             const nlohmann::json& entityData,
-            entt::registry& registry,
+            ECS::RegistryID const& registry_id,
             const std::unordered_map<Assets::GUID, Assets::GUID>& guidRemap,
             Assets::GUID prefabGUID,
             Assets::GUID instanceRootGUID
         ) {
+
+            //Get controllers and registry
             auto ecs_controller = services.lock()->get<ECS::Controller>();
+            entt::registry& registry = ecs_controller->getRegistry(registry_id);
 
             // ========================================
             // 1. VALIDATE INPUT DATA
@@ -263,7 +265,7 @@ namespace PAIN {
             // ========================================
             // 3. CREATE ENTITY
             // ========================================
-            auto entity = ecs_controller->createEntity(newGUID);
+            auto entity = ecs_controller->createEntity(newGUID, registry_id);
 
             if (entity == entt::null) {
                 PN_CORE_ERROR("Failed to create entity!");
@@ -390,8 +392,11 @@ namespace PAIN {
             return isValid;
         }
 
-        entt::entity Service::instantiatePrefab(const Assets::GUID& prefab_asset_id, entt::registry& registry, const glm::vec3& position) {
+        entt::entity Service::instantiatePrefab(const Assets::GUID& prefab_asset_id, ECS::RegistryID const& registry_id, const glm::vec3& position) {
             PN_CORE_INFO("=== INSTANTIATING PREFAB ===");
+
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
 
             // ========================================
             // 1. LOAD PREFAB ASSET
@@ -461,7 +466,7 @@ namespace PAIN {
 
                     auto entity = instantiateEntity(
                         entityJson,
-                        registry,
+                        registry_id,
                         guidRemap,
                         prefab_asset_id,
                         instanceRootGUID
@@ -551,5 +556,63 @@ namespace PAIN {
             }
             return result;
         }
+
+        void Service::updateAllInstances(const Assets::GUID& prefabGUID, entt::registry& registry, bool preserveOverrides) {
+            PN_CORE_INFO("[PrefabService] Updating all instances of prefab: {}", prefabGUID.ToString());
+            auto instances = getInstancesOfPrefab(prefabGUID, registry);
+
+            for (auto instanceEntity : instances) {
+                updateSingleInstance(instanceEntity, registry, preserveOverrides);
+            }
+            PN_CORE_INFO("[PrefabService] Updated {} instances", instances.size());
+        }
+        
+        void Service::updateSingleInstance(entt::entity instanceRoot, entt::registry& registry, bool preserveOverrides) {
+            if (!registry.all_of<PrefabInstance>(instanceRoot)) {
+                PN_CORE_WARN("[PrefabService] Entity is not a prefab instance");
+                return;
+            }
+            auto& prefabInst = registry.get<PrefabInstance>(instanceRoot);
+            auto savedOverrides = prefabInst.componentOverrides; // Backup overrides
+            // Get fresh prefab data
+            auto asset_service = services.lock()->get<Assets::Manager>();
+            auto prefabAssetOpt = asset_service->getAsset<PrefabAsset>(prefabInst.sourcePrefabGUID);
+            if (!prefabAssetOpt.has_value()) {
+                PN_CORE_ERROR("[PrefabService] Source prefab not found: {}",
+                    prefabInst.sourcePrefabGUID.ToString());
+                return;
+            }
+            auto prefabAsset = prefabAssetOpt.value();
+            // Find corresponding entity data in prefab
+            nlohmann::json* entityData = nullptr;
+            for (auto& entJson : prefabAsset->entities) {
+                Assets::GUID entGUID(entJson["entityGUID"].get<std::string>());
+                if (entGUID == prefabInst.correspondingPrefabEntityGUID) {
+                    entityData = &entJson;
+                    break;
+                }
+            }
+            if (!entityData || !entityData->contains("components")) {
+                PN_CORE_ERROR("[PrefabService] Could not find entity data in prefab");
+                return;
+            }
+            auto ecs_controller = services.lock()->get<ECS::Controller>();
+            // Apply fresh prefab component data
+            ecs_controller->loadAllComponentsFromJson(instanceRoot, (*entityData)["components"]);
+            // Re-apply overrides if requested
+            if (preserveOverrides && !savedOverrides.empty()) {
+                for (const auto& [componentName, overrideData] : savedOverrides) {
+                    // Check if component still exists
+                    if (ecs_controller->hasComponentByName(instanceRoot, componentName)) {
+                        ecs_controller->loadAllComponentsFromJson(instanceRoot, overrideData);
+                    }
+                }
+
+                // Restore overrides map
+                prefabInst.componentOverrides = savedOverrides;
+            }
+            PN_CORE_INFO("[PrefabService] Updated instance: {}", static_cast<uint32_t>(instanceRoot));
+        }
+
 	}
 }

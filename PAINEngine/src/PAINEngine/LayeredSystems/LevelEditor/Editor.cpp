@@ -13,6 +13,7 @@
 #include "Panels/ViewportPanel.h"
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
+#include "Panels/PrefabsPanel.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -73,6 +74,7 @@ namespace PAIN {
             //Register resource panel
 #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
+            registerPanel(std::make_shared<Panel::PrefabPanel>());
 #endif
             
             // Call onAttach on all registered panels

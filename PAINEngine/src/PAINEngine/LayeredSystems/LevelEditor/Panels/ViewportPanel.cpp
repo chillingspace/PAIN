@@ -487,7 +487,7 @@ namespace PAIN {
 						// Only create drag-drop target if mouse NOT over cube rect to avoid blocking cube's mouse events
 						if (!isPointInsideRect(ImGui::GetMousePos(), cubeRectMin, cubeRectMax)) {
 							ImGui::SetCursorScreenPos(viewportPos);
-							ImGui::InvisibleButton("##ViewportDropZone", size);
+							if(size.x != 0 && size.y != 0) ImGui::InvisibleButton("##ViewportDropZone", size);
 
 							auto filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Material);
 							if (ImGui::BeginDragDropTarget()) {
