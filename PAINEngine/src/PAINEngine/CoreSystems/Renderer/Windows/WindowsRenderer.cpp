@@ -758,9 +758,15 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, normalTexture);
 			geometry_shader->SetUniform("material.normal_map", 8);
 
-			glActiveTexture(GL_TEXTURE9);
-			glBindTexture(GL_TEXTURE_2D, roughnessTexture);
-			geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+			if (gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, roughnessTexture);
+				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
+			}
 
 			if (gs.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
 				glActiveTexture(GL_TEXTURE10);
