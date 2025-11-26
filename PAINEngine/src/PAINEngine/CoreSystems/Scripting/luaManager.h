@@ -6,6 +6,7 @@
 #include <optional>
 #include <queue>
 #include "PAINEngine/CoreSystems/Events/Event.h"
+#include "PAINEngine/CoreSystems/Scene/sCameraController.h"
 #include "PAINEngine/ECS/System/ISystem.h"
 #include <entt/entity/entity.hpp>
 #include "PAINEngine/CoreSystems/Path/Path.h"

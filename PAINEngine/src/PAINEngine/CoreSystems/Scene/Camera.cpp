@@ -1,5 +1,6 @@
-
+#include "pch.h"
 #include "Camera.h"
+
 namespace PAIN {
 
 	glm::mat4 Camera::model() const

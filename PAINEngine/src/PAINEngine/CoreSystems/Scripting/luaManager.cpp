@@ -519,6 +519,28 @@ namespace PAIN {
             api_->SetRotation(entityId, { x, y, z });
             });
 
+        lua_.set_function("getMobileMoveAxes", []() {
+            return std::make_tuple(
+                PAIN::g_MobileMoveAxes.x,
+                PAIN::g_MobileMoveAxes.y
+            );
+            });
+
+        lua_.set_function("getMobileLookDelta", []() { // PC: (0,0), Android: rightside drag since last frame
+            float dx = PAIN::g_MobileLookDelta.dx;
+            float dy = PAIN::g_MobileLookDelta.dy;
+            // consume for this frame
+            PAIN::g_MobileLookDelta.dx = 0.f;
+            PAIN::g_MobileLookDelta.dy = 0.f;
+            return std::make_tuple(dx, dy);
+            });
+
+        #ifdef __ANDROID__
+                lua_.set_function("isAndroid", []() { return true; });
+        #else
+                lua_.set_function("isAndroid", []() { return false; });
+        #endif
+
 
         /* =========================================================================== */
         /*                                  Physics                                    */
