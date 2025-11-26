@@ -115,8 +115,34 @@ namespace PAIN {
             void SetGameCamera();
             void ChangeGameCamera(std::string cam_name);
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
-            std::vector<Layer>& getLayers() { return layers; }
-            std::vector<std::vector<bool>>& getMaskMatrix() { return mask_matrix; }
+            // Get current scene layers
+            const std::vector<Scene::Layer>& getLayers() const {
+                return layers;
+            }
+
+            // Get mutable reference for editor
+            std::vector<Scene::Layer>& getLayers() {
+                return layers;
+            }
+
+            // Get mask matrix
+            const std::vector<std::vector<bool>>& getMaskMatrix() const {
+                return mask_matrix;
+            }
+
+            // Get mutable reference for editor
+            std::vector<std::vector<bool>>& getMaskMatrix() {
+                return mask_matrix;
+            }
+
+            // Check if two layers can interact
+            bool canLayersInteract(int layer1, int layer2) const {
+                if (layer1 < 0 || layer2 < 0) return true;  // Invalid = allow
+                if (layer1 >= mask_matrix.size()) return true;
+                if (layer2 >= mask_matrix[layer1].size()) return true;
+
+                return mask_matrix[layer1][layer2];
+            }
         };
 	}
 

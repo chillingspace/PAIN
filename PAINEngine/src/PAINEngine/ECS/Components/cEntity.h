@@ -42,6 +42,11 @@ namespace PAIN {
             // Optional: Store scene layer name for debugging
             std::string layerName = "Default";
 
+            // Check if this layer can interact with another layer
+            bool canInteractWith(uint32_t otherLayerMask) const {
+                return (layer_mask & otherLayerMask) != 0;
+            }
+
             //Serialization flag
             static constexpr bool ShouldSerialize = true;
         };

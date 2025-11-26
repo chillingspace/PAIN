@@ -63,7 +63,7 @@ namespace PAIN {
 
                                 // Optional: Add default model
                                 if (scene) {
-                                    auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                    auto models = services->get<Assets::Manager>()->getAllAssetDataOfType(Assets::Type::Model);
                                     if (!models.empty()) {
                                         auto asset_service = services->get<Assets::Manager>();
 
