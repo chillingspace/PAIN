@@ -194,10 +194,10 @@ namespace PAIN {
 				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-				GraphicsSettings::get().ibl = true;
+				// GraphicsSettings::get().ibl = true;
 			}
 			else {
-				GraphicsSettings::get().ibl = false;
+				// GraphicsSettings::get().ibl = false;
 			}
 
 			//Load Skybox GUID

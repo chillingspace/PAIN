@@ -126,7 +126,7 @@ namespace PAIN {
                         }
 
                         // Daytime Toggle
-                        if (ImGui::Checkbox("Daytime", &gfx.daytime)) {}
+                        if (ImGui::Checkbox("Daytime", &gfx.sunlight)) {}
                         
                         // Draw Floor
                         if (ImGui::Checkbox("Draw Floor", &gfx.draw_floor)) {}
@@ -137,7 +137,7 @@ namespace PAIN {
                         ImGui::Separator();
 
                         // Ambient Occlusion toggle
-                        if (ImGui::Checkbox("Ambient Occlusion", &gfx.ao)) {}
+                        if (ImGui::Checkbox("Ambient Occlusion", &gfx.DEBUG_USE_AO_MAP)) {}
 
                         // Blur Quality slider (integer)
                         if (ImGui::SliderInt("Blur Quality", &gfx.blur_quality, 2, 10)) {}
