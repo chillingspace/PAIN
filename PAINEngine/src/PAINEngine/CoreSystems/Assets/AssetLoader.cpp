@@ -941,6 +941,13 @@ namespace PAIN {
                     if (layerJson.contains("mask")) layer.mask = layerJson["mask"].get<int>();
                     if (layerJson.contains("enabled")) layer.enabled = layerJson["enabled"].get<bool>();
                     if (layerJson.contains("name")) layer.name = layerJson["name"].get<std::string>();
+                    if (layerJson.contains("color") && layerJson["color"].is_array() && layerJson["color"].size() >= 3) {
+                        layer.color = glm::vec3(
+                            layerJson["color"][0].get<float>(),
+                            layerJson["color"][1].get<float>(),
+                            layerJson["color"][2].get<float>()
+                        );
+                    }
                     sceneAsset->layers.push_back(layer);
                 }
             }

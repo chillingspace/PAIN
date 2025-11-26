@@ -4,9 +4,9 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.26039832830429077,
-            -0.6929636001586914,
-            -0.672305166721344
+            -0.41716140508651733,
+            -0.5999341011047363,
+            -0.6826825141906738
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
@@ -163,8 +163,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -263,8 +263,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -343,14 +343,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    2.4458258152008057,
-                                    1.7107356786727905,
-                                    0.36521297693252563
+                                    2.3676440715789795,
+                                    1.6937519311904907,
+                                    0.36598914861679077
                                 ],
                                 "min": [
-                                    -0.2414391040802002,
-                                    -0.9453327655792236,
-                                    -1.5247409343719482
+                                    -0.28222915530204773,
+                                    -0.8905047178268433,
+                                    -1.5258104801177979
                                 ]
                             }
                         },
@@ -389,15 +389,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.9559434652328491,
-                                0.4994831085205078,
-                                -0.5822455883026123
+                                0.8834909200668335,
+                                0.4999983310699463,
+                                -0.582286536693573
                             ],
                             "rotation": [
-                                -0.3066188097000122,
-                                0.6371694207191467,
-                                0.3066188097000122,
-                                0.6371694207191467
+                                0.34428274631500244,
+                                -0.6177928447723389,
+                                -0.34449493885040283,
+                                -0.617353081703186
                             ],
                             "scale": [
                                 1.0,
@@ -614,8 +614,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1018,8 +1018,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1428,8 +1428,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1534,8 +1534,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1640,8 +1640,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1724,12 +1724,22 @@
     },
     "layers": [
         {
+            "color": [
+                1.0,
+                1.0,
+                1.0
+            ],
             "enabled": true,
             "id": 0,
             "mask": 1,
             "name": "Layer 0"
         },
         {
+            "color": [
+                1.0,
+                0.1764705777168274,
+                0.1764705777168274
+            ],
             "enabled": false,
             "id": 1,
             "mask": 2,
