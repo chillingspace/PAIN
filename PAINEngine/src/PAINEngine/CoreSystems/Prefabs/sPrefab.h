@@ -25,6 +25,11 @@ namespace PAIN {
             std::unordered_map<Assets::GUID, Assets::GUID> createGUIDRemapTable(std::vector<nlohmann::json> entities);
             entt::entity instantiateEntity(const nlohmann::json& entityData, entt::registry& registry, const std::unordered_map<Assets::GUID, Assets::GUID>& guidRemap, Assets::GUID prefabGUID, Assets::GUID instanceRootGUID);
 
+            // Validate that all referenced GUIDs are in the remap
+            bool validateGUIDRemap(
+                const std::vector<nlohmann::json>& entities,
+                const std::unordered_map<Assets::GUID, Assets::GUID>& guidRemap
+            );
         public:
 
             //Create service

@@ -167,7 +167,7 @@ namespace PAIN {
 
 			// Helper method to find entity at mouse position - IMPROVED VERSION
 			entt::entity ViewportPanel::findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize) {
-				auto scene = services->get<Scene>();
+				auto scene = services->get<Scene::SceneManager>();
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 
@@ -256,7 +256,7 @@ namespace PAIN {
 
 			// ImGuizmo picking logic
 			void ViewportPanel::performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize) {
-				auto scene = services->get<Scene>();
+				auto scene = services->get<Scene::SceneManager>();
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 
@@ -273,7 +273,7 @@ namespace PAIN {
 			void ViewportPanel::handleMaterialDrop(File* materialFile,
 				ImVec2 localMousePos,
 				ImVec2 viewportSize) {
-				auto scene = services->get<Scene>();
+				auto scene = services->get<Scene::SceneManager>();
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 				auto assetService = services->get<Assets::Manager>();
@@ -332,7 +332,7 @@ namespace PAIN {
 					ImGuizmo::BeginFrame();
 
 					auto editor = services->get<PAIN::Editor::Editor>();
-					auto scene = services->get<Scene>();
+					auto scene = services->get<Scene::SceneManager>();
 					auto ecs = services->get<ECS::Controller>();
 
 					// Toolbar

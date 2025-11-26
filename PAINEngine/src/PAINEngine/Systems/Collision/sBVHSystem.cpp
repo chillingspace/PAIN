@@ -57,101 +57,402 @@ namespace PAIN {
         return localAABB;
     }
 
-    // Implementation of the system's main update logic
-    void sBVHSystem::onUpdate(AppTiming timing, entt::registry& registry)
-    {
-         // Get required services
-         auto sceneService = getServices()->get<Scene>();
-          if (!sceneService) {
-             PN_CORE_WARN("Scene service not found in BVH System. Cannot process meshes.");
-             return;
-         }
+    // CoreSystems/BVH/sBVHSystem.cpp
 
-        // --- Phase 1: Update World AABBs and Collect Items ---
-        std::vector<std::pair<entt::entity, AABB>> bvhItems;
-        
-        // Estimate reservation based on the number of entities with a Transform component
-        bvhItems.reserve(registry.storage<WorldTransform>().size());
+    std::vector<entt::entity> sBVHSystem::queryAABB(
+        const AABB& queryBox,
+        entt::registry& registry,
+        int queryLayerID
+    ) {
+        std::vector<entt::entity> results;
 
-        // Create a view for entities having a Transform component
-        auto view = registry.view<WorldTransform>();
-
-        for (auto entity : view) {
-             auto& transform = view.get<WorldTransform>(entity); // Get transform component
-             BoundingVolume* bvComponent = registry.try_get<BoundingVolume>(entity); // Try to get existing BV component
-
-             // If no BV component, try to create one from ModelRenderer
-             if (!bvComponent) {
-                 auto* modelRenderer = registry.try_get<ModelRenderer>(entity);
-                 if (modelRenderer) { // Check if ModelRenderer mesh_id
-                     auto model_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->modelGUID);
-                     if (model_opt.has_value()) { // Check if model was found
-                        // Add cBoundingVolume component to the entity
-                        bvComponent = &registry.emplace<BoundingVolume>(entity);
-                        
-                        // Calculate local AABB from the model's vertices
-                        bvComponent->localAABB = calculateLocalAABB(model_opt.value());
-                        
-                        bvComponent->needsUpdate = true; // Mark for world AABB update
-                     } else {
-                         // Mesh ID mesh_id but mesh not loaded/cached, skip entity
-                         continue;
-                     }
-                 } else {
-                     // Entity has transform but no BV or ModelRenderer, skip it
-                     continue;
-                 }
-             }
-
-            // Simple update trigger: assume transform changed every frame
-            bool transformChanged = true;
-            if (transformChanged) {
-                 bvComponent->needsUpdate = true;
-            }
-
-            // Recalculate world AABB if marked for update
-            if (bvComponent->needsUpdate) {
-                glm::mat4 worldMatrix = transform.matrix;
-                // Transform the local AABB to world space
-                bvComponent->worldAABB = bvComponent->localAABB.transform(worldMatrix);
-                bvComponent->needsUpdate = false; // Reset flag
-            }
-
-             // Add entity and its world AABB to the list for the BVH build input
-             bvhItems.push_back({entity, bvComponent->worldAABB});
+        if (!m_bvh.isBuilt()) {
+            PN_CORE_WARN("BVH not built - cannot query");
+            return results;
         }
 
+        // Get scene layers
+        auto serialization = getServices()->get<Serialization::Service>();
+        auto scnManager = getServices()->get<Scene::SceneManager>();
 
-        // --- Phase 2: Rebuild the BVH Tree ---
-         m_bvh.build(bvhItems);
+        // Recursive query function
+        std::function<void(int)> queryNode = [&](int nodeIndex) {
+            if (nodeIndex < 0 || nodeIndex >= m_bvh.getNodes().size()) {
+                return;
+            }
 
-         // --- Phase 3: Update BVH Node Indices in Components ---
-         const auto& nodes = m_bvh.getNodes();
-         for(int i = 0; i < nodes.size(); ++i) { // Iterate all nodes in the pool
-             const auto& node = nodes[i];
-             // Check if it's an active leaf node associated with a valid entity
-             if (node.isLeaf() && node.height != -1 && registry.valid(node.entity)) {
-                 // Update the bvhNodeIndex in the entity's component
-                 if (auto* bvComp = registry.try_get<BoundingVolume>(node.entity)) {
-                     bvComp->bvhNodeIndex = i; // Store the index of this leaf node
-                 }
-             }
-         }
-         // Clear indices for components whose entities were not included in the last build
-         auto bvView = registry.view<BoundingVolume>();
-         for (auto entity : bvView) {
-             bool foundInBvhItems = false;
-             for(const auto& item : bvhItems) { // Check if the entity was part of the build input
-                 if (item.first == entity) {
-                     foundInBvhItems = true;
-                     break;
-                 }
-             }
-             if (!foundInBvhItems) { // Reset index if entity wasn't processed
-                 bvView.get<BoundingVolume>(entity).bvhNodeIndex = -1;
-             }
-         }
-    } // End of onUpdate
+            const auto& node = m_bvh.getNodes()[nodeIndex];
+
+            // Check if query box intersects this node
+            if (!queryBox.intersects(node.aabb)) {
+                return;  // No intersection - prune this branch
+            }
+
+            // Leaf node - check entity
+            if (node.isLeaf()) {
+                if (!registry.valid(node.entity)) {
+                    return;
+                }
+
+                // Layer filtering
+                if (queryLayerID != -1) {
+                    auto* entityLayer = registry.try_get<Entity::Layer>(node.entity);
+                    if (entityLayer) {
+                        // Check if layers can collide
+                        if (!scnManager->canLayersInteract(queryLayerID, entityLayer->layer_id)) {
+                            return;  // Layers cannot collide - skip
+                        }
+                    }
+                }
+
+                // Check precise AABB intersection
+                auto* bv = registry.try_get<BoundingVolume>(node.entity);
+                if (bv && queryBox.intersects(bv->worldAABB)) {
+                    results.push_back(node.entity);
+                }
+
+                return;
+            }
+
+            // Internal node - recurse to children
+            if (node.child1Index != -1) {
+                queryNode(node.child1Index);
+            }
+            if (node.child2Index != -1) {
+                queryNode(node.child2Index);
+            }
+            };
+
+        // Start query from root
+        queryNode(m_bvh.getRootIndex());
+
+        return results;
+    }
+
+    bool sBVHSystem::shouldCollide(
+        entt::entity entityA,
+        entt::entity entityB
+    ) {
+        auto controller = getServices()->get<ECS::Controller>();
+        if (!controller) return true;
+
+        auto& registry = controller->getRegistry();
+
+        // Get layer components
+        auto layerA = registry.try_get<Entity::Layer>(entityA);
+        auto layerB = registry.try_get<Entity::Layer>(entityB);
+
+        // No layer component = default layer (always collide)
+        if (!layerA || !layerB) return true;
+
+        // Get scene manager
+        auto sceneManager = getServices()->get<Scene::SceneManager>();
+        if (!sceneManager) return true;
+
+        const auto& layers = sceneManager->getLayers();
+
+        // Check if layers exist and are enabled
+        if (layerA->layer_id < layers.size() && !layers[layerA->layer_id].enabled) {
+            return false;
+        }
+        if (layerB->layer_id < layers.size() && !layers[layerB->layer_id].enabled) {
+            return false;
+        }
+
+        // Check collision matrix
+        return sceneManager->canLayersInteract(layerA->layer_id, layerB->layer_id);
+    }
+
+    std::optional<sBVHSystem::RaycastHit> sBVHSystem::raycast(
+        const glm::vec3& origin,
+        const glm::vec3& direction,
+        float maxDistance,
+        entt::registry& registry,
+        int layerMask
+    ) {
+        if (!m_bvh.isBuilt()) {
+            return std::nullopt;
+        }
+
+        RaycastHit closestHit;
+        closestHit.distance = maxDistance;
+
+        glm::vec3 rayDir = glm::normalize(direction);
+
+        // Recursive raycast function
+        std::function<void(int)> raycastNode = [&](int nodeIndex) {
+            if (nodeIndex < 0 || nodeIndex >= m_bvh.getNodes().size()) {
+                return;
+            }
+
+            const auto& node = m_bvh.getNodes()[nodeIndex];
+
+            // Ray-AABB intersection test
+            float tMin, tMax;
+            if (!rayAABBIntersect(origin, rayDir, node.aabb, tMin, tMax)) {
+                return;  // Ray doesn't hit this node
+            }
+
+            if (tMin > closestHit.distance) {
+                return;  // Already found closer hit
+            }
+
+            // Leaf node - check entity
+            if (node.isLeaf()) {
+                if (!registry.valid(node.entity)) {
+                    return;
+                }
+
+                // Layer filtering
+                auto* entityLayer = registry.try_get<Entity::Layer>(node.entity);
+                if (entityLayer && layerMask != -1) {
+                    // Check if layer is in mask
+                    if ((layerMask & entityLayer->layer_mask) == 0) {
+                        return;  // Layer not in mask - skip
+                    }
+                }
+
+                // Get entity's AABB
+                auto* bv = registry.try_get<BoundingVolume>(node.entity);
+                if (!bv) return;
+
+                // Precise ray-AABB intersection
+                float t;
+                if (rayAABBIntersect(origin, rayDir, bv->worldAABB, tMin, tMax)) {
+                    if (tMin >= 0 && tMin < closestHit.distance) {
+                        closestHit.entity = node.entity;
+                        closestHit.distance = tMin;
+                        closestHit.point = origin + rayDir * tMin;
+                        closestHit.normal = calculateAABBNormal(bv->worldAABB, closestHit.point);
+                        closestHit.layer = entityLayer ? entityLayer->layer_id : 0;
+                    }
+                }
+
+                return;
+            }
+
+            // Internal node - recurse to children
+            if (node.child1Index != -1) {
+                raycastNode(node.child1Index);
+            }
+            if (node.child2Index != -1) {
+                raycastNode(node.child2Index);
+            }
+            };
+
+        raycastNode(m_bvh.getRootIndex());
+
+        if (closestHit.entity != entt::null) {
+            return closestHit;
+        }
+
+        return std::nullopt;
+    }
+
+    // Helper: Ray-AABB intersection
+    bool sBVHSystem::rayAABBIntersect(
+        const glm::vec3& origin,
+        const glm::vec3& direction,
+        const AABB& aabb,
+        float& tMin,
+        float& tMax
+    ) {
+        tMin = 0.0f;
+        tMax = std::numeric_limits<float>::max();
+
+        for (int i = 0; i < 3; ++i) {
+            if (std::abs(direction[i]) < 1e-6f) {
+                // Ray is parallel to slab
+                if (origin[i] < aabb.min[i] || origin[i] > aabb.max[i]) {
+                    return false;
+                }
+            }
+            else {
+                // Compute intersection with slab
+                float invD = 1.0f / direction[i];
+                float t0 = (aabb.min[i] - origin[i]) * invD;
+                float t1 = (aabb.max[i] - origin[i]) * invD;
+
+                if (t0 > t1) std::swap(t0, t1);
+
+                tMin = std::max(tMin, t0);
+                tMax = std::min(tMax, t1);
+
+                if (tMin > tMax) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // Helper: Calculate normal at AABB hit point
+    glm::vec3 sBVHSystem::calculateAABBNormal(const AABB& aabb, const glm::vec3& point) {
+        const float epsilon = 0.001f;
+
+        // Check which face was hit
+        if (std::abs(point.x - aabb.min.x) < epsilon) return glm::vec3(-1, 0, 0);
+        if (std::abs(point.x - aabb.max.x) < epsilon) return glm::vec3(1, 0, 0);
+        if (std::abs(point.y - aabb.min.y) < epsilon) return glm::vec3(0, -1, 0);
+        if (std::abs(point.y - aabb.max.y) < epsilon) return glm::vec3(0, 1, 0);
+        if (std::abs(point.z - aabb.min.z) < epsilon) return glm::vec3(0, 0, -1);
+        if (std::abs(point.z - aabb.max.z) < epsilon) return glm::vec3(0, 0, 1);
+
+        return glm::vec3(0, 1, 0);  // Default up
+    }
+
+    std::vector<std::pair<entt::entity, entt::entity>> sBVHSystem::detectCollisions(
+        entt::registry& registry
+    ) {
+        std::vector<std::pair<entt::entity, entt::entity>> collisionPairs;
+
+        if (!m_bvh.isBuilt()) {
+            return collisionPairs;
+        }
+
+        // Get all entities with bounding volumes
+        auto view = registry.view<BoundingVolume>();
+
+        for (auto entityA : view) {
+            // Query BVH for potential collisions
+            const auto& bvA = view.get<BoundingVolume>(entityA);
+            auto potentialCollisions = queryAABB(bvA.worldAABB, registry, -1);
+
+            for (auto entityB : potentialCollisions) {
+                // Skip self-collision
+                if (entityA == entityB) continue;
+
+                // Check if already in pair (avoid duplicates)
+                if (entityA > entityB) continue;
+
+                // Layer-based filtering
+                if (!shouldCollide(entityA, entityB)) {
+                    continue;
+                }
+
+                // Check actual AABB intersection
+                auto* bvB = registry.try_get<BoundingVolume>(entityB);
+                if (bvB && bvA.worldAABB.intersects(bvB->worldAABB)) {
+                    collisionPairs.push_back({ entityA, entityB });
+                }
+            }
+        }
+
+        return collisionPairs;
+    }
+
+    void sBVHSystem::onUpdate(AppTiming timing, entt::registry& registry) {
+        auto sceneService = getServices()->get<Scene::SceneManager>();
+        if (!sceneService) return;
+        // Reuse allocations (Fix #1)
+        m_currentFrameEntities.clear();
+        m_bvhItems.clear();
+
+        bool anyEntityMoved = false;
+        int aabbUpdateCount = 0;
+
+        // Single-pass entity processing with better cache locality (Fix #4)
+        auto bvView = registry.view<WorldTransform, BoundingVolume>();
+
+        for (auto [entity, transform, bvComponent] : bvView.each()) {
+
+            m_currentFrameEntities.insert(entity);
+
+            // Update AABB if transform dirty (Fix #5)
+            if (bvComponent.needsUpdate) {
+                AABB newWorldAABB = bvComponent.localAABB.transform(transform.matrix);
+
+                if (!(bvComponent.worldAABB == newWorldAABB)) {
+                    bvComponent.worldAABB = newWorldAABB;
+                    aabbUpdateCount++;
+                    anyEntityMoved = true;
+
+                    // Incremental update if possible
+                    if (m_bvh.isBuilt() &&
+                        !m_needsFullRebuild &&
+                        bvComponent.bvhNodeIndex != -1) {
+                        m_bvh.updateLeaf(bvComponent.bvhNodeIndex, bvComponent.worldAABB);
+                    }
+                }
+
+                bvComponent.needsUpdate = false;
+            }
+
+            m_bvhItems.push_back({ entity, bvComponent.worldAABB });
+        }
+
+        // Separate pass for new entities (Fix #6)
+        auto needsBVView = registry.view<WorldTransform, ModelRenderer>(entt::exclude<BoundingVolume>);
+
+        for (auto [entity, transform, modelRenderer] : needsBVView.each()) {
+
+            // Early validation (Fix #6)
+            if (!modelRenderer.modelGUID.IsValid()) continue;
+
+            auto model_opt = getServices()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer.modelGUID);
+            if (!model_opt.has_value() || model_opt.value()->vertices.empty()) continue;
+
+            // Create BV component
+            auto& bvComponent = registry.emplace<BoundingVolume>(entity);
+            bvComponent.localAABB = calculateLocalAABB(model_opt.value());
+            bvComponent.worldAABB = bvComponent.localAABB.transform(transform.matrix);
+            bvComponent.needsUpdate = false;
+            bvComponent.bvhNodeIndex = -1;
+
+            m_currentFrameEntities.insert(entity);
+            m_bvhItems.push_back({ entity, bvComponent.worldAABB });
+
+            // Incremental insert (Fix #2)
+            if (m_bvh.isBuilt() && m_bvhItems.size() < m_lastEntityCount * 1.2) {
+                bvComponent.bvhNodeIndex = m_bvh.insertLeaf(entity, bvComponent.worldAABB);
+            }
+            else {
+                m_needsFullRebuild = true;
+            }
+        }
+
+        // Improved removal detection (Fix #3)
+        std::vector<entt::entity> removedEntities;
+        for (auto trackedEntity : m_trackedEntities) {
+            if (m_currentFrameEntities.find(trackedEntity) == m_currentFrameEntities.end()) {
+                removedEntities.push_back(trackedEntity);
+            }
+        }
+
+        if (!removedEntities.empty()) {
+            if (removedEntities.size() < m_trackedEntities.size() * 0.05) {
+                // Incremental removal (Fix #2)
+                for (auto entity : removedEntities) {
+                    auto* bv = registry.try_get<BoundingVolume>(entity);
+                    if (bv && bv->bvhNodeIndex != -1) {
+                        m_bvh.removeLeaf(bv->bvhNodeIndex);
+                    }
+                }
+            }
+            else {
+                m_needsFullRebuild = true;
+            }
+        }
+
+        m_trackedEntities = std::move(m_currentFrameEntities);
+
+        // Rebuild only if necessary (Fix #2, #8)
+        if (m_needsFullRebuild || !m_bvh.isBuilt()) {
+            PN_CORE_INFO("BVH full rebuild: {} items", m_bvhItems.size());
+
+            auto rebuildStart = std::chrono::high_resolution_clock::now();
+            m_bvh.build(m_bvhItems);
+            auto rebuildEnd = std::chrono::high_resolution_clock::now();
+
+            auto rebuildTime = std::chrono::duration_cast<std::chrono::microseconds>(rebuildEnd - rebuildStart).count();
+            PN_CORE_INFO("BVH rebuild complete: {} μs", rebuildTime);
+
+            m_needsFullRebuild = false;
+            m_lastEntityCount = m_bvhItems.size();
+        }
+    }
+
 
     // Implementation for event handling
     void sBVHSystem::onEvent(Event::Event& e)

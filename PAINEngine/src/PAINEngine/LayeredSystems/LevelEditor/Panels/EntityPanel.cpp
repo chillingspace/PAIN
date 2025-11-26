@@ -51,7 +51,7 @@ namespace PAIN {
                         command_manager->executeAction(Action{
                             [this, final_name]() {
                                 auto ecs = PN_ECS_SERVICE;
-                                auto scene = services->get<Scene>();
+                                auto scene = services->get<Scene::SceneManager>();
 
                                 entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
 
@@ -63,7 +63,7 @@ namespace PAIN {
 
                                 // Optional: Add default model
                                 if (scene) {
-                                    auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                    auto models = services->get<Assets::Manager>()->getAllAssetDataOfType(Assets::Type::Model);
                                     if (!models.empty()) {
                                         auto asset_service = services->get<Assets::Manager>();
 

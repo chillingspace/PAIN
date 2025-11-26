@@ -523,7 +523,7 @@ namespace PAIN {
 #endif
 	}
 
-	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene)
 	{
 		//PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
 
@@ -573,7 +573,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -862,7 +862,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
+	void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene, const LightSources& lights)
 	{
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
@@ -1073,7 +1073,7 @@ namespace PAIN {
 	}
 
 
-	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene)
 	{
 		if (!debug_VAO || !debug_shader) return;
 

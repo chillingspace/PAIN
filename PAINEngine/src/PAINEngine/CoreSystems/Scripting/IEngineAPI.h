@@ -8,6 +8,8 @@
 #include <entt/entity/entity.hpp>
 
 namespace PAIN {
+    namespace Serialization { class Service; }
+
     namespace Event { class Event; } 
     class Camera;
 
@@ -118,7 +120,7 @@ namespace PAIN {
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */
-        virtual void  ChangeScene(std::string name) = 0;
+        virtual bool  ChangeScene(std::string name) = 0;
         virtual void  PauseAllSystems(bool toPause) = 0;
         virtual bool  IsGamePaused() const = 0;
         virtual float GetFps() const = 0;
@@ -171,11 +173,6 @@ namespace PAIN {
         virtual void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
         virtual void SetLightForward(entt::entity entityId, float x, float y, float z) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
-        
-        /* =========================================================================== */
-        /*                                  Scripting                                  */
-        /* =========================================================================== */
-        virtual bool IsScriptActive(entt::entity entityId) = 0; // Check if the entity is valid and has a Scripts component attached
 
     };
 

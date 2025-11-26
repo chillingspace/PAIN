@@ -814,5 +814,174 @@ namespace PAIN {
                 return nullptr;
             }
         }
+
+        std::shared_ptr<Scene::SceneAsset> Loader::ImportScene(std::string const& virtual_path) const {
+            PN_CORE_INFO("[AssetLoader] Loading scene: {}", virtual_path);
+
+            // Check if virtual path has valid extension
+            std::filesystem::path resolved = path_service->resolvePath(virtual_path);
+            if (resolved.extension() != ".scn") {
+                PN_CORE_ERROR("[AssetLoader] Invalid file type: {}", virtual_path);
+                throw std::runtime_error("Invalid file type, expected .scn: " + virtual_path);
+            }
+
+            // Open file stream
+            auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
+            if (!stream || !stream->good()) {
+                PN_CORE_ERROR("[AssetLoader] Failed to open scene file: {}", virtual_path);
+                throw std::runtime_error("Failed to open scene file: " + virtual_path);
+            }
+
+            // Read entire file
+            std::vector<uint8_t> data(stream->size());
+            size_t read = stream->read(data.data(), data.size());
+            if (read != data.size()) {
+                PN_CORE_ERROR("[AssetLoader] Failed to read full scene file: {}", virtual_path);
+                throw std::runtime_error("Failed to read full scene file: " + virtual_path);
+            }
+
+            // Parse JSON
+            nlohmann::json sceneJson;
+            try {
+                std::string jsonString(data.begin(), data.end());
+                sceneJson = nlohmann::json::parse(jsonString);
+            }
+            catch (const nlohmann::json::exception& e) {
+                PN_CORE_ERROR("[AssetLoader] JSON parse error in {}: {}", virtual_path, e.what());
+                throw std::runtime_error("Failed to parse scene JSON: " + std::string(e.what()));
+            }
+
+            // Create SceneAsset
+            auto sceneAsset = std::make_shared<Scene::SceneAsset>();
+
+            // Parse camera settings
+            if (sceneJson.contains("camera")) {
+                auto& cam = sceneJson["camera"];
+
+                if (cam.contains("position") && cam["position"].is_array() && cam["position"].size() >= 3) {
+                    sceneAsset->camera.position = glm::vec3(
+                        cam["position"][0].get<float>(),
+                        cam["position"][1].get<float>(),
+                        cam["position"][2].get<float>()
+                    );
+                }
+
+                if (cam.contains("forward") && cam["forward"].is_array() && cam["forward"].size() >= 3) {
+                    sceneAsset->camera.forward = glm::vec3(
+                        cam["forward"][0].get<float>(),
+                        cam["forward"][1].get<float>(),
+                        cam["forward"][2].get<float>()
+                    );
+                }
+
+                if (cam.contains("up") && cam["up"].is_array() && cam["up"].size() >= 3) {
+                    sceneAsset->camera.up = glm::vec3(
+                        cam["up"][0].get<float>(),
+                        cam["up"][1].get<float>(),
+                        cam["up"][2].get<float>()
+                    );
+                }
+
+                if (cam.contains("fov")) {
+                    sceneAsset->camera.fov = cam["fov"].get<float>();
+                }
+
+                if (cam.contains("nearPlane")) {
+                    sceneAsset->camera.nearPlane = cam["nearPlane"].get<float>();
+                }
+
+                if (cam.contains("farPlane")) {
+                    sceneAsset->camera.farPlane = cam["farPlane"].get<float>();
+                }
+
+                if (cam.contains("aspectRatioW")) {
+                    sceneAsset->camera.aspectRatioW = cam["aspectRatioW"].get<float>();
+                }
+
+                if (cam.contains("aspectRatioH")) {
+                    sceneAsset->camera.aspectRatioH = cam["aspectRatioH"].get<float>();
+                }
+            }
+
+            // Parse environment settings
+            if (sceneJson.contains("environment")) {
+                auto& env = sceneJson["environment"];
+
+                if (env.contains("skyboxGUID")) {
+                    sceneAsset->environment.skyboxGUID = Assets::GUID(env["skyboxGUID"].get<std::string>());
+                }
+
+                if (env.contains("useDaytime")) {
+                    sceneAsset->environment.useDaytime = env["useDaytime"].get<bool>();
+                }
+
+                if (env.contains("cameraLightIntensity") && env["cameraLightIntensity"].is_array() && env["cameraLightIntensity"].size() >= 3) {
+                    sceneAsset->environment.cameraLightIntensity = glm::vec3(
+                        env["cameraLightIntensity"][0].get<float>(),
+                        env["cameraLightIntensity"][1].get<float>(),
+                        env["cameraLightIntensity"][2].get<float>()
+                    );
+                }
+
+                if (env.contains("worldLightIntensity") && env["worldLightIntensity"].is_array() && env["worldLightIntensity"].size() >= 3) {
+                    sceneAsset->environment.worldLightIntensity = glm::vec3(
+                        env["worldLightIntensity"][0].get<float>(),
+                        env["worldLightIntensity"][1].get<float>(),
+                        env["worldLightIntensity"][2].get<float>()
+                    );
+                }
+            }
+
+            // Parse layers
+            if (sceneJson.contains("layers") && sceneJson["layers"].is_array()) {
+                sceneAsset->layers.clear();
+                for (auto& layerJson : sceneJson["layers"]) {
+                    Scene::Layer layer;
+                    if (layerJson.contains("id")) layer.id = layerJson["id"].get<int>();
+                    if (layerJson.contains("mask")) layer.mask = layerJson["mask"].get<int>();
+                    if (layerJson.contains("enabled")) layer.enabled = layerJson["enabled"].get<bool>();
+                    if (layerJson.contains("name")) layer.name = layerJson["name"].get<std::string>();
+                    if (layerJson.contains("color") && layerJson["color"].is_array() && layerJson["color"].size() >= 3) {
+                        layer.color = glm::vec3(
+                            layerJson["color"][0].get<float>(),
+                            layerJson["color"][1].get<float>(),
+                            layerJson["color"][2].get<float>()
+                        );
+                    }
+                    sceneAsset->layers.push_back(layer);
+                }
+            }
+
+            // Parse mask matrix
+            if (sceneJson.contains("mask_matrix") && sceneJson["mask_matrix"].is_array()) {
+                sceneAsset->mask_matrix.clear();
+                for (auto& row : sceneJson["mask_matrix"]) {
+                    std::vector<bool> matrixRow;
+                    for (auto& val : row) {
+                        matrixRow.push_back(val.get<bool>());
+                    }
+                    sceneAsset->mask_matrix.push_back(matrixRow);
+                }
+            }
+
+            // Store entity data as-is (will be parsed by SceneManager)
+            if (sceneJson.contains("ecs")) {
+                sceneAsset->entityData = sceneJson["ecs"];
+            }
+
+            PN_CORE_INFO("[AssetLoader] Successfully loaded scene: {}", virtual_path);
+            PN_CORE_INFO("[AssetLoader] Camera pos: ({}, {}, {})",
+                sceneAsset->camera.position.x,
+                sceneAsset->camera.position.y,
+                sceneAsset->camera.position.z);
+
+            if (!sceneAsset->entityData.empty()) {
+                int entityCount = sceneAsset->entityData.contains("Entities") ?
+                    sceneAsset->entityData["Entities"].size() : 0;
+                PN_CORE_INFO("[AssetLoader] Scene contains {} entities", entityCount);
+            }
+
+            return sceneAsset;
+        }
 	}
 }

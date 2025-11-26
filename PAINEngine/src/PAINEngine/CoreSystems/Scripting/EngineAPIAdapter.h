@@ -14,10 +14,12 @@
 #include "PAINEngine/CoreSystems/Events/Event.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
+#include "CoreSystems/Scene/Scene.h"
+#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
 
-    class Scene;
+    class Scene::SceneManager;
     class Camera;
 
     class EngineAPIAdapter final : public IEngineAPI {
@@ -27,9 +29,10 @@ namespace PAIN {
             PAIN::Assets::Manager* assets,
             //PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
-            PAIN::Scene* scene)
+            PAIN::Scene::SceneManager* scene,
+            PAIN::Serialization::Service* ser)
             : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
-              fs_(fs), scene_(scene)
+              fs_(fs), scene_(scene), ser_(ser)
         {
             //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
             //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);
@@ -122,7 +125,7 @@ namespace PAIN {
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */
-        void  ChangeScene(std::string name) override;
+        bool  ChangeScene(std::string name) override;
         void  PauseAllSystems(bool toPause) override;
         bool  IsGamePaused() const override;
         float GetFps() const override;
@@ -176,11 +179,6 @@ namespace PAIN {
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
         void SetLightForward(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
-        
-        /* =========================================================================== */
-        /*                                  Scripting                                 */
-        /* =========================================================================== */
-        bool IsScriptActive(entt::entity entityId) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());
@@ -207,7 +205,8 @@ namespace PAIN {
         PAIN::MetaData::Service& meta_;
         //PAIN::Audio::Audio* audio_ = nullptr;
         PAIN::Path::Path* fs_ = nullptr;
-        PAIN::Scene* scene_ = nullptr;
+        PAIN::Scene::SceneManager* scene_ = nullptr;
+        PAIN::Serialization::Service* ser_ = nullptr;
         PAIN::Assets::Manager* assets_ = nullptr;
         std::unordered_set<int> keysDown_, mouseDown_;
         std::unordered_set<int> keysPressed_, keysReleased_;

@@ -16,7 +16,7 @@ namespace PAIN {
         void System::onUpdate(AppTiming timing, entt::registry& registry)
         {
             auto audioService = getServices()->get<PAIN::Audio::Audio>();
-            auto scene = getServices()->get<Scene>();
+            auto scene = getServices()->get<Scene::SceneManager>();
             auto pathService = getServices()->get<Path::Path>();
             auto asset_service = getServices()->get<Assets::Manager>();
 

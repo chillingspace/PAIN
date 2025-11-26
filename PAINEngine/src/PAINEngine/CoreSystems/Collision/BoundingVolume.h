@@ -28,6 +28,73 @@ namespace PAIN {
         // Constructor initializer list uses member names directly
         AABB(const glm::vec3& pMin, const glm::vec3& pMax) : min(pMin), max(pMax) {}
 
+        // ========================================
+        // COMPARISON OPERATORS
+        // ========================================
+
+        // Equality operator - checks if two AABBs are identical
+        bool operator==(const AABB& other) const {
+            const float epsilon = 1e-6f;  // Tolerance for floating point comparison
+
+            return glm::all(glm::lessThan(glm::abs(min - other.min), glm::vec3(epsilon))) &&
+                glm::all(glm::lessThan(glm::abs(max - other.max), glm::vec3(epsilon)));
+        }
+
+        // Inequality operator
+        bool operator!=(const AABB& other) const {
+            return !(*this == other);
+        }
+
+        // Less-than operator (for sorting/ordering in containers like std::set, std::map)
+        // Orders by volume, then by center position if volumes are equal
+        bool operator<(const AABB& other) const {
+            float thisVolume = getVolume();
+            float otherVolume = other.getVolume();
+
+            const float epsilon = 1e-6f;
+
+            // Compare by volume first
+            if (std::abs(thisVolume - otherVolume) > epsilon) {
+                return thisVolume < otherVolume;
+            }
+
+            // If volumes are equal, compare by center position
+            glm::vec3 thisCenter = getCenter();
+            glm::vec3 otherCenter = other.getCenter();
+
+            if (std::abs(thisCenter.x - otherCenter.x) > epsilon) {
+                return thisCenter.x < otherCenter.x;
+            }
+            if (std::abs(thisCenter.y - otherCenter.y) > epsilon) {
+                return thisCenter.y < otherCenter.y;
+            }
+            return thisCenter.z < otherCenter.z;
+        }
+
+        // ========================================
+        // HELPER: Get Volume
+        // ========================================
+
+        float getVolume() const {
+            glm::vec3 diff = max - min;
+
+            // Handle degenerate cases
+            const float epsilon = 1e-6f;
+            if (diff.x <= epsilon || diff.y <= epsilon || diff.z <= epsilon) {
+                return 0.0f;
+            }
+
+            return diff.x * diff.y * diff.z;
+        }
+
+        // ========================================
+        // HELPER: Check if AABB is valid
+        // ========================================
+
+        bool isValid() const {
+            return min.x <= max.x && min.y <= max.y && min.z <= max.z;
+        }
+
         // Expand the AABB to include a point
         void expand(const glm::vec3& point) {
             // Use glm::min/max which are safe from macros

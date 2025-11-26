@@ -183,6 +183,12 @@ namespace PAIN {
 							ImGui::Text("%s", text.c_str());
 						}
 					}
+					else if (data.has_value() && data.type() == typeid(std::shared_ptr<std::string>)) {
+						auto str = std::any_cast<std::shared_ptr<std::string>>(data);
+
+						//Show message
+						ImGui::Text("%s", str->c_str());
+					}
 					else {
 						//Show message
 						ImGui::Text("%s", "Hello World!");
