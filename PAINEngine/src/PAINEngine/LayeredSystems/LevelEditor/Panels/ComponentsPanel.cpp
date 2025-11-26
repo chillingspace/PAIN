@@ -1027,7 +1027,7 @@ namespace PAIN {
 
                 ImGui::Spacing();
 
-                //Get ecs constroller
+                //Get ecs controller
                 auto controller = services->get<ECS::Controller>();
                 if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected)) {
                     if (layerCompOpt.has_value()) {
@@ -1040,22 +1040,60 @@ namespace PAIN {
                         const char* currentLayerName = layers[layerComp.get().layer_id].name.c_str();
                         if (ImGui::BeginCombo("Layer", currentLayerName)) {
                             for (size_t i = 0; i < layers.size(); ++i) {
-                                bool selected = (layerComp.get().layer_id == i);
+                                bool i_selected = (layerComp.get().layer_id == i);
 
                                 // Color indicator
                                 ImGui::PushStyleColor(ImGuiCol_Text,
                                     ImVec4(layers[i].color.x, layers[i].color.y,
                                         layers[i].color.z, 1.0f));
 
-                                if (ImGui::Selectable(std::string(layers[i].name + "##" + std::to_string(layers[i].id)).c_str(), selected)) {
-                                    layerComp.get().layer_id = i;
-                                    layerComp.get().layer_mask = 1 << i;
-                                    layerComp.get().layerName = layers[i].name;
+                                if (ImGui::Selectable(std::string(layers[i].name + "##" + std::to_string(layers[i].id)).c_str(), i_selected)) {
+
+                                    //Propogate layer tag
+                                    std::function<void(entt::entity)> propogate_layer_tag = [&](entt::entity entity) {
+
+                                        //Mark world transform as dirty
+                                        if (auto* layer = controller->getRegistry().try_get<Entity::Layer>(entity)) {
+                                            layer->layer_id = i;
+                                            layer->layer_mask = 1 << i;
+                                            layer->layerName = layers[i].name;
+                                        }
+
+                                        //Get hierarchy and propagate to children if exists
+                                        if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(entity)) {
+                                            for (const auto& childGUID : hierarchy->childrenGUIDs) {
+                                                entt::entity child = controller->getGUIDRegistry().resolveGUID(childGUID);
+                                                if (child != entt::null && controller->getRegistry().valid(child)) {
+                                                    propogate_layer_tag(child);
+                                                }
+                                            }
+                                        }
+                                    };
+
+                                    //Root entity
+                                    entt::entity root_entity = selected;
+                                    if (auto* id = controller->getRegistry().try_get<Entity::GUID>(root_entity)) {
+                                        Assets::GUID root_id = id->guid;
+
+                                        //Identify absolute root
+                                        while (root_id.IsValid()) {
+                                            if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(root_entity)) {
+                                                root_entity = controller->resolveGUID(root_id);
+                                                root_id = hierarchy->parentGUID;
+                                            }
+                                            else {
+                                                break;
+                                            }
+                                        }
+
+                                        //Propogate down
+                                        propogate_layer_tag(root_entity);
+                                    }
                                 }
 
                                 ImGui::PopStyleColor();
 
-                                if (selected) {
+                                if (i_selected) {
                                     ImGui::SetItemDefaultFocus();
                                 }
                             }

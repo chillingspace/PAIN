@@ -225,6 +225,7 @@ namespace PAIN {
 
 		void SceneManager::setupLayers(SceneAsset const& scene_asset) {
 			layers = scene_asset.layers;
+			if(layers.empty()) layers.push_back(Layer{ 0, 1, true });
 			mask_matrix = scene_asset.mask_matrix;
 
 			//Get all entities with layers
@@ -344,7 +345,8 @@ namespace PAIN {
 					{"id", layer.id},
 					{"mask", layer.mask},
 					{"enabled", layer.enabled},
-					{"name", layer.name}
+					{"name", layer.name},
+					{"color",  {layer.color.r, layer.color.g, layer.color.b}}
 					});
 			}
 			sceneJson["layers"] = layersJson;
