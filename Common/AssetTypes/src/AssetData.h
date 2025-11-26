@@ -380,6 +380,56 @@ namespace PAIN {
             std::filesystem::path relative_path;
         };
 
+        static std::filesystem::path extractSubfolderPath(Info& asset, std::filesystem::path const& assets_root) {
+            std::error_code ec;
+
+            // Get the directory containing the asset file
+            auto assetDir = std::filesystem::weakly_canonical(
+                asset.raw_path.parent_path(), ec);
+
+            if (ec) {
+                std::cerr << "Could not canonicalize asset directory: " << asset.raw_path.string() << std::endl;
+                return std::filesystem::path();
+            }
+
+            // Check game folders (Prefabs, Scenes, etc.)
+            for (const auto& [type, folder] : getAllGameFolders()) {
+                // Build full path to the fixed folder
+                auto fixedFolderPath = std::filesystem::weakly_canonical(
+                    assets_root / folder, ec);
+
+                if (ec) continue;
+
+                // Check if asset is within this fixed folder
+                if (isSubPath(assetDir, fixedFolderPath)) {
+                    // Extract the path RELATIVE to the fixed folder
+                    auto relativePath = std::filesystem::relative(assetDir, fixedFolderPath, ec);
+
+                    if (!ec) {
+                        return relativePath;
+                    }
+                }
+            }
+
+            // Check engine folders
+            for (const auto& [type, folder] : getAllEngineFolders()) {
+                auto fixedFolderPath = std::filesystem::weakly_canonical(
+                    assets_root / folder, ec);
+
+                if (ec) continue;
+
+                if (isSubPath(assetDir, fixedFolderPath)) {
+                    auto relativePath = std::filesystem::relative(assetDir, fixedFolderPath, ec);
+
+                    if (!ec) {
+                        return relativePath;
+                    }
+                }
+            }
+
+            return std::filesystem::path();
+        }
+
         struct Descriptor {
 
             //Identity

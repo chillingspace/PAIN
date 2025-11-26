@@ -112,26 +112,7 @@ namespace PAIN {
         void Organizer::enforceGameAssetLocation(Info& asset) const {
 
             //Identify asset relative folder
-            std::filesystem::path relative_path;
-
-            //Check asset root first
-            if (isSubPath(asset.raw_path.parent_path(), assets_root)) relative_path = std::filesystem::relative(asset.raw_path.parent_path(), assets_root);
-
-            //Iterate through to find relative folder
-            if (relative_path.empty()) {
-                for (auto const& [type, folder] : getAllGameFolders()) {
-
-                    //Check if sub path
-                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
-                }
-            }
-            if (relative_path.empty()) {
-                for (auto const& [type, folder] : getAllEngineFolders()) {
-
-                    //Check if sub path
-                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
-                }
-            }
+            std::filesystem::path relative_path = extractSubfolderPath(asset, assets_root);
 
             //Check if game dir has asset type
             if (game_dir.find(asset.type) != game_dir.end()) {
@@ -174,26 +155,7 @@ namespace PAIN {
         void Organizer::enforceEngineAssetLocation(Info& asset) const {
 
             //Identify asset relative folder
-            std::filesystem::path relative_path;
-
-            //Check asset root first
-            if (isSubPath(asset.raw_path.parent_path(), assets_root)) relative_path = std::filesystem::relative(asset.raw_path.parent_path(), assets_root);
-
-            //Iterate through to find relative folder
-            if (relative_path.empty()) {
-                for (auto const& [type, folder] : getAllGameFolders()) {
-
-                    //Check if sub path
-                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
-                }
-            }
-            if (relative_path.empty()) {
-                for (auto const& [type, folder] : getAllEngineFolders()) {
-
-                    //Check if sub path
-                    if (isSubPath(asset.relative_folder, folder)) relative_path = std::filesystem::relative(asset.relative_folder, folder);
-                }
-            }
+            std::filesystem::path relative_path = extractSubfolderPath(asset, assets_root);
 
             //Check if game dir has asset type
             if (engine_dir.find(asset.type) != engine_dir.end()) {
