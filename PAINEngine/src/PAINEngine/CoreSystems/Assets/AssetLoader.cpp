@@ -936,7 +936,7 @@ namespace PAIN {
             if (sceneJson.contains("layers") && sceneJson["layers"].is_array()) {
                 sceneAsset->layers.clear();
                 for (auto& layerJson : sceneJson["layers"]) {
-                    Scene::SceneAsset::Layer layer;
+                    Scene::Layer layer;
                     if (layerJson.contains("id")) layer.id = layerJson["id"].get<int>();
                     if (layerJson.contains("mask")) layer.mask = layerJson["mask"].get<int>();
                     if (layerJson.contains("enabled")) layer.enabled = layerJson["enabled"].get<bool>();

@@ -53,16 +53,13 @@ namespace PAIN {
                 void drawEditMaskModal();
 
                 //Settings panel
+                void drawLayerManagementPanel();
+
+                // Layer management state
                 void drawGraphicsSettingsPanel();
 
                 // Layer management state
                 unsigned selectedLayerIdx_ = 0;
-
-                // Collapsing header states
-                bool graphicsExpanded_ = false;
-                bool environmentExpanded_ = false;
-                bool cameraExpanded_ = false;
-                bool layersExpanded_ = false;
 
                 //Camera ambient lighting
                 glm::vec3 camera_ambient_color = glm::vec3(0);

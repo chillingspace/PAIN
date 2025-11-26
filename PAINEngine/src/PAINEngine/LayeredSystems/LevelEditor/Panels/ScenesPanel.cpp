@@ -219,53 +219,70 @@ namespace PAIN {
             void ScenesPanel::drawEditMaskModal() {
                 if (!showEditMask_) return;
 
-                auto ser = services->get<Serialization::Service>();
-                if (!ser) { showEditMask_ = false; return; }
-                const auto& doc = ser->doc(); // read-only view
+                //Get scene service
+                auto scn_service = services->get<Scene::SceneManager>();
 
-                ImGui::OpenPopup("Edit Layer Bit Mask");
-                if (!ImGui::BeginPopupModal("Edit Layer Bit Mask", &showEditMask_, ImGuiWindowFlags_AlwaysAutoResize))
+                //Get layers and matrix
+                auto& layers = scn_service->getLayers();
+                auto& maskMatrix = scn_service->getMaskMatrix();
+
+                // Ensure mask matrix is correct size
+                const unsigned n = static_cast<unsigned>(layers.size());
+                if (maskMatrix.size() != n) {
+                    maskMatrix.resize(n);
+                    for (auto& row : maskMatrix) {
+                        row.resize(n, false);
+                    }
+                }
+
+                ImGui::OpenPopup("Edit Layer Collision Matrix");
+                if (!ImGui::BeginPopupModal("Edit Layer Collision Matrix", &showEditMask_,
+                    ImGuiWindowFlags_AlwaysAutoResize)) {
                     return;
+                }
 
-                const unsigned n = static_cast<unsigned>(doc.layers.size());
-                // make sure the service has an NxN mask (diagonal forced false)
-                ser->ensureMaskSize();
+                ImGui::TextWrapped("This matrix defines which layers can interact with each other.");
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                    "Checked = layers can collide/interact");
+                ImGui::Separator();
+                ImGui::Spacing();
 
-                ImGui::PushID("MaskGrid");
-                ImGui::TextUnformatted("Bitmask Grid:");
+                if (n > 0 && ImGui::BeginTable("##CollisionMatrix", n + 1,
+                    ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_RowBg)) {
 
-                if (n > 0 && ImGui::BeginTable("##BitmaskGrid", n + 1,
-                    ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame)) {
+                    // Header row
+                    ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+                    ImGui::TableNextColumn();
+                    ImGui::TextUnformatted("Layer \\ Layer");
 
-                    // Header
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn(); ImGui::Text("Layer\\Mask");
                     for (unsigned col = 0; col < n; ++col) {
                         ImGui::TableNextColumn();
-                        ImGui::Text("L%u", doc.layers[col].id);
+                        ImGui::Text("L%d", layers[col].id);
                     }
 
-                    // Rows
+                    // Data rows
                     for (unsigned i = 0; i < n; ++i) {
                         ImGui::TableNextRow();
-                        ImGui::TableNextColumn(); ImGui::Text("L%u", doc.layers[i].id);
+                        ImGui::TableNextColumn();
+                        ImGui::Text("L%d", layers[i].id);
 
                         for (unsigned j = 0; j < n; ++j) {
                             ImGui::TableNextColumn();
 
-                            if (i == j) { ImGui::TextUnformatted("X"); continue; }
+                            // Diagonal is always disabled (layer can't interact with itself)
+                            if (i == j) {
+                                ImGui::TextDisabled("X");
+                                continue;
+                            }
 
-                            // get current bit safely
-                            bool bit = (i < doc.mask_matrix.size() &&
-                                j < doc.mask_matrix[i].size()) ? doc.mask_matrix[i][j] : false;
+                            // Get current bit
+                            bool canInteract = maskMatrix[i][j];
 
-                            // unique ID per cell
-                            const std::string id = "##m_" + std::to_string(i) + "_" + std::to_string(j);
-                            if (ImGui::Checkbox(id.c_str(), &bit)) {
-                                //// write back via service (keeps symmetry & marks dirty)
-                                //ser->setMask(i, j, bit);
-                                //if (hooks_.onDirty) hooks_.onDirty();
-                                //if (hooks_.onMaskChanged) hooks_.onMaskChanged(i, j, bit);
+                            const std::string id = "##mask_" + std::to_string(i) + "_" + std::to_string(j);
+                            if (ImGui::Checkbox(id.c_str(), &canInteract)) {
+                                // Update matrix symmetrically
+                                maskMatrix[i][j] = canInteract;
+                                maskMatrix[j][i] = canInteract;
                             }
                         }
                     }
@@ -274,13 +291,158 @@ namespace PAIN {
                 }
 
                 ImGui::Spacing();
-                if (ImGui::Button("Done##MaskGrid")) {
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                // Quick actions
+                if (ImGui::Button("Enable All")) {
+                    for (unsigned i = 0; i < n; ++i) {
+                        for (unsigned j = 0; j < n; ++j) {
+                            if (i != j) {
+                                maskMatrix[i][j] = true;
+                            }
+                        }
+                    }
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Disable All")) {
+                    for (auto& row : maskMatrix) {
+                        std::fill(row.begin(), row.end(), false);
+                    }
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Done")) {
                     showEditMask_ = false;
                     ImGui::CloseCurrentPopup();
                 }
 
-                ImGui::PopID();
                 ImGui::EndPopup();
+            }
+
+            void ScenesPanel::drawLayerManagementPanel() {
+                //Get scene service
+                auto scn_service = services->get<Scene::SceneManager>();
+
+                //Get layers and matrix
+                auto& layers = scn_service->getLayers();
+                auto& maskMatrix = scn_service->getMaskMatrix();
+
+                ImGui::Indent();
+
+                ImGui::Text("Total Layers: %u", static_cast<unsigned>(layers.size()));
+
+                // Add/Remove layer buttons
+                if (ImGui::Button("Add Layer")) {
+                    // Create new layer with next available ID
+                    int newId = 0;
+                    for (const auto& layer : layers) {
+                        if (layer.id >= newId) newId = layer.id + 1;
+                    }
+
+                    Scene::Layer newLayer;
+                    newLayer.id = newId;
+                    newLayer.mask = 1 << newId; // Unique bit mask
+                    newLayer.enabled = true;
+                    layers.push_back(newLayer);
+
+                    // Resize mask matrix
+                    size_t n = layers.size();
+                    maskMatrix.resize(n);
+                    for (auto& row : maskMatrix) {
+                        row.resize(n, false);
+                    }
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Remove Selected") && !layers.empty()) {
+                    if (selectedLayerIdx_ < layers.size()) {
+                        layers.erase(layers.begin() + selectedLayerIdx_);
+
+                        // Resize mask matrix
+                        size_t n = layers.size();
+                        maskMatrix.resize(n);
+                        for (auto& row : maskMatrix) {
+                            row.resize(n, false);
+                        }
+
+                        // Adjust selection
+                        if (selectedLayerIdx_ >= layers.size() && !layers.empty()) {
+                            selectedLayerIdx_ = static_cast<unsigned>(layers.size() - 1);
+                        }
+                    }
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Edit Mask Matrix")) {
+                    showEditMask_ = true;
+                }
+
+                ImGui::Separator();
+
+                // Layer list
+                ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
+
+                for (unsigned i = 0; i < layers.size(); ++i) {
+                    ImGui::PushID(i);
+
+                    // Visibility checkbox
+                    const std::string checkboxId = "##vis_" + std::to_string(i);
+                    if (ImGui::Checkbox(checkboxId.c_str(), &layers[i].enabled)) {
+                        // Layer visibility changed
+                    }
+
+                    ImGui::SameLine();
+
+                    // Selectable layer item
+                    const std::string label = "Layer " + std::to_string(layers[i].id) +
+                        " (Mask: 0x" + std::to_string(layers[i].mask) + ")";
+
+                    if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
+                        selectedLayerIdx_ = i;
+                    }
+
+                    // Context menu for layer
+                    if (ImGui::BeginPopupContextItem()) {
+                        if (ImGui::MenuItem("Delete Layer")) {
+                            layers.erase(layers.begin() + i);
+                            // Resize mask matrix
+                            size_t n = layers.size();
+                            maskMatrix.resize(n);
+                            for (auto& row : maskMatrix) {
+                                row.resize(n, false);
+                            }
+                            ImGui::EndPopup();
+                            ImGui::PopID();
+                            break;
+                        }
+                        ImGui::EndPopup();
+                    }
+
+                    ImGui::PopID();
+                }
+
+                ImGui::EndChild();
+
+                // Selected layer properties
+                if (selectedLayerIdx_ < layers.size()) {
+                    ImGui::Separator();
+                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Selected Layer Properties");
+
+                    auto& selectedLayer = layers[selectedLayerIdx_];
+
+                    ImGui::Text("Index: %u", selectedLayerIdx_);
+                    ImGui::InputInt("Layer ID", &selectedLayer.id);
+                    ImGui::InputInt("Bit Mask", &selectedLayer.mask);
+                    ImGui::Checkbox("Enabled", &selectedLayer.enabled);
+                }
+
+                ImGui::Unindent();
             }
 
             void ScenesPanel::drawGraphicsSettingsPanel() {
@@ -396,6 +558,11 @@ namespace PAIN {
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
                     drawGraphicsSettingsPanel();
+                }
+
+                //Render Layer settings
+                if (ImGui::CollapsingHeader("Layer Settings")) {
+                    drawLayerManagementPanel();
                 }
 
                 //// Scene configuration panels

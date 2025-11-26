@@ -223,6 +223,11 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Environment setup complete");
 		}
 
+		void SceneManager::setupLayers(SceneAsset const& scene_asset) {
+			layers = scene_asset.layers;
+			mask_matrix = scene_asset.mask_matrix;
+		}
+
 		nlohmann::json SceneManager::captureCurrentEntities() {
 			nlohmann::json ecs = nlohmann::json::object();
 			nlohmann::json ents = nlohmann::json::array();
@@ -281,6 +286,10 @@ namespace PAIN {
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
 			scene_asset.environment.useDaytime = using_day_time;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
+
+			//Capture all layer variables
+			scene_asset.layers = layers;
+			scene_asset.mask_matrix = mask_matrix;
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
@@ -355,6 +364,7 @@ namespace PAIN {
 			//Build new scene
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
+			setupLayers(scn_asset);
 
 			//Failed to build entities
 			if (!buildEntitiesFromAsset(scn_asset)) {

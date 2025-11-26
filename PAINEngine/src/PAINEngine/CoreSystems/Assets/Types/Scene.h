@@ -9,6 +9,15 @@
 
 namespace PAIN {
     namespace Scene {
+
+        //Scene layering
+        struct Layer {
+            int id = 0;
+            int mask = 1;
+            bool enabled = true;
+            // @todo add entities later
+        };
+
         struct SceneAsset : public Assets::IAsset {
 
             //Default camera settings
@@ -31,13 +40,7 @@ namespace PAIN {
                 glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
             } environment;
 
-            //Scene Layers
-            struct Layer {
-                int id = 0;
-                int mask = 1;
-                bool enabled = true;
-                // @todo add entities later
-            };
+            //Layers
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;
 

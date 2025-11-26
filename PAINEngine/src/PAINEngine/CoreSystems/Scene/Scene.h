@@ -36,10 +36,15 @@ namespace PAIN {
             //Boolean for checking day time
             bool using_day_time = true;
 
+            //Layers management
+            std::vector<Layer> layers;
+            std::vector<std::vector<bool>> mask_matrix;
+
             //Internal methods
             bool buildEntitiesFromAsset(SceneAsset const& scene_asset);
             void setupCamera(SceneAsset const& scene_asset);
             void setupEnvironment(SceneAsset const& scene_asset);
+            void setupLayers(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
             void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
@@ -110,6 +115,8 @@ namespace PAIN {
             void SetGameCamera();
             void ChangeGameCamera(std::string cam_name);
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+            std::vector<Layer>& getLayers() { return layers; }
+            std::vector<std::vector<bool>>& getMaskMatrix() { return mask_matrix; }
         };
 	}
 
