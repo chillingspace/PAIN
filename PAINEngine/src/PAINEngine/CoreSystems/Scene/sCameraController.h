@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 
 #include "Camera.h"
 #include "Scene.h"
@@ -91,4 +90,17 @@ namespace PAIN {
         float m_moveRadiusPx = 120.f, m_moveDeadzonePx = 10.f, m_lookSensitivity = 1.0f, m_moveScale = 1.0f;
         float m_cachedMoveX = 0.f, m_cachedMoveY = 0.f;
 	};
+
+	struct MobileMoveAxes {
+		float x = 0.f;
+		float y = 0.f;
+	};
+	extern MobileMoveAxes g_MobileMoveAxes;
+
+	struct MobileLookDelta {
+		float dx = 0.f;  
+		float dy = 0.f;  
+	};
+	extern MobileLookDelta g_MobileLookDelta;
+
 }

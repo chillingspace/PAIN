@@ -1,7 +1,11 @@
+#include "pch.h"
 #include "sCameraController.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 
 namespace PAIN {
+    MobileMoveAxes g_MobileMoveAxes;
+    MobileLookDelta g_MobileLookDelta;
+
     void sCameraController::onDetach() {}
 
     void sCameraController::onAttach()
@@ -111,11 +115,16 @@ namespace PAIN {
     // ANDROID ONLY
     void sCameraController::updateTouchControls(int pointerId, float x, float y) {
         if (m_touchLooking && pointerId == m_touchPointerId) {
-            // yOffset = lastY - y so drag up looks up
-            xOffset += (x - m_touchLastX);
-            yOffset += (m_touchLastY - y);
+            float dx = (x - m_touchLastX);
+            float dy = (m_touchLastY - y);
+
+            xOffset += dx;
+            yOffset += dy;
             m_touchLastX = x;
             m_touchLastY = y;
+
+            g_MobileLookDelta.dx += dx;
+            g_MobileLookDelta.dy += dy;
         }
         if (m_move.active && pointerId == m_move.id) {
             // acts as a jpy stick
@@ -147,6 +156,10 @@ namespace PAIN {
             // Save the normalized vector for onUpdate movement this frame.
             m_cachedMoveX = nx;
             m_cachedMoveY = ny;
+
+            // for lua
+            g_MobileMoveAxes.x = -nx;
+            g_MobileMoveAxes.y = ny;
         }
     }
 
@@ -161,6 +174,9 @@ namespace PAIN {
             m_move = MoveStick{};
             m_cachedMoveX = 0.f;
             m_cachedMoveY = 0.f;
+
+            g_MobileMoveAxes.x = 0.f;
+            g_MobileMoveAxes.y = 0.f;
         }
     }
 #endif
@@ -270,8 +286,8 @@ namespace PAIN {
         }
 
       
-
-
+// disable camera movement, want to move player insetad
+#if 0
         if (m_move.active && camera) {
             // Project forward to XZ like you already do
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
@@ -283,6 +299,7 @@ namespace PAIN {
             camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
             camera->pos += (m_cachedMoveX)*right * speed * dt;
         }
+#endif
 
         if (mouseButtonDown && xOffset != 0.f) {
             // transformation matrix(rotate)

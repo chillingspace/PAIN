@@ -1,4 +1,5 @@
-﻿#include "Scene.h"
+﻿#include "pch.h"
+#include "Scene.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Controller.h"
