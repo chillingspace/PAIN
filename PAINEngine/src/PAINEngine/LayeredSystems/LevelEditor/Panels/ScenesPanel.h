@@ -3,81 +3,36 @@
 #ifndef PAIN_EDITOR_SCENES_PANEL_HPP
 #define PAIN_EDITOR_SCENES_PANEL_HPP
 
-#include "pch.h"
 #include "Panels.h"
-#include "CoreSystems/Scene/Scene.h"
-#include "CoreSystems/Serialization/sSerialization.h"
-#include "ECS/Controller.h"
 
 
 namespace PAIN {
     namespace Editor {
         namespace Panel {
 
-            // Optional wiring points for future integration (leave empty for now).
-            struct ScenesHooks {
-                // Called after creating a new scene (name without ".scn")
-                std::function<void(const std::string& baseName)> onCreate;
-                // Called on "Save Scene As" (new base name)
-                std::function<bool(const std::string& baseName)> onSaveAs;
-                // Called on "Save Curr Scene"
-                std::function<bool(const std::string& currSceneId)> onSaveCurrent;
-                // Called before deleting current scene (id with extension or your internal id)
-                std::function<bool(const std::string& sceneId)> onDelete;
-                // Called when user requests a scene change (id with extension)
-                std::function<bool(const std::string& sceneId)> onChange;
-
-                std::function<void(const std::string& sceneId)> onModifyScene; // for modified scene, but havent changed scene file
-                std::function<void(unsigned i, unsigned j, bool v)> onMaskChanged;
-                std::function<void(unsigned idx, bool visible)>     onLayerVisibleChanged;
-                std::function<void()>                               onDirty;
-            };
-
             class ScenesPanel : public IPanel {
             public:
-                ScenesPanel(ScenesHooks hooks = {});
+                ScenesPanel();
                 ~ScenesPanel() override = default;
 
                 void nextWindowSettings() override;   
-                void setHooks(ScenesHooks h) { hooks_ = std::move(h); }
-
-
                 void onAttach() override;
                 void onUpdate(AppTiming timing) override;
 
                 static constexpr const char* getStaticName() { return "##ScenesPanel"; }
 
-                // Expose hooks
-                void notifyModifyScene() {
-                    if (hooks_.onModifyScene) {
-                        hooks_.onModifyScene(currSceneId_);
-                    }
-                }
-
             private:
-                // Error message when loading scene fails
-                bool showSceneLoadError_ = false;
-                std::string loadSceneErrorMsg_;
 
-                // Temporary in-panel “model” 
-               int selected_scene_index = 0; 
-               std::string currSceneId_;
-                struct Layer {
-                    unsigned id;
-                    bool visible = true;
-                };
-                std::vector<Layer> layers_;                    
-                std::vector<std::vector<bool>> mask_;         
-                unsigned selectedLayerIdx_ = 0;
-
+                //Selected GUID asset
                 Assets::GUID selected;
 
+                //Selected scn name
+                std::string selected_scn_name;
+
+                //Popups
                 std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
                 std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
-
-                // Camera 
-                int selected_cam_index = 0;
 
                 // UI 
                 bool showCreate_ = false;
@@ -86,15 +41,10 @@ namespace PAIN {
                 bool showEditMask_ = false;
                 std::string tmpNameBuf_;       
 
-                // Hooks for future backend integration 
-                ScenesHooks hooks_;
+                // Hooks for future backend integration
                 char nameBuf_[64] = "";  
 
             private:
-                // helpers
-                void ensureAtLeastOneLayer();
-                void rebuildMaskSize(std::size_t n);
-                static std::string baseNameFromId(const std::string& sceneId);
 
                 // modals
                 void drawCreateModal();
@@ -102,9 +52,18 @@ namespace PAIN {
                 void drawSaveAsModal();
                 void drawEditMaskModal();
 
-                // ui 
+                //Settings panel
+                void drawLayerManagementPanel();
 
-                void drawSkyboxSettingsPanel();
+                // Layer management state
+                void drawGraphicsSettingsPanel();
+
+                // Layer management state
+                unsigned selectedLayerIdx_ = 0;
+
+                //Camera ambient lighting
+                glm::vec3 camera_ambient_color = glm::vec3(0);
+                float camara_ambient_intensity = 0.5f;
             };
 
         } // namespace Panel

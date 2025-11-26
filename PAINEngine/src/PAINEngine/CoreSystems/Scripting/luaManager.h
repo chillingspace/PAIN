@@ -6,10 +6,10 @@
 #include <optional>
 #include <queue>
 #include "PAINEngine/CoreSystems/Events/Event.h"
+#include "PAINEngine/CoreSystems/Scene/sCameraController.h"
 #include "PAINEngine/ECS/System/ISystem.h"
 #include <entt/entity/entity.hpp>
 #include "PAINEngine/CoreSystems/Path/Path.h"
-#include "PAINEngine/LayeredSystems/LevelEditor/Editor.h"
 
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 
@@ -31,7 +31,7 @@ namespace PAIN {
         struct CollisionInterest { entt::entity entityInterested; entt::entity entityToCheck; };
 
     public:
-        void init(std::shared_ptr<Editor::Editor> editor, std::shared_ptr<IEngineAPI> api, bool shipping);
+        void init(std::shared_ptr<IEngineAPI> api, bool shipping);
         bool loadScriptForEntity(entt::entity entityId, const std::string& filePath,
             const std::vector<ScriptExternalVar>& vars = {}, bool runWhenPaused = false);
 
@@ -88,7 +88,6 @@ namespace PAIN {
 
         sol::state lua_;
         std::shared_ptr<IEngineAPI> api_;
-        std::shared_ptr<Editor::Editor> editor_;
         bool shipping_{ false };
         bool gamePaused_{ false };
 

@@ -12,7 +12,7 @@
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
-
+#include "ECS/Controller.h"
 #include "CoreSystems/Windows/Window.h"
 
 
@@ -535,7 +535,7 @@ namespace PAIN {
 #endif
 	}
 
-	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene)
 	{
 		//PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
 
@@ -585,7 +585,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
 		auto& gs = GraphicsSettings::get();
 
@@ -917,7 +917,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
+	void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene, const LightSources& lights)
 	{
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
@@ -1138,7 +1138,7 @@ namespace PAIN {
 	}
 
 
-	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene)
 	{
 		if (!debug_VAO || !debug_shader) return;
 
@@ -1384,36 +1384,57 @@ namespace PAIN {
 
 			// render 2D textures onto screen
 			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path texture_path = "engine/textures/sunshine.png";
-#else	
-				std::filesystem::path texture_path = "engine\\textures\\sunshine.png";
-#endif
-				// !TODO: add queue and iterate through all 2D textures to be rendered last
-				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if (texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, { 0.85f, -0.85f }, 0.1f);
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after Render2DTexture in PostProcessPass: {}", err);
+				auto ecs = services->get<ECS::Controller>();
+				auto& registry = ecs->getRegistry();
+
+				auto texture_entity_view = registry.view<Texture2D, LocalTransform, UIElement>();
+				for (auto&& [entity, texture_comp, trans_comp, ui_elem] : texture_entity_view.each()) {
+					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
+					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+
+					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value() || !elem_comp_opt) continue;
+
+					auto& texture_comp = texture_comp_opt.value().get();
+					auto& transform_comp = transform_comp_opt.value().get();
+					auto& elem_comp = elem_comp_opt.value().get();
+
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
+					if (!texture_opt.has_value()) continue;
+
+					if (elem_comp.b_is_enabled) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
+
+				}
 			}
 
 			// render text onto screen
 			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
-#else	
-				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
-#endif
-				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
-				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, { 1.f, 1.f, 1.f });
-				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after TextRenderer in PostProcessPass: {}", err);
+				auto ecs = services->get<ECS::Controller>();
+				auto& registry = ecs->getRegistry();
+
+				auto text_entity_view = registry.view<UIText, UIElement, UIRectTransform>();
+				for (auto&& [entity, text_comp, elem_comp, rect_comp] : text_entity_view.each()) {
+					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+					auto rect_comp_opt = ecs->getEntityComponent<UIRectTransform>(entity);
+
+					if (!text_comp_opt.has_value() || !elem_comp_opt.has_value() || !rect_comp_opt.has_value()) continue;
+
+					text_comp = text_comp_opt.value().get();
+					elem_comp = elem_comp_opt.value().get();
+					rect_comp = rect_comp_opt.value().get();
+
+					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+
+					// Assign calculated projection
+					text_comp.text_pos = rect_comp.calculated_world_position;
+
+					if (!font_opt.has_value()) continue;
+
+					if (elem_comp.b_is_enabled) { TextRenderer::get().renderText(text_comp); }
+
+					//TextRenderer::get().debugRenderQuad();
+				}
 			}
 
 			glEnable(GL_DEPTH_TEST);

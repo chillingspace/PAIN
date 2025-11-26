@@ -3,12 +3,10 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include "pch.h"
 #include "Applications/AppSystem.h"
 #include "System/ISystem.h"
-
 #include "CoreSystems/Serialization/sSerialization.h"
-#include "ECS/Components/AllComponents.h"
+#include "Utility/Log.h"
 
 namespace PAIN {
 	namespace ECS {

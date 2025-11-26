@@ -4,37 +4,55 @@
 #define SCENE_ASSET_HPP
 
 #include "AssetData.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Renderer/Light.h"
 
 namespace PAIN {
     namespace Scene {
 
-        struct Scene : public Assets::IAsset {
+        //Scene layering
+        struct Layer {
+            int id = 0;
+            int mask = 1;
+            bool enabled = true;
+            std::string name = "Layer " + std::to_string(id);
+            glm::vec3 color = glm::vec3(1.0f);
+        };
+
+        struct SceneAsset : public Assets::IAsset {
 
             //Default camera settings
-            struct Camera{
-
-
+            struct CameraSettings {
+                glm::vec3 position{ 0.f, 2.f, 4.f };
+                glm::vec3 forward{ 0.f, 0.f, -1.f };
+                glm::vec3 up{ 0.f, 1.f, 0.f };
+                float fov = GraphicsSettings::get().fov;
+                float nearPlane{ 0.1f };
+                float farPlane{ 100.f };
+                float aspectRatioW{ 16.f };
+                float aspectRatioH{ 9.f };
             } camera;
-
-            //Scene Layers
-            struct Layer {
-                int id = 0;         
-                int mask = 1;        
-                bool enabled = true; // B_State (visibility)
-                // @todo add entities later
-            };
-            std::vector<Layer> layers;
-            std::vector<std::vector<bool>> mask_matrix;
 
             //Environment settings
             struct Environment {
-                glm::vec3 ambientColor = glm::vec3(0.2f);
-                float ambientIntensity = 1.0f;
-                GUID skyboxGUID;
+                Assets::GUID skyboxGUID;
+                bool useDaytime = true;
+                glm::vec3 cameraLightIntensity{ 0.01f };
+                glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
             } environment;
 
-            Scene() = default;
-            ~Scene();
+            //Layers
+            std::vector<Layer> layers;
+            std::vector<std::vector<bool>> mask_matrix;
+
+            //Entity data
+            nlohmann::json entityData;
+
+            //Default constructor
+            SceneAsset() {
+                layers.push_back(Layer{ 0, 1, true });
+            }
+            ~SceneAsset() = default;
         };
     }
 }

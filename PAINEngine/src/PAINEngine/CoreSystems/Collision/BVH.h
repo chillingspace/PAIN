@@ -24,6 +24,20 @@ public:
     int getRootIndex() const { return m_rootIndex; }
     bool isEmpty() const { return m_rootIndex == -1; }
 
+    // NEW: Incremental update methods
+    bool isBuilt() const { return m_rootIndex != -1 && m_nodeCount > 0; }
+    void updateLeaf(int leafIndex, const AABB& newAABB);
+    void clear();
+
+    // Incremental operations
+    int insertLeaf(entt::entity entity, const AABB& aabb);
+    void removeLeaf(int nodeIndex);
+
+    // NEW: Get node info
+    bool isValidLeaf(int nodeIndex) const;
+
+    std::vector<std::pair<int, entt::entity>> getLeafNodes() const;
+
 private:
     std::vector<BVHNode> m_nodes;
     int m_rootIndex = -1;
@@ -31,10 +45,17 @@ private:
     int m_nodeCapacity = 0;
     int m_freeListIndex = -1;
 
+    void rebuildFreeList();
+    void refitParentChain(int leafIndex);
+
     int allocateNode();
     void freeNode(int nodeIndex);
     int buildRecursive(std::vector<std::pair<entt::entity, AABB>>& items, int start, int end);
     void computeAABB(int nodeIndex);
+
+    // Helper for insertLeaf
+    int findBestSibling(const AABB& leafAABB);
+    float calculateSurfaceArea(const AABB& aabb);
 };
 
 } // namespace PAIN

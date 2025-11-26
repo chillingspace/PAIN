@@ -8,6 +8,8 @@
 #include <entt/entity/entity.hpp>
 
 namespace PAIN {
+    namespace Serialization { class Service; }
+
     namespace Event { class Event; } 
     class Camera;
 
@@ -118,7 +120,7 @@ namespace PAIN {
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */
-        virtual void  ChangeScene(std::string name) = 0;
+        virtual bool  ChangeScene(std::string name) = 0;
         virtual void  PauseAllSystems(bool toPause) = 0;
         virtual bool  IsGamePaused() const = 0;
         virtual float GetFps() const = 0;

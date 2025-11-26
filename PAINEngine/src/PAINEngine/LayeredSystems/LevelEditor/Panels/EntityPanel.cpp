@@ -51,7 +51,7 @@ namespace PAIN {
                         command_manager->executeAction(Action{
                             [this, final_name]() {
                                 auto ecs = PN_ECS_SERVICE;
-                                auto scene = services->get<Scene>();
+                                auto scene = services->get<Scene::SceneManager>();
 
                                 entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
 
@@ -63,7 +63,7 @@ namespace PAIN {
 
                                 // Optional: Add default model
                                 if (scene) {
-                                    auto models = services->get<Assets::Manager>()->getAllAssetsOfType<Assets::Model>(Assets::Type::Model);
+                                    auto models = services->get<Assets::Manager>()->getAllAssetDataOfType(Assets::Type::Model);
                                     if (!models.empty()) {
                                         auto asset_service = services->get<Assets::Manager>();
 
@@ -88,13 +88,13 @@ namespace PAIN {
                                 // Mark transform dirty
                                 auto transformSystem = ecs->getSystem<Transform::System>();
                                 if (transformSystem) {
-                                    transformSystem->markDirty(entity, ecs->getRegistry());
+                                    transformSystem->markDirty(entity, ecs->getRegistry(currentRegistryID));
                                 }
                             },
                             [this, final_name]() {
                                 // Undo: find and delete by name
                                 auto ecs = PN_ECS_SERVICE;
-                                auto& registry = ecs->getRegistry();
+                                auto& registry = ecs->getRegistry(currentRegistryID);
                                 auto view = registry.view<Entity::Name>();
 
                                 for (auto entity : view) {
@@ -194,13 +194,13 @@ namespace PAIN {
                                     // Mark dirty
                                     auto transformSystem = ecs->getSystem<Transform::System>();
                                     if (transformSystem) {
-                                        transformSystem->markDirty(new_entity, ecs->getRegistry());
+                                        transformSystem->markDirty(new_entity, ecs->getRegistry(currentRegistryID));
                                     }
                                 }
                             },
                             [this, final_name]() {
                                 auto ecs = PN_ECS_SERVICE;
-                                auto& registry = ecs->getRegistry();
+                                auto& registry = ecs->getRegistry(currentRegistryID);
                                 auto view = registry.view<Entity::Name>();
 
                                 for (auto entity : view) {
@@ -270,7 +270,7 @@ namespace PAIN {
             void EntityPanel::onUpdate(PAIN::AppTiming timing) {
                 auto ecs = PN_ECS_SERVICE;
                 auto ser = PN_SERI_SERVICE;
-                auto& registry = ecs->getRegistry();
+                auto& registry = ecs->getRegistry(currentRegistryID);
 
                 // Auto-add required components to all entities
                 auto view_all = registry.view<Entity::Name>();
@@ -390,7 +390,7 @@ namespace PAIN {
                 std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
 
                 // Check if entity is a prefab instance
-                bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry().any_of<Prefab::PrefabInstance>(entity);
+                bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry(currentRegistryID).any_of<Prefab::PrefabInstance>(entity);
 
                 // Add icon or indicator for prefab instances
                 if (is_prefab_instance) {
@@ -451,7 +451,7 @@ namespace PAIN {
                             std::string prefab_name = generateUniquePrefabName(getEntityName(selected_entity));
 
                             // Create prefab
-                            prefab_service->createPrefab(selected_entity, prefab_name, ecs->getRegistry());
+                            prefab_service->createPrefab(selected_entity, prefab_name, ecs->getRegistry(currentRegistryID));
 
                             PN_CORE_INFO("Created prefab: {}", prefab_name);
                         }
@@ -504,7 +504,7 @@ namespace PAIN {
             std::vector<entt::entity> EntityPanel::getRootEntities() {
                 std::vector<entt::entity> roots;
                 auto ecs = PN_ECS_SERVICE;
-                auto& registry = ecs->getRegistry();
+                auto& registry = ecs->getRegistry(currentRegistryID);
 
                 for (const auto& [entity, name] : editor_entities) {
                     if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
@@ -543,8 +543,8 @@ namespace PAIN {
                 auto transformSystem = ecs->getSystem<Transform::System>();
 
                 if (transformSystem) {
-                    transformSystem->setParent(child, parent, ecs->getRegistry());
-                    transformSystem->markDirty(child, ecs->getRegistry());
+                    transformSystem->setParent(child, parent, ecs->getRegistry(currentRegistryID));
+                    transformSystem->markDirty(child, ecs->getRegistry(currentRegistryID));
                 }
             }
 
@@ -553,8 +553,8 @@ namespace PAIN {
                 auto transformSystem = ecs->getSystem<Transform::System>();
 
                 if (transformSystem) {
-                    transformSystem->removeParent(child, ecs->getRegistry());
-                    transformSystem->markDirty(child, ecs->getRegistry());
+                    transformSystem->removeParent(child, ecs->getRegistry(currentRegistryID));
+                    transformSystem->markDirty(child, ecs->getRegistry(currentRegistryID));
                 }
             }
 

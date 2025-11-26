@@ -33,6 +33,23 @@ namespace PAIN {
             //Serialization flag
             static constexpr bool ShouldSerialize = true;
         };
+
+        //Layer comp
+        struct Layer {
+            int layer_id = 0;
+            int layer_mask = 1;
+
+            // Optional: Store scene layer name for debugging
+            std::string layerName = "Default";
+
+            // Check if this layer can interact with another layer
+            bool canInteractWith(uint32_t otherLayerMask) const {
+                return (layer_mask & otherLayerMask) != 0;
+            }
+
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
+        };
 	}
 }
 
@@ -49,6 +66,11 @@ REFL_TYPE(PAIN::Entity::Hierarchy)
 REFL_FIELD(parentGUID)
 REFL_FIELD(childrenGUIDs)
 REFL_FIELD(siblingIndex)
+REFL_END
+
+REFL_TYPE(PAIN::Entity::Layer)
+REFL_FIELD(layer_id)
+REFL_FIELD(layer_mask)
 REFL_END
 
 #endif

@@ -149,6 +149,10 @@ namespace PAIN {
 				}
 				});
 
+			asset_loader->RegisterLoader(Type::Scenes, [this](std::string const& virtual_path) {
+				return asset_loader->ImportScene(virtual_path);
+				});
+
 			//Import asset registry
 			asset_registry = asset_loader->ImportAssetRegistry("assets://" + asset_registry_filename);
 
@@ -385,6 +389,21 @@ namespace PAIN {
 			//Cache asset
 			return cacheAsset(id);
 		}
+
+		void Manager::reshipAsset(GUID const& id) {
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Re process asset and ship
+			auto data = asset_registry[id];
+			Info asset;
+			asset.raw_path = path_service->resolvePath(Path::main_assets_alias, "");
+			asset.raw_path /= data->main_relative_path;
+			asset.name = asset.raw_path.filename().string();
+			asset.relative_folder = data->main_relative_path.parent_path();
+			asset.type = data->type;
+			asset_compiler->processAsset(asset);
+		}
 #endif
 		bool Manager::checkAssetCached(GUID const& id) const {
 			//Check asset cache
@@ -454,6 +473,35 @@ namespace PAIN {
 
 			//Move file
 			if (asset_organizer->moveFile(from, to)) {
+			}
+		}
+
+		void Manager::removeFile(Assets::GUID const& id) {
+
+			//Get main relative path
+			auto it = asset_registry.find(id);
+			if (it != asset_registry.end()) {
+
+				//Get main relative path
+				auto relative = it->second->main_relative_path;
+
+				//Ensure relative
+				if (relative.empty() || relative.extension() == Assets::descriptor_ext) return;
+
+				//Get file path
+				std::filesystem::path file_path = services->get<Path::Path>()->resolvePath(Path::main_assets_alias, "");
+				file_path /= relative;
+
+				//Check if from is a directory
+				if (std::filesystem::is_directory(file_path)) {
+
+					//File operations to delete all
+					std::filesystem::remove_all(file_path);
+				}
+				else {
+					//Remove file
+					asset_organizer->removeFile(file_path);
+				}
 			}
 		}
 

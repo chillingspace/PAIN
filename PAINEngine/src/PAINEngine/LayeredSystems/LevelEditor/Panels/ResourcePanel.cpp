@@ -315,10 +315,9 @@ namespace PAIN {
 					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Entity")) {
 						// Instantiate prefab in scene
 						auto prefab_service = services->get<Prefab::Service>();
-						auto& registry = services->get<ECS::Controller>()->getRegistry();
 
 						//Create instance
-						entt::entity instance = prefab_service->instantiatePrefab(file.id, registry);
+						entt::entity instance = prefab_service->instantiatePrefab(file.id);
 
 						//Check for null instance
 						if (instance != entt::null) {
@@ -1866,9 +1865,15 @@ namespace PAIN {
 								//Get GUID
 								auto id = asset_service->findGUID(relative);
 
-								//Check if cached
-								if (asset_service->checkAssetCached(id)) {
-									asset_service->recacheAsset(id);
+								//Check if asset is cachable
+								if (!Assets::isAssetCacheable(Assets::getAssetType(file))) {
+									asset_service->reshipAsset(id);
+								}
+								else {
+									//Check if cached
+									if (asset_service->checkAssetCached(id)) {
+										asset_service->recacheAsset(id);
+									}
 								}
 							}
 

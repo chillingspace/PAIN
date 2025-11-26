@@ -34,10 +34,14 @@ namespace PAIN {
             auto window_service = svc->get<Window::Window>();
 
             // Get camera matrices for world-space UI
-            auto camera_service = svc->get<sCameraController>(); // Your camera system
-            glm::mat4 view = camera_service->getViewMatrix();
-            glm::mat4 projection = camera_service->getProjectionMatrix();
+            auto scene_service = svc->get<Scene::SceneManager>();
+            Camera* cam = scene_service->GetActiveCamera();
+            glm::mat4 view = cam->view();
+            glm::mat4 projection = cam->projection();
             glm::vec2 viewport = window_service->getFrameBuffer();
+
+            // For every UI label with a UIFollowsWorldEntity, the position is projected from world to screen and written to the label's UIRectTransform.calculated_world_position.
+            updateFloatingLabels(registry, view, projection, viewport);
 
             auto canvas_view = registry.view<UICanvas, UIRectTransform, Entity::Hierarchy>();
 
@@ -45,8 +49,6 @@ namespace PAIN {
                 // Check if this canvas has a valid parent
                 if (!hierarchy.parentGUID.IsValid()) { // root node (no parent)
                     glm::vec2 screen_size = window_service->getFrameBuffer();
-
-                    // OPTIONAL: Use WorldTransform if you want to support moving screens 
                     glm::vec2 layout_origin(0);
                     if (registry.all_of<WorldTransform>(entity)) {
                         const auto& wtrans = registry.get<WorldTransform>(entity);
@@ -78,9 +80,12 @@ namespace PAIN {
                 // If UIRectTransform has local size, multiply by world_scale.xy for final size
                 if (registry.all_of<UIRectTransform>(entity)) {
                     auto& rect = registry.get<UIRectTransform>(entity);
-                    calculated_size = rect.size_delta * glm::vec2(world_scale);
-                    rect.calculated_world_position = calculated_pos;
-                    rect.calculated_world_size = calculated_size;
+
+                    if (!registry.all_of<UIFollowsWorldEntity>(entity)) {
+                        calculated_size = rect.size_delta * glm::vec2(world_scale);
+                        rect.calculated_world_position = calculated_pos;
+                        rect.calculated_world_size = calculated_size;
+                    }
                 }
             }
 
@@ -93,6 +98,47 @@ namespace PAIN {
                         processHierarchy(child, registry, calculated_size, calculated_pos);
                     }
                 }
+            }
+        }
+
+        glm::vec2 LayoutSystem::worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        {
+            glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
+            if (clip.w == 0.0f) return { -10000, -10000 }; // clearly "offscreen"
+            glm::vec3 ndc = glm::vec3(clip) / clip.w;
+            // If behind camera, we also consider as offscreen
+            if (clip.w < 0.0f) return { -10000, -10000 };
+            glm::vec2 screen;
+            screen.x = (ndc.x * 0.5f + 0.5f) * viewport.x;
+            screen.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * viewport.y; // flip Y
+            return screen;
+        }
+
+        void LayoutSystem::updateFloatingLabels(entt::registry& registry, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        {
+            auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform>();
+            auto svc = services.lock();
+            auto metadata_service = svc->get<MetaData::Service>();
+            auto ecs = svc->get<ECS::Controller>();
+
+            for (auto&& [entity, follows, rect] : view_floating.each()) {
+
+                entt::entity follow_entity = ecs->resolveGUID(follows.entity_target_guid);
+
+                if (follow_entity == entt::null) continue;
+
+                if (!registry.valid(follow_entity) || !registry.all_of<WorldTransform>(follow_entity))
+                    continue;
+
+                const auto& world = registry.get<WorldTransform>(follow_entity);
+                glm::vec3 world_pos = glm::vec3(world.matrix * glm::vec4(follows.world_offset, 1.f));
+                glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
+
+                glm::vec2 screen_pos = worldToScreen(world_pos, view, proj, viewport);
+
+                // Not getting assigned here?
+                rect.calculated_world_position = screen_pos;
+                // Optionally, allow a pixel offset in UIFollowsWorldEntity for vertical separation
             }
         }
         

@@ -147,8 +147,7 @@ namespace {
 
 namespace PAIN {
 
-    void LuaManager::init(std::shared_ptr<Editor::Editor> editor, std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
-        editor_ = editor;
+    void LuaManager::init(std::shared_ptr<IEngineAPI> api, bool shipping) {  // after init, script can then call for eg registerUpdate function coz exist in lua global table
         api_ = api;
         shipping_ = shipping;
 
@@ -347,14 +346,6 @@ namespace PAIN {
             return std::make_tuple(pos.x, pos.y);
             };
 
-        lua_["changeScene"] = [this](const std::string& name) {
-            if (!editor_) {
-                PN_CORE_WARN("[Lua] ChangeScene called but editor_ is null");
-            }
-            return editor_->changeScene(name);
-            };
-
-
 
 #if SCRIPT_ENABLE_DEBUG_TOOLS
         // Example: only in debug builds, allow dangerous actions
@@ -527,6 +518,28 @@ namespace PAIN {
             if (!api_) return;
             api_->SetRotation(entityId, { x, y, z });
             });
+
+        lua_.set_function("getMobileMoveAxes", []() {
+            return std::make_tuple(
+                PAIN::g_MobileMoveAxes.x,
+                PAIN::g_MobileMoveAxes.y
+            );
+            });
+
+        lua_.set_function("getMobileLookDelta", []() { // PC: (0,0), Android: rightside drag since last frame
+            float dx = PAIN::g_MobileLookDelta.dx;
+            float dy = PAIN::g_MobileLookDelta.dy;
+            // consume for this frame
+            PAIN::g_MobileLookDelta.dx = 0.f;
+            PAIN::g_MobileLookDelta.dy = 0.f;
+            return std::make_tuple(dx, dy);
+            });
+
+        #ifdef __ANDROID__
+                lua_.set_function("isAndroid", []() { return true; });
+        #else
+                lua_.set_function("isAndroid", []() { return false; });
+        #endif
 
 
         /* =========================================================================== */

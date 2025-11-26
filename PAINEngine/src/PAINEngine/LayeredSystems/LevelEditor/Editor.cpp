@@ -13,6 +13,8 @@
 #include "Panels/ViewportPanel.h"
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
+#include "Panels/PrefabsPanel.h"
+#include "Panels/AnimationPanel.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -53,65 +55,6 @@ namespace PAIN {
             auto ser = services->get<PAIN::Serialization::Service>();
             PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
 
-            // if ScenesPanel uses a hooks struct, fill it:
-            Panel::ScenesHooks hooks{};
-
-            hooks.onCreate = [ser](const std::string& base) {
-                if (!ser->createNewScene(base)) {
-                    PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
-                }
-                };
-            hooks.onSaveAs = [ser](const std::string& base) -> bool {
-                if (!ser->saveSceneAs(base)) {
-                    PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
-                    return false;
-                }
-                return true;
-                };
-            hooks.onSaveCurrent = [ser](const std::string& currSceneId) -> bool {
-                if (!ser->saveCurrentScene()) {
-                    PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
-                    return false;
-                }
-                return true;
-                };
-            hooks.onDelete = [ser](const std::string& sceneId) -> bool {
-                if (!ser->deleteSceneById(sceneId)) {
-                    PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
-                    return false;
-                }
-                return true;
-                };
-            //hooks.onChange = [ser](const std::string& sceneId) -> bool {
-            //    if (!ser->loadSceneById(sceneId)) {
-            //        PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
-            //        return false;
-            //    }
-            //    PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-            //    return true;
-            //    };
-
-            hooks.onChange = [this](const std::string& sceneId) -> bool {
-                return this->changeScene(sceneId);
-                };
-
-            hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
-            hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
-                ser->setMask(i, j, v);      
-                ser->modifyScene();         
-                };
-
-            hooks.onLayerVisibleChanged = [ser](unsigned idx, bool vis) {
-                ser->setLayerVisible(idx, vis); 
-                ser->modifyScene();
-                };
-            hooks.onDirty = [ser]() { ser->modifyScene(); };
-
-
-
-
-            auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
-
             // Create EntityPanel first and keep a reference
             auto entity_panel = std::make_shared<Panel::EntityPanel>();
             registerPanel(entity_panel);
@@ -119,13 +62,17 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
-            registerPanel(scenesPanel);
-            registerPanel(std::make_shared<Panel::ComponentsPanel>());
+
+            auto components_panel = std::make_shared<Panel::ComponentsPanel>();
+            registerPanel(components_panel);
 
             // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
             viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
+
+            auto animation_panel = std::make_shared<Panel::AnimationPanel>();
+            registerPanel(animation_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
@@ -133,21 +80,9 @@ namespace PAIN {
             //Register resource panel
 #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
+            registerPanel(std::make_shared<Panel::PrefabPanel>());
 #endif
-
-            // Use weak ptr to prevent mem leak
-            auto weakScenesPanel = std::weak_ptr<Panel::ScenesPanel>(scenesPanel);
-
-            command_manager->onModifySceneHook = [weakScenesPanel]() {
-                if (auto sp = weakScenesPanel.lock()) {  // convert to shared_ptr safely
-
-                    sp->notifyModifyScene();
-                }
-            };
-
             
-            
-
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
                 panel->onAttach();
@@ -386,24 +321,6 @@ namespace PAIN {
             ImGui::End();
             ImGui::PopStyleVar(2);
         }
-
-        bool Editor::changeScene(const std::string& sceneId) {
-            auto ser = services->get<PAIN::Serialization::Service>();
-
-            // Load Fail
-            if (!ser->loadSceneById(sceneId)) {
-                PN_CORE_WARN("[Editor] Failed to load scene: {}", sceneId);
-                return false;
-            }
-
-            // TODO: notify panels, reset selection, etc.
-            // scenesPanel->setCurrentScene(sceneId);  // if you expose something like this
-
-            // Load Successful
-            PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-            return true;
-        }
-
     }
 }
 

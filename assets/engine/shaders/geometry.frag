@@ -77,7 +77,12 @@ void main() {
 
 
     // gMaterial = vec3(material.rough, material.metal, material.alwaysLit);
-    gMaterial = vec3(texture(material.roughnessmetallic_map, vTexCoords).gb, dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
+    if (material.use_roughnessmetallic > 0.5) {
+        gMaterial = vec3(texture(material.roughnessmetallic_map, vTexCoords).gb, dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
+    }
+    else {
+        gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
+    }
 
     if (material.use_emission > 0.5) {
         gEmission = texture(material.emission_map, vTexCoords).rgb;

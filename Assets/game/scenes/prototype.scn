@@ -1,8 +1,127 @@
 {
-    "active_cam_id": "",
-    "dirty": false,
+    "camera": {
+        "aspectRatioH": 9.0,
+        "aspectRatioW": 16.0,
+        "farPlane": 100.0,
+        "forward": [
+            -0.11223310232162476,
+            -0.5105429291725159,
+            -0.8524962067604065
+        ],
+        "fov": 90.0,
+        "nearPlane": 0.10000000149011612,
+        "position": [
+            0.40571483969688416,
+            0.2870022654533386,
+            0.8937503099441528
+        ],
+        "up": [
+            0.0,
+            1.0,
+            0.0
+        ]
+    },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "5f4c99c0-a37a-4f45-8fc4-368d719a4056"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "ui_canvas"
+                        },
+                        "UICanvas": {
+                            "b_face_camera": true,
+                            "render_mode": 0,
+                            "sort_order": 0,
+                            "world_scale": 0.0010000000474974513
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "ui_canvas"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -53,6 +172,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -121,7 +244,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 21,
+                            "bvhNodeIndex": 5,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -167,6 +290,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -235,7 +362,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 10,
+                            "bvhNodeIndex": 9,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -281,6 +408,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -396,6 +527,10 @@
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.8813047409057617,
@@ -510,6 +645,10 @@
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.5335639715194702,
@@ -577,7 +716,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 9,
+                            "bvhNodeIndex": 10,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -623,6 +762,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -691,7 +834,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 20,
+                            "bvhNodeIndex": 21,
                             "localAABB": {
                                 "max": [
                                     57.97823715209961,
@@ -737,6 +880,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -799,7 +946,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 18,
+                            "bvhNodeIndex": 20,
                             "localAABB": {
                                 "max": [
                                     69.66659545898438,
@@ -845,6 +992,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -948,6 +1099,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -1056,6 +1211,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -1166,6 +1325,10 @@
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.7755335569381714,
@@ -1274,6 +1437,10 @@
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.4785497784614563,
@@ -1335,7 +1502,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 15,
+                            "bvhNodeIndex": 16,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -1381,6 +1548,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -1496,6 +1667,10 @@
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.5818593502044678,
@@ -1604,6 +1779,10 @@
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.593765377998352,
@@ -1711,6 +1890,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -1826,6 +2009,10 @@
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.0,
@@ -1912,6 +2099,10 @@
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.0,
@@ -1975,6 +2166,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -2050,6 +2245,10 @@
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -2127,6 +2326,10 @@
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.7489223480224609,
@@ -2188,7 +2391,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 16,
+                            "bvhNodeIndex": 18,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2234,6 +2437,10 @@
                             "childrenGUIDs": [],
                             "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -2349,6 +2556,10 @@
                             "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.9208627939224243,
@@ -2426,14 +2637,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    -3.4948418140411377,
-                                    1.4994242191314697,
-                                    2.1492223739624023
+                                    -3.3230948448181152,
+                                    1.500491976737976,
+                                    1.963675856590271
                                 ],
                                 "min": [
-                                    -5.509153366088867,
-                                    -0.5010853409767151,
-                                    0.1350884735584259
+                                    -5.347178936004639,
+                                    -0.5014773607254028,
+                                    -0.05848187208175659
                                 ]
                             }
                         },
@@ -2445,17 +2656,21 @@
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
-                                -4.501997470855713,
-                                0.4991694390773773,
-                                1.142155408859253
+                                -4.335136890411377,
+                                0.49950727820396423,
+                                0.9525970220565796
                             ],
                             "rotation": [
-                                4.1329334635520354e-05,
-                                0.0035041412338614464,
-                                8.62118395161815e-05,
-                                0.9999938607215881
+                                5.349595539883012e-06,
+                                0.005562396254390478,
+                                0.0004899019841104746,
+                                0.9999843835830688
                             ],
                             "scale": [
                                 1.0,
@@ -2532,7 +2747,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 5,
+                            "bvhNodeIndex": 15,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -2567,6 +2782,10 @@
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
                         "LocalTransform": {
                             "position": [
                                 0.0,
@@ -2599,26 +2818,171 @@
                     },
                     "Name": "game manager"
                 }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "5f4c99c0-a37a-4f45-8fc4-368d719a4056",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "BoxLabel"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "81d7f475-5f23-5f45-a182-bcf8928fcd87",
+                            "world_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        },
+                        "UIText": {
+                            "alignment": 1,
+                            "color": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "display_text": "Press E",
+                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
+                            "font_size": 1.0,
+                            "line_height": 1.0,
+                            "max_length": 0,
+                            "outline_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "outline_thickness": 0.0,
+                            "rich_text": false,
+                            "shadow_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "shadow_offset": [
+                                0.0,
+                                0.0
+                            ],
+                            "text_pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "word_wrap": true,
+                            "wrap_width": 1000.0
+                        }
+                    },
+                    "Name": "BoxLabel"
+                }
             }
         ]
     },
-    "grid_id": 0,
-    "layers": [],
-    "mask_matrix": [],
-    "meta_tags": [],
-    "metadata_service": {
-        "groups": null,
-        "registered_tags": [
-            "Enemy",
-            "Environment",
-            "Player",
-            "Untagged",
-            "enemy_patrol_end",
-            "enemy_patrol_start",
-            "hiding_spot",
-            "letter_carried",
-            "letter_collectible",
-            "letter_collection"
+    "environment": {
+        "cameraLightIntensity": [
+            0.009999999776482582,
+            0.009999999776482582,
+            0.009999999776482582
+        ],
+        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "useDaytime": true,
+        "worldLightIntensity": [
+            1.5,
+            1.5,
+            1.5
         ]
-    }
+    },
+    "layers": [
+        {
+            "color": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "enabled": true,
+            "id": 0,
+            "mask": 1,
+            "name": "Layer 0"
+        }
+    ],
+    "mask_matrix": []
 }

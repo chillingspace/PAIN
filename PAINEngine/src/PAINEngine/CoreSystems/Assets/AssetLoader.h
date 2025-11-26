@@ -6,6 +6,7 @@
 #include "Types/Texture.h"
 #include "Types/Shader.h"
 #include "Types/Text.h"
+#include "Types/Scene.h"
 
 #include "AssetData.h"
 
@@ -86,6 +87,9 @@ namespace PAIN {
 
 			//Import material
 			std::shared_ptr<Material> ImportMaterial(std::string const& virtual_path) const;
+
+			//Import scene
+			std::shared_ptr<Scene::SceneAsset> ImportScene(std::string const& virtual_path) const;
 		};
 	}
 }

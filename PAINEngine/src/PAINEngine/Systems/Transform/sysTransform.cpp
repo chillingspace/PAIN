@@ -48,6 +48,11 @@ namespace PAIN {
 			world.matrix = parentWorld * localMat;
 			world.dirty = false;
 
+			//Try get BV and mark update needed
+			if (auto* bv = registry.try_get<BoundingVolume>(e)) {
+				bv->needsUpdate = true;
+			}
+
 			// Recursively update children
 			if (hierarchy) {
 				for (const auto& childGUID : hierarchy->childrenGUIDs) {

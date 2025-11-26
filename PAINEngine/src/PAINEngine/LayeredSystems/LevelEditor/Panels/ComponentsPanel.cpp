@@ -9,6 +9,7 @@
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
+#include "CoreSystems/Scene/Scene.h"
 #include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
@@ -43,7 +44,7 @@ namespace PAIN {
 
                 // ---- Transform ----
                 registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",
-                    [this](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
+                    [&](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
                         static struct {
                             entt::entity entity = entt::null;
                             LocalTransform original_transform;
@@ -103,7 +104,7 @@ namespace PAIN {
 
                                 // Mark dirty
                                 if (transformSystem) {
-                                    transformSystem->markDirty(selected, ecs->getRegistry());
+                                    transformSystem->markDirty(selected, ecs->getRegistry(currentRegistryID));
                                 }
                             }
                         }
@@ -127,8 +128,11 @@ namespace PAIN {
                                     entity_name = metadata->getEntityName(entity);
                                 }
 
+                                //Create temp registry id
+                                auto registr_id = currentRegistryID;
+
                                 command_manager->executeAction(Action{
-                                    [ecs, entity, final_transform, transformSystem]() {
+                                    [ecs, entity, final_transform, transformSystem, registr_id]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
@@ -136,11 +140,11 @@ namespace PAIN {
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
-                                    [ecs, entity, old_transform, transformSystem]() {
+                                    [ecs, entity, old_transform, transformSystem, registr_id]() {
                                         if (ecs->checkEntity(entity)) {
                                             auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
                                             if (transform_opt.has_value()) {
@@ -148,7 +152,7 @@ namespace PAIN {
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
@@ -216,6 +220,29 @@ namespace PAIN {
                             }
                         }
                     });
+
+                // ---- Texture2D ----
+                registerCompUIFunc<PAIN::Texture2D>("Texture2D",
+                    [this](ComponentsPanel& panel, PAIN::Texture2D& texture_comp) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Texture",
+                            texture_comp.texture_guid,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                            panel.services)) {
+                            changed = true;
+                        }
+
+                        changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    });
                 
                 // UItext comp ui
                 registerCompUIFunc<PAIN::UIText>("UIText",
@@ -245,6 +272,9 @@ namespace PAIN {
                             changed = true;
                         }
 
+                        // Font position
+                        ImGui::Text("Text Position: (%.8f, %.8f)", text.text_pos.x, text.text_pos.y);
+
                         // Font size
                         changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");
 
@@ -270,7 +300,7 @@ namespace PAIN {
                         // Shadow
                         ImGui::Separator();
                         ImGui::Text("Shadow");
-                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, -32, 32, "%.1f");
+                        changed |= ImGui::DragFloat2("Offset", &text.shadow_offset.x, 1.0f, 0.0f, 0.0f, "%.1f");
                         changed |= ImGui::ColorEdit4("Shadow Color", &text.shadow_color.x);
 
                         ImGui::Spacing();
@@ -280,6 +310,8 @@ namespace PAIN {
                         changed |= ImGui::Checkbox("Rich Text", &text.rich_text);
 
                         changed |= ImGui::DragFloat("Line Height", &text.line_height, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        changed |= ImGui::DragFloat("Text Wrap", &text.wrap_width, 0.02f, 0.2f, 4.0f, "%.2f");
 
                         // Max length (for input fields, optional)
                         changed |= ImGui::DragInt("Max Length", &text.max_length, 1, 0, 4096);
@@ -350,6 +382,95 @@ namespace PAIN {
 
                 registerCompUIFunc<PAIN::UIAnimation>("UIAnimation",
                     [this](ComponentsPanel&, PAIN::UIAnimation& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UIFollowsWorldEntity>("UIFollowsWorldEntity",
+                    [this](ComponentsPanel& panel, PAIN::UIFollowsWorldEntity& follow) {
+
+                        auto ecs = panel.services->get<ECS::Controller>();
+
+                        bool changed = false;
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Get ECS registry and metadata service
+                        auto& registry = ecs->getRegistry(currentRegistryID);
+                        auto metadata_service = panel.services->get<MetaData::Service>();
+
+                        // --- Dropdown for selecting world_target entity ---
+                        //std::vector<entt::entity> all_entities;
+                        //std::vector<std::string> all_names;
+
+                        //auto view = registry.view<Entity::Name>();
+                        //// Iterate through entities with the entity name component
+                        //for (auto entity : view) {
+                        //    std::string name = metadata_service->getEntityName(entity);
+                        //    if (name.empty()) name = "[unnamed]";
+                        //    all_entities.push_back(entity);
+                        //    all_names.push_back(name);
+                        //}
+
+                        // Find currently selected entity index
+                        //int current_idx = -1;
+                        //for (size_t i = 0; i < all_entities.size(); ++i) {
+                        //    if (all_entities[i] == follow.entity_target) {
+                        //        current_idx = (int)i;
+                        //        break;
+                        //    }
+                        //}
+
+                        // Accept entity as drag-drop target
+                        if (ImGui::BeginDragDropTarget()) {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
+                                entt::entity dragged_entity = *(const entt::entity*)payload->Data;
+
+                                Assets::GUID entity_guid = ecs->getOrCreateEntityGUID(dragged_entity);
+
+                                if (entity_guid != follow.entity_target_guid) {
+
+                                    follow.entity_target_guid = entity_guid;
+
+                                    changed = true;
+                                }
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+
+                        entt::entity entity = ecs->resolveGUID(follow.entity_target_guid);
+
+                        std::string entity_name = metadata_service->getEntityName(entity);
+
+                        // Have an imgui text to show the current entity that is dragged
+                        std::string target_name = entity != entt::null ? entity_name : "[none]";
+
+                        ImGui::Text("World Target: %s", target_name.c_str());
+
+                        // Optionally allow clearing the target
+                        if (ImGui::Button("Clear Target")) {
+                            follow.entity_target_guid = Assets::GUID{};
+                            changed = true;
+                        }
+
+                        // Create dropdown
+                        //if (ImGui::BeginCombo("World Target", current_idx >= 0 ? all_names[current_idx].c_str() : "[none]")) {
+                        //    for (size_t i = 0; i < all_entities.size(); ++i) {
+                        //        bool is_selected = (follow.entity_target == all_entities[i]);
+                        //        if (ImGui::Selectable(all_names[i].c_str(), is_selected)) {
+                        //            follow.entity_target = all_entities[i];
+                        //            changed = true;
+                        //        }
+                        //        if (is_selected)
+                        //            ImGui::SetItemDefaultFocus();
+                        //    }
+                        //    ImGui::EndCombo();
+                        //}
+
+                        // World offset input
+                        changed |= ImGui::DragFloat3("World Offset", &follow.world_offset.x, 0.1f, -100.0f, 100.0f, "%.2f");
+
+                        ImGui::PopStyleVar();
+                        return changed;
+                    }
+                );
+
                 // ---- Script ---- (UNCHANGED)
                 /*registerCompUIFunc<PAIN::Scripts>("Scripts",
                     [this](ComponentsPanel&, PAIN::Scripts& as) { DrawWithReflection(as, this); });*/
@@ -480,11 +601,9 @@ namespace PAIN {
                     // Iterate registered component factories
                     for (const auto& [comp_name, factory_func] : ecs->getComponentFactories()) {
                         
-                        if (comp_name == "Name" ||
-                            comp_name == "Tag" ||
-                            comp_name == "Editor Visiblity" ||
-                            comp_name == "Relation" ||
-                            comp_name == "Group") {
+                        if (comp_name == getComponentName<Entity::Name>() ||
+                            comp_name == getComponentName<Entity::Layer>() ||
+                            comp_name == getComponentName<MetaData::EditorVisible>()) {
                             continue;
                         }
 
@@ -685,12 +804,9 @@ namespace PAIN {
                 }
 
                 for (const auto& comp_name : component_names) {
-                    // Skip Metadata Component
-                    if (comp_name == "Name" ||
-                        comp_name == "Tag" ||
-                        comp_name == "Editor Visiblity" ||
-                        comp_name == "Relation" ||
-                        comp_name == "Group") {
+                    if (comp_name == getComponentName<Entity::Name>() ||
+                        comp_name == getComponentName<Entity::Layer>() ||
+                        comp_name == getComponentName<MetaData::EditorVisible>()) {
                         continue;
                     }
 
@@ -954,94 +1070,178 @@ namespace PAIN {
 
                 ImGui::Spacing();
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
-                //ImGui::Text("Entity ID: %u", static_cast<uint32_t>(selected));
+                ImGui::Text("Entity Properties");
                 ImGui::PopStyleColor();
 
+                ImGui::Spacing();
+
                 // Display entity name from metadata
-                auto metadata = services->get<MetaData::Service>();
-                if (metadata) {
-                    auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
-                    std::string entity_name = name_comp_opt.has_value() ? name_comp_opt->get().name : "";
+                std::string entity_name;
+                auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
+                if (!name_comp_opt.has_value()) {
+                    entity_name = services->get<ECS::Controller>()->getRegistry(currentRegistryID).emplace<Entity::Name>(selected).name;
 
-                    ImGui::SameLine(0, 20);
+                }
+                else {
+                    entity_name = name_comp_opt->get().name;
+                }
 
-                    // Checkbox
-                    static bool checkbox = true;
-                    ImGui::PushID("Chkbox");
-                    if (ImGui::Checkbox("", &checkbox)) {
-                        // logic for checkbox here
-                    }
-                    ImGui::PopID();
-                    ImGui::SameLine(0, 8);
+                // Checkbox
+                static bool checkbox = true;
+                ImGui::PushID("Chkbox");
+                if (ImGui::Checkbox("", &checkbox)) {
+                    // logic for checkbox here
+                }
+                ImGui::PopID();
+                ImGui::SameLine(0, 8);
 
-                    // Entity Name
-                    char name_buf[128];
-                    strncpy(name_buf, entity_name.c_str(), sizeof(name_buf));
-                    name_buf[sizeof(name_buf) - 1] = '\0';
+                // Entity Name
+                char name_buf[128];
+                strncpy(name_buf, entity_name.c_str(), sizeof(name_buf));
+                name_buf[sizeof(name_buf) - 1] = '\0';
 
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
-                    if (ImGui::InputText("##entityName", name_buf, sizeof(name_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                        std::string new_name(name_buf);
-                        if(name_comp_opt.has_value()) name_comp_opt.value().get().name = new_name;
-                    }
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
+                if (ImGui::InputText("##entityName", name_buf, sizeof(name_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    std::string new_name(name_buf);
+                    if(name_comp_opt.has_value()) name_comp_opt.value().get().name = new_name;
+                }
 
-                    // Tag Dropdown
-                    ImGui::Separator();
-                    ImGui::Spacing();
-                    ImGui::SameLine(0, 20);
-                    std::string tag_value = "Untagged";
-                    auto curr_tags = metadata->getRegisteredTags();
-                    if (!curr_tags.empty()) {
-                        std::vector<const char*> tag_items;
-                        for (const auto& tag : curr_tags)
-                            tag_items.push_back(tag.c_str());
+                //// Tag Dropdown
+                //ImGui::Separator();
+                //ImGui::Spacing();
+                //ImGui::SameLine(0, 20);
+                //std::string tag_value = "Untagged";
+                //auto curr_tags = metadata->getRegisteredTags();
+                //if (!curr_tags.empty()) {
+                //    std::vector<const char*> tag_items;
+                //    for (const auto& tag : curr_tags)
+                //        tag_items.push_back(tag.c_str());
 
-                        for (const auto& tag : curr_tags)
-                            if (metadata->hasTag(selected, tag))
-                                tag_value = tag;
+                //    for (const auto& tag : curr_tags)
+                //        if (metadata->hasTag(selected, tag))
+                //            tag_value = tag;
 
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-                        if (ImGui::BeginCombo("##TagCombo", tag_value.c_str())) {
-                            for (size_t i = 0; i < tag_items.size(); ++i) {
-                                bool is_selected = (tag_value == tag_items[i]);
-                                if (ImGui::Selectable(tag_items[i], is_selected)) {
-                                    metadata->setEntityTag(selected, tag_items[i]);
+                //    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+                //    if (ImGui::BeginCombo("##TagCombo", tag_value.c_str())) {
+                //        for (size_t i = 0; i < tag_items.size(); ++i) {
+                //            bool is_selected = (tag_value == tag_items[i]);
+                //            if (ImGui::Selectable(tag_items[i], is_selected)) {
+                //                metadata->setEntityTag(selected, tag_items[i]);
+                //            }
+                //            if (is_selected) ImGui::SetItemDefaultFocus();
+                //        }
+                //        ImGui::EndCombo();
+                //    }
+                //}
+                //ImGui::SameLine(0, 5);
+                //ImGui::Text("Tag");
+
+                // Layer Dropdown
+                //ImGui::Spacing();
+                //Get scn service
+
+                ImGui::Spacing();
+
+                //Get ecs controller
+                auto controller = services->get<ECS::Controller>();
+                if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected)) {
+                    if (layerCompOpt.has_value()) {
+
+                        auto layerComp = layerCompOpt.value();
+                        auto sceneManager = services->get<Scene::SceneManager>();
+                        const auto& layers = sceneManager->getLayers();
+
+                        // Layer dropdown
+                        const char* currentLayerName = layers[layerComp.get().layer_id].name.c_str();
+                        if (ImGui::BeginCombo("Layer", currentLayerName)) {
+                            for (size_t i = 0; i < layers.size(); ++i) {
+                                bool i_selected = (layerComp.get().layer_id == i);
+
+                                // Color indicator
+                                ImGui::PushStyleColor(ImGuiCol_Text,
+                                    ImVec4(layers[i].color.x, layers[i].color.y,
+                                        layers[i].color.z, 1.0f));
+
+                                if (ImGui::Selectable(std::string(layers[i].name + "##" + std::to_string(layers[i].id)).c_str(), i_selected)) {
+
+                                    //Propogate layer tag
+                                    std::function<void(entt::entity)> propogate_layer_tag = [&](entt::entity entity) {
+
+                                        //Mark world transform as dirty
+                                        if (auto* layer = controller->getRegistry(currentRegistryID).try_get<Entity::Layer>(entity)) {
+                                            layer->layer_id = i;
+                                            layer->layer_mask = 1 << i;
+                                            layer->layerName = layers[i].name;
+                                        }
+
+                                        //Get hierarchy and propagate to children if exists
+                                        if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(entity)) {
+                                            for (const auto& childGUID : hierarchy->childrenGUIDs) {
+                                                entt::entity child = controller->getGUIDRegistry().resolveGUID(childGUID);
+                                                if (child != entt::null && controller->getRegistry(currentRegistryID).valid(child)) {
+                                                    propogate_layer_tag(child);
+                                                }
+                                            }
+                                        }
+                                    };
+
+                                    //Root entity
+                                    entt::entity root_entity = selected;
+                                    if (auto* id = controller->getRegistry(currentRegistryID).try_get<Entity::GUID>(root_entity)) {
+                                        Assets::GUID root_id = id->guid;
+
+                                        //Identify absolute root
+                                        while (root_id.IsValid()) {
+                                            if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(root_entity)) {
+                                                root_entity = controller->resolveGUID(root_id);
+                                                root_id = hierarchy->parentGUID;
+                                            }
+                                            else {
+                                                break;
+                                            }
+                                        }
+
+                                        //Propogate down
+                                        propogate_layer_tag(root_entity);
+                                    }
                                 }
-                                if (is_selected) ImGui::SetItemDefaultFocus();
+
+                                ImGui::PopStyleColor();
+
+                                if (i_selected) {
+                                    ImGui::SetItemDefaultFocus();
+                                }
                             }
                             ImGui::EndCombo();
                         }
-                    }
-                    ImGui::SameLine(0, 5);
-                    ImGui::Text("Tag");
 
-                    // Layer Dropdown
-                    //ImGui::Spacing();
-                    ImGui::SameLine(0, 20);
-                    static const char* layers[] = { "Default", "Testing2", "Testing3" };
-                    static int layer_idx = 0;
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
-                    if (ImGui::Combo("##LayerCombo", &layer_idx, layers, IM_ARRAYSIZE(layers))) {
-                        //metadata layer logic
-                    }
-                    ImGui::SameLine(0, 5);
-                    ImGui::Text("Layer");
-
-
-                    if (metadata->isLocked(selected)) {
-                        ImGui::SameLine();
-                        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "[LOCKED]");
-                        ImGui::Separator();
-                        ImGui::Spacing();
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
-                        ImGui::Text("Entity is locked");
-                        ImGui::PopStyleColor();
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("Unlock this entity in the Entity Panel to edit its components.");
-                        return;
+                        // Show current mask (debug)
+                        ImGui::Text("Bitmask: 0x%08X", layerComp.get().layer_mask);
                     }
                 }
+
                 ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+                ImGui::Text("Entity Components");
+                ImGui::PopStyleColor();
+                ImGui::Spacing();
+
+                //if (metadata->isLocked(selected)) {
+                //    ImGui::SameLine();
+                //    ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "[LOCKED]");
+                //    ImGui::Separator();
+                //    ImGui::Spacing();
+                //    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
+                //    ImGui::Text("Entity is locked");
+                //    ImGui::PopStyleColor();
+                //    ImGui::Spacing();
+                //    ImGui::TextWrapped("Unlock this entity in the Entity Panel to edit its components.");
+                //    return;
+                //}
+                //ImGui::Spacing();
 
                 renderEntityComponents(selected);
 

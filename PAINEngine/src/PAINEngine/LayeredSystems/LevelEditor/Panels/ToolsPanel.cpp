@@ -295,7 +295,7 @@ namespace PAIN {
 
                             create.do_action = [&, shared_id]() {
                                 auto ecs = services->get<ECS::Controller>();
-                                auto scene = services->get<Scene>();
+                                auto scene = services->get<Scene::SceneManager>();
 
                                 glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
                                 glm::quat rot = { 1.f, 0.f, 0.f, 0.f };

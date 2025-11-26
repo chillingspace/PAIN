@@ -1,4 +1,6 @@
 #include "sRenderer.h"
+#include "Core.h"
+#include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Renderer/Windows/WindowsRenderer.h"
 #include "CoreSystems/Renderer/Mesh.h"
@@ -33,7 +35,7 @@ namespace PAIN {
 		w_renderer->Init(services);
 
 		//Init scene
-		m_Scene = services->get<Scene>();
+		m_Scene = services->get<Scene::SceneManager>();
 		
 		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
@@ -129,7 +131,6 @@ namespace PAIN {
 	{
 		// populate shadow map first
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -171,7 +172,8 @@ namespace PAIN {
 	void sRenderer::geometryPass()
 	{
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
+		auto sceneManager = services->get<Scene::SceneManager>();
+		const auto& layers = sceneManager->getLayers();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -182,11 +184,20 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err before geometry pass: {}", err);
 		}
 
-		w_renderer->BeginGeometryPass(scene);
+		w_renderer->BeginGeometryPass(m_Scene);
 		for (auto e : view) {
 
   			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			if (!mdl.has_value() || !mdl->get().visible) continue;
+
+			// Check layer visibility
+			if (auto layerComp = ecs->getEntityComponent<Entity::Layer>(e)) {
+				int layerID = layerComp->get().layer_id;
+				if (layerID < layers.size() && !layers[layerID].enabled) {
+					continue;
+				}
+			}
 
 			glm::mat4 model_xform{ 1.f };
 			if (transform.has_value())
@@ -208,8 +219,6 @@ namespace PAIN {
 				//Draw geo
 				w_renderer->DrawGeometry(m_Scene, mdl->get(), model_xform);
 			}
-			
-
 		}
 		w_renderer->EndGeometryPass();
 
@@ -222,7 +231,6 @@ namespace PAIN {
 	void sRenderer::reflectionPass()
 	{
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -296,7 +304,7 @@ namespace PAIN {
 			}
 		}
 
-		auto scene = services->get<Scene>();
+		auto scene = services->get<Scene::SceneManager>();
 		w_renderer->LightingPass(scene, LightSources::get());
 
 		//Skybox::get().render(scene->GetActiveCamera()->view(), scene->GetActiveCamera()->projection());
@@ -308,7 +316,7 @@ namespace PAIN {
 		if (debug_mode == 0) { return; }
 
 		auto ecs = services->get<ECS::Controller>();
-		auto scene = services->get<Scene>();
+		auto scene = services->get<Scene::SceneManager>();
 		
 		if (!ecs || !scene || !w_renderer) {
 			PN_CORE_WARN("DebugPass skipped: Missing required services.");
@@ -395,6 +403,7 @@ namespace PAIN {
 	{
 		w_renderer->PostProcessPass();
 	}
+
 
 	void sRenderer::onUpdate(AppTiming timing) {
 

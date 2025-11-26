@@ -376,6 +376,8 @@ namespace PAIN {
 
         bool Service::loadSceneById(std::string_view sceneIdWithExt)
         {
+            // !TODO: ADD CHECK FOR WHEN TRYING TO LOAD LEVEL THAT DOESN'T EXIST
+
             PN_CORE_INFO("[Serialization] loadSceneById called with '{}'", sceneIdWithExt);
             const std::string path = makeVirtualScenePathFromBase(sceneIdWithExt); 
             PN_CORE_INFO("[Serialization] Trying scene path: {}", path);

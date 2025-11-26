@@ -30,6 +30,13 @@ namespace PAIN {
         bool useOverrides = false;
     };
 
+    //Texture 2d instance
+    struct Texture2D {
+        //material GUID
+        Assets::GUID texture_guid;
+        float texture_scale;
+    };
+
     struct ModelRenderer {
 
         //Serialization flag
@@ -134,3 +141,9 @@ REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);
 
+REFL_TYPE(PAIN::Texture2D)
+REFL_FIELD(texture_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(texture_scale)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Texture2D>);

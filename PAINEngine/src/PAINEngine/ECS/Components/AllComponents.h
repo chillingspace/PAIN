@@ -28,6 +28,7 @@ namespace PAIN {
         Entity::GUID,
         Entity::Name,
         Entity::Hierarchy,
+        Entity::Layer,
 
         //prefan comps
         Prefab::PrefabInstance,
@@ -41,6 +42,7 @@ namespace PAIN {
         LocalTransform,
         WorldTransform,
         ModelRenderer,
+        Texture2D,
         Lighting,
         Physics::RigidBody3D,
         Collision::Collider,
@@ -56,6 +58,7 @@ namespace PAIN {
         UICanvas,
         UIAnimation,
         UIText,
+        UIFollowsWorldEntity,
         // AI
         //AI::Blackboard,
         AI::Controller,
@@ -71,6 +74,7 @@ namespace PAIN {
         if constexpr (std::is_same_v<T, Entity::GUID>) return "GUID";
         if constexpr (std::is_same_v<T, Entity::Name>) return "Name";
         if constexpr (std::is_same_v<T, Entity::Hierarchy>) return "Hierarchy";
+        if constexpr (std::is_same_v<T, Entity::Layer>) return "Layer";
 
         //Prefab components
         if constexpr (std::is_same_v<T, Prefab::PrefabInstance>) return "PrefabInstance";
@@ -84,6 +88,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, LocalTransform>) return "LocalTransform";
         else if constexpr (std::is_same_v<T, WorldTransform>) return "WorldTransform";
         else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
+        else if constexpr (std::is_same_v<T, Texture2D>) return "Texture2D";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
         else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collider";
@@ -99,6 +104,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, UICanvas>) return "UICanvas";
         else if constexpr (std::is_same_v<T, UIAnimation>) return "UIAnimation";
         else if constexpr (std::is_same_v<T, UIText>) return "UIText";
+        else if constexpr (std::is_same_v<T, UIFollowsWorldEntity>) return "UIFollowsWorldEntity";
         // AI components
         //else if constexpr (std::is_same_v<T, AI::Blackboard>) return "AIBlackboard";
         else if constexpr (std::is_same_v<T, AI::Controller>) return "AIController";

@@ -22,6 +22,8 @@
 #include "Systems/UI/sysUILayout.h"
 #include "Systems/UI/sysUIInput.h"
 #include "Systems/UI/sysUIAnimation.h"
+#include "ECS/Components/AllComponents.h"
+
 namespace PAIN {
     namespace ECS {
         /*****************************************************************//**
@@ -309,6 +311,8 @@ namespace PAIN {
             registerComponent<Entity::GUID>("GUID");
             registerComponent<Entity::Name>("Name");
             registerComponent<Entity::Hierarchy>("Hierarchy");
+            registerComponent<Entity::Layer>("Layer");
+
             //Register prefab instance
             registerComponent<Prefab::PrefabInstance>("PrefabInstance");
             // Core components
@@ -316,6 +320,7 @@ namespace PAIN {
             registerComponent<LocalTransform>("LocalTransform");
             registerComponent<WorldTransform>("WorldTransform");
             registerComponent<ModelRenderer>("ModelRenderer");
+            registerComponent<Texture2D>("Texture2D");
             registerComponent<Lighting>("Lighting");
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
             registerComponent<Collision::Collider>("Collider");
@@ -340,6 +345,7 @@ namespace PAIN {
             registerComponent<UICanvas>("UICanvas");
             registerComponent<UIAnimation>("UIAnimation");
             registerComponent<UIText>("UIText");
+            registerComponent<UIFollowsWorldEntity>("UIFollowsWorldEntity");
         }
         void Controller::registerAllSystems()
         {
@@ -370,6 +376,7 @@ namespace PAIN {
             ctx->entity_count++;
             Assets::GUID guid = Assets::GUID::Generate();
             ctx->registry.emplace<Entity::GUID>(new_entity, guid);
+            ctx->registry.emplace<Entity::Layer>(new_entity);
             ctx->guid_registry.registerEntity(new_entity, guid);
             PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
                 static_cast<uint32_t>(new_entity),
@@ -384,6 +391,7 @@ namespace PAIN {
             entt::entity new_entity = ctx->registry.create();
             ctx->entity_count++;
             ctx->registry.emplace<Entity::GUID>(new_entity, e_id);
+            ctx->registry.emplace<Entity::Layer>(new_entity);
             ctx->guid_registry.registerEntity(new_entity, e_id);
             PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
                 static_cast<uint32_t>(new_entity),
