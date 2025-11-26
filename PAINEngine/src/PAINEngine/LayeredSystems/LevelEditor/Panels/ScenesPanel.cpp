@@ -127,7 +127,7 @@ namespace PAIN {
                     bool cancel_clicked = ImGui::Button("Cancel", ImVec2(button_width, 0));
 
                     if (delete_clicked) {
-                        services->get<Scene::SceneManager>()->deleteScene();
+                        services->get<Scene::SceneManager>()->deleteScene(selected);
                         closePopUp(popup_id);
                     }
                     if (cancel_clicked) {
@@ -175,7 +175,7 @@ namespace PAIN {
                     ImGui::Spacing();
 
                     if (ImGui::Button("Confirm")) {
-                        services->get<Scene::SceneManager>()->deleteScene();
+                        services->get<Scene::SceneManager>()->deleteScene(selected);
                         showDelete_ = false;
                         ImGui::CloseCurrentPopup();
                     }

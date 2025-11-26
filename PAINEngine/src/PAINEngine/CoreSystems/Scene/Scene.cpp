@@ -693,16 +693,17 @@ namespace PAIN {
 			unloadScene();
 		}
 
-		void SceneManager::deleteScene() {
-			//auto assetManager = services->get<Assets::Manager>();
-			//auto path_service = services->get<Path::Path>();
-			//if (!assetManager || !path_service) {
-			//	PN_CORE_ERROR("[SceneManager] Asset | Path Manager not available");
-			//	return false;
-			//}
+		void SceneManager::deleteScene(Assets::GUID const& id) {
 
-			////Remove scene
-			//assetManager->removeFile(path_service->resolvePath(Path::main_assets_alias, curr_scene_path.string()));
+			//Get asset manager
+			auto assetManager = services->get<Assets::Manager>();
+			if (!assetManager) {
+				PN_CORE_ERROR("[SceneManager] Asset Manager not available");
+				return;
+			}
+
+			//Delete file
+			assetManager->removeFile(id);
 		}
 
 		void SceneManager::saveActiveScene(Assets::GUID const& scn_id, std::string const& name) {

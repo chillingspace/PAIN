@@ -168,6 +168,9 @@ namespace PAIN {
 			//Move file function
 			void moveFile(std::filesystem::path const& from, std::filesystem::path const& to);
 
+			//Delete fil overload
+			void removeFile(Assets::GUID const& id);
+
 			//Delete file function
 			void removeFile(std::filesystem::path const& file_path);
 

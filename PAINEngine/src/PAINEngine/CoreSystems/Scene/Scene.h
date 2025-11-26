@@ -73,7 +73,7 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
 
             //Delete current active scene
-            void deleteScene();
+            void deleteScene(Assets::GUID const& id);
 
             //Create default scene
             void createScene(std::string const& name);

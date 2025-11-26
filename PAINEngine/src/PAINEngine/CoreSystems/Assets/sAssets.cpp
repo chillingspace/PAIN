@@ -476,6 +476,35 @@ namespace PAIN {
 			}
 		}
 
+		void Manager::removeFile(Assets::GUID const& id) {
+
+			//Get main relative path
+			auto it = asset_registry.find(id);
+			if (it != asset_registry.end()) {
+
+				//Get main relative path
+				auto relative = it->second->main_relative_path;
+
+				//Ensure relative
+				if (relative.empty() || relative.extension() == Assets::descriptor_ext) return;
+
+				//Get file path
+				std::filesystem::path file_path = services->get<Path::Path>()->resolvePath(Path::main_assets_alias, "");
+				file_path /= relative;
+
+				//Check if from is a directory
+				if (std::filesystem::is_directory(file_path)) {
+
+					//File operations to delete all
+					std::filesystem::remove_all(file_path);
+				}
+				else {
+					//Remove file
+					asset_organizer->removeFile(file_path);
+				}
+			}
+		}
+
 		void Manager::removeFile(std::filesystem::path const& file_path) {
 
 			//Get path service
