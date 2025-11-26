@@ -217,6 +217,40 @@ namespace PAIN {
                             }
                         }
                     });
+
+                // ---- Texture2D ----
+                registerCompUIFunc<PAIN::Texture2D>("Texture2D",
+                    [this](ComponentsPanel& panel, PAIN::Texture2D& texture_comp) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Texture",
+                            texture_comp.texture_guid,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                            panel.services)) {
+                            changed = true;
+                        }
+
+                        changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        ImGui::Spacing();
+                        ImGui::Separator();
+                        ImGui::Spacing();
+
+                        // Rendering Options
+                        if (ImGui::CollapsingHeader("Rendering Options")) {
+                            ImGui::Indent(10.0f);
+                            changed |= ImGui::Checkbox("Visible", &texture_comp.b_visible);
+                            ImGui::Unindent(10.0f);
+                        }
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    });
                 
                 // UItext comp ui
                 registerCompUIFunc<PAIN::UIText>("UIText",
@@ -356,6 +390,91 @@ namespace PAIN {
 
                 registerCompUIFunc<PAIN::UIAnimation>("UIAnimation",
                     [this](ComponentsPanel&, PAIN::UIAnimation& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+
+                registerCompUIFunc<PAIN::UIFollowsWorldEntity>("UIFollowsWorldEntity",
+                    [this](ComponentsPanel& panel, PAIN::UIFollowsWorldEntity& follow) {
+
+                        auto ecs = panel.services->get<ECS::Controller>();
+
+                        bool changed = false;
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Get ECS registry and metadata service
+                        auto& registry = ecs->getRegistry();
+                        auto metadata_service = panel.services->get<MetaData::Service>();
+
+                        // --- Dropdown for selecting world_target entity ---
+                        //std::vector<entt::entity> all_entities;
+                        //std::vector<std::string> all_names;
+
+                        //auto view = registry.view<Entity::Name>();
+                        //// Iterate through entities with the entity name component
+                        //for (auto entity : view) {
+                        //    std::string name = metadata_service->getEntityName(entity);
+                        //    if (name.empty()) name = "[unnamed]";
+                        //    all_entities.push_back(entity);
+                        //    all_names.push_back(name);
+                        //}
+
+                        // Find currently selected entity index
+                        //int current_idx = -1;
+                        //for (size_t i = 0; i < all_entities.size(); ++i) {
+                        //    if (all_entities[i] == follow.entity_target) {
+                        //        current_idx = (int)i;
+                        //        break;
+                        //    }
+                        //}
+
+                        // Accept entity as drag-drop target
+                        if (ImGui::BeginDragDropTarget()) {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
+                                entt::entity dragged_entity = *(const entt::entity*)payload->Data;
+
+                                std::string ent_name = services->get<MetaData::Service>()->getEntityName(dragged_entity);
+
+                                if (ent_name != follow.entity_target_string) {
+
+                                    follow.entity_target_string = ent_name;
+
+                                    changed = true;
+                                }
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+
+                        // Have an imgui text to show the current entity that is dragged
+                        std::string target_name = follow.entity_target_string != "" ? follow.entity_target_string : "[none]";
+
+                        ImGui::Text("World Target: %s", target_name.c_str());
+
+                        // Optionally allow clearing the target
+                        if (ImGui::Button("Clear Target")) {
+                            follow.entity_target_string = "";
+                            changed = true;
+                        }
+
+                        // Create dropdown
+                        //if (ImGui::BeginCombo("World Target", current_idx >= 0 ? all_names[current_idx].c_str() : "[none]")) {
+                        //    for (size_t i = 0; i < all_entities.size(); ++i) {
+                        //        bool is_selected = (follow.entity_target == all_entities[i]);
+                        //        if (ImGui::Selectable(all_names[i].c_str(), is_selected)) {
+                        //            follow.entity_target = all_entities[i];
+                        //            changed = true;
+                        //        }
+                        //        if (is_selected)
+                        //            ImGui::SetItemDefaultFocus();
+                        //    }
+                        //    ImGui::EndCombo();
+                        //}
+
+                        // World offset input
+                        changed |= ImGui::DragFloat3("World Offset", &follow.world_offset.x, 0.1f, -100.0f, 100.0f, "%.2f");
+
+                        ImGui::PopStyleVar();
+                        return changed;
+                    }
+                );
+
                 // ---- Script ---- (UNCHANGED)
                 /*registerCompUIFunc<PAIN::Scripts>("Scripts",
                     [this](ComponentsPanel&, PAIN::Scripts& as) { DrawWithReflection(as, this); });*/

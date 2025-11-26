@@ -34,10 +34,13 @@ namespace PAIN {
             auto window_service = svc->get<Window::Window>();
 
             // Get camera matrices for world-space UI
-            auto camera_service = svc->get<sCameraController>(); // Your camera system
+            auto camera_service = svc->get<sCameraController>();
             glm::mat4 view = camera_service->getViewMatrix();
             glm::mat4 projection = camera_service->getProjectionMatrix();
             glm::vec2 viewport = window_service->getFrameBuffer();
+
+            // For every UI label with a UIFollowsWorldEntity, the position is projected from world to screen and written to the label's UIRectTransform.calculated_world_position.
+            updateFloatingLabels(registry, view, projection, viewport);
 
             auto canvas_view = registry.view<UICanvas, UIRectTransform, Entity::Hierarchy>();
 
@@ -45,8 +48,6 @@ namespace PAIN {
                 // Check if this canvas has a valid parent
                 if (!hierarchy.parentGUID.IsValid()) { // root node (no parent)
                     glm::vec2 screen_size = window_service->getFrameBuffer();
-
-                    // OPTIONAL: Use WorldTransform if you want to support moving screens 
                     glm::vec2 layout_origin(0);
                     if (registry.all_of<WorldTransform>(entity)) {
                         const auto& wtrans = registry.get<WorldTransform>(entity);
@@ -93,6 +94,48 @@ namespace PAIN {
                         processHierarchy(child, registry, calculated_size, calculated_pos);
                     }
                 }
+            }
+        }
+
+        glm::vec2 LayoutSystem::worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        {
+            glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
+            if (clip.w == 0.0f) return { -10000, -10000 }; // clearly "offscreen"
+            glm::vec3 ndc = glm::vec3(clip) / clip.w;
+            // If behind camera, we also consider as offscreen
+            if (clip.w < 0.0f) return { -10000, -10000 };
+            glm::vec2 screen;
+            screen.x = (ndc.x * 0.5f + 0.5f) * viewport.x;
+            screen.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * viewport.y; // flip Y
+            return screen;
+        }
+
+        void LayoutSystem::updateFloatingLabels(entt::registry& registry, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        {
+            auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform>();
+            auto svc = services.lock();
+            auto metadata_service = svc->get<MetaData::Service>();
+
+            for (auto&& [entity, follows, rect] : view_floating.each()) {
+
+                // Entity here is invalid !!!!!!!!!!!!!!!!!!!
+                auto ent_opt = metadata_service->getEntityByName(follows.entity_target_string);
+
+                if (!ent_opt) continue;
+
+                if (!registry.valid(ent_opt.value()) || !registry.all_of<WorldTransform>(ent_opt.value()))
+                    continue;
+
+                std::string ent_name = metadata_service->getEntityName(entity);
+
+                const auto& world = registry.get<WorldTransform>(ent_opt.value());
+                glm::vec3 world_pos = glm::vec3(world.matrix * glm::vec4(follows.world_offset, 1.f));
+                glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
+
+                glm::vec2 screen_pos = worldToScreen(world_pos, view, proj, viewport);
+
+                rect.calculated_world_position = screen_pos;
+                // Optionally, allow a pixel offset in UIFollowsWorldEntity for vertical separation
             }
         }
         

@@ -30,6 +30,15 @@ namespace PAIN {
         bool useOverrides = false;
     };
 
+    //Texture 2d instance
+    struct Texture2D {
+        //material GUID
+        Assets::GUID texture_guid;
+        float texture_scale;
+        // If texture 2d is only based for ui, then this var is not needed, all check by ui elem
+        bool b_visible = true;
+    };
+
     struct ModelRenderer {
 
         //Serialization flag
@@ -134,3 +143,10 @@ REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);
 
+REFL_TYPE(PAIN::Texture2D)
+REFL_FIELD(texture_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(texture_scale)
+REFL_FIELD(b_visible)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Texture2D>);
