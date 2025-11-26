@@ -159,6 +159,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     return shadow;
 }
 
+const int IBL_DEBUG_TYPE = 8;
 
 void main() {
     if (u_NumShadowMaps > MAX_SHADOWMAPPED_LIGHTS) {
@@ -204,7 +205,7 @@ void main() {
 
         int dbg = int(DEBUG_TYPE);
 
-        if (dbg == 6)
+        if (dbg == IBL_DEBUG_TYPE)
         {
             vec3 irradiance = texture(irradianceMap, N).rgb;
             FragColor = vec4(irradiance, 1.0);
@@ -215,7 +216,7 @@ void main() {
         vec3 R = reflect(-V, N);
 
         // DEBUG: Show the prefilter map. should look like perfect mirror
-        if (dbg == 7)
+        if (dbg == IBL_DEBUG_TYPE+1)
         {
             vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
             FragColor = vec4(prefilteredColor, 1.0);
@@ -228,7 +229,7 @@ void main() {
         float NdotV = max(dot(N, V), 0.001);
 
         // debug brdf lut. should look like gradient red/orange
-        if (dbg == 8)
+        if (dbg == IBL_DEBUG_TYPE+2)
         {
             vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
             FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);

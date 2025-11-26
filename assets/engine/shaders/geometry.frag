@@ -42,6 +42,8 @@ uniform Material material;
 // debug
 uniform float DEBUG_TYPE;
 
+const int IBL_DEBUG_TYPE = 8;
+
 void main() {
     // for debugging
     int dbg = int(DEBUG_TYPE);
@@ -49,7 +51,7 @@ void main() {
     gPos = vFragPos;
     gNorm = normalize(vNormal);
     // gMaterial = vec3(material.rough, material.metal, material.alwaysLit);
-    gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < 6 ? 1.0 : 0.0);
+    gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
 
     if (material.use_emission > 0.5) {
         gEmission = texture(material.emission_map, vTexCoords).rgb;
@@ -58,13 +60,15 @@ void main() {
         gEmission = vec3(0.0, 0.0, 0.0);
     }
 
-    // 6 onwards is IBL stuff
-    if (dbg > 0 && dbg < 6) {
-        if (dbg == 1) gCol = texture(material.tex, vTexCoords).rgb;
-        else if (dbg == 2) gCol = texture(material.ao_map, vTexCoords).rgb;
-        else if (dbg == 3) gCol = texture(material.normal_map, vTexCoords).rgb;
-        else if (dbg == 4) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).rg, 1);
-        else if (dbg == 5) gCol = texture(material.emission_map, vTexCoords).rgb;
+    // IBL_DEBUG_TYPE onwards is IBL stuff
+    if (dbg > 0 && dbg < IBL_DEBUG_TYPE) {
+        if (dbg == 1) gCol = vec3(1.0, 0.0, 1.0);
+        else if (dbg == 2) gCol = texture(material.tex, vTexCoords).rgb;
+        else if (dbg == 3) gCol = texture(material.ao_map, vTexCoords).rgb;
+        else if (dbg == 4) gCol = texture(material.normal_map, vTexCoords).rgb;
+        else if (dbg == 5) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).g, 0, 0);
+        else if (dbg == 6) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).b, 0, 0);
+        else if (dbg == 7) gCol = texture(material.emission_map, vTexCoords).rgb;
 
         return;
     }
