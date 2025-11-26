@@ -6,7 +6,8 @@
 #include "AssetData.h"
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "ECS/Controller.h"
-
+#include "EntityPanel.h"
+#include "ComponentsPanel.h"
 
 namespace PAIN {
     namespace Editor {
@@ -14,7 +15,11 @@ namespace PAIN {
 
             //Prefab panel implementation
             class PrefabPanel : public IPanel {
-                private:
+            private:
+
+                //Reference to the entity and component panel
+                std::weak_ptr<EntityPanel> entity_panel;
+                std::weak_ptr<ComponentsPanel> comp_panel;
 
                 // Current state
                 bool isInEditMode = false;

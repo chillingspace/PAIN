@@ -168,116 +168,117 @@ namespace PAIN {
         }
 
         bool Service::loadSceneFromFile(const std::string& file_path) {
-            auto path_service = services->get<Path::Path>();
-            std::string virtPath = file_path;
-
-            if (virtPath.size() < 4 || virtPath.rfind(".scn") != virtPath.size() - 4)
-                virtPath += ".scn";
-
-#ifdef PN_PLATFORM_WINDOWS
-            // avoid the assert in WindowsPath::createFileStream
-            const std::string realPath = path_service->resolvePath(virtPath);
-            if (!std::filesystem::exists(realPath)) {
-                PN_CORE_WARN("[Scene] File not found: {}", realPath);
-                return false;
-            }
-#endif
-            const auto j = loadJsonFile(file_path);
-            if (!j.is_object()) {
-                PN_CORE_WARN("[Scene] expected object root (reflection)");
-                return false;
-            }
-
-            // Reflect into doc_
-            // set doc_ + clear dirty
-            doc_from_json_(j);
-
-            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
-                if (j.contains("metadata_service")) {
-                    metadata_service->deserializeServiceState(j["metadata_service"]);
-                }
-            }
-
-            // Rebuild ECS from the new bolt on section if present
-            if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
-                if (auto controller = services->get<PAIN::ECS::Controller>()) {
-                    controller->destroyAllEntities();
-
-                    if (auto entsIt = ecsIt->find("Entities"); entsIt != ecsIt->end() && entsIt->is_array()) {
-                        // PASS 1: Create all entities with their original GUIDs
-                        // This ensures all entities exist in the GUID registry before we deserialize Hierarchy
-                        std::vector<std::pair<entt::entity, const nlohmann::json*>> entity_data_pairs;
-
-                        for (const auto& ewrap : *entsIt) {
-                            if (!ewrap.is_object()) continue;
-                            auto eit = ewrap.find("Entity");
-                            if (eit == ewrap.end() || !eit->is_object()) continue;
-
-                            const auto& E = *eit;
-
-                            // Extract the GUID from Components
-                            Assets::GUID entity_guid;
-                            bool has_guid = false;
-
-                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-                                if (auto guidIt = compsIt->find("GUID"); guidIt != compsIt->end() && guidIt->is_object()) {
-                                    try {
-                                        // Deserialize the GUID using reflection
-                                        Entity::GUID guid_comp;
-                                        PAIN::Serialization::from_json_reflected(guid_comp, *guidIt);
-                                        entity_guid = guid_comp.guid;
-                                        has_guid = true;
-                                    }
-                                    catch (const std::exception& ex) {
-                                        PN_CORE_ERROR("[Scene Load] Failed to deserialize GUID: {}", ex.what());
-                                    }
-                                }
-                            }
-
-                            // Create entity with the original GUID if available
-                            entt::entity e;
-                            if (has_guid && entity_guid.IsValid()) {
-                                e = controller->createEntity(entity_guid);
-                                PN_CORE_INFO("[Scene Load] Created entity {} with preserved GUID {}",
-                                    static_cast<uint32_t>(e), entity_guid.ToString());
-                            }
-                            else {
-                                e = controller->createEntity();
-                                PN_CORE_WARN("[Scene Load] Created entity {} without GUID, generated new one",
-                                    static_cast<uint32_t>(e));
-                            }
-
-                            // Store for second pass
-                            entity_data_pairs.emplace_back(e, &E);
-                        }
-
-                        // PASS 2: Deserialize all components now that all entities exist in GUID registry
-                        for (const auto& [e, E_ptr] : entity_data_pairs) {
-                            const auto& E = *E_ptr;
-
-                            // Name
-                            if (auto n = E.find("Name"); n != E.end() && n->is_string())
-                                controller->addEntityComponent(e, Entity::Name{ n->get<std::string>() });
-                            else
-                                controller->addEntityComponent(e, Entity::Name{ "Entity " + std::to_string((int)e) });
-
-                            // Deserialize all components (including Hierarchy, which now can resolve GUIDs)
-                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-                                controller->loadAllComponentsFromJson(e, *compsIt);
-                            }
-                        }
-
-                        PN_CORE_INFO("[Scene Load] Successfully loaded {} entities with hierarchy", entity_data_pairs.size());
-                    }
-                }
-            }
-
-            // Remember which file is loaded for saving
-            curr_scene_file_ = file_path;
-
-            PN_CORE_INFO("[Serialization] loadSceneFromFile OK, marking scene changed");
-            markSceneChanged();
-            return true;
+            return false;
+//            auto path_service = services->get<Path::Path>();
+//            std::string virtPath = file_path;
+//
+//            if (virtPath.size() < 4 || virtPath.rfind(".scn") != virtPath.size() - 4)
+//                virtPath += ".scn";
+//
+//#ifdef PN_PLATFORM_WINDOWS
+//            // avoid the assert in WindowsPath::createFileStream
+//            const std::string realPath = path_service->resolvePath(virtPath);
+//            if (!std::filesystem::exists(realPath)) {
+//                PN_CORE_WARN("[Scene] File not found: {}", realPath);
+//                return false;
+//            }
+//#endif
+//            const auto j = loadJsonFile(file_path);
+//            if (!j.is_object()) {
+//                PN_CORE_WARN("[Scene] expected object root (reflection)");
+//                return false;
+//            }
+//
+//            // Reflect into doc_
+//            // set doc_ + clear dirty
+//            doc_from_json_(j);
+//
+//            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
+//                if (j.contains("metadata_service")) {
+//                    metadata_service->deserializeServiceState(j["metadata_service"]);
+//                }
+//            }
+//
+//            // Rebuild ECS from the new bolt on section if present
+//            if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
+//                if (auto controller = services->get<PAIN::ECS::Controller>()) {
+//                    controller->destroyAllEntities();
+//
+//                    if (auto entsIt = ecsIt->find("Entities"); entsIt != ecsIt->end() && entsIt->is_array()) {
+//                        // PASS 1: Create all entities with their original GUIDs
+//                        // This ensures all entities exist in the GUID registry before we deserialize Hierarchy
+//                        std::vector<std::pair<entt::entity, const nlohmann::json*>> entity_data_pairs;
+//
+//                        for (const auto& ewrap : *entsIt) {
+//                            if (!ewrap.is_object()) continue;
+//                            auto eit = ewrap.find("Entity");
+//                            if (eit == ewrap.end() || !eit->is_object()) continue;
+//
+//                            const auto& E = *eit;
+//
+//                            // Extract the GUID from Components
+//                            Assets::GUID entity_guid;
+//                            bool has_guid = false;
+//
+//                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
+//                                if (auto guidIt = compsIt->find("GUID"); guidIt != compsIt->end() && guidIt->is_object()) {
+//                                    try {
+//                                        // Deserialize the GUID using reflection
+//                                        Entity::GUID guid_comp;
+//                                        PAIN::Serialization::from_json_reflected(guid_comp, *guidIt);
+//                                        entity_guid = guid_comp.guid;
+//                                        has_guid = true;
+//                                    }
+//                                    catch (const std::exception& ex) {
+//                                        PN_CORE_ERROR("[Scene Load] Failed to deserialize GUID: {}", ex.what());
+//                                    }
+//                                }
+//                            }
+//
+//                            // Create entity with the original GUID if available
+//                            entt::entity e;
+//                            if (has_guid && entity_guid.IsValid()) {
+//                                e = controller->createEntity(entity_guid);
+//                                PN_CORE_INFO("[Scene Load] Created entity {} with preserved GUID {}",
+//                                    static_cast<uint32_t>(e), entity_guid.ToString());
+//                            }
+//                            else {
+//                                e = controller->createEntity();
+//                                PN_CORE_WARN("[Scene Load] Created entity {} without GUID, generated new one",
+//                                    static_cast<uint32_t>(e));
+//                            }
+//
+//                            // Store for second pass
+//                            entity_data_pairs.emplace_back(e, &E);
+//                        }
+//
+//                        // PASS 2: Deserialize all components now that all entities exist in GUID registry
+//                        for (const auto& [e, E_ptr] : entity_data_pairs) {
+//                            const auto& E = *E_ptr;
+//
+//                            // Name
+//                            if (auto n = E.find("Name"); n != E.end() && n->is_string())
+//                                controller->addEntityComponent(e, Entity::Name{ n->get<std::string>() });
+//                            else
+//                                controller->addEntityComponent(e, Entity::Name{ "Entity " + std::to_string((int)e) });
+//
+//                            // Deserialize all components (including Hierarchy, which now can resolve GUIDs)
+//                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
+//                                controller->loadAllComponentsFromJson(e, *compsIt);
+//                            }
+//                        }
+//
+//                        PN_CORE_INFO("[Scene Load] Successfully loaded {} entities with hierarchy", entity_data_pairs.size());
+//                    }
+//                }
+//            }
+//
+//            // Remember which file is loaded for saving
+//            curr_scene_file_ = file_path;
+//
+//            PN_CORE_INFO("[Serialization] loadSceneFromFile OK, marking scene changed");
+//            markSceneChanged();
+//            return true;
         }
 
         std::string Service::getCurrSceneId() const
@@ -439,6 +440,7 @@ namespace PAIN {
 
         nlohmann::json Service::to_json_from_doc_() const
         {
+            return nlohmann::json();
             // Reflection Check
             /*
 #ifdef _DEBUG
@@ -460,41 +462,41 @@ namespace PAIN {
 #endif
 */
 
-            // reflection SceneDoc object
-            nlohmann::json root = to_json_reflected(doc_);
+            //// reflection SceneDoc object
+            //nlohmann::json root = to_json_reflected(doc_);
 
-            // Attach ECS dump
-            nlohmann::json ecs = nlohmann::json::object();
-            nlohmann::json ents = nlohmann::json::array();
+            //// Attach ECS dump
+            //nlohmann::json ecs = nlohmann::json::object();
+            //nlohmann::json ents = nlohmann::json::array();
 
-            if (auto controller = services->get<PAIN::ECS::Controller>()) {
-                // Use EnTT view to iterate all entities with EntityName component
-                auto& registry = controller->getRegistry();
-                auto view = registry.view<Entity::Name>();
-                for (auto e : view) {
+            //if (auto controller = services->get<PAIN::ECS::Controller>()) {
+            //    // Use EnTT view to iterate all entities with EntityName component
+            //    auto& registry = controller->getRegistry();
+            //    auto view = registry.view<Entity::Name>();
+            //    for (auto e : view) {
 
-                    nlohmann::json E = nlohmann::json::object();
+            //        nlohmann::json E = nlohmann::json::object();
 
-                    // Name
-                    if (auto name = controller->getEntityComponent<Entity::Name>(e);
-                        name.has_value()) {
-                        E["Name"] = name->get().name;
-                    }
-                    else {
-                        E["Name"] = "Entity " + std::to_string((int)e);
-                    }
+            //        // Name
+            //        if (auto name = controller->getEntityComponent<Entity::Name>(e);
+            //            name.has_value()) {
+            //            E["Name"] = name->get().name;
+            //        }
+            //        else {
+            //            E["Name"] = "Entity " + std::to_string((int)e);
+            //        }
 
-                    // Components
-                    E["Components"] = controller->getAllComponentsAsJson(e);
+            //        // Components
+            //        E["Components"] = controller->getAllComponentsAsJson(e);
 
-                    ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
-                }
-            }
+            //        ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+            //    }
+            //}
 
-            ecs["Entities"] = std::move(ents);  
-            root["ecs"] = std::move(ecs);            // bolt on section
+            //ecs["Entities"] = std::move(ents);  
+            //root["ecs"] = std::move(ecs);            // bolt on section
 
-            return root;
+            //return root;
         }
 
 

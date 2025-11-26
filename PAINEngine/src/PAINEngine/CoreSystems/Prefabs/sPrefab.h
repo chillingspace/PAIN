@@ -47,15 +47,15 @@ namespace PAIN {
             entt::entity instantiatePrefab(const Assets::GUID& prefab_asset_id, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, const glm::vec3& position = glm::vec3(0.0f));
 
             //Prefab overrides
-            void applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, entt::registry& registry);
+            void applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Checks
             bool isInstance(entt::entity entity, entt::registry& registry) const;
             std::vector<entt::entity> getInstancesOfPrefab(const Assets::GUID& prefab_asset_id, entt::registry& registry) const;
 
             //Prefab instances function
-            void updateAllInstances(const Assets::GUID& prefabGUID,entt::registry& registry,bool preserveOverrides = true);
-            void updateSingleInstance(entt::entity instanceRoot, entt::registry& registry, bool preserveOverrides = true);
+            void updateAllInstances(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, bool preserveOverrides = true);
+            void updateSingleInstance(entt::entity instanceRoot, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, bool preserveOverrides = true);
 
             //Create path service
             static Service* create(std::shared_ptr<Services> service);
