@@ -131,7 +131,7 @@ namespace PAIN {
 	};
 
 	struct UIFollowsWorldEntity {
-		std::string entity_target_string;
+		Assets::GUID entity_target_guid;
 		glm::vec3 world_offset; 
 	};
 
@@ -241,7 +241,7 @@ REFL_END
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);
 
 REFL_TYPE(PAIN::UIFollowsWorldEntity)
-REFL_FIELD(entity_target_string)
+REFL_FIELD(entity_target_guid)
 REFL_FIELD(world_offset)
 REFL_END
 

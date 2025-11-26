@@ -10,6 +10,7 @@ file(GLOB_RECURSE ENGINE_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PAINEngine/*.hpp"
+    
 )
 
 add_library(PAINEngine STATIC ${ENGINE_SRC})
