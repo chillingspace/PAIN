@@ -495,8 +495,8 @@ namespace PAIN {
                 PN_CORE_INFO("Toggled DEBUG_PBR_MAP_TYPE: {}", (int)gs.DEBUG_PBR_MAP_TYPE);
                 break;
             case PAIN_KEY_F9:
-                gs.sunlight = !gs.sunlight;
-                PN_CORE_INFO("Toggled sunlight: {}", gs.sunlight);
+                gs.world_light = !gs.world_light;
+                PN_CORE_INFO("Toggled world_light: {}", gs.world_light);
                 break;
             case PAIN_KEY_F10:
                 gs.ibl = !gs.ibl;

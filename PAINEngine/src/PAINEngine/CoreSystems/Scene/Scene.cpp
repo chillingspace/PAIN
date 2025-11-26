@@ -185,8 +185,8 @@ namespace PAIN {
 			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
 			//Set up world light
-			using_day_time = env.useDaytime;
-			if (using_day_time) {
+			using_world_light = env.useDaytime;
+			if (using_world_light) {
 				if (!getWorldLight()) {
 					LightSources::get().create(world_light_name);
 				}
@@ -307,7 +307,7 @@ namespace PAIN {
 			//Capture all graphics and env variables
 			scene_asset.environment.cameraLightIntensity = getCameraLight() ? getCameraLight()->L_intensity : scene_asset.environment.cameraLightIntensity;
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
-			scene_asset.environment.useDaytime = using_day_time;
+			scene_asset.environment.useDaytime = using_world_light;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
 
 			//Capture all layer variables
@@ -577,7 +577,7 @@ namespace PAIN {
 
 			// Daytime / Nighttime setting
 			{
-				if (using_day_time) {
+				if (using_world_light && GraphicsSettings::get().world_light) {
 
 					auto olc = getWorldLight();
 
@@ -587,7 +587,6 @@ namespace PAIN {
 						getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-						GraphicsSettings::get().ibl = true;
 					}
 					else {
 						olc->position = GetActiveCamera()->pos - glm::normalize(olc->forward) * olc->shadow_source_follow_distance;
@@ -598,7 +597,6 @@ namespace PAIN {
 
 					if (olc) {
 						LightSources::get().destroy("world");
-						GraphicsSettings::get().ibl = false;
 					}
 				}
 			}

@@ -126,7 +126,7 @@ namespace PAIN {
                         }
 
                         // Daytime Toggle
-                        if (ImGui::Checkbox("Daytime", &gfx.sunlight)) {}
+                        if (ImGui::Checkbox("Daytime", &gfx.world_light)) {}
                         
                         // Draw Floor
                         if (ImGui::Checkbox("Draw Floor", &gfx.draw_floor)) {}

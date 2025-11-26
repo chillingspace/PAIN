@@ -55,7 +55,7 @@ namespace PAIN {
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
-		bool sunlight = true;
+		bool world_light = true;
 		float fov = 90.f;
 		
 		int blur_quality = 4;	// number of blur passes. higher = blurrier, BUT SLOWER, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2. too high won't help. sublinear growth.

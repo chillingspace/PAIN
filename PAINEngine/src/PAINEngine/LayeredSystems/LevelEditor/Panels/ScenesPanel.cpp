@@ -767,10 +767,15 @@ namespace PAIN {
                 if (scn_service->getCameraLight() && ImGui::ColorEdit3("Camera Light Intensity", glm::value_ptr(scn_service->getCameraLight()->L_intensity))) {
                 }
 
-                //Set using day
-                bool using_day = scn_service->getUsingDayTime();
-                if (ImGui::Checkbox("Using Day Time", &using_day)) {
-                    scn_service->setUsingDayTime(using_day);
+                //Set using world light
+                bool using_wlight = scn_service->getUsingWorldLight();
+                if (ImGui::Checkbox("Using World Light", &using_wlight)) {
+                    scn_service->setUsingWorldLight(using_wlight);
+                }
+
+                bool using_ibl = GraphicsSettings::get().ibl;
+                if (ImGui::Checkbox("Using IBL", &using_ibl)) {
+                    GraphicsSettings::get().ibl = using_ibl;
                 }
             }
 
