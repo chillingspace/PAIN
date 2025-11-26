@@ -57,72 +57,73 @@ namespace PAIN {
         // return CreateEntity();
 
 
-        // validate 
-        if (!assets_ || !fs_) {
-            PN_CORE_ERROR("CreatePrefabInstance: missing asset/fs services");
-            return entt::null;
-        }
+       // // validate 
+       // if (!assets_ || !fs_) {
+       //     PN_CORE_ERROR("CreatePrefabInstance: missing asset/fs services");
+       //     return entt::null;
+       // }
 
-        // lookup prefab by name
-        PAIN::Assets::GUID guid = assets_->findByName(prefab);
-        if (!guid.IsValid()) {
-            PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' not found", prefab);
-            return entt::null;
-        }
+       // // lookup prefab by name
+       // PAIN::Assets::GUID guid = assets_->findByName(prefab);
+       // if (!guid.IsValid()) {
+       //     PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' not found", prefab);
+       //     return entt::null;
+       // }
 
-        auto meta_data = assets_->getAssetData(guid);
-        if (!meta_data) {
-            PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' has no metadata", prefab);
-            return entt::null;
-        }
+       // auto meta_data = assets_->getAssetData(guid);
+       // if (!meta_data) {
+       //     PN_CORE_ERROR("CreatePrefabInstance: prefab '{}' has no metadata", prefab);
+       //     return entt::null;
+       // }
 
-        // resolve to OS path
-        std::string vpath =
-            fs_->aliasCombineRelative("assets", meta_data->shipped_relative_path.string());
+       // // resolve to OS path
+       // std::string vpath =
+       //     fs_->aliasCombineRelative("assets", meta_data->shipped_relative_path.string());
 
-        std::string osPath = fs_->resolvePath(vpath);
+       // std::string osPath = fs_->resolvePath(vpath);
 
 
-        // load JSON
-        nlohmann::json j;
-        try {
-            std::ifstream in(osPath);
-            if (!in) {
-                PN_CORE_ERROR("CreatePrefabInstance: cannot open '{}'", osPath);
-                return entt::null;
-            }
-            in >> j;
-        }
-        catch (const std::exception& e) {
-            PN_CORE_ERROR("CreatePrefabInstance: JSON error '{}': {}", osPath, e.what());
-            return entt::null;
-        }
+       // // load JSON
+       // nlohmann::json j;
+       // try {
+       //     std::ifstream in(osPath);
+       //     if (!in) {
+       //         PN_CORE_ERROR("CreatePrefabInstance: cannot open '{}'", osPath);
+       //         return entt::null;
+       //     }
+       //     in >> j;
+       // }
+       // catch (const std::exception& e) {
+       //     PN_CORE_ERROR("CreatePrefabInstance: JSON error '{}': {}", osPath, e.what());
+       //     return entt::null;
+       // }
 
-        // create entity 
-        entt::entity e = ecs_.createEntity();
+       // // create entity 
+       // entt::entity e = ecs_.createEntity();
 
-        // meta
-        if (!name.empty())
-            meta_.setEntityName(e, name);
+       // // meta
+       // if (!name.empty())
+       //     meta_.setEntityName(e, name);
 
-       /* if (!layer.empty())
-            ecs_.addEntityComponent<PAIN::MetaData::Group>(e, PAIN::MetaData::Group{ layer });*/
+       ///* if (!layer.empty())
+       //     ecs_.addEntityComponent<PAIN::MetaData::Group>(e, PAIN::MetaData::Group{ layer });*/
 
-        // deserialize components
-        try {
-            const nlohmann::json* comps = &j;
-            if (j.contains("components") && j["components"].is_object())
-                comps = &j["components"];
+       // // deserialize components
+       // try {
+       //     const nlohmann::json* comps = &j;
+       //     if (j.contains("components") && j["components"].is_object())
+       //         comps = &j["components"];
 
-            ecs_.loadAllComponentsFromJson(e, *comps);
-        }
-        catch (const std::exception& eex) {
-            PN_CORE_ERROR("CreatePrefabInstance: component hydrate failed: {}", eex.what());
-            ecs_.destroyEntity(e);
-            return entt::null;
-        }
+       //     ecs_.loadAllComponentsFromJson(e, *comps);
+       // }
+       // catch (const std::exception& eex) {
+       //     PN_CORE_ERROR("CreatePrefabInstance: component hydrate failed: {}", eex.what());
+       //     ecs_.destroyEntity(e);
+       //     return entt::null;
+       // }
 
-        return e;
+       // return e;
+        return entt::null;
     }
 
     /* =========================================================================== */

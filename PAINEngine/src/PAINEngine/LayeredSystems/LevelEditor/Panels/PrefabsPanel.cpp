@@ -7,6 +7,8 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 
+#include "LayeredSystems/LevelEditor/Editor.h"
+
 
 namespace PAIN {
     namespace Editor {
@@ -100,6 +102,11 @@ namespace PAIN {
                 isInEditMode = true;
                 currentEditingPrefabGUID = prefabGUID;
                 hasUnsavedChanges = false;
+
+                //Set the state of panels
+                entity_panel.lock()->setRegistry(editRegistryID);
+                comp_panel.lock()->setRegistry(editRegistryID);
+
                 PN_CORE_INFO("[PrefabEditMode] Successfully entered edit mode. Root entity: {}", static_cast<uint32_t>(editRootEntity));
                 return true;
             }
@@ -139,6 +146,11 @@ namespace PAIN {
                 editRegistryID = ECS::MAIN_REGISTRY_ID;
                 editRootEntity = entt::null;
                 hasUnsavedChanges = false;
+
+                //Set the state of panels
+                entity_panel.lock()->setRegistry(ECS::MAIN_REGISTRY_ID);
+                comp_panel.lock()->setRegistry(ECS::MAIN_REGISTRY_ID);
+
                 PN_CORE_INFO("[PrefabEditMode] Successfully exited edit mode");
                 return true;
             }
@@ -350,6 +362,10 @@ namespace PAIN {
             void PrefabPanel::onAttach() {
                 name = "Prefabs Panel";
                 flags = ImGuiWindowFlags_None;
+
+                //Init with reference to entity and comp panel
+                entity_panel = services->get<Editor>()->getPanel<EntityPanel>();
+                comp_panel = services->get<Editor>()->getPanel<ComponentsPanel>();
             }
 
             void PrefabPanel::onUpdate(PAIN::AppTiming timing) {

@@ -79,6 +79,7 @@ namespace PAIN {
             Prefab::PrefabAsset prefab_asset;
             prefab_asset.rootEntityGUID = registry.get<Entity::GUID>(rootEntity).guid;
             prefab_asset.name = prefabName;
+            prefab_asset.prefabName = prefabName;
 
             //Add entities into prefab
             for (auto e : hierarchyEntities) {
@@ -278,7 +279,7 @@ namespace PAIN {
             try {
                 if (entityData.contains("components")) {
                     const auto& componentsJson = entityData["components"];
-                    ecs_controller->loadAllComponentsFromJson(entity, componentsJson);
+                    ecs_controller->loadAllComponentsFromJson(entity, componentsJson, registry_id);
                 }
             }
             catch (const std::exception& e) {
@@ -533,13 +534,15 @@ namespace PAIN {
             return rootEntity;
         }
 
-        void Service::applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, entt::registry& registry) {
+        void Service::applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, ECS::RegistryID const& registry_id) {
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
             if (!registry.any_of<PrefabInstance>(instanceEntity)) return;
             auto& instance = registry.get<PrefabInstance>(instanceEntity);
             instance.componentOverrides[componentName] = overrideData;
             // Immediately apply the override if you want:
             auto ecs_controller = services.lock()->get<ECS::Controller>();
-            ecs_controller->loadAllComponentsFromJson(instanceEntity, overrideData);
+            ecs_controller->loadAllComponentsFromJson(instanceEntity, overrideData, registry_id);
         }
 
         bool Service::isInstance(entt::entity entity, entt::registry& registry) const {
@@ -557,17 +560,24 @@ namespace PAIN {
             return result;
         }
 
-        void Service::updateAllInstances(const Assets::GUID& prefabGUID, entt::registry& registry, bool preserveOverrides) {
+        void Service::updateAllInstances(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id, bool preserveOverrides) {
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             PN_CORE_INFO("[PrefabService] Updating all instances of prefab: {}", prefabGUID.ToString());
             auto instances = getInstancesOfPrefab(prefabGUID, registry);
 
             for (auto instanceEntity : instances) {
-                updateSingleInstance(instanceEntity, registry, preserveOverrides);
+                updateSingleInstance(instanceEntity, registry_id, preserveOverrides);
             }
             PN_CORE_INFO("[PrefabService] Updated {} instances", instances.size());
         }
         
-        void Service::updateSingleInstance(entt::entity instanceRoot, entt::registry& registry, bool preserveOverrides) {
+        void Service::updateSingleInstance(entt::entity instanceRoot, ECS::RegistryID const& registry_id, bool preserveOverrides) {
+
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             if (!registry.all_of<PrefabInstance>(instanceRoot)) {
                 PN_CORE_WARN("[PrefabService] Entity is not a prefab instance");
                 return;
@@ -598,13 +608,13 @@ namespace PAIN {
             }
             auto ecs_controller = services.lock()->get<ECS::Controller>();
             // Apply fresh prefab component data
-            ecs_controller->loadAllComponentsFromJson(instanceRoot, (*entityData)["components"]);
+            ecs_controller->loadAllComponentsFromJson(instanceRoot, (*entityData)["components"], registry_id);
             // Re-apply overrides if requested
             if (preserveOverrides && !savedOverrides.empty()) {
                 for (const auto& [componentName, overrideData] : savedOverrides) {
                     // Check if component still exists
-                    if (ecs_controller->hasComponentByName(instanceRoot, componentName)) {
-                        ecs_controller->loadAllComponentsFromJson(instanceRoot, overrideData);
+                    if (ecs_controller->hasComponentByName(instanceRoot, componentName, registry_id)) {
+                        ecs_controller->loadAllComponentsFromJson(instanceRoot, overrideData, registry_id);
                     }
                 }
 

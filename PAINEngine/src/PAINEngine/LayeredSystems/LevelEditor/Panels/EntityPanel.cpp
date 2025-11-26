@@ -53,13 +53,13 @@ namespace PAIN {
                                 auto ecs = PN_ECS_SERVICE;
                                 auto scene = services->get<Scene::SceneManager>();
 
-                                entt::entity entity = ecs->createEntity(); // Auto-assigns GUID
+                                entt::entity entity = ecs->createEntity(currentRegistryID); // Auto-assigns GUID
 
                                 // Add core components
-                                ecs->addEntityComponent(entity, Entity::Name{ final_name });
-                                ecs->addEntityComponent(entity, LocalTransform{});
-                                ecs->addEntityComponent(entity, WorldTransform{});
-                                ecs->addEntityComponent(entity, Entity::Hierarchy{});
+                                ecs->addEntityComponent(entity, Entity::Name{ final_name }, currentRegistryID);
+                                ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
+                                ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
+                                ecs->addEntityComponent(entity, Entity::Hierarchy{}, currentRegistryID);
 
                                 // Optional: Add default model
                                 if (scene) {
@@ -81,7 +81,7 @@ namespace PAIN {
                                         }
 
                                         //Add default model renderer
-                                        ecs->addEntityComponent(entity, ModelRenderer{ base_model_id });
+                                        ecs->addEntityComponent(entity, ModelRenderer{ base_model_id }, currentRegistryID);
                                     }
                                 }
 
@@ -99,7 +99,7 @@ namespace PAIN {
 
                                 for (auto entity : view) {
                                     if (view.get<Entity::Name>(entity).name == final_name) {
-                                        ecs->destroyEntity(entity);
+                                        ecs->destroyEntity(entity, currentRegistryID);
                                         break;
                                     }
                                 }
@@ -141,7 +141,7 @@ namespace PAIN {
                         command_manager->executeAction(Action{
                             [this, entity_to_remove]() {
                                 auto ecs = PN_ECS_SERVICE;
-                                if (ecs->checkEntity(entity_to_remove)) {
+                                if (ecs->checkEntity(entity_to_remove, currentRegistryID)) {
                                     removeEntityWithChildren(entity_to_remove);
                                 }
                                 selected_entity = entt::null;
@@ -180,11 +180,11 @@ namespace PAIN {
                             [this, final_name, clone_source]() {
                                 auto ecs = PN_ECS_SERVICE;
 
-                                if (ecs->checkEntity(clone_source)) {
-                                    entt::entity new_entity = ecs->cloneEntity(clone_source);
+                                if (ecs->checkEntity(clone_source, currentRegistryID)) {
+                                    entt::entity new_entity = ecs->cloneEntity(clone_source, currentRegistryID, currentRegistryID);
 
                                     // Set name
-                                    if (auto name_comp = ecs->getEntityComponent<Entity::Name>(new_entity)) {
+                                    if (auto name_comp = ecs->getEntityComponent<Entity::Name>(new_entity, currentRegistryID)) {
                                         name_comp.value().get().name = final_name;
                                     }
 
@@ -276,13 +276,13 @@ namespace PAIN {
                 auto view_all = registry.view<Entity::Name>();
                 for (auto entity : view_all) {
                     if (!registry.all_of<Entity::Hierarchy>(entity)) {
-                        ecs->addEntityComponent(entity, Entity::Hierarchy{});
+                        ecs->addEntityComponent(entity, Entity::Hierarchy{}, currentRegistryID);
                     }
                     if (!registry.all_of<LocalTransform>(entity)) {
-                        ecs->addEntityComponent(entity, LocalTransform{});
+                        ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
                     }
                     if (!registry.all_of<WorldTransform>(entity)) {
-                        ecs->addEntityComponent(entity, WorldTransform{});
+                        ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
                     }
                 }
 
@@ -297,7 +297,7 @@ namespace PAIN {
                 }
 
                 // Rebuild entity list if needed
-                size_t current_count = static_cast<size_t>(ecs->getEntitiesCount());
+                size_t current_count = static_cast<size_t>(ecs->getEntitiesCount(currentRegistryID));
                 if (total_entities != current_count || force_refresh) {
                     total_entities = current_count;
                     editor_entities.clear();
@@ -350,7 +350,7 @@ namespace PAIN {
                 }
 
                 // Show ungroup button for entities with children
-                if (ecs->checkEntity(selected_entity)) {
+                if (ecs->checkEntity(selected_entity, currentRegistryID)) {
                     std::vector<entt::entity> children = getEntityChildren(selected_entity);
                     if (!children.empty()) {
                         ImGui::Spacing();
@@ -374,7 +374,7 @@ namespace PAIN {
             void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth) {
                 auto ecs = PN_ECS_SERVICE;
 
-                if (!ecs->checkEntity(entity)) return;
+                if (!ecs->checkEntity(entity, currentRegistryID)) return;
 
                 std::string entity_name = getEntityName(entity);
                 bool is_selected = (selected_entity == entity);
@@ -464,7 +464,7 @@ namespace PAIN {
                         ungroupEntity(entity);
                     }
 
-                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
                         if (hierarchy.value().get().parentGUID.IsValid() && ImGui::MenuItem("Move to Root")) {
                             removeParent(entity);
                             force_refresh = true;
@@ -507,7 +507,7 @@ namespace PAIN {
                 auto& registry = ecs->getRegistry(currentRegistryID);
 
                 for (const auto& [entity, name] : editor_entities) {
-                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
                         if (!hierarchy.value().get().parentGUID.IsValid()) {
                             roots.push_back(entity);
                         }
@@ -524,13 +524,13 @@ namespace PAIN {
                 std::vector<entt::entity> children;
                 auto ecs = PN_ECS_SERVICE;
 
-                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(parent);
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(parent, currentRegistryID);
                 if (!hierarchy_opt) return children;
 
                 auto& hierarchy = hierarchy_opt.value().get();
                 for (const auto& childGUID : hierarchy.childrenGUIDs) {
-                    entt::entity child = ecs->resolveGUID(childGUID);
-                    if (child != entt::null && ecs->checkEntity(child)) {
+                    entt::entity child = ecs->resolveGUID(childGUID, currentRegistryID);
+                    if (child != entt::null && ecs->checkEntity(child, currentRegistryID)) {
                         children.push_back(child);
                     }
                 }
@@ -561,7 +561,7 @@ namespace PAIN {
             bool EntityPanel::isAncestor(entt::entity potential_ancestor, entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
 
-                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity);
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
                 if (!hierarchy_opt) return false;
 
                 std::unordered_set<Assets::GUID> visited;
@@ -577,12 +577,12 @@ namespace PAIN {
                     }
                     visited.insert(current_parent_guid);
 
-                    entt::entity current_parent = ecs->resolveGUID(current_parent_guid);
+                    entt::entity current_parent = ecs->resolveGUID(current_parent_guid, currentRegistryID);
                     if (current_parent == potential_ancestor) {
                         return true;
                     }
 
-                    auto parent_hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(current_parent);
+                    auto parent_hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(current_parent, currentRegistryID);
                     if (!parent_hierarchy_opt) break;
 
                     current_parent_guid = parent_hierarchy_opt->get().parentGUID;
@@ -594,7 +594,7 @@ namespace PAIN {
             void EntityPanel::removeEntityWithChildren(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
 
-                if (!ecs->checkEntity(entity)) return;
+                if (!ecs->checkEntity(entity, currentRegistryID)) return;
 
                 std::vector<entt::entity> children = getEntityChildren(entity);
                 for (auto child : children) {
@@ -602,13 +602,13 @@ namespace PAIN {
                 }
 
                 // Remove from parent's children list
-                if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity)) {
+                if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
                     if (hierarchy.value().get().parentGUID.IsValid()) {
-                        entt::entity parent = ecs->resolveGUID(hierarchy.value().get().parentGUID);
-                        if (parent != entt::null && ecs->checkEntity(parent)) {
-                            if (auto parent_hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(parent)) {
+                        entt::entity parent = ecs->resolveGUID(hierarchy.value().get().parentGUID, currentRegistryID);
+                        if (parent != entt::null && ecs->checkEntity(parent, currentRegistryID)) {
+                            if (auto parent_hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(parent, currentRegistryID)) {
                                 auto& children_guids = parent_hierarchy.value().get().childrenGUIDs;
-                                auto child_guid = ecs->getEntityComponent<Entity::GUID>(entity);
+                                auto child_guid = ecs->getEntityComponent<Entity::GUID>(entity, currentRegistryID);
                                 if (child_guid) {
                                     children_guids.erase(
                                         std::remove(children_guids.begin(), children_guids.end(), child_guid.value().get().guid),
@@ -620,7 +620,7 @@ namespace PAIN {
                     }
                 }
 
-                ecs->destroyEntity(entity);
+                ecs->destroyEntity(entity, currentRegistryID);
             }
 
             void EntityPanel::cloneEntityWithChildren(entt::entity source, entt::entity cloned_parent) {
@@ -628,7 +628,7 @@ namespace PAIN {
                 auto ecs = PN_ECS_SERVICE;
 
                 for (auto child : children) {
-                    entt::entity cloned_child = ecs->cloneEntity(child);
+                    entt::entity cloned_child = ecs->cloneEntity(child, currentRegistryID, currentRegistryID);
                     setEntityParent(cloned_child, cloned_parent);
                     cloneEntityWithChildren(child, cloned_child);
                 }
@@ -637,13 +637,13 @@ namespace PAIN {
             void EntityPanel::ungroupEntity(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
 
-                if (!ecs->checkEntity(entity)) return;
+                if (!ecs->checkEntity(entity, currentRegistryID)) return;
 
-                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity);
+                auto hierarchy_opt = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
                 if (!hierarchy_opt) return;
 
                 Assets::GUID parent_guid = hierarchy_opt->get().parentGUID;
-                entt::entity parent = parent_guid.IsValid() ? ecs->resolveGUID(parent_guid) : entt::null;
+                entt::entity parent = parent_guid.IsValid() ? ecs->resolveGUID(parent_guid, currentRegistryID) : entt::null;
 
                 std::vector<entt::entity> children = getEntityChildren(entity);
                 for (auto child : children) {
@@ -660,7 +660,7 @@ namespace PAIN {
 
             std::string EntityPanel::getEntityName(entt::entity entity) {
                 auto ecs = PN_ECS_SERVICE;
-                auto name_comp = ecs->getEntityComponent<Entity::Name>(entity);
+                auto name_comp = ecs->getEntityComponent<Entity::Name>(entity, currentRegistryID);
                 return name_comp ? name_comp.value().get().name : "Unnamed";
             }
 

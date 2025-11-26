@@ -454,56 +454,56 @@ namespace PAIN {
         /*****************************************************************//**
         * Component Methods
         *********************************************************************/
-        const std::unordered_map<std::string, std::function<void(entt::entity)>>& Controller::getComponentFactories() const {
+        const std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>>& Controller::getComponentFactories() const {
             return component_factories;
         }
-        std::vector<std::string> Controller::getEntityComponentNames(entt::entity entity) const {
+        std::vector<std::string> Controller::getEntityComponentNames(entt::entity entity, RegistryID registryId) const {
             std::vector<std::string> component_names;
-            if (!checkEntity(entity, MAIN_REGISTRY_ID)) {
+            if (!checkEntity(entity, registryId)) {
                 return component_names;
             }
             // Iterate all registered component checkers
             for (const auto& [name, checker] : component_checkers) {
-                if (checker(entity)) {
+                if (checker(entity, registryId)) {
                     component_names.push_back(name);
                 }
             }
             return component_names;
         }
-        void Controller::loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps) {
+        void Controller::loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps, RegistryID registryId) {
             // Note: This uses MAIN_REGISTRY_ID for backward compatibility
             if (!comps.is_object()) {
                 PN_CORE_WARN("loadAllComponentsFromJson: Expected object, got {}", comps.type_name());
                 return;
             }
-            deserializeAllComponentsImpl(entity, getRegistry(MAIN_REGISTRY_ID), comps, AllGameplayComponents{});
+            deserializeAllComponentsImpl(entity, getRegistry(registryId), comps, AllGameplayComponents{});
         }
-        nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity) const {
+        nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity, RegistryID registryId) const {
             // Note: This uses MAIN_REGISTRY_ID for backward compatibility
-            if (!checkEntity(entity, MAIN_REGISTRY_ID)) {
+            if (!checkEntity(entity, registryId)) {
                 return nlohmann::json::object();
             }
-            return serializeAllComponentsImpl(entity, getRegistry(MAIN_REGISTRY_ID), AllGameplayComponents{});
+            return serializeAllComponentsImpl(entity, getRegistry(registryId), AllGameplayComponents{});
         }
-        bool Controller::hasComponentByName(entt::entity entity, const std::string& name) const {
+        bool Controller::hasComponentByName(entt::entity entity, const std::string& name, RegistryID registryId) const {
             auto it = component_checkers.find(name);
             if (it == component_checkers.end()) {
                 return false;
             }
-            return it->second(entity);
+            return it->second(entity, registryId);
         }
-        void Controller::removeComponentByName(entt::entity entity, const std::string& name) {
+        void Controller::removeComponentByName(entt::entity entity, const std::string& name, RegistryID registryId) {
             auto it = component_removers.find(name);
             if (it != component_removers.end()) {
-                it->second(entity);
+                it->second(entity, registryId);
             }
         }
-        void* Controller::getComponentPtrByName(entt::entity entity, const std::string& name) {
+        void* Controller::getComponentPtrByName(entt::entity entity, const std::string& name, RegistryID registryId) {
             auto it = component_getters.find(name);
             if (it == component_getters.end()) {
                 return nullptr;
             }
-            return it->second(entity);
+            return it->second(entity, registryId);
         }
     }
 }
