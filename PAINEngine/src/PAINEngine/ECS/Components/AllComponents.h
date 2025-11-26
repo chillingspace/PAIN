@@ -71,6 +71,7 @@ namespace PAIN {
         if constexpr (std::is_same_v<T, Entity::GUID>) return "GUID";
         if constexpr (std::is_same_v<T, Entity::Name>) return "Name";
         if constexpr (std::is_same_v<T, Entity::Hierarchy>) return "Hierarchy";
+        if constexpr (std::is_same_v<T, Entity::Layer>) return "Layer";
 
         //Prefab components
         if constexpr (std::is_same_v<T, Prefab::PrefabInstance>) return "PrefabInstance";

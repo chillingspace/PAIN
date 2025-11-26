@@ -226,6 +226,27 @@ namespace PAIN {
 		void SceneManager::setupLayers(SceneAsset const& scene_asset) {
 			layers = scene_asset.layers;
 			mask_matrix = scene_asset.mask_matrix;
+
+			//Get all entities with layers
+			auto ecs_controller = services->get<ECS::Controller>();
+
+			//Get view of components
+			auto view = ecs_controller->getRegistry().view<Entity::Layer, Entity::GUID>();
+
+			// When creating entities, check if layer component exists and validate
+			for (auto [e, layer, guid] : view.each()) {
+					
+				// Validate layer ID is within scene's layer count
+				if (layer.layer_id >= layers.size()) {
+					PN_CORE_WARN("Entity {} has invalid layerID {}, resetting to 0", guid.guid.ToString(), layer.layer_id);
+					layer.layer_id = 0;
+					layer.layer_mask = 1;
+				}
+
+				// Update mask based on ID
+				layer.layer_mask = 1 << layer.layer_id;
+				layer.layerName = layers[layer.layer_id].name;
+			}
 		}
 
 		nlohmann::json SceneManager::captureCurrentEntities() {

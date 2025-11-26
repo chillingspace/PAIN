@@ -309,6 +309,8 @@ namespace PAIN {
             registerComponent<Entity::GUID>("GUID");
             registerComponent<Entity::Name>("Name");
             registerComponent<Entity::Hierarchy>("Hierarchy");
+            registerComponent<Entity::Layer>("Layer");
+
             //Register prefab instance
             registerComponent<Prefab::PrefabInstance>("PrefabInstance");
             // Core components
@@ -370,6 +372,7 @@ namespace PAIN {
             ctx->entity_count++;
             Assets::GUID guid = Assets::GUID::Generate();
             ctx->registry.emplace<Entity::GUID>(new_entity, guid);
+            ctx->registry.emplace<Entity::Layer>(new_entity);
             ctx->guid_registry.registerEntity(new_entity, guid);
             PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
                 static_cast<uint32_t>(new_entity),
@@ -384,6 +387,7 @@ namespace PAIN {
             entt::entity new_entity = ctx->registry.create();
             ctx->entity_count++;
             ctx->registry.emplace<Entity::GUID>(new_entity, e_id);
+            ctx->registry.emplace<Entity::Layer>(new_entity);
             ctx->guid_registry.registerEntity(new_entity, e_id);
             PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
                 static_cast<uint32_t>(new_entity),

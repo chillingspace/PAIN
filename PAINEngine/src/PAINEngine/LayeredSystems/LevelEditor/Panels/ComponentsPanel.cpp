@@ -10,6 +10,7 @@
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
 #include "ECS/Components/AllComponents.h"
+#include "CoreSystems/Scene/Scene.h"
 
 #ifdef _DEBUG
 
@@ -485,11 +486,9 @@ namespace PAIN {
                     // Iterate registered component factories
                     for (const auto& [comp_name, factory_func] : ecs->getComponentFactories()) {
                         
-                        if (comp_name == "Name" ||
-                            comp_name == "Tag" ||
-                            comp_name == "Editor Visiblity" ||
-                            comp_name == "Relation" ||
-                            comp_name == "Group") {
+                        if (comp_name == getComponentName<Entity::Name>() ||
+                            comp_name == getComponentName<Entity::Layer>() ||
+                            comp_name == getComponentName<MetaData::EditorVisible>()) {
                             continue;
                         }
 
@@ -690,12 +689,9 @@ namespace PAIN {
                 }
 
                 for (const auto& comp_name : component_names) {
-                    // Skip Metadata Component
-                    if (comp_name == "Name" ||
-                        comp_name == "Tag" ||
-                        comp_name == "Editor Visiblity" ||
-                        comp_name == "Relation" ||
-                        comp_name == "Group") {
+                    if (comp_name == getComponentName<Entity::Name>() ||
+                        comp_name == getComponentName<Entity::Layer>() ||
+                        comp_name == getComponentName<MetaData::EditorVisible>()) {
                         continue;
                     }
 
@@ -959,94 +955,140 @@ namespace PAIN {
 
                 ImGui::Spacing();
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
-                //ImGui::Text("Entity ID: %u", static_cast<uint32_t>(selected));
+                ImGui::Text("Entity Properties");
                 ImGui::PopStyleColor();
 
+                ImGui::Spacing();
+
                 // Display entity name from metadata
-                auto metadata = services->get<MetaData::Service>();
-                if (metadata) {
-                    auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
-                    std::string entity_name = name_comp_opt.has_value() ? name_comp_opt->get().name : "";
+                std::string entity_name;
+                auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
+                if (!name_comp_opt.has_value()) {
+                    entity_name = services->get<ECS::Controller>()->getRegistry().emplace<Entity::Name>(selected).name;
 
-                    ImGui::SameLine(0, 20);
+                }
+                else {
+                    entity_name = name_comp_opt->get().name;
+                }
 
-                    // Checkbox
-                    static bool checkbox = true;
-                    ImGui::PushID("Chkbox");
-                    if (ImGui::Checkbox("", &checkbox)) {
-                        // logic for checkbox here
-                    }
-                    ImGui::PopID();
-                    ImGui::SameLine(0, 8);
+                // Checkbox
+                static bool checkbox = true;
+                ImGui::PushID("Chkbox");
+                if (ImGui::Checkbox("", &checkbox)) {
+                    // logic for checkbox here
+                }
+                ImGui::PopID();
+                ImGui::SameLine(0, 8);
 
-                    // Entity Name
-                    char name_buf[128];
-                    strncpy(name_buf, entity_name.c_str(), sizeof(name_buf));
-                    name_buf[sizeof(name_buf) - 1] = '\0';
+                // Entity Name
+                char name_buf[128];
+                strncpy(name_buf, entity_name.c_str(), sizeof(name_buf));
+                name_buf[sizeof(name_buf) - 1] = '\0';
 
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
-                    if (ImGui::InputText("##entityName", name_buf, sizeof(name_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                        std::string new_name(name_buf);
-                        if(name_comp_opt.has_value()) name_comp_opt.value().get().name = new_name;
-                    }
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
+                if (ImGui::InputText("##entityName", name_buf, sizeof(name_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    std::string new_name(name_buf);
+                    if(name_comp_opt.has_value()) name_comp_opt.value().get().name = new_name;
+                }
 
-                    // Tag Dropdown
-                    ImGui::Separator();
-                    ImGui::Spacing();
-                    ImGui::SameLine(0, 20);
-                    std::string tag_value = "Untagged";
-                    auto curr_tags = metadata->getRegisteredTags();
-                    if (!curr_tags.empty()) {
-                        std::vector<const char*> tag_items;
-                        for (const auto& tag : curr_tags)
-                            tag_items.push_back(tag.c_str());
+                //// Tag Dropdown
+                //ImGui::Separator();
+                //ImGui::Spacing();
+                //ImGui::SameLine(0, 20);
+                //std::string tag_value = "Untagged";
+                //auto curr_tags = metadata->getRegisteredTags();
+                //if (!curr_tags.empty()) {
+                //    std::vector<const char*> tag_items;
+                //    for (const auto& tag : curr_tags)
+                //        tag_items.push_back(tag.c_str());
 
-                        for (const auto& tag : curr_tags)
-                            if (metadata->hasTag(selected, tag))
-                                tag_value = tag;
+                //    for (const auto& tag : curr_tags)
+                //        if (metadata->hasTag(selected, tag))
+                //            tag_value = tag;
 
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-                        if (ImGui::BeginCombo("##TagCombo", tag_value.c_str())) {
-                            for (size_t i = 0; i < tag_items.size(); ++i) {
-                                bool is_selected = (tag_value == tag_items[i]);
-                                if (ImGui::Selectable(tag_items[i], is_selected)) {
-                                    metadata->setEntityTag(selected, tag_items[i]);
+                //    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+                //    if (ImGui::BeginCombo("##TagCombo", tag_value.c_str())) {
+                //        for (size_t i = 0; i < tag_items.size(); ++i) {
+                //            bool is_selected = (tag_value == tag_items[i]);
+                //            if (ImGui::Selectable(tag_items[i], is_selected)) {
+                //                metadata->setEntityTag(selected, tag_items[i]);
+                //            }
+                //            if (is_selected) ImGui::SetItemDefaultFocus();
+                //        }
+                //        ImGui::EndCombo();
+                //    }
+                //}
+                //ImGui::SameLine(0, 5);
+                //ImGui::Text("Tag");
+
+                // Layer Dropdown
+                //ImGui::Spacing();
+                //Get scn service
+
+                ImGui::Spacing();
+
+                //Get ecs constroller
+                auto controller = services->get<ECS::Controller>();
+                if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected)) {
+                    if (layerCompOpt.has_value()) {
+
+                        auto layerComp = layerCompOpt.value();
+                        auto sceneManager = services->get<Scene::SceneManager>();
+                        const auto& layers = sceneManager->getLayers();
+
+                        // Layer dropdown
+                        const char* currentLayerName = layers[layerComp.get().layer_id].name.c_str();
+                        if (ImGui::BeginCombo("Layer", currentLayerName)) {
+                            for (size_t i = 0; i < layers.size(); ++i) {
+                                bool selected = (layerComp.get().layer_id == i);
+
+                                // Color indicator
+                                ImGui::PushStyleColor(ImGuiCol_Text,
+                                    ImVec4(layers[i].color.x, layers[i].color.y,
+                                        layers[i].color.z, 1.0f));
+
+                                if (ImGui::Selectable(std::string(layers[i].name + "##" + std::to_string(layers[i].id)).c_str(), selected)) {
+                                    layerComp.get().layer_id = i;
+                                    layerComp.get().layer_mask = 1 << i;
+                                    layerComp.get().layerName = layers[i].name;
                                 }
-                                if (is_selected) ImGui::SetItemDefaultFocus();
+
+                                ImGui::PopStyleColor();
+
+                                if (selected) {
+                                    ImGui::SetItemDefaultFocus();
+                                }
                             }
                             ImGui::EndCombo();
                         }
-                    }
-                    ImGui::SameLine(0, 5);
-                    ImGui::Text("Tag");
 
-                    // Layer Dropdown
-                    //ImGui::Spacing();
-                    ImGui::SameLine(0, 20);
-                    static const char* layers[] = { "Default", "Testing2", "Testing3" };
-                    static int layer_idx = 0;
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
-                    if (ImGui::Combo("##LayerCombo", &layer_idx, layers, IM_ARRAYSIZE(layers))) {
-                        //metadata layer logic
-                    }
-                    ImGui::SameLine(0, 5);
-                    ImGui::Text("Layer");
-
-
-                    if (metadata->isLocked(selected)) {
-                        ImGui::SameLine();
-                        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "[LOCKED]");
-                        ImGui::Separator();
-                        ImGui::Spacing();
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
-                        ImGui::Text("Entity is locked");
-                        ImGui::PopStyleColor();
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("Unlock this entity in the Entity Panel to edit its components.");
-                        return;
+                        // Show current mask (debug)
+                        ImGui::Text("Bitmask: 0x%08X", layerComp.get().layer_mask);
                     }
                 }
+
                 ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+                ImGui::Text("Entity Components");
+                ImGui::PopStyleColor();
+                ImGui::Spacing();
+
+                //if (metadata->isLocked(selected)) {
+                //    ImGui::SameLine();
+                //    ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "[LOCKED]");
+                //    ImGui::Separator();
+                //    ImGui::Spacing();
+                //    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.6f, 0.0f, 1.0f));
+                //    ImGui::Text("Entity is locked");
+                //    ImGui::PopStyleColor();
+                //    ImGui::Spacing();
+                //    ImGui::TextWrapped("Unlock this entity in the Entity Panel to edit its components.");
+                //    return;
+                //}
+                //ImGui::Spacing();
 
                 renderEntityComponents(selected);
 

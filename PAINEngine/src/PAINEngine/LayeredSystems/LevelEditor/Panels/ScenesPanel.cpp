@@ -324,125 +324,426 @@ namespace PAIN {
             }
 
             void ScenesPanel::drawLayerManagementPanel() {
-                //Get scene service
-                auto scn_service = services->get<Scene::SceneManager>();
+                auto scnService = services->get<Scene::SceneManager>();
+                if (!scnService) return;
 
-                //Get layers and matrix
-                auto& layers = scn_service->getLayers();
-                auto& maskMatrix = scn_service->getMaskMatrix();
+                auto& layers = scnService->getLayers();
+                auto& maskMatrix = scnService->getMaskMatrix();
 
-                ImGui::Indent();
+                // At the START of drawLayerManagementPanel(), before the layer loop:
+                std::unordered_map<int, int> layerEntityCounts;
+                auto controller = services->get<ECS::Controller>();
+                if (controller) {
+                    auto& registry = controller->getRegistry();
+                    auto view = registry.view<Entity::Layer>();
 
-                ImGui::Text("Total Layers: %u", static_cast<unsigned>(layers.size()));
+                    for (auto entity : view) {
+                        const auto& entityLayer = view.get<Entity::Layer>(entity);
+                        layerEntityCounts[entityLayer.layer_id]++;
+                    }
+                }
 
-                // Add/Remove layer buttons
-                if (ImGui::Button("Add Layer")) {
-                    // Create new layer with next available ID
-                    int newId = 0;
+                // Statistics bar
+                {
+                    ImGui::BeginGroup();
+                    ImGui::Text("Layers: %u/32", static_cast<unsigned>(layers.size()));
+                    ImGui::SameLine(120);
+
+                    int enabledCount = 0;
                     for (const auto& layer : layers) {
-                        if (layer.id >= newId) newId = layer.id + 1;
+                        if (layer.enabled) enabledCount++;
                     }
+                    ImGui::Text("Enabled: %d", enabledCount);
+                    ImGui::SameLine(240);
 
-                    Scene::Layer newLayer;
-                    newLayer.id = newId;
-                    newLayer.mask = 1 << newId; // Unique bit mask
-                    newLayer.enabled = true;
-                    layers.push_back(newLayer);
-
-                    // Resize mask matrix
-                    size_t n = layers.size();
-                    maskMatrix.resize(n);
-                    for (auto& row : maskMatrix) {
-                        row.resize(n, false);
-                    }
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Remove Selected") && !layers.empty()) {
                     if (selectedLayerIdx_ < layers.size()) {
-                        layers.erase(layers.begin() + selectedLayerIdx_);
+                        ImGui::TextColored(
+                            ImVec4(layers[selectedLayerIdx_].color.x,
+                                layers[selectedLayerIdx_].color.y,
+                                layers[selectedLayerIdx_].color.z, 1.0f),
+                            "%s Selected", layers[selectedLayerIdx_].name.c_str());
+                    }
+                    ImGui::EndGroup();
+                }
 
-                        // Resize mask matrix
-                        size_t n = layers.size();
-                        maskMatrix.resize(n);
-                        for (auto& row : maskMatrix) {
-                            row.resize(n, false);
-                        }
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
 
-                        // Adjust selection
-                        if (selectedLayerIdx_ >= layers.size() && !layers.empty()) {
+                // Toolbar
+                {
+                    // Add Layer button
+                    if (ImGui::Button("Add Layer", ImVec2(100, 0))) {
+                        if (layers.size() < 32) {
+                            int newId = 0;
+                            for (const auto& layer : layers) {
+                                if (layer.id >= newId) newId = layer.id + 1;
+                            }
+
+                            Scene::Layer newLayer;
+                            newLayer.id = newId;
+                            newLayer.mask = 1 << newId;
+                            newLayer.enabled = true;
+                            newLayer.name = "Layer " + std::to_string(newId);
+
+                            // Assign a nice default color
+                            static const glm::vec3 defaultColors[] = {
+                                {0.9f, 0.3f, 0.3f},  // Red
+                                {0.3f, 0.9f, 0.3f},  // Green
+                                {0.3f, 0.3f, 0.9f},  // Blue
+                                {0.9f, 0.9f, 0.3f},  // Yellow
+                                {0.9f, 0.3f, 0.9f},  // Magenta
+                                {0.3f, 0.9f, 0.9f},  // Cyan
+                            };
+                            newLayer.color = defaultColors[newId % 6];
+
+                            layers.push_back(newLayer);
+
+                            // Resize and initialize mask matrix
+                            size_t n = layers.size();
+                            maskMatrix.resize(n);
+                            for (auto& row : maskMatrix) {
+                                row.resize(n, false);
+                            }
+
+                            // Auto-select new layer
                             selectedLayerIdx_ = static_cast<unsigned>(layers.size() - 1);
+
+                            PN_CORE_INFO("[LayerPanel] Created layer '{}'", newLayer.name);
+                        }
+                        else {
+                            PN_CORE_WARN("[LayerPanel] Maximum 32 layers reached!");
                         }
                     }
-                }
 
-                ImGui::SameLine();
-
-                if (ImGui::Button("Edit Mask Matrix")) {
-                    showEditMask_ = true;
-                }
-
-                ImGui::Separator();
-
-                // Layer list
-                ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
-
-                for (unsigned i = 0; i < layers.size(); ++i) {
-                    ImGui::PushID(i);
-
-                    // Visibility checkbox
-                    const std::string checkboxId = "##vis_" + std::to_string(i);
-                    if (ImGui::Checkbox(checkboxId.c_str(), &layers[i].enabled)) {
-                        // Layer visibility changed
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Add a new layer (Max 32)");
                     }
 
                     ImGui::SameLine();
 
-                    // Selectable layer item
-                    const std::string label = "Layer " + std::to_string(layers[i].id) +
-                        " (Mask: 0x" + std::to_string(layers[i].mask) + ")";
+                    // Remove button
+                    ImGui::BeginDisabled(layers.empty() || selectedLayerIdx_ >= layers.size());
+                    if (ImGui::Button("Remove", ImVec2(100, 0))) {
+                        if (selectedLayerIdx_ < layers.size()) {
+                            std::string removedName = layers[selectedLayerIdx_].name;
+                            layers.erase(layers.begin() + selectedLayerIdx_);
 
-                    if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
-                        selectedLayerIdx_ = i;
-                    }
-
-                    // Context menu for layer
-                    if (ImGui::BeginPopupContextItem()) {
-                        if (ImGui::MenuItem("Delete Layer")) {
-                            layers.erase(layers.begin() + i);
                             // Resize mask matrix
                             size_t n = layers.size();
                             maskMatrix.resize(n);
                             for (auto& row : maskMatrix) {
                                 row.resize(n, false);
                             }
+
+                            // Adjust selection
+                            if (selectedLayerIdx_ >= layers.size() && !layers.empty()) {
+                                selectedLayerIdx_ = static_cast<unsigned>(layers.size() - 1);
+                            }
+
+                            PN_CORE_INFO("[LayerPanel] Removed layer '{}'", removedName);
+                        }
+                    }
+                    ImGui::EndDisabled();
+
+                    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                        ImGui::SetTooltip("Remove selected layer");
+                    }
+
+                    ImGui::SameLine();
+
+                    // Collision Matrix button
+                    if (ImGui::Button("Collision Matrix", ImVec2(130, 0))) {
+                        showEditMask_ = true;
+                    }
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Edit layer collision matrix");
+                    }
+
+                    ImGui::SameLine();
+
+                    // Quick actions dropdown
+                    if (ImGui::Button("Actions", ImVec2(100, 0))) {
+                        ImGui::OpenPopup("LayerActions");
+                    }
+
+                    if (ImGui::BeginPopup("LayerActions")) {
+                        if (ImGui::MenuItem("Enable All Layers")) {
+                            for (auto& layer : layers) layer.enabled = true;
+                        }
+                        if (ImGui::MenuItem("Disable All Layers")) {
+                            for (auto& layer : layers) layer.enabled = false;
+                        }
+                        ImGui::Separator();
+                        if (ImGui::MenuItem("Reset Layer Colors")) {
+                            static const glm::vec3 colors[] = {
+                                {0.9f, 0.3f, 0.3f}, {0.3f, 0.9f, 0.3f}, {0.3f, 0.3f, 0.9f},
+                                {0.9f, 0.9f, 0.3f}, {0.9f, 0.3f, 0.9f}, {0.3f, 0.9f, 0.9f},
+                            };
+                            for (size_t i = 0; i < layers.size(); ++i) {
+                                layers[i].color = colors[i % 6];
+                            }
+                        }
+                        ImGui::Separator();
+                        if (ImGui::MenuItem("Enable All Collisions")) {
+                            for (size_t i = 0; i < maskMatrix.size(); ++i) {
+                                for (size_t j = 0; j < maskMatrix[i].size(); ++j) {
+                                    if (i != j) maskMatrix[i][j] = true;
+                                }
+                            }
+                        }
+                        if (ImGui::MenuItem("Disable All Collisions")) {
+                            for (auto& row : maskMatrix) {
+                                std::fill(row.begin(), row.end(), false);
+                            }
+                        }
+                        ImGui::EndPopup();
+                    }
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                // Layer list with cards
+                ImGui::BeginChild("##LayerCardList", ImVec2(0, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+                if (layers.empty()) {
+                    // Empty state
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 100);
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+                    float textWidth = ImGui::CalcTextSize("No layers created yet").x;
+                    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - textWidth) * 0.5f);
+                    ImGui::Text("No layers created yet");
+                    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Click 'Add Layer' to create one").x) * 0.5f);
+                    ImGui::Text("Click 'Add Layer' to create one");
+                    ImGui::PopStyleColor();
+                }
+
+                for (unsigned i = 0; i < layers.size(); ++i) {
+                    ImGui::PushID(i);
+
+                    auto& layer = layers[i];
+                    bool isSelected = (selectedLayerIdx_ == i);
+
+                    // Card background
+                    ImVec2 cardPos = ImGui::GetCursorScreenPos();
+                    ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 80);
+
+                    ImU32 cardColor = isSelected
+                        ? IM_COL32(60, 80, 100, 255)   // Selected
+                        : IM_COL32(40, 45, 50, 255);    // Normal
+
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        cardPos,
+                        ImVec2(cardPos.x + cardSize.x, cardPos.y + cardSize.y),
+                        cardColor,
+                        4.0f  // Rounded corners
+                    );
+
+                    // Color indicator bar on left
+                    ImU32 colorIndicator = IM_COL32(
+                        static_cast<int>(layer.color.x * 255),
+                        static_cast<int>(layer.color.y * 255),
+                        static_cast<int>(layer.color.z * 255),
+                        255
+                    );
+                    ImGui::GetWindowDrawList()->AddRectFilled(
+                        cardPos,
+                        ImVec2(cardPos.x + 6, cardPos.y + cardSize.y),
+                        colorIndicator,
+                        4.0f, ImDrawFlags_RoundCornersLeft
+                    );
+
+                    // Card content
+                    ImGui::SetCursorScreenPos(ImVec2(cardPos.x + 12, cardPos.y + 8));
+
+                    ImGui::BeginGroup();
+                    {
+                        // Row 1: Visibility + Name + Actions
+                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
+
+                        // Visibility toggle with nice icon
+                        bool wasEnabled = layer.enabled;
+                        if (ImGui::Checkbox(layer.enabled ? "Visible" : "Hidden", &layer.enabled)) {
+                            if (wasEnabled != layer.enabled) {
+                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}",
+                                    layer.name,
+                                    layer.enabled ? "enabled" : "disabled");
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip(layer.enabled ? "Layer Visible" : "Layer Hidden");
+                        }
+
+                        ImGui::SameLine();
+
+                        // Layer name (editable)
+                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.25f, 0.3f, 0.8f));
+                        ImGui::SetNextItemWidth(250);
+                        char nameBuf[64];
+                        strncpy_s(nameBuf, layer.name.c_str(), sizeof(nameBuf) - 1);
+                        if (ImGui::InputText("##Name", nameBuf, sizeof(nameBuf))) {
+                            layer.name = nameBuf;
+                        }
+                        ImGui::PopStyleColor();
+
+                        ImGui::SameLine();
+
+                        // Color picker (compact)
+                        ImGui::SetNextItemWidth(80);
+                        if (ImGui::ColorEdit3("##Color", &layer.color.x,
+                            ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                            // Color changed
+                        }
+
+                        ImGui::SameLine();
+
+                        // Quick duplicate button
+                        if (ImGui::SmallButton("Duplicate")) {
+                            if (layers.size() < 32) {
+                                Scene::Layer duplicate = layer;
+                                duplicate.id = static_cast<int>(layers.size());
+                                duplicate.mask = 1 << duplicate.id;
+                                duplicate.name = layer.name + " Copy";
+                                layers.push_back(duplicate);
+
+                                // Resize mask matrix
+                                size_t n = layers.size();
+                                maskMatrix.resize(n);
+                                for (auto& row : maskMatrix) {
+                                    row.resize(n, false);
+                                }
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip("Duplicate layer");
+                        }
+
+                        // Row 2: Layer info
+                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+                        // Selected layer details (only if valid)
+                        if (selectedLayerIdx_ < layers.size()) {
+                            auto& selectedLayer = layers[selectedLayerIdx_];
+
+                            ImGui::Text("ID");
+                            ImGui::SameLine();
+                            ImGui::SetNextItemWidth(65);
+                            if (ImGui::InputInt("##LayerID", &selectedLayer.id, 1, 100, ImGuiInputTextFlags_ElideLeft)) {
+                                // Validate ID range
+                                if (selectedLayer.id < 0) selectedLayer.id = 0;
+                                if (selectedLayer.id > 31) selectedLayer.id = 31;
+                                selectedLayer.mask = 1 << selectedLayer.id;
+                            }
+                        }
+                        ImGui::SameLine(125);
+                        ImGui::Text("Mask: 0x%08X", layer.mask);
+                        ImGui::SameLine(250);
+
+                        // Show collision count
+                        int collisionCount = 0;
+                        if (i < maskMatrix.size()) {
+                            for (bool canCollide : maskMatrix[i]) {
+                                if (canCollide) collisionCount++;
+                            }
+                        }
+                        ImGui::Text("Collides with: %d layers", collisionCount);
+                        ImGui::PopStyleColor();
+
+                        // Row 3: Entity count (if entities have layer component)
+                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
+
+                        int entityCount = 0;
+                        auto it = layerEntityCounts.find(layer.id);
+                        if (it != layerEntityCounts.end()) {
+                            entityCount = it->second;
+                        }
+
+                        // Color code based on count
+                        ImVec4 countColor = entityCount > 0
+                            ? ImVec4(0.7f, 0.9f, 0.7f, 1.0f)  // Green if has entities
+                            : ImVec4(0.6f, 0.6f, 0.6f, 1.0f);  // Gray if empty
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, countColor);
+                        ImGui::Text("Entities: %d", entityCount);
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::EndGroup();
+
+                    // Card content
+                    ImGui::SetCursorScreenPos(ImVec2(cardPos.x, cardPos.y));
+
+                    // Make card clickable
+                    ImGui::InvisibleButton("##CardButton", cardSize);
+                    if (ImGui::IsItemClicked()) {
+                        selectedLayerIdx_ = i;
+                    }
+
+                    // Context menu
+                    if (ImGui::BeginPopupContextItem(("LayerContext" + std::to_string(i)).c_str())) {
+                        ImGui::TextColored(ImVec4(layer.color.x, layer.color.y, layer.color.z, 1.0f),
+                            "Layer: %s", layer.name.c_str());
+                        ImGui::Separator();
+
+                        if (ImGui::MenuItem("Duplicate")) {
+                            if (layers.size() < 32) {
+                                Scene::Layer duplicate = layer;
+                                duplicate.id = static_cast<int>(layers.size());
+                                duplicate.mask = 1 << duplicate.id;
+                                duplicate.name = layer.name + " Copy";
+                                layers.push_back(duplicate);
+
+                                size_t n = layers.size();
+                                maskMatrix.resize(n);
+                                for (auto& row : maskMatrix) {
+                                    row.resize(n, false);
+                                }
+                            }
+                        }
+
+                        if (ImGui::MenuItem(layer.enabled ? "Disable" : "Enable")) {
+                            layer.enabled = !layer.enabled;
+                        }
+
+                        ImGui::Separator();
+
+                        if (ImGui::MenuItem("Move Up", nullptr, false, i > 0)) {
+                            std::swap(layers[i], layers[i - 1]);
+                            selectedLayerIdx_ = i - 1;
+                        }
+
+                        if (ImGui::MenuItem("Move Down", nullptr, false, i < layers.size() - 1)) {
+                            std::swap(layers[i], layers[i + 1]);
+                            selectedLayerIdx_ = i + 1;
+                        }
+
+                        ImGui::Separator();
+
+                        if (ImGui::MenuItem("Delete", "Del")) {
+                            layers.erase(layers.begin() + i);
+                            size_t n = layers.size();
+                            maskMatrix.resize(n);
+                            for (auto& row : maskMatrix) {
+                                row.resize(n, false);
+                            }
+                            if (selectedLayerIdx_ >= layers.size() && !layers.empty()) {
+                                selectedLayerIdx_ = static_cast<unsigned>(layers.size() - 1);
+                            }
                             ImGui::EndPopup();
                             ImGui::PopID();
                             break;
                         }
+
                         ImGui::EndPopup();
                     }
 
+                    ImGui::Dummy(ImVec2(0, 3)); // Space for next card
                     ImGui::PopID();
                 }
 
                 ImGui::EndChild();
-
-                // Selected layer properties
-                if (selectedLayerIdx_ < layers.size()) {
-                    ImGui::Separator();
-                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Selected Layer Properties");
-
-                    auto& selectedLayer = layers[selectedLayerIdx_];
-
-                    ImGui::Text("Index: %u", selectedLayerIdx_);
-                    ImGui::InputInt("Layer ID", &selectedLayer.id);
-                    ImGui::InputInt("Bit Mask", &selectedLayer.mask);
-                    ImGui::Checkbox("Enabled", &selectedLayer.enabled);
-                }
-
-                ImGui::Unindent();
             }
 
             void ScenesPanel::drawGraphicsSettingsPanel() {
