@@ -172,6 +172,8 @@ namespace PAIN {
 	void sRenderer::geometryPass()
 	{
 		auto ecs = services->get<ECS::Controller>();
+		auto sceneManager = services->get<Scene::SceneManager>();
+		const auto& layers = sceneManager->getLayers();
 
 		// Use EnTT view to iterate all entities with EntityName component
 		auto& registry = ecs->getRegistry();
@@ -187,6 +189,15 @@ namespace PAIN {
 
   			auto transform = ecs->getEntityComponent<WorldTransform>(e);
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			if (!mdl.has_value() || !mdl->get().visible) continue;
+
+			// Check layer visibility
+			if (auto layerComp = ecs->getEntityComponent<Entity::Layer>(e)) {
+				int layerID = layerComp->get().layer_id;
+				if (layerID < layers.size() && !layers[layerID].enabled) {
+					continue;
+				}
+			}
 
 			glm::mat4 model_xform{ 1.f };
 			if (transform.has_value())
@@ -208,8 +219,6 @@ namespace PAIN {
 				//Draw geo
 				w_renderer->DrawGeometry(m_Scene, mdl->get(), model_xform);
 			}
-			
-
 		}
 		w_renderer->EndGeometryPass();
 

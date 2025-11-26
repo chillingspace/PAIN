@@ -66,7 +66,6 @@ REFL_END
 REFL_TYPE(PAIN::Entity::Layer)
 REFL_FIELD(layer_id)
 REFL_FIELD(layer_mask)
-REFL_FIELD(layerName)
 REFL_END
 
 #endif

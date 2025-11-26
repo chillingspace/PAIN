@@ -28,6 +28,7 @@ namespace PAIN {
         Entity::GUID,
         Entity::Name,
         Entity::Hierarchy,
+        Entity::Layer,
 
         //prefan comps
         Prefab::PrefabInstance,

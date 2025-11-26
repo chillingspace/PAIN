@@ -343,7 +343,8 @@ namespace PAIN {
 				layersJson.push_back({
 					{"id", layer.id},
 					{"mask", layer.mask},
-					{"enabled", layer.enabled}
+					{"enabled", layer.enabled},
+					{"name", layer.name}
 					});
 			}
 			sceneJson["layers"] = layersJson;
@@ -836,6 +837,7 @@ namespace PAIN {
 
 
 		}
+
 		void SceneManager::SetGameCamera()
 		{
 			auto it = game_cameras.find(active_game_cam);
@@ -844,10 +846,12 @@ namespace PAIN {
 			}
 
 		}
+
 		void SceneManager::ChangeGameCamera(std::string cam_name)
 		{
 			active_game_cam = cam_name;
 		}
+		
 		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
 			return game_cameras;
 		}
