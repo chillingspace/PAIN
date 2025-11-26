@@ -1322,20 +1322,22 @@ namespace PAIN {
 				auto ecs = services->get<ECS::Controller>();
 				auto& registry = ecs->getRegistry();
 
-				auto texture_entity_view = registry.view<Texture2D, LocalTransform>();
-				for (auto&& [entity, texture_comp, trans_comp] : texture_entity_view.each()) {
+				auto texture_entity_view = registry.view<Texture2D, LocalTransform, UIElement>();
+				for (auto&& [entity, texture_comp, trans_comp, ui_elem] : texture_entity_view.each()) {
 					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
 					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
 
-					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value()) continue;
+					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value() || !elem_comp_opt) continue;
 
 					auto& texture_comp = texture_comp_opt.value().get();
 					auto& transform_comp = transform_comp_opt.value().get();
+					auto& elem_comp = elem_comp_opt.value().get();
 
 					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
 					if (!texture_opt.has_value()) continue;
 
-					if (texture_comp.b_visible) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
+					if (elem_comp.b_is_enabled) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
 
 				}
 			}
@@ -1345,17 +1347,22 @@ namespace PAIN {
 				auto ecs = services->get<ECS::Controller>();
 				auto& registry = ecs->getRegistry();
 
-				auto text_entity_view = registry.view<UIText, UIElement>();
-				for (auto&& [entity, text_comp, elem_comp] : text_entity_view.each()) {
+				auto text_entity_view = registry.view<UIText, UIElement, UIRectTransform>();
+				for (auto&& [entity, text_comp, elem_comp, rect_comp] : text_entity_view.each()) {
 					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
 					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+					auto rect_comp_opt = ecs->getEntityComponent<UIRectTransform>(entity);
 
-					if (!text_comp_opt.has_value() || elem_comp_opt.has_value()) continue;
+					if (!text_comp_opt.has_value() || !elem_comp_opt.has_value() || !rect_comp_opt.has_value()) continue;
 
-					auto& text_comp = text_comp_opt.value().get();
-					auto& elem_comp = elem_comp_opt.value().get();
+					text_comp = text_comp_opt.value().get();
+					elem_comp = elem_comp_opt.value().get();
+					rect_comp = rect_comp_opt.value().get();
 
 					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+
+					// Assign calculated projection
+					text_comp.text_pos = rect_comp.calculated_world_position;
 
 					if (!font_opt.has_value()) continue;
 

@@ -239,17 +239,6 @@ namespace PAIN {
 
                         changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
 
-                        ImGui::Spacing();
-                        ImGui::Separator();
-                        ImGui::Spacing();
-
-                        // Rendering Options
-                        if (ImGui::CollapsingHeader("Rendering Options")) {
-                            ImGui::Indent(10.0f);
-                            changed |= ImGui::Checkbox("Visible", &texture_comp.b_visible);
-                            ImGui::Unindent(10.0f);
-                        }
-
                         ImGui::PopStyleVar();
 
                         return changed;
@@ -284,7 +273,7 @@ namespace PAIN {
                         }
 
                         // Font position
-                        ImGui::DragFloat2("Text Position", &text.text_pos.x, 1.0f, 0.0f, 0.0f, "%.1f");
+                        ImGui::Text("Text Position: (%.8f, %.8f)", text.text_pos.x, text.text_pos.y);
 
                         // Font size
                         changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");

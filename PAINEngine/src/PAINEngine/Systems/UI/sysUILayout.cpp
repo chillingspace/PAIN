@@ -34,9 +34,10 @@ namespace PAIN {
             auto window_service = svc->get<Window::Window>();
 
             // Get camera matrices for world-space UI
-            auto camera_service = svc->get<sCameraController>();
-            glm::mat4 view = camera_service->getViewMatrix();
-            glm::mat4 projection = camera_service->getProjectionMatrix();
+            auto scene_service = svc->get<Scene::SceneManager>();
+            Camera* cam = scene_service->GetActiveCamera();
+            glm::mat4 view = cam->view();
+            glm::mat4 projection = cam->projection();
             glm::vec2 viewport = window_service->getFrameBuffer();
 
             // For every UI label with a UIFollowsWorldEntity, the position is projected from world to screen and written to the label's UIRectTransform.calculated_world_position.
@@ -79,9 +80,12 @@ namespace PAIN {
                 // If UIRectTransform has local size, multiply by world_scale.xy for final size
                 if (registry.all_of<UIRectTransform>(entity)) {
                     auto& rect = registry.get<UIRectTransform>(entity);
-                    calculated_size = rect.size_delta * glm::vec2(world_scale);
-                    rect.calculated_world_position = calculated_pos;
-                    rect.calculated_world_size = calculated_size;
+
+                    if (!registry.all_of<UIFollowsWorldEntity>(entity)) {
+                        calculated_size = rect.size_delta * glm::vec2(world_scale);
+                        rect.calculated_world_position = calculated_pos;
+                        rect.calculated_world_size = calculated_size;
+                    }
                 }
             }
 
@@ -119,7 +123,6 @@ namespace PAIN {
 
             for (auto&& [entity, follows, rect] : view_floating.each()) {
 
-                // Entity here is invalid !!!!!!!!!!!!!!!!!!!
                 entt::entity follow_entity = ecs->resolveGUID(follows.entity_target_guid);
 
                 if (follow_entity == entt::null) continue;
@@ -127,14 +130,13 @@ namespace PAIN {
                 if (!registry.valid(follow_entity) || !registry.all_of<WorldTransform>(follow_entity))
                     continue;
 
-                std::string ent_name = metadata_service->getEntityName(follow_entity);
-
                 const auto& world = registry.get<WorldTransform>(follow_entity);
                 glm::vec3 world_pos = glm::vec3(world.matrix * glm::vec4(follows.world_offset, 1.f));
                 glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
 
                 glm::vec2 screen_pos = worldToScreen(world_pos, view, proj, viewport);
 
+                // Not getting assigned here?
                 rect.calculated_world_position = screen_pos;
                 // Optionally, allow a pixel offset in UIFollowsWorldEntity for vertical separation
             }
