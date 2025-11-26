@@ -293,6 +293,7 @@ namespace PAIN {
 
 			//Capture all camera variables
 			if (active_camera) {
+				scene_asset.camera.active_game_cam = active_game_cam;
 				scene_asset.camera.position = active_camera->pos;
 				scene_asset.camera.forward = active_camera->forward;
 				scene_asset.camera.up = active_camera->up;
@@ -320,6 +321,7 @@ namespace PAIN {
 
 			//Camera settings
 			sceneJson["camera"] = {
+				{"active_cam", scn_asset.camera.active_game_cam},
 				{"position", {scn_asset.camera.position.x, scn_asset.camera.position.y, scn_asset.camera.position.z}},
 				{"forward", {scn_asset.camera.forward.x, scn_asset.camera.forward.y, scn_asset.camera.forward.z}},
 				{"up", {scn_asset.camera.up.x, scn_asset.camera.up.y, scn_asset.camera.up.z}},

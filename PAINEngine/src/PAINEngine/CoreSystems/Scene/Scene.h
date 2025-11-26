@@ -111,12 +111,14 @@ namespace PAIN {
             bool getUsingDayTime() const { return using_day_time; }
             void setUsingDayTime(bool day_time) { using_day_time = day_time; }
 
+            // Cameras
             Camera* GetActiveCamera();
             void SetActiveCamera(Camera* cam);
             void SetEditorCamera();
             void SetGameCamera();
             void ChangeGameCamera(std::string cam_name);
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+
             // Get current scene layers
             const std::vector<Scene::Layer>& getLayers() const {
                 return layers;

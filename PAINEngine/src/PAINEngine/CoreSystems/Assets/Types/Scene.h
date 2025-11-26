@@ -23,6 +23,7 @@ namespace PAIN {
 
             //Default camera settings
             struct CameraSettings {
+                std::string active_game_cam;
                 glm::vec3 position{ 0.f, 2.f, 4.f };
                 glm::vec3 forward{ 0.f, 0.f, -1.f };
                 glm::vec3 up{ 0.f, 1.f, 0.f };

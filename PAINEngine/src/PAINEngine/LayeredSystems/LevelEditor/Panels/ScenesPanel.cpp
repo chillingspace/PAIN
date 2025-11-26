@@ -5,6 +5,7 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
+#include <CoreSystems/Scripting/EngineAPIAdapter.h>
 
 namespace PAIN {
     namespace Editor {
@@ -774,6 +775,38 @@ namespace PAIN {
                 }
             }
 
+            void ScenesPanel::drawActiveCamPanel()
+            {
+                auto scene = services->get<Scene::SceneManager>();
+                std::vector<const char*> camera_names;
+
+
+                for (const auto& camera : scene->GetAllGameCamera()) {
+                    if (!camera.first.empty()) {
+                        camera_names.push_back(camera.first.c_str());
+                    }
+                }
+
+                // Combo box for active cam selection
+                if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
+                    if (!camera_names.empty() && selected_cam_index == -1) {
+                        selected_cam_index = 0;
+                        const auto& cameras = scene->GetAllGameCamera();
+                        auto it = cameras.find(camera_names[selected_cam_index]);
+                        if (it != cameras.end()) {
+                            scene->ChangeGameCamera(it->first);
+                        }
+                    }
+                    if (selected_cam_index >= 0 && selected_cam_index < camera_names.size()) {
+                        const auto& cameras = scene->GetAllGameCamera();
+                        auto it = cameras.find(camera_names[selected_cam_index]);
+                        if (it != cameras.end()) {
+                            scene->ChangeGameCamera(it->first);
+                        }
+                    }
+                }
+            }
+
             void ScenesPanel::onAttach()
             {
                 registerPopUp("CreateScene", createScenePopup("CreateScene"));
@@ -851,8 +884,6 @@ namespace PAIN {
 
                 ImGui::Separator();
                 ImGui::Spacing();
-                auto scene = services->get<Scene>();
-                std::vector<const char*> camera_names;
 
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
@@ -864,24 +895,10 @@ namespace PAIN {
                     drawLayerManagementPanel();
                 }
 
-                // Combo box for active cam selection
-                if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
-                    if (!camera_names.empty() && selected_cam_index == -1) {
-                        selected_cam_index = 0;
-                        const auto& cameras = scene->GetAllGameCamera();
-                        auto it = cameras.find(camera_names[selected_cam_index]);
-                        if (it != cameras.end()) {
-                            scene->ChangeGameCamera(it->first);
-                        }
-                    }
-                    if (selected_cam_index >= 0 && selected_cam_index < camera_names.size()) {
-                        const auto& cameras = scene->GetAllGameCamera();
-                        auto it = cameras.find(camera_names[selected_cam_index]);
-                        if (it != cameras.end()) {
-                            scene->ChangeGameCamera(it->first);
-                        }
-                    }
-                }
+                //Render Active Cam
+                drawActiveCamPanel();
+
+              
                 //// Scene configuration panels
                 //drawSkyboxSettingsPanel();
                 //drawGraphicsSettingsPanel();
