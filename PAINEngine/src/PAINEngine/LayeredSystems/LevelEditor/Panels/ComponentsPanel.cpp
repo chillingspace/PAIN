@@ -433,11 +433,11 @@ namespace PAIN {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
                                 entt::entity dragged_entity = *(const entt::entity*)payload->Data;
 
-                                std::string ent_name = services->get<MetaData::Service>()->getEntityName(dragged_entity);
+                                Assets::GUID entity_guid = ecs->getOrCreateEntityGUID(dragged_entity);
 
-                                if (ent_name != follow.entity_target_string) {
+                                if (entity_guid != follow.entity_target_guid) {
 
-                                    follow.entity_target_string = ent_name;
+                                    follow.entity_target_guid = entity_guid;
 
                                     changed = true;
                                 }
@@ -445,14 +445,18 @@ namespace PAIN {
                             ImGui::EndDragDropTarget();
                         }
 
+                        entt::entity entity = ecs->resolveGUID(follow.entity_target_guid);
+
+                        std::string entity_name = metadata_service->getEntityName(entity);
+
                         // Have an imgui text to show the current entity that is dragged
-                        std::string target_name = follow.entity_target_string != "" ? follow.entity_target_string : "[none]";
+                        std::string target_name = entity != entt::null ? entity_name : "[none]";
 
                         ImGui::Text("World Target: %s", target_name.c_str());
 
                         // Optionally allow clearing the target
                         if (ImGui::Button("Clear Target")) {
-                            follow.entity_target_string = "";
+                            follow.entity_target_guid = Assets::GUID{};
                             changed = true;
                         }
 

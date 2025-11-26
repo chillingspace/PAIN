@@ -115,20 +115,21 @@ namespace PAIN {
             auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform>();
             auto svc = services.lock();
             auto metadata_service = svc->get<MetaData::Service>();
+            auto ecs = svc->get<ECS::Controller>();
 
             for (auto&& [entity, follows, rect] : view_floating.each()) {
 
                 // Entity here is invalid !!!!!!!!!!!!!!!!!!!
-                auto ent_opt = metadata_service->getEntityByName(follows.entity_target_string);
+                entt::entity follow_entity = ecs->resolveGUID(follows.entity_target_guid);
 
-                if (!ent_opt) continue;
+                if (follow_entity == entt::null) continue;
 
-                if (!registry.valid(ent_opt.value()) || !registry.all_of<WorldTransform>(ent_opt.value()))
+                if (!registry.valid(follow_entity) || !registry.all_of<WorldTransform>(follow_entity))
                     continue;
 
-                std::string ent_name = metadata_service->getEntityName(entity);
+                std::string ent_name = metadata_service->getEntityName(follow_entity);
 
-                const auto& world = registry.get<WorldTransform>(ent_opt.value());
+                const auto& world = registry.get<WorldTransform>(follow_entity);
                 glm::vec3 world_pos = glm::vec3(world.matrix * glm::vec4(follows.world_offset, 1.f));
                 glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
 
