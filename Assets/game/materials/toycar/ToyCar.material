@@ -1,0 +1,30 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\toycar\\ToyCar_basecolor.png",
+        "ao": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png",
+        "clearCoat": "game\\textures\\toycar\\ToyCar_clearcoat.png",
+        "emissive": "game\\textures\\toycar\\ToyCar_emissive.png",
+        "lightmap": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png",
+        "metallic": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png",
+        "normal": "game\\textures\\toycar\\ToyCar_normal.png",
+        "roughness": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png"
+    }
+}

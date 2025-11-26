@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Fabric_occlusion.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18360802043286616928
+  },
+  "descriptor_version": 1,
+  "guid": "6487b1f5-f45a-4d47-bdcc-fd75ac2078cf",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\game\\models\\toycar\\Fabric_occlusion.png"
+  }
+}

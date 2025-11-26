@@ -614,7 +614,6 @@ namespace PAIN {
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
-			// TEMPORARY: Only render first submesh
 			const auto& submesh = modelAsset->submeshes[i];
 
 			//Check out of bounds
