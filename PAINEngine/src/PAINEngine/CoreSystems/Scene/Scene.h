@@ -80,8 +80,10 @@ namespace PAIN {
             //Delete current active scene
             void deleteScene(Assets::GUID const& id);
 
+#ifdef _DEBUG
             //Create default scene
             void createScene(std::string const& name);
+#endif
 
             //Save curr scene
             void saveActiveScene(Assets::GUID const& scn_id, std::string const& name = "");
