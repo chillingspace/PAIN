@@ -71,6 +71,10 @@ namespace PAIN {
 
 			void ViewportPanel::onAttach()
 			{
+				//Init with reference to entity and comp panel
+				m_EntityPanel = services->get<Editor>()->getPanel<EntityPanel>();
+				m_comp_panel = services->get<Editor>()->getPanel<ComponentsPanel>();
+				m_prefab_panel = services->get<Editor>()->getPanel<PrefabPanel>();
 			}
 
 			float ViewportPanel::getTimeScale() const {
@@ -364,6 +368,44 @@ namespace PAIN {
 						ImGui::SameLine();
 						if (ImGui::RadioButton("Local", m_GizmoMode == ImGuizmo::LOCAL))
 							m_GizmoMode = ImGuizmo::LOCAL;
+
+						ImGui::SameLine();
+						ImGui::Spacing();
+						ImGui::SameLine();
+
+						//Toggle mode
+						if (m_prefab_panel->getEditingMode()) {
+
+							//Toggle between registries
+							if (ImGui::SmallButton(currentRegistryID == ECS::MAIN_REGISTRY_ID ? "Edit Prefab" : "Edit Scene")) {
+								//Set prev registry to auto simulate
+								ecs->setRegistryAutoSimulate(currentRegistryID, false);
+								if (currentRegistryID != ECS::MAIN_REGISTRY_ID) {
+									currentRegistryID = ECS::MAIN_REGISTRY_ID;
+								}
+								else {
+									currentRegistryID = m_prefab_panel->getEditRegistryID();
+								}
+								//Set curr registry to auto simulate
+								ecs->setRegistryAutoSimulate(currentRegistryID, true);
+							}
+
+							//Set comp and entity panel registries
+							if (m_comp_panel->getCurrentRegistry() != currentRegistryID) m_comp_panel->setRegistry(currentRegistryID);
+							if (m_EntityPanel->getCurrentRegistry() != currentRegistryID) m_EntityPanel->setRegistry(currentRegistryID);
+						}
+						else {
+
+							//Ensure main registry auto simulates
+							if(!ecs->isRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID))ecs->setRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID, true);
+
+							//Reset registry IDs
+							if(currentRegistryID != ECS::MAIN_REGISTRY_ID) currentRegistryID = ECS::MAIN_REGISTRY_ID;
+
+							//Reset registry IDs
+							if (m_comp_panel->getCurrentRegistry() != currentRegistryID) m_comp_panel->setRegistry(currentRegistryID);
+							if (m_EntityPanel->getCurrentRegistry() != currentRegistryID) m_EntityPanel->setRegistry(currentRegistryID);
+						}
 					}
 					ImGui::EndChild();
 

@@ -6,9 +6,6 @@
 #include "AssetData.h"
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "ECS/Controller.h"
-#include "EntityPanel.h"
-#include "ComponentsPanel.h"
-#include "ViewportPanel.h"
 
 namespace PAIN {
     namespace Editor {
@@ -17,11 +14,6 @@ namespace PAIN {
             //Prefab panel implementation
             class PrefabPanel : public IPanel {
             private:
-
-                //Reference to the entity and component panel
-                std::weak_ptr<EntityPanel> entity_panel;
-                std::weak_ptr<ComponentsPanel> comp_panel;
-                std::weak_ptr<ViewportPanel> viewport_panel;
 
                 // Current state
                 bool isInEditMode = false;
@@ -68,6 +60,12 @@ namespace PAIN {
             public:
                 PrefabPanel() = default;
                 ~PrefabPanel() override = default;
+
+                //Get in edit mode
+                bool getEditingMode() const { return isInEditMode; }
+
+                //Get edit registry id
+                ECS::RegistryID getEditRegistryID() const { return editRegistryID; }
 
                 void nextWindowSettings() override;
                 void onAttach() override;

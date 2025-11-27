@@ -128,7 +128,7 @@ namespace PAIN {
         entt::registry& Controller::getRegistry(RegistryID id) {
             auto* ctx = getRegistryContext(id);
             if (!ctx) {
-                PN_CORE_ERROR("[ECS Controller] Returning main registry as fallback");
+                PN_CORE_WARN("[ECS Controller] Returning main registry as fallback");
                 return registries[MAIN_REGISTRY_ID].registry;
             }
             return ctx->registry;
@@ -136,7 +136,7 @@ namespace PAIN {
         const entt::registry& Controller::getRegistry(RegistryID id) const {
             auto* ctx = getRegistryContext(id);
             if (!ctx) {
-                PN_CORE_ERROR("[ECS Controller] Returning main registry as fallback");
+                PN_CORE_WARN("[ECS Controller] Returning main registry as fallback");
                 return registries.at(MAIN_REGISTRY_ID).registry;
             }
             return ctx->registry;

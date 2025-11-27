@@ -8,6 +8,7 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 
 #include "LayeredSystems/LevelEditor/Editor.h"
+#include "ViewportPanel.h"
 
 
 namespace PAIN {
@@ -103,14 +104,12 @@ namespace PAIN {
                 currentEditingPrefabGUID = prefabGUID;
                 hasUnsavedChanges = false;
 
-                //Set the state of panels
-                entity_panel.lock()->setRegistry(editRegistryID);
-                comp_panel.lock()->setRegistry(editRegistryID);
-                viewport_panel.lock()->setRegistry(editRegistryID);
-
                 //Set only the prefab registry to simulate
                 ecsController->setRegistryAutoSimulate(editRegistryID, true);
                 ecsController->setRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID, false);
+
+                //Set viewport panel
+                services->get<Editor>()->getPanel<ViewportPanel>()->setRegistry(editRegistryID);
 
                 PN_CORE_INFO("[PrefabEditMode] Successfully entered edit mode. Root entity: {}", static_cast<uint32_t>(editRootEntity));
                 return true;
@@ -156,10 +155,8 @@ namespace PAIN {
                 editRootEntity = entt::null;
                 hasUnsavedChanges = false;
 
-                //Set the state of panels
-                entity_panel.lock()->setRegistry(editRegistryID);
-                comp_panel.lock()->setRegistry(editRegistryID);
-                viewport_panel.lock()->setRegistry(editRegistryID);
+                //Set viewport panel
+                services->get<Editor>()->getPanel<ViewportPanel>()->setRegistry(editRegistryID);
 
                 PN_CORE_INFO("[PrefabEditMode] Successfully exited edit mode");
                 return true;
@@ -344,8 +341,9 @@ namespace PAIN {
                     ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), " *unsaved*");
                 }
                 ImGui::PopStyleColor();
-                // Right side: Action buttons
-                ImGui::SameLine(ImGui::GetWindowWidth() - 220);
+
+                ImGui::Spacing();
+
                 if (ImGui::Button("Save")) {
                     if (saveCurrentPrefab()) {
                         PN_CORE_INFO("Prefab saved successfully");
@@ -373,11 +371,6 @@ namespace PAIN {
             void PrefabPanel::onAttach() {
                 name = "Prefabs Panel";
                 flags = ImGuiWindowFlags_None;
-
-                //Init with reference to entity and comp panel
-                entity_panel = services->get<Editor>()->getPanel<EntityPanel>();
-                comp_panel = services->get<Editor>()->getPanel<ComponentsPanel>();
-                viewport_panel = services->get<Editor>()->getPanel<ViewportPanel>();
             }
 
             void PrefabPanel::onUpdate(PAIN::AppTiming timing) {

@@ -34,7 +34,7 @@ namespace PAIN {
             void collectHierarchy(entt::entity root, std::vector<entt::entity>& outEntities, ECS::RegistryID const& registry_id);
 
             //Serialize a single entity
-            nlohmann::json serializeEntity(entt::entity entity, const ECS::RegistryID const& registry_id);
+            nlohmann::json serializeEntity(entt::entity entity, ECS::RegistryID const& registry_id);
 
             //Create and save prefab
             void createPrefab(entt::entity rootEntity, const std::string& prefabName, ECS::RegistryID const& registry_id);

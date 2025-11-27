@@ -8,11 +8,14 @@
 #include "CoreSystems/Scene/sCameraController.h"
 #include "ImGuizmo.h"
 
+#include "ComponentsPanel.h"
+#include "EntityPanel.h"
+#include "PrefabsPanel.h"
+
 // Forward declarations - no include needed
 namespace PAIN {
     namespace Editor {
         namespace Panel {
-            class EntityPanel;
             struct File;  // Forward declare File here
         }
     }
@@ -38,8 +41,6 @@ namespace PAIN {
                 void setSimulationState(bool isPaused) {
                     isSimulationPaused = isPaused;
                 }
-
-                void setEntityPanel(std::shared_ptr<EntityPanel> panel) { m_EntityPanel = panel; }
 
                 void setRegistry(ECS::RegistryID registryID) {
                     currentRegistryID = registryID;
@@ -68,6 +69,8 @@ namespace PAIN {
                 entt::entity m_HoveredEntity = entt::null;
 
                 std::shared_ptr<EntityPanel> m_EntityPanel;
+                std::shared_ptr<ComponentsPanel> m_comp_panel;
+                std::shared_ptr<PrefabPanel> m_prefab_panel;
 
                 entt::entity m_DragHoveredEntity = entt::null;  // Add this
                 entt::entity findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize);
