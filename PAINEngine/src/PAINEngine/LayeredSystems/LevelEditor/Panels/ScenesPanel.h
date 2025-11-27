@@ -29,6 +29,9 @@ namespace PAIN {
                 //Selected scn name
                 std::string selected_scn_name;
 
+                //Selected cam index
+                int selected_cam_index;
+
                 //Popups
                 std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
                 std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
@@ -57,6 +60,9 @@ namespace PAIN {
 
                 // Layer management state
                 void drawGraphicsSettingsPanel();
+
+                // Cam Panel
+                void drawActiveCamPanel();
 
                 // Layer management state
                 unsigned selectedLayerIdx_ = 0;

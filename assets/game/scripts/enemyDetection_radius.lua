@@ -1,5 +1,5 @@
 
--- radius/proximity-based (enemy detection) script
+-- radius/proximity-based (enemy detection) script 
 
 local player = nil
 

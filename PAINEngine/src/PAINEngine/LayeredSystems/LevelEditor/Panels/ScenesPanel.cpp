@@ -5,6 +5,7 @@
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
+#include <CoreSystems/Scripting/EngineAPIAdapter.h>
 
 namespace PAIN {
     namespace Editor {
@@ -21,9 +22,9 @@ namespace PAIN {
             }
 
             ScenesPanel::ScenesPanel() {
-
                 name = "Scene Manager";                 // visible window title
                 flags = ImGuiWindowFlags_None;    // normal tool window
+                selected_cam_index = -1;
             }
 
             void ScenesPanel::nextWindowSettings() {
@@ -779,6 +780,56 @@ namespace PAIN {
                 }
             }
 
+            void ScenesPanel::drawActiveCamPanel()
+            {
+                auto scene = services->get<Scene::SceneManager>();
+                std::vector<const char*> camera_names;
+
+
+                for (const auto& camera : scene->GetAllGameCamera()) {
+                    if (!camera.first.empty()) {
+                        camera_names.push_back(camera.first.c_str());
+                    }
+                }
+                std::string active_game_cam = scene->GetActiveGameCamera();
+
+                if (active_game_cam != "") {
+
+                    // Find the iterator to the name in the vector
+                    auto name_it = std::find(camera_names.begin(), camera_names.end(), active_game_cam);
+
+                    // If found, calculate the index using std::distance
+                    if (name_it != camera_names.end()) {
+                        selected_cam_index = static_cast<int>(std::distance(camera_names.begin(), name_it));
+                    }
+
+                    const auto& cameras = scene->GetAllGameCamera();
+                    auto cam_it = cameras.find(active_game_cam);
+                    if (cam_it != cameras.end()) {
+                        scene->ChangeGameCamera(cam_it->first);
+                    }
+                }
+
+                // Combo box for active cam selection
+                if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
+                    if (!camera_names.empty() && selected_cam_index == -1) {
+                        selected_cam_index = 0;
+                        const auto& cameras = scene->GetAllGameCamera();
+                        auto it = cameras.find(camera_names[selected_cam_index]);
+                        if (it != cameras.end()) {
+                            scene->ChangeGameCamera(it->first);
+                        }
+                    }
+                    if (selected_cam_index >= 0 && selected_cam_index < camera_names.size()) {
+                        const auto& cameras = scene->GetAllGameCamera();
+                        auto it = cameras.find(camera_names[selected_cam_index]);
+                        if (it != cameras.end()) {
+                            scene->ChangeGameCamera(it->first);
+                        }
+                    }
+                }
+            }
+
             void ScenesPanel::onAttach()
             {
                 registerPopUp("CreateScene", createScenePopup("CreateScene"));
@@ -855,6 +906,7 @@ namespace PAIN {
                 }
 
                 ImGui::Separator();
+                ImGui::Spacing();
 
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
@@ -866,6 +918,10 @@ namespace PAIN {
                     drawLayerManagementPanel();
                 }
 
+                //Render Active Cam
+                drawActiveCamPanel();
+
+              
                 //// Scene configuration panels
                 //drawSkyboxSettingsPanel();
                 //drawGraphicsSettingsPanel();

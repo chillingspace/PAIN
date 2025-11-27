@@ -151,6 +151,9 @@ namespace PAIN {
 
 			const auto& camSettings = scene_asset.camera;
 
+			// Set active game cam
+			active_game_cam = camSettings.active_game_cam;
+
 			// Create or update camera
 			editor_camera = std::make_unique<Camera>(
 				camSettings.position,
@@ -294,6 +297,10 @@ namespace PAIN {
 
 			//Capture all camera variables
 			if (active_camera) {
+				// Game camera separate from editor cam
+				scene_asset.camera.active_game_cam = active_game_cam;
+
+				// Editor cam variables
 				scene_asset.camera.position = active_camera->pos;
 				scene_asset.camera.forward = active_camera->forward;
 				scene_asset.camera.up = active_camera->up;
@@ -321,6 +328,7 @@ namespace PAIN {
 
 			//Camera settings
 			sceneJson["camera"] = {
+				{"active_game_cam", scn_asset.camera.active_game_cam},
 				{"position", {scn_asset.camera.position.x, scn_asset.camera.position.y, scn_asset.camera.position.z}},
 				{"forward", {scn_asset.camera.forward.x, scn_asset.camera.forward.y, scn_asset.camera.forward.z}},
 				{"up", {scn_asset.camera.up.x, scn_asset.camera.up.y, scn_asset.camera.up.z}},
@@ -552,7 +560,9 @@ namespace PAIN {
 			auto ecs = services->get<ECS::Controller>();
 			auto& registry = ecs->getRegistry();
 			auto view = registry.view<Entity::Name>();
+
 			game_cameras.clear();
+
 			for (auto e : view) {
 
 				// animation
@@ -763,7 +773,7 @@ namespace PAIN {
 			//PN_CORE_INFO("[SceneManager] Cleared all lights");
 
 			// Reset camera (but don't destroy it - we'll reuse it)
-			// Camera will be reconfigured when a new scene loads
+			active_game_cam = "";
 
 			// Clear scene asset reference (but keep the object if we're reloading)
 			// currentSceneAsset.reset();
@@ -793,14 +803,22 @@ namespace PAIN {
 		{
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
+				PN_CORE_INFO("Using Camera  : {}", active_game_cam);
 				SetActiveCamera(it->second.get());
 			}
+
 
 		}
 
 		void SceneManager::ChangeGameCamera(std::string cam_name)
 		{
+			PN_CORE_INFO("SELECTING Camera : {}", cam_name);
 			active_game_cam = cam_name;
+		}
+
+		const std::string& SceneManager::GetActiveGameCamera()
+		{
+			return active_game_cam;
 		}
 		
 		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {

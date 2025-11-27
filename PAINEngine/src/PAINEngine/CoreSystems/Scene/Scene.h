@@ -110,12 +110,15 @@ namespace PAIN {
             bool getUsingWorldLight() const { return using_world_light; }
             void setUsingWorldLight(bool world_light) { using_world_light = world_light; }
 
+            // Cameras
             Camera* GetActiveCamera();
             void SetActiveCamera(Camera* cam);
             void SetEditorCamera();
             void SetGameCamera();
             void ChangeGameCamera(std::string cam_name);
+            const std::string& GetActiveGameCamera();
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+
             // Get current scene layers
             const std::vector<Scene::Layer>& getLayers() const {
                 return layers;
