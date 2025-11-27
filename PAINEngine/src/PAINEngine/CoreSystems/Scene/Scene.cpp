@@ -14,11 +14,12 @@
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "ECS/Components/cAnimation.h"
 
 namespace PAIN {
 	namespace Scene {
 
-		entt::entity SceneManager::AddObject(const std::shared_ptr<Assets::Model>& mdl,  const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, Assets::GUID const& diff_id, Assets::GUID const& ao_id)
+		entt::entity SceneManager::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, Assets::GUID const& diff_id, Assets::GUID const& ao_id)
 		{
 			auto ecs = services->get<ECS::Controller>();
 			auto meta = services->get<MetaData::Service>();
@@ -28,21 +29,26 @@ namespace PAIN {
 			ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
 			ecs->addEntityComponent(entity, WorldTransform{});
 			ecs->addEntityComponent(entity, Entity::Hierarchy{});
-		
+
+			// Create ModelRenderer and CACHE the model asset pointer
 			ModelRenderer mr = ModelRenderer{ mdl->guid };
-			if (mdl->animations.size()) {
-				//mr.isPlaying = true;
-				//mr.currentAnimationIndex = 0;
-
-				mr.PlayAnimation(0);
-			}
-
+			mr.cachedModelAsset = mdl;  // ← ADD THIS LINE!
 			ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
+
+			// Add Animation component if model has animations
+			if (mdl->animations.size()) {
+				Animation anim;
+				anim.PlayAnimation(0);  // Start first animation
+				ecs->addEntityComponent(entity, static_cast<Animation>(anim));
+
+			
+			}
 
 			if (meta) meta->setEntityName(entity, name);
 
 			return entity;
 		}
+
 
 		bool SceneManager::buildEntitiesFromAsset(SceneAsset const& scene_asset) {
 			if (scene_asset.entityData.empty()) {
@@ -697,9 +703,6 @@ namespace PAIN {
 
 			for (auto e : view) {
 
-				// animation
-				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-				if (mdl.has_value()) mdl->get().UpdateAnimation(timing.dt);
 
 				auto cam = ecs->getEntityComponent<Cam>(e);
 
@@ -927,15 +930,12 @@ namespace PAIN {
 
 		void SceneManager::SetEditorCamera() {
 			SetActiveCamera(editor_camera.get());
-
-
 		}
 
 		void SceneManager::SetGameCamera()
 		{
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
-				PN_CORE_INFO("Using Camera  : {}", active_game_cam);
 				SetActiveCamera(it->second.get());
 			}
 

@@ -4,6 +4,9 @@
 #include "EntityPanel.h"
 #include "ECS/Components/AllComponents.h"
 #include "ECS/sMetaData.h"
+#include "Systems/Animation/sysAnimation.h" 
+#include "ECS/Components/cAnimation.h"
+
 
 #ifdef _DEBUG
 
@@ -23,6 +26,13 @@ namespace PAIN {
                     ImGui::TextDisabled("ECS Controller unavailable");
                     return;
                 }
+
+                // ===== GLOBAL ANIMATION SYSTEM CONTROLS ===== 
+                RenderGlobalAnimationControls();
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
 
                 // If no entity is selected, show all animated entities
                 if (m_SelectedEntity == entt::null) {
@@ -90,6 +100,73 @@ namespace PAIN {
                 RenderTimelineEditor();
             }
 
+            void AnimationPanel::RenderGlobalAnimationControls() {
+                auto ecs = services->get<ECS::Controller>();
+                if (!ecs) return;
+
+                // Get Animation System
+                auto animSysOpt = ecs->getSystem<AnimationSystem::System>();                 
+                if (!animSysOpt) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Animation System not found!");
+                    return;
+                }
+
+                auto animSys = animSysOpt.get();
+
+                ImGui::TextColored(ImVec4(0.3f, 0.8f, 1.0f, 1.0f), "Global Animation Controls");
+                ImGui::Spacing();
+
+                // Enable/Disable All Animations
+                bool isEnabled = animSys->isAnimationEnabled();
+                if (ImGui::Checkbox("Enable All Animations", &isEnabled)) {
+                    animSys->enableAnimation(isEnabled);
+                }
+
+                ImGui::SameLine();
+                ImGui::TextDisabled("(?)");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    ImGui::Text("Toggle animation updates for all entities");
+                    ImGui::EndTooltip();
+                }
+
+                // Global Time Scale
+                float timeScale = animSys->getGlobalTimeScale();
+                ImGui::Text("Global Speed");
+                if (ImGui::SliderFloat("##GlobalSpeed", &timeScale, 0.0f, 3.0f, "%.2fx")) {
+                    animSys->setGlobalTimeScale(timeScale);
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Reset##GlobalSpeed")) {
+                    animSys->setGlobalTimeScale(1.0f);
+                }
+
+                // Quick buttons
+                ImGui::Spacing();
+                if (ImGui::Button("Pause All", ImVec2(80, 0))) {
+                    animSys->setGlobalTimeScale(0.0f);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Slow Mo", ImVec2(80, 0))) {
+                    animSys->setGlobalTimeScale(0.25f);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Normal", ImVec2(80, 0))) {
+                    animSys->setGlobalTimeScale(1.0f);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Fast", ImVec2(80, 0))) {
+                    animSys->setGlobalTimeScale(2.0f);
+                }
+
+                // Status display
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                    "Status: %s | Speed: %.2fx",
+                    isEnabled ? "Running" : "Paused",
+                    timeScale);
+            }
 
             void AnimationPanel::RenderAnimatedEntitiesList() {
                 auto ecs = services->get<ECS::Controller>();
@@ -99,16 +176,19 @@ namespace PAIN {
                 ImGui::Spacing();
 
                 auto& registry = ecs->getRegistry();
-                auto view = registry.view<ModelRenderer>();
+                auto view = registry.view<ModelRenderer, Animation>();
 
                 bool foundAnimated = false;
 
                 if (ImGui::BeginChild("AnimatedEntitiesList", ImVec2(0, 200), true)) {
                     for (auto e : view) {
                         auto modelRenderer = ecs->getEntityComponent<ModelRenderer>(e);
+                        auto animComp = ecs->getEntityComponent<Animation>(e);
+
                         if (!modelRenderer) continue;
 
                         auto& mdl = modelRenderer->get();
+                        auto& anim = animComp->get();
 
                         // Check if this model has animations
                         if (!mdl.cachedModelAsset || mdl.cachedModelAsset->animations.empty()) {
@@ -138,11 +218,11 @@ namespace PAIN {
                         }
 
                         // Show current animation status
-                        if (mdl.currentAnimationIndex >= 0 &&
-                            mdl.currentAnimationIndex < static_cast<int>(mdl.cachedModelAsset->animations.size())) {
+                        if (anim.currentAnimationIndex >= 0 && 
+                            anim.currentAnimationIndex < static_cast<int>(mdl.cachedModelAsset->animations.size())) {
 
                             ImGui::SameLine();
-                            if (mdl.isPlaying) {
+                            if (anim.isPlaying) {
                                 ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "[Playing]");
                             }
                             else {
@@ -172,28 +252,29 @@ namespace PAIN {
             void AnimationPanel::RenderAnimationList() {
                 auto ecs = services->get<ECS::Controller>();
                 auto& mdl = ecs->getEntityComponent<ModelRenderer>(m_SelectedEntity)->get();
+                auto& anim = ecs->getEntityComponent<Animation>(m_SelectedEntity)->get();
 
                 ImGui::Text("Available Animations");
                 ImGui::Spacing();
 
                 if (ImGui::BeginChild("AnimationList", ImVec2(0, 150), true)) {
                     for (size_t i = 0; i < mdl.cachedModelAsset->animations.size(); ++i) {
-                        const auto& anim = mdl.cachedModelAsset->animations[i];
+                        const auto& animData = mdl.cachedModelAsset->animations[i];
 
                         ImGui::PushID(static_cast<int>(i));
-                        bool isSelected = (mdl.currentAnimationIndex == static_cast<int>(i));
+                        bool isSelected = (anim).currentAnimationIndex == static_cast<int>(i);
 
-                        if (ImGui::Selectable(anim.name.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
-                            mdl.currentAnimationIndex = static_cast<int>(i);
+                        if (ImGui::Selectable(animData.name.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
+                            anim.currentAnimationIndex = static_cast<int>(i);
 
                             if (ImGui::IsMouseDoubleClicked(0)) {
-                                mdl.PlayAnimation(static_cast<int>(i), mdl.loopAnimation, mdl.playbackSpeed);
+                                anim.PlayAnimation(static_cast<int>(i), anim.loopAnimation, anim.playbackSpeed);
                             }
                         }
 
                         if (ImGui::IsItemHovered()) {
                             ImGui::BeginTooltip();
-                            ImGui::Text("Duration: %.2fs", anim.duration);
+                            ImGui::Text("Duration: %.2fs", animData.duration);
                             ImGui::Text("Double-click to play");
                             ImGui::EndTooltip();
                         }
@@ -207,70 +288,72 @@ namespace PAIN {
             void AnimationPanel::RenderAnimationControls() {
                 auto ecs = services->get<ECS::Controller>();
                 auto& mdl = ecs->getEntityComponent<ModelRenderer>(m_SelectedEntity)->get();
+                auto& anim = ecs->getEntityComponent<Animation>(m_SelectedEntity)->get();
 
-                if (mdl.currentAnimationIndex < 0 ||
-                    mdl.currentAnimationIndex >= static_cast<int>(mdl.cachedModelAsset->animations.size())) {
+                if (anim.currentAnimationIndex < 0 ||
+                    anim.currentAnimationIndex >= static_cast<int>(mdl.cachedModelAsset->animations.size())) {
                     ImGui::TextDisabled("Select an animation to preview");
                     return;
                 }
 
-                const auto& currentAnim = mdl.cachedModelAsset->animations[mdl.currentAnimationIndex];
+                const auto& currentAnim = mdl.cachedModelAsset->animations[anim.currentAnimationIndex];
 
                 ImGui::Text("Playback Controls");
                 ImGui::Spacing();
 
-                if (mdl.isPlaying) {
+                if (anim.isPlaying) {
                     if (ImGui::Button("Pause", ImVec2(80, 0))) {
-                        mdl.isPlaying = false;
+                        anim.isPlaying = false;
                     }
                 }
                 else {
                     if (ImGui::Button("Play", ImVec2(80, 0))) {
-                        mdl.PlayAnimation(mdl.currentAnimationIndex, mdl.loopAnimation, mdl.playbackSpeed);
+                        anim.PlayAnimation(anim.currentAnimationIndex, anim.loopAnimation, anim.playbackSpeed);
                     }
                 }
 
                 ImGui::SameLine();
                 if (ImGui::Button("Stop", ImVec2(80, 0))) {
-                    mdl.isPlaying = false;
-                    mdl.animationTime = 0.0f;
+                    anim.isPlaying = false;
+                    anim.animationTime = 0.0f;
                 }
 
                 ImGui::SameLine();
                 if (ImGui::Button("Reset", ImVec2(80, 0))) {
-                    mdl.animationTime = 0.0f;
+                    anim.animationTime = 0.0f;
                 }
 
                 ImGui::Spacing();
-                ImGui::Checkbox("Loop Animation", &mdl.loopAnimation);
+                ImGui::Checkbox("Loop Animation", &anim.loopAnimation);
 
                 ImGui::Text("Playback Speed");
-                ImGui::SliderFloat("##Speed", &mdl.playbackSpeed, 0.1f, 5.0f, "%.2fx");
+                ImGui::SliderFloat("##Speed", &anim.playbackSpeed, 0.1f, 5.0f, "%.2fx");
 
                 ImGui::Spacing();
                 ImGui::Text("Timeline Scrubber");
                 float timeNormalized = (currentAnim.duration > 0.0f)
-                    ? mdl.animationTime / currentAnim.duration
+                    ? anim.animationTime / currentAnim.duration
                     : 0.0f;
 
                 if (ImGui::SliderFloat("##TimeScrubber", &timeNormalized, 0.0f, 1.0f, "%.3f")) {
-                    mdl.animationTime = timeNormalized * currentAnim.duration;
-                    mdl.isPlaying = false;
+                    anim.animationTime = timeNormalized * currentAnim.duration;
+                    anim.isPlaying = false;
                 }
 
-                ImGui::Text("Time: %.2fs / %.2fs", mdl.animationTime, currentAnim.duration);
+                ImGui::Text("Time: %.2fs / %.2fs", anim.animationTime, currentAnim.duration);
             }
 
             void AnimationPanel::RenderTimelineEditor() {
                 auto ecs = services->get<ECS::Controller>();
                 auto& mdl = ecs->getEntityComponent<ModelRenderer>(m_SelectedEntity)->get();
+                auto& anim = ecs->getEntityComponent<Animation>(m_SelectedEntity)->get();
 
-                if (mdl.currentAnimationIndex < 0 ||
-                    mdl.currentAnimationIndex >= static_cast<int>(mdl.cachedModelAsset->animations.size())) {
+                if (anim.currentAnimationIndex < 0 ||
+                    anim.currentAnimationIndex >= static_cast<int>(mdl.cachedModelAsset->animations.size())) {
                     return;
                 }
 
-                const auto& currentAnim = mdl.cachedModelAsset->animations[mdl.currentAnimationIndex];
+                const auto& currentAnim = mdl.cachedModelAsset->animations[anim.currentAnimationIndex];
 
                 ImGui::Text("Timeline");
                 ImGui::Spacing();
@@ -321,7 +404,7 @@ namespace PAIN {
                     }
                 }
 
-                float currentX = canvas_pos.x + (mdl.animationTime / currentAnim.duration) * timelineWidth;
+                float currentX = canvas_pos.x + (anim.animationTime / currentAnim.duration) * timelineWidth;
                 draw_list->AddLine(
                     ImVec2(currentX, canvas_pos.y),
                     ImVec2(currentX, canvas_pos.y + canvas_size.y),
@@ -341,8 +424,8 @@ namespace PAIN {
                     ImVec2 mouse_pos = ImGui::GetMousePos();
                     float clickX = mouse_pos.x - canvas_pos.x;
                     float normalizedTime = std::clamp(clickX / timelineWidth, 0.0f, 1.0f);
-                    mdl.animationTime = normalizedTime * currentAnim.duration;
-                    mdl.isPlaying = false;
+                    anim.animationTime = normalizedTime * currentAnim.duration;
+                    anim.isPlaying = false;
                 }
             }
 

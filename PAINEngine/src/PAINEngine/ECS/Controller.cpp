@@ -316,6 +316,7 @@ namespace PAIN {
             registerComponent<LocalTransform>("LocalTransform");
             registerComponent<WorldTransform>("WorldTransform");
             registerComponent<ModelRenderer>("ModelRenderer");
+            registerComponent<Animation>("Animation");
             registerComponent<Texture2D>("Texture2D");
             registerComponent<Lighting>("Lighting");
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
@@ -349,7 +350,7 @@ namespace PAIN {
             registerSystem<Physics::System>();
             registerSystem<PAIN::Scripting::GameScriptingSystem>();
 #ifdef PN_PLATFORM_WINDOWS	
-            registerSystem<Animation::System>();
+            registerSystem<AnimationSystem::System>();            
             registerSystem<Audio::System>();
 #endif
             registerSystem<sBVHSystem>();

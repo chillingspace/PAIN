@@ -205,21 +205,9 @@ namespace PAIN {
 
                         ImGui::PopStyleVar();
 
-                        // Optional: Add animation info if present
-                        if (renderer.currentAnimationIndex >= 0) {
-                            ImGui::Spacing();
-                            ImGui::Separator();
-                            ImGui::Spacing();
-
-                            if (ImGui::CollapsingHeader("Animation (Debug Info)")) {
-                                ImGui::BeginDisabled();
-                                ImGui::Text("Current Animation: %d", renderer.currentAnimationIndex);
-                                ImGui::Text("Animation Time: %.2f", renderer.animationTime);
-                                ImGui::Text("Is Playing: %s", renderer.isPlaying ? "Yes" : "No");
-                                ImGui::EndDisabled();
-                            }
-                        }
                     });
+
+
 
                 // ---- Texture2D ----
                 registerCompUIFunc<PAIN::Texture2D>("Texture2D",
@@ -242,6 +230,13 @@ namespace PAIN {
                         ImGui::PopStyleVar();
 
                         return changed;
+                    });
+
+                // ---- Animation ----
+                registerCompUIFunc<PAIN::Animation>("Animation",
+                    [](ComponentsPanel&, PAIN::Animation& anim) {
+                        // Basic fields; reflection will handle labels from cAnimation.h
+                        DrawWithReflection(anim);
                     });
                 
                 // UItext comp ui
