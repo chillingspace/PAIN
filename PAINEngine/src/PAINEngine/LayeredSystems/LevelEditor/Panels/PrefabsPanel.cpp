@@ -112,6 +112,19 @@ namespace PAIN {
                 services->get<Editor>()->getPanel<ViewportPanel>()->setRegistry(editRegistryID);
 
                 PN_CORE_INFO("[PrefabEditMode] Successfully entered edit mode. Root entity: {}", static_cast<uint32_t>(editRootEntity));
+
+                std::vector<entt::entity> entities;
+                prefabService->collectHierarchy(editRootEntity, entities, editRegistryID);
+
+                originalPrefabData = nlohmann::json::array();
+                for (auto entity : entities) {
+                    originalPrefabData.push_back(
+                        prefabService->serializeEntity(entity, editRegistryID)
+                    );
+                }
+
+                PN_CORE_INFO("[PrefabEditMode] Stored original prefab state");
+
                 return true;
             }
 
@@ -160,6 +173,37 @@ namespace PAIN {
 
                 PN_CORE_INFO("[PrefabEditMode] Successfully exited edit mode");
                 return true;
+            }
+
+            bool PrefabPanel::hasPrefabChanged() const {
+                if (!isInEditMode || editRootEntity == entt::null) {
+                    return false;
+                }
+
+                auto prefabService = services->get<Prefab::Service>();
+                auto ecsController = services->get<ECS::Controller>();
+
+                if (!prefabService || !ecsController) {
+                    return false;
+                }
+
+                // Serialize current state from edit registry
+                auto& editRegistry = ecsController->getRegistry(editRegistryID);
+                nlohmann::json currentPrefabData = nlohmann::json::array();
+
+                // Collect all entities in edit registry
+                std::vector<entt::entity> entities;
+                prefabService->collectHierarchy(editRootEntity, entities, editRegistryID);
+
+                // Serialize each entity
+                for (auto entity : entities) {
+                    currentPrefabData.push_back(
+                        prefabService->serializeEntity(entity, editRegistryID)
+                    );
+                }
+
+                // Compare with original
+                return (currentPrefabData != originalPrefabData);
             }
 
             bool PrefabPanel::saveCurrentPrefab() {
@@ -263,29 +307,82 @@ namespace PAIN {
                 // 4. If preserveOverrides, re-apply componentOverrides on top
             }
 
-            bool PrefabPanel::showUnsavedChangesDialog() {
-                bool shouldDiscard = false;
-                ImGui::OpenPopup("Unsaved Changes");
+            void PrefabPanel::showUnsavedChangesDialog() {
+
+                // Center the popup
                 ImVec2 center = ImGui::GetMainViewport()->GetCenter();
                 ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-                if (ImGui::BeginPopupModal("Unsaved Changes", nullptr,
-                    ImGuiWindowFlags_AlwaysAutoResize)) {
+                ImGui::SetNextWindowSize(ImVec2(400, 0), ImGuiCond_Appearing);
 
-                    ImGui::Text("You have unsaved changes to this prefab.");
-                    ImGui::Text("Are you sure you want to discard them?");
+                if (ImGui::BeginPopupModal("Unsaved Changes##PrefabEditor", nullptr,
+                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Warning");
+                    ImGui::Spacing();
                     ImGui::Separator();
-                    if (ImGui::Button("Discard Changes", ImVec2(120, 0))) {
-                        shouldDiscard = true;
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    ImGui::Spacing();
+
+                    ImGui::TextWrapped("The prefab has unsaved changes. What would you like to do?");
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    // Calculate button layout
+                    float buttonWidth = 110.0f;
+                    float spacing = ImGui::GetStyle().ItemSpacing.x;
+                    float totalWidth = (buttonWidth * 3) + (spacing * 2);
+                    float offset = (ImGui::GetContentRegionAvail().x - totalWidth) * 0.5f;
+                    if (offset > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                    // ========================================
+                    // Save Button (Green)
+                    // ========================================
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.6f, 0.1f, 1.0f));
+
+                    if (ImGui::Button("Save", ImVec2(buttonWidth, 0))) {
+                        saveCurrentPrefab();
+                        exitEditMode();
                         showUnsavedWarning = false;
                         ImGui::CloseCurrentPopup();
                     }
+
+                    ImGui::PopStyleColor(3);
+                    ImGui::SameLine();
+
+                    // ========================================
+                    // Discard Button (Red)
+                    // ========================================
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+
+                    if (ImGui::Button("Discard", ImVec2(buttonWidth, 0))) {
+                        exitEditMode();
+                        showUnsavedWarning = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::PopStyleColor(3);
+                    ImGui::SameLine();
+
+                    // ========================================
+                    // Cancel Button (Grey)
+                    // ========================================
+                    if (ImGui::Button("Cancel", ImVec2(buttonWidth, 0))) {
+                        showUnsavedWarning = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+
                     ImGui::EndPopup();
                 }
-                return shouldDiscard;
+
+                // Open popup on first frame
+                if (showUnsavedWarning && !ImGui::IsPopupOpen("Unsaved Changes##PrefabEditor")) {
+                    ImGui::OpenPopup("Unsaved Changes##PrefabEditor");
+                }
             }
 
             void PrefabPanel::render() {
@@ -329,43 +426,65 @@ namespace PAIN {
 
                 // Handle unsaved warning dialog
                 if (showUnsavedWarning) {
-                    if (showUnsavedChangesDialog()) {
-                        exitEditMode(false);
-                        showUnsavedWarning = false;
-                    }
+                    showUnsavedChangesDialog();
                 }
             }
 
             void PrefabPanel::renderToolbar() {
 
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                // Left side: Prefab name and mode indicator
-                ImGui::Text("PREFAB MODE");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(0.3f, 0.8f, 1.0f, 1.0f), " | ");
-                ImGui::SameLine();
-                ImGui::Text("Editing: %s", currentPrefabName.c_str());
-                if (hasUnsavedChanges) {
-                    ImGui::SameLine();
-                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), " *unsaved*");
+                // ========================================
+                // Save Button
+                // ========================================
+                bool hasChanges = hasPrefabChanged();
+
+                if (hasChanges) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));  // Green
                 }
-                ImGui::PopStyleColor();
 
-                ImGui::Spacing();
+                if (ImGui::Button("Save Prefab", ImVec2(120, 30))) {
+                    saveCurrentPrefab();
+                }
 
-                if (ImGui::Button("Save")) {
-                    if (saveCurrentPrefab()) {
-                        PN_CORE_INFO("Prefab saved successfully");
+                if (hasChanges) {
+                    ImGui::PopStyleColor();
+                }
+
+                if (ImGui::IsItemHovered()) {
+                    if (hasChanges) {
+                        ImGui::SetTooltip("Unsaved changes");
+                    }
+                    else {
+                        ImGui::SetTooltip("No changes to save");
                     }
                 }
+
                 ImGui::SameLine();
-                if (ImGui::Button("Discard & Exit")) {
-                    if (hasUnsavedChanges) {
+
+                // ========================================
+                // Exit Button
+                // ========================================
+                if (ImGui::Button("Exit Editor", ImVec2(120, 30))) {
+                    // Check for unsaved changes
+                    if (hasPrefabChanged()) {
                         showUnsavedWarning = true;
                     }
                     else {
-                        exitEditMode(false);
+                        // No changes, exit directly
+                        exitEditMode();
                     }
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+
+                // ========================================
+                // Unsaved Changes Indicator
+                // ========================================
+                if (hasChanges) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Unsaved changes");
+                }
+                else {
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "No changes");
                 }
             }
 
@@ -378,11 +497,6 @@ namespace PAIN {
                 //Display the number of instances in scene
                 ImGui::Text("Number Of Instances In Scene: %d", prefab_instances.size());
                 ImGui::PopStyleColor();
-
-                //Button to propagate
-                if (!hasUnsavedChanges && ImGui::Button("Update All Instances")) {
-                    services->get<Prefab::Service>()->updateAllInstances(currentEditingPrefabGUID);
-                }
             }
 
             void PrefabPanel::renderPrefabInfo() {

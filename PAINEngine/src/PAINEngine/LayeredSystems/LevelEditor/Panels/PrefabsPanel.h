@@ -22,6 +22,9 @@ namespace PAIN {
                 ECS::RegistryID editRegistryID = ECS::MAIN_REGISTRY_ID;
                 entt::entity editRootEntity = entt::null;
 
+                //OG Prefab data
+                nlohmann::json originalPrefabData;
+
                 // Track if there are unsaved changes
                 bool hasUnsavedChanges = false;
 
@@ -37,6 +40,9 @@ namespace PAIN {
                 //Exit editing mode
                 bool exitEditMode(bool saveChanges = true);
 
+                //Prefab checker
+                bool hasPrefabChanged() const;
+
                 //Save curr prefab
                 bool saveCurrentPrefab();
 
@@ -47,7 +53,7 @@ namespace PAIN {
                 void propagateToInstances(bool preserveOverrides = true);
 
                 //Show unsaved changes
-                bool showUnsavedChangesDialog();
+                void showUnsavedChangesDialog();
 
                 //Render tool bar
                 void renderToolbar();
