@@ -150,119 +150,87 @@ namespace PAIN {
 				entityInfos.push_back(info);
 			}
 			PN_CORE_INFO("[SceneManager] PASS 1 Complete: Created {} entities", entityInfos.size());
+			// ========================================
 			// PASS 2: Load components
+			// ========================================
 			PN_CORE_INFO("[SceneManager] PASS 2: Loading components");
-
 			for (auto& info : entityInfos) {
 				const auto& E = *info.jsonData;
-
 				if (info.isPrefabInstance) {
-					PN_CORE_INFO("========================================");
-					PN_CORE_INFO("[DEBUG] Processing prefab instance entity {}", static_cast<uint32_t>(info.entity));
-					PN_CORE_INFO("[DEBUG] Source prefab GUID: {}", info.sourcePrefabGUID.ToString());
-					PN_CORE_INFO("[DEBUG] Corresponding entity GUID: {}", info.correspondingPrefabEntityGUID.ToString());
-
+					// ========================================
+					// PREFAB INSTANCE: Load from prefab + apply overrides
+					// ========================================
+					PN_CORE_TRACE("[SceneManager] Loading prefab instance entity {}",
+						static_cast<uint32_t>(info.entity));
+					// Get prefab asset
 					auto assetManager = services->get<Assets::Manager>();
 					auto prefabAssetOpt = assetManager->getAsset<Prefab::PrefabAsset>(info.sourcePrefabGUID);
-
 					if (!prefabAssetOpt.has_value()) {
-						PN_CORE_ERROR("[SceneManager] Prefab {} not found!", info.sourcePrefabGUID.ToString());
+						PN_CORE_ERROR("[SceneManager] Prefab {} not found. Loading as regular entity.",
+							info.sourcePrefabGUID.ToString());
+
+						// Fallback: Load as regular entity
 						if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-							controller->loadAllComponentsFromJson(info.entity, *compsIt, ECS::MAIN_REGISTRY_ID);
+							controller->loadAllComponentsFromJson(info.entity, *compsIt);
 						}
 						continue;
 					}
-
 					auto prefabAsset = prefabAssetOpt.value();
-
-					// DEBUG: Print all entity GUIDs in the prefab
-					PN_CORE_INFO("[DEBUG] Prefab '{}' has {} entities:", prefabAsset->prefabName, prefabAsset->entities.size());
-					for (size_t i = 0; i < prefabAsset->entities.size(); ++i) {
-						const auto& prefabEntity = prefabAsset->entities[i];
-						if (prefabEntity.contains("entityGUID")) {
-							std::string guidStr = prefabEntity["entityGUID"].get<std::string>();
-							PN_CORE_INFO("[DEBUG]   Entity[{}]: GUID = {}", i, guidStr);
-						}
-						else {
-							PN_CORE_WARN("[DEBUG]   Entity[{}]: NO entityGUID FIELD!", i);
-						}
-					}
-
-					// Find corresponding entity
+					// Find corresponding entity in prefab
 					nlohmann::json const* prefabEntityData = nullptr;
-					bool found = false;
-
 					for (const auto& prefabEntity : prefabAsset->entities) {
 						if (prefabEntity.contains("entityGUID")) {
 							Assets::GUID prefabEntityGUID(prefabEntity["entityGUID"].get<std::string>());
-
-							PN_CORE_TRACE("[DEBUG] Comparing: {} == {} ?",
-								prefabEntityGUID.ToString(),
-								info.correspondingPrefabEntityGUID.ToString());
-
 							if (prefabEntityGUID == info.correspondingPrefabEntityGUID) {
 								prefabEntityData = &prefabEntity;
-								found = true;
-								PN_CORE_INFO("[DEBUG] ✅ MATCH FOUND!");
 								break;
 							}
 						}
-						else {
-							PN_CORE_WARN("[DEBUG] Prefab entity missing entityGUID field!");
-						}
 					}
-
-					if (!found) {
-						PN_CORE_ERROR("[DEBUG] ❌ NO MATCH FOUND - Entity not found in prefab!");
-						PN_CORE_ERROR("[DEBUG] Looking for: {}", info.correspondingPrefabEntityGUID.ToString());
-						PN_CORE_ERROR("[DEBUG] This means the prefab was likely modified and this entity no longer exists.");
-
-						// Fallback: load from scene
+					if (!prefabEntityData) {
+						PN_CORE_ERROR("[SceneManager] Entity not found in prefab. Loading as regular entity.");
 						if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-							controller->loadAllComponentsFromJson(info.entity, *compsIt, ECS::MAIN_REGISTRY_ID);
+							controller->loadAllComponentsFromJson(info.entity, *compsIt);
 						}
 						continue;
 					}
-
-					// Continue with normal loading...
+					// Load components from prefab
 					if (prefabEntityData->contains("components") && (*prefabEntityData)["components"].is_object()) {
-						controller->loadAllComponentsFromJson(info.entity, (*prefabEntityData)["components"], ECS::MAIN_REGISTRY_ID);
+						controller->loadAllComponentsFromJson(info.entity, (*prefabEntityData)["components"]);
 						PN_CORE_TRACE("[SceneManager] Loaded {} components from prefab",
 							(*prefabEntityData)["components"].size());
 					}
-
 					// Apply overrides
 					if (!info.componentOverrides.empty()) {
 						for (auto it = info.componentOverrides.begin(); it != info.componentOverrides.end(); ++it) {
 							const std::string& componentName = it.key();
 							const nlohmann::json& overrideData = it.value();
-
+							// Load this specific component (will replace the prefab version)
 							nlohmann::json componentJson;
 							componentJson[componentName] = overrideData;
-							controller->loadAllComponentsFromJson(info.entity, componentJson, ECS::MAIN_REGISTRY_ID);
+							controller->loadAllComponentsFromJson(info.entity, componentJson);
 						}
 						PN_CORE_TRACE("[SceneManager] Applied {} overrides", info.componentOverrides.size());
 					}
-
-					// Re-add PrefabInstance
+					// Re-add PrefabInstance component (reload from scene)
 					if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
 						if (auto prefabInstIt = compsIt->find("PrefabInstance");
 							prefabInstIt != compsIt->end() && prefabInstIt->is_object()) {
 
 							nlohmann::json prefabInstJson;
 							prefabInstJson["PrefabInstance"] = *prefabInstIt;
-							controller->loadAllComponentsFromJson(info.entity, prefabInstJson, ECS::MAIN_REGISTRY_ID);
+							controller->loadAllComponentsFromJson(info.entity, prefabInstJson);
 						}
 					}
-
-					PN_CORE_INFO("========================================");
 				}
 				else {
-					// Regular entity (unchanged)
+					// ========================================
+					// REGULAR ENTITY: Load all components from scene
+					// ========================================
 					if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-						controller->loadAllComponentsFromJson(info.entity, *compsIt, ECS::MAIN_REGISTRY_ID);
+						controller->loadAllComponentsFromJson(info.entity, *compsIt);
 					}
-
+					// Fallback: Add Name component if not present
 					if (!controller->hasEntityComponent<Entity::Name>(info.entity)) {
 						if (auto n = E.find("Name"); n != E.end() && n->is_string()) {
 							controller->addEntityComponent(info.entity, Entity::Name{ n->get<std::string>() });
@@ -274,8 +242,8 @@ namespace PAIN {
 					}
 				}
 			}
-
 			PN_CORE_INFO("[SceneManager] PASS 2 Complete: Loaded components for {} entities", entityInfos.size());
+			PN_CORE_INFO("[SceneManager] Successfully built {} entities from scene asset", entityInfos.size());
 			return true;
 		}
 

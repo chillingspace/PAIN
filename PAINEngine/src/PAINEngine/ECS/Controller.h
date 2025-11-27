@@ -232,6 +232,9 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity, RegistryID)>> component_getters;
 
+			// Map component names to serialization functions
+			std::unordered_map<std::string, std::function<nlohmann::json(entt::entity, RegistryID)>> component_serializers;
+
 			// Helper methods for multi-registry support
 			RegistryContext* getRegistryContext(RegistryID id);
 			const RegistryContext* getRegistryContext(RegistryID id) const;
@@ -348,6 +351,10 @@ namespace PAIN {
 				component_getters[name] = [this](entt::entity e, RegistryID const& registry_id) -> void* {
 					return static_cast<void*>(getRegistry(registry_id).try_get<T>(e));
 					};
+				// Getter for comp serializers
+				component_serializers[name] = [this](entt::entity e, RegistryID const& registry_id) -> nlohmann::json {
+					return PAIN::Serialization::to_json_reflected(getRegistry(registry_id).try_get<T>(e));
+					};
 			}
 
 			// Check if component type is registered
@@ -369,6 +376,8 @@ namespace PAIN {
 			// Get all components as JSON (for serialization)
 			nlohmann::json getAllComponentsAsJson(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
+			//Get components as json
+			nlohmann::json getComponentAsJson(entt::entity entity, std::string const& comp_name, RegistryID registryId) const;
 
 			// Deserialize all components from JSON
 			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps, RegistryID registryId = MAIN_REGISTRY_ID);

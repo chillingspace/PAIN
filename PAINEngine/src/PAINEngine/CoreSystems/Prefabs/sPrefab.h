@@ -59,7 +59,12 @@ namespace PAIN {
 
             //Load the prefab for editing
             entt::entity loadPrefabForEditing(const Assets::GUID& prefabAssetGUID,ECS::RegistryID const& editRegistryID);
-            
+
+            //Overrider helpers
+            bool isComponentOverridden(entt::entity instance, const std::string& componentName, ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID) const;
+            nlohmann::json getComponentFromPrefab(const Assets::GUID& prefabGUID, const Assets::GUID& entityGUID, const std::string& componentName) const;
+            bool detectAndSaveOverride(entt::entity instance, const std::string& componentName, ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID);
+
             //Create path service
             static Service* create(std::shared_ptr<Services> service);
         };

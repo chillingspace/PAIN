@@ -482,6 +482,21 @@ namespace PAIN {
             }
             return serializeAllComponentsImpl(entity, getRegistry(registryId), AllGameplayComponents{});
         }
+        nlohmann::json Controller::getComponentAsJson(entt::entity entity, std::string const& comp_name, RegistryID registryId) const {
+            auto* ctx = getRegistryContext(registryId);
+            if (!ctx) return nlohmann::json();
+
+            auto& registry = ctx->registry;
+            if (!registry.valid(entity)) return nlohmann::json();
+
+            // Get single component and serialize it
+            auto it = component_serializers.find(comp_name);
+            if (it != component_serializers.end()) {
+                return it->second(entity, registryId);
+            }
+
+            return nlohmann::json();
+        }
         bool Controller::hasComponentByName(entt::entity entity, const std::string& name, RegistryID registryId) const {
             auto it = component_checkers.find(name);
             if (it == component_checkers.end()) {
