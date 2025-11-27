@@ -20,6 +20,9 @@ namespace PAIN {
 
             //Map of cameras
             std::unordered_map<std::string, std::unique_ptr<Camera>> game_cameras;
+            std::unordered_set<std::string> active_cameras;
+
+
             std::string active_game_cam;
 
             //Current scene

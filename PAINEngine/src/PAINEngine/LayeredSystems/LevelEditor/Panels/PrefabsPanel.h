@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef _DEBUG
 #ifndef PREFAB_PANEL_HPP
 #define PREFAB_PANEL_HPP
 
@@ -78,3 +79,4 @@ namespace PAIN {
     }
 }
 #endif 
+#endif

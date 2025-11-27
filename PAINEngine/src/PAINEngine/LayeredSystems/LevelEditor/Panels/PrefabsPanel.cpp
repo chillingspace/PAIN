@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #include "pch.h"
 #include "PrefabsPanel.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
@@ -397,3 +398,4 @@ namespace PAIN {
         } 
     }
 }
+#endif

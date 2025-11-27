@@ -29,7 +29,9 @@ namespace PAIN {
                 //Selected scn name
                 std::string selected_scn_name;
 
-                //Selected cam index
+                // Camera variables
+                std::vector<std::string> cached_camera_names;
+                std::vector<const char*> cached_camera_names_ptr;
                 int selected_cam_index;
 
                 //Popups

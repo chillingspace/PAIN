@@ -561,7 +561,8 @@ namespace PAIN {
 			auto& registry = ecs->getRegistry();
 			auto view = registry.view<Entity::Name>();
 
-			game_cameras.clear();
+			std::unordered_set<std::string> cameras_seen_this_frame;
+
 
 			for (auto e : view) {
 
@@ -581,11 +582,9 @@ namespace PAIN {
 				glm::vec3 entity_scale = { 0.f,0.f,0.f };
 
 				if (trans.has_value()) {
-
 					entity_pos = trans->get().position;
 					entity_rot = trans->get().rotation;
 					entity_scale = trans->get().scale;
-
 				}
 
 				glm::vec3 offset_world = entity_rot * (cam->get().trans_offset * entity_scale);
@@ -605,7 +604,50 @@ namespace PAIN {
 					entity_name = metadata->getEntityName(e);
 				}
 
-				game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio)));
+				cameras_seen_this_frame.insert(entity_name);
+
+
+				auto it = game_cameras.find(entity_name); // Single lookup
+
+				// If camera exists update every frame else create new
+				if (it != game_cameras.end()) {
+					auto curr_cam = it->second.get();
+					curr_cam->pos = cam_pos;
+					curr_cam->forward = forward;
+					curr_cam->up = up;
+					curr_cam->fov = GraphicsSettings::get().fov;
+					curr_cam->near_plane = near_plane;
+					curr_cam->far_plane = far_plane;
+					curr_cam->width_ratio = width_ratio;
+					curr_cam->height_ratio = height_ratio;
+
+				}
+				else {
+					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio)));
+
+				}
+			}
+
+			// Clear unwanted cameras
+			for (auto it = game_cameras.begin(); it != game_cameras.end(); ) {
+				const std::string& map_name = it->first;
+				if (cameras_seen_this_frame.find(map_name) == cameras_seen_this_frame.end()) {
+
+					// SAFETY: Check if we are deleting the currently active camera
+					if (active_camera == it->second.get()) {
+						// Fallback to editor camera or nullptr to prevent crashing
+						SetEditorCamera();
+						active_game_cam = "";
+						PN_CORE_WARN("Active Camera '{}' was deleted. Switched to Editor Camera.", map_name);
+					}
+
+					// Erase returns the iterator to the NEXT element
+					it = game_cameras.erase(it);
+				}
+				else {
+					// Move to next
+					++it;
+				}
 
 			}
 		}
@@ -661,6 +703,7 @@ namespace PAIN {
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
 		void SceneManager::createScene(std::string const& name) {
 
 			//Check if valid name was provided
@@ -684,7 +727,7 @@ namespace PAIN {
 			unloadScene();
 		}
 
-#ifdef _DEBUG
+
 		void SceneManager::deleteScene(Assets::GUID const& id) {
 
 			//Get asset manager
@@ -795,18 +838,14 @@ namespace PAIN {
 
 		void SceneManager::SetEditorCamera() {
 			SetActiveCamera(editor_camera.get());
-
-
 		}
 
 		void SceneManager::SetGameCamera()
 		{
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
-				PN_CORE_INFO("Using Camera  : {}", active_game_cam);
 				SetActiveCamera(it->second.get());
 			}
-
 
 		}
 

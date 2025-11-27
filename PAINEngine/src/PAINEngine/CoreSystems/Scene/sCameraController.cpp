@@ -186,17 +186,24 @@ namespace PAIN {
         const float dt = timing.dt;
 
 #ifdef _DEBUG
-        auto editor_visible = services->get<Editor::Editor>()->isVisible();
-#else
-        auto editor_visible = false;
-#endif 
-        if (editor_visible) {
-            m_Scene->SetEditorCamera();
+        auto editor = services->get<Editor::Editor>();
+        bool editor_visible = editor->isVisible();
 
+        static bool lastEditorVisible = !editor_visible; // Force update on first frame
+
+        if (lastEditorVisible != editor_visible) {
+            if (editor_visible) {
+                PN_CORE_INFO("EDITOR");
+                m_Scene->SetEditorCamera();
+            }
+            else {
+                PN_CORE_INFO("GAME");
+                m_Scene->SetGameCamera();
+            }
+            lastEditorVisible = editor_visible;
         }
-        else {
-            m_Scene->SetGameCamera();
-        }
+#endif 
+
         camera = m_Scene->GetActiveCamera();
 
         // Move left/right based on cross product of forward and up vectors

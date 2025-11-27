@@ -783,48 +783,43 @@ namespace PAIN {
             void ScenesPanel::drawActiveCamPanel()
             {
                 auto scene = services->get<Scene::SceneManager>();
-                std::vector<const char*> camera_names;
+                if (scene) {
 
+                    const auto& cameras = scene->GetAllGameCamera(); // Get by const reference!
+                    std::string active_game_cam = scene->GetActiveGameCamera();
 
-                for (const auto& camera : scene->GetAllGameCamera()) {
-                    if (!camera.first.empty()) {
-                        camera_names.push_back(camera.first.c_str());
-                    }
-                }
-                std::string active_game_cam = scene->GetActiveGameCamera();
+                    int current_active_index = -1;
+                    int loop_index = 0;
 
-                if (active_game_cam != "") {
+                    cached_camera_names_ptr.clear();
+                    for (const auto& [name, camPtr] : cameras) {
+                        cached_camera_names_ptr.push_back(name.c_str());
 
-                    // Find the iterator to the name in the vector
-                    auto name_it = std::find(camera_names.begin(), camera_names.end(), active_game_cam);
-
-                    // If found, calculate the index using std::distance
-                    if (name_it != camera_names.end()) {
-                        selected_cam_index = static_cast<int>(std::distance(camera_names.begin(), name_it));
-                    }
-
-                    const auto& cameras = scene->GetAllGameCamera();
-                    auto cam_it = cameras.find(active_game_cam);
-                    if (cam_it != cameras.end()) {
-                        scene->ChangeGameCamera(cam_it->first);
-                    }
-                }
-
-                // Combo box for active cam selection
-                if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
-                    if (!camera_names.empty() && selected_cam_index == -1) {
-                        selected_cam_index = 0;
-                        const auto& cameras = scene->GetAllGameCamera();
-                        auto it = cameras.find(camera_names[selected_cam_index]);
-                        if (it != cameras.end()) {
-                            scene->ChangeGameCamera(it->first);
+                        // SYNC LOGIC: Check if this is our active camera
+                        if (name == active_game_cam) {
+                            current_active_index = loop_index;
                         }
+                        loop_index++;
                     }
-                    if (selected_cam_index >= 0 && selected_cam_index < camera_names.size()) {
-                        const auto& cameras = scene->GetAllGameCamera();
-                        auto it = cameras.find(camera_names[selected_cam_index]);
-                        if (it != cameras.end()) {
-                            scene->ChangeGameCamera(it->first);
+
+                    if (current_active_index != -1) {
+                        selected_cam_index = current_active_index;
+                    }
+
+
+                    // Combo box for active cam selection
+                    if (ImGui::Combo("Select Active Camera", &selected_cam_index, cached_camera_names_ptr.data(), cached_camera_names_ptr.size())) {
+                        
+                        // Input sanitization
+                        if (selected_cam_index >= 0 && selected_cam_index < cached_camera_names_ptr.size()) {
+
+                            const char* selectedName = cached_camera_names_ptr[selected_cam_index];
+
+                            auto it = cameras.find(selectedName);
+                            if (it != cameras.end()) {
+  
+                                scene->ChangeGameCamera(it->first);
+                            }
                         }
                     }
                 }
@@ -919,6 +914,7 @@ namespace PAIN {
                 }
 
                 //Render Active Cam
+                ImGui::Spacing();
                 drawActiveCamPanel();
 
               
