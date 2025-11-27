@@ -15,10 +15,11 @@
 
 #include "pch.h"
 #include "ECS/System/ISystem.h"
+#include "ECS/Components/cMeshRenderer.h"
 
 namespace PAIN {
 
-	namespace Animation {
+	namespace AnimationSystem {
 
 		class System : public ECS::System::ISystem
 		{
@@ -37,6 +38,10 @@ namespace PAIN {
 			void enableAnimation(bool enable);
 			bool isAnimationEnabled() const;
 
+			// System-level time control
+			void setGlobalTimeScale(float scale);
+			float getGlobalTimeScale() const;
+
 		private:
 
 			// Animation system configuration values
@@ -45,10 +50,14 @@ namespace PAIN {
 
 			// Animation state control
 			bool b_animation_enabled;
-			float accumulated_time;
+			float global_time_scale; // Multiplier for all animations (1.0 = normal speed)
 
 			// Animation initialization setup
 			void animationSetup();
+
+			// Core animation update logic
+			void updateAllAnimations(float deltaTime, entt::registry& reg);
+			void computeBoneTransforms(entt::entity entity, Animation& anim, ModelRenderer& renderer, const Assets::AnimationClip& animData);
 
 		};
 	}

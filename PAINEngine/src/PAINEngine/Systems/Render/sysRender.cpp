@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "sysRender.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
@@ -7,6 +7,7 @@
 #include "ECS/Controller.h"
 #include "ECS/Components/AllComponents.h"
 #include "Systems/Collision/sBVHSystem.h"
+#include "ECS/Components/cAnimation.h" 
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -245,7 +246,7 @@ namespace PAIN {
             for (auto e : view) {
                 auto transform = registry.try_get<WorldTransform>(e);
                 auto mdl = registry.try_get<ModelRenderer>(e);
-                
+
                 if (!mdl || !mdl->visible) continue;
 
                 // Check layer visibility
@@ -267,17 +268,21 @@ namespace PAIN {
                     InitializeModelRenderer(e, *const_cast<ModelRenderer*>(mdl));
                 }
 
-                // Skip if not visible or not ready
                 if (!mdl->visible) {
                     continue;
                 }
 
-                // Draw geometry
+
+                // Get Animation component if present
+                Animation* anim = registry.try_get<Animation>(e);
+
+                // Draw geometry, passing animation pointer (may be null)
                 rendererService->w_renderer->DrawGeometry(rendererService->m_Scene, *mdl, model_xform);
             }
 
             rendererService->w_renderer->EndGeometryPass();
         }
+
 
         void System::reflectionPass(entt::registry& registry) {
             auto rendererService = services.lock()->get<sRenderer>();

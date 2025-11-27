@@ -79,33 +79,6 @@ namespace PAIN {
             return (index < materials.size()) ? &materials[index] : nullptr;
         }
 
-        void PlayAnimation(int animIndex, bool loop = true, float speed = 1.0f) {
-            currentAnimationIndex = animIndex;
-            animationTime = 0.0f;
-            isPlaying = true;
-            loopAnimation = loop;
-            playbackSpeed = speed;
-        }
-
-        void UpdateAnimation(float deltaTime) {
-            if (!isPlaying || currentAnimationIndex < 0 || !cachedModelAsset) return;
-
-            if (currentAnimationIndex >= cachedModelAsset->animations.size()) return;
-
-            const auto& anim = cachedModelAsset->animations[currentAnimationIndex];
-            animationTime += deltaTime * playbackSpeed;
-
-            if (animationTime >= anim.duration) {
-                if (loopAnimation) {
-                    animationTime = fmod(animationTime, anim.duration);
-                    // currentAnimationIndex++;             // don't change animation type, is a loop
-                }
-                else {
-                    animationTime = anim.duration;
-                    isPlaying = false;
-                }
-            }
-        }
     };
 }
 
