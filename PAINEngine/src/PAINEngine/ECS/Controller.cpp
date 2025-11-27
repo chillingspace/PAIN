@@ -128,7 +128,7 @@ namespace PAIN {
         entt::registry& Controller::getRegistry(RegistryID id) {
             auto* ctx = getRegistryContext(id);
             if (!ctx) {
-                PN_CORE_ERROR("[ECS Controller] Returning main registry as fallback");
+                PN_CORE_WARN("[ECS Controller] Returning main registry as fallback");
                 return registries[MAIN_REGISTRY_ID].registry;
             }
             return ctx->registry;
@@ -136,7 +136,7 @@ namespace PAIN {
         const entt::registry& Controller::getRegistry(RegistryID id) const {
             auto* ctx = getRegistryContext(id);
             if (!ctx) {
-                PN_CORE_ERROR("[ECS Controller] Returning main registry as fallback");
+                PN_CORE_WARN("[ECS Controller] Returning main registry as fallback");
                 return registries.at(MAIN_REGISTRY_ID).registry;
             }
             return ctx->registry;
@@ -316,6 +316,7 @@ namespace PAIN {
             registerComponent<LocalTransform>("LocalTransform");
             registerComponent<WorldTransform>("WorldTransform");
             registerComponent<ModelRenderer>("ModelRenderer");
+            registerComponent<Animation>("Animation");
             registerComponent<Texture2D>("Texture2D");
             registerComponent<Lighting>("Lighting");
             registerComponent<Physics::RigidBody3D>("RigidBody3D");
@@ -349,7 +350,7 @@ namespace PAIN {
             registerSystem<Physics::System>();
             registerSystem<PAIN::Scripting::GameScriptingSystem>();
 #ifdef PN_PLATFORM_WINDOWS	
-            registerSystem<Animation::System>();
+            registerSystem<AnimationSystem::System>();            
             registerSystem<Audio::System>();
 #endif
             registerSystem<sBVHSystem>();
@@ -475,12 +476,48 @@ namespace PAIN {
             }
             deserializeAllComponentsImpl(entity, getRegistry(registryId), comps, AllGameplayComponents{});
         }
+        std::vector<std::string> Controller::getComponentNames(
+            entt::entity entity,
+            RegistryID registryId
+        ) const {
+            std::vector<std::string> names;
+
+            auto* ctx = getRegistryContext(registryId);
+            if (!ctx) return names;
+
+            auto& registry = ctx->registry;
+            if (!registry.valid(entity)) return names;
+
+            // Iterate through all registered components
+            for (const auto& [name, _] : component_checkers) {
+                if (hasComponentByName(entity, name, registryId)) {
+                    names.push_back(name);
+                }
+            }
+
+            return names;
+        }
         nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity, RegistryID registryId) const {
             // Note: This uses MAIN_REGISTRY_ID for backward compatibility
             if (!checkEntity(entity, registryId)) {
                 return nlohmann::json::object();
             }
             return serializeAllComponentsImpl(entity, getRegistry(registryId), AllGameplayComponents{});
+        }
+        nlohmann::json Controller::getComponentAsJson(entt::entity entity, std::string const& comp_name, RegistryID registryId) const {
+            auto* ctx = getRegistryContext(registryId);
+            if (!ctx) return nlohmann::json();
+
+            auto& registry = ctx->registry;
+            if (!registry.valid(entity)) return nlohmann::json();
+
+            // Get single component and serialize it
+            auto it = component_serializers.find(comp_name);
+            if (it != component_serializers.end()) {
+                return it->second(entity, registryId);
+            }
+
+            return nlohmann::json();
         }
         bool Controller::hasComponentByName(entt::entity entity, const std::string& name, RegistryID registryId) const {
             auto it = component_checkers.find(name);

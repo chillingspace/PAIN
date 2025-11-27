@@ -636,5 +636,303 @@ namespace PAIN {
             PN_CORE_INFO("[PrefabService] Updated instance: {}", static_cast<uint32_t>(instanceRoot));
         }
 
+        entt::entity Service::loadPrefabForEditing(const Assets::GUID& prefabAssetGUID,ECS::RegistryID const& editRegistryID) {
+            PN_CORE_INFO("=== LOADING PREFAB FOR EDITING (PRESERVE GUIDs) ===");
+
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(editRegistryID);
+            auto assetManager = services.lock()->get<Assets::Manager>();
+
+            // Load prefab asset
+            auto prefabAssetOpt = assetManager->getAsset<Prefab::PrefabAsset>(prefabAssetGUID);
+            if (!prefabAssetOpt.has_value()) {
+                PN_CORE_ERROR("Prefab asset not found: {}", prefabAssetGUID.ToString());
+                return entt::null;
+            }
+
+            auto prefabAsset = prefabAssetOpt.value();
+
+            if (prefabAsset->entities.empty()) {
+                PN_CORE_ERROR("Prefab has no entities!");
+                return entt::null;
+            }
+
+            PN_CORE_INFO("Loading prefab '{}' with {} entities (PRESERVING ORIGINAL GUIDs)",
+                prefabAsset->prefabName, prefabAsset->entities.size());
+
+            //NO GUID REMAP - Use original GUIDs from prefab file
+            std::vector<entt::entity> loadedEntities;
+
+            for (const auto& entityData : prefabAsset->entities) {
+                if (!entityData.contains("entityGUID")) {
+                    PN_CORE_WARN("Entity missing GUID, skipping");
+                    continue;
+                }
+
+                // Use ORIGINAL GUID from prefab (no remapping!)
+                Assets::GUID originalGUID(entityData["entityGUID"].get<std::string>());
+
+                // Create entity with original GUID
+                auto ecsController = services.lock()->get<ECS::Controller>();
+                entt::entity entity = ecsController->createEntity(originalGUID, editRegistryID);
+
+                if (entity == entt::null) {
+                    PN_CORE_ERROR("Failed to create entity with GUID {}", originalGUID.ToString());
+                    continue;
+                }
+
+                // Load components
+                if (entityData.contains("components") && entityData["components"].is_object()) {
+                    ecsController->loadAllComponentsFromJson(entity, entityData["components"], editRegistryID);
+                }
+
+                loadedEntities.push_back(entity);
+
+                PN_CORE_TRACE("Loaded entity {} with ORIGINAL GUID {}",
+                    static_cast<uint32_t>(entity), originalGUID.ToString());
+            }
+
+            // Fix up hierarchy (GUIDs should already match since we used originals)
+            for (size_t i = 0; i < loadedEntities.size(); ++i) {
+                auto entity = loadedEntities[i];
+
+                if (registry.any_of<Entity::Hierarchy>(entity)) {
+                    auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
+
+                    // Hierarchy GUIDs should already be correct since we used original GUIDs
+                    // No remapping needed!
+
+                    PN_CORE_TRACE("Entity {} hierarchy: parent={}, children={}",
+                        static_cast<uint32_t>(entity),
+                        hierarchy.parentGUID.ToString(),
+                        hierarchy.childrenGUIDs.size());
+                }
+            }
+
+            // Find and return root entity
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            entt::entity rootEntity = ecsController->getGUIDRegistry(editRegistryID)
+                .resolveGUID(prefabAsset->rootEntityGUID);
+
+            if (rootEntity == entt::null) {
+                PN_CORE_ERROR("Failed to find root entity with GUID {}",
+                    prefabAsset->rootEntityGUID.ToString());
+
+                // Return first entity as fallback
+                return loadedEntities.empty() ? entt::null : loadedEntities[0];
+            }
+
+            PN_CORE_INFO("Successfully loaded prefab for editing, root entity: {}",
+                static_cast<uint32_t>(rootEntity));
+
+            return rootEntity;
+        }
+
+        bool Service::isComponentOverridden(entt::entity instance,const std::string& componentName,ECS::RegistryID registryID) const {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Check if entity has PrefabInstance component
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) return false;
+
+            // Skip non-serializable components
+            std::unordered_set<std::string> skipComponents = {
+                getComponentName<Prefab::PrefabInstance>(),
+                getComponentName<Entity::GUID>(),
+                getComponentName<WorldTransform>()
+            };
+
+            if (skipComponents.find(componentName) != skipComponents.end()) {
+                return false;
+            }
+
+            // Get current component value from instance
+            nlohmann::json currentComponentJson = ecsController->getComponentAsJson(
+                instance, componentName, registryID
+            );
+
+            if (currentComponentJson.empty()) {
+                // Component doesn't exist on instance
+                return false;
+            }
+
+            // Get original component value from prefab
+            nlohmann::json prefabComponentJson = getComponentFromPrefab(
+                prefabInst->sourcePrefabGUID,
+                prefabInst->correspondingPrefabEntityGUID,
+                componentName
+            );
+
+            if (prefabComponentJson.empty()) {
+                // Component doesn't exist in prefab
+                // This could mean it was added to the instance (which is an override!)
+                return true;
+            }
+
+            // Compare JSON values
+            bool isDifferent = (currentComponentJson != prefabComponentJson);
+
+            return isDifferent;
+        }
+
+        nlohmann::json Service::getComponentFromPrefab(const Assets::GUID& prefabGUID,const Assets::GUID& entityGUID,const std::string& componentName) const {
+            // Load prefab
+            auto assetManager = services.lock()->get<Assets::Manager>();
+            auto prefabOpt = assetManager->getAsset<PrefabAsset>(prefabGUID);
+
+            if (!prefabOpt.has_value()) {
+                return nlohmann::json();
+            }
+
+            auto prefab = prefabOpt.value();
+
+            // Find entity in prefab
+            for (const auto& entityData : prefab->entities) {
+                if (entityData.contains("entityGUID")) {
+                    Assets::GUID guid(entityData["entityGUID"].get<std::string>());
+                    if (guid == entityGUID) {
+                        // Found the entity, extract component
+                        if (entityData.contains("components") &&
+                            entityData["components"].contains(componentName)) {
+                            return entityData["components"][componentName];
+                        }
+                    }
+                }
+            }
+
+            return nlohmann::json();
+        }
+        
+        bool Service::detectAndSaveOverride(entt::entity instance, const std::string& componentName, ECS::RegistryID registryID) {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Get PrefabInstance component
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) {
+                PN_CORE_WARN("Entity is not a prefab instance");
+                return false;
+            }
+
+            // Get current component value from instance
+            nlohmann::json instanceComponentJson = ecsController->getComponentAsJson(
+                instance, componentName, registryID
+            );
+
+            if (instanceComponentJson.empty()) {
+                PN_CORE_WARN("Component '{}' not found on instance", componentName);
+                return false;
+            }
+
+            // Get original component value from prefab
+            nlohmann::json prefabComponentJson = getComponentFromPrefab(
+                prefabInst->sourcePrefabGUID,
+                prefabInst->correspondingPrefabEntityGUID,
+                componentName
+            );
+
+            // Compare
+            if (instanceComponentJson == prefabComponentJson) {
+                // No difference - remove override if it exists
+                prefabInst->componentOverrides.erase(componentName);
+                PN_CORE_TRACE("Component '{}' matches prefab, override removed", componentName);
+                return false;
+            }
+            else {
+                // Different - save as override
+                prefabInst->componentOverrides[componentName] = instanceComponentJson;
+                PN_CORE_INFO("Component '{}' overridden", componentName);
+                return true;
+            }
+        }
+
+        void Service::updateAllOverrides(entt::entity instance,ECS::RegistryID registryID) {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Verify this is a prefab instance
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) return;
+
+            // Get all component names on this entity
+            auto componentNames = ecsController->getComponentNames(instance, registryID);
+
+            // Skip these components (metadata, not user-editable)
+            std::unordered_set<std::string> skipComponents = {
+                getComponentName<Prefab::PrefabInstance>(),
+                getComponentName<Entity::GUID>(),
+                getComponentName<WorldTransform>()
+            };
+
+            // Check each component
+            for (const auto& componentName : componentNames) {
+                if (skipComponents.find(componentName) != skipComponents.end()) {
+                    continue;
+                }
+
+                detectAndSaveOverride(instance, componentName, registryID);
+            }
+
+            PN_CORE_TRACE("Updated overrides for entity {}, {} overrides found",
+                static_cast<uint32_t>(instance),
+                prefabInst->componentOverrides.size());
+        }
+
+        bool Service::revertComponentOverride(entt::entity instance,const std::string& componentName,ECS::RegistryID registryID) {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Get PrefabInstance
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) {
+                PN_CORE_ERROR("Entity is not a prefab instance");
+                return false;
+            }
+
+            // Get original component from prefab
+            nlohmann::json prefabComponentJson = getComponentFromPrefab(
+                prefabInst->sourcePrefabGUID,
+                prefabInst->correspondingPrefabEntityGUID,
+                componentName
+            );
+
+            if (prefabComponentJson.empty()) {
+                PN_CORE_ERROR("Component '{}' not found in prefab", componentName);
+                return false;
+            }
+
+            // Load prefab component value onto instance
+            nlohmann::json componentsJson;
+            componentsJson[componentName] = prefabComponentJson;
+            ecsController->loadAllComponentsFromJson(instance, componentsJson, registryID);
+
+            // Remove from overrides
+            prefabInst->componentOverrides.erase(componentName);
+
+            PN_CORE_INFO("Reverted component '{}' to prefab value", componentName);
+            return true;
+        }
+
+        void Service::revertAllOverrides(entt::entity instance,ECS::RegistryID registryID) {
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registryID);
+
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) return;
+
+            // Get list of overridden components
+            std::vector<std::string> overriddenComponents;
+            for (const auto& [compName, _] : prefabInst->componentOverrides) {
+                overriddenComponents.push_back(compName);
+            }
+
+            // Revert each one
+            for (const auto& compName : overriddenComponents) {
+                revertComponentOverride(instance, compName, registryID);
+            }
+
+            PN_CORE_INFO("Reverted all {} overrides for entity {}",
+                overriddenComponents.size(),
+                static_cast<uint32_t>(instance));
+        }
 	}
 }

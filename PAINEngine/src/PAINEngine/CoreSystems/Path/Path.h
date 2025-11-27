@@ -78,7 +78,7 @@ namespace PAIN {
 				std::vector<uint8_t> data(size());
 				size_t read_size = read(data.data(), data.size());
 				if (read_size != data.size()) {
-					PN_CORE_ERROR("Failed to read full model file, returning empty json obj");
+					PN_CORE_ERROR("Failed to read file, returning empty json obj");
 					return nlohmann::json();
 				}
 

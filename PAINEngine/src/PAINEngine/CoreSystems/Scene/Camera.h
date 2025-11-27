@@ -41,5 +41,11 @@ namespace PAIN {
 		glm::mat4 view() const;
 		glm::mat4 projection() const;
 
+		void debugPrintFOV() const {
+			std::cout << "Vertical FOV: " << fov << " degrees" << std::endl;
+			std::cout << "Aspect Ratio: " << aspect_ratio << std::endl;
+			float hFOV = 2.0f * glm::degrees(glm::atan(glm::tan(glm::radians(fov) / 2.0f) * aspect_ratio));
+			std::cout << "Horizontal FOV: " << hFOV << " degrees" << std::endl;
+		}
 	};
 }

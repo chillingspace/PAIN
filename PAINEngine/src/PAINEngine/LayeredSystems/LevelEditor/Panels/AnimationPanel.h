@@ -18,6 +18,9 @@ namespace PAIN {
                 void SetSelectedEntity(entt::entity entity);  // Changed from ECS::Entity
 
             private:
+                // Rendering methods
+                void RenderGlobalAnimationControls();
+
                 void RenderAnimationList();
                 void RenderAnimationControls();
                 void RenderTimelineEditor();

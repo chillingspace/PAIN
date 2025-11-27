@@ -31,15 +31,15 @@ namespace PAIN {
             explicit Service(std::shared_ptr<Services> svc) :services{svc}{}
 
             //Collect all entities in the hierarchy
-            void collectHierarchy(entt::entity root, std::vector<entt::entity>& outEntities, ECS::RegistryID const& registry_id);
+            void collectHierarchy(entt::entity root, std::vector<entt::entity>& outEntities, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Serialize a single entity
-            nlohmann::json serializeEntity(entt::entity entity, const ECS::RegistryID const& registry_id);
+            nlohmann::json serializeEntity(entt::entity entity, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Create and save prefab
-            void createPrefab(entt::entity rootEntity, const std::string& prefabName, ECS::RegistryID const& registry_id);
-            bool savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& filePath, ECS::RegistryID const& registry_id);
-            nlohmann::json serializePrefab(Prefab::PrefabAsset const& prefab_asset, ECS::RegistryID const& registry_id);
+            void createPrefab(entt::entity rootEntity, const std::string& prefabName, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
+            bool savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& filePath, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
+            nlohmann::json serializePrefab(Prefab::PrefabAsset const& prefab_asset, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Prefab loading and instantiate
             Prefab::PrefabAsset deserializePrefab(const nlohmann::json& prefabJson);
@@ -50,12 +50,27 @@ namespace PAIN {
             void applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Checks
-            bool isInstance(entt::entity entity, ECS::RegistryID const& registry_id) const;
-            std::vector<entt::entity> getInstancesOfPrefab(const Assets::GUID& prefab_asset_id, ECS::RegistryID const& registry_id) const;
+            bool isInstance(entt::entity entity, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID) const;
+            std::vector<entt::entity> getInstancesOfPrefab(const Assets::GUID& prefab_asset_id, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID) const;
 
             //Prefab instances function
             void updateAllInstances(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, bool preserveOverrides = true);
             void updateSingleInstance(entt::entity instanceRoot, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, bool preserveOverrides = true);
+
+            //Load the prefab for editing
+            entt::entity loadPrefabForEditing(const Assets::GUID& prefabAssetGUID,ECS::RegistryID const& editRegistryID);
+
+            //Overrider helpers
+            bool isComponentOverridden(entt::entity instance, const std::string& componentName, ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID) const;
+            nlohmann::json getComponentFromPrefab(const Assets::GUID& prefabGUID, const Assets::GUID& entityGUID, const std::string& componentName) const;
+            bool detectAndSaveOverride(entt::entity instance, const std::string& componentName, ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID);
+
+            //Update all overrides
+            void updateAllOverrides(entt::entity instance,ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID);
+
+            //Revert overrides
+            bool revertComponentOverride(entt::entity instance,const std::string& componentName,ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID);
+            void revertAllOverrides(entt::entity instance,ECS::RegistryID registryID = ECS::MAIN_REGISTRY_ID);
 
             //Create path service
             static Service* create(std::shared_ptr<Services> service);

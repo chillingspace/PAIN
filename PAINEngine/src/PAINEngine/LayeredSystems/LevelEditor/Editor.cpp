@@ -68,7 +68,6 @@ namespace PAIN {
 
             // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
-            viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
 
             auto animation_panel = std::make_shared<Panel::AnimationPanel>();

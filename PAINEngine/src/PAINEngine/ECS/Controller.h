@@ -232,6 +232,9 @@ namespace PAIN {
 			// Map component names to getter functions (returns void*)
 			std::unordered_map<std::string, std::function<void* (entt::entity, RegistryID)>> component_getters;
 
+			// Map component names to serialization functions
+			std::unordered_map<std::string, std::function<nlohmann::json(entt::entity, RegistryID)>> component_serializers;
+
 			// Helper methods for multi-registry support
 			RegistryContext* getRegistryContext(RegistryID id);
 			const RegistryContext* getRegistryContext(RegistryID id) const;
@@ -348,6 +351,43 @@ namespace PAIN {
 				component_getters[name] = [this](entt::entity e, RegistryID const& registry_id) -> void* {
 					return static_cast<void*>(getRegistry(registry_id).try_get<T>(e));
 					};
+				// Getter for comp serializers
+				component_serializers[name] = [this, name](entt::entity e, RegistryID const& registry_id) -> nlohmann::json {
+
+					constexpr bool type_should_deserialize = getShouldSerialize<T>();
+
+					// CRITICAL: Wrap entire deserialization logic in if constexpr
+					if constexpr (type_should_deserialize) {
+
+						T* comp_ptr = getRegistry(registry_id).try_get<T>(e);
+
+						// Try reflection first, then fallback to JSON
+						if constexpr (refl::trait::is_reflectable_v<T>) {
+							try {
+								return PAIN::Serialization::to_json_reflected(*comp_ptr);
+							}
+							catch (const std::exception& e) {
+								PN_CORE_ERROR("Failed to serialize {} using reflection: {}", name, e.what());
+							}
+						}
+						else {
+							// Only compile this if type is convertible to JSON
+							if constexpr (std::is_constructible_v<nlohmann::json, T>) {
+								try {
+									return nlohmann::json(*comp_ptr);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_WARN("Failed to serialize {}: {}", name, e.what());
+								}
+							}
+							else {
+								PN_CORE_WARN("Component {} is not serializable (no reflection or JSON converter)", name);
+							}
+						}
+					}
+
+					return nlohmann::json();
+					};
 			}
 
 			// Check if component type is registered
@@ -366,9 +406,14 @@ namespace PAIN {
 			// Get all component names registered for an entity
 			std::vector<std::string> getEntityComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
+			//Get component name
+			std::vector<std::string> getComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
+
 			// Get all components as JSON (for serialization)
 			nlohmann::json getAllComponentsAsJson(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
+			//Get components as json
+			nlohmann::json getComponentAsJson(entt::entity entity, std::string const& comp_name, RegistryID registryId) const;
 
 			// Deserialize all components from JSON
 			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps, RegistryID registryId = MAIN_REGISTRY_ID);

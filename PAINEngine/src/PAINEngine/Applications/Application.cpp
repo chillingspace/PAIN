@@ -8,6 +8,7 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 #include "CoreSystems/Renderer/text.h"
@@ -107,6 +108,9 @@ namespace PAIN {
 		//Push other core systems into the stack
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
+
+		//Create entity template and prefab service
+		services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
 		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
 
 		// Add Serialization

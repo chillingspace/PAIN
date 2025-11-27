@@ -7,9 +7,6 @@
 #include "AssetData.h"
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "ECS/Controller.h"
-#include "EntityPanel.h"
-#include "ComponentsPanel.h"
-#include "ViewportPanel.h"
 
 namespace PAIN {
     namespace Editor {
@@ -19,17 +16,15 @@ namespace PAIN {
             class PrefabPanel : public IPanel {
             private:
 
-                //Reference to the entity and component panel
-                std::weak_ptr<EntityPanel> entity_panel;
-                std::weak_ptr<ComponentsPanel> comp_panel;
-                std::weak_ptr<ViewportPanel> viewport_panel;
-
                 // Current state
                 bool isInEditMode = false;
                 Assets::GUID currentEditingPrefabGUID;
                 std::string currentPrefabName;
                 ECS::RegistryID editRegistryID = ECS::MAIN_REGISTRY_ID;
                 entt::entity editRootEntity = entt::null;
+
+                //OG Prefab data
+                nlohmann::json originalPrefabData;
 
                 // Track if there are unsaved changes
                 bool hasUnsavedChanges = false;
@@ -46,6 +41,9 @@ namespace PAIN {
                 //Exit editing mode
                 bool exitEditMode(bool saveChanges = true);
 
+                //Prefab checker
+                bool hasPrefabChanged() const;
+
                 //Save curr prefab
                 bool saveCurrentPrefab();
 
@@ -56,7 +54,7 @@ namespace PAIN {
                 void propagateToInstances(bool preserveOverrides = true);
 
                 //Show unsaved changes
-                bool showUnsavedChangesDialog();
+                void showUnsavedChangesDialog();
 
                 //Render tool bar
                 void renderToolbar();
@@ -64,11 +62,20 @@ namespace PAIN {
                 //Render prefab info
                 void renderPrefabInfo();
 
+                //Render instance tools
+                void renderInstanceTools();
+
                 //Render
                 void render();
             public:
                 PrefabPanel() = default;
                 ~PrefabPanel() override = default;
+
+                //Get in edit mode
+                bool getEditingMode() const { return isInEditMode; }
+
+                //Get edit registry id
+                ECS::RegistryID getEditRegistryID() const { return editRegistryID; }
 
                 void nextWindowSettings() override;
                 void onAttach() override;

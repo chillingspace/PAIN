@@ -92,7 +92,10 @@ namespace PAIN {
                 void ungroupEntity(entt::entity entity);
 
                 // Prefab helpers
+#ifdef PN_PLATFORM_WINDOWS
                 std::string generateUniquePrefabName(const std::string& base_name);
+                std::string generateUniqueTemplateName(const std::string& base_name);
+#endif
                 void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
 
                 // Utility

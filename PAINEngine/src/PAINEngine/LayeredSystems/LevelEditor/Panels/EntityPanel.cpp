@@ -18,6 +18,7 @@
 #include "Systems/Transform/sysTransform.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
 #ifdef _DEBUG
 
@@ -442,7 +443,7 @@ namespace PAIN {
                     }
 
 #ifdef PN_PLATFORM_WINDOWS
-                    if (ImGui::MenuItem("Create Prefab from Entity")) {
+                    if (ImGui::MenuItem("Create Prefab")) {
                         if (selected_entity != entt::null) {
                             // Get prefab service
                             auto prefab_service = services->get<Prefab::Service>();
@@ -454,6 +455,21 @@ namespace PAIN {
                             prefab_service->createPrefab(selected_entity, prefab_name, currentRegistryID);
 
                             PN_CORE_INFO("Created prefab: {}", prefab_name);
+                        }
+                    }
+
+                    if (ImGui::MenuItem("Create Template")) {
+                        if (selected_entity != entt::null) {
+                            // Get prefab service
+                            auto template_service = services->get<EntityTemplate::Service>();
+
+                            // Generate unique name
+                            std::string template_name = generateUniqueTemplateName(getEntityName(selected_entity));
+
+                            // Create prefab
+                            template_service->createFromEntity(selected_entity, template_name, currentRegistryID);
+
+                            PN_CORE_INFO("Created template: {}", template_name);
                         }
                     }
 #endif
@@ -684,6 +700,27 @@ namespace PAIN {
                 }
 
                 return prefab_name;
+            }
+
+            std::string EntityPanel::generateUniqueTemplateName(const std::string& base_name) {
+                auto path_service = services->get<Path::Path>();
+                auto template_folder = Assets::getAllGameFolders()[Assets::Type::Templates];
+                std::filesystem::path full_path = path_service->resolvePath(Path::main_assets_alias, template_folder.string());
+
+                //Prefab ext
+                auto prefab_ext = *Assets::getAllExtensions()[Assets::Type::Templates].begin();
+
+                int counter = 1;
+                std::string template_name = base_name;
+                full_path /= (template_name + prefab_ext);
+
+                // Check if file exists and increment counter
+                while (std::filesystem::exists(full_path)) {
+                    template_name = base_name + "_" + std::to_string(counter++);
+                    full_path.replace_filename(template_name + prefab_ext);
+                }
+
+                return template_name;
             }
 #endif
 

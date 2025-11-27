@@ -1384,6 +1384,7 @@ namespace PAIN {
 			// render 2D textures onto screen
 			{
 				auto ecs = services->get<ECS::Controller>();
+				auto& layers = services->get<Scene::SceneManager>()->getLayers();
 				auto& registry = ecs->getRegistry();
 
 				auto texture_entity_view = registry.view<Texture2D, LocalTransform, UIElement>();
@@ -1391,6 +1392,15 @@ namespace PAIN {
 					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
 					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
 					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+
+					// Check layer visibility
+					auto layerComp = registry.try_get<Entity::Layer>(entity);
+					if (layerComp) {
+						int layerID = layerComp->layer_id;
+						if (layerID < layers.size() && !layers[layerID].enabled) {
+							continue;
+						}
+					}
 
 					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value() || !elem_comp_opt) continue;
 
@@ -1409,10 +1419,21 @@ namespace PAIN {
 			// render text onto screen
 			{
 				auto ecs = services->get<ECS::Controller>();
+				auto& layers = services->get<Scene::SceneManager>()->getLayers();
 				auto& registry = ecs->getRegistry();
 
 				auto text_entity_view = registry.view<UIText, UIElement, UIRectTransform>();
 				for (auto&& [entity, text_comp, elem_comp, rect_comp] : text_entity_view.each()) {
+
+					// Check layer visibility
+					auto layerComp = registry.try_get<Entity::Layer>(entity);
+					if (layerComp) {
+						int layerID = layerComp->layer_id;
+						if (layerID < layers.size() && !layers[layerID].enabled) {
+							continue;
+						}
+					}
+
 					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
 					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
 					auto rect_comp_opt = ecs->getEntityComponent<UIRectTransform>(entity);
