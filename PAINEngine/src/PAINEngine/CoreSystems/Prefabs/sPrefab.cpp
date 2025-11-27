@@ -809,5 +809,93 @@ namespace PAIN {
                 return true;
             }
         }
+
+        void Service::updateAllOverrides(entt::entity instance,ECS::RegistryID registryID) {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Verify this is a prefab instance
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) return;
+
+            // Get all component names on this entity
+            auto componentNames = ecsController->getComponentNames(instance, registryID);
+
+            // Skip these components (metadata, not user-editable)
+            std::unordered_set<std::string> skipComponents = {
+                "PrefabInstance",
+                "Entity::GUID",
+                "WorldTransform"  // Computed, not serialized
+            };
+
+            // Check each component
+            for (const auto& componentName : componentNames) {
+                if (skipComponents.find(componentName) != skipComponents.end()) {
+                    continue;
+                }
+
+                detectAndSaveOverride(instance, componentName, registryID);
+            }
+
+            PN_CORE_TRACE("Updated overrides for entity {}, {} overrides found",
+                static_cast<uint32_t>(instance),
+                prefabInst->componentOverrides.size());
+        }
+
+        bool Service::revertComponentOverride(entt::entity instance,const std::string& componentName,ECS::RegistryID registryID) {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
+
+            // Get PrefabInstance
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) {
+                PN_CORE_ERROR("Entity is not a prefab instance");
+                return false;
+            }
+
+            // Get original component from prefab
+            nlohmann::json prefabComponentJson = getComponentFromPrefab(
+                prefabInst->sourcePrefabGUID,
+                prefabInst->correspondingPrefabEntityGUID,
+                componentName
+            );
+
+            if (prefabComponentJson.empty()) {
+                PN_CORE_ERROR("Component '{}' not found in prefab", componentName);
+                return false;
+            }
+
+            // Load prefab component value onto instance
+            nlohmann::json componentsJson;
+            componentsJson[componentName] = prefabComponentJson;
+            ecsController->loadAllComponentsFromJson(instance, componentsJson, registryID);
+
+            // Remove from overrides
+            prefabInst->componentOverrides.erase(componentName);
+
+            PN_CORE_INFO("Reverted component '{}' to prefab value", componentName);
+            return true;
+        }
+        void Service::revertAllOverrides(entt::entity instance,ECS::RegistryID registryID) {
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registryID);
+
+            auto* prefabInst = registry.try_get<PrefabInstance>(instance);
+            if (!prefabInst) return;
+
+            // Get list of overridden components
+            std::vector<std::string> overriddenComponents;
+            for (const auto& [compName, _] : prefabInst->componentOverrides) {
+                overriddenComponents.push_back(compName);
+            }
+
+            // Revert each one
+            for (const auto& compName : overriddenComponents) {
+                revertComponentOverride(instance, compName, registryID);
+            }
+
+            PN_CORE_INFO("Reverted all {} overrides for entity {}",
+                overriddenComponents.size(),
+                static_cast<uint32_t>(instance));
+        }
 	}
 }

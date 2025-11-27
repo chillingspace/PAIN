@@ -365,12 +365,13 @@ namespace PAIN {
 			nlohmann::json ents = nlohmann::json::array();
 
 			auto controller = services->get<ECS::Controller>();
+			auto prefabService = services->get<Prefab::Service>();
+
 			if (!controller) {
 				PN_CORE_ERROR("[SceneManager] ECS Controller not available");
 				return ecs;
 			}
 
-			// Iterate all entities with Name component
 			auto& registry = controller->getRegistry();
 			auto view = registry.view<Entity::Name>();
 
@@ -381,8 +382,10 @@ namespace PAIN {
 				if (auto nameOpt = controller->getEntityComponent<Entity::Name>(e)) {
 					E["Name"] = nameOpt->get().name;
 				}
-				else {
-					E["Name"] = "Entity " + std::to_string(static_cast<uint32_t>(e));
+
+				// Detect and save overrides for prefab instances
+				if (prefabService && registry.any_of<Prefab::PrefabInstance>(e)) {
+					prefabService->updateAllOverrides(e, ECS::MAIN_REGISTRY_ID);
 				}
 
 				// Serialize all components

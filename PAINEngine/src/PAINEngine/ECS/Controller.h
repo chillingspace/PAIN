@@ -373,6 +373,9 @@ namespace PAIN {
 			// Get all component names registered for an entity
 			std::vector<std::string> getEntityComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
+			//Get component name
+			std::vector<std::string> getComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
+
 			// Get all components as JSON (for serialization)
 			nlohmann::json getAllComponentsAsJson(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 

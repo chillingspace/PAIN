@@ -476,6 +476,27 @@ namespace PAIN {
             }
             deserializeAllComponentsImpl(entity, getRegistry(registryId), comps, AllGameplayComponents{});
         }
+        std::vector<std::string> Controller::getComponentNames(
+            entt::entity entity,
+            RegistryID registryId
+        ) const {
+            std::vector<std::string> names;
+
+            auto* ctx = getRegistryContext(registryId);
+            if (!ctx) return names;
+
+            auto& registry = ctx->registry;
+            if (!registry.valid(entity)) return names;
+
+            // Iterate through all registered components
+            for (const auto& [name, _] : component_checkers) {
+                if (hasComponentByName(entity, name, registryId)) {
+                    names.push_back(name);
+                }
+            }
+
+            return names;
+        }
         nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity, RegistryID registryId) const {
             // Note: This uses MAIN_REGISTRY_ID for backward compatibility
             if (!checkEntity(entity, registryId)) {
