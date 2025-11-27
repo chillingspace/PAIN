@@ -40,6 +40,12 @@ namespace PAIN {
             glm::mat4 projection = cam->projection();
             glm::vec2 viewport = window_service->getFrameBuffer();
 
+            //static bool printed = false;
+            //if (!printed) {
+            //    cam->debugPrintFOV();
+            //    printed = true;
+            //}
+
             // For every UI label with a UIFollowsWorldEntity, the position is projected from world to screen and written to the label's UIRectTransform.calculated_world_position.
             updateFloatingLabels(registry, view, projection, viewport);
 
@@ -101,44 +107,119 @@ namespace PAIN {
             }
         }
 
-        glm::vec2 LayoutSystem::worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        // Check if position is behind camera
+        bool LayoutSystem::isPositionBehindCamera(const glm::vec4& clip_space_pos)
         {
-            glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
-            if (clip.w == 0.0f) return { -10000, -10000 }; // clearly "offscreen"
-            glm::vec3 ndc = glm::vec3(clip) / clip.w;
-            // If behind camera, we also consider as offscreen
-            if (clip.w < 0.0f) return { -10000, -10000 };
+            return clip_space_pos.w <= 0.0f;
+        }
+
+        // Check if NDC coordinates are within camera frustum
+        bool LayoutSystem::isInCameraFrustum(const glm::vec3& ndc)
+        {
+            return ndc.x >= -1.0f && ndc.x <= 1.0f &&
+                ndc.y >= -1.0f && ndc.y <= 1.0f &&
+                ndc.z >= -1.0f && ndc.z <= 1.0f;
+        }
+
+        // Convert world position to clip space
+        glm::vec4 LayoutSystem::worldToClipSpace(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj)
+        {
+            return proj * view * glm::vec4(world_pos, 1.0f);
+        }
+
+        // Convert clip space to NDC
+        glm::vec3 LayoutSystem::clipToNDC(const glm::vec4& clip)
+        {
+            if (clip.w == 0.0f) return glm::vec3(0.0f);
+            return glm::vec3(clip) / clip.w;
+        }
+
+        // Convert NDC to screen coordinates
+        glm::vec2 LayoutSystem::ndcToScreen(const glm::vec3& ndc, const glm::vec2& viewport)
+        {
             glm::vec2 screen;
             screen.x = (ndc.x * 0.5f + 0.5f) * viewport.x;
-            screen.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * viewport.y; // flip Y
+            // Alternate between these 2 screen y, first one inverts y,, having some issues with this, so we go with the second one whr it sticks above the entity
+            //screen.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * viewport.y;
+            screen.y = ((ndc.y * 0.5f + 0.5f)) * viewport.y;
             return screen;
         }
 
+        // Main world to screen function
+        glm::vec2 LayoutSystem::worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
+        {
+            glm::vec4 clip = worldToClipSpace(world_pos, view, proj);
+
+            if (isPositionBehindCamera(clip)) {
+                return { -10000, -10000 };
+            }
+
+            glm::vec3 ndc = clipToNDC(clip);
+            return ndcToScreen(ndc, viewport);
+        }
+
+        // Check if screen position is within viewport bounds
+        bool LayoutSystem::isScreenPosVisible(const glm::vec2& screen_pos, const glm::vec2& viewport, float margin = 0.0f)
+        {
+            return screen_pos.x >= -margin && screen_pos.x <= viewport.x + margin &&
+                screen_pos.y >= -margin && screen_pos.y <= viewport.y + margin;
+        }
+
+        // Calculate world position of entity with offset
+        glm::vec3 LayoutSystem::getEntityWorldPosition(const WorldTransform& transform, const glm::vec3& offset)
+        {
+            return glm::vec3(transform.matrix * glm::vec4(offset, 1.0f));
+        }
+
+        // Update all floating labels
         void LayoutSystem::updateFloatingLabels(entt::registry& registry, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
         {
-            auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform>();
+            auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform, UIElement>();
             auto svc = services.lock();
-            auto metadata_service = svc->get<MetaData::Service>();
             auto ecs = svc->get<ECS::Controller>();
 
-            for (auto&& [entity, follows, rect] : view_floating.each()) {
-
+            for (auto&& [entity, follows, rect, elem] : view_floating.each()) {
                 entt::entity follow_entity = ecs->resolveGUID(follows.entity_target_guid);
 
-                if (follow_entity == entt::null) continue;
-
-                if (!registry.valid(follow_entity) || !registry.all_of<WorldTransform>(follow_entity))
+                if (follow_entity == entt::null || !registry.valid(follow_entity)) {
+                    elem.b_is_enabled = false;
                     continue;
+                }
 
-                const auto& world = registry.get<WorldTransform>(follow_entity);
-                glm::vec3 world_pos = glm::vec3(world.matrix * glm::vec4(follows.world_offset, 1.f));
-                glm::vec4 clip = proj * view * glm::vec4(world_pos, 1.0f);
+                if (!registry.all_of<WorldTransform>(follow_entity)) {
+                    elem.b_is_enabled = false;
+                    continue;
+                }
 
-                glm::vec2 screen_pos = worldToScreen(world_pos, view, proj, viewport);
+                const auto& world_transform = registry.get<WorldTransform>(follow_entity);
+                glm::vec3 world_pos = getEntityWorldPosition(world_transform, follows.world_offset);
 
-                // Not getting assigned here?
-                rect.calculated_world_position = screen_pos;
-                // Optionally, allow a pixel offset in UIFollowsWorldEntity for vertical separation
+                glm::vec4 clip = worldToClipSpace(world_pos, view, proj);
+
+                // Check if behind camera
+                if (isPositionBehindCamera(clip)) {
+                    elem.b_is_enabled = false;
+                    continue;
+                }
+
+                glm::vec3 ndc = clipToNDC(clip);
+
+                // Check if within camera frustum (FOV check)
+                if (!isInCameraFrustum(ndc)) {
+                    elem.b_is_enabled = false;
+                    continue;
+                }
+
+                glm::vec2 screen_pos = ndcToScreen(ndc, viewport);
+
+                // Final viewport bounds check
+                if (!isScreenPosVisible(screen_pos, viewport, 50.0f)) {
+                    elem.b_is_enabled = false;
+                }
+                else {
+                    elem.b_is_enabled = true;
+                    rect.calculated_world_position = screen_pos;
+                }
             }
         }
         

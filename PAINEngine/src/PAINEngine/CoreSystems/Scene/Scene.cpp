@@ -607,9 +607,6 @@ namespace PAIN {
 				throw std::runtime_error("animation obj err");
 			}
 			
-			// font
-			TextRenderer::get();
-			
 	#ifdef PN_PLATFORM_WINDOWS
 			std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
 	#else

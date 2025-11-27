@@ -30,7 +30,14 @@ namespace PAIN {
 
         private:
             void processHierarchy(entt::entity entity, entt::registry& registry, const glm::vec2& parent_size, const glm::vec2& parent_pos);
+            bool isPositionBehindCamera(const glm::vec4& clip_space_pos);
+            bool isInCameraFrustum(const glm::vec3& ndc);
+            glm::vec4 worldToClipSpace(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj);
+            glm::vec3 clipToNDC(const glm::vec4& clip);
+            glm::vec2 ndcToScreen(const glm::vec3& ndc, const glm::vec2& viewport);
             glm::vec2 worldToScreen(const glm::vec3& world_pos, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport);
+            bool isScreenPosVisible(const glm::vec2& screen_pos, const glm::vec2& viewport, float margin);
+            glm::vec3 getEntityWorldPosition(const WorldTransform& transform, const glm::vec3& offset);
             void updateFloatingLabels(entt::registry& registry, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport);
         };
     }
