@@ -13,6 +13,8 @@
 #include "Panels/ViewportPanel.h"
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
+#include "Panels/PrefabsPanel.h"
+#include "Panels/AnimationPanel.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -60,12 +62,17 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
-            registerPanel(std::make_shared<Panel::ComponentsPanel>());
+
+            auto components_panel = std::make_shared<Panel::ComponentsPanel>();
+            registerPanel(components_panel);
 
             // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
             viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
+
+            auto animation_panel = std::make_shared<Panel::AnimationPanel>();
+            registerPanel(animation_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
@@ -73,6 +80,7 @@ namespace PAIN {
             //Register resource panel
 #ifdef PN_PLATFORM_WINDOWS
             registerPanel(std::make_shared<Panel::ResourcePanel>());
+            registerPanel(std::make_shared<Panel::PrefabPanel>());
 #endif
             
             // Call onAttach on all registered panels

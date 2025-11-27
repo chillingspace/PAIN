@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
@@ -34,7 +33,7 @@ namespace PAIN {
             Assets::GUID curr_skybox_id;
 
             //Boolean for checking day time
-            bool using_day_time = true;
+            bool using_world_light = true;
 
             //Layers management
             std::vector<Layer> layers;
@@ -108,8 +107,8 @@ namespace PAIN {
                 return light.has_value() ? &light->get() : nullptr;
             }
 
-            bool getUsingDayTime() const { return using_day_time; }
-            void setUsingDayTime(bool day_time) { using_day_time = day_time; }
+            bool getUsingWorldLight() const { return using_world_light; }
+            void setUsingWorldLight(bool world_light) { using_world_light = world_light; }
 
             // Cameras
             Camera* GetActiveCamera();

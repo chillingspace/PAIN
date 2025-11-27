@@ -315,10 +315,9 @@ namespace PAIN {
 					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Entity")) {
 						// Instantiate prefab in scene
 						auto prefab_service = services->get<Prefab::Service>();
-						auto& registry = services->get<ECS::Controller>()->getRegistry();
 
 						//Create instance
-						entt::entity instance = prefab_service->instantiatePrefab(file.id, registry);
+						entt::entity instance = prefab_service->instantiatePrefab(file.id);
 
 						//Check for null instance
 						if (instance != entt::null) {

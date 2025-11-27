@@ -825,13 +825,9 @@ namespace PAIN {
                 mat.name = mat.name.empty() ? "UnamedMaterial_" + std::to_string(def_name_count++) : mat.name;
 
                 //Identify the nested folder
-                std::filesystem::path relative_path;
-
-                //Get relative path
-                relative_path = std::filesystem::relative(asset_info.relative_folder, getAllGameFolders()[Assets::Type::Model]);
+                std::filesystem::path relative_path = extractSubfolderPath(asset_info, assets_root);
                 bool game_folder = true;
                 if (relative_path.empty()) {
-                    relative_path = std::filesystem::relative(asset_info.relative_folder, getAllEngineFolders()[Assets::Type::Model]);
                     game_folder = false;
                 }
 

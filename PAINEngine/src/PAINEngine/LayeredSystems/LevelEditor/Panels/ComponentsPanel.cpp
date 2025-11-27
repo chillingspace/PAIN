@@ -9,8 +9,8 @@
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
-#include "ECS/Components/AllComponents.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "ECS/Components/AllComponents.h"
 
 #ifdef _DEBUG
 
@@ -44,7 +44,7 @@ namespace PAIN {
 
                 // ---- Transform ----
                 registerCompUIFunc<PAIN::LocalTransform>("LocalTransform",
-                    [this](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
+                    [&](ComponentsPanel& panel, PAIN::LocalTransform& transform_ref) {
                         static struct {
                             entt::entity entity = entt::null;
                             LocalTransform original_transform;
@@ -104,7 +104,7 @@ namespace PAIN {
 
                                 // Mark dirty
                                 if (transformSystem) {
-                                    transformSystem->markDirty(selected, ecs->getRegistry());
+                                    transformSystem->markDirty(selected, ecs->getRegistry(currentRegistryID));
                                 }
                             }
                         }
@@ -128,28 +128,31 @@ namespace PAIN {
                                     entity_name = metadata->getEntityName(entity);
                                 }
 
+                                //Create temp registry id
+                                auto registr_id = currentRegistryID;
+
                                 command_manager->executeAction(Action{
-                                    [ecs, entity, final_transform, transformSystem]() {
-                                        if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
+                                    [ecs, entity, final_transform, transformSystem, registr_id]() {
+                                        if (ecs->checkEntity(entity, registr_id)) {
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity, registr_id);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = final_transform;
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
-                                    [ecs, entity, old_transform, transformSystem]() {
-                                        if (ecs->checkEntity(entity)) {
-                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity);
+                                    [ecs, entity, old_transform, transformSystem, registr_id]() {
+                                        if (ecs->checkEntity(entity, registr_id)) {
+                                            auto transform_opt = ecs->getEntityComponent<LocalTransform>(entity, registr_id);
                                             if (transform_opt.has_value()) {
                                                 transform_opt.value().get() = old_transform;
                                             }
                                             // Mark dirty
                                             if (transformSystem) {
-                                                transformSystem->markDirty(entity, ecs->getRegistry());
+                                                transformSystem->markDirty(entity, ecs->getRegistry(registr_id));
                                             }
                                         }
                                     },
@@ -217,6 +220,29 @@ namespace PAIN {
                             }
                         }
                     });
+
+                // ---- Texture2D ----
+                registerCompUIFunc<PAIN::Texture2D>("Texture2D",
+                    [this](ComponentsPanel& panel, PAIN::Texture2D& texture_comp) {
+                        // Model GUID selector (using reflection)
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // Model Asset Selection
+                        if (DrawAssetSelectorField("Select A Texture",
+                            texture_comp.texture_guid,
+                            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                            panel.services)) {
+                            changed = true;
+                        }
+
+                        changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    });
                 
                 // UItext comp ui
                 registerCompUIFunc<PAIN::UIText>("UIText",
@@ -247,7 +273,7 @@ namespace PAIN {
                         }
 
                         // Font position
-                        ImGui::DragFloat2("Text Position", &text.text_pos.x, 1.0f, 0.0f, 0.0f, "%.1f");
+                        ImGui::Text("Text Position: (%.8f, %.8f)", text.text_pos.x, text.text_pos.y);
 
                         // Font size
                         changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f, 128.0f, "%.1f");
@@ -295,7 +321,6 @@ namespace PAIN {
                         return changed;
                     }
                 );
-
 
                 registerCompUIFunc<PAIN::Cam>("Camera",
                     [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
@@ -366,7 +391,7 @@ namespace PAIN {
                         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
                         // Get ECS registry and metadata service
-                        auto& registry = ecs->getRegistry();
+                        auto& registry = ecs->getRegistry(currentRegistryID);
                         auto metadata_service = panel.services->get<MetaData::Service>();
 
                         // --- Dropdown for selecting world_target entity ---
@@ -396,11 +421,11 @@ namespace PAIN {
                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
                                 entt::entity dragged_entity = *(const entt::entity*)payload->Data;
 
-                                std::string ent_name = services->get<MetaData::Service>()->getEntityName(dragged_entity);
+                                Assets::GUID entity_guid = ecs->getOrCreateEntityGUID(dragged_entity, currentRegistryID);
 
-                                if (ent_name != follow.entity_target_string) {
+                                if (entity_guid != follow.entity_target_guid) {
 
-                                    follow.entity_target_string = ent_name;
+                                    follow.entity_target_guid = entity_guid;
 
                                     changed = true;
                                 }
@@ -408,14 +433,18 @@ namespace PAIN {
                             ImGui::EndDragDropTarget();
                         }
 
+                        entt::entity entity = ecs->resolveGUID(follow.entity_target_guid, currentRegistryID);
+
+                        std::string entity_name = metadata_service->getEntityName(entity);
+
                         // Have an imgui text to show the current entity that is dragged
-                        std::string target_name = follow.entity_target_string != "" ? follow.entity_target_string : "[none]";
+                        std::string target_name = entity != entt::null ? entity_name : "[none]";
 
                         ImGui::Text("World Target: %s", target_name.c_str());
 
                         // Optionally allow clearing the target
                         if (ImGui::Button("Clear Target")) {
-                            follow.entity_target_string = "";
+                            follow.entity_target_guid = Assets::GUID{};
                             changed = true;
                         }
 
@@ -547,7 +576,7 @@ namespace PAIN {
 
                     entt::entity selected_entity = entity_panel->getSelectedEntity();
 
-                    if (!ecs->checkEntity(selected_entity)) {
+                    if (!ecs->checkEntity(selected_entity, currentRegistryID)) {
                         ImGui::Text("No valid entity selected");
                         if (ImGui::Button("Close", ImVec2(-1, 0))) {
                             closePopUp(popup_id);
@@ -578,7 +607,7 @@ namespace PAIN {
                         }
 
                         // Skip if entity already has this component
-                        if (ecs->hasComponentByName(selected_entity, comp_name)) {
+                        if (ecs->hasComponentByName(selected_entity, comp_name, currentRegistryID)) {
                             continue;
                         }
 
@@ -602,7 +631,7 @@ namespace PAIN {
                                 closePopUp(popup_id);
                             }
                             else {
-                                ecs->addComponentByName(selected_entity, comp_name);
+                                ecs->addComponentByName(selected_entity, comp_name, currentRegistryID);
                                 search_filter[0] = '\0';
                                 closePopUp(popup_id);
                             }
@@ -641,7 +670,7 @@ namespace PAIN {
                     }
 
                     entt::entity entity = entity_panel->getSelectedEntity();
-                    if (entity == entt::null || !ecs->checkEntity(entity)) {
+                    if (entity == entt::null || !ecs->checkEntity(entity, currentRegistryID)) {
                         ImGui::Text("No valid entity selected");
                         ImGui::Spacing();
                         if (ImGui::Button("Close", ImVec2(-1, 0))) {
@@ -707,8 +736,8 @@ namespace PAIN {
                         }
 
                         // Use new removeComponentByName method
-                        if (ecs->hasComponentByName(entity, comp_string_ref)) {
-                            ecs->removeComponentByName(entity, comp_string_ref);
+                        if (ecs->hasComponentByName(entity, comp_string_ref, currentRegistryID)) {
+                            ecs->removeComponentByName(entity, comp_string_ref, currentRegistryID);
                         }
 
                         closePopUp(popup_id);
@@ -728,7 +757,7 @@ namespace PAIN {
                     if (!entity_panel) return;
 
                     entt::entity selected_entity = entity_panel->getSelectedEntity();
-                    if (!ecs->checkEntity(selected_entity)) return;
+                    if (!ecs->checkEntity(selected_entity, currentRegistryID)) return;
 
                     static int motion_type_idx = 1; // Default to Dynamic
                     const char* motion_names[] = { "Static", "Dynamic", "Kinematic" };
@@ -740,10 +769,10 @@ namespace PAIN {
                     if (ImGui::Button("Add RigidBody3D", ImVec2(-1, 0))) {
                         // Add the component
 
-                        if (!ecs->hasComponentByName(selected_entity, "RigidBody3D")) {
+                        if (!ecs->hasComponentByName(selected_entity, "RigidBody3D", currentRegistryID)) {
                             Physics::RigidBody3D rb;
                             rb.motion_type = static_cast<PAIN::Physics::MotionType>(motion_type_idx);
-                            ecs->addEntityComponent<PAIN::Physics::RigidBody3D>(selected_entity, std::move(rb));
+                            ecs->addEntityComponent<PAIN::Physics::RigidBody3D>(selected_entity, std::move(rb), currentRegistryID);
                         }
                         closePopUp(popup_id);
                     }
@@ -756,7 +785,7 @@ namespace PAIN {
             void ComponentsPanel::renderEntityComponents(entt::entity entity) {
                 auto ecs = services->get<ECS::Controller>();
 
-                if (!ecs || !ecs->checkEntity(entity)) {
+                if (!ecs || !ecs->checkEntity(entity, currentRegistryID)) {
                     ImGui::Spacing();
                     ImGui::TextDisabled("Invalid entity");
                     return;
@@ -765,7 +794,7 @@ namespace PAIN {
                 // if lua script active.
 
                 // Get all component names for this entity
-                auto component_names = ecs->getEntityComponentNames(entity);
+                auto component_names = ecs->getEntityComponentNames(entity, currentRegistryID);
 
                 if (component_names.empty()) {
                     ImGui::Spacing();
@@ -807,8 +836,8 @@ namespace PAIN {
                         if (ImGui::MenuItem("Reset to Default")) {
                             // TODO: Implement reset - would need default component values
                             // For now, could remove and re-add with defaults
-                            ecs->removeComponentByName(entity, comp_name);
-                            ecs->addComponentByName(entity, comp_name);
+                            ecs->removeComponentByName(entity, comp_name, currentRegistryID);
+                            ecs->addComponentByName(entity, comp_name, currentRegistryID);
                         }
 
                         ImGui::Separator();
@@ -829,7 +858,7 @@ namespace PAIN {
                         ImGui::Spacing();
 
                         // Get component pointer (type-erased)
-                        void* comp_ptr = ecs->getComponentPtrByName(entity, comp_name);
+                        void* comp_ptr = ecs->getComponentPtrByName(entity, comp_name, currentRegistryID);
 
                         //Start drag-and-drop source
                         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
@@ -1022,7 +1051,7 @@ namespace PAIN {
 #endif
 
                 // No entity selected - show placeholder
-                if (selected == entt::null || !ecs->checkEntity(selected)) {
+                if (selected == entt::null || !ecs->checkEntity(selected, currentRegistryID)) {
 
                     ImGui::Spacing();
                     ImGui::Spacing();
@@ -1047,9 +1076,9 @@ namespace PAIN {
 
                 // Display entity name from metadata
                 std::string entity_name;
-                auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected);
+                auto name_comp_opt = services->get<ECS::Controller>()->getEntityComponent<Entity::Name>(selected, currentRegistryID);
                 if (!name_comp_opt.has_value()) {
-                    entity_name = services->get<ECS::Controller>()->getRegistry().emplace<Entity::Name>(selected).name;
+                    entity_name = services->get<ECS::Controller>()->getRegistry(currentRegistryID).emplace<Entity::Name>(selected).name;
 
                 }
                 else {
@@ -1114,7 +1143,7 @@ namespace PAIN {
 
                 //Get ecs controller
                 auto controller = services->get<ECS::Controller>();
-                if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected)) {
+                if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected, currentRegistryID)) {
                     if (layerCompOpt.has_value()) {
 
                         auto layerComp = layerCompOpt.value();
@@ -1138,17 +1167,17 @@ namespace PAIN {
                                     std::function<void(entt::entity)> propogate_layer_tag = [&](entt::entity entity) {
 
                                         //Mark world transform as dirty
-                                        if (auto* layer = controller->getRegistry().try_get<Entity::Layer>(entity)) {
+                                        if (auto* layer = controller->getRegistry(currentRegistryID).try_get<Entity::Layer>(entity)) {
                                             layer->layer_id = i;
                                             layer->layer_mask = 1 << i;
                                             layer->layerName = layers[i].name;
                                         }
 
                                         //Get hierarchy and propagate to children if exists
-                                        if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(entity)) {
+                                        if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(entity)) {
                                             for (const auto& childGUID : hierarchy->childrenGUIDs) {
-                                                entt::entity child = controller->getGUIDRegistry().resolveGUID(childGUID);
-                                                if (child != entt::null && controller->getRegistry().valid(child)) {
+                                                entt::entity child = controller->getGUIDRegistry(currentRegistryID).resolveGUID(childGUID);
+                                                if (child != entt::null && controller->getRegistry(currentRegistryID).valid(child)) {
                                                     propogate_layer_tag(child);
                                                 }
                                             }
@@ -1157,13 +1186,13 @@ namespace PAIN {
 
                                     //Root entity
                                     entt::entity root_entity = selected;
-                                    if (auto* id = controller->getRegistry().try_get<Entity::GUID>(root_entity)) {
+                                    if (auto* id = controller->getRegistry(currentRegistryID).try_get<Entity::GUID>(root_entity)) {
                                         Assets::GUID root_id = id->guid;
 
                                         //Identify absolute root
                                         while (root_id.IsValid()) {
-                                            if (auto* hierarchy = controller->getRegistry().try_get<Entity::Hierarchy>(root_entity)) {
-                                                root_entity = controller->resolveGUID(root_id);
+                                            if (auto* hierarchy = controller->getRegistry(currentRegistryID).try_get<Entity::Hierarchy>(root_entity)) {
+                                                root_entity = controller->resolveGUID(root_id, currentRegistryID);
                                                 root_id = hierarchy->parentGUID;
                                             }
                                             else {

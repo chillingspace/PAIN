@@ -156,7 +156,7 @@ namespace PAIN {
             std::filesystem::path displacementTexturePath;// Displacement
             
             //Materials
-            glm::vec3 baseColor{ 1.0f, 1.0f, 1.0f };
+            glm::vec3 baseColor{ 1.0f, 0.0f, 1.0f };
             float metallic = 0.0f;
             float roughness = 0.5f;
             glm::vec3 emissive{ 0.0f, 0.0f, 0.0f };

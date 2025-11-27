@@ -21,31 +21,31 @@
 namespace PAIN {
 
 	struct UIRectTransform {
-		glm::f32vec3 local_position{ 0, 0, 0 };
-		glm::f32quat rotation;
-		glm::f32vec3 scale{ 1, 1, 1 };
+		glm::vec3 local_position{ 0, 0, 0 };
+		glm::quat rotation;
+		glm::vec3 scale{ 1, 1, 1 };
 
 		// Anchor system (normalized 0-1 relative to parent)
 		// Bottom-left anchor
-		glm::f32vec2 anchor_min{ 0, 0 };
+		glm::vec2 anchor_min{ 0, 0 };
 		// Top-right anchor
-		glm::f32vec2 anchor_max{ 1, 1 };
+		glm::vec2 anchor_max{ 1, 1 };
 
 		// Center of the entity
-		glm::f32vec2 pivot{ 0.5f, 0.5f };
+		glm::vec2 pivot{ 0.5f, 0.5f };
 
 		// Position of pivot relative to anchors
-		glm::f32vec2 anchored_position{ 0, 0 };
+		glm::vec2 anchored_position{ 0, 0 };
 		// Width/height when anchors together
-		glm::f32vec2 size_delta{ 100, 100 };
+		glm::vec2 size_delta{ 100, 100 };
 
 		// Left, Bottom padding
-		glm::f32vec2 offset_min{ 0, 0 };
+		glm::vec2 offset_min{ 0, 0 };
 		// -Right, -Top padding
-		glm::f32vec2 offset_max{ 0, 0 };
+		glm::vec2 offset_max{ 0, 0 };
 
-		glm::f32vec2 calculated_world_size{ 100, 100 };
-		glm::f32vec2 calculated_world_position{ 0, 0 };
+		glm::vec2 calculated_world_size{ 100, 100 };
+		glm::vec2 calculated_world_position{ 0, 0 };
 	};
 
 	struct UIElement {
@@ -131,7 +131,7 @@ namespace PAIN {
 	};
 
 	struct UIFollowsWorldEntity {
-		std::string entity_target_string;
+		Assets::GUID entity_target_guid;
 		glm::vec3 world_offset; 
 	};
 
@@ -241,7 +241,7 @@ REFL_END
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);
 
 REFL_TYPE(PAIN::UIFollowsWorldEntity)
-REFL_FIELD(entity_target_string)
+REFL_FIELD(entity_target_guid)
 REFL_FIELD(world_offset)
 REFL_END
 

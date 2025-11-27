@@ -17,11 +17,9 @@ _G.PlayerState = {
     player = nil, -- cache the player entity
     carriedLetter = nil, -- entity id of letter currently on back
     pickupRadius = 2.0,  -- how close player must be to pick up letter
-
     deliveryRadius  = 4.0, --  to drop off at collection point
     lettersDelivered = 0,  -- letters delivered so far
     lettersToWin = 3,  -- how many letters needed to win
-
     carriedOffset = {   -- offset of letter on the player's back
         x = 0.0,
         y = 1.2,
@@ -38,6 +36,13 @@ _G.PlayerState = {
     _keysRegistered = false
 }
 
+_G.Input = _G.Input or {}
+local I = _G.Input
+I.tapCount = I.tapCount or 0
+I.tapTimer = I.tapTimer or 0.0
+I.doubleTapped = I.doubleTapped or false
+I.doubleTapThreshold = I.doubleTapThreshold or 0.25
+
 local S = _G.PlayerState
 local collectPressed = false
 local hidePressed = false
@@ -48,6 +53,17 @@ if not S._keysRegistered then
     registerKeyUp("C", function() collectPressed = false end)
     registerKeyDown("H", function() hidePressed = true end)
     registerKeyUp("H",   function() hidePressed = false end)
+    
+    -- mouse click and press (android) treated as a generic action
+    if registerOnClick then
+        registerOnClick(function()
+            I.tapCount = I.tapCount + 1 -- record that a tap happened, timing handled in update
+            if I.tapCount == 1 then -- reset timer so we measure from the first tap in a cluster
+                I.tapTimer = 0.0
+            end
+        end)
+    end
+
     S._keysRegistered = true
 end
 
@@ -94,12 +110,37 @@ function S.update(dt)
         return
     end
 
+    ----------------------------------------------------------------
+    -- tap / double-tap handling for generic input (click/touch)
+    ----------------------------------------------------------------
+    if I.tapCount > 0 then
+        I.tapTimer = I.tapTimer + dt
+
+        if I.tapTimer > I.doubleTapThreshold then
+            -- too slow, reset
+            I.tapCount = 0
+            I.tapTimer = 0.0
+            I.doubleTapped = false
+        elseif I.tapCount >= 2 then
+            -- got 2 taps within the threshold -> double tap!
+            I.doubleTapped = true
+            I.tapCount = 0
+            I.tapTimer = 0.0
+        else
+            I.doubleTapped = false
+        end
+    else
+        I.doubleTapped = false
+    end
+
+    local tapped = false
+
     local px, py, pz = getPosition(S.player)
 
     -------------------------------------------------
     -- hiding logic -> press H
     -------------------------------------------------
-    if hidePressed then
+    if hidePressed or tapped then
         hidePressed = false -- consume key press
 
         if S.hidden then
@@ -123,6 +164,13 @@ function S.update(dt)
                     S.letterBaseScale.y,
                     S.letterBaseScale.z
                 )
+            end
+
+            -- hard reset tap state so no double tap queues a jump on unhide
+            if I then
+                I.doubleTapped = false
+                I.tapCount = 0
+                I.tapTimer = 0.0
             end
 
             log("[PlayerState] Player left hiding spot")
@@ -182,6 +230,13 @@ function S.update(dt)
                         )
                     end
 
+                    -- reset tap state to avoid jump immediately after hiding
+                    if I then
+                        I.doubleTapped = false
+                        I.tapCount = 0
+                        I.tapTimer = 0.0
+                    end
+
                     S.hidden = true
                     S.hiddenIn = bestSpot
                     log("[PlayerState] Player is hiding in a box")
@@ -234,7 +289,7 @@ function S.update(dt)
             end
 
             -- inside delivery radius + C pressed = deliver
-            if bestPoint and collectPressed then
+            if bestPoint and (collectPressed or tapped) then
                 collectPressed = false
 
                 -- snap the letter onto the collection point first (??)
@@ -302,7 +357,7 @@ function S.update(dt)
     end
 
     if bestLetter then
-        if collectPressed then
+        if collectPressed or tapped then
             S.carriedLetter = bestLetter
             collectPressed = false -- avoid multiple logs
 
@@ -321,7 +376,15 @@ function S.update(dt)
 end
 
 function S.isHidden()
-    return S.hidden == true
+    if S.hidden then
+        if I then
+            I.doubleTapped = false   -- do not allow jump while hiding
+            I.tapCount = 0
+            I.tapTimer = 0.0
+        end
+        return true
+    end
+    return false
 end
 
 function S.canBeCaught()

@@ -203,7 +203,7 @@ namespace Core {
         float position_x, position_y;
 
     public:
-        GameObject();                        // camelCase for constructors
+        GameObject();                        // PascalCase for constructors
         ~GameObject();
 
         void updatePosition(float dx, float dy);  // camelCase for functions
@@ -308,6 +308,38 @@ The engine uses a lightweight component-based architecture for game objects, all
 ---
 
 ## 📚 API Reference
+
+### Debug keys reference
+
+#### Graphics
+
+- `F1` - Toggle editor
+- `F2` - Toggle debug drawings
+- `F3` - Toggle PBR diffuse map
+- `F4` - Toggle PBR AO map
+- `F5` - Toggle PBR normal map
+- `F6` - Toggle PBR roughness/metallic map
+- `F7` - Toggle PBR emissive map
+
+<hr />
+
+- `F8` - Toggle between map rendering
+
+1. Object only
+2. Diffuse
+3. AO
+4. Normal
+5. Roughness
+6. Metallic
+7. Emissive
+8. IBL irradiance
+9. IBL prefilter
+10. IBL BRDFLUT
+
+<hr />
+
+- `F` - Toggle checkered floor
+- `I` - Toggle animation interpolation
 
 ### Core Logging System
 

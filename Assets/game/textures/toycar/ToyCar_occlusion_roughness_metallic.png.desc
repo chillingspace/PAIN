@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "ToyCar_occlusion_roughness_metallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1209679765325768551
+  },
+  "descriptor_version": 1,
+  "guid": "fa5a4964-92d3-a54f-be14-f85167d12582",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png"
+  }
+}

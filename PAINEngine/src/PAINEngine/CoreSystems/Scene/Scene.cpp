@@ -1,4 +1,5 @@
-﻿#include "Scene.h"
+﻿#include "pch.h"
+#include "Scene.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Controller.h"
@@ -184,8 +185,8 @@ namespace PAIN {
 			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
 			//Set up world light
-			using_day_time = env.useDaytime;
-			if (using_day_time) {
+			using_world_light = env.useDaytime;
+			if (using_world_light) {
 				if (!getWorldLight()) {
 					LightSources::get().create(world_light_name);
 				}
@@ -193,10 +194,10 @@ namespace PAIN {
 				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-				GraphicsSettings::get().ibl = true;
+				// GraphicsSettings::get().ibl = true;
 			}
 			else {
-				GraphicsSettings::get().ibl = false;
+				// GraphicsSettings::get().ibl = false;
 			}
 
 			//Load Skybox GUID
@@ -307,7 +308,7 @@ namespace PAIN {
 			//Capture all graphics and env variables
 			scene_asset.environment.cameraLightIntensity = getCameraLight() ? getCameraLight()->L_intensity : scene_asset.environment.cameraLightIntensity;
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
-			scene_asset.environment.useDaytime = using_day_time;
+			scene_asset.environment.useDaytime = using_world_light;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
 
 			//Capture all layer variables
@@ -425,73 +426,7 @@ namespace PAIN {
 			// for .mesh(converted from .obj only)
 			std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
 			std::shared_ptr<Assets::Model> mdl;
-			{
-	#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path ogre_smile_path = "game/models/ogre_smile.mesh";
-	#else	
-				std::filesystem::path ogre_smile_path = "game\\models\\ogre_smile.mesh";
-	#endif
-			
-				//Get model
-				mdl_opt = asset_manager->getAsset<Assets::Model>(ogre_smile_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-			
-					// logging to check data
-					{
-						PN_CORE_TRACE("File: {}\nVertices: {}\nIndices: {}\nMaterials: {}", mdl->vpath, mdl->vertices.size(), mdl->indices.size(), mdl->materials.size());
-						//PN_CORE_TRACE("Base roughness: {}\nBase metallic: {}\nBase color: {},{},{}", mdl->materials[0].roughness, mdl->materials[0].metallic, mdl->materials[0].baseColor.r, mdl->materials[0].baseColor.g, mdl->materials[0].baseColor.b);
-					}
-			
-					AddObject(mdl, "ogre_smile", { 0.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
-				}
-			}
-			
-	#ifdef PN_PLATFORM_WINDOWS
-			std::filesystem::path ogre_path = "game/models/ogre.mesh";
-	#else	
-			std::filesystem::path ogre_path = "game\\models\\ogre.mesh";
-	#endif
-			//Get model
-			mdl_opt = asset_manager->getAsset<Assets::Model>(ogre_path);
-			if (mdl_opt.has_value()) {
-				mdl = mdl_opt.value();
-			
-				AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f });
-			
-				AddObject(mdl, "ogre_left", { -2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
-				AddObject(mdl, "ogre_right", { 2.f, 1.f, 0.f }, { 0.f,0.f,0.f, 0.f }, { 1.f, 1.f, 1.f }, ogre_diff, ogre_smile_ao);
-			}
-			
-	#ifdef PN_PLATFORM_WINDOWS
-			std::filesystem::path sdcc_path = "game/models/sdcc.mesh";
-	#else	
-			std::filesystem::path sdcc_path = "game\\models\\sdcc.mesh";
-	#endif
-			
-			auto sdcc_diff = Assets::GUID("71051859-f5ee-144a-b1e5-59ad02d13695");
-			//Get model
-			mdl_opt = asset_manager->getAsset<Assets::Model>(sdcc_path);
-			if (mdl_opt.has_value()) {
-				mdl = mdl_opt.value();
-			
-				AddObject(mdl, "sdcc", { 5.f, 0.f, -3.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
-			}
-			
-	#ifdef PN_PLATFORM_WINDOWS
-			std::filesystem::path city_path = "game/models/city.mesh";
-	#else	
-			std::filesystem::path city_path = "game\\models\\city.mesh";
-	#endif
-			
-			auto city_diff = Assets::GUID{ "29fe999b-d257-bf41-879d-6d7578d43734" };
-			//Get model
-			mdl_opt = asset_manager->getAsset<Assets::Model>(city_path);
-			if (mdl_opt.has_value()) {
-				mdl = mdl_opt.value();
-			
-				AddObject(mdl, "city", { -8.f, 0.f, -5.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(0.0f, 1.0f, 0.0f)), { 3.f, 3.f, 3.f });
-			}
+		
 			
 	#ifdef PN_PLATFORM_WINDOWS
 			std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
@@ -504,6 +439,20 @@ namespace PAIN {
 				mdl = mdl_opt.value();
 			
 				auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+			}
+
+
+#ifdef PN_PLATFORM_WINDOWS
+			std::filesystem::path tc_path = "game/models/toycar/ToyCar.mesh";
+#else	
+			std::filesystem::path tc_path = "game\\models\\toycar\\ToyCar.mesh";
+#endif
+			//Get model
+			mdl_opt = asset_manager->getAsset<Assets::Model>(tc_path);
+			if (mdl_opt.has_value()) {
+				mdl = mdl_opt.value();
+
+				auto e = AddObject(mdl, "toycar", { 2.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.005f });
 			}
 			
 			
@@ -578,7 +527,7 @@ namespace PAIN {
 
 			// Daytime / Nighttime setting
 			{
-				if (using_day_time) {
+				if (using_world_light && GraphicsSettings::get().world_light) {
 
 					auto olc = getWorldLight();
 
@@ -588,7 +537,6 @@ namespace PAIN {
 						getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-						GraphicsSettings::get().ibl = true;
 					}
 					else {
 						olc->position = GetActiveCamera()->pos - glm::normalize(olc->forward) * olc->shadow_source_follow_distance;
@@ -599,7 +547,6 @@ namespace PAIN {
 
 					if (olc) {
 						LightSources::get().destroy("world");
-						GraphicsSettings::get().ibl = false;
 					}
 				}
 			}

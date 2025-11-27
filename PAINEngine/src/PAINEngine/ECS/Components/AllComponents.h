@@ -42,6 +42,7 @@ namespace PAIN {
         LocalTransform,
         WorldTransform,
         ModelRenderer,
+        Texture2D,
         Lighting,
         Physics::RigidBody3D,
         Collision::Collider,
@@ -87,6 +88,7 @@ namespace PAIN {
         else if constexpr (std::is_same_v<T, LocalTransform>) return "LocalTransform";
         else if constexpr (std::is_same_v<T, WorldTransform>) return "WorldTransform";
         else if constexpr (std::is_same_v<T, ModelRenderer>) return "ModelRenderer";
+        else if constexpr (std::is_same_v<T, Texture2D>) return "Texture2D";
         else if constexpr (std::is_same_v<T, Lighting>) return "Lighting";
         else if constexpr (std::is_same_v<T, Physics::RigidBody3D>) return "RigidBody3D";
         else if constexpr (std::is_same_v<T, Collision::Collider>) return "Collider";

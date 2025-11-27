@@ -3,12 +3,10 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include "pch.h"
 #include "Applications/AppSystem.h"
 #include "System/ISystem.h"
-
 #include "CoreSystems/Serialization/sSerialization.h"
-#include "ECS/Components/AllComponents.h"
+#include "Utility/Log.h"
 
 namespace PAIN {
 	namespace ECS {
@@ -223,16 +221,16 @@ namespace PAIN {
 
 			std::vector<std::shared_ptr<System::ISystem>> systems;
 
-			std::unordered_map<std::string, std::function<void(entt::entity)>> component_factories;
+			std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>> component_factories;
 
 			// Map component names to type check functions
-			std::unordered_map<std::string, std::function<bool(entt::entity)>> component_checkers;
+			std::unordered_map<std::string, std::function<bool(entt::entity, RegistryID)>> component_checkers;
 
 			// Map component names to removal functions
-			std::unordered_map<std::string, std::function<void(entt::entity)>> component_removers;
+			std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>> component_removers;
 
 			// Map component names to getter functions (returns void*)
-			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
+			std::unordered_map<std::string, std::function<void* (entt::entity, RegistryID)>> component_getters;
 
 			// Helper methods for multi-registry support
 			RegistryContext* getRegistryContext(RegistryID id);
@@ -335,20 +333,20 @@ namespace PAIN {
 				// For multi-registry support, use the template component methods with registryId parameter
 				
 				// Factory for creating by name
-				component_factories[name] = [this](entt::entity e) {
-					getRegistry(MAIN_REGISTRY_ID).emplace<T>(e);
+				component_factories[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					getRegistry(registry_id).emplace<T>(e);
 					};
 				// Checker for hasComponentByName
-				component_checkers[name] = [this](entt::entity e) {
-					return getRegistry(MAIN_REGISTRY_ID).all_of<T>(e);
+				component_checkers[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					return getRegistry(registry_id).all_of<T>(e);
 					};
 				// Remover for removeComponentByName
-				component_removers[name] = [this](entt::entity e) {
-					getRegistry(MAIN_REGISTRY_ID).remove<T>(e);
+				component_removers[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					getRegistry(registry_id).remove<T>(e);
 					};
 				// Getter for editor UI (type-erased)
-				component_getters[name] = [this](entt::entity e) -> void* {
-					return static_cast<void*>(getRegistry(MAIN_REGISTRY_ID).try_get<T>(e));
+				component_getters[name] = [this](entt::entity e, RegistryID const& registry_id) -> void* {
+					return static_cast<void*>(getRegistry(registry_id).try_get<T>(e));
 					};
 			}
 
@@ -358,34 +356,34 @@ namespace PAIN {
 			}
 
 			// Create component by string name (for editor/serialization)
-			void addComponentByName(entt::entity entity, const std::string& name) {
+			void addComponentByName(entt::entity entity, const std::string& name, RegistryID registry_id = MAIN_REGISTRY_ID) {
 				auto it = component_factories.find(name);
 				if (it != component_factories.end()) {
-					it->second(entity);
+					it->second(entity, registry_id);
 				}
 			}
 
 			// Get all component names registered for an entity
-			std::vector<std::string> getEntityComponentNames(entt::entity entity) const;
+			std::vector<std::string> getEntityComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			// Get all components as JSON (for serialization)
-			nlohmann::json getAllComponentsAsJson(entt::entity entity) const;
+			nlohmann::json getAllComponentsAsJson(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 
 			// Deserialize all components from JSON
-			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps);
+			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps, RegistryID registryId = MAIN_REGISTRY_ID);
 
 
 			// Check if entity has a component by name (uses registered factories)
-			bool hasComponentByName(entt::entity entity, const std::string& name) const;
+			bool hasComponentByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			// Remove component by name (for editor use)
-			void removeComponentByName(entt::entity entity, const std::string& name);
+			void removeComponentByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID);
 
 			// Get component pointer by name (type-erased for editor)
-			void* getComponentPtrByName(entt::entity entity, const std::string& name);
+			void* getComponentPtrByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID);
 
-			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
+			const std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>>& getComponentFactories() const;
 
 			/*****************************************************************//**
 			* Template Component Methods (Type-Safe)

@@ -227,14 +227,18 @@ namespace PAIN {
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
 
-			unsigned int attachments[4] = {
+			static constexpr int NUM_GBUFFERS = 5;
+
+			unsigned int attachments[NUM_GBUFFERS] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3,
+				GL_COLOR_ATTACHMENT4,
 			};
-			glDrawBuffers(4, attachments);
+			glDrawBuffers(NUM_GBUFFERS, attachments);
 
 			glGenRenderbuffers(1, &ds_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
@@ -378,6 +382,14 @@ namespace PAIN {
 			// bone weights
 			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
 			glEnableVertexAttribArray(4);
+
+			// tangent
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, tangent));
+			glEnableVertexAttribArray(5);
+
+			// bitangent
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
+			glEnableVertexAttribArray(6);
 
 			// Unbind VAO
 			glBindVertexArray(0);
@@ -575,6 +587,8 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
+		auto& gs = GraphicsSettings::get();
+
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
@@ -600,7 +614,6 @@ namespace PAIN {
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
-			// TEMPORARY: Only render first submesh
 			const auto& submesh = modelAsset->submeshes[i];
 
 			//Check out of bounds
@@ -631,94 +644,97 @@ namespace PAIN {
 			//Check material asset
 			if (materialAsset) {
 
-				//Albedo Texture
-				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+				{
+					//Albedo Texture
+					std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-				if (tex_opt.has_value()) {
-					albedoTexture = tex_opt.value()->gl_texture;
+					if (tex_opt.has_value() && gs.DEBUG_USE_DIFFUSE_MAP) {
+						albedoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Normal texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_NORMAL_MAP) {
+						normalTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Metallic texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						metallicTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Roughness texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						roughnessTexture = tex_opt.value()->gl_texture;
+					}
+
+					//AO texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_AO_MAP) {
+						aoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Emissive texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+					if (tex_opt.has_value() && gs.DEBUG_USE_EMISSION_MAP) {
+						emissiveTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Height texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+					if (tex_opt.has_value()) {
+						heightTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Opacity texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+					if (tex_opt.has_value()) {
+						opacityTexture = tex_opt.value()->gl_texture;
+					}
+
+
+					// Use override or asset default
+					glm::vec3 baseColor = material->useOverrides
+						? material->baseColorOverride
+						: materialAsset->baseColor;
+
+					float metallic = material->useOverrides
+						? material->metallicOverride
+						: materialAsset->metallic;
+
+					float roughness = material->useOverrides
+						? material->roughnessOverride
+						: materialAsset->roughness;
+
+					geometry_shader->SetUniform("material.rough", roughness);
+					geometry_shader->SetUniform("material.metal", metallic);
+					geometry_shader->SetUniform("material.color", baseColor);
 				}
-
-				//Normal texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
-
-				if (tex_opt.has_value()) {
-					normalTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Metallic texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
-
-				if (tex_opt.has_value()) {
-					metallicTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Roughness texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
-
-				if (tex_opt.has_value()) {
-					roughnessTexture = tex_opt.value()->gl_texture;
-				}
-
-				//AO texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
-
-				if (tex_opt.has_value()) {
-					aoTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Emissive texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
-
-				if (tex_opt.has_value()) {
-					emissiveTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Height texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
-
-				if (tex_opt.has_value()) {
-					heightTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Opacity texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
-
-				if (tex_opt.has_value()) {
-					opacityTexture = tex_opt.value()->gl_texture;
-				}
-
-				// Use override or asset default
-				glm::vec3 baseColor = material->useOverrides
-					? material->baseColorOverride
-					: materialAsset->baseColor;
-
-				float metallic = material->useOverrides
-					? material->metallicOverride
-					: materialAsset->metallic;
-
-				float roughness = material->useOverrides
-					? material->roughnessOverride
-					: materialAsset->roughness;
-
-				geometry_shader->SetUniform("material.rough", roughness);
-				geometry_shader->SetUniform("material.metal", metallic);
-				geometry_shader->SetUniform("material.color", baseColor);
 			}
 
 			// Bind textures from MaterialInstance
@@ -726,21 +742,56 @@ namespace PAIN {
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
 			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
 
-			if (hasTexture) {
+			if (hasTexture && gs.DEBUG_USE_DIFFUSE_MAP) {
 				glActiveTexture(GL_TEXTURE6);
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
-
-				if (GraphicsSettings::get().ao && aoTexture != 0) {
-					glActiveTexture(GL_TEXTURE7);
-					glBindTexture(GL_TEXTURE_2D, aoTexture);
-					geometry_shader->SetUniform("material.ao_map", 7);
-					geometry_shader->SetUniform("material.use_ao", 1.0f);
-				}
-				else {
-					geometry_shader->SetUniform("material.use_ao", 0.0f);
-				}
 			}
+			else {
+				geometry_shader->SetUniform("material.useTex", 0.f);
+			}
+
+			if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, aoTexture);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.0f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.0f);
+			}
+
+			if (gs.DEBUG_USE_NORMAL_MAP && normalTexture) {
+				glActiveTexture(GL_TEXTURE8);
+				glBindTexture(GL_TEXTURE_2D, normalTexture);
+				geometry_shader->SetUniform("material.normal_map", 8);
+				geometry_shader->SetUniform("material.use_normal", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_normal", 0.f);
+			}
+
+			if (gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, roughnessTexture);
+				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
+			}
+
+			if (gs.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, emissiveTexture);
+				geometry_shader->SetUniform("material.use_emission", 1.f);
+				geometry_shader->SetUniform("material.emission_map", 10);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_emission", 0.f);
+			}
+
+
 
 			// animation
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
@@ -781,7 +832,7 @@ namespace PAIN {
 
 					if (GraphicsSettings::get().interpolate_animation) {
 						auto next_key_it = std::next(key_it);
-						if (next_key_it != track.end()) {							
+						if (next_key_it != track.end()) {
 							// interpolate between current keyframe pose and next keyframe pose
 							const float t = (component.animationTime - key_it->time) / (next_key_it->time - key_it->time);
 							const glm::vec3 i_scale = glm::mix(key_it->scale, next_key_it->scale, t);
@@ -830,6 +881,9 @@ namespace PAIN {
 				}
 
 			}
+
+			// debug
+			geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
 
 			// Draw this submesh
 			glDrawElements(
@@ -906,24 +960,30 @@ namespace PAIN {
 
 			pbr_shader->Bind();
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
+			{
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, pos_texture);
 
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, col_texture);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, col_texture);
 
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, norm_texture);
 
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, emission_texture);
+			}
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
 
-			int tex_id = 4;
+			static constexpr int NEXT_VALID_TEXID = 5;		// increment this after adding new texture bindings above
+			int tex_id = NEXT_VALID_TEXID;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
@@ -932,9 +992,9 @@ namespace PAIN {
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
 #ifdef PN_PLATFORM_WINDOWS
-					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+					ss << "u_ShadowMaps[" << (tex_id - NEXT_VALID_TEXID) << "]";
 #else
-					ss << "u_ShadowMap" << (tex_id - 4);
+					ss << "u_ShadowMap" << (tex_id - NEXT_VALID_TEXID);
 #endif
 
 					pbr_shader->SetUniform(ss.str(), tex_id);
@@ -942,7 +1002,7 @@ namespace PAIN {
 					ss.clear();
 
 					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					pbr_shader->SetUniform(ss.str(), tex_id - static_cast<float>(NEXT_VALID_TEXID));
 					ss.str("");
 					ss.clear();
 
@@ -990,12 +1050,16 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
 			}
 
-			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
+			pbr_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
+
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - NEXT_VALID_TEXID) * 1.f);
 
 			pbr_shader->SetUniform("gPos", 0);
 			pbr_shader->SetUniform("gCol", 1);
 			pbr_shader->SetUniform("gNorm", 2);
 			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("gEmission", 4);
+
 			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
@@ -1319,19 +1383,27 @@ namespace PAIN {
 
 			// render 2D textures onto screen
 			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path texture_path = "engine/textures/sunshine.png";
-#else	
-				std::filesystem::path texture_path = "engine\\textures\\sunshine.png";
-#endif
-				// !TODO: add queue and iterate through all 2D textures to be rendered last
-				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if (texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, { 0.85f, -0.85f }, 0.1f);
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after Render2DTexture in PostProcessPass: {}", err);
+				auto ecs = services->get<ECS::Controller>();
+				auto& registry = ecs->getRegistry();
+
+				auto texture_entity_view = registry.view<Texture2D, LocalTransform, UIElement>();
+				for (auto&& [entity, texture_comp, trans_comp, ui_elem] : texture_entity_view.each()) {
+					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
+					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+
+					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value() || !elem_comp_opt) continue;
+
+					auto& texture_comp = texture_comp_opt.value().get();
+					auto& transform_comp = transform_comp_opt.value().get();
+					auto& elem_comp = elem_comp_opt.value().get();
+
+					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
+					if (!texture_opt.has_value()) continue;
+
+					if (elem_comp.b_is_enabled) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
+
+				}
 			}
 
 			// render text onto screen
@@ -1339,17 +1411,28 @@ namespace PAIN {
 				auto ecs = services->get<ECS::Controller>();
 				auto& registry = ecs->getRegistry();
 
-				auto text_entity_view = registry.view<UIText>();
-				for (auto entity : text_entity_view) {
+				auto text_entity_view = registry.view<UIText, UIElement, UIRectTransform>();
+				for (auto&& [entity, text_comp, elem_comp, rect_comp] : text_entity_view.each()) {
 					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
-					if (!text_comp_opt.has_value()) continue;
-					auto& text_comp = text_comp_opt.value().get();
+					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+					auto rect_comp_opt = ecs->getEntityComponent<UIRectTransform>(entity);
+
+					if (!text_comp_opt.has_value() || !elem_comp_opt.has_value() || !rect_comp_opt.has_value()) continue;
+
+					text_comp = text_comp_opt.value().get();
+					elem_comp = elem_comp_opt.value().get();
+					rect_comp = rect_comp_opt.value().get();
 
 					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+
+					// Assign calculated projection
+					text_comp.text_pos = rect_comp.calculated_world_position;
+
 					if (!font_opt.has_value()) continue;
 
-					TextRenderer::get().renderText(text_comp);
-					TextRenderer::get().debugRenderQuad();
+					if (elem_comp.b_is_enabled) { TextRenderer::get().renderText(text_comp); }
+
+					//TextRenderer::get().debugRenderQuad();
 				}
 			}
 
