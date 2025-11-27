@@ -1144,7 +1144,7 @@ namespace PAIN {
                 //Get ecs controller
                 auto controller = services->get<ECS::Controller>();
                 if (auto layerCompOpt = controller->getEntityComponent<Entity::Layer>(selected, currentRegistryID)) {
-                    if (layerCompOpt.has_value()) {
+                    if (layerCompOpt.has_value() && currentRegistryID == ECS::MAIN_REGISTRY_ID) {
 
                         auto layerComp = layerCompOpt.value();
                         auto sceneManager = services->get<Scene::SceneManager>();

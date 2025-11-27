@@ -106,6 +106,7 @@ namespace PAIN {
                 //Set the state of panels
                 entity_panel.lock()->setRegistry(editRegistryID);
                 comp_panel.lock()->setRegistry(editRegistryID);
+                viewport_panel.lock()->setRegistry(editRegistryID);
 
                 //Set only the prefab registry to simulate
                 ecsController->setRegistryAutoSimulate(editRegistryID, true);
@@ -156,8 +157,9 @@ namespace PAIN {
                 hasUnsavedChanges = false;
 
                 //Set the state of panels
-                entity_panel.lock()->setRegistry(ECS::MAIN_REGISTRY_ID);
-                comp_panel.lock()->setRegistry(ECS::MAIN_REGISTRY_ID);
+                entity_panel.lock()->setRegistry(editRegistryID);
+                comp_panel.lock()->setRegistry(editRegistryID);
+                viewport_panel.lock()->setRegistry(editRegistryID);
 
                 PN_CORE_INFO("[PrefabEditMode] Successfully exited edit mode");
                 return true;
@@ -374,6 +376,7 @@ namespace PAIN {
                 //Init with reference to entity and comp panel
                 entity_panel = services->get<Editor>()->getPanel<EntityPanel>();
                 comp_panel = services->get<Editor>()->getPanel<ComponentsPanel>();
+                viewport_panel = services->get<Editor>()->getPanel<ViewportPanel>();
             }
 
             void PrefabPanel::onUpdate(PAIN::AppTiming timing) {

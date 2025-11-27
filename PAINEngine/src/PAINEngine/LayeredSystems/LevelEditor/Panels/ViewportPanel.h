@@ -41,7 +41,18 @@ namespace PAIN {
 
                 void setEntityPanel(std::shared_ptr<EntityPanel> panel) { m_EntityPanel = panel; }
 
+                void setRegistry(ECS::RegistryID registryID) {
+                    currentRegistryID = registryID;
+                }
+
+                ECS::RegistryID getCurrentRegistry() const {
+                    return currentRegistryID;
+                }
+
             private:
+
+                //Set registry ID
+                ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
                 ImTextureID renderTexture;
                 int texWidth, texHeight;
 

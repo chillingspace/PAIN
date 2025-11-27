@@ -8,6 +8,7 @@
 #include "ECS/Controller.h"
 #include "EntityPanel.h"
 #include "ComponentsPanel.h"
+#include "ViewportPanel.h"
 
 namespace PAIN {
     namespace Editor {
@@ -20,6 +21,7 @@ namespace PAIN {
                 //Reference to the entity and component panel
                 std::weak_ptr<EntityPanel> entity_panel;
                 std::weak_ptr<ComponentsPanel> comp_panel;
+                std::weak_ptr<ViewportPanel> viewport_panel;
 
                 // Current state
                 bool isInEditMode = false;

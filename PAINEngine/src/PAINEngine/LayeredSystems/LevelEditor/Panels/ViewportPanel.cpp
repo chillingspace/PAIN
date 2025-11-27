@@ -31,15 +31,15 @@ namespace PAIN {
 	// helper so viewport wont need to know jolt details
 	static void SyncBodyToTransform(
 		entt::entity e,
+		entt::registry& registry,
 		ECS::Controller* ecs,
 		const LocalTransform& t,
 		bool dragging // true while gizmo is moving, false on release
 	) {
 		if (!ecs) return;
-		auto& reg = ecs->getRegistry();
-		if (!reg.all_of<Physics::RigidBody3D>(e)) return;
+		if (!registry.all_of<Physics::RigidBody3D>(e)) return;
 
-		auto& rb = reg.get<Physics::RigidBody3D>(e);
+		auto& rb = registry.get<Physics::RigidBody3D>(e);
 		if (auto phys = ecs->getSystem<Physics::System>()) {
 			phys->teleportBodyToTransform(e, t, rb);
 		}
@@ -188,7 +188,7 @@ namespace PAIN {
 				float closestDistance = (std::numeric_limits<float>::max)();
 
 				// Iterate through entities with ModelRenderer (more precise than just Transform)
-				auto view = ecs->getRegistry().view<LocalTransform, WorldTransform, ModelRenderer>();
+				auto view = ecs->getRegistry(currentRegistryID).view<LocalTransform, WorldTransform, ModelRenderer>();
 
 				for (auto [entity, local, world, model] : view.each()) {
 
@@ -225,11 +225,11 @@ namespace PAIN {
 
 				// Fallback to entities with just Transform (in case some don't have ModelRenderer)
 				if (closestEntity == entt::null) {
-					auto transformOnlyView = ecs->getRegistry().view<LocalTransform>();
+					auto transformOnlyView = ecs->getRegistry(currentRegistryID).view<LocalTransform>();
 
 					for (auto entity : transformOnlyView) {
 						// Skip if we already checked this entity
-						if (ecs->getRegistry().all_of<ModelRenderer>(entity)) {
+						if (ecs->getRegistry(currentRegistryID).all_of<ModelRenderer>(entity)) {
 							continue;
 						}
 
@@ -288,8 +288,8 @@ namespace PAIN {
 				// Apply material to the closest entity
 				if (closestEntity != entt::null) {
 					// Check if entity has a ModelRenderer component
-					if (ecs->getRegistry().all_of<ModelRenderer>(closestEntity)) {
-						auto& modelRenderer = ecs->getRegistry().get<ModelRenderer>(closestEntity);
+					if (ecs->getRegistry(currentRegistryID).all_of<ModelRenderer>(closestEntity)) {
+						auto& modelRenderer = ecs->getRegistry(currentRegistryID).get<ModelRenderer>(closestEntity);
 
 						// Apply the material to all submeshes (you can modify this logic)
 						if (modelRenderer.materials.empty()) {
@@ -529,8 +529,8 @@ namespace PAIN {
 						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
 
 						if (selectedEntity != entt::null) {
-							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity);
-							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity);
+							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
+							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
 
 							if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
 								LocalTransform& localTransform = localTransformOpt.value().get();
@@ -612,13 +612,13 @@ namespace PAIN {
 										// ===================================================
 										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
 
-										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
 										if (hierarchyOpt.has_value()) {
 											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
 											if (hierarchy.parentGUID.IsValid()) {
-												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
 												if (parentEntity != entt::null) {
-													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
 													if (parentWorldOpt.has_value()) {
 														parentWorldMatrix = parentWorldOpt.value().get().matrix;
 													}
@@ -666,13 +666,13 @@ namespace PAIN {
 										// ===================================================
 										auto transformSystem = ecs->getSystem<Transform::System>();
 										if (transformSystem) {
-											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
 										}
 
 										// Physics sync
-										SyncBodyToTransform(selectedEntity, ecs.get(), localTransform, /*dragging=*/true);
+										SyncBodyToTransform(selectedEntity, ecs->getRegistry(currentRegistryID), ecs.get(), localTransform, /*dragging=*/true);
 
-										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
 										if (rbOpt.has_value()) {
 											auto& rb = rbOpt.value().get();
 											auto physics_system = ecs->getSystem<Physics::System>();
@@ -701,13 +701,13 @@ namespace PAIN {
 										// Final decompose (same logic as above)
 										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
 
-										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity);
+										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
 										if (hierarchyOpt.has_value()) {
 											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
 											if (hierarchy.parentGUID.IsValid()) {
-												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID);
+												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
 												if (parentEntity != entt::null) {
-													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity);
+													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
 													if (parentWorldOpt.has_value()) {
 														parentWorldMatrix = parentWorldOpt.value().get().matrix;
 													}
@@ -738,11 +738,11 @@ namespace PAIN {
 										// Mark dirty
 										auto transformSystem = ecs->getSystem<Transform::System>();
 										if (transformSystem) {
-											transformSystem->markDirty(selectedEntity, ecs->getRegistry());
+											transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
 										}
 
 										// Reactivate physics
-										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity);
+										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
 										if (rbOpt.has_value()) {
 											auto& rb = rbOpt.value().get();
 											auto physics_system = ecs->getSystem<Physics::System>();
