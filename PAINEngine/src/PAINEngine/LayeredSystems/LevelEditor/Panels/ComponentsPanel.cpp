@@ -12,6 +12,8 @@
 #include "CoreSystems/Scene/Scene.h"
 #include "ECS/Components/AllComponents.h"
 
+#include "CoreSystems/Prefabs/sPrefab.h"
+
 #ifdef _DEBUG
 
 namespace PAIN {
@@ -805,47 +807,112 @@ namespace PAIN {
                     }
 
                     ImGui::PushID(comp_name.c_str());
+                    // ========================================
+                    // Check if this component is overridden
+                    // ========================================
+                    bool isOverridden = false;
+                    auto prefabService = services->get<Prefab::Service>();
+                    auto& registry = ecs->getRegistry(currentRegistryID);
 
-                    // Component header with TreeNode (Unity style)
+                    if (prefabService && registry.any_of<Prefab::PrefabInstance>(entity)) {
+                        isOverridden = prefabService->isComponentOverridden(entity, comp_name, currentRegistryID);
+                    }
+                    // ========================================
+                    // Apply special styling for overridden components
+                    // ========================================
+                    if (isOverridden) {
+                        // Blue color scheme for overridden components
+                        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.8f, 1.0f));        // Base blue
+                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.3f, 0.5f, 0.9f, 1.0f)); // Lighter on hover
+                        ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.15f, 0.35f, 0.7f, 1.0f)); // Darker when active
+                    }
+                    // Component header with TreeNode
                     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen |
                         ImGuiTreeNodeFlags_Framed |
                         ImGuiTreeNodeFlags_SpanAvailWidth |
                         ImGuiTreeNodeFlags_AllowItemOverlap |
                         ImGuiTreeNodeFlags_FramePadding;
-
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
                     bool node_open = ImGui::TreeNodeEx(comp_name.c_str(), node_flags);
                     ImGui::PopStyleVar();
+                    // ========================================
+                    // Pop override colors
+                    // ========================================
+                    if (isOverridden) {
+                        ImGui::PopStyleColor(3);
+                    }
+                    // ========================================
+                    // Add revert button for overridden components
+                    // ========================================
+                    if (isOverridden) {
+                        ImGui::SameLine();
+                        ImGui::Text("(Override)");
+                        ImGui::SameLine();
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.35f, 0.2f, 0.8f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.45f, 0.25f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.25f, 0.15f, 1.0f));
+                        if (ImGui::SmallButton("Revert")) {
+                            if (prefabService) {
+                                prefabService->revertComponentOverride(entity, comp_name, currentRegistryID);
+                            }
+                        }
 
+                        ImGui::PopStyleColor(3);
+
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip("Revert to prefab value");
+                        }
+                    }
                     // Right-click context menu
                     if (ImGui::BeginPopupContextItem()) {
                         ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", comp_name.c_str());
-                        ImGui::Separator();
 
+                        // ========================================
+                        // Show override status in context menu
+                        // ========================================
+                        if (isOverridden) {
+                            ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "(Overridden)");
+                        }
+
+                        ImGui::Separator();
                         if (ImGui::MenuItem("Remove Component")) {
                             comp_string_ref = comp_name;
                             should_open_remove_popup = true;
                             ImGui::CloseCurrentPopup();
                         }
-
-                        if (ImGui::MenuItem("Reset to Default")) {
-                            // TODO: Implement reset - would need default component values
-                            // For now, could remove and re-add with defaults
-                            ecs->removeComponentByName(entity, comp_name, currentRegistryID);
-                            ecs->addComponentByName(entity, comp_name, currentRegistryID);
+                        // ========================================
+                        // Different reset behavior for prefab instances
+                        // ========================================
+                        if (registry.any_of<Prefab::PrefabInstance>(entity)) {
+                            if (isOverridden) {
+                                // If overridden, show "Revert to Prefab"
+                                if (ImGui::MenuItem("Revert to Prefab")) {
+                                    if (prefabService) {
+                                        prefabService->revertComponentOverride(entity, comp_name, currentRegistryID);
+                                    }
+                                }
+                            }
+                            else {
+                                // If not overridden, disabled (already using prefab value)
+                                ImGui::BeginDisabled();
+                                ImGui::MenuItem("Already Using Prefab Value");
+                                ImGui::EndDisabled();
+                            }
                         }
-
+                        else {
+                            // Regular entity - show "Reset to Default"
+                            if (ImGui::MenuItem("Reset to Default")) {
+                                ecs->removeComponentByName(entity, comp_name, currentRegistryID);
+                                ecs->addComponentByName(entity, comp_name, currentRegistryID);
+                            }
+                        }
                         ImGui::Separator();
-
                         if (ImGui::MenuItem("Copy Component")) {
-                            // TODO: Serialize component to clipboard
                             ImGui::SetClipboardText(comp_name.c_str());
                         }
-
                         if (ImGui::MenuItem("Paste Component Values")) {
                             // TODO: Deserialize from clipboard
                         }
-
                         ImGui::EndPopup();
                     }
 

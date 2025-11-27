@@ -352,8 +352,41 @@ namespace PAIN {
 					return static_cast<void*>(getRegistry(registry_id).try_get<T>(e));
 					};
 				// Getter for comp serializers
-				component_serializers[name] = [this](entt::entity e, RegistryID const& registry_id) -> nlohmann::json {
-					return PAIN::Serialization::to_json_reflected(getRegistry(registry_id).try_get<T>(e));
+				component_serializers[name] = [this, name](entt::entity e, RegistryID const& registry_id) -> nlohmann::json {
+
+					constexpr bool type_should_deserialize = getShouldSerialize<T>();
+
+					// CRITICAL: Wrap entire deserialization logic in if constexpr
+					if constexpr (type_should_deserialize) {
+
+						T* comp_ptr = getRegistry(registry_id).try_get<T>(e);
+
+						// Try reflection first, then fallback to JSON
+						if constexpr (refl::trait::is_reflectable_v<T>) {
+							try {
+								return PAIN::Serialization::to_json_reflected(*comp_ptr);
+							}
+							catch (const std::exception& e) {
+								PN_CORE_ERROR("Failed to serialize {} using reflection: {}", name, e.what());
+							}
+						}
+						else {
+							// Only compile this if type is convertible to JSON
+							if constexpr (std::is_constructible_v<nlohmann::json, T>) {
+								try {
+									return nlohmann::json(*comp_ptr);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_WARN("Failed to serialize {}: {}", name, e.what());
+								}
+							}
+							else {
+								PN_CORE_WARN("Component {} is not serializable (no reflection or JSON converter)", name);
+							}
+						}
+					}
+
+					return nlohmann::json();
 					};
 			}
 

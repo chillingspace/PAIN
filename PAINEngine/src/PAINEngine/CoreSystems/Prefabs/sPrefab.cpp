@@ -727,16 +727,52 @@ namespace PAIN {
             return rootEntity;
         }
 
-        bool Service::isComponentOverridden( entt::entity instance,const std::string& componentName,ECS::RegistryID registryID) const {
-            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registryID);
+        bool Service::isComponentOverridden(entt::entity instance,const std::string& componentName,ECS::RegistryID registryID) const {
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            auto& registry = ecsController->getRegistry(registryID);
 
             // Check if entity has PrefabInstance component
             auto* prefabInst = registry.try_get<PrefabInstance>(instance);
             if (!prefabInst) return false;
 
-            // Check if this component is in the overrides map
-            return prefabInst->componentOverrides.find(componentName) !=
-                prefabInst->componentOverrides.end();
+            // Skip non-serializable components
+            std::unordered_set<std::string> skipComponents = {
+                getComponentName<Prefab::PrefabInstance>(),
+                getComponentName<Entity::GUID>(),
+                getComponentName<WorldTransform>()
+            };
+
+            if (skipComponents.find(componentName) != skipComponents.end()) {
+                return false;
+            }
+
+            // Get current component value from instance
+            nlohmann::json currentComponentJson = ecsController->getComponentAsJson(
+                instance, componentName, registryID
+            );
+
+            if (currentComponentJson.empty()) {
+                // Component doesn't exist on instance
+                return false;
+            }
+
+            // Get original component value from prefab
+            nlohmann::json prefabComponentJson = getComponentFromPrefab(
+                prefabInst->sourcePrefabGUID,
+                prefabInst->correspondingPrefabEntityGUID,
+                componentName
+            );
+
+            if (prefabComponentJson.empty()) {
+                // Component doesn't exist in prefab
+                // This could mean it was added to the instance (which is an override!)
+                return true;
+            }
+
+            // Compare JSON values
+            bool isDifferent = (currentComponentJson != prefabComponentJson);
+
+            return isDifferent;
         }
 
         nlohmann::json Service::getComponentFromPrefab(const Assets::GUID& prefabGUID,const Assets::GUID& entityGUID,const std::string& componentName) const {
@@ -823,9 +859,9 @@ namespace PAIN {
 
             // Skip these components (metadata, not user-editable)
             std::unordered_set<std::string> skipComponents = {
-                "PrefabInstance",
-                "Entity::GUID",
-                "WorldTransform"  // Computed, not serialized
+                getComponentName<Prefab::PrefabInstance>(),
+                getComponentName<Entity::GUID>(),
+                getComponentName<WorldTransform>()
             };
 
             // Check each component
@@ -876,6 +912,7 @@ namespace PAIN {
             PN_CORE_INFO("Reverted component '{}' to prefab value", componentName);
             return true;
         }
+
         void Service::revertAllOverrides(entt::entity instance,ECS::RegistryID registryID) {
             auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registryID);
 
