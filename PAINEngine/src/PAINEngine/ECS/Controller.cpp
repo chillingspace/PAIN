@@ -18,6 +18,7 @@
 #include "Systems/Collision/sBVHSystem.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
 #include "Systems/Transform/sysTransform.h"
+#include "Systems/Render/sysRender.h"
 // UI Systems
 #include "Systems/UI/sysUILayout.h"
 #include "Systems/UI/sysUIInput.h"
@@ -356,6 +357,7 @@ namespace PAIN {
             registerSystem<UI::LayoutSystem>();
             registerSystem<UI::InputSystem>();
             registerSystem<UI::AnimationSystem>();
+            registerSystem<Render::System>();
         }
         void Controller::onEvent(Event::Event& e) {
             dispatchToLayers(e);

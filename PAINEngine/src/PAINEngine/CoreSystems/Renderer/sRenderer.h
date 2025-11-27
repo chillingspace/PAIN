@@ -18,24 +18,20 @@ namespace PAIN {
 
 		std::shared_ptr<Scene::SceneManager> m_Scene;
 
-		void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);
-
 		void onDetach() override;
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
-
-		void shadowPass();
-		void geometryPass();
-		void reflectionPass();
-		void lightingPass();
-		void debugPass(int debug_mode);
 		void postProcessPass();
-		void uiPass();
 
         void onUpdate(AppTiming timing) override;
 
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
+
+		//Get final fbo
+		unsigned int getFinalFbo() const {
+			return w_renderer->getFinalFbo();
+		}
 
 		// Framebuffer for IMGUI Viewport
 		ImTextureID getFramebufferTexture() const {
