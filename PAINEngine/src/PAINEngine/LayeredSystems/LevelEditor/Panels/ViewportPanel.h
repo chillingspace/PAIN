@@ -38,6 +38,7 @@ namespace PAIN {
 
                 glm::vec3 getWorldPositionAtMouse(ImVec2 localMousePos, ImVec2 viewportSize, float defaultDistance);
                 void handlePrefabDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize);
+                void handleTemplateDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize);
 
                 bool wantsInput() const { return contentHovered && isFocused; }
 

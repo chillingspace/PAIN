@@ -6,6 +6,7 @@
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -149,6 +150,21 @@ namespace PAIN {
 				}
 				});
 
+			//Register Templates loader
+			asset_loader->RegisterLoader(Type::Templates, [this](std::string const& virtual_path) {
+
+				auto template_service = services->get<EntityTemplate::Service>();
+
+				if (template_service) {
+					return template_service->loadTemplateFromFile(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Prefab service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::EntityTemplate::TemplateAsset>();
+				}
+				});
+
+			//Registry scene loader
 			asset_loader->RegisterLoader(Type::Scenes, [this](std::string const& virtual_path) {
 				return asset_loader->ImportScene(virtual_path);
 				});

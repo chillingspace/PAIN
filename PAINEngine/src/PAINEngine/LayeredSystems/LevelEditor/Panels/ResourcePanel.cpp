@@ -9,6 +9,7 @@
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 #include "ECS/Controller.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
@@ -312,12 +313,24 @@ namespace PAIN {
 						//Create new default material
 						openPopUp("New Material");
 					}
-					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Entity")) {
+					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Prefab Entity")) {
 						// Instantiate prefab in scene
 						auto prefab_service = services->get<Prefab::Service>();
 
 						//Create instance
 						entt::entity instance = prefab_service->instantiatePrefab(file.id);
+
+						//Check for null instance
+						if (instance != entt::null) {
+							PN_CORE_INFO("Instantiated prefab: {}", file.file_name);
+						}
+					}
+					if (file.type == Assets::Type::Templates && ImGui::MenuItem("Instantiate Template Entity")) {
+						// Instantiate prefab in scene
+						auto template_service = services->get<EntityTemplate::Service>();
+
+						//Create instance
+						entt::entity instance = template_service->spawn(file.id);
 
 						//Check for null instance
 						if (instance != entt::null) {

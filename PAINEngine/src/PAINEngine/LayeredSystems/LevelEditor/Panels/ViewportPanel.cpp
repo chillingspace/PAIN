@@ -26,6 +26,7 @@
 #include "Systems/Transform/sysTransform.h"
 
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
 
 namespace PAIN {
@@ -184,6 +185,50 @@ namespace PAIN {
 				}
 				else {
 					PN_CORE_ERROR("[ViewportPanel] Failed to instantiate prefab '{}'", prefabFile->file_name);
+				}
+			}
+			
+			void ViewportPanel::handleTemplateDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize) {
+				auto templateService = services->get<EntityTemplate::Service>();
+				auto assetManager = services->get<Assets::Manager>();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!templateService || !prefabFile || !assetManager || !ecs) {
+					PN_CORE_ERROR("[ViewportPanel] Required services not available for prefab drop");
+					return;
+				}
+
+				// ========================================
+				// Get world position at mouse cursor
+				// ========================================
+				glm::vec3 worldPosition = getWorldPositionAtMouse(localMousePos, viewportSize, 10.0f);
+
+				PN_CORE_INFO("[ViewportPanel] Dropping template at world position: ({}, {}, {})",
+					worldPosition.x, worldPosition.y, worldPosition.z);
+
+				// ========================================
+				// Instantiate prefab at that position
+				// ========================================
+				Assets::GUID prefabGUID = prefabFile->id;
+
+				entt::entity instantiatedEntity = templateService->spawn(
+					prefabGUID,
+					currentRegistryID,
+					worldPosition
+				);
+
+				if (instantiatedEntity != entt::null) {
+					PN_CORE_INFO("[ViewportPanel] Successfully instantiated template '{}' as entity {}",
+						prefabFile->file_name,
+						static_cast<uint32_t>(instantiatedEntity));
+
+					// Select the newly created entity
+					if (m_EntityPanel) {
+						m_EntityPanel->setSelectedEntity(instantiatedEntity);
+					}
+				}
+				else {
+					PN_CORE_ERROR("[ViewportPanel] Failed to instantiate template '{}'", prefabFile->file_name);
 				}
 			}
 
@@ -689,6 +734,22 @@ namespace PAIN {
 									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
 
 									handlePrefabDrop(droppedFile, localMousePos, size);
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							auto template_filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Templates);
+							if (ImGui::BeginDragDropTarget()) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+									std::string(template_filetype_string + "_FILE").c_str())) {
+
+									PN_CORE_INFO("Template payload accepted!");
+									File* droppedFile = (File*)payload->Data;
+
+									ImVec2 mousePos = ImGui::GetMousePos();
+									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+									handleTemplateDrop(droppedFile, localMousePos, size);
 								}
 								ImGui::EndDragDropTarget();
 							}
