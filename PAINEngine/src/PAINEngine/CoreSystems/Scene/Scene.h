@@ -116,6 +116,7 @@ namespace PAIN {
             void SetEditorCamera();
             void SetGameCamera();
             void ChangeGameCamera(std::string cam_name);
+            const std::string& GetActiveGameCamera();
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
 
             // Get current scene layers

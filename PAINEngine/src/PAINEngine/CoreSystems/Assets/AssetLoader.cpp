@@ -858,6 +858,10 @@ namespace PAIN {
             if (sceneJson.contains("camera")) {
                 auto& cam = sceneJson["camera"];
 
+                if (cam.contains("active_game_cam")) {
+                    sceneAsset->camera.active_game_cam = cam["active_game_cam"].get<std::string>();
+                }
+
                 if (cam.contains("position") && cam["position"].is_array() && cam["position"].size() >= 3) {
                     sceneAsset->camera.position = glm::vec3(
                         cam["position"][0].get<float>(),

@@ -791,6 +791,24 @@ namespace PAIN {
                         camera_names.push_back(camera.first.c_str());
                     }
                 }
+                std::string active_game_cam = scene->GetActiveGameCamera();
+
+                if (active_game_cam != "") {
+
+                    // Find the iterator to the name in the vector
+                    auto name_it = std::find(camera_names.begin(), camera_names.end(), active_game_cam);
+
+                    // If found, calculate the index using std::distance
+                    if (name_it != camera_names.end()) {
+                        selected_cam_index = static_cast<int>(std::distance(camera_names.begin(), name_it));
+                    }
+
+                    const auto& cameras = scene->GetAllGameCamera();
+                    auto cam_it = cameras.find(active_game_cam);
+                    if (cam_it != cameras.end()) {
+                        scene->ChangeGameCamera(cam_it->first);
+                    }
+                }
 
                 // Combo box for active cam selection
                 if (ImGui::Combo("Select Active Camera", &selected_cam_index, camera_names.data(), camera_names.size())) {
