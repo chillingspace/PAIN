@@ -25,6 +25,8 @@
 #include "ECS/Components/cEntity.h"
 #include "Systems/Transform/sysTransform.h"
 
+#include "CoreSystems/Prefabs/sPrefab.h"
+
 
 namespace PAIN {
 
@@ -67,6 +69,122 @@ namespace PAIN {
 				renderTexture = texID;
 				texWidth = width;
 				texHeight = height;
+			}
+
+			glm::vec3 ViewportPanel::getWorldPositionAtMouse(ImVec2 localMousePos,ImVec2 viewportSize,float defaultDistance) {
+				auto scene = services->get<Scene::SceneManager>();
+				auto camera = scene->GetActiveCamera();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!camera || !ecs) {
+					return glm::vec3(0.0f);  // Fallback to origin
+				}
+
+				// Get camera matrices
+				glm::mat4 viewMatrix = camera->view();
+				glm::mat4 projMatrix = camera->projection();
+
+				// Get ray
+				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
+				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
+
+				// ========================================
+				// TRY 1: Find intersection with existing geometry
+				// ========================================
+				float closestDistance = std::numeric_limits<float>::max();
+				bool foundHit = false;
+
+				auto view = ecs->getRegistry(currentRegistryID).view<LocalTransform, ModelRenderer>();
+
+				for (auto [entity, transform, model] : view.each()) {
+					if (!model.visible) continue;
+
+					// Try AABB intersection
+					float distance;
+					if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
+						if (distance < closestDistance) {
+							closestDistance = distance;
+							foundHit = true;
+						}
+					}
+				}
+
+				// ========================================
+				// TRY 2: If hit found, use that position
+				// ========================================
+				if (foundHit) {
+					return rayOrigin + (rayDirection * closestDistance);
+				}
+
+				// ========================================
+				// TRY 3: No hit - project onto ground plane (Y=0)
+				// ========================================
+				// Plane equation: dot(N, (P - P0)) = 0
+				// For Y=0 plane: N = (0, 1, 0), P0 = (0, 0, 0)
+
+				glm::vec3 planeNormal(0.0f, 1.0f, 0.0f);
+				glm::vec3 planePoint(0.0f, 0.0f, 0.0f);
+
+				float denom = glm::dot(rayDirection, planeNormal);
+
+				if (abs(denom) > 0.0001f) {
+					// Ray intersects plane
+					float t = glm::dot((planePoint - rayOrigin), planeNormal) / denom;
+
+					if (t >= 0.0f) {
+						// Valid intersection
+						return rayOrigin + (rayDirection * t);
+					}
+				}
+
+				// ========================================
+				// FALLBACK: Fixed distance in front of camera
+				// ========================================
+				return rayOrigin + (rayDirection * defaultDistance);
+			}
+
+			void ViewportPanel::handlePrefabDrop(File* prefabFile,ImVec2 localMousePos,ImVec2 viewportSize) {
+				auto prefabService = services->get<Prefab::Service>();
+				auto assetManager = services->get<Assets::Manager>();
+				auto ecs = services->get<ECS::Controller>();
+
+				if (!prefabService || !prefabFile || !assetManager || !ecs) {
+					PN_CORE_ERROR("[ViewportPanel] Required services not available for prefab drop");
+					return;
+				}
+
+				// ========================================
+				// Get world position at mouse cursor
+				// ========================================
+				glm::vec3 worldPosition = getWorldPositionAtMouse(localMousePos, viewportSize, 10.0f);
+
+				PN_CORE_INFO("[ViewportPanel] Dropping prefab at world position: ({}, {}, {})",
+					worldPosition.x, worldPosition.y, worldPosition.z);
+
+				// ========================================
+				// Instantiate prefab at that position
+				// ========================================
+				Assets::GUID prefabGUID = prefabFile->id;
+
+				entt::entity instantiatedEntity = prefabService->instantiatePrefab(
+					prefabGUID,
+					currentRegistryID,
+					worldPosition  // <-- Pass the world position!
+				);
+
+				if (instantiatedEntity != entt::null) {
+					PN_CORE_INFO("[ViewportPanel] Successfully instantiated prefab '{}' as entity {}",
+						prefabFile->file_name,
+						static_cast<uint32_t>(instantiatedEntity));
+
+					// Select the newly created entity
+					if (m_EntityPanel) {
+						m_EntityPanel->setSelectedEntity(instantiatedEntity);
+					}
+				}
+				else {
+					PN_CORE_ERROR("[ViewportPanel] Failed to instantiate prefab '{}'", prefabFile->file_name);
+				}
 			}
 
 			void ViewportPanel::onAttach()
@@ -531,11 +649,11 @@ namespace PAIN {
 							ImGui::SetCursorScreenPos(viewportPos);
 							if(size.x != 0 && size.y != 0) ImGui::InvisibleButton("##ViewportDropZone", size);
 
-							auto filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Material);
+							auto mat_filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Material);
 							if (ImGui::BeginDragDropTarget()) {
 								// Check what payload is available
 								if (const ImGuiPayload* payload = ImGui::GetDragDropPayload()) {
-									if (strcmp(payload->DataType, std::string(filetype_string + "_FILE").c_str()) == 0) {
+									if (strcmp(payload->DataType, std::string(mat_filetype_string + "_FILE").c_str()) == 0) {
 										m_DragHoveredEntity = findEntityAtMousePos(
 											ImVec2(ImGui::GetMousePos().x - viewportPos.x, ImGui::GetMousePos().y - viewportPos.y),
 											size
@@ -547,7 +665,7 @@ namespace PAIN {
 									}
 								}
 
-								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(mat_filetype_string + "_FILE").c_str())) {
 									PN_CORE_INFO("Material payload accepted!");
 									File* droppedFile = (File*)payload->Data;
 
@@ -555,6 +673,62 @@ namespace PAIN {
 									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
 
 									handleMaterialDrop(droppedFile, localMousePos, size);
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							auto prefab_filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Prefabs);
+							if (ImGui::BeginDragDropTarget()) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+									std::string(prefab_filetype_string + "_FILE").c_str())) {
+
+									PN_CORE_INFO("Prefab payload accepted!");
+									File* droppedFile = (File*)payload->Data;
+
+									ImVec2 mousePos = ImGui::GetMousePos();
+									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+									handlePrefabDrop(droppedFile, localMousePos, size);
+								}
+								ImGui::EndDragDropTarget();
+							}
+
+							auto model_filetype_string = PAIN::Assets::assetTypeToString(Assets::Type::Model);
+							if (ImGui::BeginDragDropTarget()) {
+								if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+									std::string(model_filetype_string + "_FILE").c_str())) {
+
+									PN_CORE_INFO("Prefab payload accepted!");
+									File* droppedFile = (File*)payload->Data;
+
+									ImVec2 mousePos = ImGui::GetMousePos();
+									ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+
+									//Get world position for placing model
+									glm::vec3 worldPosition = getWorldPositionAtMouse(localMousePos, size, 10.0f);
+
+									//Create an entity
+									entt::entity entity = ecs->createEntity(currentRegistryID); // Auto-assigns GUID
+
+									//Craft entity name
+									std::string e_name = droppedFile->file_name.substr(0, droppedFile->file_name.find_first_of('.'));
+									e_name += std::to_string(static_cast<int>(entity));
+
+									// Add core components
+									ecs->addEntityComponent(entity, Entity::Name{ e_name }, currentRegistryID);
+									ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
+									ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
+									ecs->addEntityComponent(entity, Entity::Hierarchy{}, currentRegistryID);
+									ecs->addEntityComponent(entity, ModelRenderer{ droppedFile->id }, currentRegistryID);
+
+									//Move created model
+									auto l_trans_opt = ecs->getEntityComponent<LocalTransform>(entity, currentRegistryID);
+									if (l_trans_opt.has_value()) {
+										l_trans_opt.value().get().position = worldPosition;
+									}
+
+									PN_CORE_INFO("[ViewportPanel] Dropping model at world position: ({}, {}, {})",
+										worldPosition.x, worldPosition.y, worldPosition.z);
 								}
 								ImGui::EndDragDropTarget();
 							}

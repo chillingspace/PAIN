@@ -36,6 +36,9 @@ namespace PAIN {
                 float getTimeScale() const;
                 void setRenderTexture(ImTextureID texID, int width, int height);
 
+                glm::vec3 getWorldPositionAtMouse(ImVec2 localMousePos, ImVec2 viewportSize, float defaultDistance);
+                void handlePrefabDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize);
+
                 bool wantsInput() const { return contentHovered && isFocused; }
 
                 void setSimulationState(bool isPaused) {
