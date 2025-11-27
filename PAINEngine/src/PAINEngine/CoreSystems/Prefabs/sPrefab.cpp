@@ -14,7 +14,10 @@ namespace PAIN {
             return new Service(service);
         }
 
-        void Service::collectHierarchy(entt::entity root, entt::registry& registry, std::vector<entt::entity>& outEntities) {
+        void Service::collectHierarchy(entt::entity root, std::vector<entt::entity>& outEntities, ECS::RegistryID const& registry_id) {
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             //Check if entity is valid
             if (!registry.valid(root)) {
                 PN_CORE_WARN("Invalid root entity in collectHierarchy");
@@ -43,13 +46,17 @@ namespace PAIN {
                     entt::entity child = ecs_controller->getGUIDRegistry().resolveGUID(childGUID);
 
                     if (child != entt::null && registry.valid(child)) {
-                        collectHierarchy(child, registry, outEntities);
+                        collectHierarchy(child, outEntities, registry_id);
                     }
                 }
             }
         }
 
-        nlohmann::json Service::serializeEntity(entt::entity entity, const entt::registry& registry) {
+        nlohmann::json Service::serializeEntity(entt::entity entity, ECS::RegistryID const& registry_id) {
+
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             nlohmann::json entityJson;
             // Serialize GUID at top-level
             const auto& guid = registry.get<Entity::GUID>(entity).guid;
@@ -70,10 +77,14 @@ namespace PAIN {
         }
 #ifdef PN_PLATFORM_WINDOWS
         // Creation of prefabs should oly be done in windows, think of release build when running in android
-        void Service::createPrefab(entt::entity rootEntity, const std::string& prefabName, entt::registry& registry) {
+        void Service::createPrefab(entt::entity rootEntity, const std::string& prefabName, ECS::RegistryID const& registry_id) {
+
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             // Gather hierarchy
             std::vector<entt::entity> hierarchyEntities;
-            collectHierarchy(rootEntity, registry, hierarchyEntities);
+            collectHierarchy(rootEntity, hierarchyEntities, registry_id);
 
             //Create prefab
             Prefab::PrefabAsset prefab_asset;
@@ -83,7 +94,7 @@ namespace PAIN {
 
             //Add entities into prefab
             for (auto e : hierarchyEntities) {
-                prefab_asset.entities.push_back(serializeEntity(e, registry));
+                prefab_asset.entities.push_back(serializeEntity(e, registry_id));
             }
 
             //Craft path to prefab assets
@@ -93,13 +104,13 @@ namespace PAIN {
             std::string virt_path_to_prefab = path_service->aliasCombineRelative(Path::main_assets_alias, prefab_folder.string() + "/" + prefabName + prefab_ext);
 
             //Save prefab to file
-            savePrefabToFile(prefab_asset, virt_path_to_prefab, registry);
+            savePrefabToFile(prefab_asset, virt_path_to_prefab, registry_id);
         }
 #endif
 
-        nlohmann::json Service::serializePrefab(Prefab::PrefabAsset const& prefab_asset, entt::registry& registry) {
+        nlohmann::json Service::serializePrefab(Prefab::PrefabAsset const& prefab_asset, ECS::RegistryID const& registry_id) {
             auto ecs_controller = services.lock()->get<ECS::Controller>();
-            entt::entity root = ecs_controller->getGUIDRegistry().resolveGUID(prefab_asset.rootEntityGUID);
+            entt::entity root = ecs_controller->getGUIDRegistry(registry_id).resolveGUID(prefab_asset.rootEntityGUID);
             if (root == entt::null) throw std::runtime_error("Root GUID not found!");
 
             // Output JSON
@@ -113,9 +124,9 @@ namespace PAIN {
             return prefabJson;
         }
 
-        bool Service::savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& virtual_path, entt::registry& registry) {
+        bool Service::savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& virtual_path, ECS::RegistryID const& registry_id) {
             try {
-                nlohmann::json prefabJson = serializePrefab(prefab_asset, registry);
+                nlohmann::json prefabJson = serializePrefab(prefab_asset, registry_id);
                 auto path_service = services.lock()->get<Path::Path>();
 
                 auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Write, false);
@@ -545,11 +556,14 @@ namespace PAIN {
             ecs_controller->loadAllComponentsFromJson(instanceEntity, overrideData, registry_id);
         }
 
-        bool Service::isInstance(entt::entity entity, entt::registry& registry) const {
-            return registry.any_of<PrefabInstance>(entity);
+        bool Service::isInstance(entt::entity entity, ECS::RegistryID const& registry_id) const {
+            return services.lock()->get<ECS::Controller>()->getRegistry(registry_id).any_of<PrefabInstance>(entity);
         }
 
-        std::vector<entt::entity> Service::getInstancesOfPrefab(const Assets::GUID& prefabGUID, entt::registry& registry) const {
+        std::vector<entt::entity> Service::getInstancesOfPrefab(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id) const {
+            //Get registry
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
+
             std::vector<entt::entity> result;
             auto view = registry.view<PrefabInstance>();
             for (auto e : view) {
@@ -561,11 +575,9 @@ namespace PAIN {
         }
 
         void Service::updateAllInstances(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id, bool preserveOverrides) {
-            //Get registry
-            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(registry_id);
 
             PN_CORE_INFO("[PrefabService] Updating all instances of prefab: {}", prefabGUID.ToString());
-            auto instances = getInstancesOfPrefab(prefabGUID, registry);
+            auto instances = getInstancesOfPrefab(prefabGUID, registry_id);
 
             for (auto instanceEntity : instances) {
                 updateSingleInstance(instanceEntity, registry_id, preserveOverrides);

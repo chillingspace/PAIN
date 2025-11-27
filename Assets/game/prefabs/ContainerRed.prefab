@@ -47,6 +47,10 @@
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
                 "LocalTransform": {
                     "position": [
                         0.0,
@@ -101,9 +105,9 @@
                     "name": "ContainerRed"
                 }
             },
-            "entityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+            "entityGUID": "e598d3ce-93b8-9646-99f8-65f8fb42db04"
         }
     ],
-    "prefabName": "",
-    "rootEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+    "prefabName": "ContainerRed",
+    "rootEntityGUID": "e598d3ce-93b8-9646-99f8-65f8fb42db04"
 }

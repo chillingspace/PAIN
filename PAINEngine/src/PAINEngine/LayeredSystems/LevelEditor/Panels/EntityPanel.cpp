@@ -451,7 +451,7 @@ namespace PAIN {
                             std::string prefab_name = generateUniquePrefabName(getEntityName(selected_entity));
 
                             // Create prefab
-                            prefab_service->createPrefab(selected_entity, prefab_name, ecs->getRegistry(currentRegistryID));
+                            prefab_service->createPrefab(selected_entity, prefab_name, currentRegistryID);
 
                             PN_CORE_INFO("Created prefab: {}", prefab_name);
                         }

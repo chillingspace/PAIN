@@ -31,15 +31,15 @@ namespace PAIN {
             explicit Service(std::shared_ptr<Services> svc) :services{svc}{}
 
             //Collect all entities in the hierarchy
-            void collectHierarchy(entt::entity root, entt::registry& registry, std::vector<entt::entity>& outEntities);
+            void collectHierarchy(entt::entity root, std::vector<entt::entity>& outEntities, ECS::RegistryID const& registry_id);
 
             //Serialize a single entity
-            nlohmann::json serializeEntity(entt::entity entity, const entt::registry& registry);
+            nlohmann::json serializeEntity(entt::entity entity, const ECS::RegistryID const& registry_id);
 
             //Create and save prefab
-            void createPrefab(entt::entity rootEntity, const std::string& prefabName, entt::registry& registry);
-            bool savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& filePath, entt::registry& registry);
-            nlohmann::json serializePrefab(Prefab::PrefabAsset const& prefab_asset, entt::registry& registry);
+            void createPrefab(entt::entity rootEntity, const std::string& prefabName, ECS::RegistryID const& registry_id);
+            bool savePrefabToFile(Prefab::PrefabAsset const& prefab_asset, const std::string& filePath, ECS::RegistryID const& registry_id);
+            nlohmann::json serializePrefab(Prefab::PrefabAsset const& prefab_asset, ECS::RegistryID const& registry_id);
 
             //Prefab loading and instantiate
             Prefab::PrefabAsset deserializePrefab(const nlohmann::json& prefabJson);
@@ -50,8 +50,8 @@ namespace PAIN {
             void applyOverride(entt::entity instanceEntity, const std::string& componentName, const nlohmann::json& overrideData, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID);
 
             //Checks
-            bool isInstance(entt::entity entity, entt::registry& registry) const;
-            std::vector<entt::entity> getInstancesOfPrefab(const Assets::GUID& prefab_asset_id, entt::registry& registry) const;
+            bool isInstance(entt::entity entity, ECS::RegistryID const& registry_id) const;
+            std::vector<entt::entity> getInstancesOfPrefab(const Assets::GUID& prefab_asset_id, ECS::RegistryID const& registry_id) const;
 
             //Prefab instances function
             void updateAllInstances(const Assets::GUID& prefabGUID, ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID, bool preserveOverrides = true);

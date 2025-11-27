@@ -67,7 +67,7 @@ namespace PAIN {
                 auto prefabAsset = prefabAssetOpt.value();
 
                 //Set curr prefab name
-                currentPrefabName = prefabAsset->prefabName;
+                currentPrefabName = prefabAsset->prefabName.empty() ? prefabAsset->main_relative_path.stem().string() : prefabAsset->prefabName;
 
                 //Create isolated registry for editing
                 std::string registryName = "PrefabEdit_" + currentPrefabName;
@@ -189,17 +189,18 @@ namespace PAIN {
 
                 //Collect all entities in hierarchy
                 std::vector<entt::entity> hierarchyEntities;
-                prefabService->collectHierarchy(editRootEntity, editRegistry, hierarchyEntities);
+                prefabService->collectHierarchy(editRootEntity, hierarchyEntities, editRegistryID);
                 PN_CORE_INFO("[PrefabEditMode] Collected {} entities to serialize", hierarchyEntities.size());
 
                 //Create prefab
                 Prefab::PrefabAsset updatedPrefab;
                 updatedPrefab.rootEntityGUID = editRegistry.get<Entity::GUID>(editRootEntity).guid;
                 updatedPrefab.name = currentPrefabName;
+                updatedPrefab.prefabName = currentPrefabName;
 
                 //Add entities into prefab
                 for (auto e : hierarchyEntities) {
-                    updatedPrefab.entities.push_back(prefabService->serializeEntity(e, editRegistry));
+                    updatedPrefab.entities.push_back(prefabService->serializeEntity(e, editRegistryID));
                 }
 
                 //Craft path to prefab assets
@@ -208,7 +209,7 @@ namespace PAIN {
                 std::string virt_path_to_prefab = path_service->aliasCombineRelative(Path::main_assets_alias, prefab_folder.string() + "/" + updatedPrefab.name + prefab_ext);
 
                 //Save prefab to file
-                prefabService->savePrefabToFile(updatedPrefab, virt_path_to_prefab, editRegistry);
+                prefabService->savePrefabToFile(updatedPrefab, virt_path_to_prefab, editRegistryID);
 
                 //Reload asset in asset manager
                 assetManager->reshipAsset(currentEditingPrefabGUID);
@@ -249,7 +250,7 @@ namespace PAIN {
                 
                 //Get all instances in the active scene
                 auto& mainRegistry = ecsController->getRegistry(ECS::MAIN_REGISTRY_ID);
-                auto instances = prefabService->getInstancesOfPrefab(currentEditingPrefabGUID, mainRegistry);
+                auto instances = prefabService->getInstancesOfPrefab(currentEditingPrefabGUID, ECS::MAIN_REGISTRY_ID);
                 PN_CORE_INFO("[PrefabEditMode] Found {} instances to update", instances.size());
 
 
@@ -345,13 +346,13 @@ namespace PAIN {
                 ImGui::PopStyleColor();
                 // Right side: Action buttons
                 ImGui::SameLine(ImGui::GetWindowWidth() - 220);
-                if (ImGui::Button("Save", ImVec2(100, 30))) {
+                if (ImGui::Button("Save")) {
                     if (saveCurrentPrefab()) {
                         PN_CORE_INFO("Prefab saved successfully");
                     }
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Discard & Exit", ImVec2(100, 30))) {
+                if (ImGui::Button("Discard & Exit")) {
                     if (hasUnsavedChanges) {
                         showUnsavedWarning = true;
                     }
