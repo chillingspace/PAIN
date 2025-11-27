@@ -636,5 +636,95 @@ namespace PAIN {
             PN_CORE_INFO("[PrefabService] Updated instance: {}", static_cast<uint32_t>(instanceRoot));
         }
 
+        entt::entity Service::loadPrefabForEditing(const Assets::GUID& prefabAssetGUID,ECS::RegistryID const& editRegistryID) {
+            PN_CORE_INFO("=== LOADING PREFAB FOR EDITING (PRESERVE GUIDs) ===");
+
+            auto& registry = services.lock()->get<ECS::Controller>()->getRegistry(editRegistryID);
+            auto assetManager = services.lock()->get<Assets::Manager>();
+
+            // Load prefab asset
+            auto prefabAssetOpt = assetManager->getAsset<Prefab::PrefabAsset>(prefabAssetGUID);
+            if (!prefabAssetOpt.has_value()) {
+                PN_CORE_ERROR("Prefab asset not found: {}", prefabAssetGUID.ToString());
+                return entt::null;
+            }
+
+            auto prefabAsset = prefabAssetOpt.value();
+
+            if (prefabAsset->entities.empty()) {
+                PN_CORE_ERROR("Prefab has no entities!");
+                return entt::null;
+            }
+
+            PN_CORE_INFO("Loading prefab '{}' with {} entities (PRESERVING ORIGINAL GUIDs)",
+                prefabAsset->prefabName, prefabAsset->entities.size());
+
+            //NO GUID REMAP - Use original GUIDs from prefab file
+            std::vector<entt::entity> loadedEntities;
+
+            for (const auto& entityData : prefabAsset->entities) {
+                if (!entityData.contains("entityGUID")) {
+                    PN_CORE_WARN("Entity missing GUID, skipping");
+                    continue;
+                }
+
+                // Use ORIGINAL GUID from prefab (no remapping!)
+                Assets::GUID originalGUID(entityData["entityGUID"].get<std::string>());
+
+                // Create entity with original GUID
+                auto ecsController = services.lock()->get<ECS::Controller>();
+                entt::entity entity = ecsController->createEntity(originalGUID, editRegistryID);
+
+                if (entity == entt::null) {
+                    PN_CORE_ERROR("Failed to create entity with GUID {}", originalGUID.ToString());
+                    continue;
+                }
+
+                // Load components
+                if (entityData.contains("components") && entityData["components"].is_object()) {
+                    ecsController->loadAllComponentsFromJson(entity, entityData["components"], editRegistryID);
+                }
+
+                loadedEntities.push_back(entity);
+
+                PN_CORE_TRACE("Loaded entity {} with ORIGINAL GUID {}",
+                    static_cast<uint32_t>(entity), originalGUID.ToString());
+            }
+
+            // Fix up hierarchy (GUIDs should already match since we used originals)
+            for (size_t i = 0; i < loadedEntities.size(); ++i) {
+                auto entity = loadedEntities[i];
+
+                if (registry.any_of<Entity::Hierarchy>(entity)) {
+                    auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
+
+                    // Hierarchy GUIDs should already be correct since we used original GUIDs
+                    // No remapping needed!
+
+                    PN_CORE_TRACE("Entity {} hierarchy: parent={}, children={}",
+                        static_cast<uint32_t>(entity),
+                        hierarchy.parentGUID.ToString(),
+                        hierarchy.childrenGUIDs.size());
+                }
+            }
+
+            // Find and return root entity
+            auto ecsController = services.lock()->get<ECS::Controller>();
+            entt::entity rootEntity = ecsController->getGUIDRegistry(editRegistryID)
+                .resolveGUID(prefabAsset->rootEntityGUID);
+
+            if (rootEntity == entt::null) {
+                PN_CORE_ERROR("Failed to find root entity with GUID {}",
+                    prefabAsset->rootEntityGUID.ToString());
+
+                // Return first entity as fallback
+                return loadedEntities.empty() ? entt::null : loadedEntities[0];
+            }
+
+            PN_CORE_INFO("Successfully loaded prefab for editing, root entity: {}",
+                static_cast<uint32_t>(rootEntity));
+
+            return rootEntity;
+        }
 	}
 }

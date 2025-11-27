@@ -55,6 +55,9 @@ namespace PAIN {
                 //Render prefab info
                 void renderPrefabInfo();
 
+                //Render instance tools
+                void renderInstanceTools();
+
                 //Render
                 void render();
             public:

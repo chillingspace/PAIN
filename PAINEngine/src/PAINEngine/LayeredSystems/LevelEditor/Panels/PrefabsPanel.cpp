@@ -79,7 +79,7 @@ namespace PAIN {
                 auto& editRegistry = ecsController->getRegistry(editRegistryID);
 
                 //Instantiate prefab into edit registry
-                editRootEntity = prefabService->instantiatePrefab(prefabGUID, editRegistryID);
+                editRootEntity = prefabService->loadPrefabForEditing(prefabGUID, editRegistryID);
                 if (editRootEntity == entt::null) {
                     PN_CORE_ERROR("[PrefabEditMode] Failed to instantiate prefab in edit registry");
                     ecsController->destroyRegistry(editRegistryID);
@@ -313,10 +313,19 @@ namespace PAIN {
                 //Render prefab info
                 renderPrefabInfo();
 
+                ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
 
                 //Render tool bar
                 renderToolbar();
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                //Render Instance tooling
+                renderInstanceTools();
 
                 // Handle unsaved warning dialog
                 if (showUnsavedWarning) {
@@ -357,6 +366,22 @@ namespace PAIN {
                     else {
                         exitEditMode(false);
                     }
+                }
+            }
+
+            void PrefabPanel::renderInstanceTools() {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+                //Get instances of prefabs from main scene
+                auto prefab_instances = services->get<Prefab::Service>()->getInstancesOfPrefab(currentEditingPrefabGUID);
+
+                //Display the number of instances in scene
+                ImGui::Text("Number Of Instances In Scene: %d", prefab_instances.size());
+                ImGui::PopStyleColor();
+
+                //Button to propagate
+                if (!hasUnsavedChanges && ImGui::Button("Update All Instances")) {
+                    services->get<Prefab::Service>()->updateAllInstances(currentEditingPrefabGUID);
                 }
             }
 
