@@ -107,6 +107,10 @@ namespace PAIN {
                 entity_panel.lock()->setRegistry(editRegistryID);
                 comp_panel.lock()->setRegistry(editRegistryID);
 
+                //Set only the prefab registry to simulate
+                ecsController->setRegistryAutoSimulate(editRegistryID, true);
+                ecsController->setRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID, false);
+
                 PN_CORE_INFO("[PrefabEditMode] Successfully entered edit mode. Root entity: {}", static_cast<uint32_t>(editRootEntity));
                 return true;
             }
@@ -136,6 +140,7 @@ namespace PAIN {
                 }
 
                 //Destroy the edit registry to clean up resources
+                ecsController->setRegistryAutoSimulate(editRegistryID, false);
                 ecsController->destroyRegistry(editRegistryID);
                 PN_CORE_INFO("[PrefabEditMode] Destroyed edit registry: {}", editRegistryID);
 
@@ -143,7 +148,10 @@ namespace PAIN {
                 isInEditMode = false;
                 currentEditingPrefabGUID = Assets::GUID();
                 currentPrefabName.clear();
+
+                //Reset main registry to simulate again
                 editRegistryID = ECS::MAIN_REGISTRY_ID;
+                ecsController->setRegistryAutoSimulate(editRegistryID, true);
                 editRootEntity = entt::null;
                 hasUnsavedChanges = false;
 

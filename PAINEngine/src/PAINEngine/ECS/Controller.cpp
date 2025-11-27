@@ -176,10 +176,10 @@ namespace PAIN {
             return registries.find(id) != registries.end();
         }
         void Controller::setRegistryAutoSimulate(RegistryID id, bool autoSimulate) {
-            if (id == MAIN_REGISTRY_ID) {
-                PN_CORE_WARN("[ECS Controller] Cannot change auto-simulate for main registry");
-                return;
-            }
+            //if (id == MAIN_REGISTRY_ID) {
+            //    PN_CORE_WARN("[ECS Controller] Cannot change auto-simulate for main registry");
+            //    return;
+            //}
 
             auto* ctx = getRegistryContext(id);
             if (ctx) {
@@ -281,23 +281,18 @@ namespace PAIN {
         }
         void Controller::onFixedUpdate(AppTiming timing) {
 
-            // Update main registry (existing behavior)
-            updateSystemsForRegistry(MAIN_REGISTRY_ID, timing, true);
-
             // Update auto-simulated registries
             for (auto& [id, ctx] : registries) {
-                if (id != MAIN_REGISTRY_ID && ctx.auto_simulate) {
+                if (ctx.auto_simulate) {
                     updateSystemsForRegistry(id, timing, true);
                 }
             }
         }
         void Controller::onUpdate(AppTiming timing) {
-            // Update main registry (existing behavior)
-            updateSystemsForRegistry(MAIN_REGISTRY_ID, timing, false);
 
             // Update auto-simulated registries
             for (auto& [id, ctx] : registries) {
-                if (id != MAIN_REGISTRY_ID && ctx.auto_simulate) {
+                if (ctx.auto_simulate) {
                     updateSystemsForRegistry(id, timing, false);
                 }
             }
