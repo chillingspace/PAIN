@@ -5,16 +5,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.869122326374054,
-            -0.4648505747318268,
-            0.1689395308494568
+            0.5030034780502319,
+            -0.2706089913845062,
+            -0.820827841758728
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -1.6995415687561035,
-            1.2481541633605957,
-            -0.5946810841560364
+            -0.2815890312194824,
+            0.5650812983512878,
+            1.3757286071777344
         ],
         "up": [
             0.0,
@@ -28,6 +28,196 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "760cd31c-c1bb-9d4c-b981-615ed7d51ffd"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "5f4c99c0-a37a-4f45-8fc4-368d719a4056",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.7390000224113464,
+                                -0.7359142303466797,
+                                1.8052318096160889
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "Joystick"
+                        },
+                        "Texture2D": {
+                            "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+                            "texture_scale": 0.15000000596046448
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "Joystick"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "14cc74bf-f58d-ef4d-8132-21ed09ba03a3"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "5f4c99c0-a37a-4f45-8fc4-368d719a4056",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -0.7080000042915344,
+                                -0.7360000014305115,
+                                0.2289106547832489
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "JumpButton"
+                        },
+                        "Texture2D": {
+                            "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+                            "texture_scale": 0.15000000596046448
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                1.0,
+                                1.0
+                            ],
+                            "anchor_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "JumpButton"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
                         },
                         "Hierarchy": {
@@ -36,8 +226,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -69,7 +259,7 @@
                             "entity_target_guid": "81d7f475-5f23-5f45-a182-bcf8928fcd87",
                             "world_offset": [
                                 0.0,
-                                0.0,
+                                41.900001525878906,
                                 0.0
                             ]
                         },
@@ -128,7 +318,7 @@
                             ],
                             "display_text": "Press E",
                             "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
-                            "font_size": 1.0,
+                            "font_size": 0.4000000059604645,
                             "line_height": 1.0,
                             "max_length": 0,
                             "outline_color": [
@@ -150,8 +340,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                856.0604248046875,
-                                457.6817321777344
+                                803.632080078125,
+                                421.9951477050781
                             ],
                             "word_wrap": true,
                             "wrap_width": 1000.0
@@ -277,14 +467,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    3.677419662475586,
-                                    1.4991168975830078,
-                                    -0.7740018963813782
+                                    3.4260199069976807,
+                                    1.4990344047546387,
+                                    1.4552658796310425
                                 ],
                                 "min": [
-                                    1.6772645711898804,
-                                    -0.5010382533073425,
-                                    -2.7740018367767334
+                                    1.4260199069976807,
+                                    -0.5010364651679993,
+                                    -0.544805109500885
                                 ]
                             }
                         },
@@ -323,15 +513,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                2.677342176437378,
-                                0.49903929233551025,
-                                -1.7740018367767334
+                                2.4260199069976807,
+                                0.4989997148513794,
+                                0.45523038506507874
                             ],
                             "rotation": [
-                                -2.741331627476029e-05,
-                                0.7071067690849304,
-                                2.741331627476029e-05,
-                                0.7071067690849304
+                                -1.773316580511164e-05,
+                                0.0,
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 1.0,
@@ -520,7 +710,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 18,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -536,14 +726,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.13575132191181183,
+                                    0.13575129210948944,
                                     0.30859532952308655,
-                                    0.7170239686965942
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    -0.13575126230716705,
+                                    -0.13575129210948944,
                                     0.0,
-                                    0.1594114899635315
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -564,7 +754,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -573,9 +763,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                2.9802322387695313e-08,
                                 0.0,
-                                0.43821772933006287
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -949,7 +1139,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 7,
+                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -965,14 +1155,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.13575129210948944,
+                                    0.9147800207138062,
                                     0.30859532952308655,
-                                    0.16134721040725708
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    -0.13575129210948944,
+                                    0.6432774066925049,
                                     0.0,
-                                    -0.39626526832580566
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -993,7 +1183,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -1002,9 +1192,9 @@
                         },
                         "LocalTransform": {
                             "position": [
+                                0.7790287137031555,
                                 0.0,
-                                0.0,
-                                -0.11745902895927429
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -1054,7 +1244,12 @@
                             "name": "ContainerBlue"
                         },
                         "PrefabInstance": {
-                            "componentOverrides": {},
+                            "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                }
+                            },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "a1aea2b3-2aad-bc47-b105-134a88de0c8a",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
@@ -1067,7 +1262,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 27,
+                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -1083,14 +1278,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.6189544200897217,
+                                    0.9147800207138062,
                                     0.30859532952308655,
-                                    -0.3978746831417084
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    0.0613420233130455,
+                                    0.6432774066925049,
                                     0.0,
-                                    -0.6693772077560425
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -1111,7 +1306,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -1120,15 +1315,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.3401482105255127,
+                                0.7790287137031555,
                                 0.0,
-                                -0.5336259603500366
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
                                 0.0,
-                                0.7071067690849304
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -1172,7 +1367,12 @@
                             "name": "ContainerBlue"
                         },
                         "PrefabInstance": {
-                            "componentOverrides": {},
+                            "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                }
+                            },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "79545481-3503-ae4e-a365-ebaa3f1e6387",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
@@ -1409,7 +1609,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 16,
+                            "bvhNodeIndex": 11,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -1425,14 +1625,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.20755678415298462,
+                                    0.629583477973938,
                                     0.09757581353187561,
-                                    0.20676036179065704
+                                    0.13504602015018463
                                 ],
                                 "min": [
-                                    0.13592058420181274,
+                                    0.5579472780227661,
                                     0.0,
-                                    0.13512417674064636
+                                    0.06340982764959335
                                 ]
                             }
                         },
@@ -1453,7 +1653,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -1462,9 +1662,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.17173868417739868,
+                                0.593765377998352,
                                 0.0,
-                                0.1709422618150711
+                                0.0992279201745987
                             ],
                             "rotation": [
                                 0.0,
@@ -1514,7 +1714,12 @@
                             "name": "OilDrumRed"
                         },
                         "PrefabInstance": {
-                            "componentOverrides": {},
+                            "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                }
+                            },
                             "correspondingPrefabEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a",
                             "instanceRootGUID": "de0d6b51-3af2-6445-a9b7-5dd31e5204a7",
                             "sourcePrefabGUID": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b"
@@ -1746,7 +1951,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 39,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -1762,14 +1967,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    1.3239785432815552,
+                                    0.13575129210948944,
                                     0.30859532952308655,
-                                    0.9090211391448975
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    1.0524760484695435,
+                                    -0.13575129210948944,
                                     0.0,
-                                    0.3514086902141571
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -1790,7 +1995,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -1799,9 +2004,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                1.1882272958755493,
                                 0.0,
-                                0.6302149295806885
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2195,7 +2400,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 10,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2213,12 +2418,12 @@
                                 "max": [
                                     0.13575129210948944,
                                     0.30859532952308655,
-                                    1.2708271741867065
+                                    0.27880623936653137
                                 ],
                                 "min": [
                                     -0.13575129210948944,
                                     0.0,
-                                    0.7132147550582886
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -2239,7 +2444,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2250,7 +2455,7 @@
                             "position": [
                                 0.0,
                                 0.0,
-                                0.9920209646224976
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2313,7 +2518,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 43,
+                            "bvhNodeIndex": 21,
                             "localAABB": {
                                 "max": [
                                     57.97823715209961,
@@ -2329,14 +2534,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.5889564156532288,
+                                    0.2541748881340027,
                                     0.21110306680202484,
-                                    0.9323102831840515
+                                    0.7221170663833618
                                 ],
                                 "min": [
-                                    0.48004817962646484,
+                                    0.13821841776371002,
                                     0.0,
-                                    0.8807318806648254
+                                    0.7159662842750549
                                 ]
                             }
                         },
@@ -2357,7 +2562,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2366,15 +2571,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.5335639715194702,
+                                0.19619666039943695,
                                 0.0,
-                                0.9043459892272949
+                                0.7166728377342224
                             ],
                             "rotation": [
                                 0.0,
-                                0.20223022997379303,
                                 0.0,
-                                0.9793379902839661
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -2418,7 +2623,12 @@
                             "name": "MetalPlank1"
                         },
                         "PrefabInstance": {
-                            "componentOverrides": {},
+                            "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                }
+                            },
                             "correspondingPrefabEntityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e",
                             "instanceRootGUID": "718c3b6a-573f-b14c-9714-d5fcb59806d0",
                             "sourcePrefabGUID": "40444285-5787-df4f-a3b0-18b0a2d6ae3d"
@@ -2431,7 +2641,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 44,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2447,14 +2657,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    1.1601109504699707,
+                                    0.13575129210948944,
                                     0.30859532952308655,
-                                    1.1768807172775269
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    0.6024985313415527,
+                                    -0.13575129210948944,
                                     0.0,
-                                    0.9053782224655151
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -2475,7 +2685,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2484,15 +2694,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.8813047409057617,
                                 0.0,
-                                1.041129469871521
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
                                 0.0,
-                                0.7071067690849304
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -2549,7 +2759,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 9,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2567,12 +2777,12 @@
                                 "max": [
                                     0.13575129210948944,
                                     0.30859532952308655,
-                                    1.2708271741867065
+                                    0.27880623936653137
                                 ],
                                 "min": [
                                     -0.13575129210948944,
                                     0.0,
-                                    0.7132147550582886
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -2593,7 +2803,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2604,7 +2814,7 @@
                             "position": [
                                 0.0,
                                 0.0,
-                                0.9920209646224976
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2651,7 +2861,7 @@
                             "visible": true
                         },
                         "Name": {
-                            "name": "ContainerRed2"
+                            "name": "ContainerRed"
                         },
                         "PrefabInstance": {
                             "componentOverrides": {},
@@ -2660,14 +2870,14 @@
                             "sourcePrefabGUID": "b0e4056d-b1ff-3448-a193-26eb095b6a2c"
                         }
                     },
-                    "Name": "ContainerRed2"
+                    "Name": "ContainerRed"
                 }
             },
             {
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 5,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2684,13 +2894,13 @@
                             "worldAABB": {
                                 "max": [
                                     0.13575129210948944,
-                                    0.6175702810287476,
-                                    1.0269585847854614
+                                    0.30859532952308655,
+                                    0.27880623936653137
                                 ],
                                 "min": [
                                     -0.13575129210948944,
-                                    0.3089749217033386,
-                                    0.4693460762500763
+                                    0.0,
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -2711,7 +2921,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2721,8 +2931,8 @@
                         "LocalTransform": {
                             "position": [
                                 0.0,
-                                0.3089749217033386,
-                                0.7481523156166077
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2785,7 +2995,7 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 41,
+                            "bvhNodeIndex": 0,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -2801,14 +3011,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.6302930116653442,
+                                    0.13575129210948944,
                                     0.30859532952308655,
-                                    1.7670470476150513
+                                    0.27880623936653137
                                 ],
                                 "min": [
-                                    0.010573096573352814,
+                                    -0.13575129210948944,
                                     0.0,
-                                    1.2642017602920532
+                                    -0.27880623936653137
                                 ]
                             }
                         },
@@ -2829,7 +3039,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "88b7d550-9958-4e42-802f-e0776459a796",
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -2838,15 +3048,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.3204330503940582,
                                 0.0,
-                                1.5156244039535522
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
-                                0.5134599208831787,
                                 0.0,
-                                0.8581135869026184
+                                0.0,
+                                1.0
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -2907,14 +3117,16 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [
-                                "24e0338e-b3b9-8e4a-b6a4-7146e40669cf"
+                                "24e0338e-b3b9-8e4a-b6a4-7146e40669cf",
+                                "14cc74bf-f58d-ef4d-8132-21ed09ba03a3",
+                                "760cd31c-c1bb-9d4c-b981-615ed7d51ffd"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2939,7 +3151,7 @@
                         },
                         "UICanvas": {
                             "b_face_camera": true,
-                            "render_mode": 0,
+                            "render_mode": 2,
                             "sort_order": 0,
                             "world_scale": 0.0010000000474974513
                         },
@@ -3025,7 +3237,27 @@
             "id": 0,
             "mask": 1,
             "name": "Layer 0"
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": true,
+            "id": 1,
+            "mask": 2,
+            "name": "UI"
         }
     ],
-    "mask_matrix": []
+    "mask_matrix": [
+        [
+            false,
+            false
+        ],
+        [
+            false,
+            false
+        ]
+    ]
 }
