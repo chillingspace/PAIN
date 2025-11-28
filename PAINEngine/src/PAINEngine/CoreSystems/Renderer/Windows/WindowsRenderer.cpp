@@ -37,6 +37,8 @@ namespace PAIN {
 
 		//GS.use_instanced_rendering = false;
 
+		glBindVertexArray(geometry_vao);
+
 		if (!GS.use_instanced_rendering) {
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
 			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
@@ -51,6 +53,9 @@ namespace PAIN {
 		unsigned int offset{};
 		std::vector<unsigned int> indices;
 		std::unordered_set<std::string> referenced{};
+
+		auto ecs = services->get<ECS::Controller>();
+
 		for (const auto& mdl : models) {
 			if (referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
 				continue;
@@ -62,6 +67,7 @@ namespace PAIN {
 			total_vertices += m->vertices.size();
 			total_indices += m->indices.size();
 			vertices.insert(vertices.end(), m->vertices.begin(), m->vertices.end());
+			instanced_offsets[m->vpath] = { offset, (unsigned int)m->indices.size() };
 
 			// translate indices
 			std::vector<unsigned int> translated_indices{};
@@ -78,6 +84,17 @@ namespace PAIN {
 		glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(Assets::Vertex), vertices.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_indices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+		// create instance buffer
+
+		//glCreateBuffers(1, &geometry_ibo);
+		glGenBuffers(1, &geometry_ibo);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
+		glBufferStorage(GL_ARRAY_BUFFER, referenced.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+		// cleanup
+
+		glBindVertexArray(0);
 	}
 
 	void WindowsRenderer::initShaders()
@@ -655,10 +672,18 @@ namespace PAIN {
 
 		// Bind component's VAO (already has vertex data uploaded)
 		glBindVertexArray(geometry_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
+
+		//if (!GS.use_instanced_rendering) 
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
+		}
+
+		if (GS.use_instanced_rendering) {
+
+		}
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
@@ -748,6 +773,7 @@ namespace PAIN {
 					}
 
 					//Height texture
+					/*
 					tex_opt = material->useOverrides ?
 						assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
@@ -755,6 +781,7 @@ namespace PAIN {
 					if (tex_opt.has_value()) {
 						heightTexture = tex_opt.value()->gl_texture;
 					}
+					*/
 
 					//Opacity texture
 					tex_opt = material->useOverrides ?
@@ -788,7 +815,7 @@ namespace PAIN {
 			// Bind textures from MaterialInstance
 			bool hasTexture = albedoTexture != 0;
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
-			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
+			//geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
 
 			if (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) {
 				glActiveTexture(GL_TEXTURE6);
