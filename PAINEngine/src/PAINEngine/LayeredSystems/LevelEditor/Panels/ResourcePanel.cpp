@@ -641,11 +641,10 @@ namespace PAIN {
 					}
 					
 					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
-						setSelectedFilePath(file.path.string());
-						b_script_entity_switched = true;
-					}
-					else if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-						setSelectedFilePath("");
+
+						openPopUp("Script Editor");
+						current_script_file = file.path.string();
+						setScriptSaved(true);
 					}
 
 					ImGui::PopStyleColor();
@@ -692,6 +691,77 @@ namespace PAIN {
 				if (shown_count == 0) {
 					ImGui::Text("No results.");
 				}
+			}
+
+			void ResourcePanel::setScriptSaved(bool is_script_changed) {
+				is_script_loaded = is_script_changed;
+			}
+
+			bool ResourcePanel::getScriptSaved() {
+				return is_script_loaded;
+			}
+
+			std::function<void(std::any const&)> ResourcePanel::scriptEditorPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					static char script_buffer[65536] = "";
+
+					std::ifstream file_(current_script_file, std::ios::in | std::ios::binary);
+					if (file_) {
+						file_.read(script_buffer, sizeof(script_buffer) - 1);
+						std::streamsize count = file_.gcount();
+						script_buffer[count] = '\0';
+						file_.close();
+					}
+					else {
+						script_buffer[0] = '\0';
+
+						PN_CORE_WARN("Failed to open file: ", current_script_file);
+					}
+
+					// Editable text Input
+					if (ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
+						ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput)) {
+						setScriptSaved(false);
+					}
+
+					// Save button (TODO: Check if it updates real time.)
+					if (!getScriptSaved()) {
+						if (ImGui::Button("Save Script")) {
+							std::ofstream file_(current_script_file, std::ios::out | std::ios::binary);
+							if (file_) {
+								file_.write(script_buffer, strlen(script_buffer));
+								file_.close();
+								setScriptSaved(true);
+							}
+							else {
+								PN_CORE_WARN("Failed to save file: ", current_script_file);
+							}
+						}
+					}
+					else {
+						ImGui::BeginDisabled();
+						ImGui::Button("Save Script");
+						ImGui::EndDisabled();
+					}
+
+					ImGui::SameLine();
+
+					// Open in Visual Studio Code button
+					if (ImGui::Button("Open in VS Code")) {
+						std::string command = "code \"" + current_script_file + "\"";
+						system(command.c_str());
+					}
+
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
 			}
 
 			ResourcePanel::MaterialPreview::MaterialPreview() {
@@ -1291,21 +1361,6 @@ namespace PAIN {
 				}*/
 			}
 
-			std::string ResourcePanel::getSelectedFilePath() {
-				return selected_filepath;
-			}
-
-			void ResourcePanel::setSelectedFilePath(std::string filepath) {
-				selected_filepath = filepath;
-			}
-
-			bool ResourcePanel::isScriptAndEntitySwitched() const {
-				return b_script_entity_switched;
-			}
-
-			void ResourcePanel::setScriptAndEntitySwitched(bool is_switched) {
-				b_script_entity_switched = is_switched;
-			}
 
 			void ResourcePanel::renderFileEditor() {
 				for (decltype(file_editing_map)::iterator it = file_editing_map.begin(); it != file_editing_map.end(); ++it) {
@@ -1756,6 +1811,8 @@ namespace PAIN {
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
 				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
+
+				registerPopUp("Script Editor", scriptEditorPopup("Script Editor"));
 
 				//Initialize root and current path
 #ifdef PN_PLATFORM_ANDROID
