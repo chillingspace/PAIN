@@ -250,7 +250,9 @@ namespace PAIN {
 
 		std::optional<entt::entity> InputSystem::raycastUI(const glm::vec2& mouse_pos, entt::registry& registry) {
 			auto ecs = services.lock()->get<ECS::Controller>();
-			auto view = registry.view<UIRectTransform, UIElement>();
+
+
+			auto view = registry.group<UIRectTransform>(entt::get <UIElement>);
 
 			// Each candidate: entity, canvas_sort, sibling_index
 			std::vector<std::tuple<entt::entity, int, int>> candidates;
