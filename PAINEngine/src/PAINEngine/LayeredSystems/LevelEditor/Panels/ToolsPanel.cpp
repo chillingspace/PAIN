@@ -1,5 +1,9 @@
 #include "pch.h"
 #include "ToolsPanel.h"
+#include "EntityPanel.h"
+#include "ComponentsPanel.h"
+#include "ECS/Components/AllComponents.h"
+#include "../Editor.h"
 
 
 #ifdef _DEBUG
@@ -36,6 +40,8 @@ namespace PAIN {
                 registerPopUp("Settings", settingsPopUp("Settings"));
                 registerPopUp("Unsaved Changes", unsavedChangesPopUp("Unsaved Changes"));
                 registerPopUp("Unsaved Scene", unsavedScenePopUp("Unsaved Scene"));
+
+                registerPopUp("Add Component", addComponentPopUp("Add Component"));
 			}
             
 			void Tools::nextWindowSettings() {
@@ -241,6 +247,122 @@ namespace PAIN {
                 };
             }
 
+            std::function<void(std::any const&)> Tools::addComponentPopUp(std::string const& popup_id) {
+                return [this, popup_id](std::any const& data) {
+                    auto ecs = services->get<ECS::Controller>();
+                    auto entity_panel = entities_panel.lock();
+                    auto component_panel = components_panel.lock();
+
+                    if (!entity_panel) {
+                        auto editor = services->get<PAIN::Editor::Editor>();
+                        if (editor) {
+                            auto ep = editor->getPanel<Panel::EntityPanel>();
+                            if (ep) {
+                                entities_panel = ep;
+                                entity_panel = ep;
+                            }
+                        }
+                    }
+
+                    if (!component_panel) {
+                        auto editor = services->get<PAIN::Editor::Editor>();
+                        if (editor) {
+                            auto cp = editor->getPanel<Panel::ComponentsPanel>();
+                            if (cp) {
+                                components_panel = cp;
+                                component_panel = cp;
+                            }
+                        }
+                    }
+
+                    if (!entity_panel) {
+                        ImGui::Text("EntityPanel not available");
+                        if (ImGui::Button("Close", ImVec2(-1, 0))) {
+                            closePopUp(popup_id);
+                        }
+                        return;
+                    }
+
+                    entt::entity selected_entity = entity_panel->getSelectedEntity();
+
+                    if (!ecs->checkEntity(selected_entity, component_panel->getCurrentRegistry())) {
+                        ImGui::Text("No valid entity selected");
+                        if (ImGui::Button("Close", ImVec2(-1, 0))) {
+                            closePopUp(popup_id);
+                        }
+                        return;
+                    }
+
+                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Add Component");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    static char search_filter[256] = "";
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::InputTextWithHint("##Search", "Search components...", search_filter, 256);
+                    ImGui::Spacing();
+
+                    ImGui::BeginChild("##ComponentList", ImVec2(400, 350), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+                    bool found_any = false;
+
+                    // Iterate registered component factories
+                    for (const auto& [comp_name, factory_func] : ecs->getComponentFactories()) {
+
+                        if (comp_name == getComponentName<Entity::Name>() ||
+                            comp_name == getComponentName<Entity::Layer>() ||
+                            comp_name == getComponentName<MetaData::EditorVisible>()) {
+                            continue;
+                        }
+
+                        // Skip if entity already has this component
+                        if (ecs->hasComponentByName(selected_entity, comp_name, component_panel->getCurrentRegistry())) {
+                            continue;
+                        }
+
+                        // Search filter
+                        if (strlen(search_filter) > 0) {
+                            std::string comp_lower = comp_name;
+                            std::string search_lower = search_filter;
+                            std::transform(comp_lower.begin(), comp_lower.end(), comp_lower.begin(), ::tolower);
+                            std::transform(search_lower.begin(), search_lower.end(), search_lower.begin(), ::tolower);
+                            if (comp_lower.find(search_lower) == std::string::npos) {
+                                continue;
+                            }
+                        }
+
+                        found_any = true;
+
+                        if (ImGui::Selectable(comp_name.c_str(), false)) {
+                            if (comp_name == "RigidBody3D") {
+                                openPopUp("AddRigidBody3DConfig");
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
+                            else {
+                                ecs->addComponentByName(selected_entity, comp_name, component_panel->getCurrentRegistry());
+                                search_filter[0] = '\0';
+                                closePopUp(popup_id);
+                            }
+                        }
+                    }
+
+                    if (!found_any) {
+                        ImGui::TextDisabled("No available components");
+                    }
+
+                    ImGui::EndChild();
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    if (ImGui::Button("Cancel", ImVec2(-1, 0))) {
+                        search_filter[0] = '\0';
+                        closePopUp(popup_id);
+                    }
+                    };
+            }
+
             void Tools::onAttach()
             {
             }
@@ -324,10 +446,18 @@ namespace PAIN {
                         ImGui::EndMenu(); 
                     }
 
-                    if (ImGui::BeginMenu("Component")) { ImGui::MenuItem("Add..."); ImGui::EndMenu(); }
-                    if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
+                    if (ImGui::BeginMenu("Component")) { 
+
+                        if (ImGui::MenuItem("Add...")) {
+                            openPopUp("Add Component");
+                        }
+                        ImGui::EndMenu(); 
+                    }
+
+                    /*if (ImGui::BeginMenu("Services")) { ImGui::MenuItem("Cloud"); ImGui::EndMenu(); }
                     if (ImGui::BeginMenu("Window")) { ImGui::MenuItem("Layouts"); ImGui::EndMenu(); }
-                    if (ImGui::BeginMenu("Help")) { ImGui::MenuItem("About"); ImGui::EndMenu(); }
+                    if (ImGui::BeginMenu("Help")) { ImGui::MenuItem("About"); ImGui::EndMenu(); }*/
+
                     // Display FPS on the right side of the menu bar
                     float fps = 1.0f / timing.dt;
                     float text_width = 150.0f; // Approximate width for the FPS text
