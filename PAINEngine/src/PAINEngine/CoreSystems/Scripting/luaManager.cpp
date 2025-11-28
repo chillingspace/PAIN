@@ -628,6 +628,18 @@ namespace PAIN {
                       );
                   });
 
+        lua_.set_function("getCameraOffsets", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                // 6 floats: trans(x,y,z), rot(x,y,z)
+                return std::make_tuple(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+            }
+
+            auto [t, r] = api_->GetCameraOffsets(entityId);
+            return std::make_tuple(t.x, t.y, t.z, r.x, r.y, r.z);
+            });
+
+
         /* =========================================================================== */
         /*                                Particles                                    */
         /* =========================================================================== */

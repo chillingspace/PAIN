@@ -692,7 +692,11 @@ namespace PAIN {
 
 				glm::vec3 offset_world = entity_rot * (cam->get().trans_offset * entity_scale);
 				glm::vec3 cam_pos = entity_pos + offset_world;
-				glm::vec3 forward{ glm::normalize(entity_pos - cam_pos) };
+
+				glm::vec3 look_offset = cam->get().rot_offset * entity_scale; //offset from entity
+				glm::vec3 target_pos = entity_pos + look_offset;
+
+				glm::vec3 forward{ glm::normalize(target_pos - cam_pos) };
 				glm::vec3 up{ 0.f, 1.f, 0.f };
 				float near_plane = cam->get().near_plane;
 				float far_plane = cam->get().far_plane;

@@ -460,6 +460,17 @@ namespace PAIN {
         cam->right = glm::normalize(glm::cross(cam->forward, cam->up));
     }
 
+    std::pair<glm::vec3, glm::vec3> EngineAPIAdapter::GetCameraOffsets(entt::entity entityId)
+    {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Cam>(entityId)) {
+            const auto& cam = opt->get();
+            return { cam.trans_offset, cam.rot_offset };
+        }
+
+        // default if entity has no camera
+        return { glm::vec3(0.f), glm::vec3(0.f) };
+    }
+
     /* =========================================================================== */
     /*                                Particles                                    */
     /* =========================================================================== */

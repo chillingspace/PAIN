@@ -205,6 +205,25 @@ namespace PAIN {
 #endif 
 
         camera = m_Scene->GetActiveCamera();
+        if (!camera) return;
+
+
+        // -------- GAME MODE --------
+#ifdef _DEBUG
+        bool gameMode = !editor_visible;
+#else
+    // No editor in release, always game mode
+        bool gameMode = true;
+#endif
+
+        if (gameMode) {
+            // active camera is driven by lua (thirdPersonCamera.lua) in game mode
+            xOffset = 0.f;
+            yOffset = 0.f;
+            return;
+        }
+
+        // -------- EDITOR CAMERA --------
 
         // Move left/right based on cross product of forward and up vectors
         glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
