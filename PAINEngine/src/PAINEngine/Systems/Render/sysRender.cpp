@@ -8,6 +8,7 @@
 #include "ECS/Components/AllComponents.h"
 #include "Systems/Collision/sBVHSystem.h"
 #include "ECS/Components/cAnimation.h" 
+#include "ECS/Controller.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -201,26 +202,25 @@ namespace PAIN {
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
-            auto view = registry.view<Entity::Name>();
             glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(), 
                        GraphicsSettings::get().getShadowMapWidth());
+
+            auto renderGroup = registry.group<ModelRenderer>(
+                entt::get<WorldTransform, Entity::Layer>
+            );
+
 
             for (const Light& l : LightSources::get().getAll()) {
                 if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED) continue;
 
                 rendererService->w_renderer->BeginShadowPass(l);
 
-                for (auto e : view) {
-                    auto transform = registry.try_get<WorldTransform>(e);
-                    auto mdl = registry.try_get<ModelRenderer>(e);
+                for (auto [entity, model, transform, layer] : renderGroup.each()) {
 
-                    glm::mat4 model_xform(1.0f);
-                    if (transform) {
-                        model_xform = transform->matrix;
-                    }
+                    glm::mat4 model_xform = transform.matrix;
 
-                    if (mdl && mdl->castShadows) {
-                        rendererService->w_renderer->DrawShadows(*mdl, model_xform, l);
+                    if (model.visible && model.castShadows) {
+                        rendererService->w_renderer->DrawShadows(model, model_xform, l);
                     }
                 }
 
@@ -239,45 +239,37 @@ namespace PAIN {
             if (!sceneManager) return;
 
             const auto& layers = sceneManager->getLayers();
-            auto view = registry.view<Entity::Name>();
+            auto renderGroup = registry.group<ModelRenderer>(
+                entt::get<WorldTransform, Entity::Layer>
+            );
 
             rendererService->w_renderer->BeginGeometryPass(rendererService->m_Scene);
 
-            for (auto e : view) {
-                auto transform = registry.try_get<WorldTransform>(e);
-                auto mdl = registry.try_get<ModelRenderer>(e);
+            // Use structured bindings with .each() for proper group iteration
+            for (auto [entity, model, transform, layer] : renderGroup.each()) {
+                // Components guaranteed to exist by group - no try_get needed!
+                if (!model.visible) continue;
 
-                if (!mdl || !mdl->visible) continue;
-
-                // Check layer visibility
-                auto layerComp = registry.try_get<Entity::Layer>(e);
-                if (layerComp) {
-                    int layerID = layerComp->layer_id;
-                    if (layerID < layers.size() && !layers[layerID].enabled) {
-                        continue;
-                    }
-                }
-
-                glm::mat4 model_xform(1.0f);
-                if (transform) {
-                    model_xform = transform->matrix;
-                }
-
-                // Initialize component if model GUID changed
-                if (mdl->modelGUID != mdl->prevModelGUID) {
-                    InitializeModelRenderer(e, *const_cast<ModelRenderer*>(mdl));
-                }
-
-                if (!mdl->visible) {
+                // Check layer visibility (not part of group, so still need try_get)
+                int layerID = layer.layer_id;
+                if (layerID < layers.size() && !layers[layerID].enabled) {
                     continue;
                 }
 
 
-                // Get Animation component if present
-                Animation* anim = registry.try_get<Animation>(e);
+                glm::mat4 model_xform = transform.matrix;
+
+                // Initialize component if model GUID changed
+                if (model.modelGUID != model.prevModelGUID) {
+                    InitializeModelRenderer(entity, const_cast<ModelRenderer&>(model));
+                }
+
+                if (!model.visible) {
+                    continue;
+                }
 
                 // Draw geometry, passing animation pointer (may be null)
-                rendererService->w_renderer->DrawGeometry(rendererService->m_Scene, *mdl, model_xform);
+                rendererService->w_renderer->DrawGeometry(rendererService->m_Scene, const_cast<ModelRenderer&>(model), model_xform);
             }
 
             rendererService->w_renderer->EndGeometryPass();
@@ -288,15 +280,13 @@ namespace PAIN {
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
-            auto view = registry.view<Entity::Name>();
+            auto renderGroup = registry.group<ModelRenderer>(
+                entt::get<WorldTransform, Entity::Layer>
+            );
 
-            for (auto e : view) {
-                auto transform = registry.try_get<WorldTransform>(e);
-                auto mdl = registry.try_get<ModelRenderer>(e);
 
-                if (mdl) {
-                    rendererService->w_renderer->ReflectionPass(*mdl);
-                }
+            for (auto [entity, model, transform, layer] : renderGroup.each()) {
+                rendererService->w_renderer->ReflectionPass(model);
             }
         }
 
@@ -307,16 +297,15 @@ namespace PAIN {
             auto svc = services.lock();
             if (!svc) return;
 
-            auto view = registry.view<Entity::Name>();
+            auto lightingGroup = registry.group<Lighting>(
+                entt::get<LocalTransform>
+            );
+
 
             // Cache to track which lights are still active this frame
             std::unordered_set<std::string> activeLightNames;
 
-            for (auto entity : view) {
-                auto light_comp = registry.try_get<Lighting>(entity);
-                auto trans_comp = registry.try_get<LocalTransform>(entity);
-
-                if (!light_comp || !trans_comp) continue;
+            for (auto [entity, lighting, transform] : lightingGroup.each()) {
 
                 std::string lightName = "light_" + std::to_string((uint32_t)entity);
                 activeLightNames.insert(lightName);
@@ -328,10 +317,10 @@ namespace PAIN {
 
                 if (auto lightOpt = LightSources::get().get(lightName)) {
                     Light& light = lightOpt.value();
-                    light.position = trans_comp->position + light_comp->offset;
-                    light.L_intensity = light_comp->light_intensity;
-                    light.type = static_cast<Light::TYPES>(light_comp->light_type);
-                    light.setShadowType(static_cast<Light::SHADOW_TYPES>(light_comp->shadow_type));
+                    light.position = transform.position + lighting.offset;
+                    light.L_intensity = lighting.light_intensity;
+                    light.type = static_cast<Light::TYPES>(lighting.light_type);
+                    light.setShadowType(static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
                 }
             }
 
