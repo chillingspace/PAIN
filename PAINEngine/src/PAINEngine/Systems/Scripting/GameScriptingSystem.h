@@ -12,6 +12,11 @@ namespace PAIN {
 
     namespace Scripting {
 
+        inline sol::table make_ai_context(sol::state& L, entt::registry& reg, entt::entity e, IEngineAPI* api) {
+            (void)reg; (void)e; (void)api;
+            return L.create_table(); // empty context for now
+        }
+
         class GameScriptingSystem : public ECS::System::ISystem {
         public:
 
@@ -36,6 +41,10 @@ namespace PAIN {
             bool loadAllScriptsForEntityFromVDir(entt::entity entity, const std::string& alias,
                 const std::string& relativeRoot, bool recursive = true,
                 bool runWhenPaused = false);
+
+        public:
+            LuaManager& getLuaManager() { return luaManager_; } // for AI system
+            const LuaManager& getLuaManager() const { return luaManager_; }
 
         private:
             LuaManager luaManager_;

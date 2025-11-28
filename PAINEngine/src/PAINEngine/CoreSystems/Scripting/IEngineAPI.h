@@ -36,15 +36,6 @@ namespace PAIN {
         /*                                  Lookup                                     */
         /* =========================================================================== */
         virtual std::optional<int> FindEntity(std::string_view name) = 0;
-        //virtual int GetImageID(std::string_view name) = 0;
-        //virtual int GetScriptID(std::string_view name) = 0;
-        ////virtual int GetAudioID(std::string_view name) = 0;
-        //virtual int GetModelID(std::string_view name) = 0;
-        //virtual int GetFontID(std::string_view name) = 0;
-        //virtual int GetScenesID(std::string_view name) = 0;
-        //virtual int GetPrefabsID(std::string_view name) = 0;
-        //virtual int GetDataID(std::string_view name) = 0;
-        //virtual int GetShaderID(std::string_view name) = 0;
 
         virtual std::string GetAssetGUID(std::string_view name, PAIN::Assets::Type want) = 0;
 
@@ -90,26 +81,6 @@ namespace PAIN {
         /* =========================================================================== */
         /*                                   Audio                                     */
         /* =========================================================================== */
-        //// --- Audio: playback ---
-        //virtual int   Audio_Play(const std::string& vpath, float x, float y, float z, float volumeDb) = 0;
-        //virtual int   Audio_PlayRandomFrom(const std::string& playlist, float x, float y, float z, float volumeDb) = 0;
-
-        //// --- Audio: channel control ---
-        //virtual bool  Audio_Stop(int channelId) = 0;
-        //virtual void  Audio_StopAll() = 0;
-        //virtual bool  Audio_Pause(int channelId) = 0;
-        //virtual bool  Audio_Resume(int channelId) = 0;
-        //virtual void  Audio_PauseAll() = 0;
-        //virtual void  Audio_ResumeAll() = 0;
-        //virtual bool  Audio_SetChannelVolumeDb(int channelId, float db) = 0;
-        //virtual bool  Audio_SetChannelPosition(int channelId, float x, float y, float z) = 0;
-
-        //// --- Audio: listener & groups ---
-        //virtual void  Audio_SetListener(float px, float py, float pz, float vx, float vy, float vz, float fx, float fy, float fz, float ux, float uy, float uz) = 0;
-        //virtual bool  Audio_SetGroupVolumeDb(const std::string& group, float db) = 0;
-        //virtual bool  Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) = 0;
-        //virtual bool  Audio_SetMuteAll(bool mute) = 0;
-
         virtual void Audio_Play(entt::entity entityId) = 0;
         virtual void Audio_Stop(entt::entity entityId) = 0;
 

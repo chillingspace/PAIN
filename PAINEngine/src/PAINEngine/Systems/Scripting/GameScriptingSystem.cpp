@@ -51,6 +51,14 @@ namespace PAIN {
             ensureInit();
             if (!init_) return;
 
+            // --- publish LuaManager* into this registry's context once ---
+            {
+                auto& ctx = reg.ctx();
+                if (!ctx.contains<PAIN::LuaManager*>()) {
+                    ctx.emplace<PAIN::LuaManager*>(&luaManager_);
+                }
+            }
+
             auto services_ptr = getServices();
             auto assets = services_ptr->get<Assets::Manager>();
             auto fs = services_ptr->get<Path::Path>();

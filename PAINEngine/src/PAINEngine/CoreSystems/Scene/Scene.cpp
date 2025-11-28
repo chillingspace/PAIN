@@ -939,6 +939,15 @@ namespace PAIN {
 			return active_camera;
 		}
 
+		Camera* SceneManager::GetGameCamera()
+		{
+			auto it = game_cameras.find(active_game_cam);
+			if (it != game_cameras.end()) {
+				return it->second.get();
+			}
+			return nullptr;
+		}
+
 		void SceneManager::SetActiveCamera(Camera* cam) {
 			active_camera = cam;
 		}

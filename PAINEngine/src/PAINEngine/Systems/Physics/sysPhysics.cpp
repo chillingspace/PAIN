@@ -256,6 +256,13 @@ namespace PAIN {
             // }
             // ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
 
+			{ // make Physics::System discoverable via registry context
+				auto& ctx = registry.ctx();
+				if (!ctx.contains<PAIN::Physics::System*>()) {
+					ctx.emplace<PAIN::Physics::System*>(this);
+				}
+			}
+
             // onUpdate is now ONLY responsible for syncing the physics state back to the transforms for rendering.
 			if (temp_allocator && job_system && jolt_physics)
 			{

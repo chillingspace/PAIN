@@ -322,6 +322,55 @@ namespace PAIN {
                 registerCompUIFunc<PAIN::Cam>("Camera",
                     [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
 
+                registerCompUIFunc<PAIN::MetaData::Tag>("Tag",
+                    [this](ComponentsPanel& panel, PAIN::MetaData::Tag& tagComp)
+                    {
+                        auto ecs = panel.services->get<ECS::Controller>();
+                        auto metaSvc = panel.services->get<PAIN::MetaData::Service>();
+                        auto entityPanel = panel.entities_panel.lock();
+
+                        if (!ecs || !metaSvc || !entityPanel) {
+                            ImGui::TextUnformatted("Metadata/Entity panel not available");
+                            return;
+                        }
+
+                        entt::entity e = entityPanel->getSelectedEntity();
+                        if (e == entt::null) {
+                            ImGui::TextUnformatted("No entity selected");
+                            return;
+                        }
+
+                        std::string currentTag = "Untagged";
+                        if (!tagComp.tags.empty())
+                            currentTag = *tagComp.tags.begin();
+
+                        ImGui::Text("Current Tag: %s", currentTag.c_str());
+
+                        const auto& allTags = metaSvc->getRegisteredTags();
+
+                        if (ImGui::BeginCombo("Tag", currentTag.c_str())) {
+                            for (auto const& t : allTags) {
+                                bool selected = (t == currentTag);
+                                if (ImGui::Selectable(t.c_str(), selected)) {
+                                    // Clears old tags & sets this one
+                                    metaSvc->setEntityTag(e, t);
+                                }
+                                if (selected)
+                                    ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::EndCombo();
+                        }
+
+                        // Allow adding a new custom tag
+                        static char newTagBuf[64] = {};
+                        ImGui::InputText("New Tag", newTagBuf, sizeof(newTagBuf));
+                        ImGui::SameLine();
+                        if (ImGui::Button("Add##Tag") && newTagBuf[0] != '\0') {
+                            metaSvc->setEntityTag(e, newTagBuf);   // also registers it
+                            newTagBuf[0] = '\0';
+                        }
+                    });
+
                 // ---- Light ---- (UNCHANGED)
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
                     [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
@@ -360,6 +409,26 @@ namespace PAIN {
                 
                 registerCompUIFunc<PAIN::AI::Steering>("AISteering",
                     [](ComponentsPanel&, PAIN::AI::Steering& rb) { DrawWithReflection(rb); });
+
+                registerCompUIFunc<PAIN::AI::Blackboard>("AIBlackboard",
+                    [](ComponentsPanel&, PAIN::AI::Blackboard& bb) {
+                        #ifdef _DEBUG
+                            bb.DebugDrawImGui();
+                        #else
+                            ImGui::Text("Blackboard (debug view only in _DEBUG builds)");
+                        #endif
+                    });
+
+                registerCompUIFunc<PAIN::AI::CommandQueue>("AICommandQueue",
+                    [](ComponentsPanel&, PAIN::AI::CommandQueue& q) {
+                        #ifdef _DEBUG
+                            q.DebugDrawImGui();
+                        #else
+                            ImGui::Text("CommandQueue (debug view only in _DEBUG builds)");
+                        #endif
+                    });
+
+
 
                 /*******************************************
                 *  UI comps
