@@ -1,3 +1,5 @@
+
+#ifdef PN_PLATFORM_WINDOWS
 #include "pch.h"
 #include "ToolsPanel.h"
 #include "EntityPanel.h"
@@ -375,13 +377,11 @@ namespace PAIN {
                         if (ImGui::MenuItem("New Scene", "Ctrl+N")) { openPopUp("New Scene"); }
                         if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {
 
-#ifdef PN_PLATFORM_WINDOWS
                             std::string path = PN_SERI_SERVICE->OpenSceneFileDialog();
                             if (!path.empty()) {
                                 std::string id = PN_SERI_SERVICE->getSceneId(path);
                                 PN_SERI_SERVICE->loadSceneById(id);
                             }
-#endif
 
                         }
                         ImGui::Separator();
@@ -496,7 +496,7 @@ namespace PAIN {
                 ImGui::EndChild();
 			}
             void Tools::onEvent(Event::Event& event) {
-#ifdef PN_PLATFORM_WINDOWS
+
                 // Handle closing of application tool panel
                 Event::Dispatcher dispatcher(event);
 
@@ -522,11 +522,11 @@ namespace PAIN {
                     return true;
 
                     });
-#endif
 		}
 
         }
 	}
 }
 
+#endif
 #endif
