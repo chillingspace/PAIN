@@ -183,6 +183,8 @@ namespace PAIN {
 
     void sCameraController::onUpdate(AppTiming timing)
     {
+        if (!m_Scene) return;
+
         const float dt = timing.dt;
 
 #ifdef _DEBUG

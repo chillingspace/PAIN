@@ -44,6 +44,7 @@ namespace PAIN {
 		~WindowsRenderer();
 
 		void Init(std::shared_ptr<Services> app_services);
+		void initSceneVbo(const std::vector<PAIN::ModelRenderer>& models);
 
 		// PASSES
 		void BeginShadowPass(const Light& l);
@@ -72,8 +73,8 @@ namespace PAIN {
 			return final_texture;
 		}
 
-		static constexpr int MAX_VERTICES = 1000000;
-		static constexpr int MAX_INDICES = 1000000;
+		static constexpr int MAX_VERTICES = 10000000;
+		static constexpr int MAX_INDICES = MAX_VERTICES;
 
 	private:
 		/*

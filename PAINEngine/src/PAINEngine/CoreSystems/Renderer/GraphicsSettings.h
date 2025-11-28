@@ -102,5 +102,8 @@ namespace PAIN {
 		};
 
 		DEBUG_PBR_MAP_TYPES DEBUG_PBR_MAP_TYPE = DEBUG_PBR_MAP_TYPES::NONE;
+
+		// optimisation
+		bool use_instanced_rendering = true;
 	};
 }

@@ -121,14 +121,14 @@ namespace PAIN {
 		// Register all systems here
 		services->get<ECS::Controller>()->registerAllSystems();
 
-		// Scenes
-		addCoreSystem(std::make_shared<Scene::SceneManager>());
+		// Renderer
+		addCoreSystem(std::make_shared<sRenderer>());
 
 		// Camera System
 		addCoreSystem(std::make_shared<sCameraController>());
 
-		// Renderer
-		addCoreSystem(std::make_shared<sRenderer>());
+		// Scenes
+		addCoreSystem(std::make_shared<Scene::SceneManager>());
 
 
 		//Editor only added when debug mode

@@ -25,11 +25,59 @@ namespace PAIN {
 	//};
 
 	WindowsRenderer::WindowsRenderer() {
-
+		PN_CORE_INFO("WindowsRenderer ctor");
 	}
 
 	WindowsRenderer::~WindowsRenderer() {
 		Cleanup();
+	}
+
+	void WindowsRenderer::initSceneVbo(const std::vector<PAIN::ModelRenderer>& models) {
+		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
+
+		//GS.use_instanced_rendering = false;
+
+		if (!GS.use_instanced_rendering) {
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+			return;
+		}
+
+		unsigned int total_vertices{};
+		unsigned int total_indices{};
+		std::vector<Assets::Vertex> vertices;
+		unsigned int offset{};
+		std::vector<unsigned int> indices;
+		std::unordered_set<std::string> referenced{};
+		for (const auto& mdl : models) {
+			if (referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
+				continue;
+			}
+
+			const auto& m = mdl.cachedModelAsset;
+
+			referenced.insert(m->vpath);
+			total_vertices += m->vertices.size();
+			total_indices += m->indices.size();
+			vertices.insert(vertices.end(), m->vertices.begin(), m->vertices.end());
+
+			// translate indices
+			std::vector<unsigned int> translated_indices{};
+			translated_indices.reserve(m->indices.size());
+			for (unsigned int idx : m->indices) {
+				translated_indices.push_back(offset + idx);
+			}
+			offset += m->vertices.size();		// yes vertices not indices. this isnt a bug.
+
+			indices.insert(indices.end(),translated_indices.begin(),translated_indices.end());
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(Assets::Vertex), vertices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_indices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 	}
 
 	void WindowsRenderer::initShaders()
@@ -356,12 +404,12 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &geometry_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &geometry_ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
@@ -406,7 +454,7 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &debug_VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
 			glEnableVertexAttribArray(0);
@@ -587,7 +635,7 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
-		auto& gs = GraphicsSettings::get();
+		//auto& gs = GraphicsSettings::get();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -650,7 +698,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_DIFFUSE_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_DIFFUSE_MAP) {
 						albedoTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -659,7 +707,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_NORMAL_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_NORMAL_MAP) {
 						normalTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -668,7 +716,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
 						metallicTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -677,7 +725,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
 						roughnessTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -686,7 +734,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_AO_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_AO_MAP) {
 						aoTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -695,7 +743,7 @@ namespace PAIN {
 						assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
 						: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
 
-					if (tex_opt.has_value() && gs.DEBUG_USE_EMISSION_MAP) {
+					if (tex_opt.has_value() && GS.DEBUG_USE_EMISSION_MAP) {
 						emissiveTexture = tex_opt.value()->gl_texture;
 					}
 
@@ -742,7 +790,7 @@ namespace PAIN {
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
 			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
 
-			if (hasTexture && gs.DEBUG_USE_DIFFUSE_MAP) {
+			if (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) {
 				glActiveTexture(GL_TEXTURE6);
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
@@ -761,7 +809,7 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.use_ao", 0.0f);
 			}
 
-			if (gs.DEBUG_USE_NORMAL_MAP && normalTexture) {
+			if (GS.DEBUG_USE_NORMAL_MAP && normalTexture) {
 				glActiveTexture(GL_TEXTURE8);
 				glBindTexture(GL_TEXTURE_2D, normalTexture);
 				geometry_shader->SetUniform("material.normal_map", 8);
@@ -771,7 +819,7 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.use_normal", 0.f);
 			}
 
-			if (gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
+			if (GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
 				glActiveTexture(GL_TEXTURE9);
 				glBindTexture(GL_TEXTURE_2D, roughnessTexture);
 				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
@@ -781,7 +829,7 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
 			}
 
-			if (gs.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
+			if (GS.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
 				glActiveTexture(GL_TEXTURE10);
 				glBindTexture(GL_TEXTURE_2D, emissiveTexture);
 				geometry_shader->SetUniform("material.use_emission", 1.f);

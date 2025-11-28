@@ -243,6 +243,10 @@ namespace PAIN {
                 entt::get<WorldTransform, Entity::Layer>
             );
 
+            if (!rendererService->m_Scene) {
+                return;
+            }
+
             rendererService->w_renderer->BeginGeometryPass(rendererService->m_Scene);
 
             // Use structured bindings with .each() for proper group iteration

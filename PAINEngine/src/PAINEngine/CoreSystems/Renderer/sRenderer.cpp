@@ -35,8 +35,8 @@ namespace PAIN {
 		w_renderer->Init(services);
 
 		//Init scene
-		m_Scene = services->get<Scene::SceneManager>();
-		
+		//m_Scene = services->get<Scene::SceneManager>();
+
 		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
 
