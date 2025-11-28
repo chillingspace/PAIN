@@ -1,10 +1,5 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
-
-#ifdef PN_PLATFORM_WINDOWS
-#include "ResourcePanel.h"
-#endif
-
 #include "EntityPanel.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
