@@ -185,7 +185,7 @@ namespace PAIN {
     {
         if (!m_Scene) return;
 
-        const float dt = timing.dt;
+        const float dt = timing.unscaled_dt;
 
 #ifdef _DEBUG
         auto editor = services->get<Editor::Editor>();

@@ -421,31 +421,31 @@ namespace PAIN {
             }
         );
 
-        lua_.set_function("createPrefabInstance",
-            [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
-                if (!is_api_ready()) return -1;
+        //lua_.set_function("createPrefabInstance",
+        //    [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
+        //        if (!is_api_ready()) return -1;
 
-                //ask the engine to instantiate the prefab
-                entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
-                if (e != entt::null) {
-                    return static_cast<int>(entt::to_integral(e));
-                }
+        //        //ask the engine to instantiate the prefab
+        //        entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
+        //        if (e != entt::null) {
+        //            return static_cast<int>(entt::to_integral(e));
+        //        }
 
-                // fallback hook 
-                if (instantiatePrefab_) {
-                    entt::entity f = instantiatePrefab_(prefab, layer, name);
-                    if (f != entt::null) {
-                        return static_cast<int>(entt::to_integral(f));
-                    }
-                    PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
-                }
+        //        // fallback hook 
+        //        if (instantiatePrefab_) {
+        //            entt::entity f = instantiatePrefab_(prefab, layer, name);
+        //            if (f != entt::null) {
+        //                return static_cast<int>(entt::to_integral(f));
+        //            }
+        //            PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
+        //        }
 
-                // create an empty entity so scripts dont break
-                entt::entity empty = api_->CreateEntity({}, {});
-                PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
-                return static_cast<int>(entt::to_integral(empty));
-            }
-        );
+        //        // create an empty entity so scripts dont break
+        //        entt::entity empty = api_->CreateEntity({}, {});
+        //        PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
+        //        return static_cast<int>(entt::to_integral(empty));
+        //    }
+        //);
 
         /* =========================================================================== */
         /*                                  Lookup                                     */

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Test_AI_CommandQueue.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 13841155638175357846
+  },
+  "descriptor_version": 1,
+  "guid": "b3fabc5f-cc26-894c-be9d-96a9f432c627",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\Test_AI_CommandQueue.lua"
+  }
+}

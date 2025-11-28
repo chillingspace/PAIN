@@ -1475,6 +1475,8 @@ namespace PAIN {
 					if (!font_opt.has_value()) continue;
 
 					text_comp.text_pos = rect_comp.calculated_world_position;
+					// For text, only one var, can jsut either x or y
+					text_comp.scale_factor = rect_comp.scale.x;
 					TextRenderer::get().renderText(text_comp);
 				}
 			}

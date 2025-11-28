@@ -59,7 +59,6 @@ namespace PAIN {
             auto entity_panel = std::make_shared<Panel::EntityPanel>();
             registerPanel(entity_panel);
 
-            registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
 
@@ -76,8 +75,8 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
-            //Register resource panel
 #ifdef PN_PLATFORM_WINDOWS
+            registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             registerPanel(std::make_shared<Panel::PrefabPanel>());
 #endif
@@ -170,6 +169,10 @@ namespace PAIN {
                 if (!editor_visible) {
                     if (auto viewport = services->get<Panel::ViewportPanel>()) {
                         viewport->setSimulationState(false); // false = playing
+                       
+                    }
+                    if (isPaused()) {
+                        togglePause();
                     }
                 }
             }
