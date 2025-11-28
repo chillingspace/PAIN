@@ -169,6 +169,10 @@ namespace PAIN {
                 if (!editor_visible) {
                     if (auto viewport = services->get<Panel::ViewportPanel>()) {
                         viewport->setSimulationState(false); // false = playing
+                       
+                    }
+                    if (isPaused()) {
+                        togglePause();
                     }
                 }
             }

@@ -63,6 +63,8 @@ namespace PAIN {
 
 			virtual void safeShutdown() = 0;
 
+			virtual bool isMinimized() const = 0;
+
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
 
