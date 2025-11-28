@@ -1380,82 +1380,57 @@ namespace PAIN {
 		{
 			glDisable(GL_DEPTH_TEST);
 			glDepthMask(GL_TRUE);
+			auto ecs = services->get<ECS::Controller>();
+			auto& registry = ecs->getRegistry();
+			// At class/system initialization, create persistent groups
+			auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform>);
+			auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
 
-			// render 2D textures onto screen
+			// render 2D textures
 			{
-				auto ecs = services->get<ECS::Controller>();
-				auto& layers = services->get<Scene::SceneManager>()->getLayers();
-				auto& registry = ecs->getRegistry();
+				auto scn_service = services->get<Scene::SceneManager>();
 
-				auto texture_entity_view = registry.view<Texture2D, LocalTransform, UIElement>();
-				for (auto&& [entity, texture_comp, trans_comp, ui_elem] : texture_entity_view.each()) {
-					auto texture_comp_opt = ecs->getEntityComponent<Texture2D>(entity);
-					auto transform_comp_opt = ecs->getEntityComponent<LocalTransform>(entity);
-					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
+				for (auto [entity, texture_comp, ui_elem, trans_comp] : texture_group.each()) {
 
-					// Check layer visibility
+					// Layer check
 					auto layerComp = registry.try_get<Entity::Layer>(entity);
-					if (layerComp) {
-						int layerID = layerComp->layer_id;
-						if (layerID < layers.size() && !layers[layerID].enabled) {
-							continue;
-						}
+					if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+						continue;
 					}
 
-					if (!texture_comp_opt.has_value() || !transform_comp_opt.has_value() || !elem_comp_opt) continue;
-
-					auto& texture_comp = texture_comp_opt.value().get();
-					auto& transform_comp = transform_comp_opt.value().get();
-					auto& elem_comp = elem_comp_opt.value().get();
+					if (!ui_elem.b_is_enabled) continue;
 
 					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
 					if (!texture_opt.has_value()) continue;
 
-					if (elem_comp.b_is_enabled) { Render2DTexture(texture_opt.value()->gl_texture, transform_comp.position, texture_comp.texture_scale); }
-
+					Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
 				}
 			}
 
-			// render text onto screen
+			// render text
 			{
 				auto ecs = services->get<ECS::Controller>();
-				auto& layers = services->get<Scene::SceneManager>()->getLayers();
+				auto scn_service = services->get<Scene::SceneManager>();
 				auto& registry = ecs->getRegistry();
 
-				auto text_entity_view = registry.view<UIText, UIElement, UIRectTransform>();
-				for (auto&& [entity, text_comp, elem_comp, rect_comp] : text_entity_view.each()) {
+				for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
 
-					// Check layer visibility
+					// Layer check
 					auto layerComp = registry.try_get<Entity::Layer>(entity);
-					if (layerComp) {
-						int layerID = layerComp->layer_id;
-						if (layerID < layers.size() && !layers[layerID].enabled) {
-							continue;
-						}
+					if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+						continue;
 					}
 
-					auto text_comp_opt = ecs->getEntityComponent<UIText>(entity);
-					auto elem_comp_opt = ecs->getEntityComponent<UIElement>(entity);
-					auto rect_comp_opt = ecs->getEntityComponent<UIRectTransform>(entity);
-
-					if (!text_comp_opt.has_value() || !elem_comp_opt.has_value() || !rect_comp_opt.has_value()) continue;
-
-					text_comp = text_comp_opt.value().get();
-					elem_comp = elem_comp_opt.value().get();
-					rect_comp = rect_comp_opt.value().get();
+					if (!ui_elem.b_is_enabled) continue;
 
 					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
-
-					// Assign calculated projection
-					text_comp.text_pos = rect_comp.calculated_world_position;
-
 					if (!font_opt.has_value()) continue;
 
-					if (elem_comp.b_is_enabled) { TextRenderer::get().renderText(text_comp); }
-
-					//TextRenderer::get().debugRenderQuad();
+					text_comp.text_pos = rect_comp.calculated_world_position;
+					TextRenderer::get().renderText(text_comp);
 				}
 			}
+
 
 			glEnable(GL_DEPTH_TEST);
 		}

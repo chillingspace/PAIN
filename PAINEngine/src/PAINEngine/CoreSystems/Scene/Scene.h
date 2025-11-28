@@ -132,6 +132,15 @@ namespace PAIN {
                 return layers;
             }
 
+            bool isLayerEnabled(int layer_id) {
+                for (const auto& layer : layers) {
+                    if (layer.id == layer_id) {
+                        return layer.enabled;
+                    }
+                }
+                return true;
+            }
+
             // Get mask matrix
             const std::vector<std::vector<bool>>& getMaskMatrix() const {
                 return mask_matrix;
