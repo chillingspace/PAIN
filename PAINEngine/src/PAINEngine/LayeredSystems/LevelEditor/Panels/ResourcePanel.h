@@ -89,13 +89,9 @@ namespace PAIN {
                 void pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback); //Thread safe insertion for file event queue
                 void onEvent(Event::Event& event) override;
 
-                std::string getSelectedFilePath();
-                void setSelectedFilePath(std::string filepath);
-                std::string selected_filepath;
-
-                bool isScriptAndEntitySwitched() const;
-                void setScriptAndEntitySwitched(bool is_switched);
-                bool b_script_entity_switched = false;
+                // Script Saving
+                void setScriptSaved(bool is_script_changed);
+                bool getScriptSaved();
 
             private:
 
@@ -173,6 +169,10 @@ namespace PAIN {
                 bool renderPopUpContext(std::string const& virtual_path);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
+
+                // Script Saving
+                std::string current_script_file;
+                bool is_script_loaded;
 
                 // ----------------------------
                 // File Render
@@ -258,6 +258,7 @@ namespace PAIN {
                 std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> newMaterialPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> scriptEditorPopup(std::string const& popup_id);
 
                 // ----------------------------
                 // File Operations
