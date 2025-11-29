@@ -5,16 +5,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.6262720227241516,
-            -0.7234119176864624,
-            0.2906177043914795
+            0.6444374322891235,
+            -0.355709046125412,
+            0.6768836379051208
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.6777068972587585,
-            0.6099464893341064,
-            -0.11600415408611298
+            0.2842046320438385,
+            1.8607230186462402,
+            -3.609337329864502
         ],
         "up": [
             0.0,
@@ -5441,7 +5441,7 @@
                         "AudioSource": {
                             "group_name": "",
                             "is3D": true,
-                            "looping": false,
+                            "looping": true,
                             "maxDistance": 50.0,
                             "minDistance": 1.0,
                             "pitchDb": 0.0,
@@ -5471,14 +5471,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    0.4457886219024658,
-                                    0.07399993389844894,
-                                    0.4376772940158844
+                                    2.0188112258911133,
+                                    1.0240354537963867,
+                                    0.28069403767585754
                                 ],
                                 "min": [
-                                    0.3132631778717041,
-                                    -0.026001809164881706,
-                                    0.3051520884037018
+                                    -0.48290887475013733,
+                                    -0.9760359525680542,
+                                    -2.2210729122161865
                                 ]
                             }
                         },
@@ -5517,20 +5517,20 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.37952589988708496,
-                                0.023999955505132675,
-                                0.3714146912097931
+                                0.7679511308670044,
+                                0.023999957367777824,
+                                -0.9701894521713257
                             ],
                             "rotation": [
-                                -6.7998589656781405e-06,
-                                0.5404740571975708,
-                                2.327727088413667e-06,
-                                0.8413606882095337
+                                1.3007267625653185e-05,
+                                -0.14943814277648926,
+                                3.6470103168539936e-06,
+                                -0.9887710809707642
                             ],
                             "scale": [
-                                0.05000000074505806,
-                                0.05000000074505806,
-                                0.05000000074505806
+                                1.0,
+                                1.0,
+                                1.0
                             ]
                         },
                         "ModelRenderer": {
@@ -6282,8 +6282,8 @@
                                 0.0
                             ],
                             "scale": [
-                                3.0,
-                                3.0,
+                                2.3928232192993164,
+                                2.3928232192993164,
                                 1.0
                             ],
                             "size_delta": [
@@ -6322,8 +6322,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                675.9143676757813,
-                                327.84564208984375
+                                1133.5909423828125,
+                                360.2587585449219
                             ],
                             "word_wrap": true,
                             "wrap_width": 1000.0
@@ -7439,6 +7439,14 @@
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                             "texture_scale": 0.15000000596046448
                         },
+                        "UIButton": {
+                            "disabled_color": -12303292,
+                            "highlighted_color": -5592406,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "JumpButton_OnClick",
+                            "pressed_color": -7829368,
+                            "state": 0
+                        },
                         "UIElement": {
                             "b_is_enabled": true,
                             "b_is_interactable": true,
@@ -7446,16 +7454,16 @@
                         },
                         "UIRectTransform": {
                             "anchor_max": [
-                                1.0,
-                                1.0
+                                0.0,
+                                0.0
                             ],
                             "anchor_min": [
                                 0.0,
                                 0.0
                             ],
                             "anchored_position": [
-                                0.0,
-                                0.0
+                                300.0,
+                                200.0
                             ],
                             "local_position": [
                                 0.0,
@@ -7486,8 +7494,8 @@
                                 1.0
                             ],
                             "size_delta": [
-                                100.0,
-                                100.0
+                                450.0,
+                                200.0
                             ]
                         }
                     },
@@ -9613,68 +9621,47 @@
             {
                 "Entity": {
                     "Components": {
-                        "AudioSource": {
-                            "group_name": "",
-                            "is3D": true,
-                            "looping": false,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "00000000-0000-0000-0000-000000000000",
-                            "volumeDb": 0.0
-                        },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 99,
+                            "bvhNodeIndex": -1,
                             "localAABB": {
                                 "max": [
-                                    11.664676666259766,
-                                    8.72545051574707,
-                                    11.37221908569336
+                                    39.673301696777344,
+                                    420.59906005859375,
+                                    45.83308792114258
                                 ],
                                 "min": [
-                                    -11.664676666259766,
+                                    -39.673301696777344,
                                     0.0,
-                                    -11.37221908569336
+                                    -45.83308792114258
                                 ]
                             },
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    1.3051100969314575,
-                                    0.02931751310825348,
-                                    0.2641608417034149
+                                    0.5645624399185181,
+                                    0.4034689664840698,
+                                    4.066751003265381
                                 ],
                                 "min": [
-                                    1.226723551750183,
-                                    0.0,
-                                    0.1877395361661911
+                                    0.3590750992298126,
+                                    0.1332550048828125,
+                                    3.6453969478607178
                                 ]
                             }
                         },
                         "Collider": {
-                            "box_size": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
                             "collision_layer": 0,
                             "friction": 0.5,
                             "is_trigger": false,
                             "restitution": 0.10000000149011612,
-                            "shape": 0
+                            "shape": 3
                         },
                         "GUID": {
-                            "guid": "c3f98cd4-3007-be47-bd74-a0995090d644"
+                            "guid": "63e9ba5a-ccc4-b34b-b00c-4378c0204ea6"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "dd325b13-bcea-b748-af59-bd03e4e59451",
+                            "parentGUID": "3257d9d5-62be-c04a-a070-e7e9f78e0efd",
                             "siblingIndex": 0
                         },
                         "Layer": {
@@ -9683,28 +9670,28 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                1.2659168243408203,
-                                0.0,
-                                0.2259501963853836
+                                0.399617075920105,
+                                0.17753708362579346,
+                                4.035260200500488
                             ],
                             "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
+                                -0.5212154984474182,
+                                -0.10439948737621307,
+                                -0.11132217943668365,
+                                0.8396680951118469
                             ],
                             "scale": [
-                                0.0033599999733269215,
-                                0.0033599999733269215,
-                                0.0033599999733269215
+                                0.0010000000474974513,
+                                0.0010000000474974513,
+                                0.0010000000474974513
                             ]
                         },
                         "ModelRenderer": {
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                                    "albedoTextureOverride": "dd3797a7-90a6-494b-93b7-b722741806c5",
+                                    "aoTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -9717,109 +9704,83 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+                                    "materialGUID": "25761c8e-c7df-b34c-9aa3-8773404367e8",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "metallicTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
+                                    "normalTextureOverride": "ac7775c2-ce14-d14b-84f9-ee350b08a665",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                                    "roughnessTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+                            "modelGUID": "bb6d037b-4004-3b40-8eac-253cbe07beac",
                             "receiveShadows": true,
                             "visible": true
                         },
                         "Name": {
-                            "name": "Gear"
+                            "name": "MetalPillar2"
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
-                                "AudioSource": {
-                                    "group_name": "",
-                                    "is3D": true,
-                                    "looping": false,
-                                    "maxDistance": 50.0,
-                                    "minDistance": 1.0,
-                                    "pitchDb": 0.0,
-                                    "playOnStart": false,
-                                    "pos": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "selected_audio": "00000000-0000-0000-0000-000000000000",
-                                    "volumeDb": 0.0
-                                },
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 99,
+                                    "bvhNodeIndex": -1,
                                     "localAABB": {
                                         "max": [
-                                            11.664676666259766,
-                                            8.72545051574707,
-                                            11.37221908569336
+                                            39.673301696777344,
+                                            420.59906005859375,
+                                            45.83308792114258
                                         ],
                                         "min": [
-                                            -11.664676666259766,
+                                            -39.673301696777344,
                                             0.0,
-                                            -11.37221908569336
+                                            -45.83308792114258
                                         ]
                                     },
                                     "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
-                                            1.3051100969314575,
-                                            0.02931751310825348,
-                                            0.2641608417034149
+                                            0.5645624399185181,
+                                            0.4034689664840698,
+                                            4.066751003265381
                                         ],
                                         "min": [
-                                            1.226723551750183,
-                                            0.0,
-                                            0.1877395361661911
+                                            0.3590750992298126,
+                                            0.1332550048828125,
+                                            3.6453969478607178
                                         ]
                                     }
                                 },
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
-                                    "parentGUID": "dd325b13-bcea-b748-af59-bd03e4e59451",
+                                    "parentGUID": "3257d9d5-62be-c04a-a070-e7e9f78e0efd",
                                     "siblingIndex": 0
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        1.2659168243408203,
-                                        0.0,
-                                        0.2259501963853836
+                                        0.399617075920105,
+                                        0.17753708362579346,
+                                        4.035260200500488
                                     ],
                                     "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
+                                        -0.5212154984474182,
+                                        -0.10439948737621307,
+                                        -0.11132217943668365,
+                                        0.8396680951118469
                                     ],
                                     "scale": [
-                                        0.0033599999733269215,
-                                        0.0033599999733269215,
-                                        0.0033599999733269215
-                                    ]
-                                },
-                                "Tag": {
-                                    "tags": [
-                                        "letter_collectible"
+                                        0.0010000000474974513,
+                                        0.0010000000474974513,
+                                        0.0010000000474974513
                                     ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5",
-                            "instanceRootGUID": "c3f98cd4-3007-be47-bd74-a0995090d644",
-                            "sourcePrefabGUID": "3e1bed01-56de-1b43-9134-1ae7de7f7226"
-                        },
-                        "Tag": {
-                            "tags": [
-                                "letter_collectible"
-                            ]
+                            "correspondingPrefabEntityGUID": "766b2732-58e8-7043-bac4-480124d27118",
+                            "instanceRootGUID": "63e9ba5a-ccc4-b34b-b00c-4378c0204ea6",
+                            "sourcePrefabGUID": "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da"
                         }
                     },
-                    "Name": "Gear"
+                    "Name": "MetalPillar2"
                 }
             },
             {
@@ -13281,171 +13242,6 @@
                         }
                     },
                     "Name": "Building1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "BoundingVolume": {
-                            "bvhNodeIndex": -1,
-                            "localAABB": {
-                                "max": [
-                                    39.673301696777344,
-                                    420.59906005859375,
-                                    45.83308792114258
-                                ],
-                                "min": [
-                                    -39.673301696777344,
-                                    0.0,
-                                    -45.83308792114258
-                                ]
-                            },
-                            "needsUpdate": false,
-                            "worldAABB": {
-                                "max": [
-                                    0.5645624399185181,
-                                    0.4034689664840698,
-                                    4.066751003265381
-                                ],
-                                "min": [
-                                    0.3590750992298126,
-                                    0.1332550048828125,
-                                    3.6453969478607178
-                                ]
-                            }
-                        },
-                        "Collider": {
-                            "collision_layer": 0,
-                            "friction": 0.5,
-                            "is_trigger": false,
-                            "restitution": 0.10000000149011612,
-                            "shape": 3
-                        },
-                        "GUID": {
-                            "guid": "63e9ba5a-ccc4-b34b-b00c-4378c0204ea6"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "3257d9d5-62be-c04a-a070-e7e9f78e0efd",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.399617075920105,
-                                0.17753708362579346,
-                                4.035260200500488
-                            ],
-                            "rotation": [
-                                -0.5212154984474182,
-                                -0.10439948737621307,
-                                -0.11132217943668365,
-                                0.8396680951118469
-                            ],
-                            "scale": [
-                                0.0010000000474974513,
-                                0.0010000000474974513,
-                                0.0010000000474974513
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "dd3797a7-90a6-494b-93b7-b722741806c5",
-                                    "aoTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "25761c8e-c7df-b34c-9aa3-8773404367e8",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
-                                    "normalTextureOverride": "ac7775c2-ce14-d14b-84f9-ee350b08a665",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "f44386fa-3ea0-3147-b982-f7d516e882ba",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "bb6d037b-4004-3b40-8eac-253cbe07beac",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "MetalPillar2"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "BoundingVolume": {
-                                    "bvhNodeIndex": -1,
-                                    "localAABB": {
-                                        "max": [
-                                            39.673301696777344,
-                                            420.59906005859375,
-                                            45.83308792114258
-                                        ],
-                                        "min": [
-                                            -39.673301696777344,
-                                            0.0,
-                                            -45.83308792114258
-                                        ]
-                                    },
-                                    "needsUpdate": false,
-                                    "worldAABB": {
-                                        "max": [
-                                            0.5645624399185181,
-                                            0.4034689664840698,
-                                            4.066751003265381
-                                        ],
-                                        "min": [
-                                            0.3590750992298126,
-                                            0.1332550048828125,
-                                            3.6453969478607178
-                                        ]
-                                    }
-                                },
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "3257d9d5-62be-c04a-a070-e7e9f78e0efd",
-                                    "siblingIndex": 0
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        0.399617075920105,
-                                        0.17753708362579346,
-                                        4.035260200500488
-                                    ],
-                                    "rotation": [
-                                        -0.5212154984474182,
-                                        -0.10439948737621307,
-                                        -0.11132217943668365,
-                                        0.8396680951118469
-                                    ],
-                                    "scale": [
-                                        0.0010000000474974513,
-                                        0.0010000000474974513,
-                                        0.0010000000474974513
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "766b2732-58e8-7043-bac4-480124d27118",
-                            "instanceRootGUID": "63e9ba5a-ccc4-b34b-b00c-4378c0204ea6",
-                            "sourcePrefabGUID": "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da"
-                        }
-                    },
-                    "Name": "MetalPillar2"
                 }
             }
         ]
