@@ -57,7 +57,7 @@ namespace PAIN {
 		auto ecs = services->get<ECS::Controller>();
 
 		for (const auto& mdl : models) {
-			if (referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
+			if (!mdl.cachedModelAsset || referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
 				continue;
 			}
 
