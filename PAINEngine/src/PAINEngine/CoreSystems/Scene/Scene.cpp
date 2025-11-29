@@ -626,14 +626,6 @@ namespace PAIN {
 			//Configure scene with default settings
 			configScene(default_scene_config);
 
-
-
-#ifdef PN_PLATFORM_WINDOWS
-			std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
-#else
-			std::filesystem::path sb_path = "engine\\textures\\skybox2.hdr";
-#endif
-
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");
 		}

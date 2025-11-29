@@ -20,10 +20,10 @@ namespace PAIN {
 			}
 
 			// Use group to iterate entities with all required components for the main update
-			auto group = registry.group<LocalTransform>(entt::get<WorldTransform, Entity::GUID, Entity::Hierarchy>);
+			auto view = registry.view<LocalTransform, WorldTransform, Entity::GUID, Entity::Hierarchy>();
 
 			//View each entity to update
-			for (auto [entity, local, world, guid, hierarchy] : group.each()) {
+			for (auto [entity, local, world, guid, hierarchy] : view.each()) {
 				if (!hierarchy.parentGUID.IsValid()) {
 					updateRecursive(entity, glm::mat4(1.0f), registry);
 				}
