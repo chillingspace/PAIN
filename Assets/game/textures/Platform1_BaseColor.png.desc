@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Platform1_BaseColor.png"
+    "source_file": "game\\textures\\Platform1_baseColor.png"
   }
 }

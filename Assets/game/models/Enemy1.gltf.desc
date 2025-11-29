@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Cube.gltf",
+    "name": "Enemy1.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 12099118809149533521
+    "hash": 17836311270270716328
   },
   "descriptor_version": 1,
-  "guid": "cff4914f-5fb7-ae4e-9d22-814985ca8a66",
+  "guid": "75790b7a-8875-9b41-bec7-aa27692ac525",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\Cube.gltf"
+    "source_file": "game\\models\\Enemy1.gltf"
   }
 }
