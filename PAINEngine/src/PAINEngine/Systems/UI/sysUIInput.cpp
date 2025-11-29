@@ -102,6 +102,8 @@ namespace PAIN {
 
 
 			// If editor wants the mouse, don't let game UI handle it
+						// Ignore game UI clicks when the editor overlay is visible
+#ifdef _DEBUG
 			if (ImGui::GetCurrentContext()) {
 				ImGuiIO& io = ImGui::GetIO();
 				if (io.WantCaptureMouse) {
@@ -111,8 +113,7 @@ namespace PAIN {
 				}
 			}
 
-			// Ignore game UI clicks when the editor overlay is visible
-#ifdef _DEBUG
+
 
 			if (auto editor = services.lock()->get<PAIN::Editor::Editor>()) {
 				if (editor->isVisible()) {
