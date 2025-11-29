@@ -521,7 +521,7 @@ namespace PAIN {
                 }
 
                 //Compress asset
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, channels,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
 
@@ -1074,6 +1074,227 @@ namespace PAIN {
 
             //Update desc file with hashing
             desc_file.hash = fileHashing(asset_info.raw_path);
+        }
+
+        // Helper function: Convert aiMatrix4x4 to position, rotation, scale
+        struct Transform {
+            glm::vec3 position;
+            glm::quat rotation;
+            glm::vec3 scale;
+        };
+
+        static Transform aiMatrixToTransform(const aiMatrix4x4& matrix) {
+            Transform transform;
+            
+            // Extract translation
+            transform.position = glm::vec3(matrix.a4, matrix.b4, matrix.c4);
+            
+            // Extract rotation and scale
+            aiVector3D aiScale, aiPos;
+            aiQuaternion aiRot;
+            matrix.Decompose(aiScale, aiRot, aiPos);
+            
+            transform.scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+            transform.rotation = glm::quat(aiRot.w, aiRot.x, aiRot.y, aiRot.z);
+            
+            return transform;
+        }
+
+        // Helper function: Create entity JSON with components
+        static nlohmann::json createEntityJSON(
+            const std::string& name,
+            const GUID& guid,
+            const Transform& transform,
+            const GUID& parentGUID,
+            int siblingIndex,
+            const GUID& modelGUID = GUID{},
+            uint32_t materialIndex = 0
+        ) {
+            nlohmann::json entity;
+            entity["Entity"]["Name"] = name;
+            
+            // Components
+            auto& components = entity["Entity"]["Components"];
+            
+            // GUID component
+            components["GUID"]["guid"] = guid.ToString();
+            
+            // Name component
+            components["Name"]["name"] = name;
+            
+            // LocalTransform component
+            components["LocalTransform"]["position"] = {
+                transform.position.x, transform.position.y, transform.position.z
+            };
+            components["LocalTransform"]["rotation"] = {
+                transform.rotation.x, transform.rotation.y, 
+                transform.rotation.z, transform.rotation.w
+            };
+            components["LocalTransform"]["scale"] = {
+                transform.scale.x, transform.scale.y, transform.scale.z
+            };
+            
+            // Hierarchy component
+            components["Hierarchy"]["parentGUID"] = parentGUID.ToString();
+            components["Hierarchy"]["childrenGUIDs"] = nlohmann::json::array();
+            components["Hierarchy"]["siblingIndex"] = siblingIndex;
+            
+            // Layer component (default layer)
+            components["Layer"]["layer_id"] = 0;
+            components["Layer"]["layer_mask"] = 1;
+            
+            // If has mesh, add ModelRenderer component
+            if (modelGUID.IsValid()) {
+                components["ModelRenderer"]["modelGUID"] = modelGUID.ToString();
+                components["ModelRenderer"]["materials"] = nlohmann::json::array();
+                components["ModelRenderer"]["visible"] = true;
+                components["ModelRenderer"]["castShadows"] = true;
+                components["ModelRenderer"]["receiveShadows"] = true;
+            }
+            
+            return entity;
+        }
+
+        // Helper function: Recursively process aiNode tree
+        static void processNodeRecursive(
+            const aiNode* node,
+            const aiScene* scene,
+            const GUID& parentGUID,
+            int siblingIndex,
+            nlohmann::json& entitiesArray,
+            std::unordered_map<std::string, GUID>& nodeNameToGUID,
+            const std::filesystem::path& modelFolder
+        ) {
+            if (!node) return;
+            
+            // Generate GUID for this node
+            GUID nodeGUID = GUID::Generate();
+            std::string nodeName = node->mName.C_Str();
+            nodeNameToGUID[nodeName] = nodeGUID;
+            
+            // Extract transform from node
+            Transform transform = aiMatrixToTransform(node->mTransformation);
+            
+            // Check if node has mesh
+            GUID modelGUID{};
+            if (node->mNumMeshes > 0) {
+                // For now, we'll set a placeholder - in full implementation
+                // this would reference the actual model asset created from the mesh
+                // TODO: Create or reference model asset
+                modelGUID = GUID::Generate();  // Placeholder
+            }
+            
+            // Create entity JSON
+            nlohmann::json entityJSON = createEntityJSON(
+                nodeName,
+                nodeGUID,
+                transform,
+                parentGUID,
+                siblingIndex,
+                modelGUID
+            );
+            
+            // Add to entities array
+            entitiesArray.push_back(entityJSON);
+            
+            // Process children recursively
+            for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+                processNodeRecursive(
+                    node->mChildren[i],
+                    scene,
+                    nodeGUID,  // This node becomes the parent
+                    i,
+                    entitiesArray,
+                    nodeNameToGUID,
+                    modelFolder
+                );
+            }
+        }
+
+        void Compiler::compileScene(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
+            
+            // Set output extension to .scn
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + ".scn");
+            
+            // Create output directory
+            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
+            
+            // Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+            
+            std::cout << "[Scene] Compiling scene from GLTF: " << asset_info.raw_path.filename() << std::endl;
+            
+            // Load with Assimp
+            Assimp::Importer importer;
+            unsigned int ppFlags = aiProcess_Triangulate | aiProcess_GenNormals;
+            const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);
+            
+            if (!scene || !scene->mRootNode) {
+                std::cerr << "Failed to load GLTF scene: " << importer.GetErrorString() << std::endl;
+                return;
+            }
+            
+            std::cout << "[Scene] Found " << scene->mNumMeshes << " meshes, " 
+                      << scene->mNumMaterials << " materials" << std::endl;
+            
+            // Prepare scene JSON structure
+            nlohmann::json sceneJSON;
+            
+            // Camera settings (use defaults for now, can be enhanced later)
+            sceneJSON["camera"]["active_game_cam"] = "MainCamera";
+            sceneJSON["camera"]["position"] = {0.0f, 2.0f, 4.0f};
+            sceneJSON["camera"]["forward"] = {0.0f, 0.0f, -1.0f};
+            sceneJSON["camera"]["up"] = {0.0f, 1.0f, 0.0f};
+            sceneJSON["camera"]["fov"] = 90.0f;
+            sceneJSON["camera"]["nearPlane"] = 0.1f;
+            sceneJSON["camera"]["farPlane"] = 100.0f;
+            sceneJSON["camera"]["aspectRatioW"] = 16.0f;
+            sceneJSON["camera"]["aspectRatioH"] = 9.0f;
+            
+            // TODO: Extract camera from scene if available
+            if (scene->HasCameras()) {
+                std::cout << "[Scene] Found " << scene->mNumCameras << " cameras (camera import not yet implemented)" << std::endl;
+            }
+            
+            // Entity system
+            nlohmann::json entitiesArray = nlohmann::json::array();
+            std::unordered_map<std::string, GUID> nodeNameToGUID;
+            
+            // Process scene hierarchy starting from root
+            GUID nullGUID{};  // Represents no parent (root entities)
+            processNodeRecursive(
+                scene->mRootNode,
+                scene,
+                nullGUID,
+                0,
+                entitiesArray,
+                nodeNameToGUID,
+                assets_root / getAllGameFolders()[Type::Model]
+            );
+            
+            sceneJSON["ecs"]["Entities"] = entitiesArray;
+            
+            std::cout << "[Scene] Created " << entitiesArray.size() << " entities from scene graph" << std::endl;
+            
+            // Write scene JSON to file
+            try {
+                std::ofstream outFile(asset_info.shipped_path);
+                if (!outFile.is_open()) {
+                    std::cerr << "Failed to open output file: " << asset_info.shipped_path << std::endl;
+                    return;
+                }
+                
+                outFile << sceneJSON.dump(4);  // Pretty print with 4-space indent
+                outFile.close();
+                
+                std::cout << "[Scene] Successfully compiled scene to: " << asset_info.shipped_path << std::endl;
+                
+                // Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
+                
+            } catch (const std::exception& e) {
+                std::cerr << "Error writing scene file: " << e.what() << std::endl;
+            }
         }
 
         std::string Compiler::GetCuttlefishExecutable() const {

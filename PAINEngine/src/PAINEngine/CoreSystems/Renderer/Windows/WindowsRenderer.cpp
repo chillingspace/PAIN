@@ -1454,66 +1454,6 @@ namespace PAIN {
 		;		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
-		{
-			glDisable(GL_DEPTH_TEST);
-			glDepthMask(GL_TRUE);
-			auto ecs = services->get<ECS::Controller>();
-			auto& registry = ecs->getRegistry();
-			// At class/system initialization, create persistent groups
-			auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform>);
-			auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
-
-			// render 2D textures
-			{
-				auto scn_service = services->get<Scene::SceneManager>();
-
-				for (auto [entity, texture_comp, ui_elem, trans_comp] : texture_group.each()) {
-
-					// Layer check
-					auto layerComp = registry.try_get<Entity::Layer>(entity);
-					if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
-						continue;
-					}
-
-					if (!ui_elem.b_is_enabled) continue;
-
-					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
-					if (!texture_opt.has_value()) continue;
-
-					Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
-				}
-			}
-
-			// render text
-			{
-				auto ecs = services->get<ECS::Controller>();
-				auto scn_service = services->get<Scene::SceneManager>();
-				auto& registry = ecs->getRegistry();
-
-				for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
-
-					// Layer check
-					auto layerComp = registry.try_get<Entity::Layer>(entity);
-					if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
-						continue;
-					}
-
-					if (!ui_elem.b_is_enabled) continue;
-
-					auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
-					if (!font_opt.has_value()) continue;
-
-					text_comp.text_pos = rect_comp.calculated_world_position;
-					// For text, only one var, can jsut either x or y
-					text_comp.scale_factor = rect_comp.scale.x;
-					TextRenderer::get().renderText(text_comp);
-				}
-			}
-
-
-			glEnable(GL_DEPTH_TEST);
-		}
-
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
