@@ -12,12 +12,19 @@
 #include "sysUIInput.h"
 #include "ECS/Controller.h"
 #include "ECS/sMetaData.h"
+#include "CoreSystems/Windows/Window.h"
+#include "CoreSystems/Scripting/luaManager.h" 
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/Android/TouchEvents.h"
 #include "CoreSystems/Events/Android/OtherEvents.h"
 #include "CoreSystems/Events/Android/SurfaceEvents.h"
+
+#ifdef PN_PLATFORM_WINDOWS
+#include "imgui.h"
+#include "LayeredSystems/LevelEditor/Editor.h" 
+#endif
 
 namespace PAIN {
 	namespace UI {
@@ -31,6 +38,12 @@ namespace PAIN {
 		}
 
 		void InputSystem::onUpdate(AppTiming timing, entt::registry& registry) {
+
+#ifdef PN_PLATFORM_WINDOWS
+			if (m_mouse_position.x < 0.0f || m_mouse_position.y < 0.0f)
+				return;
+#endif
+
 			// Raycast to find hovered UI element
 			auto hit_entity = raycastUI(m_mouse_position, registry);
 
@@ -58,16 +71,53 @@ namespace PAIN {
 
 		void InputSystem::onEvent(Event::Event& event) {
 #ifdef PN_PLATFORM_WINDOWS
+
 			// Handle mouse movement for windows
 			if (event.getType() == Event::Type::MouseMove) {
 				Event::Dispatcher dispatcher(event);
 
 				dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-					m_mouse_position = glm::vec2(e.getWindowPos());
-					// Return false to continue dispatching to other systems
+					//m_mouse_position = glm::vec2(e.getWindowPos());
+					//// Return false to continue dispatching to other systems
+					//return false;
+
+					auto svc = services.lock();
+					auto window = svc->get<Window::Window>();
+					if (window) {
+						glm::vec2 fb = window->getFrameBuffer(); // (width, height)
+						glm::vec2 winPos = e.getWindowPos();     // origin: top-left
+
+						// Convert to UI space: origin bottom-left
+						m_mouse_position = { winPos.x, fb.y - winPos.y };
+					}
+					else {
+						// Fallback: old behaviour
+						m_mouse_position = glm::vec2(e.getWindowPos());
+					}
+
 					return false;
-					});
+					}
+				);
 			}
+
+
+			// If editor wants the mouse, don't let game UI handle it
+			if (ImGui::GetCurrentContext()) {
+				ImGuiIO& io = ImGui::GetIO();
+				if (io.WantCaptureMouse) {
+					// Optional: debug
+					// PN_CORE_INFO("[UIInput] Skipping UI input because ImGui wants the mouse");
+					return;
+				}
+			}
+
+			// Ignore game UI clicks when the editor overlay is visible
+			if (auto editor = services.lock()->get<PAIN::Editor::Editor>()) {
+				if (editor->isVisible()) {
+					return;
+				}
+			}
+
 
 			// Handle mouse button press
 			if (event.getType() == Event::Type::MouseButtonPress) {
@@ -84,6 +134,10 @@ namespace PAIN {
 						auto ecs = services.lock()->get<ECS::Controller>();
 						auto& registry = ecs->getRegistry();
 						updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
+
+						// DEBUG: log which entity we pressed on
+						PN_CORE_INFO("[UIInput] MouseDown on UI entity id = {}",
+							static_cast<uint32_t>(m_pressed_entity));
 
 						// Return true to stop dispatching - UI consumed this event
 						return true;
@@ -111,14 +165,39 @@ namespace PAIN {
 							registry.all_of<UIButton>(m_pressed_entity)) {
 							auto& button = registry.get<UIButton>(m_pressed_entity);
 
+							// DEBUG:
+							PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
+								static_cast<uint32_t>(m_pressed_entity),
+								static_cast<uint32_t>(m_hovered_entity),
+								button.on_click_callback_lua);
+
 							// Execute Lua callback if exists
 							if (!button.on_click_callback_lua.empty()) {
 								// TODO: Call Lua function via your scripting service
-								PN_CORE_INFO("Button clicked: {}", button.on_click_callback_lua);
+								//PN_CORE_INFO("Button clicked: {}", button.on_click_callback_lua);
 
 								// Example: If you have a Lua service
 								// auto lua_service = services->get<LuaService>();
 								// lua_service->executeCallback(button.on_click_callback_lua);
+
+								auto& ctx = registry.ctx();
+
+								if (ctx.contains<PAIN::LuaManager*>()) {
+									auto& luaMgrPtr = ctx.get<PAIN::LuaManager*>();
+									if (luaMgrPtr) {
+										PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
+											button.on_click_callback_lua);
+										luaMgrPtr->callGlobal(button.on_click_callback_lua);
+									}
+									else {
+										PN_CORE_WARN("[UIInput] LuaManager* in registry ctx is null; cannot run '{}'",
+											button.on_click_callback_lua);
+									}
+								}
+								else {
+									PN_CORE_WARN("[UIInput] No LuaManager* in registry ctx; cannot run '{}'",
+										button.on_click_callback_lua);
+								}
 							}
 						}
 
@@ -200,7 +279,26 @@ namespace PAIN {
 							// Execute Lua callback if exists
 							if (!button.on_click_callback_lua.empty()) {
 								// TODO: Call Lua function via your scripting service
-								PN_CORE_INFO("Button clicked: {}", button.on_click_callback_lua);
+								//PN_CORE_INFO("Button clicked: {}", button.on_click_callback_lua);
+
+								auto& ctx = registry.ctx();
+
+								if (ctx.contains<PAIN::LuaManager*>()) {
+									auto& luaMgrPtr = ctx.get<PAIN::LuaManager*>();
+									if (luaMgrPtr) {
+										PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
+											button.on_click_callback_lua);
+										luaMgrPtr->callGlobal(button.on_click_callback_lua);
+									}
+									else {
+										PN_CORE_WARN("[UIInput] LuaManager* in registry ctx is null; cannot run '{}'",
+											button.on_click_callback_lua);
+									}
+								}
+								else {
+									PN_CORE_WARN("[UIInput] No LuaManager* in registry ctx; cannot run '{}'",
+										button.on_click_callback_lua);
+								}
 							}
 						}
 
@@ -254,6 +352,9 @@ namespace PAIN {
 
 			auto view = registry.group<UIRectTransform>(entt::get <UIElement>);
 
+			//PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.1f}, {:.1f})", mouse_pos.x, mouse_pos.y);
+
+
 			// Each candidate: entity, canvas_sort, sibling_index
 			std::vector<std::tuple<entt::entity, int, int>> candidates;
 
@@ -265,7 +366,25 @@ namespace PAIN {
 				glm::vec2 rect_min = pos;
 				glm::vec2 rect_max = pos + size;
 
+				// DEBUG: log every UI element tested
+				/*PN_CORE_INFO("[UIInput] UI Entity {:08X}: rect min=({:.1f}, {:.1f}) max=({:.1f}, {:.1f}) enabled={} interactable={}",
+					static_cast<uint32_t>(entity),
+					rect_min.x, rect_min.y,
+					rect_max.x, rect_max.y,
+					element.b_is_enabled,
+					element.b_is_interactable);*/
+
+
 				if (isPointInRect(mouse_pos, rect_min, rect_max)) {
+					PN_CORE_INFO("[UIInput] ---> Hit entity {:08X}", static_cast<uint32_t>(entity));
+
+					if (registry.all_of<UIButton>(entity)) {
+						auto& btn = registry.get<UIButton>(entity);
+						PN_CORE_INFO("[UIInput]      UIButton on_click_callback_lua = '{}'",
+							btn.on_click_callback_lua);
+					}
+
+
 					// Canvas sort order by traversing up the hierarchy
 					int canvas_sort = 0;
 					entt::entity parent = entity;

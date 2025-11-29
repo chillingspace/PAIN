@@ -39,7 +39,7 @@ namespace PAIN {
 
             entt::entity m_hovered_entity = entt::null;
             entt::entity m_pressed_entity = entt::null;
-            glm::vec2 m_mouse_position{ 0, 0 };
+            glm::vec2 m_mouse_position{ -1.f, -1.f };
         };
 
     }

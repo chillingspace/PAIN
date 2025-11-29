@@ -3,44 +3,39 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 99,
+                    "bvhNodeIndex": 87,
                     "localAABB": {
                         "max": [
-                            11.664676666259766,
-                            8.72545051574707,
-                            11.37221908569336
+                            199.99998474121094,
+                            90.56856536865234,
+                            100.0
                         ],
                         "min": [
-                            -11.664676666259766,
+                            -200.00001525878906,
                             0.0,
-                            -11.37221908569336
+                            -100.0
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            2.4275827407836914,
-                            0.01828538253903389,
-                            0.02292519621551037
+                            0.2459999918937683,
+                            0.1113993376493454,
+                            0.12300000339746475
                         ],
                         "min": [
-                            2.349195957183838,
-                            -0.01103212870657444,
-                            -0.0534961074590683
+                            -0.2460000365972519,
+                            0.0,
+                            -0.12300000339746475
                         ]
                     }
                 },
                 "Collider": {
-                    "box_size": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
                     "collision_layer": 0,
                     "friction": 0.5,
                     "is_trigger": false,
                     "restitution": 0.10000000149011612,
-                    "shape": 0
+                    "shape": 3
                 },
                 "Hierarchy": {
                     "childrenGUIDs": [],
@@ -53,9 +48,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        2.3883893489837646,
-                        -0.01103212870657444,
-                        -0.01528545655310154
+                        0.0,
+                        0.0,
+                        0.0
                     ],
                     "rotation": [
                         0.0,
@@ -64,17 +59,17 @@
                         1.0
                     ],
                     "scale": [
-                        0.0033599999733269215,
-                        0.0033599999733269215,
-                        0.0033599999733269215
+                        0.001230000052601099,
+                        0.001230000052601099,
+                        0.001230000052601099
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                            "albedoTextureOverride": "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+                            "aoTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -87,27 +82,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+                            "materialGUID": "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "metallicTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "normalTextureOverride": "6fc0ccbc-ae9d-a948-9557-6140470621c4",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                            "roughnessTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+                    "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Gear"
+                    "name": "Platform1"
                 }
             },
-            "entityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
+            "entityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
         }
     ],
-    "prefabName": "Gear",
-    "rootEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
+    "prefabName": "Platform1",
+    "rootEntityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
 }

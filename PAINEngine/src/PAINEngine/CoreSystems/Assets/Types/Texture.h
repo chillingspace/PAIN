@@ -23,6 +23,8 @@ namespace PAIN {
         struct Texture : public IAsset {
         public:
             int width = 0, height = 0, mips = 1;
+            int getWidth() { return width;  }
+            int getHeight() { return height; }
             std::vector<size_t> mipOffsets;
 #ifdef PN_PLATFORM_ANDROID
             TextureFormat format = TextureFormat::ASTC;
