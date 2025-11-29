@@ -46,9 +46,9 @@ namespace PAIN {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			glBindVertexArray(shadow_vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
 			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			return;

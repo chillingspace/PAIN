@@ -126,7 +126,7 @@ namespace PAIN {
 			return final_texture;
 		}
 
-		static constexpr int MAX_VERTICES = 10000000;
+		static constexpr int MAX_VERTICES = 1000000;
 		static constexpr int MAX_INDICES = MAX_VERTICES;
 
 	private:
