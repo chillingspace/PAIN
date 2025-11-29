@@ -18,12 +18,12 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\OilDrumBlue_baseColor_1001.png",
-        "ao": "game\\textures\\.\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
-        "emissive": "game\\textures\\.\\OilDrumBlue_emissive_1001.png",
-        "lightmap": "game\\textures\\.\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
-        "metallic": "game\\textures\\.\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
-        "normal": "game\\textures\\.\\OilDrumBlue_normal_1001.png",
-        "roughness": "game\\textures\\.\\OilDrumBlue_occlusionRoughnessMetallic_1001.png"
+        "albedo": "game\\textures\\OilDrumBlue_baseColor_1001.png",
+        "ao": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
+        "emissive": "game\\textures\\OilDrumBlue_emissive_1001.png",
+        "lightmap": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
+        "metallic": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
+        "normal": "game\\textures\\OilDrumBlue_normal_1001.png",
+        "roughness": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png"
     }
 }

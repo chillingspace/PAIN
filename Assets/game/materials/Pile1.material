@@ -18,12 +18,12 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\Pile1_baseColor.png",
-        "ao": "game\\textures\\.\\Pile1_occlusionRoughnessMetallic.png",
-        "emissive": "game\\textures\\.\\Pile1_emissive.png",
-        "lightmap": "game\\textures\\.\\Pile1_occlusionRoughnessMetallic.png",
-        "metallic": "game\\textures\\.\\Pile1_occlusionRoughnessMetallic.png",
-        "normal": "game\\textures\\.\\Pile1_normal.png",
-        "roughness": "game\\textures\\.\\Pile1_occlusionRoughnessMetallic.png"
+        "albedo": "game\\textures\\Pile1_baseColor.png",
+        "ao": "game\\textures\\Pile1_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Pile1_emissive.png",
+        "lightmap": "game\\textures\\Pile1_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Pile1_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Pile1_normal.png",
+        "roughness": "game\\textures\\Pile1_occlusionRoughnessMetallic.png"
     }
 }
