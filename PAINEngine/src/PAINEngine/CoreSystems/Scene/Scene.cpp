@@ -661,6 +661,11 @@ namespace PAIN {
 			//Configure scene with default settings
 			configScene(default_scene_config);
 
+			//Craft skybox path and get GUID
+			std::filesystem::path skybox_path = "engine/textures/skybox.hdr";
+
+			//Set skybox
+			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");

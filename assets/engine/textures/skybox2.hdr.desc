@@ -15,6 +15,6 @@
     "window_compression": "BC6H"
   },
   "meta_data": {
-    "source_file": "engine\\textures\\textures\\skybox2.hdr"
+    "source_file": "engine\\textures\\skybox2.hdr"
   }
 }
