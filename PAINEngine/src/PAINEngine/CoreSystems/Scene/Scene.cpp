@@ -645,8 +645,20 @@ namespace PAIN {
 			//Create default scene asset
 			SceneAsset default_scene_config;
 
+			// Prep for subs
+			//std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+
+			//auto scn_opt = asset_manager->getAssetData(init_scn_path);
+
+			//if (scn_opt) {
+
+			//	loadScene(scn_opt.get()->guid);
+			//}
+
+
 			//Configure scene with default settings
 			configScene(default_scene_config);
+
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");

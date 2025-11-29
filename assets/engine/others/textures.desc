@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "textures",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "44a6718a-bef8-3244-915e-f899db1a51b1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\others\\textures"
+  }
+}

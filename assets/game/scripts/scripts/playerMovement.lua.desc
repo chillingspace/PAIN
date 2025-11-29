@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "playerMovement.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 13451495954621042865
+  },
+  "descriptor_version": 1,
+  "guid": "a03aa1fd-1d3b-ae4b-b48f-b4c06d7aa1c6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\scripts\\playerMovement.lua"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "enemyPatrol.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 8779589714174256089
+  },
+  "descriptor_version": 1,
+  "guid": "91decdb8-51ee-b642-8013-042034d23774",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\scripts\\enemyPatrol.lua"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "skybox2.hdr",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17052283534174590415
+  },
+  "descriptor_version": 1,
+  "guid": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 2048,
+    "window_compression": "BC6H"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\textures\\skybox2.hdr"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "wav_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5113658877700982689
+  },
+  "descriptor_version": 1,
+  "guid": "055992f3-a208-554c-9c7a-1a10ee9f41c0",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\textures\\wav_icon.png"
+  }
+}
