@@ -380,7 +380,18 @@ namespace PAIN {
 			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 			for (auto&& [entity, rigidBody, transform] : view.each()) {
 				
-				// Only create if not already created
+				// Check if scale OR offset changed in editor
+				// If so, destroy the existing body so it can be recreated below with new settings
+				if (!rigidBody.bodyID.IsInvalid() && 
+					(rigidBody.collider_scale != rigidBody.last_applied_scale || 
+					 rigidBody.collider_offset != rigidBody.last_applied_offset)) {
+					
+					body_interface->RemoveBody(rigidBody.bodyID);
+					body_interface->DestroyBody(rigidBody.bodyID);
+					rigidBody.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+				}
+
+				// Only create if not already created (or just destroyed above)
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
 					const glm::quat& q = glm::normalize(transform.rotation);
@@ -391,12 +402,25 @@ namespace PAIN {
 										   q.w); // Jolt uses x, y, z, w order
 
 					// Create Jolt body settings
-					// Create BoxShape
-					JPH::Ref<JPH::BoxShape> boxShape = new JPH::BoxShape(
-						JPH::Vec3(.5f * transform.scale.x, 
-								  .5f * transform.scale.y,
-								  .5f * transform.scale.z),
+					
+					// 1. Create the base BoxShape (Apply Scale)
+					// Note: Jolt BoxShape takes half-extents
+					JPH::Ref<JPH::Shape> finalShape = new JPH::BoxShape(
+						JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x, 
+								  .5f * transform.scale.y * rigidBody.collider_scale.y,
+								  .5f * transform.scale.z * rigidBody.collider_scale.z),
 								  .0f);
+
+					// 2. Apply Offset using RotatedTranslatedShape if needed
+					// We wrap the box shape in a transform shape to offset it from the entity center
+					if (rigidBody.collider_offset != glm::vec3(0.0f)) {
+						JPH::Vec3 offset(
+							rigidBody.collider_offset.x * transform.scale.x,
+							rigidBody.collider_offset.y * transform.scale.y,
+							rigidBody.collider_offset.z * transform.scale.z
+						);
+						finalShape = new JPH::RotatedTranslatedShape(offset, JPH::Quat::sIdentity(), finalShape);
+					}
 
 					JPH::EMotionType motion_type;
 					switch (rigidBody.motion_type) {
@@ -409,7 +433,7 @@ namespace PAIN {
 
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
-						boxShape,
+						finalShape,
 						JPH::RVec3(transform.position.x, 
 								   transform.position.y, 
 								   transform.position.z),
@@ -429,6 +453,10 @@ namespace PAIN {
 
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;
+
+					// Cache the values we just used so we can detect future changes
+					rigidBody.last_applied_scale = rigidBody.collider_scale;
+					rigidBody.last_applied_offset = rigidBody.collider_offset;
 
 					body_interface->SetLinearVelocity(body_id, JPH::Vec3::sZero());
 					body_interface->SetAngularVelocity(body_id, JPH::Vec3::sZero());

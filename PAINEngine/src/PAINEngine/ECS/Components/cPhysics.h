@@ -22,6 +22,7 @@
  #include <Jolt/Core/JobSystemThreadPool.h> 
  #include <Jolt/Physics/Collision/ObjectLayer.h>
  #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+ #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
  //#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h" 
 #include "CoreSystems/Collision/sLayer.h"
 #include "GLMSerialization.h"
@@ -91,6 +92,18 @@ namespace PAIN {
             
             MotionType motion_type = MotionType::Dynamic;
             Physics::LayerMapping physics_behavior;
+
+            // Scale modifier for the collider (multiplies with transform scale)
+            glm::vec3 collider_scale = glm::vec3(1.0f);
+            
+            // Helper to detect changes in editor (do not serialize this)
+            glm::vec3 last_applied_scale = glm::vec3(1.0f);
+
+            // Displacement of the collider from the entity center
+            glm::vec3 collider_offset = glm::vec3(0.0f);
+
+            // Helper to detect changes in editor (do not serialize this)
+            glm::vec3 last_applied_offset = glm::vec3(0.0f);
 
             // link layer to bodyID
             /*RigidBody3D() {
@@ -289,6 +302,8 @@ REFL_FIELD(mass)
 //REFL_FIELD(layer)
 REFL_FIELD(motion_type)
 REFL_FIELD(physics_behavior)
+REFL_FIELD(collider_scale) // Currently only for Jolt rigidbody
+REFL_FIELD(collider_offset) // Currently only for Joly rigidbody
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
