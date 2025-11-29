@@ -7,6 +7,9 @@
 #include "CoreSystems/Scene/Scene.h"
 #include <CoreSystems/Scripting/EngineAPIAdapter.h>
 
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -31,6 +34,7 @@ namespace PAIN {
                 // default window; leave docking/frameless tricks to ToolsPanel only
             }
 
+#ifdef PN_PLATFORM_WINDOWS
             std::function<void(std::any const&)> ScenesPanel::createScenePopup(std::string const& popup_id)
             {
                 return [this, popup_id](std::any const&) {
@@ -136,8 +140,9 @@ namespace PAIN {
                     }
                     };
             }
+#endif
 
-            // Modals
+#ifdef PN_PLATFORM_WINDOWS
             void ScenesPanel::drawCreateModal() {
                 if (!showCreate_) return;
                 ImGui::OpenPopup("Create Scene");
@@ -216,7 +221,7 @@ namespace PAIN {
                     ImGui::EndPopup();
                 }
             }
-
+#endif
             void ScenesPanel::drawEditMaskModal() {
                 if (!showEditMask_) return;
 
@@ -584,7 +589,7 @@ namespace PAIN {
                         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.25f, 0.3f, 0.8f));
                         ImGui::SetNextItemWidth(250);
                         char nameBuf[64];
-                        strncpy_s(nameBuf, layer.name.c_str(), sizeof(nameBuf) - 1);
+                        strncpy(nameBuf, layer.name.c_str(), sizeof(nameBuf) - 1);
                         if (ImGui::InputText("##Name", nameBuf, sizeof(nameBuf))) {
                             layer.name = nameBuf;
                         }
@@ -875,9 +880,11 @@ namespace PAIN {
 
             void ScenesPanel::onAttach()
             {
+#ifdef PN_PLATFORM_WINDOWS
                 registerPopUp("CreateScene", createScenePopup("CreateScene"));
                 registerPopUp("SaveSceneAs", saveSceneAsPopup("SaveSceneAs"));
                 registerPopUp("DeleteScene", deleteScenePopup("DeleteScene"));
+#endif
                 registerPopUp("Info", defPopUp("Info"));
             }
 
@@ -894,10 +901,12 @@ namespace PAIN {
                 //Render current scene ID
                 ImGui::Text("Scene ID: %s", !asset_service->checkAssetRegistered(scn_id) ? "(none)" : asset_service->getAssetData(scn_id)->name.c_str());
 
+#ifdef PN_PLATFORM_WINDOWS
                 // Create New Scene
                 if (ImGui::Button("Create New Scene")) {
                     openPopUp("CreateScene");
                 }
+#endif
 
                 // Show dropdown of available scenes
                 if (!asset_service->getAllAssetDataOfType(Assets::Type::Scenes).empty()) {
@@ -928,25 +937,31 @@ namespace PAIN {
                     }
                     //Save curr scene
                     else {
+#ifdef PN_PLATFORM_WINDOWS
                         if (ImGui::Button("Save")) {
                             scn_service->saveActiveScene(selected);
                             openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
                         }
                         ImGui::SameLine();
+#endif
                     }
 
+#ifdef PN_PLATFORM_WINDOWS
                     //Delete scene option
                     if (ImGui::Button("Delete")) {
                         openPopUp("DeleteScene");
                     }
 
                     ImGui::SameLine();
+#endif
                 }
 
+#ifdef PN_PLATFORM_WINDOWS
                 //Save scene as
                 if (ImGui::Button("Save As")) {
                     openPopUp("SaveSceneAs");
                 }
+#endif
 
                 ImGui::Separator();
                 ImGui::Spacing();
@@ -964,7 +979,6 @@ namespace PAIN {
                 //Render Active Cam
                 ImGui::Spacing();
                 drawActiveCamPanel();
-
               
                 //// Scene configuration panels
                 //drawSkyboxSettingsPanel();
@@ -1007,9 +1021,11 @@ namespace PAIN {
                 //if (ImGui::Button("Edit Layer Bit Mask")) { showEditMask_ = true; }
 
                 // Modals last
+#ifdef PN_PLATFORM_WINDOWS
                 drawCreateModal();
                 drawDeleteModal();
                 drawSaveAsModal();
+#endif
                 drawEditMaskModal();
 
                 //// Show the error popup when load scene fails

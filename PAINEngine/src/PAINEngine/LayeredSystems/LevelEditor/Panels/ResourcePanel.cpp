@@ -11,6 +11,7 @@
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 #include "ECS/Controller.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;

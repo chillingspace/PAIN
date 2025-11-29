@@ -497,6 +497,7 @@ namespace PAIN {
 			return sceneJson;
 		}
 
+#ifdef PN_PLATFORM_WINDOWS
 		bool SceneManager::saveSceneToPath(SceneAsset& scn_asset, std::filesystem::path const& relative) {
 
 			//Convert scene asset to JSON
@@ -522,6 +523,7 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Scene saved successfully to: {}", virtual_path);
 			return true;
 		}
+#endif
 
 		void SceneManager::configScene(SceneAsset const& scn_asset) {
 			//Build new scene

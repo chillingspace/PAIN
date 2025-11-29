@@ -33,6 +33,9 @@ namespace PAIN {
                 case PAIN::AnimationType::Scale:
                     rect_transform.scale = glm::mix(ani_comp.start_vec3, ani_comp.end_vec3, t);
                     break;
+                case PAIN::AnimationType::Color:
+
+                    break;
                 case PAIN::AnimationType::Rotation:
                     // Interpolate quaternion
                     break;

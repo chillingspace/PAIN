@@ -90,7 +90,7 @@ namespace PAIN {
 		//glCreateBuffers(1, &geometry_ibo);
 		glGenBuffers(1, &geometry_ibo);
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-		glBufferStorage(GL_ARRAY_BUFFER, referenced.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_STORAGE_BIT);
+		glBufferData(GL_ARRAY_BUFFER, referenced.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_DRAW);
 
 		// cleanup
 
@@ -890,7 +890,9 @@ namespace PAIN {
 					if (key_it == track.end())	PN_CORE_ERROR("Invalid iterator key_it in animation block in DrawGeometry in WindowsRenderer.cpp");
 
 					// find the bone idx affected by current track
-					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(), [&bone_name](const Assets::Bone& b) {return b.name == bone_name; });
+					std::string bone_name_copy = bone_name;  // Create copy for lambda
+					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(),
+						[&bone_name_copy](const Assets::Bone& b) {return b.name == bone_name_copy; });
 					if (bone_it == modelAsset->skeleton.end()) {
 						//PN_CORE_WARN("Bone does not exist for animation track {} for model {}. Skipped: {}", component.currentAnimationIndex, modelAsset->vpath, ++bones_skipped);
 						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");

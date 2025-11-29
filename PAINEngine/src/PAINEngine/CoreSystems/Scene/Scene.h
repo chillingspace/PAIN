@@ -50,7 +50,9 @@ namespace PAIN {
             nlohmann::json captureCurrentEntities();
             void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
+#ifdef PN_PLATFORM_WINDOWS
             bool saveSceneToPath(SceneAsset& scn_asset, std::filesystem::path const& relative);
+#endif
 
             //Scene configuration
             void configScene(SceneAsset const& scn_asset);

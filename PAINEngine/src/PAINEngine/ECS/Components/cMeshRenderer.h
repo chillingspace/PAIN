@@ -3,6 +3,7 @@
 #include "pch.h"
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
+#include "AssetTypes.h"
 
 namespace PAIN {
 

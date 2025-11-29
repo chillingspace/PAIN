@@ -15,11 +15,9 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "CoreSystems/Scene/Scene.h"
-#include "PAINEngine/CoreSystems/Serialization/sSerialization.h"
 
 namespace PAIN {
 
-    class Scene::SceneManager;
     class Camera;
 
     class EngineAPIAdapter final : public IEngineAPI {

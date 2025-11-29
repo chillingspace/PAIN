@@ -16,30 +16,27 @@
 
 #include <refl.hpp>
 #include <imgui.h>
-#include "pch.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/constants.hpp>
 #include <entt/entt.hpp>
-#include "ComponentsPanel.h"
-#include "ECS/Components/cLight.h"
-#include "ECS/Components/cAudioSource.h"
-#include "ECS/Components/cBoundingVolume.h"
-#include "ECS/Components/cPhysics.h"
-#include "ECS/Components/cUIComps.h"
-#include "ECS/Components/cAI.h"
-#include "ECS/Components/cMeshRenderer.h"
-#include "CoreSystems/Assets/sAssets.h"  
-#include "ECS/Components/cScript.h"
-#include "Applications/AppSystem.h"
 
-#include "ResourcePanel.h"
+//Components include
+#include "ECS/Components/AllComponents.h"
+
+//Asset data
 #include "AssetData.h"
-#include "CoreSystems/Path/Path.h"
 
+//Panels
+#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
+
+//Core services
+#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Assets/sAssets.h"
 
  // Helper: Fuzzy match score
 inline int fuzzyMatchScore(const std::string& pattern, const std::string& str) {
