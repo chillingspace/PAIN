@@ -98,23 +98,6 @@
                 },
                 "Name": {
                     "name": "Building1"
-                },
-                "RigidBody3D": {
-                    "angular_velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "mass": -107374176.0,
-                    "motion_type": 0,
-                    "physics_behavior": {
-                        "behavior": 1
-                    },
-                    "velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
                 }
             },
             "entityGUID": "d205dc07-fd62-4a4a-ab77-940aeaa10828"

@@ -103,23 +103,6 @@
                 },
                 "Name": {
                     "name": "BigGround"
-                },
-                "RigidBody3D": {
-                    "angular_velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "mass": -107374176.0,
-                    "motion_type": 0,
-                    "physics_behavior": {
-                        "behavior": 1
-                    },
-                    "velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
                 }
             },
             "entityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133"

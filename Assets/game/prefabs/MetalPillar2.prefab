@@ -98,23 +98,6 @@
                 },
                 "Name": {
                     "name": "MetalPillar2"
-                },
-                "RigidBody3D": {
-                    "angular_velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "mass": -107374176.0,
-                    "motion_type": 0,
-                    "physics_behavior": {
-                        "behavior": 1
-                    },
-                    "velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
                 }
             },
             "entityGUID": "766b2732-58e8-7043-bac4-480124d27118"
