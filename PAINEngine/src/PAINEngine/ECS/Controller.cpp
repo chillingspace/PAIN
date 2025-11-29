@@ -484,8 +484,8 @@ namespace PAIN {
             registerSystem<Physics::System>();
             registerSystem<PAIN::Scripting::GameScriptingSystem>();
             registerSystem<PAIN::AI::System>();
+            registerSystem<AnimationSystem::System>();
 #ifdef PN_PLATFORM_WINDOWS	
-            registerSystem<AnimationSystem::System>();            
             registerSystem<Audio::System>();
 #endif
             registerSystem<sBVHSystem>();
