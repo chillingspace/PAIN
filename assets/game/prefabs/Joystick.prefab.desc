@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Joystick.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 11133949131515721498
+  },
+  "descriptor_version": 1,
+  "guid": "14d402c8-6370-ff42-b7c9-3a0602138046",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Joystick.prefab"
+  }
+}
