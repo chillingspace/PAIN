@@ -521,7 +521,7 @@ namespace PAIN {
                 }
 
                 //Compress asset
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
+                compression_success = CuttlefishCompressor(raw_pixels, width, height, channels,
                     asset_info.shipped_path.string(),
                     compression_format, desc_file.import_settings);
 
