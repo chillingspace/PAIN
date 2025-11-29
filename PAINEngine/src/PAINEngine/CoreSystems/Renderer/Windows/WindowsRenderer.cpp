@@ -44,6 +44,13 @@ namespace PAIN {
 			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			glBindVertexArray(shadow_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
 			return;
 		}
 
@@ -77,7 +84,7 @@ namespace PAIN {
 			}
 			offset += m->vertices.size();		// yes vertices not indices. this isnt a bug.
 
-			indices.insert(indices.end(),translated_indices.begin(),translated_indices.end());
+			indices.insert(indices.end(), translated_indices.begin(), translated_indices.end());
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
@@ -132,12 +139,24 @@ namespace PAIN {
 		//Get assets loader
 		auto assets_loader = services->get<Assets::Manager>();
 
+
+		//FLoor shader
+		auto shader_opt = assets_loader->getAsset<Assets::Shader>(floor_path);
+		floor_shader = shader_opt.has_value() ? shader_opt.value() : floor_shader;
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program for floor");
+			throw std::runtime_error("");
+			return;
+		}
+
 		//PBR Shader
-		auto shader_opt = assets_loader->getAsset<Assets::Shader>(pbr_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(pbr_path);
 		pbr_shader = shader_opt.has_value() ? shader_opt.value() : pbr_shader;
 
 		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for pbr");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -146,16 +165,8 @@ namespace PAIN {
 		geometry_shader = shader_opt.has_value() ? shader_opt.value() : geometry_shader;
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-		//FLoor shader
-		shader_opt = assets_loader->getAsset<Assets::Shader>(floor_path);
-		floor_shader = shader_opt.has_value() ? shader_opt.value() : floor_shader;
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for geometry");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -164,7 +175,8 @@ namespace PAIN {
 		passthrough_shader = shader_opt.has_value() ? shader_opt.value() : passthrough_shader;
 
 		if (!passthrough_shader || passthrough_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for passthrough");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -173,7 +185,8 @@ namespace PAIN {
 		shadow_shader = shader_opt.has_value() ? shader_opt.value() : shadow_shader;
 
 		if (!shadow_shader || shadow_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for shadow");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -182,7 +195,8 @@ namespace PAIN {
 		texture2d_shader = shader_opt.has_value() ? shader_opt.value() : texture2d_shader;
 
 		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for texture2d");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -191,7 +205,8 @@ namespace PAIN {
 		tone_shader = shader_opt.has_value() ? shader_opt.value() : tone_shader;
 
 		if (!tone_shader || tone_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for tone");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -200,7 +215,8 @@ namespace PAIN {
 		bloom_shader = shader_opt.has_value() ? shader_opt.value() : bloom_shader;
 
 		if (!bloom_shader || bloom_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for bloom");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -209,7 +225,8 @@ namespace PAIN {
 		bloom_blend_shader = shader_opt.has_value() ? shader_opt.value() : bloom_blend_shader;
 
 		if (!bloom_blend_shader || bloom_blend_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for bloom blend");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -218,7 +235,8 @@ namespace PAIN {
 		blur_shader = shader_opt.has_value() ? shader_opt.value() : blur_shader;
 
 		if (!blur_shader || blur_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for blur");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -227,7 +245,8 @@ namespace PAIN {
 		gamma_shader = shader_opt.has_value() ? shader_opt.value() : gamma_shader;
 
 		if (!gamma_shader || gamma_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for gamma");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -236,7 +255,8 @@ namespace PAIN {
 		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
 		if (!debug_shader || debug_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for debug");
+			throw std::runtime_error("");
 			return;
 		}
 	}
@@ -246,6 +266,7 @@ namespace PAIN {
 		glGenTextures(1, &tex);
 		if (!tex) {
 			PN_CORE_ERROR("Failed to gen texture");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -460,6 +481,38 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
+		// for shadow
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &shadow_vao);
+			glBindVertexArray(shadow_vao);
+
+			// Generate and bind VBO
+			glGenBuffers(1, &shadow_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+			// glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+			// Generate and bind EBO (index buffer)
+			glGenBuffers(1, &shadow_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+			// glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
+			glEnableVertexAttribArray(0);
+
+			// Normal attribute, layout(location = 1)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
+			glEnableVertexAttribArray(1);
+
+			// texcoords attribute, layout(location = 2)
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
+			glEnableVertexAttribArray(2);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
+
 
 		// === VAO/VBO For Debug Shaders ===
 		{
@@ -570,10 +623,10 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		glBindVertexArray(geometry_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBindVertexArray(shadow_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
 		if (component.cachedModelAsset->submeshes.empty()) {
@@ -883,7 +936,7 @@ namespace PAIN {
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
 			int bones_skipped{};
 			if (component.isPlaying) {
-				//PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
+				PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
 
 				static std::vector<glm::mat4> boneMatrices;
 				static constexpr int MAX_BONES = 100;
