@@ -10,6 +10,6 @@
   "guid": "6b58ba55-1033-8142-99d5-be2e990fc2ff",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\prefabs\\Pallet.prefab"
+    "source_file": "game\\prefabs\\prefabs\\Pallet.prefab"
   }
 }

@@ -10,6 +10,6 @@
   "guid": "6d22a8ce-cf49-4347-acb9-1bb72dfe5eb1",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\prefabs\\Floor.prefab"
+    "source_file": "game\\prefabs\\prefabs\\Floor.prefab"
   }
 }

@@ -10,6 +10,6 @@
   "guid": "c43905ab-cdaa-1747-ac78-c1da0ed346f2",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\prefabs\\Rock1.prefab"
+    "source_file": "game\\prefabs\\prefabs\\Rock1.prefab"
   }
 }

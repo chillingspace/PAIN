@@ -10,6 +10,6 @@
   "guid": "65593ba1-3e64-5e49-8273-2e6ace4e597a",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\prefabs\\Pile1.prefab"
+    "source_file": "game\\prefabs\\prefabs\\Pile1.prefab"
   }
 }
