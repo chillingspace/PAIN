@@ -4,10 +4,10 @@
     "type": "Scenes"
   },
   "build_data": {
-    "hash": 1498981745690346007
+    "hash": 10536184978475394252
   },
   "descriptor_version": 1,
-  "guid": "041f02c6-debb-2a44-841d-1ee91e88baf1",
+  "guid": "49fcd029-f588-8249-a240-5094bd4cb542",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\scenes\\prototype.scn"

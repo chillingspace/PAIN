@@ -713,6 +713,9 @@ namespace PAIN {
         sol::environment env(lua_, sol::create, lua_.globals());
         env["entityId"] = entity;
 
+        // expose the real globals table to scripts
+        env["_G_root"] = lua_.globals();
+
         // Inject external vars
         for (const auto& v : vars) {
             std::visit([&](auto&& value) { env[v.id] = value; }, v.val);
@@ -883,8 +886,23 @@ namespace PAIN {
     }
 
     void LuaManager::callGlobal(const std::string& name) {
-        sol::object obj = lua_[name];
+        /*sol::object obj = lua_[name];
         if (!obj.valid() || obj.get_type() != sol::type::function) return;
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn();
+        if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }*/
+
+
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' is not a function", name);
+            return;
+        }
+        PN_CORE_INFO("[LuaManager] callGlobal: calling '{}'", name);
         sol::protected_function fn = obj.as<sol::protected_function>();
         sol::protected_function_result r = fn();
         if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
