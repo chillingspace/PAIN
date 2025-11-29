@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "sphere.obj",
+    "name": "BigGround.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 11280537345787077406
+    "hash": 15249820761726060259
   },
   "descriptor_version": 1,
-  "guid": "c785b686-6362-e347-a2d6-96a3b22a0a13",
+  "guid": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\sphere.obj"
+    "source_file": "game\\models\\BigGround.gltf"
   }
 }

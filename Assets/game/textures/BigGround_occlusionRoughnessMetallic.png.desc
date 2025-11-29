@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "BigGround_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13179236418769923052
+  },
+  "descriptor_version": 1,
+  "guid": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\BigGround_occlusionRoughnessMetallic.png"
+  }
+}
