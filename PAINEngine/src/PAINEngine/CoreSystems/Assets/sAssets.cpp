@@ -190,7 +190,19 @@ namespace PAIN {
 
 		GUID Manager::findByName(const std::string& name) 
 		{
-			return findGUID(name);
+			GUID g = findGUID(name);
+			if (g.IsValid())
+				return g;
+
+			// search by asset "name" field from the registry
+			for (const auto& [guid, asset] : asset_registry) {
+				if (asset && asset->name == name) {
+					return guid;
+				}
+			}
+
+			// Nothing found
+			return GUID();
 		}
 
 		Type Manager::getTypeByGUID(const GUID& id) const

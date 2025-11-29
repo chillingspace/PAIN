@@ -86,6 +86,11 @@ function S.init(player)
         local sx, sy, sz = getScale(player)
         S.playerBaseScale = { x = sx, y = sy, z = sz }
     end
+
+    -- grab heart UI objects
+    S.heart1 = findEntity("heart_1")
+    S.heart2 = findEntity("heart_2")
+    S.heart3 = findEntity("heart_3")
 end
 
 function S.update(dt)
@@ -416,6 +421,19 @@ function S.setCheckpoint(player, checkpointEntity)
     --log("[PlayerState] Checkpoint set at:", x, y, z)
 end
 
+local function updateHeartsUI()
+    -- hide hearts if > lives
+    if S.lives <= 2 and S.heart3 then
+        setUITexture(S.heart3, "game/textures/heart grey.png")
+    end
+    if S.lives <= 1 and S.heart2 then
+        setUITexture(S.heart2, "game/textures/heart grey.png")
+    end
+    if S.lives <= 0 and S.heart1 then
+        setUITexture(S.heart1, "game/textures/heart grey.png")
+    end
+end
+
 function S.onCaught(player)
     -- guard, dont recatch during cooldown
     if not S.canBeCaught() then
@@ -430,6 +448,8 @@ function S.onCaught(player)
     local deathPos = { x = px, y = py, z = pz }
 
     S.lives = S.lives - 1
+    if S.lives < 0 then S.lives = 0 end
+    updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
 
     -- DROP CARRIED LETTER HERE 
