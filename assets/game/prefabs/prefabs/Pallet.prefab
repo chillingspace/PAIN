@@ -3,38 +3,38 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 38,
+                    "bvhNodeIndex": -1,
                     "localAABB": {
                         "max": [
-                            135.75128173828125,
-                            308.5953063964844,
-                            278.80621337890625
+                            100.36543273925781,
+                            20.727630615234375,
+                            84.21436309814453
                         ],
                         "min": [
-                            -135.75128173828125,
-                            0.0,
-                            -278.80621337890625
+                            -100.0,
+                            -9.5367431640625e-07,
+                            -84.21436309814453
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.1996690034866333,
-                            0.30859532952308655,
-                            0.34561270475387573
+                            0.28263890743255615,
+                            0.135856494307518,
+                            0.40992966294288635
                         ],
                         "min": [
-                            0.6420565843582153,
-                            0.0,
-                            0.07411013543605804
+                            0.1216854527592659,
+                            -0.015646472573280334,
+                            0.24150094389915466
                         ]
                     }
                 },
                 "Collider": {
                     "box_size": [
-                        1.0,
-                        1.0,
-                        1.0
+                        0.0,
+                        0.0,
+                        0.0
                     ],
                     "collision_layer": 0,
                     "friction": 0.5,
@@ -44,7 +44,7 @@
                 },
                 "Hierarchy": {
                     "childrenGUIDs": [],
-                    "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
                 "Layer": {
@@ -53,15 +53,15 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        0.9208627939224243,
-                        0.0,
-                        0.20986142754554749
+                        0.19497784972190857,
+                        0.05263344943523407,
+                        0.3257153034210205
                     ],
                     "rotation": [
                         0.0,
-                        0.7071067690849304,
-                        0.0,
-                        0.7071067690849304
+                        -0.0,
+                        -0.3654301166534424,
+                        0.9308387637138367
                     ],
                     "scale": [
                         0.0010000000474974513,
@@ -73,8 +73,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "albedoTextureOverride": "c60c8f27-fe85-4546-8281-deaab9d87acc",
+                            "aoTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -87,27 +87,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                            "materialGUID": "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                            "metallicTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "normalTextureOverride": "19d818f3-a8fc-1b4a-bf95-b233da10f329",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "roughnessTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                    "modelGUID": "f79091e8-3999-8543-a6da-c631ad94a064",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "ContainerRed"
+                    "name": "Pallet"
                 }
             },
-            "entityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+            "entityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127"
         }
     ],
-    "prefabName": "ContainerRed",
-    "rootEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+    "prefabName": "Pallet",
+    "rootEntityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127"
 }

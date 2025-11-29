@@ -3,48 +3,43 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 38,
+                    "bvhNodeIndex": 36,
                     "localAABB": {
                         "max": [
-                            135.75128173828125,
-                            308.5953063964844,
-                            278.80621337890625
+                            9.290358543395996,
+                            7.747631072998047,
+                            9.775418281555176
                         ],
                         "min": [
-                            -135.75128173828125,
-                            0.0,
-                            -278.80621337890625
+                            -9.290358543395996,
+                            -2.384185791015625e-07,
+                            -9.775418281555176
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.1996690034866333,
-                            0.30859532952308655,
-                            0.34561270475387573
+                            1.1098458766937256,
+                            0.2423025220632553,
+                            0.9360253214836121
                         ],
                         "min": [
-                            0.6420565843582153,
-                            0.0,
-                            0.07411013543605804
+                            0.4412212371826172,
+                            -7.456398165572864e-09,
+                            0.24211485683918
                         ]
                     }
                 },
                 "Collider": {
-                    "box_size": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
                     "collision_layer": 0,
                     "friction": 0.5,
                     "is_trigger": false,
                     "restitution": 0.10000000149011612,
-                    "shape": 0
+                    "shape": 3
                 },
                 "Hierarchy": {
                     "childrenGUIDs": [],
-                    "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
                 "Layer": {
@@ -53,28 +48,28 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        0.9208627939224243,
+                        0.7755335569381714,
                         0.0,
-                        0.20986142754554749
+                        0.5890700817108154
                     ],
                     "rotation": [
                         0.0,
-                        0.7071067690849304,
+                        -0.07751553505659103,
                         0.0,
-                        0.7071067690849304
+                        0.9969911575317383
                     ],
                     "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
+                        0.031274400651454926,
+                        0.031274400651454926,
+                        0.031274400651454926
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -87,27 +82,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "ContainerRed"
+                    "name": "Pile1"
                 }
             },
-            "entityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+            "entityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
         }
     ],
-    "prefabName": "ContainerRed",
-    "rootEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+    "prefabName": "Pile1",
+    "rootEntityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
 }

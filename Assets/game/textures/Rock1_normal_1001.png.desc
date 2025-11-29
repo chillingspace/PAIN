@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "WaterTower_normal.png",
+    "name": "Rock1_normal_1001.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 1803981652672700349
+    "hash": 2747172470477993169
   },
   "descriptor_version": 1,
-  "guid": "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+  "guid": "9a12556f-14ee-654b-86d6-7b230b0505f2",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\WaterTower_normal.png"
+    "source_file": "game\\textures\\Rock1_normal_1001.png"
   }
 }

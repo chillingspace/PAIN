@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Floor.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 11093958568268115489
+  },
+  "descriptor_version": 1,
+  "guid": "4b1f318e-49f7-1545-bb84-b9c6608f3471",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Floor.material"
+  }
+}

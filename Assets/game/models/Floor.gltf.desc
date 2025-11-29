@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "robot.gltf",
+    "name": "Floor.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 5314167075973862773
+    "hash": 1169141628276742215
   },
   "descriptor_version": 1,
-  "guid": "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
+  "guid": "4525969c-730e-6d40-aef8-43390fef9c6e",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\robot.gltf"
+    "source_file": "game\\models\\Floor.gltf"
   }
 }

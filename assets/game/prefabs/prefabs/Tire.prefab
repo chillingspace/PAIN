@@ -3,38 +3,38 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 38,
+                    "bvhNodeIndex": -1,
                     "localAABB": {
                         "max": [
-                            135.75128173828125,
-                            308.5953063964844,
-                            278.80621337890625
+                            34.337738037109375,
+                            23.61958885192871,
+                            34.33773422241211
                         ],
                         "min": [
-                            -135.75128173828125,
+                            -34.337738037109375,
                             0.0,
-                            -278.80621337890625
+                            -34.33773422241211
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.1996690034866333,
-                            0.30859532952308655,
-                            0.34561270475387573
+                            0.5676060914993286,
+                            0.11252615600824356,
+                            1.0530695915222168
                         ],
                         "min": [
-                            0.6420565843582153,
-                            0.0,
-                            0.07411013543605804
+                            0.3801482021808624,
+                            -0.05486844480037689,
+                            0.8597134351730347
                         ]
                     }
                 },
                 "Collider": {
                     "box_size": [
-                        1.0,
-                        1.0,
-                        1.0
+                        0.0,
+                        0.0,
+                        0.0
                     ],
                     "collision_layer": 0,
                     "friction": 0.5,
@@ -44,7 +44,7 @@
                 },
                 "Hierarchy": {
                     "childrenGUIDs": [],
-                    "parentGUID": "224ead94-cd56-b044-9049-d25b577908a7",
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
                 "Layer": {
@@ -53,28 +53,28 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        0.9208627939224243,
-                        0.0,
-                        0.20986142754554749
+                        0.45457974076271057,
+                        0.01827089488506317,
+                        0.9725275635719299
                     ],
                     "rotation": [
-                        0.0,
-                        0.7071067690849304,
-                        0.0,
-                        0.7071067690849304
+                        -0.18890297412872314,
+                        0.2841508686542511,
+                        -0.5203928351402283,
+                        0.7827932238578796
                     ],
                     "scale": [
-                        0.0010000000474974513,
-                        0.0010000000474974513,
-                        0.0010000000474974513
+                        0.002310000127181411,
+                        0.002310000127181411,
+                        0.002310000127181411
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "albedoTextureOverride": "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+                            "aoTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -87,27 +87,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                            "materialGUID": "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                            "metallicTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                            "normalTextureOverride": "91e02ba2-c6b8-184f-bd48-b59674946972",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "roughnessTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                    "modelGUID": "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "ContainerRed"
+                    "name": "Tire"
                 }
             },
-            "entityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+            "entityGUID": "8f817cf5-1578-3c4d-84ce-fb871d173c5e"
         }
     ],
-    "prefabName": "ContainerRed",
-    "rootEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"
+    "prefabName": "Tire",
+    "rootEntityGUID": "8f817cf5-1578-3c4d-84ce-fb871d173c5e"
 }
