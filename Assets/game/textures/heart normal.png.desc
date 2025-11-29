@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Heart.png",
+    "name": "heart normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 2365209457906503457
+    "hash": 15665713992316405030
   },
   "descriptor_version": 1,
-  "guid": "267e2fdd-0899-7248-809a-45a66a46f023",
+  "guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Heart.png"
+    "source_file": "game\\textures\\heart normal.png"
   }
 }
