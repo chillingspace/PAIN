@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock1_1001.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 4871795484946305518
+  },
+  "descriptor_version": 1,
+  "guid": "60701c0b-f0c8-4e41-bed6-fdf6b1c986eb",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Rock1_1001.material"
+  }
+}

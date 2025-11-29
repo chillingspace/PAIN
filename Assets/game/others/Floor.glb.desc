@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Floor.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 9861731521147353482
+  },
+  "descriptor_version": 1,
+  "guid": "6cc62f73-a17a-b74e-a216-a15e9ec82e9b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Floor.glb"
+  }
+}

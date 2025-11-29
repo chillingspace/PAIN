@@ -568,7 +568,7 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Initialized skybox");
 
 			// Demo Object and Audio Setup
-			auto audioManager = services->get<Audio::Audio>();
+
 			auto pathService = services->get<Path::Path>();
 			auto asset_manager = services->get<Assets::Manager>();
 
@@ -606,6 +606,7 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
 				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
@@ -640,13 +641,31 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
+#endif
 			}
 
 			//Create default scene asset
 			SceneAsset default_scene_config;
 
+			// Prep for subs
+			//std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+
+			//auto scn_opt = asset_manager->getAssetData(init_scn_path);
+
+			//if (scn_opt) {
+
+			//	loadScene(scn_opt.get()->guid);
+			//}
+
+
 			//Configure scene with default settings
 			configScene(default_scene_config);
+
+			//Craft skybox path and get GUID
+			std::filesystem::path skybox_path = "engine/textures/skybox.hdr";
+
+			//Set skybox
+			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");

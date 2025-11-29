@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Floor_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11697057686868042650
+  },
+  "descriptor_version": 1,
+  "guid": "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Floor_occlusionRoughnessMetallic.png"
+  }
+}

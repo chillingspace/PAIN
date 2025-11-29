@@ -259,8 +259,20 @@ namespace PAIN {
                 //Reload asset in asset manager
                 assetManager->reshipAsset(currentEditingPrefabGUID);
 
+                //Update og prefab data
+                std::vector<entt::entity> entities;
+                prefabService->collectHierarchy(editRootEntity, entities, editRegistryID);
+
+                originalPrefabData = nlohmann::json::array();
+                for (auto entity : entities) {
+                    originalPrefabData.push_back(
+                        prefabService->serializeEntity(entity, editRegistryID)
+                    );
+                }
+
                 //Propagate changes to instances in main registry
-                propagateToInstances(true);
+                prefabService->updateAllInstances(currentEditingPrefabGUID, ECS::MAIN_REGISTRY_ID, true);
+                prefabService->updateAllInstances(currentEditingPrefabGUID, editRegistryID, true);
                 hasUnsavedChanges = false;
                 PN_CORE_INFO("[PrefabEditMode] Successfully saved prefab: {}", updatedPrefab.name);
                 return true;
@@ -279,36 +291,6 @@ namespace PAIN {
                     return false;
                 }
                 return enterEditMode(prefabGUID);
-            }
-
-            void PrefabPanel::propagateToInstances(bool preserveOverrides) {
-                if (!isInEditMode) {
-                    PN_CORE_WARN("[PrefabEditMode] Not in edit mode - cannot propagate");
-                    return;
-                }
-
-                //Get services
-                auto ecsController = services->get<ECS::Controller>();
-                auto prefabService = services->get<Prefab::Service>();
-                if (!ecsController || !prefabService) return;
-                PN_CORE_INFO("[PrefabEditMode] Propagating changes to instances (preserveOverrides: {})", preserveOverrides);
-                
-                //Get all instances in the active scene
-                auto& mainRegistry = ecsController->getRegistry(ECS::MAIN_REGISTRY_ID);
-                auto instances = prefabService->getInstancesOfPrefab(currentEditingPrefabGUID, ECS::MAIN_REGISTRY_ID);
-                PN_CORE_INFO("[PrefabEditMode] Found {} instances to update", instances.size());
-
-
-                // TODO: Implement instance update logic
-                // This is complex and depends on your requirements:
-                // - If preserveOverrides = true, apply prefab changes but keep instance overrides
-                // - If preserveOverrides = false, reset all instances to match prefab exactly
-                // 
-                // For now, this is a placeholder. Full implementation would involve:
-                // 1. For each instance, get its PrefabInstance component
-                // 2. Reload prefab data from asset
-                // 3. Apply prefab data to instance
-                // 4. If preserveOverrides, re-apply componentOverrides on top
             }
 
             void PrefabPanel::showUnsavedChangesDialog() {

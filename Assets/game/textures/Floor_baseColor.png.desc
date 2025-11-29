@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Floor_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2094281693135694
+  },
+  "descriptor_version": 1,
+  "guid": "476662dc-9a7b-2243-97be-6e01bceeb854",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Floor_baseColor.png"
+  }
+}

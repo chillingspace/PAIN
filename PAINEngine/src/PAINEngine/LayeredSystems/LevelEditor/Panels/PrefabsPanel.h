@@ -52,9 +52,6 @@ namespace PAIN {
                 //Revert changes to the prefab
                 bool revertChanges();
 
-                //Propogate to instances
-                void propagateToInstances(bool preserveOverrides = true);
-
                 //Show unsaved changes
                 void showUnsavedChangesDialog();
 

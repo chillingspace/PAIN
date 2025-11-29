@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pallet_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5282272901699546973
+  },
+  "descriptor_version": 1,
+  "guid": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pallet_occlusionRoughnessMetallic.png"
+  }
+}
