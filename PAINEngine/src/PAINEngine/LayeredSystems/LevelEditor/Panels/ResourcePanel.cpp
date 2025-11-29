@@ -36,6 +36,9 @@ namespace PAIN {
                 // Search filter
                 search_filter.resize(32);
                 search_filter = "";
+
+				//Set to alw active
+				always_active = true;
             }
 
             void ResourcePanel::nextWindowSettings() {
@@ -2078,6 +2081,9 @@ namespace PAIN {
 						}
 					}
 				}
+
+				//Early return flag if panel is hidden
+				if (panel_hidden) return;
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;
