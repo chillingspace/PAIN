@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        0.0,
-                        0.0,
-                        0.0
+                        -0.8647336959838867,
+                        0.8957593441009521,
+                        -13.105713844299316
                     ],
                     "rotation": [
                         0.0,
@@ -34,7 +34,7 @@
                 },
                 "Texture2D": {
                     "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
-                    "texture_scale": 0.10000000149011612
+                    "texture_scale": 0.03999999910593033
                 },
                 "UIElement": {
                     "b_is_enabled": true,
@@ -88,9 +88,9 @@
                     ]
                 }
             },
-            "entityGUID": "5fbeceb1-04fd-ed4a-acbd-4a2ec885404e"
+            "entityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b"
         }
     ],
-    "prefabName": "Heart",
-    "rootEntityGUID": "5fbeceb1-04fd-ed4a-acbd-4a2ec885404e"
+    "prefabName": "Heart_1",
+    "rootEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b"
 }
