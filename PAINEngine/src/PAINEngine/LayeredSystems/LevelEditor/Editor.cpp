@@ -177,10 +177,11 @@ namespace PAIN {
                 }
             }
             if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
-                editor_debug_mode = (editor_debug_mode + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+                editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0
                 if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
-                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
-                else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
+                else if (editor_debug_mode == 2) PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                else PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
             }
 
 #endif
@@ -216,21 +217,24 @@ namespace PAIN {
                 }
 
                 const char* debug_mode_labels[] = {
-                "Show Debug Lines (Entity AABBs)",
-                "Show Debug Lines (BVH Tree)",
+                "Show Physics Colliders",
+                "Show BVH Tree",
+                "Show Original AABBs",
                 "Hide Debug Lines"
                 };
 
                 // Button to toggle debug lines in andriod
                 if (ImGui::Button(debug_mode_labels[editor_debug_mode])) {
-                    editor_debug_mode = (editor_debug_mode + 1) % 3;
+                    editor_debug_mode = (editor_debug_mode + 1) % 4;
 
                     if (editor_debug_mode == 0)
                         PN_CORE_INFO("Editor debug rendering: OFF");
                     else if (editor_debug_mode == 1)
-                        PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
-                    else
+                        PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
+                    else if (editor_debug_mode == 2)
                         PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                    else
+                        PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
                 }
 
                 ImGui::End();

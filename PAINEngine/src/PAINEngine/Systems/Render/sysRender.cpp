@@ -8,6 +8,7 @@
 #include "ECS/Components/AllComponents.h"
 #include "Systems/Collision/sBVHSystem.h"
 #include "ECS/Components/cAnimation.h" 
+#include "ECS/Components/cPhysics.h" // For rendering RigidBody3D
 #include "CoreSystems/Renderer/text.h"
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -368,19 +369,48 @@ namespace PAIN {
             Camera* camera = scene->GetActiveCamera();
             if (!camera) return;
 
-            // Mode 1: Draw World AABBs from cBoundingVolume
+            // Mode 1: Draw Physics Colliders (Cyan)
             if (debug_mode == 1) {
-                auto view = registry.view<BoundingVolume>();
-                glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for AABBs
+                // Iterate entities with both RigidBody3D and Transform
+                auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
+                glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan for Physics
 
-                for (auto entity : view) {
-                    auto& bounding_vol = view.get<BoundingVolume>(entity);
-                    rendererService->w_renderer->DebugPass(
-                        bounding_vol.worldAABB.min, 
-                        bounding_vol.worldAABB.max, 
-                        color, 
-                        scene
-                    );
+                for (auto [entity, rb, trans] : view.each()) {
+                    
+                    // 1. Calculate the scaled offset and half-extents in local space
+                    // Note: Half extents = 0.5 * Transform Scale * Collider Scale
+                    glm::vec3 offset_scaled = trans.scale * rb.collider_offset;
+                    glm::vec3 half_extents = 0.5f * trans.scale * rb.collider_scale;
+                    
+                    // 2. Get rotation
+                    glm::quat rotation = glm::normalize(trans.rotation);
+
+                    // 3. Calculate the 8 corners of the OBB (Oriented Bounding Box) in World Space
+                    // We do this because DebugPass draws AABBs, so we need to find the AABB that wraps our rotated physics box.
+                    glm::vec3 min_aabb(std::numeric_limits<float>::max());
+                    glm::vec3 max_aabb(std::numeric_limits<float>::lowest());
+
+                    for (int i = 0; i < 8; ++i) {
+                        glm::vec3 corner;
+                        // Generate local box corner (+/- half_extents)
+                        corner.x = (i & 1) ? half_extents.x : -half_extents.x;
+                        corner.y = (i & 2) ? half_extents.y : -half_extents.y;
+                        corner.z = (i & 4) ? half_extents.z : -half_extents.z;
+
+                        // Apply Offset (in local space, relative to pivot) + Corner
+                        glm::vec3 body_space_point = offset_scaled + corner;
+
+                        // Apply Rotation and World Translation
+                        // Point_World = World_Pos + Rotation * Point_Local
+                        glm::vec3 world_point = trans.position + (rotation * body_space_point);
+
+                        // Expand the AABB to fit this corner
+                        min_aabb = glm::min(min_aabb, world_point);
+                        max_aabb = glm::max(max_aabb, world_point);
+                    }
+
+                    // Draw the bounding box of the physics collider
+                    rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color, scene);
                 }
             }
 
@@ -430,6 +460,22 @@ namespace PAIN {
 
                 if (rootIndex != -1) {
                     drawNodeRecursive(rootIndex, 0);
+                }
+            }
+
+            // Mode 3: Draw Original World AABBs from cBoundingVolume (Red)
+            if (debug_mode == 3) {
+                auto view = registry.view<BoundingVolume>();
+                glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for Visual AABBs
+
+                for (auto entity : view) {
+                    auto& bounding_vol = view.get<BoundingVolume>(entity);
+                    rendererService->w_renderer->DebugPass(
+                        bounding_vol.worldAABB.min, 
+                        bounding_vol.worldAABB.max, 
+                        color, 
+                        scene
+                    );
                 }
             }
         }
