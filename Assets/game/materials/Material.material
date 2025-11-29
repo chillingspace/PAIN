@@ -18,10 +18,10 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\robot_Robot_BaseColor.png",
-        "emissive": "game\\textures\\.\\robot_Robot_Emissive.png",
-        "metallic": "game\\textures\\.\\robot_Robot_Metallic-robot_Robot_Roughness.png",
-        "normal": "game\\textures\\.\\robot_Robot_Height.png",
-        "roughness": "game\\textures\\.\\robot_Robot_Metallic-robot_Robot_Roughness.png"
+        "albedo": "game\\textures\\robot_Robot_BaseColor.png",
+        "emissive": "game\\textures\\robot_Robot_Emissive.png",
+        "metallic": "game\\textures\\robot_Robot_Metallic-robot_Robot_Roughness.png",
+        "normal": "game\\textures\\robot_Robot_Height.png",
+        "roughness": "game\\textures\\robot_Robot_Metallic-robot_Robot_Roughness.png"
     }
 }

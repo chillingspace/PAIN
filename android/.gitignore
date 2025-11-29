@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+ 
+# Android signing keystore - DO NOT COMMIT 
+keystore/ 
+key.properties 

@@ -520,9 +520,19 @@ namespace PAIN {
 			return;
 		}
 
+		// Use aspect ratio to scale as well
+		auto window_service = services->get<Window::Window>();
+		window_service->getFrameBuffer();
+
+		glm::vec2 framebuffer = window_service->getFrameBuffer(); 
+
+		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
+
+		float corrected_scale = scale / aspect_ratio;
+
 		texture2d_shader->Bind();
 		texture2d_shader->SetUniform("pos", pos);
-		texture2d_shader->SetUniform("ndc_scale", scale);
+		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);

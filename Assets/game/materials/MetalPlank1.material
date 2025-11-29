@@ -18,12 +18,12 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\MetalPlank1_baseColor.png",
-        "ao": "game\\textures\\.\\MetalPlank1_occlusionRoughnessMetallic.png",
-        "emissive": "game\\textures\\.\\MetalPlank1_emissive.png",
-        "lightmap": "game\\textures\\.\\MetalPlank1_occlusionRoughnessMetallic.png",
-        "metallic": "game\\textures\\.\\MetalPlank1_occlusionRoughnessMetallic.png",
-        "normal": "game\\textures\\.\\MetalPlank1_normal.png",
-        "roughness": "game\\textures\\.\\MetalPlank1_occlusionRoughnessMetallic.png"
+        "albedo": "game\\textures\\MetalPlank1_baseColor.png",
+        "ao": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\MetalPlank1_emissive.png",
+        "lightmap": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\MetalPlank1_normal.png",
+        "roughness": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png"
     }
 }
