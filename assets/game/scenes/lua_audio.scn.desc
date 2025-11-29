@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "lua_audio.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 12172804608419250667
+  },
+  "descriptor_version": 1,
+  "guid": "c0f01955-e038-8548-968f-6f4dbf2756d1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\lua_audio.scn"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Physics.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 13706654263015026642
+  },
+  "descriptor_version": 1,
+  "guid": "2c168fa7-1319-2140-a4df-9cdb657fac01",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\Physics.scn"
+  }
+}
