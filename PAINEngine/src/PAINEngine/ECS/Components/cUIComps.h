@@ -32,7 +32,7 @@ namespace PAIN {
 		glm::vec2 anchor_max{ 1, 1 };
 
 		// Center of the entity
-		glm::vec2 pivot{ 0.5f, 0.5f };
+		glm::vec2 pivot{ 0.0f, 0.0f };
 
 		// Position of pivot relative to anchors
 		glm::vec2 anchored_position{ 0, 0 };
