@@ -2,7 +2,7 @@
 out vec2 TexCoords;
 
 uniform vec2 pos;
-uniform float ndc_scale;    // within  range [0, 1]
+uniform vec2 ndc_scale;    // within  range [0, 1]
 
 void main() {
     const vec2 vertices[4] = vec2[](
