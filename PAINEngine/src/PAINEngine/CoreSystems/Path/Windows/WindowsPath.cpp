@@ -41,25 +41,8 @@ namespace PAIN {
 
         void WindowsPath::init() {
 
-            //Json config
-            json config;
-
-            try {
-	            //Convert the path to json
-	            std::ifstream file("assets/Config.json");
-	            if (!file.is_open()) {
-		            PN_CORE_WARN("Could not open config file: {}", "assets/Config.json");
-		            return;
-	            }
-	            file >> config;
-	            auto const& data = config.at("WindowsConfig");
-                app_name = data.at("Title");
-                PN_CORE_INFO(app_name);
-            }
-            catch (const nlohmann::json::exception& e) {
-	            PN_CORE_WARN(e.what());
-	            PN_CORE_WARN("Paths config invalid! No default virtual path registered");
-            }
+            //Default engine name
+            app_name = ENGINE_NAME;
 
             //Get windows paths
             out_path = normalizePath(std::filesystem::current_path().string());
@@ -85,7 +68,6 @@ namespace PAIN {
             registerVirtualPath(roaming_alias, roamingdata_path + "/" + app_name, true);
             registerVirtualPath(documents_alias, documents_path + "/" + app_name, true);
             registerVirtualPath(temp_alias, localdata_path + "/" + app_name + "/temp", true);
-            registerVirtualPath(config_alias, project_root_str + "/Config", false);
         }
 
         void WindowsPath::destroy() {

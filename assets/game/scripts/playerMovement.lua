@@ -8,6 +8,16 @@ local moveDown = false
 local jumpPressed = false
 local walkingSoundPlaying = false
 
+-- for UI button (on_click_callback_lua = "JumpButton_OnClick")
+_G_root.JumpButton_OnClick = function()
+    printLog("[UI] Jump button pressed, setting jumpPressed")
+    if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
+        return
+    end
+    jumpPressed = true
+end
+
+
 registerKeyDown("KEY_U", function() moveUp = true end)
 registerKeyDown("KEY_D", function() moveDown = true end)
 registerKeyDown("KEY_L", function() moveLeft = true end)

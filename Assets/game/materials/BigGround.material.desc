@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "BigGround.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9891524090514864826
+  },
+  "descriptor_version": 1,
+  "guid": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\BigGround.material"
+  }
+}

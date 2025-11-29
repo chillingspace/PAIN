@@ -3,7 +3,7 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 107,
+                    "bvhNodeIndex": 99,
                     "localAABB": {
                         "max": [
                             11.664676666259766,
@@ -19,14 +19,14 @@
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            1.2946337461471558,
-                            0.026961639523506165,
-                            0.28652143478393555
+                            2.4275827407836914,
+                            0.01828538253903389,
+                            0.02292519621551037
                         ],
                         "min": [
-                            1.2225459814071655,
-                            0.0,
-                            0.21624112129211426
+                            2.349195957183838,
+                            -0.01103212870657444,
+                            -0.0534961074590683
                         ]
                     }
                 },
@@ -53,9 +53,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        1.2585901021957397,
-                        0.0,
-                        0.2513812780380249
+                        2.3883893489837646,
+                        -0.01103212870657444,
+                        -0.01528545655310154
                     ],
                     "rotation": [
                         0.0,
@@ -64,16 +64,16 @@
                         1.0
                     ],
                     "scale": [
-                        0.0030899997800588608,
-                        0.0030899997800588608,
-                        0.0030899997800588608
+                        0.0033599999733269215,
+                        0.0033599999733269215,
+                        0.0033599999733269215
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "25c6e2c3-b701-4c43-b049-8c9b21a29441",
+                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
                             "baseColorOverride": [
                                 1.0,
@@ -90,7 +90,7 @@
                             "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
                             "metallicOverride": 1.0,
                             "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                            "normalTextureOverride": "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
+                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
                             "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
@@ -105,9 +105,9 @@
                     "name": "Gear"
                 }
             },
-            "entityGUID": "a2490beb-e336-f643-b774-ad53d08b6227"
+            "entityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
         }
     ],
     "prefabName": "Gear",
-    "rootEntityGUID": "a2490beb-e336-f643-b774-ad53d08b6227"
+    "rootEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
 }

@@ -18,12 +18,12 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\Tires_baseColor.png",
-        "ao": "game\\textures\\.\\Tires_occlusionRoughnessMetallic.png",
-        "emissive": "game\\textures\\.\\Tires_emissive.png",
-        "lightmap": "game\\textures\\.\\Tires_occlusionRoughnessMetallic.png",
-        "metallic": "game\\textures\\.\\Tires_occlusionRoughnessMetallic.png",
-        "normal": "game\\textures\\.\\Tires_normal.png",
-        "roughness": "game\\textures\\.\\Tires_occlusionRoughnessMetallic.png"
+        "albedo": "game\\textures\\Tires_baseColor.png",
+        "ao": "game\\textures\\Tires_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Tires_emissive.png",
+        "lightmap": "game\\textures\\Tires_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Tires_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Tires_normal.png",
+        "roughness": "game\\textures\\Tires_occlusionRoughnessMetallic.png"
     }
 }

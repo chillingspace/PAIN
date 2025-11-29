@@ -1,0 +1,108 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 95,
+                    "localAABB": {
+                        "max": [
+                            39.673301696777344,
+                            221.5447235107422,
+                            45.83308792114258
+                        ],
+                        "min": [
+                            -39.673301696777344,
+                            0.0,
+                            -45.83308792114258
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.48180922865867615,
+                            0.41966527700424194,
+                            3.658106565475464
+                        ],
+                        "min": [
+                            0.4024626314640045,
+                            0.19812053442001343,
+                            3.5664403438568115
+                        ]
+                    }
+                },
+                "Collider": {
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 3
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.44213593006134033,
+                        0.19812053442001343,
+                        3.6122732162475586
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "4abba89c-2728-1a4b-bf13-c88751021af2",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "MetalPillar1"
+                }
+            },
+            "entityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0"
+        }
+    ],
+    "prefabName": "MetalPillar1",
+    "rootEntityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0"
+}

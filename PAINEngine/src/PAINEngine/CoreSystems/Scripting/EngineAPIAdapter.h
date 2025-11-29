@@ -146,6 +146,8 @@ namespace PAIN {
         std::optional<uint32_t> GetMeshId(entt::entity entityId) override;
         void SetMeshId(entt::entity entityId, uint32_t meshId) override;
 
+        void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) override;
+
         /* =========================================================================== */
         /*                                  Lighting                                   */
         /* =========================================================================== */

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pipe1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 6777868882127193307
+  },
+  "descriptor_version": 1,
+  "guid": "a78b68cb-9f85-bd42-ac40-11329f02a070",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Pipe1.glb"
+  }
+}

@@ -1,0 +1,108 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 87,
+                    "localAABB": {
+                        "max": [
+                            199.99998474121094,
+                            90.56856536865234,
+                            100.0
+                        ],
+                        "min": [
+                            -200.00001525878906,
+                            0.0,
+                            -100.0
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.2459999918937683,
+                            0.1113993376493454,
+                            0.12300000339746475
+                        ],
+                        "min": [
+                            -0.2460000365972519,
+                            0.0,
+                            -0.12300000339746475
+                        ]
+                    }
+                },
+                "Collider": {
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 3
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.001230000052601099,
+                        0.001230000052601099,
+                        0.001230000052601099
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+                            "aoTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "normalTextureOverride": "6fc0ccbc-ae9d-a948-9557-6140470621c4",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Platform1"
+                }
+            },
+            "entityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
+        }
+    ],
+    "prefabName": "Platform1",
+    "rootEntityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
+}

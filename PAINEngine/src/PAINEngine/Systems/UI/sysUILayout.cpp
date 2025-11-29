@@ -15,6 +15,9 @@
 #include "Systems/Scripting/GameScriptingSystem.h"
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Scene/sCameraController.h"
+#include "CoreSystems/Assets/sAssets.h"   
+#include "CoreSystems/Assets/Types/Texture.h"  
+
 
 namespace PAIN {
 	namespace UI {
@@ -149,9 +152,11 @@ namespace PAIN {
 			// Process children
 			if (registry.all_of<Entity::Hierarchy>(entity)) {
 				const auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
-				for (const auto& childGUID : hierarchy.childrenGUIDs) {
+				for (const auto& childGUID : hierarchy.childrenGUIDs)
+				{
 					entt::entity child = ecs->resolveGUID(childGUID);
-					if (child != entt::null && ecs->checkEntity(child)) {
+					if (child != entt::null && ecs->checkEntity(child))
+					{
 						processHierarchy(child, registry, calculated_size, calculated_pos);
 					}
 				}

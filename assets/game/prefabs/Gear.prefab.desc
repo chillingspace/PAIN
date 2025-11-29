@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 1349083759567246739
+    "hash": 17893473386866956079
   },
   "descriptor_version": 1,
-  "guid": "b48e743b-e069-c847-9613-269499374356",
+  "guid": "3e1bed01-56de-1b43-9134-1ae7de7f7226",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\Gear.prefab"

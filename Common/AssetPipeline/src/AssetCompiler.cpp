@@ -831,6 +831,9 @@ namespace PAIN {
                     game_folder = false;
                 }
 
+                //Reset relative path properly
+                relative_path = relative_path.string() == "." || relative_path.empty() ? "" : relative_path;
+
                 //Get material textures
                 {
                     //Identify texture folder
