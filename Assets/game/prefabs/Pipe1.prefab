@@ -3,30 +3,30 @@
         {
             "components": {
                 "BoundingVolume": {
-                    "bvhNodeIndex": 99,
+                    "bvhNodeIndex": 85,
                     "localAABB": {
                         "max": [
-                            11.664676666259766,
-                            8.72545051574707,
-                            11.37221908569336
+                            263.8702392578125,
+                            80.76731872558594,
+                            40.38367462158203
                         ],
                         "min": [
-                            -11.664676666259766,
-                            0.0,
-                            -11.37221908569336
+                            -263.8702392578125,
+                            3.814697265625e-06,
+                            -40.38367462158203
                         ]
                     },
                     "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            2.4275827407836914,
-                            0.01828538253903389,
-                            0.02292519621551037
+                            0.8336532711982727,
+                            0.08076732605695724,
+                            2.846653938293457
                         ],
                         "min": [
-                            2.349195957183838,
-                            -0.01103212870657444,
-                            -0.0534961074590683
+                            0.35402804613113403,
+                            3.814697446813398e-09,
+                            2.4794349670410156
                         ]
                     }
                 },
@@ -53,28 +53,28 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        2.3883893489837646,
-                        -0.01103212870657444,
-                        -0.01528545655310154
+                        0.5938406586647034,
+                        0.0,
+                        2.663043975830078
                     ],
                     "rotation": [
                         0.0,
+                        0.29868176579475403,
                         0.0,
-                        0.0,
-                        1.0
+                        0.9543527364730835
                     ],
                     "scale": [
-                        0.0033599999733269215,
-                        0.0033599999733269215,
-                        0.0033599999733269215
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                            "albedoTextureOverride": "60d237d0-60e1-c146-86e6-e76c967840d4",
+                            "aoTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -87,27 +87,27 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+                            "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+                            "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
+                            "roughnessTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+                    "modelGUID": "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Gear"
+                    "name": "Pipe1"
                 }
             },
-            "entityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
+            "entityGUID": "76f95440-ba1d-674c-aa35-2706638fd2ea"
         }
     ],
-    "prefabName": "Gear",
-    "rootEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5"
+    "prefabName": "Pipe1",
+    "rootEntityGUID": "76f95440-ba1d-674c-aa35-2706638fd2ea"
 }
