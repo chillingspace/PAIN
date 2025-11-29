@@ -568,7 +568,7 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Initialized skybox");
 
 			// Demo Object and Audio Setup
-			auto audioManager = services->get<Audio::Audio>();
+
 			auto pathService = services->get<Path::Path>();
 			auto asset_manager = services->get<Assets::Manager>();
 
@@ -606,6 +606,7 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
 				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
@@ -640,6 +641,7 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
+#endif
 			}
 
 			//Create default scene asset
