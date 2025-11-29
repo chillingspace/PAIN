@@ -236,8 +236,10 @@ namespace PAIN {
 			{
 				//Init with reference to entity and comp panel
 				m_EntityPanel = services->get<Editor>()->getPanel<EntityPanel>();
+#ifdef PN_PLATFORM_WINDOWS
 				m_comp_panel = services->get<Editor>()->getPanel<ComponentsPanel>();
 				m_prefab_panel = services->get<Editor>()->getPanel<PrefabPanel>();
+#endif
 			}
 
 			float ViewportPanel::getTimeScale() const {
@@ -532,6 +534,8 @@ namespace PAIN {
 						if (ImGui::RadioButton("Local", m_GizmoMode == ImGuizmo::LOCAL))
 							m_GizmoMode = ImGuizmo::LOCAL;
 
+#ifdef PN_PLATFORM_WINDOWS
+
 						ImGui::SameLine();
 						ImGui::Spacing();
 						ImGui::SameLine();
@@ -569,6 +573,7 @@ namespace PAIN {
 							if (m_comp_panel->getCurrentRegistry() != currentRegistryID) m_comp_panel->setRegistry(currentRegistryID);
 							if (m_EntityPanel->getCurrentRegistry() != currentRegistryID) m_EntityPanel->setRegistry(currentRegistryID);
 						}
+#endif
 					}
 					ImGui::EndChild();
 

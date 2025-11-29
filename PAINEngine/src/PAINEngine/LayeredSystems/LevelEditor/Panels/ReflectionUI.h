@@ -41,6 +41,8 @@
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
+#include "CoreSystems/Assets/sAssets.h"
+
  // Helper: Fuzzy match score
 inline int fuzzyMatchScore(const std::string& pattern, const std::string& str) {
     int score = 0;

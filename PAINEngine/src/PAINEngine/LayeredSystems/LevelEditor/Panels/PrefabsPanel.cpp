@@ -1,3 +1,4 @@
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 #include "pch.h"
 #include "PrefabsPanel.h"
@@ -530,4 +531,5 @@ namespace PAIN {
         } 
     }
 }
+#endif
 #endif

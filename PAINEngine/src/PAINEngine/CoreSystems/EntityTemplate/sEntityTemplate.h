@@ -19,6 +19,7 @@ namespace PAIN {
             //Explicit creation of the entity template
             explicit Service(std::shared_ptr<Services> svc) : services{svc} {}
 
+#ifdef PN_PLATFORM_WINDOWS
             // Create template from an existing entity
             Assets::GUID createFromEntity(
                 entt::entity entity,
@@ -26,6 +27,7 @@ namespace PAIN {
                 ECS::RegistryID const& registry_id = ECS::MAIN_REGISTRY_ID,
                 const std::vector<std::string>& tags = {}
             );
+#endif
 
             // Spawn entity from template
             entt::entity spawn(
@@ -53,11 +55,6 @@ namespace PAIN {
 
             EntityTemplate::TemplateAsset deserializeTemplate(
                 const nlohmann::json& templateJson
-            );
-
-            std::shared_ptr<EntityTemplate::TemplateAsset> importTemplate(
-                const std::string& sourceFilePath,
-                const std::string& newTemplateName
             );
 
             // Helper: Get all component data from entity

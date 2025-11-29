@@ -27,6 +27,140 @@
 
 namespace PAIN {
     namespace ECS {
+
+        template<typename... Components>
+        nlohmann::json serializeAllComponentsImpl(
+            entt::entity entity,
+            const entt::registry& registry,
+            std::tuple<Components...>,
+            const std::unordered_set<std::string>& filter
+        ) {
+            nlohmann::json components;
+
+            auto expand = [&](auto type_tag) {
+                using T = typename decltype(type_tag)::type;
+
+                // Compile-time check: should this type be serialized?
+                constexpr bool type_should_serialize = getShouldSerialize<T>();
+
+                // CRITICAL: Wrap entire serialization logic in if constexpr
+                if constexpr (type_should_serialize) {
+                    std::string comp_name = getComponentName<T>();
+
+                    // Runtime check: is this component filtered out?
+                    const bool is_filtered = !filter.empty() && filter.count(comp_name) > 0;
+
+                    if (!is_filtered && registry.template all_of<T>(entity)) {
+                        const auto& comp = registry.template get<T>(entity);
+
+                        // Try reflection first, then fallback to JSON
+                        if constexpr (refl::trait::is_reflectable_v<T>) {
+                            try {
+                                components[comp_name] = PAIN::Serialization::to_json_reflected(comp);
+                            }
+                            catch (const std::exception& e) {
+                                PN_CORE_ERROR("Failed to serialize {} using reflection: {}", comp_name, e.what());
+                            }
+                        }
+                        else {
+                            // Only compile this if type is convertible to JSON
+                            if constexpr (std::is_constructible_v<nlohmann::json, T>) {
+                                try {
+                                    components[comp_name] = nlohmann::json(comp);
+                                }
+                                catch (const std::exception& e) {
+                                    PN_CORE_WARN("Failed to serialize {}: {}", comp_name, e.what());
+                                }
+                            }
+                            else {
+                                PN_CORE_WARN("Component {} is not serializable (no reflection or JSON converter)", comp_name);
+                            }
+                        }
+                    }
+                }
+                };
+
+            (expand(entt::type_identity<Components>{}), ...);
+            return components;
+        }
+
+        template<typename... Components>
+        void deserializeAllComponentsImpl(
+            entt::entity entity,
+            entt::registry& registry,
+            const nlohmann::json& components,
+            std::tuple<Components...>,
+            const std::unordered_set<std::string>& filter
+        ) {
+            // Validate input
+            if (!components.is_object()) {
+                PN_CORE_WARN("deserializeAllComponentsImpl: Expected JSON object, got {}", components.type_name());
+                return;
+            }
+
+            auto expand = [&](auto type_tag) {
+                using T = typename decltype(type_tag)::type;
+
+                // Compile-time check: should this type be deserialized?
+                constexpr bool type_should_deserialize = getShouldSerialize<T>();
+
+                // CRITICAL: Wrap entire deserialization logic in if constexpr
+                if constexpr (type_should_deserialize) {
+                    std::string comp_name = getComponentName<T>();
+
+                    // Runtime check: is this component filtered out?
+                    const bool is_filtered = !filter.empty() && filter.count(comp_name) > 0;
+
+                    // Check if component exists in JSON
+                    if (!is_filtered && components.contains(comp_name)) {
+                        try {
+                            T comp;
+
+                            // Try reflection first, then fallback to JSON
+                            if constexpr (refl::trait::is_reflectable_v<T>) {
+                                try {
+                                    PAIN::Serialization::from_json_reflected(comp, components[comp_name]);
+                                }
+                                catch (const std::exception& e) {
+                                    PN_CORE_ERROR("Failed to deserialize {} using reflection: {}", comp_name, e.what());
+                                    return; // Skip this component
+                                }
+                            }
+                            else {
+                                // Only compile this if type is convertible from JSON
+                                if constexpr (std::is_constructible_v<T, nlohmann::json>) {
+                                    try {
+                                        comp = components[comp_name].get<T>();
+                                    }
+                                    catch (const std::exception& e) {
+                                        PN_CORE_WARN("Failed to deserialize {}: {}", comp_name, e.what());
+                                        return; // Skip this component
+                                    }
+                                }
+                                else {
+                                    PN_CORE_WARN("Component {} is not deserializable (no reflection or JSON converter)", comp_name);
+                                    return; // Skip this component
+                                }
+                            }
+
+                            // Successfully deserialized - now emplace or replace
+                            if (registry.template all_of<T>(entity)) {
+                                registry.template replace<T>(entity, std::move(comp));
+                            }
+                            else {
+                                registry.template emplace<T>(entity, std::move(comp));
+                            }
+                        }
+                        catch (const std::exception& e) {
+                            PN_CORE_ERROR("Unexpected error deserializing {}: {}", comp_name, e.what());
+                        }
+                    }
+                }
+                };
+
+            (expand(entt::type_identity<Components>{}), ...);
+        }
+
         /*****************************************************************//**
         * EntityGUIDRegistry Implementation
         *********************************************************************/

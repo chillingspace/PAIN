@@ -1,5 +1,8 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
+
+#ifdef _DEBUG
+
 #include "EntityPanel.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
@@ -8,8 +11,6 @@
 #include "ECS/Components/AllComponents.h"
 
 #include "CoreSystems/Prefabs/sPrefab.h"
-
-#ifdef _DEBUG
 
 namespace PAIN {
     namespace Editor {
