@@ -124,12 +124,11 @@ namespace PAIN {
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
-		// Camera System
-		addCoreSystem(std::make_shared<sCameraController>());
-
 		// Scenes
 		addCoreSystem(std::make_shared<Scene::SceneManager>());
 
+		// Camera System
+		addCoreSystem(std::make_shared<sCameraController>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
