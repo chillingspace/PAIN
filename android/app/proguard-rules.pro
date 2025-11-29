@@ -19,3 +19,13 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep native methods
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+# Keep FMOD classes
+-keep class com.fmod.** { *; }
+-keep class org.fmod.** { *; }
+# Keep game activity
+-keep class com.game.pain.** { *; }
