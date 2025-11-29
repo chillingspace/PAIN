@@ -768,15 +768,63 @@ namespace PAIN {
                 if (scn_service->getCameraLight() && ImGui::ColorEdit3("Camera Light Intensity", glm::value_ptr(scn_service->getCameraLight()->L_intensity))) {
                 }
 
+                //Get graphics settings
+                auto& gs = GraphicsSettings::get();
+
                 //Set using world light
-                bool using_wlight = scn_service->getUsingWorldLight();
+                bool using_wlight = gs.world_light;
                 if (ImGui::Checkbox("Using World Light", &using_wlight)) {
-                    scn_service->setUsingWorldLight(using_wlight);
+                    gs.world_light = using_wlight;
                 }
 
-                bool using_ibl = GraphicsSettings::get().ibl;
+                //Set using IBL
+                bool using_ibl = gs.ibl;
                 if (ImGui::Checkbox("Using IBL", &using_ibl)) {
-                    GraphicsSettings::get().ibl = using_ibl;
+                    gs.ibl = using_ibl;
+                }
+
+                //Set using diffuse map
+                bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;
+                if (ImGui::Checkbox("Using Diffuse Map", &using_diffuse)) {
+                    gs.DEBUG_USE_DIFFUSE_MAP = using_diffuse;
+                }
+
+                //Set using ao map
+                bool using_ao = gs.DEBUG_USE_AO_MAP;
+                if (ImGui::Checkbox("Using AO Map", &using_ao)) {
+                    gs.DEBUG_USE_AO_MAP = using_ao;
+                }
+
+                //Set using normal map
+                bool using_normal = gs.DEBUG_USE_NORMAL_MAP;
+                if (ImGui::Checkbox("Using Normal Map", &using_normal)) {
+                    gs.DEBUG_USE_NORMAL_MAP = using_normal;
+                }
+
+                //Set using rm map
+                bool using_rm = gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP;
+                if (ImGui::Checkbox("Using Roughness Metallic Map", &using_rm)) {
+                    gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP = using_rm;
+                }
+
+                //Set using rm map
+                bool using_emissive = gs.DEBUG_USE_EMISSION_MAP;
+                if (ImGui::Checkbox("Using Emissive Map", &using_emissive)) {
+                    gs.DEBUG_USE_EMISSION_MAP = using_emissive;
+                }
+
+                //PBR Map Index
+                static int selected_pbr_index = 0;
+
+                //Find current active pbr
+                selected_pbr_index = gs.DEBUG_PBR_MAP_TYPE;
+
+                //Dropdown to select PBR Map
+                if (ImGui::Combo("PBR Map Types", &selected_pbr_index, gs.DEBUG_PBR_MAP_STRING.data(), gs.DEBUG_PBR_MAP_STRING.size())) {
+                    // When selection changes, update path text box
+                    if (selected_pbr_index >= 0 && selected_pbr_index < gs.DEBUG_PBR_MAP_STRING.size()) {
+                        gs.DEBUG_PBR_MAP_TYPE = static_cast<GraphicsSettings::DEBUG_PBR_MAP_TYPES>(selected_pbr_index);
+                    }
                 }
             }
 

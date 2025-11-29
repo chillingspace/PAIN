@@ -35,8 +35,8 @@ namespace PAIN {
             //Curr Skybox texure id
             Assets::GUID curr_skybox_id;
 
-            //Boolean for checking day time
-            bool using_world_light = true;
+            //Graphics settings
+            GraphicsSettings& gs = GraphicsSettings::get();
 
             //Layers management
             std::vector<Layer> layers;
@@ -109,9 +109,6 @@ namespace PAIN {
                 auto light = LightSources::get().get(world_light_name);
                 return light.has_value() ? &light->get() : nullptr;
             }
-
-            bool getUsingWorldLight() const { return using_world_light; }
-            void setUsingWorldLight(bool world_light) { using_world_light = world_light; }
 
             // Cameras
             Camera* GetActiveCamera();

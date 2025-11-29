@@ -284,6 +284,16 @@ namespace PAIN {
 			//Get environment variables
 			const auto& env = scene_asset.environment;
 
+			//Setup gs
+			gs.world_light = env.useWorldLight;
+			gs.ibl = env.useIBL;
+			gs.DEBUG_USE_DIFFUSE_MAP = env.useDiffuseMap;
+			gs.DEBUG_USE_AO_MAP = env.useAOMap;
+			gs.DEBUG_USE_NORMAL_MAP = env.useNormalMap;
+			gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP = env.useRoughnessMetallicMap;
+			gs.DEBUG_USE_EMISSION_MAP = env.useEmissionMap;
+			gs.DEBUG_PBR_MAP_TYPE = env.pbr_map;
+
 			//Create default light sources
 			LightSources::get().create(camera_light_name);
 			PN_CORE_INFO("[SceneManager] Created cam and world light source.");
@@ -295,8 +305,7 @@ namespace PAIN {
 			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
 			//Set up world light
-			using_world_light = env.useDaytime;
-			if (using_world_light) {
+			if (gs.world_light) {
 				if (!getWorldLight()) {
 					LightSources::get().create(world_light_name);
 				}
@@ -304,10 +313,6 @@ namespace PAIN {
 				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-				// GraphicsSettings::get().ibl = true;
-			}
-			else {
-				// GraphicsSettings::get().ibl = false;
 			}
 
 			//Load Skybox GUID
@@ -424,8 +429,16 @@ namespace PAIN {
 			//Capture all graphics and env variables
 			scene_asset.environment.cameraLightIntensity = getCameraLight() ? getCameraLight()->L_intensity : scene_asset.environment.cameraLightIntensity;
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
-			scene_asset.environment.useDaytime = using_world_light;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
+
+			//Other graphic settings
+			scene_asset.environment.useWorldLight = gs.world_light;
+			scene_asset.environment.useDiffuseMap = gs.DEBUG_USE_DIFFUSE_MAP;
+			scene_asset.environment.useAOMap = gs.DEBUG_USE_AO_MAP;
+			scene_asset.environment.useNormalMap = gs.DEBUG_USE_NORMAL_MAP;
+			scene_asset.environment.useRoughnessMetallicMap = gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP;
+			scene_asset.environment.useEmissionMap = gs.DEBUG_USE_EMISSION_MAP;
+			scene_asset.environment.pbr_map = gs.DEBUG_PBR_MAP_TYPE;
 
 			//Capture all layer variables
 			scene_asset.layers = layers;
@@ -452,9 +465,16 @@ namespace PAIN {
 			//Environment settings
 			sceneJson["environment"] = {
 				{"skyboxGUID", scn_asset.environment.skyboxGUID.ToString()},
-				{"useDaytime", scn_asset.environment.useDaytime},
 				{"cameraLightIntensity", {scn_asset.environment.cameraLightIntensity.x, scn_asset.environment.cameraLightIntensity.y, scn_asset.environment.cameraLightIntensity.z}},
 				{"worldLightIntensity", {scn_asset.environment.worldLightIntensity.x, scn_asset.environment.worldLightIntensity.y, scn_asset.environment.worldLightIntensity.z}},
+				{"useWorldLight", scn_asset.environment.useWorldLight},
+				{"useIBL", scn_asset.environment.useIBL},
+				{"useDiffuseMap", scn_asset.environment.useDiffuseMap},
+				{"useAOMap", scn_asset.environment.useAOMap},
+				{"useNormalMap", scn_asset.environment.useNormalMap},
+				{"useRoughnessMetallicMap", scn_asset.environment.useRoughnessMetallicMap},
+				{"useEmissionMap", scn_asset.environment.useEmissionMap},
+				{"pbr_map", static_cast<int>(scn_asset.environment.pbr_map)}
 			};
 
 			// Layers
@@ -652,7 +672,7 @@ namespace PAIN {
 
 					// Daytime / Nighttime setting
 			{
-				if (using_world_light && GraphicsSettings::get().world_light) {
+				if (gs.world_light) {
 
 					auto olc = getWorldLight();
 

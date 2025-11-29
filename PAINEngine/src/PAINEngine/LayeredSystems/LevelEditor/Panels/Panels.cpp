@@ -15,20 +15,27 @@ namespace PAIN {
 
                 //Draw window
                 bool b_check_active = true;
-                if (ImGui::Begin(name.c_str(), &b_check_active, flags)) {
+				if (ImGui::Begin(name.c_str(), &b_check_active, flags)) {
+					panel_hidden = false;
+				}
+				else {
+					panel_hidden = true;
+				}
 
-                    //Set window dock id
-                    dock_id = ImGui::GetWindowDockID();
+				//Render only when panel is not hidden or always active flag is set
+				if (!panel_hidden || always_active) {
+					//Set window dock id
+					dock_id = ImGui::GetWindowDockID();
 
-                    //Early exit if window is not active
-                    if (!b_check_active) { ImGui::End(); return; }
+					//Early exit if window is not active
+					if (!b_check_active) { ImGui::End(); return; }
 
-                    //Update panel
-                    onUpdate(timing);
+					//Update panel
+					onUpdate(timing);
 
-                    // Popups requested during OnGUI()/Update()
-                    drawPopUps();
-                }
+					// Popups requested during OnGUI()/Update()
+					drawPopUps();
+				}
 
                 ImGui::End();
 			}
