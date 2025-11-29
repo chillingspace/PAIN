@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "ini_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12792592705641830842
+  },
+  "descriptor_version": 1,
+  "guid": "82cfb8a4-a723-474b-8b71-7b749c05a906",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\textures\\ini_icon.png"
+  }
+}

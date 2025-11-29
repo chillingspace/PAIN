@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "jpg_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5221908069689708102
+  },
+  "descriptor_version": 1,
+  "guid": "d41f76a2-b04b-bc45-b804-3e814898dbc5",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\textures\\jpg_icon.png"
+  }
+}

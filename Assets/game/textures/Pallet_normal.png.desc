@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pallet_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10252025118079598455
+  },
+  "descriptor_version": 1,
+  "guid": "19d818f3-a8fc-1b4a-bf95-b233da10f329",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pallet_normal.png"
+  }
+}

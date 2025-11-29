@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "txt_icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13066834087179810961
+  },
+  "descriptor_version": 1,
+  "guid": "93ea4881-56a8-7148-b064-8198de76cad3",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\textures\\txt_icon.png"
+  }
+}

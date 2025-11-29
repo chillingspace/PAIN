@@ -118,6 +118,9 @@ namespace PAIN {
 			void joltSetup();
 
 			void notifyContact(const JPH::Body& b1, const JPH::Body& b2); // @TODO change to only enqueue collision, no lua
+
+			bool shouldLayersCollide(entt::entity a, entt::entity b);
+
 			void dispatchCollisionEvents(entt::registry& reg);
 		};
 

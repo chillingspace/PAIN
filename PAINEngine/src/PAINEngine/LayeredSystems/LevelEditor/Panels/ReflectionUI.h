@@ -653,6 +653,32 @@ inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
     return changed;  // Return the change state
 }
 
+inline bool DrawField(const char* label, PAIN::Physics::PhysicsBehavior& behavior) {
+    const char* names[] = { "Static", "Dynamic", "Debris", "Sensor" };
+    int idx = static_cast<int>(behavior);
+    bool changed = ImGui::Combo(label, &idx, names, 4);
+
+    if (changed) {
+        behavior = static_cast<PAIN::Physics::PhysicsBehavior>(idx);
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        switch (idx) {
+        case 0: ImGui::Text("Static: Does not move (walls, floor)"); break;
+        case 1: ImGui::Text("Dynamic: Moves and collides (player, objects)"); break;
+        case 2: ImGui::Text("Debris: Collides only with static"); break;
+        case 3: ImGui::Text("Sensor: Trigger volume (collides with dynamic)"); break;
+        }
+        ImGui::EndTooltip();
+    }
+
+    return changed;
+}
+
+inline bool DrawField(const char* label, PAIN::Physics::LayerMapping& mapping) {
+    return DrawField(label, mapping.behavior);
+}
 // ---- AI::SensorsConfig (cfg) ----
 inline bool DrawField(const char* label, PAIN::AI::SensorsConfig& cfg) {
     bool changed = false;
@@ -680,7 +706,6 @@ inline bool DrawField(const char* label, PAIN::Physics::MotionType& motion_type)
 
     return changed;
 }
-
 
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {

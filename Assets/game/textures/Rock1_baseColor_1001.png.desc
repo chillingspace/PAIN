@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Rock1_baseColor_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17456662269218469392
+  },
+  "descriptor_version": 1,
+  "guid": "1a732a46-6d9f-2e4d-beb7-74a9b73c9a0c",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Rock1_baseColor_1001.png"
+  }
+}

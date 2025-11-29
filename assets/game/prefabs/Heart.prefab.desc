@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Heart.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7606665460626737137
+  },
+  "descriptor_version": 1,
+  "guid": "b432d88b-b247-644e-942f-399c713a9722",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Heart.prefab"
+  }
+}
