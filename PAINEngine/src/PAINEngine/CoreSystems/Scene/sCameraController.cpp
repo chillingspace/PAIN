@@ -183,7 +183,10 @@ namespace PAIN {
 
     void sCameraController::onUpdate(AppTiming timing)
     {
-        if (!m_Scene) return;
+        if (!m_Scene) {
+            PN_CORE_ERROR("UNABLE TO GET SCENE MANAGER");
+            return;
+        };
 
         const float dt = timing.unscaled_dt;
 
