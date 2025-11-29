@@ -5,7 +5,6 @@
 
 #include "Panels.h"
 
-
 namespace PAIN {
     namespace Editor {
         namespace Panel {
@@ -35,9 +34,11 @@ namespace PAIN {
                 int selected_cam_index;
 
                 //Popups
+#ifdef PN_PLATFORM_WINDOWS
                 std::function<void(std::any const&)> createScenePopup(std::string const& popup_id);
                 std::function<void(std::any const&)> saveSceneAsPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> deleteScenePopup(std::string const& popup_id);
+#endif
 
                 // UI 
                 bool showCreate_ = false;
@@ -52,9 +53,11 @@ namespace PAIN {
             private:
 
                 // modals
+#ifdef PN_PLATFORM_WINDOWS
                 void drawCreateModal();
                 void drawDeleteModal();
                 void drawSaveAsModal();
+#endif
                 void drawEditMaskModal();
 
                 //Settings panel

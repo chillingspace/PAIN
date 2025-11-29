@@ -11,6 +11,7 @@
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 #include "ECS/Controller.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
@@ -36,6 +37,9 @@ namespace PAIN {
                 // Search filter
                 search_filter.resize(32);
                 search_filter = "";
+
+				//Set to alw active
+				always_active = true;
             }
 
             void ResourcePanel::nextWindowSettings() {
@@ -2078,6 +2082,9 @@ namespace PAIN {
 						}
 					}
 				}
+
+				//Early return flag if panel is hidden
+				if (panel_hidden) return;
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;

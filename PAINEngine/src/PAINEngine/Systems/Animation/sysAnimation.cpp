@@ -61,20 +61,17 @@ namespace PAIN {
 
 		void System::updateAllAnimations(float deltaTime, entt::registry& reg) {
 			// Get all entities with BOTH Animation AND ModelRenderer components
-			auto view = reg.view<Animation, ModelRenderer>();
+			// Optimized using group
+			auto group = reg.group<Animation>(entt::get<ModelRenderer>);
 
 			// Count entities
 			size_t entityCount = 0;
-			for (auto e : view) { entityCount++; }
+			for (auto e : group) { entityCount++; }
 
 
 			// Iterate and update each animated entity
-			for (auto entity : view) {
-				auto& anim = view.get<Animation>(entity);
-				auto& renderer = view.get<ModelRenderer>(entity);
-
-
-
+			for (auto [entity, anim, renderer] : group.each()) {
+				
 				// Skip if not playing or no model
 				if (!anim.isPlaying) {
 					continue;

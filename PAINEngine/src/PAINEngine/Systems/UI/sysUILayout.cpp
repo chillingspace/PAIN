@@ -62,7 +62,8 @@ namespace PAIN {
 			for (auto [entity, hierarchy, ui_canvas, ui_rect_trans] : canvas_group.each()) {
 				// Only process root canvas nodes (no parent)
 				if (hierarchy.parentGUID.IsValid()) {
-					continue;  // Skip children, they'll be processed recursively
+					// Skip children, they'll be processed recursively
+					continue;  
 				}
 
 				// Check layer visibility if canvas has a layer
@@ -70,256 +71,86 @@ namespace PAIN {
 					const auto& layerComp = registry.get<Entity::Layer>(entity);
 					auto scn_service = services.lock()->get<Scene::SceneManager>();
 					if (!scn_service->isLayerEnabled(layerComp.layer_id)) {
-						continue;  // Skip entire canvas hierarchy if layer is disabled
+						// Skip entire canvas hierarchy if layer is disabled
+						continue;  
 					}
 				}
 
-				// Calculate layout origin
-				glm::vec2 layout_origin(0, 0);  // Default to screen origin
+				// Calculate canvas position and size
+				glm::vec2 canvas_pos(0, 0);
+				glm::vec2 canvas_size = screen_size;
 
-				// If canvas has world transform, use it (for world-space UI)
-				if (registry.all_of<WorldTransform>(entity) && registry.all_of<UICanvas>(entity)) {
-					const auto& ui_canvas = registry.get<UICanvas>(entity);
-					if (ui_canvas.render_mode == CanvasRenderMode::WorldSpace) {
+				// For WorldSpace mode, position is from world transform
+				if (ui_canvas.render_mode == CanvasRenderMode::WorldSpace) {
+					if (registry.all_of<WorldTransform>(entity)) {
 						const auto& wtrans = registry.get<WorldTransform>(entity);
-						layout_origin = glm::vec2(wtrans.matrix[3].x, wtrans.matrix[3].y);
+						canvas_pos = glm::vec2(wtrans.matrix[3].x, wtrans.matrix[3].y);
+						// Optionally scale canvas size by world_scale
+						canvas_size *= ui_canvas.world_scale;
 					}
 				}
 
-				processHierarchy(entity, registry, screen_size, layout_origin);
+				// Set canvas's own rect transform (so it knows its bounds)
+				ui_rect_trans.calculated_world_position = canvas_pos;
+				ui_rect_trans.calculated_world_size = canvas_size;
+
+				// Process children with canvas as parent
+				processHierarchy(entity, registry, canvas_size, canvas_pos);
 			}
+
 		}
 
 
-		//void LayoutSystem::processHierarchy(entt::entity entity, entt::registry& registry, const glm::vec2& parent_size, const glm::vec2& parent_pos)
-		//{
-		//	auto svc = services.lock();
-		//	auto ecs = svc->get<ECS::Controller>();
-		//	// Use WorldTransform for UI position
-		//	glm::vec2 calculated_pos = parent_pos;
-		//	glm::vec2 calculated_size = parent_size;
-
-		//	// 1. world-space UI
-		//	if (registry.all_of<WorldTransform>(entity) &&
-		//		registry.all_of<UIRectTransform>(entity) &&
-		//		!registry.all_of<UIFollowsWorldEntity>(entity))
-		//	{
-		//		const auto& w_trans = registry.get<WorldTransform>(entity);
-		//		auto& rect = registry.get<UIRectTransform>(entity);
-
-		//		calculated_pos = glm::vec2(w_trans.matrix[3]);
-		//		// Calculate size using UI-specific logic or from the overall world scale
-		//		glm::vec3 world_scale(
-		//			glm::length(glm::vec3(w_trans.matrix[0])),
-		//			glm::length(glm::vec3(w_trans.matrix[1])),
-		//			glm::length(glm::vec3(w_trans.matrix[2]))
-		//		);
-
-		//		calculated_size = rect.size_delta * glm::vec2(world_scale);
-
-		//		rect.calculated_world_position = calculated_pos;
-		//		rect.calculated_world_size = calculated_size;
-
-		//		//// If UIRectTransform has local size, multiply by world_scale.xy for final size
-		//		//if (registry.all_of<UIRectTransform>(entity)) {
-		//		//	auto& rect = registry.get<UIRectTransform>(entity);
-
-		//		//	if (!registry.all_of<UIFollowsWorldEntity>(entity)) {
-		//		//		calculated_size = rect.size_delta * glm::vec2(world_scale);
-		//		//		rect.calculated_world_position = calculated_pos;
-		//		//		rect.calculated_world_size = calculated_size;
-		//		//	}
-		//		//}
-		//	}
-		//	// screen-space UI/ canvas UI (no worldtransform)
-		//	else if (registry.all_of<UIRectTransform>(entity) &&
-		//		!registry.all_of<UIFollowsWorldEntity>(entity))
-		//	{
-		//		auto& rect = registry.get<UIRectTransform>(entity);
-
-		//		//// For now: ignore anchors, treat anchored_position as bottom-left offset
-		//		//calculated_pos = parent_pos + rect.anchored_position;
-		//		//calculated_size = rect.size_delta;
-
-		//		//rect.calculated_world_position = calculated_pos;
-		//		//rect.calculated_world_size = calculated_size;
-
-		//		// Compute rect in parent space from anchors + offsets
-		//		// parent_pos/parent_size are already in screen pixels.
-		//		glm::vec2 anchor_min_pos = parent_pos + rect.anchor_min * parent_size + rect.offset_min;
-		//		glm::vec2 anchor_max_pos = parent_pos + rect.anchor_max * parent_size + rect.offset_max;
-
-		//		glm::vec2 size;
-		//		glm::vec2 pos;
-
-		//		if (rect.anchor_min == rect.anchor_max) {
-		//			// "Simple" case: fixed-size element
-		//			size = rect.size_delta;
-
-		//			// anchored_position is relative to anchor; then pivot shifts inside that rect
-		//			glm::vec2 anchor_point = parent_pos + rect.anchor_min * parent_size + rect.anchored_position;
-		//			pos = anchor_point - rect.pivot * size;
-		//		}
-		//		else {
-		//			// Stretched between anchors
-		//			size = anchor_max_pos - anchor_min_pos;
-		//			// For now, treat rect_min as position; you can refine with pivot if needed.
-		//			pos = anchor_min_pos;
-		//		}
-
-		//		rect.calculated_world_position = pos;
-		//		rect.calculated_world_size = size;
-
-		//		calculated_pos = pos;
-		//		calculated_size = size;
-		//	}
-
-		//	// Traverse children using Hierarchy 
-		//	if (registry.all_of<Entity::Hierarchy>(entity)) {
-		//		const auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
-		//		for (const auto& childGUID : hierarchy.childrenGUIDs) {
-		//			entt::entity child = ecs->resolveGUID(childGUID);
-		//			if (child != entt::null && ecs->checkEntity(child)) {
-		//				processHierarchy(child, registry, calculated_size, calculated_pos);
-		//			}
-		//		}
-		//	}
-		//}
-
-		void LayoutSystem::processHierarchy(entt::entity entity,
-			entt::registry& registry,
-			const glm::vec2& parent_size,
-			const glm::vec2& parent_pos)
+		void LayoutSystem::processHierarchy(entt::entity entity, entt::registry& registry,
+			const glm::vec2& parent_size, const glm::vec2& parent_pos)
 		{
 			auto svc = services.lock();
 			auto ecs = svc->get<ECS::Controller>();
-			auto asset_mgr = svc->get<Assets::Manager>();
 
-			glm::vec2 calculated_pos = parent_pos;
-			glm::vec2 calculated_size = parent_size;
-
-
-			// 1) SCREEN-SPACE / CANVAS UI (HUD, buttons, d-pad, etc.)
-			//    Any UIRectTransform that is NOT a UIFollowsWorldEntity
-			if (registry.all_of<UIRectTransform>(entity) &&
-				!registry.all_of<UIFollowsWorldEntity>(entity))
-			{
-				auto& rect = registry.get<UIRectTransform>(entity);
-
-				glm::vec2 anchor_min_pos = parent_pos + rect.anchor_min * parent_size + rect.offset_min;
-				glm::vec2 anchor_max_pos = parent_pos + rect.anchor_max * parent_size + rect.offset_max;
-
-				glm::vec2 size;
-				glm::vec2 pos;
-
-				if (rect.anchor_min == rect.anchor_max)
-				{
-					// --- FIXED SIZE ELEMENTS ---
-
-					// Start with whatever designer put in size_delta
-					size = rect.size_delta;
-
-					// If size_delta is "unset" (0,0), try to infer from Texture2D
-					if (size == glm::vec2(0.0f) &&
-						asset_mgr &&
-						registry.all_of<Texture2D>(entity))
-					{
-						auto& texComp = registry.get<Texture2D>(entity);
-
-						if (texComp.texture_guid.IsValid())
-						{
-							// Ask Asset Manager for the texture
-							auto texOpt = asset_mgr->getAsset<Assets::Texture>(texComp.texture_guid);
-							if (texOpt.has_value() && texOpt.value())
-							{
-								auto tex = texOpt.value();
-
-								// Replace GetWidth()/GetHeight() with your actual API
-								float w = static_cast<float>(tex->getWidth());
-								float h = static_cast<float>(tex->getHeight());
-
-								size = glm::vec2(w, h) * texComp.texture_scale;
-							}
-							else
-							{
-								// Fallback size if asset missing
-								size = glm::vec2(100.0f, 100.0f);
-							}
-						}
-						else
-						{
-							// No texture GUID, fallback
-							size = glm::vec2(100.0f, 100.0f);
-						}
-					}
-
-					// Anchor point in parent space
-					glm::vec2 anchor_point =
-						parent_pos +
-						rect.anchor_min * parent_size +
-						rect.anchored_position;
-
-					// pivot is in [0,1] (0=bottom/left, 1=top/right)
-					pos = anchor_point - rect.pivot * size;
-				}
-				else
-				{
-					// --- STRETCHED ELEMENTS ---
-					size = anchor_max_pos - anchor_min_pos;
-					pos = anchor_min_pos;
-				}
-
-				rect.calculated_world_position = pos;
-				rect.calculated_world_size = size;
-
-				calculated_pos = pos;
-				calculated_size = size;
-
-
-				// default pivot to center if uninitialized
-				if (rect.pivot == glm::vec2(0.0f)) {
-					rect.pivot = glm::vec2(0.5f, 0.5f);
-				}
-
-				// Treat as a fixed-size element.
-				// size_delta is the width/height in pixels.
-				size = rect.size_delta;
-
-				// Anchor point in parent space:
-				// - anchor_min picks a point in the parent rect (0..1)
-				// - anchored_position is an offset from that point
-				glm::vec2 anchor_point =
-					parent_pos + rect.anchor_min * parent_size + rect.anchored_position;
-
-				// Move from anchor point to bottom-left using pivot (0..1)
-				pos = anchor_point - rect.pivot * size;
-
-				rect.calculated_world_position = pos;
-				rect.calculated_world_size = size;
-
-				calculated_pos = pos;
-				calculated_size = size;
-			}
-			// 2) WORLD-FOLLOW LABELS (e.g. “Press E”)
-			else if (registry.all_of<UIRectTransform>(entity) &&
-				registry.all_of<UIFollowsWorldEntity>(entity))
-			{
-				auto& rect = registry.get<UIRectTransform>(entity);
-
-				// updateFloatingLabels has already written a screen position
-				calculated_pos = rect.calculated_world_position;
-				calculated_size = rect.calculated_world_size;
-			}
-			// 3) Non-UI entities: just propagate the parent rect
-			else
-			{
-				calculated_pos = parent_pos;
-				calculated_size = parent_size;
+			if (!registry.all_of<UIRectTransform>(entity)) {
+				return;
 			}
 
-			// Recurse into children
-			if (registry.all_of<Entity::Hierarchy>(entity))
-			{
+			if (registry.all_of<UIFollowsWorldEntity>(entity)) {
+				return;
+			}
+
+			auto& rect = registry.get<UIRectTransform>(entity);
+
+			// Calculate anchor points in parent space
+			glm::vec2 anchor_min_pos = parent_pos + rect.anchor_min * parent_size;
+			glm::vec2 anchor_max_pos = parent_pos + rect.anchor_max * parent_size;
+
+			// Calculate size based on anchors
+			glm::vec2 calculated_size;
+			glm::vec2 calculated_pos;
+
+			if (rect.anchor_min == rect.anchor_max) {
+				// Anchors together - use size_delta as absolute size
+				calculated_size = rect.size_delta;
+				calculated_pos = anchor_min_pos + rect.anchored_position;
+			}
+			else {
+				// Anchors apart - stretch between them with offsets
+				calculated_size = anchor_max_pos - anchor_min_pos +
+					glm::vec2(rect.offset_max.x - rect.offset_min.x,
+						rect.offset_max.y - rect.offset_min.y);
+				calculated_pos = anchor_min_pos + rect.offset_min;
+			}
+
+			// Apply pivot (adjust position based on pivot point)
+			calculated_pos -= rect.pivot * calculated_size;
+
+			// Apply local position, rotation, scale
+			calculated_pos += glm::vec2(rect.local_position);
+			calculated_size *= glm::vec2(rect.scale);
+
+			// Write back calculated values
+			rect.calculated_world_position = calculated_pos;
+			rect.calculated_world_size = calculated_size;
+
+			// Process children
+			if (registry.all_of<Entity::Hierarchy>(entity)) {
 				const auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
 				for (const auto& childGUID : hierarchy.childrenGUIDs)
 				{
@@ -331,7 +162,6 @@ namespace PAIN {
 				}
 			}
 		}
-
 
 
 		// Check if position is behind camera
@@ -401,9 +231,14 @@ namespace PAIN {
 		// Update all floating labels
 		void LayoutSystem::updateFloatingLabels(entt::registry& registry, const glm::mat4& view, const glm::mat4& proj, const glm::vec2& viewport)
 		{
-			auto view_floating = registry.view<UIFollowsWorldEntity, UIRectTransform, UIElement>();
+			auto view_floating = registry.group<UIFollowsWorldEntity>(entt::get<UIRectTransform, UIElement>);
 			auto svc = services.lock();
 			auto ecs = svc->get<ECS::Controller>();
+
+			// Get camera position for distance calculation
+			auto scene_service = svc->get<Scene::SceneManager>();
+			Camera* cam = scene_service->GetActiveCamera();
+			glm::vec3 cam_pos = cam->pos;
 
 			for (auto&& [entity, follows, rect, elem] : view_floating.each()) {
 				entt::entity follow_entity = ecs->resolveGUID(follows.entity_target_guid);
@@ -446,9 +281,27 @@ namespace PAIN {
 				else {
 					elem.b_is_enabled = true;
 					rect.calculated_world_position = screen_pos;
+
+					// Calculate distance-based scale
+					float distance = glm::length(world_pos - cam_pos);
+
+					// Option 1: Perspective-correct scaling (text stays consistent size)
+					// Use the clip.w (depth) for perspective-correct scaling
+					//float scale_factor = 1.0f / (clip.w * 0.01f);  // Adjust 0.01f for desired scaling
+
+					// Option 2: Simple distance-based scaling
+					const float reference_distance = 10.0f;
+					float scale_factor = reference_distance / distance;
+
+					// Clamp to reasonable range
+					scale_factor = glm::clamp(scale_factor, 0.2f, 3.0f);
+
+					// Store scale in rect for renderer to use
+					rect.scale = glm::vec3(scale_factor, scale_factor, 1.0f);
 				}
 			}
 		}
+
 
 	}
 }

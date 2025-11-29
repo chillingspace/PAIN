@@ -1,3 +1,4 @@
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 #include "pch.h"
 #include "PrefabsPanel.h"
@@ -7,6 +8,8 @@
 #include "ECS/Components/AllComponents.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Serialization/sSerialization.h"
+
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "ViewportPanel.h"
@@ -530,4 +533,5 @@ namespace PAIN {
         } 
     }
 }
+#endif
 #endif

@@ -73,8 +73,10 @@ namespace PAIN {
                 entt::entity m_HoveredEntity = entt::null;
 
                 std::shared_ptr<EntityPanel> m_EntityPanel;
+#ifdef PN_PLATFORM_WINDOWS
                 std::shared_ptr<ComponentsPanel> m_comp_panel;
                 std::shared_ptr<PrefabPanel> m_prefab_panel;
+#endif
 
                 entt::entity m_DragHoveredEntity = entt::null;  // Add this
                 entt::entity findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize);

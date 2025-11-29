@@ -6,21 +6,24 @@ namespace PAIN {
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
 			//Ensure local with world
+			// Use view for single component iteration (faster/safer for exclusion checks)
 			auto localOnly = registry.view<LocalTransform>(entt::exclude<WorldTransform>);
 			for (auto entity : localOnly) {
 				registry.emplace<WorldTransform>(entity);
 			}
 
 			//Ensure world with local
+			// Use view for single component iteration
 			auto worldOnly = registry.view<WorldTransform>(entt::exclude<LocalTransform>);
 			for (auto entity : worldOnly) {
 				registry.emplace<LocalTransform>(entity); // Default-initialized
 			}
 
-			auto view = registry.view<WorldTransform, LocalTransform, Entity::GUID, Entity::Hierarchy>();
+			// Use group to iterate entities with all required components for the main update
+			auto view = registry.view<LocalTransform, WorldTransform, Entity::GUID, Entity::Hierarchy>();
 
 			//View each entity to update
-			for (auto [entity, world, local, guid, hierarchy] : view.each()) {
+			for (auto [entity, local, world, guid, hierarchy] : view.each()) {
 				if (!hierarchy.parentGUID.IsValid()) {
 					updateRecursive(entity, glm::mat4(1.0f), registry);
 				}

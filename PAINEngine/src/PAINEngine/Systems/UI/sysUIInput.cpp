@@ -348,7 +348,9 @@ namespace PAIN {
 
 		std::optional<entt::entity> InputSystem::raycastUI(const glm::vec2& mouse_pos, entt::registry& registry) {
 			auto ecs = services.lock()->get<ECS::Controller>();
-			auto view = registry.view<UIRectTransform, UIElement>();
+
+
+			auto view = registry.group<UIRectTransform>(entt::get <UIElement>);
 
 			//PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.1f}, {:.1f})", mouse_pos.x, mouse_pos.y);
 

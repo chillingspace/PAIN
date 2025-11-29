@@ -16,7 +16,6 @@
 
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
-    class Scene::SceneManager;
     namespace Assets { class Model; } // Forward-declare Assets::Model
     struct LocalTransform;
     struct ModelRenderer;

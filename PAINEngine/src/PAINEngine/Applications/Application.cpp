@@ -121,15 +121,14 @@ namespace PAIN {
 		// Register all systems here
 		services->get<ECS::Controller>()->registerAllSystems();
 
+		// Renderer
+		addCoreSystem(std::make_shared<sRenderer>());
+
 		// Scenes
 		addCoreSystem(std::make_shared<Scene::SceneManager>());
 
 		// Camera System
 		addCoreSystem(std::make_shared<sCameraController>());
-
-		// Renderer
-		addCoreSystem(std::make_shared<sRenderer>());
-
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -161,21 +160,29 @@ namespace PAIN {
 		auto window = services->get<Window::Window>();
 		if (window) window->pollEvents();
 
+		if (window->isMinimized()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue; // Go back to start of while loop
+		}
+
 		//Drain all events in queue
 		drainEventQueue();
 
 		//Update delta time
 		auto now = std::chrono::steady_clock::now();
-		timing.dt = std::chrono::duration<float>(now - last_time).count();
+		float real_dt = std::chrono::duration<float>(now - last_time).count();
 		last_time = now;
 
-		auto fps = static_cast<int>(1.f / timing.dt);
+		// Store Unscaled Time (Always ticking even when paused)
+		timing.unscaled_dt = real_dt;
+
+		auto fps = static_cast<int>(1.f / timing.unscaled_dt);
 #ifdef PN_PLATFORM_WINDOWS
 		static float avgFps = 0.f;
 		static float timeSinceLastUpdate = 0.0f;
 
 		avgFps = avgFps * 0.95f + fps * 0.05f;
-		timeSinceLastUpdate += timing.dt;
+		timeSinceLastUpdate += timing.unscaled_dt;
 
 		if (timeSinceLastUpdate >= 0.5f) {
 			timeSinceLastUpdate = 0.0f;
@@ -193,9 +200,14 @@ namespace PAIN {
 			services->get<Audio::Audio>()->pauseAll();
 		}
 		else {
+			timing.dt = real_dt;
 			services->get<Audio::Audio>()->resumeAll();
 		}
+#else
+		timing.dt = real_dt;
 #endif
+
+
 
 		//Accumulate for fixed updates (use scaled time)
 		accumulator += timing.dt;  // Changed from timing.dt

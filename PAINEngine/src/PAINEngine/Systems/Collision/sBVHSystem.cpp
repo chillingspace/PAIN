@@ -353,9 +353,10 @@ namespace PAIN {
         int aabbUpdateCount = 0;
 
         // Single-pass entity processing with better cache locality (Fix #4)
-        auto bvView = registry.view<WorldTransform, BoundingVolume>();
+        // Optimized using group
+        auto bvGroup = registry.group<BoundingVolume>(entt::get<WorldTransform>);
 
-        for (auto [entity, transform, bvComponent] : bvView.each()) {
+        for (auto [entity, bvComponent, transform] : bvGroup.each()) {
 
             m_currentFrameEntities.insert(entity);
 
@@ -383,9 +384,10 @@ namespace PAIN {
         }
 
         // Separate pass for new entities (Fix #6)
-        auto needsBVView = registry.view<WorldTransform, ModelRenderer>(entt::exclude<BoundingVolume>);
+        // Use view to avoid group ownership conflict with sysRender
+        auto needsBVView = registry.view<ModelRenderer, WorldTransform>(entt::exclude<BoundingVolume>);
 
-        for (auto [entity, transform, modelRenderer] : needsBVView.each()) {
+        for (auto [entity, modelRenderer, transform] : needsBVView.each()) {
 
             // Early validation (Fix #6)
             if (!modelRenderer.modelGUID.IsValid()) continue;

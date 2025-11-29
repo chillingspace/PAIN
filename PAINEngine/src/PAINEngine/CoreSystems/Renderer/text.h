@@ -33,9 +33,9 @@ namespace PAIN {
 
 		float measureTextWidth(const std::string& text, std::shared_ptr<Assets::Fonts::FontGlyphAtlas> font, float scale);
 		std::vector<std::string> handleTextWrap(const PAIN::UIText& text_comp);
-		void renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
-		void renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
-		void renderGlyph(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor);
+		void renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float font_final_scale);
+		void renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float font_final_scale);
+		void renderGlyph(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float font_final_scale);
 	public:
 		// dependency injection
 		static void init(std::shared_ptr<Services> s) {

@@ -31,8 +31,10 @@ namespace PAIN {
             }
 
             // 2. Iterate all entities with AudioSource and Transform
-            auto view = registry.view<AudioSource, LocalTransform, WorldTransform>();
-            for (auto [entity, audioSrc, transform, worldtransform] : view.each())
+            // Optimized using group
+            auto group = registry.group<AudioSource>(entt::get<LocalTransform, WorldTransform>);
+            
+            for (auto [entity, audioSrc, transform, worldtransform] : group.each())
             {
                 //auto& audioSrc = view.get<AudioSource>(entity);
                 //auto& transform = view.get<Transform>(entity);

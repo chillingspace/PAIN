@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 #ifndef PREFAB_PANEL_HPP
 #define PREFAB_PANEL_HPP
@@ -7,6 +8,7 @@
 #include "AssetData.h"
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "ECS/Controller.h"
+
 
 namespace PAIN {
     namespace Editor {
@@ -86,4 +88,5 @@ namespace PAIN {
     }
 }
 #endif 
+#endif
 #endif

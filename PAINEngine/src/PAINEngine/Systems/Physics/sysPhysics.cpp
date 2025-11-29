@@ -136,10 +136,43 @@ namespace PAIN {
 			//PN_CORE_WARN("[PHYSICS] Contact b1={}, b2={}", (uint32_t)a, (uint32_t)b);
 			if (a == entt::null || b == entt::null) return;
 
+			// Check scene layer collision rules
+			if (!shouldLayersCollide(a, b)) return;
+
 			{
 				std::lock_guard<std::mutex> lock(collisionMutex_);
 				pendingCollisions_.push_back({ a, b });
 			}
+		}
+
+		bool System::shouldLayersCollide(entt::entity a, entt::entity b) {
+			auto svc = services.lock();
+			if (!svc) return true;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return true;
+
+			auto& registry = ecs->getRegistry();
+
+			// Get scene layers
+			if (!registry.all_of<Entity::Layer>(a) || !registry.all_of<Entity::Layer>(b))
+				return true;  // No layer component = allow collision
+
+			auto& layerA = registry.get<Entity::Layer>(a);
+			auto& layerB = registry.get<Entity::Layer>(b);
+
+			// Get scene manager for mask matrix
+			auto sceneMgr = svc->get<Scene::SceneManager>();
+			if (!sceneMgr) return true;
+
+			// Check mask matrix
+			const auto& mask_matrix = sceneMgr->getMaskMatrix();
+			if (layerA.layer_id < mask_matrix.size() &&
+				layerB.layer_id < mask_matrix[layerA.layer_id].size()) {
+				return mask_matrix[layerA.layer_id][layerB.layer_id];
+			}
+
+			return true;
 		}
 
 		void System::dispatchCollisionEvents(entt::registry& reg)
@@ -269,21 +302,21 @@ namespace PAIN {
 				auto& body_interface = jolt_physics->GetBodyInterface();
 
 				// Find all entities with Transform and RigidBody3D components
-				auto view = registry.view<LocalTransform, WorldTransform, Physics::RigidBody3D>();
-				for (auto&& [entity, transform, world, rigidBody] : view.each()) {
+				// Optimized using group
+				auto group = registry.group<Physics::RigidBody3D>(entt::get<LocalTransform, WorldTransform>);
+				
+				for (auto&& [entity, rigidBody, transform, world] : group.each()) {
 
-					transform = view.get<LocalTransform>(entity);
-					rigidBody = view.get<Physics::RigidBody3D>(entity);
-
-					// Check if layer needs updating
 					if (!rigidBody.bodyID.IsInvalid()) {
 						JPH::ObjectLayer current_layer = body_interface.GetObjectLayer(rigidBody.bodyID);
+						JPH::ObjectLayer desired_layer = rigidBody.physics_behavior.toJoltLayer();
 
-						if (current_layer != rigidBody.layer.value) {
+						if (current_layer != desired_layer) {
 							// Layer changed in component, update physics body
-							updateBodyLayer(rigidBody.bodyID, rigidBody.layer.value);
+							updateBodyLayer(rigidBody.bodyID, desired_layer);
 						}
 					}
+
 
 					// Check and apply motion type update
 					JPH::EMotionType desired_motion_type;
@@ -343,10 +376,9 @@ namespace PAIN {
 		}
 
 		void System::syncNewBodies(entt::registry& registry) {
-			auto view = registry.view<LocalTransform, Physics::RigidBody3D>();
-			for (auto&& [entity, transform, rigidBody] : view.each()) {
-				transform = view.get<LocalTransform>(entity);
-				rigidBody = view.get<Physics::RigidBody3D>(entity);
+			// Use view to avoid group ownership conflict with onUpdate
+			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
+			for (auto&& [entity, rigidBody, transform] : view.each()) {
 				
 				// Only create if not already created
 				if (rigidBody.bodyID.IsInvalid()) {
@@ -373,6 +405,8 @@ namespace PAIN {
 					default:                    motion_type = JPH::EMotionType::Dynamic; break;
 					}
 
+					JPH::ObjectLayer jolt_layer = rigidBody.physics_behavior.toJoltLayer();
+
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
 						boxShape,
@@ -381,7 +415,7 @@ namespace PAIN {
 								   transform.position.z),
 						rotationQuat,
 						motion_type,
-						rigidBody.layer
+						jolt_layer
 					);
 
 					settings.mAllowDynamicOrKinematic = true;  // Allow runtime motion type changes
@@ -408,12 +442,12 @@ namespace PAIN {
 
 		void System::applyBounce(entt::registry& registry, entt::entity targetEntity, float jumpImpulse)
 		{
-			auto view = registry.view<LocalTransform, Physics::RigidBody3D, Audio::AudioSource>();
-			if (!view.contains(targetEntity))
+			// Optimized for single entity lookup
+			if (!registry.all_of<LocalTransform, Physics::RigidBody3D, Audio::AudioSource>(targetEntity))
 				return;
 
-			auto& transform = view.get<LocalTransform>(targetEntity);
-			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
+			auto& transform = registry.get<LocalTransform>(targetEntity);
+			auto& rigidBody = registry.get<RigidBody3D>(targetEntity);
 
 			// Ground check
 			glm::f32 half_height = 0.5f * transform.scale.y;

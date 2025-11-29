@@ -183,7 +183,12 @@ namespace PAIN {
 
     void sCameraController::onUpdate(AppTiming timing)
     {
-        const float dt = timing.dt;
+        if (!m_Scene) {
+            PN_CORE_ERROR("UNABLE TO GET SCENE MANAGER");
+            return;
+        };
+
+        const float dt = timing.unscaled_dt;
 
 #ifdef _DEBUG
         auto editor = services->get<Editor::Editor>();

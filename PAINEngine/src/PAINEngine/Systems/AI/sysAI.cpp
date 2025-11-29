@@ -90,13 +90,14 @@ namespace PAIN {
 		void PerceptionSystem::onUpdate(float dt, entt::registry& reg) {
 			(void)dt;
 
-			auto sensorView = reg.view<Sensors, PAIN::LocalTransform>();
+			// Optimized using group
+			auto sensorGroup = reg.group<Sensors>(entt::get<PAIN::LocalTransform>);
 			auto transformView = reg.view<PAIN::LocalTransform>();
 
 			// !TODO: naive N^2 sample; replace with spatial query later
 			
 			// Iterate all entities that have Sensors + Transform
-			sensorView.each([&](entt::entity e, Sensors& sens, PAIN::LocalTransform& ts) {
+			sensorGroup.each([&](entt::entity e, Sensors& sens, PAIN::LocalTransform& ts) {
 				sens.visible_targets.clear();
 
 				// Iterate all entities that have Transform
@@ -281,9 +282,10 @@ namespace PAIN {
 		}
 
 		void NavigationSystem::onUpdate(float dt, entt::registry& reg) {
-			auto navView = reg.view<NavAgent, PAIN::LocalTransform>();
+			// Optimized using group
+			auto navGroup = reg.group<NavAgent>(entt::get<PAIN::LocalTransform>);
 
-			navView.each([&](entt::entity e, NavAgent& agent, PAIN::LocalTransform&) {
+			navGroup.each([&](entt::entity e, NavAgent& agent, PAIN::LocalTransform&) {
 
 				if (!agent.move_target.has_value())
 					return;
@@ -484,7 +486,8 @@ namespace PAIN {
 			float dt = timing.dt;
 
 			// for now, write some facts 
-			auto facts = reg.view<Blackboard, PAIN::LocalTransform>();
+			// Optimized using group
+			auto facts = reg.group<Blackboard>(entt::get<PAIN::LocalTransform>);
 			for (auto [e, bb, lt] : facts.each()) {
 				bb.set<glm::vec3>("selfpos", lt.position);
 			}

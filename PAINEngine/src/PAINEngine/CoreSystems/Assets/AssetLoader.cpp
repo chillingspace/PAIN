@@ -426,7 +426,7 @@ namespace PAIN {
             readMem(asset.vertices.data(), vtxCount * sizeof(Vertex));
             readMem(asset.indices.data(), idxCount * sizeof(uint32_t));
 
-            PN_CORE_TRACE("ImportModel: Before reading submeshes");
+            PN_CORE_TRACE("ImportModel: Read {} vertices and {} indices from {}", vtxCount, idxCount, virtual_path);
 
             // Submeshes
             uint32_t submeshCount = 0;
@@ -915,10 +915,6 @@ namespace PAIN {
                     sceneAsset->environment.skyboxGUID = Assets::GUID(env["skyboxGUID"].get<std::string>());
                 }
 
-                if (env.contains("useDaytime")) {
-                    sceneAsset->environment.useDaytime = env["useDaytime"].get<bool>();
-                }
-
                 if (env.contains("cameraLightIntensity") && env["cameraLightIntensity"].is_array() && env["cameraLightIntensity"].size() >= 3) {
                     sceneAsset->environment.cameraLightIntensity = glm::vec3(
                         env["cameraLightIntensity"][0].get<float>(),
@@ -933,6 +929,31 @@ namespace PAIN {
                         env["worldLightIntensity"][1].get<float>(),
                         env["worldLightIntensity"][2].get<float>()
                     );
+                }
+
+                if (env.contains("useWorldLight")) {
+                    sceneAsset->environment.useWorldLight = env["useWorldLight"].get<bool>();
+                }
+                if (env.contains("useIBL")) {
+                    sceneAsset->environment.useIBL = env["useIBL"].get<bool>();
+                }
+                if (env.contains("useDiffuseMap")) {
+                    sceneAsset->environment.useDiffuseMap = env["useDiffuseMap"].get<bool>();
+                }
+                if (env.contains("useAOMap")) {
+                    sceneAsset->environment.useAOMap = env["useAOMap"].get<bool>();
+                }
+                if (env.contains("useNormalMap")) {
+                    sceneAsset->environment.useNormalMap = env["useNormalMap"].get<bool>();
+                }
+                if (env.contains("useRoughnessMetallicMap")) {
+                    sceneAsset->environment.useRoughnessMetallicMap = env["useRoughnessMetallicMap"].get<bool>();
+                }
+                if (env.contains("useEmissionMap")) {
+                    sceneAsset->environment.useEmissionMap = env["useEmissionMap"].get<bool>();
+                }
+                if (env.contains("pbr_map")) {
+                    sceneAsset->environment.pbr_map = static_cast<GraphicsSettings::DEBUG_PBR_MAP_TYPES>(env["pbr_map"].get<int>());
                 }
             }
 

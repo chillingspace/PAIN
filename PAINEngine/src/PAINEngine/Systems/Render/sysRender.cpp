@@ -8,8 +8,7 @@
 #include "ECS/Components/AllComponents.h"
 #include "Systems/Collision/sBVHSystem.h"
 #include "ECS/Components/cAnimation.h" 
-#include "ECS/Controller.h"
-
+#include "CoreSystems/Renderer/text.h"
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
 #endif
@@ -164,8 +163,16 @@ namespace PAIN {
                 if (err != GL_NO_ERROR) {
                     PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
                 }
-
                 debugPass(registry, editor_debug_mode);
+                err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
+                }
+                uiPass(registry);
+                err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
+                }
                 services.lock()->get<sRenderer>()->postProcessPass();
                 err = glGetError();
                 if (err != GL_NO_ERROR) {
@@ -242,6 +249,10 @@ namespace PAIN {
             auto renderGroup = registry.group<ModelRenderer>(
                 entt::get<WorldTransform, Entity::Layer>
             );
+
+            if (!rendererService->m_Scene) {
+                return;
+            }
 
             rendererService->w_renderer->BeginGeometryPass(rendererService->m_Scene);
 
@@ -421,6 +432,63 @@ namespace PAIN {
                     drawNodeRecursive(rootIndex, 0);
                 }
             }
+        }
+
+        void System::uiPass(entt::registry& registry) {
+
+            //Get render service
+            auto rendererService = services.lock()->get<sRenderer>();
+            if (!rendererService || !rendererService->w_renderer) return;
+
+            //Texture and text groups
+            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform>);
+            auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
+
+            //Get scn services
+            auto scn_service = services.lock()->get<Scene::SceneManager>();
+
+            //Enable blending and depth mode
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_DEPTH_TEST);  // UI doesn't need depth
+
+            for (auto [entity, texture_comp, ui_elem, trans_comp] : texture_group.each()) {
+
+                // Layer check
+                auto layerComp = registry.try_get<Entity::Layer>(entity);
+                if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+                    continue;
+                }
+
+                if (!ui_elem.b_is_enabled) continue;
+
+                auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
+                if (!texture_opt.has_value()) continue;
+
+                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
+            }
+
+            for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
+
+                // Layer check
+                auto layerComp = registry.try_get<Entity::Layer>(entity);
+                if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+                    continue;
+                }
+
+                if (!ui_elem.b_is_enabled) continue;
+
+                auto font_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+                if (!font_opt.has_value()) continue;
+
+                text_comp.text_pos = rect_comp.calculated_world_position;
+                // For text, only one var, can jsut either x or y
+                text_comp.scale_factor = rect_comp.scale.x;
+                TextRenderer::get().renderText(text_comp);
+            }
+
+            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
         }
 
     } // namespace Render

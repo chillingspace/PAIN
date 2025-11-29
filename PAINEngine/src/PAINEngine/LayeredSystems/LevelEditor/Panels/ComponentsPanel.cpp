@@ -1,15 +1,16 @@
 ﻿#include "pch.h"
 #include "ComponentsPanel.h"
+
+#ifdef _DEBUG
+
 #include "EntityPanel.h"
 #include "../Editor.h"
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
 #include "CoreSystems/Scene/Scene.h"
-#include "ECS/Components/AllComponents.h"
 
 #include "CoreSystems/Prefabs/sPrefab.h"
-
-#ifdef _DEBUG
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 namespace PAIN {
     namespace Editor {

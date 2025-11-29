@@ -11,6 +11,7 @@
 namespace PAIN {
     namespace EntityTemplate {
 
+#ifdef PN_PLATFORM_WINDOWS
         Assets::GUID Service::createFromEntity(
             entt::entity entity,
             const std::string& templateName,
@@ -54,6 +55,7 @@ namespace PAIN {
 
             return templateAsset.guid;
         }
+#endif
 
         entt::entity Service::spawn(
             const Assets::GUID& templateGUID,
@@ -178,60 +180,6 @@ namespace PAIN {
             templateAsset.tags = templateJson.value("tags", std::vector<std::string>());
             templateAsset.name = templateAsset.templateName;
             return templateAsset;
-        }
-
-        std::shared_ptr<EntityTemplate::TemplateAsset> Service::importTemplate(
-            const std::string& sourceFilePath,
-            const std::string& newTemplateName
-        ) {
-            try {
-                auto path_service = services.lock()->get<Path::Path>();
-                auto assetManager = services.lock()->get<Assets::Manager>();
-
-                // Load template from source file
-                auto stream = path_service->createFileStream(sourceFilePath, Path::FileMode::Read, false);
-                if (!stream) {
-                    PN_CORE_ERROR("[EntityTemplate] Failed to open source file: {}", sourceFilePath);
-                    return nullptr;
-                }
-
-                nlohmann::json templateJson = stream->read();
-
-                // Deserialize template
-                EntityTemplate::TemplateAsset templateAsset = deserializeTemplate(templateJson);
-
-                // Use provided name or keep original
-                if (!newTemplateName.empty()) {
-                    templateAsset.templateName = newTemplateName;
-                    templateAsset.name = newTemplateName;
-                }
-
-                // Generate new GUID for imported template
-                templateAsset.guid = Assets::GUID::Generate();
-
-                // Save to project assets directory
-                std::string template_ext = *Assets::getAllExtensions()[Assets::Type::Templates].begin();
-                auto template_folder = Assets::getAllGameFolders()[Assets::Type::Templates].string();
-                std::string virt_path = path_service->aliasCombineRelative(
-                    Path::main_assets_alias,
-                    template_folder + std::string("/") + templateAsset.templateName + template_ext
-                );
-
-                if (!saveTemplateToFile(templateAsset, virt_path)) {
-                    PN_CORE_ERROR("[EntityTemplate] Failed to save imported template");
-                    return nullptr;
-                }
-
-                PN_CORE_INFO("[EntityTemplate] Successfully imported template '{}' from {}",
-                    templateAsset.templateName, sourceFilePath);
-
-                //Return template asset
-                return std::make_shared<EntityTemplate::TemplateAsset>(templateAsset);
-            }
-            catch (const std::exception& e) {
-                PN_CORE_ERROR("[EntityTemplate] Failed to import template: {}", e.what());
-                return nullptr;
-            }
         }
 
         nlohmann::json Service::getAllComponentsFromEntity(
