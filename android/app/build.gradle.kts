@@ -66,7 +66,7 @@ android {
         create("release") {
             val storeFilePath = keystoreProperties["storeFile"] as String?
             if (!storeFilePath.isNullOrBlank()) {
-                // KEY FIX: Use rootProject.file() to resolve from android/ folder
+                // Use rootProject.file() to resolve from android/ folder
                 storeFile = rootProject.file(storeFilePath)
             }
             storePassword = keystoreProperties["storePassword"] as String?
@@ -82,15 +82,25 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    
     buildTypes {
         debug { 
             isJniDebuggable = true
+            
+            // DUAL BUILD SUPPORT: Different app ID so debug and release can coexist
+            applicationIdSuffix = ".debug"  // Makes it: com.game.pain.debug
+            versionNameSuffix = "-DEBUG"    // Version shows as "1.0-DEBUG"
+            
+            // Different app name in launcher to distinguish them
+            manifestPlaceholders["appName"] = "PAIN (Debug)"
+            
             // For debug/emulator: Only ARM to avoid KTX x86 compilation error
             // Modern emulators can use ARM via translation
             ndk {
                 abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
             }
         }
+        
         release { 
             isMinifyEnabled = true  // Enable code shrinking
             isShrinkResources = true  // Remove unused resources
@@ -99,6 +109,9 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            
+            // Production app name
+            manifestPlaceholders["appName"] = "PAIN"
             
             // Optimize native builds
             externalNativeBuild {
@@ -114,6 +127,7 @@ android {
             }
         }
     }
+    
     externalNativeBuild {
         cmake {
             path = file("../../CMakeLists.txt")
