@@ -831,6 +831,9 @@ namespace PAIN {
                     game_folder = false;
                 }
 
+                //Reset relative path properly
+                relative_path = relative_path.string() == "." || relative_path.empty() ? "" : relative_path;
+
                 //Get material textures
                 {
                     //Identify texture folder
@@ -1034,7 +1037,6 @@ namespace PAIN {
 
                 //Material shipped path
                 std::filesystem::path material_folder = game_folder ? getAllGameFolders()[Assets::Type::Material] : getAllEngineFolders()[Assets::Type::Material];
-                relative_path = relative_path.string() == "." || relative_path.empty() ? "" : relative_path;
                 auto mat_path = assets_root / material_folder / relative_path / mat.name;
                 mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
                 
