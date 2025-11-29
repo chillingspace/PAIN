@@ -13,7 +13,8 @@ namespace PAIN {
         {
         }
         void AnimationSystem::onUpdate(AppTiming timing, entt::registry& registry) {
-            auto view = registry.view<UIAnimation, UIRectTransform>();
+
+            auto view = registry.group<UIAnimation>(entt::get<UIRectTransform>);
 
             for (auto&& [entity, ani_comp, rect_transform] : view.each()) {
                 ani_comp = view.get<UIAnimation>(entity);

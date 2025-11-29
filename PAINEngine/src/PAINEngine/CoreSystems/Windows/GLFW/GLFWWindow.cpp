@@ -85,6 +85,12 @@ namespace PAIN {
 			}
 		}
 
+		bool GLFW_Window::isMinimized() const {
+			int width, height;
+			glfwGetFramebufferSize(ptr_window, &width, &height);
+			return (width == 0 || height == 0);
+		}
+
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
 
 			//Fetch window class

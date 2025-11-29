@@ -421,31 +421,31 @@ namespace PAIN {
             }
         );
 
-        lua_.set_function("createPrefabInstance",
-            [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
-                if (!is_api_ready()) return -1;
+        //lua_.set_function("createPrefabInstance",
+        //    [this, is_api_ready](std::string prefab, std::string layer, std::string name) -> int {
+        //        if (!is_api_ready()) return -1;
 
-                //ask the engine to instantiate the prefab
-                entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
-                if (e != entt::null) {
-                    return static_cast<int>(entt::to_integral(e));
-                }
+        //        //ask the engine to instantiate the prefab
+        //        entt::entity e = api_->CreatePrefabInstance(std::move(prefab), std::move(layer), std::move(name));
+        //        if (e != entt::null) {
+        //            return static_cast<int>(entt::to_integral(e));
+        //        }
 
-                // fallback hook 
-                if (instantiatePrefab_) {
-                    entt::entity f = instantiatePrefab_(prefab, layer, name);
-                    if (f != entt::null) {
-                        return static_cast<int>(entt::to_integral(f));
-                    }
-                    PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
-                }
+        //        // fallback hook 
+        //        if (instantiatePrefab_) {
+        //            entt::entity f = instantiatePrefab_(prefab, layer, name);
+        //            if (f != entt::null) {
+        //                return static_cast<int>(entt::to_integral(f));
+        //            }
+        //            PN_WARN("[Lua] instantiatePrefab_ failed. Falling back to empty entity.");
+        //        }
 
-                // create an empty entity so scripts dont break
-                entt::entity empty = api_->CreateEntity({}, {});
-                PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
-                return static_cast<int>(entt::to_integral(empty));
-            }
-        );
+        //        // create an empty entity so scripts dont break
+        //        entt::entity empty = api_->CreateEntity({}, {});
+        //        PN_WARN("[Lua] Prefab creation failed. Created empty entity instead.");
+        //        return static_cast<int>(entt::to_integral(empty));
+        //    }
+        //);
 
         /* =========================================================================== */
         /*                                  Lookup                                     */
@@ -627,6 +627,18 @@ namespace PAIN {
                           glm::vec3{ ux, uy, uz }
                       );
                   });
+
+        lua_.set_function("getCameraOffsets", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                // 6 floats: trans(x,y,z), rot(x,y,z)
+                return std::make_tuple(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+            }
+
+            auto [t, r] = api_->GetCameraOffsets(entityId);
+            return std::make_tuple(t.x, t.y, t.z, r.x, r.y, r.z);
+            });
+
 
         /* =========================================================================== */
         /*                                Particles                                    */

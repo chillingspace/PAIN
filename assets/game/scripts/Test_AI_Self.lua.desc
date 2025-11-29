@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Test_AI_Self.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 5582240083204000073
+  },
+  "descriptor_version": 1,
+  "guid": "847d9563-8623-6c41-9e21-baa65c113360",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\Test_AI_Self.lua"
+  }
+}

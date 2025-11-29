@@ -82,6 +82,9 @@ namespace PAIN {
         auto font = font_opt.value().get()->getFont();
         if (!font) return {};
 
+        // Calculate final scale HERE
+        float final_scale = text_comp.font_size * text_comp.scale_factor;
+
         std::vector<std::string> lines;
         std::string curr_line, curr_word;
         float curr_width = 0.f, word_width = 0.f;
@@ -95,7 +98,7 @@ namespace PAIN {
             if (ch == ' ' || ch == '\n' || i == length - 1) {
                 if (i == length - 1 && ch != '\n' && ch != ' ') curr_word.push_back(ch);
 
-                word_width = measureTextWidth(curr_word, font, text_comp.font_size);
+                word_width = measureTextWidth(curr_word, font, final_scale);
 
                 if (curr_width + word_width > wrap_limit && !curr_line.empty()) {
                     lines.push_back(curr_line);
@@ -107,7 +110,7 @@ namespace PAIN {
 
                 if (ch == ' ' || ch == '\n') {
                     curr_line.push_back(ch);
-                    curr_width += measureTextWidth(" ", font, text_comp.font_size);
+                    curr_width += measureTextWidth(" ", font, final_scale);
                 }
                 if (ch == '\n') {
                     lines.push_back(curr_line);
@@ -127,17 +130,16 @@ namespace PAIN {
     }
 
 
-    void TextRenderer::renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
+    void TextRenderer::renderTextShadow(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float scale_factor)
     {
         if (text_comp.shadow_color.a == 0.f ||
             (text_comp.shadow_offset.x == 0.f && text_comp.shadow_offset.y == 0.f))
             return;
 
-        float font_size = text_comp.font_size;
-        float x_pos = x_cursor + ch.bearing.x * font_size;
-        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * font_size;
-        float width = ch.size.x * font_size;
-        float height = ch.size.y * font_size;
+        float x_pos = x_cursor + ch.bearing.x * scale_factor;
+        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * scale_factor;
+        float width = ch.size.x * scale_factor;
+        float height = ch.size.y * scale_factor;
 
         // Main shadow offset
         float shadow_x = x_pos + text_comp.shadow_offset.x;
@@ -192,16 +194,16 @@ namespace PAIN {
 
 
 
-    void TextRenderer::renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
+    void TextRenderer::renderTextOutline(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float font_final_scale)
     {
         if (text_comp.outline_thickness <= 0.0f || text_comp.outline_color.a == 0.f)
             return;
 
-        float font_size = text_comp.font_size;
-        float x_pos = x_cursor + ch.bearing.x * font_size;
-        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * font_size;
-        float width = ch.size.x * font_size;
-        float height = ch.size.y * font_size;
+        //float font_size = text_comp.font_size;
+        float x_pos = x_cursor + ch.bearing.x * font_final_scale;
+        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * font_final_scale;
+        float width = ch.size.x * font_final_scale;
+        float height = ch.size.y * font_final_scale;
 
         shader->SetUniform("textColor", glm::vec3(text_comp.outline_color));
         for (int dx = -1; dx <= 1; ++dx)
@@ -226,12 +228,12 @@ namespace PAIN {
             }
     }
 
-    void TextRenderer::renderGlyph(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor)
+    void TextRenderer::renderGlyph(const Assets::Fonts::Character& ch, const UIText& text_comp, float x_cursor, float y_cursor, float font_final_scale)
     {
-        float x_pos = x_cursor + ch.bearing.x * text_comp.font_size;
-        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * text_comp.font_size;
-        float width = ch.size.x * text_comp.font_size;
-        float height = ch.size.y * text_comp.font_size;
+        float x_pos = x_cursor + ch.bearing.x * font_final_scale;
+        float y_pos = y_cursor - (ch.size.y - ch.bearing.y) * font_final_scale;
+        float width = ch.size.x * font_final_scale;
+        float height = ch.size.y * font_final_scale;
 
         shader->SetUniform("textColor", text_comp.color);
         float vertices[6][4] = {
@@ -273,10 +275,11 @@ namespace PAIN {
         std::vector<std::string> lines = handleTextWrap(text_comp);
 
         float y_cursor = text_comp.text_pos.y;
+        float final_scale = text_comp.font_size * text_comp.scale_factor;
 
         for (const auto& line : lines) {
             // --- 2. Alignment (center/right/left) ---
-            float line_width = measureTextWidth(line, font, text_comp.font_size);
+            float line_width = measureTextWidth(line, font, final_scale);  
             float x_aligned = text_comp.text_pos.x;
             if (text_comp.alignment == TextAlignment::Center)
                 x_aligned -= 0.5f * line_width;
@@ -289,24 +292,21 @@ namespace PAIN {
                 if (font->glyphs.count(c) == 0) continue;
                 const auto& ch = font->glyphs[c];
 
-                // Text shadow
-                renderTextShadow(ch, text_comp, x_cursor, y_cursor);
+                // Pass final_scale to render functions
+                renderTextShadow(ch, text_comp, x_cursor, y_cursor, final_scale);   
+                renderTextOutline(ch, text_comp, x_cursor, y_cursor, final_scale);  
+                renderGlyph(ch, text_comp, x_cursor, y_cursor, final_scale);        
 
-                // Text outline
-                renderTextOutline(ch, text_comp, x_cursor, y_cursor);
-
-                // Main glyph 
-                renderGlyph(ch, text_comp, x_cursor, y_cursor);
-
-                x_cursor += (ch.advance >> 6) * text_comp.font_size;
+                x_cursor += (ch.advance >> 6) * final_scale;
             }
-            y_cursor += text_comp.font_size * text_comp.line_height;
+            y_cursor += final_scale * text_comp.line_height;
         }
 
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDisable(GL_BLEND);
     }
+
 
 
 

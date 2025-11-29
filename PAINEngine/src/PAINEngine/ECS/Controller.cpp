@@ -349,6 +349,7 @@ namespace PAIN {
             registerSystem<Transform::System>();
             registerSystem<Physics::System>();
             registerSystem<PAIN::Scripting::GameScriptingSystem>();
+            registerSystem<PAIN::AI::System>();
 #ifdef PN_PLATFORM_WINDOWS	
             registerSystem<AnimationSystem::System>();            
             registerSystem<Audio::System>();

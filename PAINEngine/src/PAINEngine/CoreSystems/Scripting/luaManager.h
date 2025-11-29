@@ -66,6 +66,10 @@ namespace PAIN {
         void Input_EndFrame();
         void onDetach();
 
+    public:
+        sol::state& state() { return lua_; } // so AI can call into Lua directly
+        const sol::state& state() const { return lua_; }
+
     private:
         // bindings
         void openLibs(bool shipping);

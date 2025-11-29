@@ -95,27 +95,6 @@ namespace PAIN {
         /* =========================================================================== */
         /*                                   Audio                                     */
         /* =========================================================================== */
-        //// --- Audio: playback ---
-        //int   Audio_Play(const std::string& vpath, float x, float y, float z, float volumeDb) override;
-        //int   Audio_PlayRandomFrom(const std::string& playlist, float x, float y, float z, float volumeDb) override;
-
-        //// --- Audio: channel control ---
-        //bool  Audio_Stop(int channelId) override;
-        //void  Audio_StopAll() override;
-        //bool  Audio_Pause(int channelId) override;
-        //bool  Audio_Resume(int channelId) override;
-        //void  Audio_PauseAll() override;
-        //void  Audio_ResumeAll() override;
-        //bool  Audio_SetChannelVolumeDb(int channelId, float db) override;
-        //bool  Audio_SetChannelPosition(int channelId, float x, float y, float z) override;
-
-        //// --- Audio: listener & groups ---
-        //void  Audio_SetListener(float px, float py, float pz, float vx, float vy, float vz,
-        //                        float fx, float fy, float fz, float ux, float uy, float uz) override;
-        //bool  Audio_SetGroupVolumeDb(const std::string& group, float db) override;
-        //bool  Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) override;
-        //bool  Audio_SetMuteAll(bool mute) override;
-
         void Audio_Play(entt::entity entityId) override;
         void Audio_Stop(entt::entity entityId) override;
         void Audio_SetVolumeDb(entt::entity entityId, float db) override;
@@ -139,6 +118,7 @@ namespace PAIN {
 
         Camera* Camera_GetActive() override;
         void Camera_SetTransform(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up = { 0.f, 1.f, 0.f }) override;
+        std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) override;
 
         /* =========================================================================== */
         /*                                Particles                                    */

@@ -46,6 +46,42 @@ namespace PAIN {
             glm::vec3 get_vec3(std::string_view key, glm::vec3 def = {}) const {
                 if (auto v = get<glm::vec3>(key)) return *v; return def;
             }
+
+
+#ifdef _DEBUG
+            void DebugDrawImGui() {
+                ImGui::Text("Blackboard entries: %d", (int)data.size());
+                ImGui::Separator();
+
+                for (auto& [key, value] : data) {
+                    ImGui::TextUnformatted(key.c_str());
+                    ImGui::SameLine(200.0f);
+
+                    std::visit([&](auto&& v) {
+                        using T = std::decay_t<decltype(v)>;
+
+                        if constexpr (std::is_same_v<T, double>) {
+                            ImGui::Text("%f", v);
+                        }
+                        else if constexpr (std::is_same_v<T, bool>) {
+                            ImGui::Text("%s", v ? "true" : "false");
+                        }
+                        else if constexpr (std::is_same_v<T, glm::vec3>) {
+                            ImGui::Text("vec3(%.2f, %.2f, %.2f)", v.x, v.y, v.z);
+                        }
+                        else if constexpr (std::is_same_v<T, std::uint32_t>) {
+                            ImGui::Text("u32(%u)", v);
+                        }
+                        else {
+                            ImGui::Text("<unknown type>");
+                        }
+                        }, value);
+                }
+            }
+#endif
+
+
+
         }; // Blackboard
 
         /*--------------------  Controller  --------------------*/
@@ -119,6 +155,48 @@ namespace PAIN {
             std::vector<Command> pending;
             void push(const Command& c) { pending.emplace_back(c); }
             void clear() { pending.clear(); }
+
+
+#ifdef _DEBUG
+            const char* ToString(CommandType t) const {
+                switch (t) {
+                case CommandType::SetMoveTarget:   return "SetMoveTarget";
+                case CommandType::ClearMoveTarget: return "ClearMoveTarget";
+                case CommandType::RequestPath:     return "RequestPath";
+                case CommandType::PlayAnimation:   return "PlayAnimation";
+                case CommandType::FaceEntity:      return "FaceEntity";
+                default:                           return "None/Unknown";
+                }
+            }
+
+            void DebugDrawImGui() {
+                ImGui::Text("Pending commands: %d", (int)pending.size());
+                ImGui::Separator();
+
+                int idx = 0;
+                for (auto const& cmd : pending) {
+                    ImGui::Text("#%d: %s", idx++, ToString(cmd.type));
+
+                    // see positions, targets, etc:
+                    if (cmd.type == CommandType::SetMoveTarget ||
+                        cmd.type == CommandType::RequestPath) {
+                        ImGui::SameLine();
+                        ImGui::Text("  v3=(%.2f, %.2f, %.2f)", cmd.v3.x, cmd.v3.y, cmd.v3.z);
+                    }
+                    if (cmd.type == CommandType::PlayAnimation) {
+                        ImGui::SameLine();
+                        ImGui::Text("  anim=\"%s\"", cmd.str.c_str());
+                    }
+                    if (cmd.type == CommandType::FaceEntity) {
+                        ImGui::SameLine();
+                        ImGui::Text("  targetEnt=%u", (std::uint32_t)cmd.target);
+                    }
+                }
+            }
+#endif
+
+     
+
         };
 	}
 }

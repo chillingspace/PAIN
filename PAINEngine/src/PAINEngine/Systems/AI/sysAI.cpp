@@ -10,8 +10,12 @@
 
 #include "pch.h"
 #include "sysAI.h"
+#include "PAINEngine/CoreSystems/Scripting/LuaAIBindings.h"
+#include "PAINEngine/ECS/Components/cMetadata.h"
+#include "PAINEngine/ECS/Components/cPhysics.h"
 
 
+//
 //static IEngineAPI* GetEngineAPI(std::shared_ptr<PAIN::Services> svc) {
 //    if (!svc) return nullptr;
 //    auto api = svc->get<IEngineAPI>();
@@ -29,6 +33,21 @@ static PAIN::Physics::System* GetPhysicsSystem(std::shared_ptr<PAIN::Services> s
 	auto physSys = ecs->getSystem<PAIN::Physics::System>();
 	return physSys ? physSys.get() : nullptr;
 }
+
+namespace {
+
+	constexpr const char* kAITargetTag = "Player";
+
+	bool has_target_tag(entt::registry& reg, entt::entity ent) {
+		if (!reg.all_of<PAIN::MetaData::Tag>(ent)) {
+			return false;
+		}
+		auto& tag = reg.get<PAIN::MetaData::Tag>(ent);
+		return tag.tags.find(kAITargetTag) != tag.tags.end();
+	}
+
+} // namespace
+
 
 namespace PAIN {
 	namespace AI {
@@ -71,18 +90,21 @@ namespace PAIN {
 		void PerceptionSystem::onUpdate(float dt, entt::registry& reg) {
 			(void)dt;
 
-			auto sensorView = reg.view<Sensors, PAIN::LocalTransform>();
+			// Optimized using group
+			auto sensorGroup = reg.group<Sensors>(entt::get<PAIN::LocalTransform>);
 			auto transformView = reg.view<PAIN::LocalTransform>();
 
 			// !TODO: naive N^2 sample; replace with spatial query later
 			
 			// Iterate all entities that have Sensors + Transform
-			sensorView.each([&](entt::entity e, Sensors& sens, PAIN::LocalTransform& ts) {
+			sensorGroup.each([&](entt::entity e, Sensors& sens, PAIN::LocalTransform& ts) {
 				sens.visible_targets.clear();
 
 				// Iterate all entities that have Transform
 				transformView.each([&](entt::entity other, PAIN::LocalTransform& to) {
 					if (other == e) return; // skip self
+
+					if (!has_target_tag(reg, other)) return; // only consider entities with the desired tag
 
 					if (canSee(e, other, reg,
 						sens.cfg.sight_fov_deg,
@@ -105,13 +127,17 @@ namespace PAIN {
 		}
 
 		/*======================== Behavior Runtime ========================*/
-		BehaviorRuntimeSystem::BehaviorRuntimeSystem(IEngineAPI* api)
-			: api_(api)
-		{
-			 //if (!api_) PN_CORE_WARN("BehaviorRuntimeSystem created with null IEngineAPI");
-		}
+		//BehaviorRuntimeSystem::BehaviorRuntimeSystem(IEngineAPI* api)
+		//	: api_(api)
+		//{
+		//	 //if (!api_) PN_CORE_WARN("BehaviorRuntimeSystem created with null IEngineAPI");
+		//}
 
 		void BehaviorRuntimeSystem::onUpdate(float dt, entt::registry& reg) {
+			if (!luaMgr_) {
+				return; // do nothing if lua is missing
+			}
+
 			auto view = reg.view<Controller>();
 			for (auto e : view) {
 				auto& ctrl = view.get<Controller>(e);
@@ -123,36 +149,76 @@ namespace PAIN {
 			}
 		}
 
-		bool BehaviorRuntimeSystem::lua_decide(entt::entity e, entt::registry& reg) {
-			// This is a narrow junction point to your LuaManager.
-			// Example idea:
-			// auto lua = services_->get<LuaManager>();
-			// return lua->tick_ai_behavior(e, reg);
-			// For now, do a trivial “patrol or chase” decision using Blackboard facts.
-			auto& bb = reg.get<Blackboard>(e);
-			bool hasTargets = bb.get_bool("hasTargets", false);
-			if (hasTargets) {
-				// enqueue a chase command
-				auto& cq = reg.get_or_emplace<CommandQueue>(e);
-				// Ask C++ to replan towards current target each tick; NavigationSystem will handle dedup.
-				if (auto tid = bb.get<std::uint32_t>("targetId")) {
-					// In a real build you'd expose a safe API to query target position; here we just set RequestPath and MoveTarget.
-					cq.push({ CommandType::RequestPath });
-				}
-				return true;
+		bool BehaviorRuntimeSystem::lua_decide(entt::entity e, entt::registry& reg, float dt) {
+			//// This is a narrow junction point to your LuaManager.
+			//// Example idea:
+			//// auto lua = services_->get<LuaManager>();
+			//// return lua->tick_ai_behavior(e, reg);
+			//// For now, do a trivial “patrol or chase” decision using Blackboard facts.
+			//auto& bb = reg.get<Blackboard>(e);
+			//bool hasTargets = bb.get_bool("hasTargets", false);
+			//if (hasTargets) {
+			//	// enqueue a chase command
+			//	auto& cq = reg.get_or_emplace<CommandQueue>(e);
+			//	// Ask C++ to replan towards current target each tick; NavigationSystem will handle dedup.
+			//	if (auto tid = bb.get<std::uint32_t>("targetId")) {
+			//		// In a real build you'd expose a safe API to query target position; here we just set RequestPath and MoveTarget.
+			//		cq.push({ CommandType::RequestPath });
+			//	}
+			//	return true;
+			//}
+			//else {
+			//	// patrol: set/keep a waypoint if not existing
+			//	auto& nav = reg.get_or_emplace<NavAgent>(e);
+			//	if (!nav.move_target.has_value()) {
+			//		// Pick a dummy local waypoint; plug patrol system here.
+			//		auto& t = reg.get<PAIN::LocalTransform>(e);
+			//		nav.move_target = t.position + glm::vec3{ 3.0f, 0.0f, 0.0f };
+			//		auto& cq = reg.get_or_emplace<CommandQueue>(e);
+			//		cq.push({ CommandType::SetMoveTarget, *nav.move_target });
+			//	}
+			//	return true;
+			//}
+
+
+			if (!luaMgr_) return false;
+
+			auto& ctrl = reg.get<PAIN::AI::Controller>(e);
+			if (ctrl.behavior_asset.empty())
+				return false;
+
+			sol::state& L = luaMgr_->state();
+			sol::state_view Lv{ L };
+
+			static const std::string kAIScriptDir = "assets/game/scripts/";
+			std::string path = kAIScriptDir + ctrl.behavior_asset;
+			sol::table mod;
+
+			try {
+				mod = Lv.require_file(ctrl.behavior_asset.c_str(), path.c_str());
 			}
-			else {
-				// patrol: set/keep a waypoint if not existing
-				auto& nav = reg.get_or_emplace<NavAgent>(e);
-				if (!nav.move_target.has_value()) {
-					// Pick a dummy local waypoint; plug patrol system here.
-					auto& t = reg.get<PAIN::LocalTransform>(e);
-					nav.move_target = t.position + glm::vec3{ 3.0f, 0.0f, 0.0f };
-					auto& cq = reg.get_or_emplace<CommandQueue>(e);
-					cq.push({ CommandType::SetMoveTarget, *nav.move_target });
-				}
-				return true;
+			catch (const sol::error& e2) {
+				PN_ERROR("[Lua][AI] require_file('{}') failed: {}", ctrl.behavior_asset, e2.what());
+				return false;
 			}
+
+			sol::protected_function update = mod["update"];
+			if (!update.valid()) {
+				PN_ERROR("[Lua][AI] Module '{}' has no `update(ctx, dt)`", ctrl.behavior_asset);
+				return false;
+			}
+
+			sol::table ctx = PAIN::Scripting::make_ai_context(Lv, reg, e, api_);
+
+			sol::protected_function_result r = update(ctx, dt);
+			if (!r.valid()) {
+				sol::error err = r;
+				PN_ERROR("[Lua][AI] {}: {}", ctrl.behavior_asset, err.what());
+				return false;
+			}
+
+			return true;
+
 		}
 
 		void BehaviorRuntimeSystem::tickEntity(float dt, entt::entity e, entt::registry& reg) {
@@ -168,7 +234,7 @@ namespace PAIN {
 				reg.emplace<NavAgent>(e);
 			}
 			// Decide (Lua or trivial fallback)
-			lua_decide(e, reg);
+			lua_decide(e, reg, dt);
 		}
 
 		/*======================== Navigation ========================*/
@@ -216,9 +282,10 @@ namespace PAIN {
 		}
 
 		void NavigationSystem::onUpdate(float dt, entt::registry& reg) {
-			auto navView = reg.view<NavAgent, PAIN::LocalTransform>();
+			// Optimized using group
+			auto navGroup = reg.group<NavAgent>(entt::get<PAIN::LocalTransform>);
 
-			navView.each([&](entt::entity e, NavAgent& agent, PAIN::LocalTransform&) {
+			navGroup.each([&](entt::entity e, NavAgent& agent, PAIN::LocalTransform&) {
 
 				if (!agent.move_target.has_value())
 					return;
@@ -249,7 +316,22 @@ namespace PAIN {
 
 			// If entity has RigidBody3D, use your physics sync helper from EngineAPIAdapter:
 			if (reg.any_of<PAIN::Physics::RigidBody3D>(e) && api_) {
-				api_->SetPosition(e, t.position); // adapter will call phys->teleportBodyToTransform(...)
+				auto& rb = reg.get<PAIN::Physics::RigidBody3D>(e);
+
+				if (rb.motion_type == Physics::MotionType::Kinematic) {
+					// Kinematic: Transform is boss; physics follows.
+					//api_->SetPosition(e, t.position);
+				}
+				else if (rb.motion_type == Physics::MotionType::Dynamic) {
+					//  - add an EngineAPIAdapter::SetLinearVelocity(...) that calls Physics::System::setVelocity(e, vel)
+					// Preserve vertical velocity so gravity still works
+					//glm::vec3 currentV = api_->GetVelocity(e);
+					//glm::vec3 v = vel;
+					//v.y = currentV.y;
+
+					//// Push horizontal velocity into physics
+					//api_->SetVelocity(e, v);
+				}
 			}
 		}
 
@@ -276,6 +358,10 @@ namespace PAIN {
 		void AICommandFlushSystem::execute(entt::entity e, entt::registry& reg) {
 			auto& q = reg.get<CommandQueue>(e);
 			auto& agent = reg.get_or_emplace<NavAgent>(e);
+
+			if (!q.pending.empty()) {
+				//PN_CORE_INFO("[AICommandFlush] entity={} command={}", (uint32_t)e, q.pending.size());
+			}
 
 			for (const auto& cmd : q.pending) {
 				switch (cmd.type) {
@@ -312,35 +398,63 @@ namespace PAIN {
 			for (auto e : view) execute(e, reg);
 		}
 
-		void System::refreshDependencies() {
-			if (auto svc = services.lock()) {
+		void System::refreshDependencies(entt::registry& reg) {
+			//if (auto svc = services.lock()) {
 
-				// Try to find Physics system
-				if (!physics_) {
-					if (auto ecs = svc->get<ECS::Controller>()) {
-						if (auto physSys = ecs->getSystem<Physics::System>()) {
-							physics_ = physSys.get();
-							PN_CORE_TRACE("AI::System bound Physics::System");
-						}
-					}
-				}
+			//	// Try to find Physics system
+			//	if (!physics_) {
+			//		if (auto ecs = svc->get<ECS::Controller>()) {
+			//			if (auto physSys = ecs->getSystem<Physics::System>()) {
+			//				physics_ = physSys.get();
+			//				PN_CORE_TRACE("AI::System bound Physics::System");
+			//			}
+			//		}
+			//	}
 
-				// Try to find Engine API
-				// !TODO: Fix IEngineAPI not registering
-				if (!engineApi_) {
-					//if (auto api = svc->get<IEngineAPI>()) {
-					//	engineApi_ = api.get();
-					//	PN_CORE_TRACE("AI::System bound IEngineAPI");
-					//}
+			//	// Try to find Engine API
+			//	// !TODO: Fix IEngineAPI not registering
+			//	if (!engineApi_) {
+			//		//if (auto api = svc->get<IEngineAPI>()) {
+			//		//	engineApi_ = api.get();
+			//		//	PN_CORE_TRACE("AI::System bound IEngineAPI");
+			//		//}
+			//	}
+			//}
+
+			// 1) From registry ctx: Physics::System* & LuaManager*
+			auto& ctx = reg.ctx();
+
+			if (!physics_) {
+				if (auto* physPtr = ctx.find<Physics::System*>()) {
+					physics_ = *physPtr;
+					PN_CORE_TRACE("AI::System bound Physics::System from registry ctx");
 				}
 			}
 
-			// Update sub-systems with the latest pointers
-			perception_ = PerceptionSystem{ physics_ };
-			behavior_ = BehaviorRuntimeSystem{ engineApi_ };
-			navigation_ = NavigationSystem{ physics_ };
-			steering_ = SteeringSystem{ engineApi_ };
-			commandFlush_ = AICommandFlushSystem{ engineApi_ };
+			if (!luaMgr_) {
+				if (auto* luaPtr = ctx.find<PAIN::LuaManager*>()) {
+					luaMgr_ = *luaPtr;
+					PN_CORE_TRACE("AI::System bound LuaManager from registry ctx");
+				}
+			}
+
+			// 2) From Services: global IEngineAPI (no ECS::Controller here)
+			if (!engineApi_) {
+				if (auto svc = services.lock()) {
+					if (auto api = svc->get<IEngineAPI>()) {
+						engineApi_ = api.get();
+						PN_CORE_TRACE("AI::System bound IEngineAPI from Services");
+					}
+				}
+			}
+
+			// 3) Push latest pointers down into subsystems
+			perception_.setPhysics(physics_);
+			behavior_.setDependencies(engineApi_, luaMgr_);
+			commandFlush_.setAPI(engineApi_);
+			navigation_.setPhysics(physics_);
+			steering_.setAPI(engineApi_);
+			
 		}
 
 
@@ -348,13 +462,13 @@ namespace PAIN {
 			: ECS::System::ISystem(svc)
 			, physics_(nullptr)
 			, engineApi_(nullptr)
+			, luaMgr_(nullptr)
 			, perception_(nullptr)
-			, behavior_(nullptr)
+			, behavior_()
 			, navigation_(nullptr)
 			, steering_(nullptr)
 			, commandFlush_(nullptr)
 		{
-			refreshDependencies();
 
 			PN_CORE_TRACE("AI::System constructed. physics_={} engineApi_={}",
 				physics_ ? "ok" : "null",
@@ -367,15 +481,23 @@ namespace PAIN {
 				return;
 
 			// bind dependencies if they were null at startup
-			refreshDependencies();
+			refreshDependencies(reg);
 
 			float dt = timing.dt;
 
-			perception_.onUpdate(dt, reg);
-			behavior_.onUpdate(dt, reg);
-			navigation_.onUpdate(dt, reg);
-			steering_.onUpdate(dt, reg);
-			commandFlush_.onUpdate(dt, reg);
+			// for now, write some facts 
+			// Optimized using group
+			auto facts = reg.group<Blackboard>(entt::get<PAIN::LocalTransform>);
+			for (auto [e, bb, lt] : facts.each()) {
+				bb.set<glm::vec3>("selfpos", lt.position);
+			}
+
+			perception_.onUpdate(dt, reg); // fill sensors
+			behavior_.onUpdate(dt, reg); // lua, enqueue commands
+			commandFlush_.onUpdate(dt, reg); // apply setmovetarget 
+			navigation_.onUpdate(dt, reg); // compute desired vel
+			steering_.onUpdate(dt, reg); // move LocalTransform + physics
+			
 		}
 
 	}

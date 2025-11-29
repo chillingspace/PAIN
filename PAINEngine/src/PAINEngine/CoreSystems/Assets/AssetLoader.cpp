@@ -426,7 +426,7 @@ namespace PAIN {
             readMem(asset.vertices.data(), vtxCount * sizeof(Vertex));
             readMem(asset.indices.data(), idxCount * sizeof(uint32_t));
 
-            PN_CORE_TRACE("ImportModel: Before reading submeshes");
+            PN_CORE_TRACE("ImportModel: Read {} vertices and {} indices from {}", vtxCount, idxCount, virtual_path);
 
             // Submeshes
             uint32_t submeshCount = 0;

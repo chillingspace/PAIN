@@ -115,7 +115,8 @@ namespace PAIN {
 		std::string display_text;
 		glm::vec3 color{ 1 };
 		Assets::GUID font_guid;
-		float font_size = 18.0f;
+		float font_size = 1.0f;
+		float scale_factor = 0.f;
 		TextAlignment alignment = TextAlignment::Left;
 		bool word_wrap = true;
 		float line_height = 1.0f;

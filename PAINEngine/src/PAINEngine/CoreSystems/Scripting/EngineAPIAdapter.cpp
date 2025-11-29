@@ -318,35 +318,6 @@ namespace PAIN {
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */
-    //int EngineAPIAdapter::Audio_Play(const std::string& vpath, float x, float y, float z, float volumeDb) {
-    //    if (!audio_) return -1;
-    //    const std::string real = resolveMaybeVirtual(vpath);
-    //    auto ch = audio_->play(real, { x,y,z }, volumeDb);    
-    //    return ch ? ch->value : -1;                         
-    //}
-    //
-    //int EngineAPIAdapter::Audio_PlayRandomFrom(const std::string& playlist, float x, float y, float z, float volumeDb) {
-    //    if (!audio_) return -1;
-    //    auto ch = audio_->playRandom(playlist, { x,y,z }, volumeDb);          
-    //    return ch ? ch->value : -1;
-    //}
-    //
-    //bool EngineAPIAdapter::Audio_Stop(int channelId) {
-    //    if (!audio_) return false;
-    //    return audio_->stop({ channelId }) == AudioResult::Ok;                 
-    //}
-    //void EngineAPIAdapter::Audio_StopAll() { if (audio_) audio_->stopAll(); }   
-    //bool EngineAPIAdapter::Audio_Pause(int channelId) { return audio_ && audio_->pauseChannel({ channelId }) == AudioResult::Ok; } 
-    //bool EngineAPIAdapter::Audio_Resume(int channelId) { return audio_ && audio_->resumeChannel({ channelId }) == AudioResult::Ok; } 
-    //void EngineAPIAdapter::Audio_PauseAll() { if (audio_) audio_->pauseAll(); }  
-    //void EngineAPIAdapter::Audio_ResumeAll() { if (audio_) audio_->resumeAll(); } 
-    //bool EngineAPIAdapter::Audio_SetChannelVolumeDb(int channelId, float db) { return audio_ && audio_->setVolumeDb({ channelId }, db) == AudioResult::Ok; }
-    //bool EngineAPIAdapter::Audio_SetChannelPosition(int channelId, float x, float y, float z) { return audio_ && audio_->setPosition({ channelId }, { x,y,z }) == AudioResult::Ok; }
-    //void EngineAPIAdapter::Audio_SetListener(float px, float py, float pz, float vx, float vy, float vz, float fx, float fy, float fz, float ux, float uy, float uz) { if (audio_) audio_->setListener({ px,py,pz }, { vx,vy,vz }, { fx,fy,fz }, { ux,uy,uz }); }
-    //bool EngineAPIAdapter::Audio_SetGroupVolumeDb(const std::string& group, float db) { return audio_ && audio_->setGroupVolumeDb(group.c_str(), db) == AudioResult::Ok; }
-    //bool EngineAPIAdapter::Audio_FadeGroupToDb(const std::string& group, float targetDb, float seconds) { return audio_ && audio_->fadeGroupToDb(group.c_str(), targetDb, seconds) == AudioResult::Ok; }
-    //bool EngineAPIAdapter::Audio_SetMuteAll(bool mute) { return audio_ && audio_->setMuteAll(mute) == AudioResult::Ok; }
-
     void EngineAPIAdapter::Audio_Play(entt::entity entityId)
     {
         auto& reg = ecs_.getRegistry();
@@ -451,13 +422,24 @@ namespace PAIN {
     void EngineAPIAdapter::Camera_SetTransform(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up)
     {
         if (!scene_) return;
-        PAIN::Camera* cam = scene_->GetActiveCamera();
+        PAIN::Camera* cam = scene_->GetGameCamera(); // so editor still has camera control
         if (!cam) return;
 
         cam->pos = pos;
         cam->forward = glm::normalize(target - pos);
         cam->up = glm::normalize(up);
         cam->right = glm::normalize(glm::cross(cam->forward, cam->up));
+    }
+
+    std::pair<glm::vec3, glm::vec3> EngineAPIAdapter::GetCameraOffsets(entt::entity entityId)
+    {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Cam>(entityId)) {
+            const auto& cam = opt->get();
+            return { cam.trans_offset, cam.rot_offset };
+        }
+
+        // default if entity has no camera
+        return { glm::vec3(0.f), glm::vec3(0.f) };
     }
 
     /* =========================================================================== */

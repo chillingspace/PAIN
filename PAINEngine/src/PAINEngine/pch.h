@@ -44,6 +44,9 @@
  * Engine Specific Library
  *********************************************************************/
 
+// shortcuts
+#define GS GraphicsSettings::get()
+
 // key events
 #include "./Utility/KeyCodes.h"
 
