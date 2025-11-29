@@ -1,0 +1,113 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 117,
+                    "localAABB": {
+                        "max": [
+                            953.6362915039063,
+                            0.009999999776482582,
+                            946.9449462890625
+                        ],
+                        "min": [
+                            -953.6362915039063,
+                            -0.009999999776482582,
+                            -946.9449462890625
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            1.2990609407424927,
+                            2.0000001313746907e-05,
+                            1.3723679780960083
+                        ],
+                        "min": [
+                            -2.51548433303833,
+                            -2.0000001313746907e-05,
+                            -2.415411949157715
+                        ]
+                    }
+                },
+                "Collider": {
+                    "box_size": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 0
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -0.6082117557525635,
+                        0.0,
+                        -0.521522045135498
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0020000000949949026,
+                        0.0020000000949949026,
+                        0.0020000000949949026
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+                            "aoTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                            "normalTextureOverride": "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "BigGround"
+                }
+            },
+            "entityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133"
+        }
+    ],
+    "prefabName": "BigGround",
+    "rootEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133"
+}
