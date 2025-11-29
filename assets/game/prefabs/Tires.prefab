@@ -47,6 +47,10 @@
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
                 "LocalTransform": {
                     "position": [
                         0.19324302673339844,
@@ -99,11 +103,28 @@
                 },
                 "Name": {
                     "name": "Tires"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
         }
     ],
-    "prefabName": "",
+    "prefabName": "Tires",
     "rootEntityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
 }

@@ -670,6 +670,12 @@ namespace PAIN {
             });
         lua_.set_function("setMeshId", [this](entt::entity entityId, int meshId) { if (api_) api_->SetMeshId(entityId, static_cast<uint32_t>(meshId)); });
 
+        lua_.set_function("setUITexture", [this](entt::entity entityId, std::string textureName) {
+            if (!api_) return;
+            api_->SetUITexture(entityId, textureName);
+            }
+        );
+
 
         /* =========================================================================== */
         /*                                  Lighting                                   */

@@ -9,6 +9,7 @@
 #include "ECS/Components/cLight.h"
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cEntity.h"
+#include "ECS/Components/cMeshRenderer.h"
 #include "Systems/Transform/sysTransform.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
@@ -599,6 +600,26 @@ namespace PAIN {
             return;
         }
         mr->mesh_id = meshId;*/
+    }
+
+    void EngineAPIAdapter::SetUITexture(entt::entity entityId, const std::string& textureGuidStr)
+    {
+        if (!assets_) return;
+
+        auto guid = assets_->findByName(textureGuidStr);
+        if (!guid.IsValid()) {
+            PN_CORE_WARN("[EngineAPIAdapter] SetUITexture: texture '{}' not found", textureGuidStr);
+            return;
+        }
+
+        auto& reg = ecs_.getRegistry();
+        if (!reg.any_of<Texture2D>(entityId)) {
+            PN_CORE_WARN("[EngineAPIAdapter] SetUITexture: entity has no Texture2D");
+            return;
+        }
+
+        auto& tex = reg.get<Texture2D>(entityId);
+        tex.texture_guid = guid;
     }
 
     /* =========================================================================== */
