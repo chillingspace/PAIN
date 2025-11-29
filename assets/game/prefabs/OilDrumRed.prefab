@@ -47,10 +47,6 @@
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
-                "Layer": {
-                    "layer_id": 0,
-                    "layer_mask": 1
-                },
                 "LocalTransform": {
                     "position": [
                         0.593765377998352,
@@ -103,28 +99,11 @@
                 },
                 "Name": {
                     "name": "OilDrumRed"
-                },
-                "RigidBody3D": {
-                    "angular_velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "mass": -107374176.0,
-                    "motion_type": 0,
-                    "physics_behavior": {
-                        "behavior": 1
-                    },
-                    "velocity": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
                 }
             },
             "entityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
         }
     ],
-    "prefabName": "OilDrumRed",
+    "prefabName": "",
     "rootEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
 }
