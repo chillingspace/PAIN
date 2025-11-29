@@ -233,6 +233,19 @@ namespace PAIN {
         // Move left/right based on cross product of forward and up vectors
         glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
 
+        // Android editor camera
+        if (m_move.active && camera) {
+            // Project forward to XZ like you already do
+            static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
+            glm::vec3 fwd = glm::normalize(glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)));
+            /* glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));*/
+
+            // Map: up on stick (negative ny) -> forward, right on stick (positive nx) -> strafe right
+            float speed = camera->speed * m_moveScale;
+            camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
+            camera->pos += (m_cachedMoveX)*right * speed * dt;
+        }
+
         switch (move_mode) {
         case FREE_FLY:
             // Move forward/backward directly in camera forward direction
@@ -289,48 +302,8 @@ namespace PAIN {
                 camera->pos -= offset;
             }
             break;
-        //case ORBIT:
-            //if (camera->move_mode == Camera::MOVE_MODES::ORBIT_ORIGIN) {
-            //    // spherical
-            //    float radius = glm::length(camera->pos);
-            //    float theta = atan2(camera->pos.z, camera->pos.x);
-            //    float phi = acos(camera->pos.y / radius);
 
-            //    if (W_KEYDOWN) radius -= camera->speed * dt;
-            //    if (S_KEYDOWN) radius += camera->speed * dt;
-            //    if (A_KEYDOWN) theta += 1.5f * dt;
-            //    if (D_KEYDOWN) theta -= 1.5f * dt;
-            //    if (SPACE_KEYDOWN) phi -= 1.5f * dt;
-            //    if (LCTRL_KEYDOWN) phi += 1.5f * dt;
-
-            //    // clamp phi
-            //    phi = glm::clamp(phi, 0.01f, glm::pi<float>() - 0.01f);
-
-            //    // cartesian
-            //    camera->pos.x = radius * sin(phi) * cos(theta);
-            //    camera->pos.y = radius * cos(phi);
-            //    camera->pos.z = radius * sin(phi) * sin(theta);
-
-            //    // look at origin
-            //    camera->forward = -glm::normalize(camera->pos);
-            //}
         }
-
-      
-// disable camera movement, want to move player insetad
-#if 0
-        if (m_move.active && camera) {
-            // Project forward to XZ like you already do
-            static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
-            glm::vec3 fwd = glm::normalize(glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)));
-            glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
-
-            // Map: up on stick (negative ny) -> forward, right on stick (positive nx) -> strafe right
-            float speed = camera->speed * m_moveScale;
-            camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
-            camera->pos += (m_cachedMoveX)*right * speed * dt;
-        }
-#endif
 
         if (mouseButtonDown && xOffset != 0.f) {
             // transformation matrix(rotate)
