@@ -114,7 +114,7 @@ namespace PAIN {
 		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene);
 		void PostProcessPass();
 
-		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale);
+		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale);
 
 		void Cleanup();
 

@@ -35,7 +35,7 @@ namespace PAIN {
     struct Texture2D {
         //material GUID
         Assets::GUID texture_guid;
-        float texture_scale;
+        glm::vec2 texture_scale{ 1 };
     };
 
     struct ModelRenderer {

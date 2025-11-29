@@ -875,7 +875,24 @@ namespace PAIN {
                             }
                         }
                     }
+                    ImGui::Spacing();
+
+                    auto cam = scene->GetActiveCamera();
+                    float curr_speed = cam->speed;
+                    float curr_sens = cam->sensitivity;
+
+                    if (ImGui::DragFloat("Camera Speed", &curr_speed, 0.1f, 0.1f, 100.0f)) {
+
+                        cam->speed = curr_speed;
+                    }
+                    ImGui::Spacing();
+
+                    if (ImGui::DragFloat("Camera Senstivity", &curr_sens, 0.1f, 0.1f, 100.0f)) {
+
+                        cam->sensitivity = curr_sens;
+                    }
                 }
+
             }
 
             void ScenesPanel::onAttach()
@@ -977,9 +994,12 @@ namespace PAIN {
                 }
 
                 //Render Active Cam
-                ImGui::Spacing();
-                drawActiveCamPanel();
-              
+
+                if (ImGui::CollapsingHeader("Camera Settings")) {
+                    drawActiveCamPanel();
+
+                }
+
                 //// Scene configuration panels
                 //drawSkyboxSettingsPanel();
                 //drawGraphicsSettingsPanel();

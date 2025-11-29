@@ -62,8 +62,8 @@ namespace PAIN {
 
 			//glfwGetWindowSize(Window::GLFW_Window::getWindow(), &WindowsRenderer::winWidth, &WindowsRenderer::winHeight);
 
-			w_renderer->Cleanup();
-			w_renderer->Init(services);
+			//w_renderer->Cleanup();
+			//w_renderer->Init(services);
 		}
 #endif
 	}

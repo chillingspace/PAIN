@@ -223,7 +223,7 @@ namespace PAIN {
                             changed = true;
                         }
 
-                        changed |= ImGui::DragFloat("Texture Scale", &texture_comp.texture_scale, 0.02f, 0.2f, 4.0f, "%.2f");
+                        changed |= ImGui::DragFloat2("Texture Scale", &texture_comp.texture_scale.x, 0.02f, 0.2f, 4.0f, "%.2f");
 
                         ImGui::PopStyleVar();
 

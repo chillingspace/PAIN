@@ -562,7 +562,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale) {
 		if (texture_id == 0) {
 			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
 			return;
@@ -577,11 +577,12 @@ namespace PAIN {
 		auto window_service = services->get<Window::Window>();
 		window_service->getFrameBuffer();
 
-		glm::vec2 framebuffer = window_service->getFrameBuffer();
+		auto framebuffer = window_service->getFrameBuffer();
 
 		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
 
-		float corrected_scale = scale / aspect_ratio;
+		// Apply aspect correction only to X component
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
 
 		texture2d_shader->Bind();
 		texture2d_shader->SetUniform("pos", pos);

@@ -5,16 +5,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.6444374322891235,
-            -0.355709046125412,
-            0.6768836379051208
+            -0.06387205421924591,
+            -0.6472819447517395,
+            0.7595698833465576
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.2842046320438385,
-            1.8607230186462402,
-            -3.609337329864502
+            0.44745922088623047,
+            0.36493855714797974,
+            -0.15856575965881348
         ],
         "up": [
             0.0,
@@ -92,10 +92,6 @@
                             "correspondingPrefabEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b",
                             "instanceRootGUID": "7cfbeb31-80cb-2345-8fb7-3445e34e9cb8",
                             "sourcePrefabGUID": "8dd07ba9-f750-7445-93aa-f8f72393ff06"
-                        },
-                        "Texture2D": {
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
-                            "texture_scale": 0.03999999910593033
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -280,10 +276,6 @@
                             "instanceRootGUID": "3f00b532-8669-2e4e-b7cb-7fd195ab7a2a",
                             "sourcePrefabGUID": "b432d88b-b247-644e-942f-399c713a9722"
                         },
-                        "Texture2D": {
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
-                            "texture_scale": 0.03999999910593033
-                        },
                         "UIElement": {
                             "b_is_enabled": true,
                             "b_is_interactable": true,
@@ -466,10 +458,6 @@
                             "correspondingPrefabEntityGUID": "5fbeceb1-04fd-ed4a-acbd-4a2ec885404e",
                             "instanceRootGUID": "1e56eb20-2248-334c-bb91-d920bf9c1f70",
                             "sourcePrefabGUID": "b432d88b-b247-644e-942f-399c713a9722"
-                        },
-                        "Texture2D": {
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
-                            "texture_scale": 0.03999999910593033
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -681,11 +669,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0",
                             "instanceRootGUID": "4c32e97e-fb77-3a4d-b725-08b7f69b3fdd",
                             "sourcePrefabGUID": "f5ed9ef3-b376-ec4e-ac89-a1aca8a00101"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar1"
@@ -846,11 +868,45 @@
                                         0.001230000052601099,
                                         0.001230000052601099
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518",
                             "instanceRootGUID": "7d56abbb-5584-8c49-9a93-63edb5a88486",
                             "sourcePrefabGUID": "e2c34590-4336-eb47-b2a0-6f0958889e0d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Platform1"
@@ -1011,11 +1067,45 @@
                                         0.001230000052601099,
                                         0.001230000052601099
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518",
                             "instanceRootGUID": "e38353fa-a4d6-084d-87d6-943dc816d0d2",
                             "sourcePrefabGUID": "e2c34590-4336-eb47-b2a0-6f0958889e0d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Platform1"
@@ -1181,11 +1271,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "9defec94-160b-784a-9652-11a763e9983b",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -1254,9 +1378,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -1342,20 +1466,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "b68dfcc6-4f2d-a042-bf0c-699901ebc882",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -1521,11 +1679,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "b2ece37c-9746-dc47-b3ea-8c001e554ab6",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -1594,9 +1786,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -1682,20 +1874,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "ad65c48a-9799-b44f-ab32-b567695b741f",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -1764,9 +1990,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.29868176579475403,
+                                0.2986817955970764,
                                 0.0,
-                                0.9543527364730835
+                                0.954352855682373
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -1852,20 +2078,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.29868176579475403,
+                                        0.2986817955970764,
                                         0.0,
-                                        0.9543527364730835
+                                        0.954352855682373
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "76f95440-ba1d-674c-aa35-2706638fd2ea",
                             "instanceRootGUID": "de8f45c3-6b9a-134a-900c-76ffb32187c9",
                             "sourcePrefabGUID": "82416aef-a4ed-614a-8e4c-6d2873653ae4"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pipe1"
@@ -1966,6 +2226,23 @@
                         },
                         "Name": {
                             "name": "WaterTower"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "WaterTower"
@@ -2126,11 +2403,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0",
                             "instanceRootGUID": "24e3916e-0d4f-5a40-9167-1e668b5bc0ad",
                             "sourcePrefabGUID": "f5ed9ef3-b376-ec4e-ac89-a1aca8a00101"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar1"
@@ -2243,6 +2554,23 @@
                         },
                         "Name": {
                             "name": "Rock1"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Rock1"
@@ -2415,9 +2743,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -2503,20 +2831,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "fa55ce74-9b62-0c4c-b24a-c154dcd98273",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -2682,11 +3044,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127",
                             "instanceRootGUID": "ed534017-1a4d-304b-93b9-d24c86010552",
                             "sourcePrefabGUID": "6b58ba55-1033-8142-99d5-be2e990fc2ff"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pallet"
@@ -2916,11 +3312,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a",
                             "instanceRootGUID": "db0fecc8-9b84-b041-8d38-66157e7be277",
                             "sourcePrefabGUID": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumRed"
@@ -3090,11 +3520,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba",
                             "instanceRootGUID": "e63f7b2d-cfd8-924c-aa94-4e900c066af3",
                             "sourcePrefabGUID": "6ed2160a-e832-1f4b-9ff7-1278724e2cc9"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumBlue"
@@ -3163,9 +3627,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -3251,20 +3715,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "adf68ead-e0c2-2245-bb18-3ddea9e5e1fb",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -3333,9 +3831,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -3421,20 +3919,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "e64f3cb1-d3dd-904c-b554-c70a7f50287d",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -3595,11 +4127,45 @@
                                         0.031274400651454926,
                                         0.031274400651454926
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a",
                             "instanceRootGUID": "2d2d3f33-04f3-3748-9c42-832af91c7221",
                             "sourcePrefabGUID": "65593ba1-3e64-5e49-8273-2e6ace4e597a"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pile1"
@@ -3668,9 +4234,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -3756,20 +4322,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "1e2f48a1-66bb-ac49-90c8-a1d4af7faeb3",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -3838,9 +4438,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -3930,20 +4530,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "f313ba41-307f-4d44-9455-763603e36830",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -4011,10 +4645,10 @@
                                 2.215759754180908
                             ],
                             "rotation": [
-                                -8.429368563156459e-07,
-                                0.7071067690849304,
-                                8.429368563156459e-07,
-                                0.7071067690849304
+                                -8.429369700024836e-07,
+                                0.7071068286895752,
+                                8.429369700024836e-07,
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -4103,21 +4737,55 @@
                                         2.215759754180908
                                     ],
                                     "rotation": [
-                                        -8.429368563156459e-07,
-                                        0.7071067690849304,
-                                        8.429368563156459e-07,
-                                        0.7071067690849304
+                                        -8.429369700024836e-07,
+                                        0.7071068286895752,
+                                        8.429369700024836e-07,
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "57536237-5ea9-c94e-a43a-cff55c4db815",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -4283,11 +4951,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "9a00572a-1ce7-7a41-9de2-7bf1500dbc57",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -4400,6 +5102,23 @@
                         },
                         "Name": {
                             "name": "Box"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -4638,6 +5357,23 @@
                         },
                         "Name": {
                             "name": "OilDrumRed"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumRed"
@@ -4803,11 +5539,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "d9aac460-03d5-904a-8df6-28845faddcb1",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -4973,11 +5743,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "fba5d261-595c-5141-b78b-c6907f0b0b11",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -5143,11 +5947,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "fc767faf-c8ae-1544-9ceb-5674b1f9fcaa",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -5216,9 +6054,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -5304,20 +6142,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "25da8528-7149-2c45-925d-d5178a9a7d56",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -5430,6 +6302,23 @@
                         },
                         "Name": {
                             "name": "OilDrumBlue"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumBlue"
@@ -5438,6 +6327,13 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "animationTime": 0.8614055514335632,
+                            "currentAnimationIndex": 0,
+                            "isPlaying": true,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0080000162124634
+                        },
                         "AudioSource": {
                             "group_name": "",
                             "is3D": true,
@@ -5471,14 +6367,14 @@
                             "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
-                                    2.0188112258911133,
-                                    1.0240354537963867,
-                                    0.28069403767585754
+                                    0.3569251298904419,
+                                    0.06400536000728607,
+                                    0.326292484998703
                                 ],
                                 "min": [
-                                    -0.48290887475013733,
-                                    -0.9760359525680542,
-                                    -2.2210729122161865
+                                    0.26876360177993774,
+                                    -0.015999432653188705,
+                                    0.23813457787036896
                                 ]
                             }
                         },
@@ -5517,27 +6413,27 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.7679511308670044,
-                                0.023999957367777824,
-                                -0.9701894521713257
+                                0.3128443658351898,
+                                0.02400313876569271,
+                                0.2822135388851166
                             ],
                             "rotation": [
-                                1.3007267625653185e-05,
-                                -0.14943814277648926,
-                                3.6470103168539936e-06,
-                                -0.9887710809707642
+                                -3.688229298859369e-06,
+                                0.053973760455846786,
+                                -2.7571753889787942e-05,
+                                0.9985423684120178
                             ],
                             "scale": [
-                                1.0,
-                                1.0,
-                                1.0
+                                0.03999999910593033,
+                                0.03999999910593033,
+                                0.03999999910593033
                             ]
                         },
                         "ModelRenderer": {
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "albedoTextureOverride": "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
                                     "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
@@ -5559,9 +6455,33 @@
                                     "roughnessOverride": 1.0,
                                     "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "useOverrides": true
+                                },
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "9aac41f9-737d-d540-a485-7155b0011394",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+                            "modelGUID": "81117530-de12-7b4c-a0e5-6ebc94459e26",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -5618,8 +6538,8 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.7390000224113464,
-                                -0.7359142303466797,
+                                -0.75,
+                                -0.7020000219345093,
                                 1.8052318096160889
                             ],
                             "rotation": [
@@ -5639,7 +6559,10 @@
                         },
                         "Texture2D": {
                             "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
-                            "texture_scale": 0.15000000596046448
+                            "texture_scale": [
+                                0.15000000596046448,
+                                0.15000000596046448
+                            ]
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -5803,6 +6726,23 @@
                         },
                         "Name": {
                             "name": "ContainerBlue"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -5968,11 +6908,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "9b81fad4-acbe-5448-b489-d5d4e2ae8d20",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -5988,11 +6962,11 @@
                             "childrenGUIDs": [
                                 "c3f98cd4-3007-be47-bd74-a0995090d644",
                                 "55e22339-8b44-ac4f-ae6b-e15ef79d3f37",
-                                "81d7f475-5f23-5f45-a182-bcf8928fcd87",
                                 "baa59969-4bff-a447-916b-309a9bc4971d",
                                 "d3e4686a-a239-1845-a53e-4e372cc2bd46",
                                 "1051b9bf-ab43-f04f-91a9-5e2cf00a6c53",
-                                "c2f3b080-1f1a-9044-bed4-c7b1438af663"
+                                "c2f3b080-1f1a-9044-bed4-c7b1438af663",
+                                "81d7f475-5f23-5f45-a182-bcf8928fcd87"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
@@ -6186,11 +7160,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "e5f8a666-1346-a24b-9a2c-586c46ff65cc",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -6282,8 +7290,8 @@
                                 0.0
                             ],
                             "scale": [
-                                2.3928232192993164,
-                                2.3928232192993164,
+                                3.0,
+                                3.0,
                                 1.0
                             ],
                             "size_delta": [
@@ -6322,8 +7330,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                1133.5909423828125,
-                                360.2587585449219
+                                740.3112182617188,
+                                422.35894775390625
                             ],
                             "word_wrap": true,
                             "wrap_width": 1000.0
@@ -6492,11 +7500,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "b818267e-869e-b343-be44-4596fd7bbc29",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -6565,9 +7607,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -6653,20 +7695,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "402c53c8-53f7-fa43-81d3-b1e7e358b52f",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -6836,11 +7912,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "1158fffe-0e96-2c4a-9d01-560eb8d27fb4",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -6909,9 +8019,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -7001,20 +8111,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "834c678e-03a9-8b48-aea7-33b8290cd61c",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -7180,11 +8324,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "0f2aa11a-d86b-a144-a8ba-191fec7ba1cb",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -7297,6 +8475,23 @@
                         },
                         "Name": {
                             "name": "Tires"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Tires"
@@ -7416,8 +8611,8 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -0.7080000042915344,
-                                -0.7360000014305115,
+                                0.7400000095367432,
+                                -0.7017571926116943,
                                 0.2289106547832489
                             ],
                             "rotation": [
@@ -7437,7 +8632,10 @@
                         },
                         "Texture2D": {
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
-                            "texture_scale": 0.15000000596046448
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
                         },
                         "UIButton": {
                             "disabled_color": -12303292,
@@ -7609,6 +8807,23 @@
                         },
                         "Name": {
                             "name": "MetalPlank1"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPlank1"
@@ -7665,9 +8880,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.2645461857318878,
+                                0.2645462155342102,
                                 0.0,
-                                0.964372992515564
+                                0.9643731117248535
                             ],
                             "scale": [
                                 0.08172647655010223,
@@ -7709,6 +8924,23 @@
                         },
                         "Name": {
                             "name": "Robot"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -7782,9 +9014,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -7870,20 +9102,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "17ec99d7-7dab-1640-b87a-095ab5c11dd4",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -8049,11 +9315,45 @@
                                         0.0020000000949949026,
                                         0.0020000000949949026
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133",
                             "instanceRootGUID": "52cd26c8-25d4-2049-9450-c9973c7aa827",
                             "sourcePrefabGUID": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "BigGround"
@@ -8264,11 +9564,45 @@
                                         0.0020000000949949026,
                                         0.0020000000949949026
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133",
                             "instanceRootGUID": "8efc0ab1-d449-cd48-8f7a-43d16fabea1f",
                             "sourcePrefabGUID": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "BigGround"
@@ -8434,11 +9768,45 @@
                                         0.0020000000949949026,
                                         0.0020000000949949026
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133",
                             "instanceRootGUID": "8bc18595-04ee-7c42-b732-6c47c7f26fa1",
                             "sourcePrefabGUID": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "BigGround"
@@ -8608,11 +9976,45 @@
                                         0.0015100000891834497,
                                         0.0015100000891834497
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc",
                             "instanceRootGUID": "fc467f14-b3ac-bb4e-9c0b-670d36b57970",
                             "sourcePrefabGUID": "088b2b68-e158-6047-aa81-a0d12e9c768c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Tires"
@@ -8778,11 +10180,45 @@
                                         0.0020000000949949026,
                                         0.0020000000949949026
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133",
                             "instanceRootGUID": "6e1105e5-222e-9740-8642-0b3100e30e30",
                             "sourcePrefabGUID": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "BigGround"
@@ -8943,11 +10379,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0",
                             "instanceRootGUID": "e0b95905-df7d-5148-a952-07a07f8f609a",
                             "sourcePrefabGUID": "f5ed9ef3-b376-ec4e-ac89-a1aca8a00101"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar1"
@@ -9108,11 +10578,45 @@
                                         0.031274400651454926,
                                         0.031274400651454926
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a",
                             "instanceRootGUID": "bdd1404c-8726-de49-9850-18a9bb6cdc6d",
                             "sourcePrefabGUID": "65593ba1-3e64-5e49-8273-2e6ace4e597a"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pile1"
@@ -9273,11 +10777,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "8bc3a01b-fb3b-d947-b237-8695d583a9a0",
                             "instanceRootGUID": "7916ff35-bf0d-0b4f-b083-d4b19927bbfa",
                             "sourcePrefabGUID": "f5ed9ef3-b376-ec4e-ac89-a1aca8a00101"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar1"
@@ -9438,11 +10976,45 @@
                                         0.031274400651454926,
                                         0.031274400651454926
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a",
                             "instanceRootGUID": "8e54f589-3cf4-a549-85d8-be971b204554",
                             "sourcePrefabGUID": "65593ba1-3e64-5e49-8273-2e6ace4e597a"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pile1"
@@ -9608,11 +11180,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127",
                             "instanceRootGUID": "6087245f-888a-354c-9e01-1cc37a8c86c7",
                             "sourcePrefabGUID": "6b58ba55-1033-8142-99d5-be2e990fc2ff"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Pallet"
@@ -9675,10 +11281,10 @@
                                 4.035260200500488
                             ],
                             "rotation": [
-                                -0.5212154984474182,
-                                -0.10439948737621307,
-                                -0.11132217943668365,
-                                0.8396680951118469
+                                -0.521215558052063,
+                                -0.10439950227737427,
+                                -0.11132219433784485,
+                                0.8396682143211365
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -9763,21 +11369,55 @@
                                         4.035260200500488
                                     ],
                                     "rotation": [
-                                        -0.5212154984474182,
-                                        -0.10439948737621307,
-                                        -0.11132217943668365,
-                                        0.8396680951118469
+                                        -0.521215558052063,
+                                        -0.10439950227737427,
+                                        -0.11132219433784485,
+                                        0.8396682143211365
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "766b2732-58e8-7043-bac4-480124d27118",
                             "instanceRootGUID": "63e9ba5a-ccc4-b34b-b00c-4378c0204ea6",
                             "sourcePrefabGUID": "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar2"
@@ -9943,11 +11583,45 @@
                                         0.002310000127181411,
                                         0.002310000127181411
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "8f817cf5-1578-3c4d-84ce-fb871d173c5e",
                             "instanceRootGUID": "55e22339-8b44-ac4f-ae6b-e15ef79d3f37",
                             "sourcePrefabGUID": "048332cb-8316-bb4d-a9c1-6f7c2c57acbe"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Tire"
@@ -10114,6 +11788,23 @@
                                         0.002310000127181411
                                     ]
                                 },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                },
                                 "Tag": {
                                     "tags": [
                                         "hiding_spot"
@@ -10123,6 +11814,23 @@
                             "correspondingPrefabEntityGUID": "8f817cf5-1578-3c4d-84ce-fb871d173c5e",
                             "instanceRootGUID": "baa59969-4bff-a447-916b-309a9bc4971d",
                             "sourcePrefabGUID": "048332cb-8316-bb4d-a9c1-6f7c2c57acbe"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -10289,6 +11997,23 @@
                                         0.0015200000489130616
                                     ]
                                 },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                },
                                 "Tag": {
                                     "tags": [
                                         "hiding_spot"
@@ -10298,6 +12023,23 @@
                             "correspondingPrefabEntityGUID": "81d7f475-5f23-5f45-a182-bcf8928fcd87",
                             "instanceRootGUID": "d3e4686a-a239-1845-a53e-4e372cc2bd46",
                             "sourcePrefabGUID": "e6c68a3a-b82a-2b44-9620-61212aa85171"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -10410,6 +12152,23 @@
                         },
                         "Name": {
                             "name": "Building1"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Building1"
@@ -10608,6 +12367,23 @@
                                         0.0033599999733269215
                                     ]
                                 },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                },
                                 "Tag": {
                                     "tags": [
                                         "letter_collectible"
@@ -10617,6 +12393,23 @@
                             "correspondingPrefabEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5",
                             "instanceRootGUID": "1051b9bf-ab43-f04f-91a9-5e2cf00a6c53",
                             "sourcePrefabGUID": "3e1bed01-56de-1b43-9134-1ae7de7f7226"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -10690,9 +12483,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -10778,20 +12571,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "45c2139d-a408-2f4a-87f2-3a7a2c042e68",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -10860,9 +12687,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -10948,20 +12775,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841",
                             "instanceRootGUID": "6b169f65-259c-2b41-b641-afc5bc5f0787",
                             "sourcePrefabGUID": "3f426811-d7c6-1849-888b-342ad606febc"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerRed"
@@ -11131,11 +12992,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "c1d1614c-e914-1b4c-86c3-ff1a7120c7a2",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -11305,11 +13200,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "5f7fc461-d98c-9b4b-a61a-4162ff58510b",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -11479,11 +13408,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "795ec1d1-c73e-6a49-8a43-d41cdb73a7cd",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -11552,9 +13515,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -11644,20 +13607,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "817b96e9-594c-8b4c-a80f-a10630ab08bd",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -11827,11 +13824,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "ee9c007a-4c85-564c-9782-73b0f881cb36",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -11900,9 +13931,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -11992,20 +14023,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "1bb724c7-4edd-1641-8141-b78773847cc8",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -12074,9 +14139,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                -0.09466597437858582,
+                                -0.09466598927974701,
                                 0.0,
-                                0.9955090880393982
+                                0.9955092072486877
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -12166,20 +14231,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        -0.09466597437858582,
+                                        -0.09466598927974701,
                                         0.0,
-                                        0.9955090880393982
+                                        0.9955092072486877
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "cb3730cb-53a0-c54b-b9e9-cc087721c3b5",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -12248,9 +14347,9 @@
                             ],
                             "rotation": [
                                 0.0,
-                                0.7071067690849304,
+                                0.7071068286895752,
                                 0.0,
-                                0.7071067690849304
+                                0.7071068286895752
                             ],
                             "scale": [
                                 0.0010000000474974513,
@@ -12340,20 +14439,54 @@
                                     ],
                                     "rotation": [
                                         0.0,
-                                        0.7071067690849304,
+                                        0.7071068286895752,
                                         0.0,
-                                        0.7071067690849304
+                                        0.7071068286895752
                                     ],
                                     "scale": [
                                         0.0010000000474974513,
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2d614323-6206-884f-966c-83ea4390f3b9",
                             "instanceRootGUID": "7c14ee6e-b6a1-d344-b736-9506ec683160",
                             "sourcePrefabGUID": "1c9b3f0c-fa0d-bc43-8087-c3396d26d225"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "ContainerBlue"
@@ -12523,11 +14656,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a",
                             "instanceRootGUID": "e8ea1986-d657-a848-922c-729f055f5cc0",
                             "sourcePrefabGUID": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumRed"
@@ -12697,11 +14864,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "f6cf30e1-ff3f-f247-afbc-9582d46a85ba",
                             "instanceRootGUID": "133d59af-26f0-3845-aa5b-6db1987ac786",
                             "sourcePrefabGUID": "6ed2160a-e832-1f4b-9ff7-1278724e2cc9"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "OilDrumBlue"
@@ -12862,11 +15063,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "766b2732-58e8-7043-bac4-480124d27118",
                             "instanceRootGUID": "0bcc6656-5d14-e949-8dba-b224895d9561",
                             "sourcePrefabGUID": "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "MetalPillar2"
@@ -13065,6 +15300,23 @@
                                         0.0033599999733269215
                                     ]
                                 },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                },
                                 "Tag": {
                                     "tags": [
                                         "letter_collectible"
@@ -13074,6 +15326,23 @@
                             "correspondingPrefabEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5",
                             "instanceRootGUID": "c2f3b080-1f1a-9044-bed4-c7b1438af663",
                             "sourcePrefabGUID": "3e1bed01-56de-1b43-9134-1ae7de7f7226"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         },
                         "Tag": {
                             "tags": [
@@ -13234,11 +15503,45 @@
                                         0.0010000000474974513,
                                         0.0010000000474974513
                                     ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "d205dc07-fd62-4a4a-ab77-940aeaa10828",
                             "instanceRootGUID": "3cb96be4-5057-4644-a781-16d59cb7b1b8",
                             "sourcePrefabGUID": "d0e3b51c-f383-e648-8727-242f9a34160f"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
                         }
                     },
                     "Name": "Building1"
@@ -13248,9 +15551,9 @@
     },
     "environment": {
         "cameraLightIntensity": [
-            0.009999999776482582,
-            0.009999999776482582,
-            0.009999999776482582
+            0.0,
+            0.0,
+            0.0
         ],
         "pbr_map": 0,
         "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
