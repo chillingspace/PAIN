@@ -18,12 +18,12 @@
         "roughness": 1.0
     },
     "textures": {
-        "albedo": "game\\textures\\.\\ContainerRed_baseColor.png",
-        "ao": "game\\textures\\.\\ContainerRed_occlusionRoughnessMetallic.png",
-        "emissive": "game\\textures\\.\\ContainerRed_emissive.png",
-        "lightmap": "game\\textures\\.\\ContainerRed_occlusionRoughnessMetallic.png",
-        "metallic": "game\\textures\\.\\ContainerRed_occlusionRoughnessMetallic.png",
-        "normal": "game\\textures\\.\\ContainerRed_normal.png",
-        "roughness": "game\\textures\\.\\ContainerRed_occlusionRoughnessMetallic.png"
+        "albedo": "game\\textures\\ContainerRed_baseColor.png",
+        "ao": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\ContainerRed_emissive.png",
+        "lightmap": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\ContainerRed_normal.png",
+        "roughness": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.png"
     }
 }
