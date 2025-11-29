@@ -5,7 +5,7 @@
 local playerId = nil
 
 -- offset of camera relative to player in *player space*
-local baseOffset = { x = 0.0, y = 3.0, z = -6.0 }
+local baseOffset = { x = 0.0, y = 0.25, z = -0.5 }
 
 local yaw   = 0.0   -- horizontal angle (radians)
 local pitch = 0.2   -- slight downward tilt
@@ -47,7 +47,7 @@ registerUpdate(function(dt)
             local dy = my - lastMouseY
 
             yaw   = yaw   - dx * mouseSensitivity  -- left/right
-            pitch = pitch - dy * mouseSensitivity  -- up/down
+            pitch = pitch + dy * mouseSensitivity  -- up/down
         end
         lastMouseX, lastMouseY = mx, my
     end
@@ -83,7 +83,7 @@ registerUpdate(function(dt)
 
     -- aim camera at player (slightly above feet)
     local targetX = px
-    local targetY = py + 1.0
+    local targetY = py 
     local targetZ = pz
 
     cameraSetTransform(

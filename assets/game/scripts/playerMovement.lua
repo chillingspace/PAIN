@@ -28,8 +28,8 @@ registerKeyUp("KEY_D", function() moveDown = false end)
 registerKeyUp("KEY_L", function() moveLeft = false end)
 registerKeyUp("KEY_R", function() moveRight = false end)
 
-local speed = 4.0
-local jumpSpeed = 5.0 
+local speed = 0.8
+local jumpSpeed = 2
 local isGrounded = true
 local groundY = nil -- will be set from initial position
 
