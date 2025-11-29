@@ -42,6 +42,28 @@ namespace PAIN {
             Kinematic
         };
 
+        enum class PhysicsBehavior {
+            Static,      
+            Dynamic,     
+            Debris,     
+            Sensor      
+        };
+
+        struct LayerMapping {
+            PhysicsBehavior behavior = PhysicsBehavior::Dynamic;
+
+            // Convert to Jolt layer
+            JPH::ObjectLayer toJoltLayer() const {
+                switch (behavior) {
+                case PhysicsBehavior::Static:  return Layer::NON_MOVING;
+                case PhysicsBehavior::Dynamic: return Layer::MOVING;
+                case PhysicsBehavior::Debris:  return Layer::DEBRIS;
+                case PhysicsBehavior::Sensor:  return Layer::SENSOR;
+                default:                       return Layer::MOVING;
+                }
+            }
+        };
+
         struct PhysicsLayer {
             JPH::ObjectLayer value = Layer::MOVING;
             JPH::BodyID* bodyID_ptr = nullptr;  // Pointer to parent's bodyID
@@ -61,17 +83,19 @@ namespace PAIN {
         };
 
 		struct RigidBody3D {
-			glm::f32vec3 velocity;
-			glm::f32vec3 angular_velocity;
+			glm::f32vec3 velocity = glm::vec3(0.f);
+			glm::f32vec3 angular_velocity = glm::vec3(0.f);
 			glm::f32 mass;
 			JPH::BodyID bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
-			bool b_is_dynamic;  
-            PhysicsLayer layer = Layer::MOVING;
+			// bool b_is_dynamic; // i think can remove  
+            
             MotionType motion_type = MotionType::Dynamic;
-            // Constructor to link layer to bodyID
-            RigidBody3D() {
+            Physics::LayerMapping physics_behavior;
+
+            // link layer to bodyID
+            /*RigidBody3D() {
                 layer.setBodyReference(bodyID);
-            }
+            }*/
 
             //Serialization flag
             static constexpr bool ShouldSerialize = true;
@@ -261,12 +285,20 @@ REFL_FIELD(velocity)
 REFL_FIELD(angular_velocity)
 REFL_FIELD(mass)
 //REFL_FIELD(bodyID)   // Uneditable; Uncommenting this causes issues with the serialization
-REFL_FIELD(b_is_dynamic)
-REFL_FIELD(layer)
+//REFL_FIELD(b_is_dynamic)
+//REFL_FIELD(layer)
 REFL_FIELD(motion_type)
+REFL_FIELD(physics_behavior)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
+
+// Layer mapping
+REFL_TYPE(PAIN::Physics::LayerMapping)
+REFL_FIELD(behavior)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Physics::LayerMapping>);
 
 // PhysicsLayer
 REFL_TYPE(PAIN::Physics::PhysicsLayer)
