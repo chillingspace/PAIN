@@ -112,11 +112,15 @@ namespace PAIN {
 			}
 
 			// Ignore game UI clicks when the editor overlay is visible
+#ifdef _DEBUG
+
 			if (auto editor = services.lock()->get<PAIN::Editor::Editor>()) {
 				if (editor->isVisible()) {
 					return;
 				}
 			}
+#endif // DEBUG
+
 
 
 			// Handle mouse button press

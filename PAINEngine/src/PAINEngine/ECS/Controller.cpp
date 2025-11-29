@@ -532,33 +532,45 @@ namespace PAIN {
                 registryId);
             return new_entity;
         }
+
         entt::entity Controller::cloneEntity(entt::entity copy, RegistryID srcRegistry, RegistryID dstRegistry) {
             if (!checkEntity(copy, srcRegistry)) {
                 PN_CORE_ERROR("Cannot clone invalid entity: {}", static_cast<uint32_t>(copy));
                 return entt::null;
             }
+
             auto* srcCtx = getRegistryContext(srcRegistry);
             auto* dstCtx = getRegistryContext(dstRegistry);
             if (!srcCtx || !dstCtx) return entt::null;
+
             // Create new entity in destination registry (auto-assigns new GUID)
             entt::entity clone = createEntity(dstRegistry);
-            // Copy all components EXCEPT EntityGUID (already has new one)
-            for (auto [id, storage] : srcCtx->registry.storage()) {
-                if (storage.contains(copy)) {
-                    // Skip EntityGUID component (already assigned)
-                    if (id == entt::type_hash<Entity::GUID>::value()) {
-                        continue;
-                    }
 
-                    // Copy component
-                    storage.push(clone, storage.value(copy));
+            // Copy all components from source EXCEPT EntityGUID
+            for (auto [id, storage] : srcCtx->registry.storage()) {
+                // Skip EntityGUID component
+                if (id == entt::type_hash<Entity::GUID>::value()) {
+                    continue;
+                }
+
+                if (storage.contains(copy)) {
+                    auto dstStorage = dstCtx->registry.storage(id);
+
+                    // Only push if destination entity doesn't already have this component
+                    if (!dstStorage->contains(clone)) {
+                        const auto& component_ref = storage.value(copy);
+                        dstStorage->push(clone, component_ref);
+                    }
                 }
             }
+
             PN_CORE_INFO("Cloned entity {} (registry {}) to {} (registry {}) with new GUID",
                 static_cast<uint32_t>(copy), srcRegistry,
                 static_cast<uint32_t>(clone), dstRegistry);
             return clone;
         }
+
+
         void Controller::destroyEntity(entt::entity entity, RegistryID registryId) {
             if (!checkEntity(entity, registryId)) {
                 PN_CORE_ERROR("Attempted to destroy invalid entity: {}",
