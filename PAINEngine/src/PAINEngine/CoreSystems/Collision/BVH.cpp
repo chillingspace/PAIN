@@ -584,12 +584,10 @@ namespace PAIN {
 
         // Ensure it's a valid leaf
         if (!node.isLeaf()) {
-            PN_CORE_WARN("Node {} is not a leaf - cannot update", leafIndex);
             return;
         }
 
         if (node.height == -1) {
-            PN_CORE_WARN("Node {} is inactive - cannot update", leafIndex);
             return;
         }
 
