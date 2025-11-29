@@ -8,9 +8,9 @@
 #include "ECS/sMetaData.h"
 #include "Systems/Transform/sysTransform.h"
 #include "CoreSystems/Scene/Scene.h"
-#include "ECS/Components/AllComponents.h"
 
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 namespace PAIN {
     namespace Editor {

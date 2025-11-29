@@ -6,7 +6,7 @@
 #include "pch.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "GLMSerialization.h"
-#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+#include <refl.hpp>
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 namespace PAIN {

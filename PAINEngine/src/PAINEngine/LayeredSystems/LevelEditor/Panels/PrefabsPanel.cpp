@@ -9,6 +9,8 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+
 #include "LayeredSystems/LevelEditor/Editor.h"
 #include "ViewportPanel.h"
 

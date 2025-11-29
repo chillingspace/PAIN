@@ -7,7 +7,7 @@
 #undef min
 
 #include "refl.hpp"
-#include "CoreSystems/Assets/sAssets.h"
+#include "AssetData.h"
 
 namespace PAIN::Editor::Attributes {
 

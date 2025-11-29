@@ -15,8 +15,6 @@
 #include "pch.h"
 #include <refl.hpp>
 #include "GLMSerialization.h"
-#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
-#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
 
 namespace PAIN {
 

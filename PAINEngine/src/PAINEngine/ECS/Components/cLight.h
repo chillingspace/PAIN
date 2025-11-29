@@ -1,7 +1,6 @@
 #pragma once
 
 #include "pch.h"
-#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
 #include "GLMSerialization.h"
 
 namespace PAIN {

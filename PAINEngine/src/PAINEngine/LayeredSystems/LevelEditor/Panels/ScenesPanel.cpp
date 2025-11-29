@@ -7,6 +7,9 @@
 #include "CoreSystems/Scene/Scene.h"
 #include <CoreSystems/Scripting/EngineAPIAdapter.h>
 
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+
+
 namespace PAIN {
     namespace Editor {
         namespace Panel {
