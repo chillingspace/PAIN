@@ -101,6 +101,21 @@ namespace PAIN {
 			NUM_PBR_MAP_TYPES,
 		};
 
+		std::vector<const char*> DEBUG_PBR_MAP_STRING{
+			"NONE",
+			"OBJECT_ONLY",
+			"DIFFUSE",
+			"AO",
+			"NORMAL",
+			"ROUGHNESS",
+			"METALLIC",
+			"EMISSION",
+			"IBL_IRRADIANCE",
+			"IBL_PREFILTER",
+			"IBL_BRDFLUT",
+			"NUM_PBR_MAP_TYPES",
+		};
+
 		DEBUG_PBR_MAP_TYPES DEBUG_PBR_MAP_TYPE = DEBUG_PBR_MAP_TYPES::NONE;
 
 		// optimisation

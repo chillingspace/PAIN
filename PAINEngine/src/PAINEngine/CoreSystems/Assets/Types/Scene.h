@@ -37,9 +37,16 @@ namespace PAIN {
             //Environment settings
             struct Environment {
                 Assets::GUID skyboxGUID;
-                bool useDaytime = true;
                 glm::vec3 cameraLightIntensity{ 0.01f };
                 glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
+                bool useWorldLight = true;
+                bool useIBL = true;
+                bool useDiffuseMap = true;
+                bool useAOMap = true ;
+                bool useNormalMap = true;
+                bool useRoughnessMetallicMap = true;
+                bool useEmissionMap = true;
+                GraphicsSettings::DEBUG_PBR_MAP_TYPES pbr_map = GraphicsSettings::DEBUG_PBR_MAP_TYPES::NONE;
             } environment;
 
             //Layers

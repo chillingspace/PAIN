@@ -77,6 +77,12 @@ namespace PAIN {
 
 				//Optional virtual panel window settings
 				virtual void nextWindowSettings() {}
+
+				//Flag to ensure panel is always active
+				bool always_active = false;
+
+				//Flag to signal that panel is hidden
+				bool panel_hidden = false;
 			public:
 
 				//Constructor
