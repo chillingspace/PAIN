@@ -105,4 +105,4 @@ jobs:
         working-directory: android
         env:
           CI_ABI: x86_64
-        run: .\gradlew.bat assembleDebug
+        run: .\gradlew.bat assembleDebug --quiet
