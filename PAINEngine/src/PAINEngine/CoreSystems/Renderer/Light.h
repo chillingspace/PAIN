@@ -22,7 +22,7 @@ namespace PAIN {
 		};
 
 	private:
-		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;
+		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 1;		// cant increase. will break android. android cannot handle > 16 textures
 		static int num_shadowmapped_lights;
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::NONE;
 		unsigned int shadow_fbo = 0;

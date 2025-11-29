@@ -13,7 +13,7 @@ struct Material {
     float rough;
     float metal;
     vec3 color;
-    float alwaysLit;    // bool
+    float debugging_geometry;    // bool
 };
 
 struct Light {
@@ -38,6 +38,7 @@ uniform sampler2D gPos;
 uniform sampler2D gCol;
 uniform sampler2D gNorm;
 uniform sampler2D gMaterial;
+uniform sampler2D gEmission;
 
 // for ibl
 uniform float u_UseIbl;
@@ -46,14 +47,14 @@ uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
 uniform vec3 u_CamPos;
 
-#define MAX_SHADOWMAPPED_LIGHTS 4
+#define MAX_SHADOWMAPPED_LIGHTS 1
 uniform sampler2D u_ShadowMap0;
-uniform sampler2D u_ShadowMap1;
-uniform sampler2D u_ShadowMap2;
-uniform sampler2D u_ShadowMap3;
 uniform float u_NumShadowMaps;
 
 Material material;
+
+// debug
+uniform float DEBUG_TYPE;
 
 
 float ggxDistribution(float nDotH) {
@@ -125,11 +126,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
         return 0.0;
     }
 
-    float shadow_map_depth;
-    if (shadow_map_idx == 0) shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
-    else if (shadow_map_idx == 1) shadow_map_depth = texture(u_ShadowMap1, projCoords.xy).r;
-    else if (shadow_map_idx == 2) shadow_map_depth = texture(u_ShadowMap2, projCoords.xy).r;
-    else if (shadow_map_idx == 3) shadow_map_depth = texture(u_ShadowMap3, projCoords.xy).r;
+    float shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
     
     float frag_depth = projCoords.z;
     
@@ -147,20 +144,12 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
     
-    ivec2 size;
-    if (shadow_map_idx == 0) size = textureSize(u_ShadowMap0, 0);
-    else if (shadow_map_idx == 1) size = textureSize(u_ShadowMap1, 0);
-    else if (shadow_map_idx == 2) size = textureSize(u_ShadowMap2, 0);
-    else if (shadow_map_idx == 3) size = textureSize(u_ShadowMap3, 0);
+    ivec2 size = textureSize(u_ShadowMap0, 0);
     vec2 texelSize = 1.0 / vec2(size);
     
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = 0.0;
-            if (shadow_map_idx == 0) pcfDepth = texture(u_ShadowMap0, projCoords.xy + vec2(x, y) * texelSize).r;
-            else if (shadow_map_idx == 1) pcfDepth = texture(u_ShadowMap1, projCoords.xy + vec2(x, y) * texelSize).r;
-            else if (shadow_map_idx == 2) pcfDepth = texture(u_ShadowMap2, projCoords.xy + vec2(x, y) * texelSize).r;
-            else if (shadow_map_idx == 3) pcfDepth = texture(u_ShadowMap3, projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = texture(u_ShadowMap0, projCoords.xy + vec2(x, y) * texelSize).r;
             
             // If shadow map is empty (no depth written), don't cast shadows
             if (pcfDepth >= 0.999) {
@@ -175,21 +164,15 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     return shadow;
 }
 
+const int IBL_DEBUG_TYPE_BASE = 8;
+const bool IBL_FLIP_Y_AXIS = true;
 
 void main() {
-// FragColor = vec4(1,1,0,1);
-// return;
-
     if (int(u_NumShadowMaps) > MAX_SHADOWMAPPED_LIGHTS) {
         FragColor = vec4(1.0, 0.0, 1.0, 1.0);
         return;
     }
 
-// #define DEBUG_USE_IBL
-#ifdef DEBUG_USE_IBL
-        FragColor = vec4(vec3(u_UseIbl),1);
-        return;
-#endif
 
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
@@ -198,104 +181,134 @@ void main() {
 
     material.rough = m.r;
     material.metal = m.g;
-    material.alwaysLit = m.b;
+    material.debugging_geometry = m.b;
 
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
     vec3 viewNormal = mat3(u_V) * normalize(normal);
 
     vec3 color = vec3(0.0);
 
-    if (material.alwaysLit == 0.0) {
-        // Direct lighting
-        vec3 directLighting = vec3(0.0);
-        for (int i = 0; i < int(u_NumLights); i++) {
-            vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
+    // if (material.alwaysLit == 0.0) {
+    // Direct lighting
+    vec3 directLighting = vec3(0.0);
+    for (int i = 0; i < int(u_NumLights); i++) {
+        vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
 
-            if (u_Lights[i].shadowMapIdx > -0.5) {
-                float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);
-                float light_intensity = 1.0 - shadow_intensity;
-                light_contrib *= light_intensity;
-            }
+        if (u_Lights[i].shadowMapIdx > -0.5) {
+            float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);
+            float light_intensity = 1.0 - shadow_intensity;
+            light_contrib *= light_intensity;
+        }
 
-            directLighting += light_contrib;
+        directLighting += light_contrib;
+    }
+    
+    // Ambient/IBL
+    vec3 ambient = vec3(0.0);
+    if (u_UseIbl > 0.5) {
+        // IBL
+        vec3 N = normalize(normal);
+
+        // if (IBL_FLIP_Y_AXIS) {
+        //     N.y = -N.y;
+        // }
+
+        int dbg = int(DEBUG_TYPE);
+
+        if (dbg == IBL_DEBUG_TYPE_BASE)
+        {
+            vec3 irradiance = texture(irradianceMap, N).rgb;
+            FragColor = vec4(irradiance, 1.0);
+            return;
+        }
+
+        vec3 V = normalize(u_CamPos - fragPos);
+        vec3 R = reflect(-V, N);
+
+        if (IBL_FLIP_Y_AXIS) {
+            R.y = -R.y;
+        }
+
+
+        // DEBUG: Show the prefilter map. should look like perfect mirror
+        if (dbg == IBL_DEBUG_TYPE_BASE+1)
+        {
+            vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
+            FragColor = vec4(prefilteredColor, 1.0);
+            return;
         }
         
-        // Ambient/IBL
-        vec3 ambient = vec3(0.0);
-        if (u_UseIbl > 0.5) {
-            // IBL
-            vec3 N = normalize(normal);
+        vec3 F0 = vec3(0.04);
+        F0 = mix(F0, material.color, material.metal);
+        
+        float NdotV = max(dot(N, V), 0.001);
 
-// #define DEBUG_IRRADIANCE_MAP
-#ifdef DEBUG_IRRADIANCE_MAP
-            {
-                vec3 irradiance = texture(irradianceMap, N).rgb;
-                FragColor = vec4(irradiance, 1.0);
-                return;
-            }
-#endif
-
-            vec3 V = normalize(u_CamPos - fragPos);
-            vec3 R = reflect(-V, N);
-
-// #define DEBUG_PREFILTER_MAP
-#ifdef DEBUG_PREFILTER_MAP
-            // DEBUG: Show the prefilter map. should look like perfect mirror
-            {
-                vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
-                FragColor = vec4(prefilteredColor, 1.0);
-                return;
-            }
-#endif
-            
-            vec3 F0 = vec3(0.04);
-            F0 = mix(F0, material.color, material.metal);
-            
-            float NdotV = max(dot(N, V), 0.001);
-
-// #define DEBUG_BRDF_LUT
-#ifdef DEBUG_BRDF_LUT
-            // debug brdf lut. should look like gradient red/orange
-            {
-                vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
-                FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
-                return;
-            }
-#endif
+        // debug brdf lut. should look like gradient red/orange
+        if (dbg == IBL_DEBUG_TYPE_BASE+2)
+        {
+            vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
+            return;
+        }
 
 
-            vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
-            
-            // Diffuse component
-            vec3 kD = (1.0 - F) * (1.0 - material.metal);
-            vec3 irradiance = texture(irradianceMap, N).rgb;
-            irradiance = irradiance / (irradiance + vec3(1.0));
-            vec3 diffuse = kD * irradiance * material.color;
+        vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
+        
+        // Diffuse component
+        vec3 kD = (1.0 - F) * (1.0 - material.metal);
+        vec3 irradiance = texture(irradianceMap, N).rgb;
+        // irradiance = irradiance / (irradiance + vec3(1.0));
+        vec3 diffuse = kD * irradiance * material.color;
 
 // #define DEBUG_IBL_DIFFUSE
 #ifdef DEBUG_IBL_DIFFUSE
-            FragColor = vec4(diffuse, 1.0);
-            return;
+        FragColor = vec4(diffuse, 1.0);
+        return;
 #endif
 
-            // Specular component  
-            const float MAX_REFLECTION_LOD = 4.0;
-            vec3 prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
-            prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
+        // Specular component  
+        const float MAX_REFLECTION_LOD = 4.0;
 
-            vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
-            vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        vec3 prefilteredColor = vec3(0.0, 0.0, 0.0);
 
-            ambient = diffuse + specular;
-        } else {
-            ambient = material.color * u_AmbientLight;
+#ifdef DEBUG_MIP_INTERPOLATION
+        {
+            // somehow flooring the mipLevel, no interpolation fixes aura issue?
+            // !TODO: jspoh figure out why and a proper fix
+            float mipLevel = material.rough * MAX_REFLECTION_LOD;
+            mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
+            prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
         }
-        
-        color = directLighting + ambient;
-    }
-    else {
-        color = material.color;
+#endif
+
+        prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+
+#ifdef DEBUG_MIP
+        {
+            // debug to see if mip issue
+            prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Force mip 0
+        }
+#endif
+
+        // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
+
+        vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+
+        ambient = diffuse + specular;
+    } else {
+        ambient = material.color * u_AmbientLight;
     }
     
+    color = directLighting + ambient;
+
+    if (material.debugging_geometry > 0.5) {
+        color = material.color;
+    }
+
+    vec3 emission = texture(gEmission, TexCoords).rgb;
+    color += emission;
+    
+    // color = color / (color + vec3(1.0)); // Reinhard
     FragColor = vec4(color, 1.0);
 }
