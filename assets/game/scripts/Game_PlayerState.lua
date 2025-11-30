@@ -31,7 +31,15 @@ _G.PlayerState = {
     hideRadius = 4.5,  -- how close to hide
     playerBaseScale = nil,   -- original scale of player
     letterBaseScale = nil,
-    hideScaleFactor = 0.4,   -- how small when hiding 
+    hideScaleFactor = 0.1,   -- how small when hiding 
+
+     -- SFX entities
+    sfxHideIn  = nil,
+    sfxHideOut = nil,
+    sfxRespawn = nil,
+    sfxIdle    = nil,
+    sfxJump    = nil,
+    sfxDrop    = nil,
 
     _keysRegistered = false
 }
@@ -91,6 +99,21 @@ function S.init(player)
     S.heart1 = findEntity("heart_1")
     S.heart2 = findEntity("heart_2")
     S.heart3 = findEntity("heart_3")
+
+    -- SFX entities
+    if not S.sfxHideIn  then S.sfxHideIn  = findEntity("sfx_hide_in") end
+    if not S.sfxHideOut then S.sfxHideOut = findEntity("sfx_hide_out") end
+    if not S.sfxRespawn then S.sfxRespawn = findEntity("sfx_respawn") end
+    if not S.sfxIdle    then S.sfxIdle    = findEntity("sfx_idle") end
+    if not S.sfxJump    then S.sfxJump    = findEntity("sfx_jump") end
+    if not S.sfxDrop    then S.sfxDrop    = findEntity("sfx_drop_collectible") end
+
+end
+
+local function playSfx(e)
+    if e and audioPlay then
+        audioPlay(e)
+    end
 end
 
 function S.update(dt)
@@ -142,6 +165,21 @@ function S.update(dt)
 
     local px, py, pz = getPosition(S.player)
 
+    -- keep all player SFX entities on the player
+    local function syncSfx(e)
+        if e then
+            setPosition(e, px, py, pz)
+        end
+    end
+
+    syncSfx(S.sfxHideIn)
+    syncSfx(S.sfxHideOut)
+    syncSfx(S.sfxRespawn)
+    syncSfx(S.sfxIdle)
+    syncSfx(S.sfxJump)
+    syncSfx(S.sfxDrop)
+
+
     -------------------------------------------------
     -- hiding logic -> press H
     -------------------------------------------------
@@ -179,6 +217,8 @@ function S.update(dt)
             end
 
             log("[PlayerState] Player left hiding spot")
+
+            playSfx(S.sfxHideOut)
 
         else
             -- try to hide: find nearest hiding_spot within radius
@@ -245,6 +285,7 @@ function S.update(dt)
                     S.hidden = true
                     S.hiddenIn = bestSpot
                     log("[PlayerState] Player is hiding in a box")
+                    playSfx(S.sfxHideIn)
                 end
             end
         end
@@ -421,7 +462,14 @@ function S.setCheckpoint(player, checkpointEntity)
     --log("[PlayerState] Checkpoint set at:", x, y, z)
 end
 
+-- local NORMAL_HEART_PATH = "game/textures/heart normal.png"
+-- local GREY_HEART_PATH   = "game/textures/heart grey.png"
+
 local function updateHeartsUI()
+    -- if S.heart1 then setUITexture(S.heart1, "game/textures/heart normal.png") end
+    -- if S.heart2 then setUITexture(S.heart2, "game/textures/heart normal.png") end
+    -- if S.heart3 then setUITexture(S.heart3, "game/textures/heart normal.png") end
+
     -- hide hearts if > lives
     if S.lives <= 2 and S.heart3 then
         setUITexture(S.heart3, "game/textures/heart grey.png")
@@ -451,13 +499,15 @@ function S.onCaught(player)
     if S.lives < 0 then S.lives = 0 end
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
+    playSfx(S.sfxRespawn)
 
-    -- DROP CARRIED LETTER HERE 
+    -- drop carried letter
     if S.carriedLetter then
         setPosition(S.carriedLetter, deathPos.x, deathPos.y, deathPos.z)
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
         log("[PlayerState] Dropped carried letter at death position")
+        playSfx(S.sfxDrop)
         S.carriedLetter = nil
     end
 

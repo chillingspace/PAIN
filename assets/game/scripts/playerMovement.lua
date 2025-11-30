@@ -17,16 +17,15 @@ _G_root.JumpButton_OnClick = function()
     jumpPressed = true
 end
 
-
-registerKeyDown("KEY_U", function() moveUp = true end)
-registerKeyDown("KEY_D", function() moveDown = true end)
-registerKeyDown("KEY_L", function() moveLeft = true end)
-registerKeyDown("KEY_R", function() moveRight = true end)
+registerKeyDown("W", function() moveUp = true end)
+registerKeyDown("S", function() moveDown = true end)
+registerKeyDown("A", function() moveLeft = true end)
+registerKeyDown("D", function() moveRight = true end)
 registerKeyDown("SPACE", function() jumpPressed = true end)
-registerKeyUp("KEY_U", function() moveUp = false end)
-registerKeyUp("KEY_D", function() moveDown = false end)
-registerKeyUp("KEY_L", function() moveLeft = false end)
-registerKeyUp("KEY_R", function() moveRight = false end)
+registerKeyUp("W", function() moveUp = false end)
+registerKeyUp("S", function() moveDown = false end)
+registerKeyUp("A", function() moveLeft = false end)
+registerKeyUp("D", function() moveRight = false end)
 
 local speed = 0.8
 local jumpSpeed = 2
@@ -39,6 +38,11 @@ local I = nil -- will be hooked to _G.Input once PlayerState has created it
 local baseRx, baseRy, baseRz = getRotation(entityId)
 local currentYaw = baseRy or 0.0
 local playerStateInited = false
+
+local idleTimer     = 0.0
+local idleInterval  = 5.0   -- seconds between idle sounds when not moving
+local S = nil -- will grab _G.PlayerState
+
 
 registerUpdate(function(dt)
     local id = entityId -- the entity script is attached to
@@ -55,14 +59,18 @@ registerUpdate(function(dt)
         playerStateInited = true
     end
 
+        if not S and _G.PlayerState then
+        S = _G.PlayerState
+    end
+
     -- while hiding: stop movement + stop audio 
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
         -- clear any pending jump inputs so they dont fire after unhide
-        if I then
-            I.doubleTapped = false
-            I.tapCount = 0     
-            I.tapTimer = 0.0
-        end
+        -- if I then
+        --     I.doubleTapped = false
+        --     I.tapCount = 0     
+        --     I.tapTimer = 0.0
+        -- end
         jumpPressed = false
 
         if walkingSoundPlaying and audioStop then
@@ -111,6 +119,20 @@ registerUpdate(function(dt)
             walkingSoundPlaying = false
         end
     end
+
+        -- idle sfx: when not moving, in intervals
+        if not isMoving then
+            idleTimer = idleTimer + dt
+            if idleTimer >= idleInterval then
+                idleTimer = 0.0
+                if S and S.sfxIdle then
+                    audioPlay(S.sfxIdle)
+                end
+            end
+        else
+            idleTimer = 0.0
+        end
+
 
     -- Make movement relative to camera yaw, if available.
     -- This means "push up" always moves in front of the camera.
@@ -163,16 +185,22 @@ registerUpdate(function(dt)
     isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
 
     -- jump, modify vertical vel -> physics handle gravity
-    local doubleTapJump = (I and I.doubleTapped) or false
-    if (jumpPressed or doubleTapJump) and isGrounded then
+    --local doubleTapJump = (I and I.doubleTapped) or false
+    --if (jumpPressed or doubleTapJump) and isGrounded then
+    if jumpPressed and isGrounded then
         curr_vy = jumpSpeed  
         isGrounded = false
 
+        -- jump sfx
+        if S and S.sfxJump then
+            audioPlay(S.sfxJump)
+        end
+
         -- consume jump
         jumpPressed = false
-        if I then
-            I.doubleTapped = false
-        end
+        -- if I then
+        --     I.doubleTapped = false
+        -- end
     end
 
     -- apply rotation and phy velocity
