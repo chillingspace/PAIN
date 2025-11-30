@@ -69,13 +69,18 @@ registerUpdate(function(dt)
             local vx = pointB.x - pointA.x
             local vz = pointB.z - pointA.z
             local lenSq = vx*vx + vz*vz
+            
             if lenSq > 0.0001 then
                 local len = math.sqrt(lenSq)
-                -- only inset if segment is long enough
-                local inset = math.min(patrolInset, len * 0.5 - 0.01)
-                if inset > 0.0 then
+                
+                -- Only inset if segment is long enough (at least 2x the inset distance)
+                local minPatrolDist = patrolInset * 3.0  -- Changed from 2.0 to 3.0 for safety
+                
+                if len > minPatrolDist then
+                    local inset = math.min(patrolInset, len * 0.4)  -- Max 40% inset, not 50%
                     local ux = vx / len
                     local uz = vz / len
+                    
                     -- move A forward along the line, B backward along the line
                     pointA.x = pointA.x + ux * inset
                     pointA.z = pointA.z + uz * inset
@@ -117,7 +122,7 @@ registerUpdate(function(dt)
     local dz = target.z - z
 
     local distSq = dx*dx + dy*dy + dz*dz
-    local closeEnough = 0.05
+    local closeEnough = 0.2
 
         if distSq < closeEnough * closeEnough then
         waitTimer = waitTime
