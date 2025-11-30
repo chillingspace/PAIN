@@ -1,0 +1,25 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            0.5,
+            0.5,
+            0.5
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\930\\textures\\930_wunderbaum_baseColor.png",
+        "metallic": "game\\textures\\930\\textures\\930_wunderbaum_metallicRoughness.png",
+        "roughness": "game\\textures\\930\\textures\\930_wunderbaum_metallicRoughness.png"
+    }
+}

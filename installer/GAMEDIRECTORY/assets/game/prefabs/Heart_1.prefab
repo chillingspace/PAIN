@@ -1,0 +1,99 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 1,
+                    "layer_mask": 2
+                },
+                "LocalTransform": {
+                    "position": [
+                        -0.8647336959838867,
+                        0.8957593441009521,
+                        -13.105713844299316
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "Heart"
+                },
+                "Texture2D": {
+                    "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                    "texture_scale": [
+                        0.05000000074505806,
+                        0.05000000074505806
+                    ]
+                },
+                "UIElement": {
+                    "b_is_enabled": true,
+                    "b_is_interactable": true,
+                    "layer": 0
+                },
+                "UIRectTransform": {
+                    "anchor_max": [
+                        1.0,
+                        1.0
+                    ],
+                    "anchor_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "anchored_position": [
+                        0.0,
+                        0.0
+                    ],
+                    "local_position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "offset_max": [
+                        0.0,
+                        0.0
+                    ],
+                    "offset_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "size_delta": [
+                        100.0,
+                        100.0
+                    ]
+                }
+            },
+            "entityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b"
+        }
+    ],
+    "prefabName": "Heart_1",
+    "rootEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b"
+}

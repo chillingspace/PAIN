@@ -1,0 +1,28 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            0.3580039143562317,
+            0.3580039143562317,
+            0.3580039143562317
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.18188662827014923,
+        "roughness": 0.740603506565094
+    },
+    "textures": {
+        "albedo": "game\\textures\\930\\textures\\930_tire_baseColor.png",
+        "ao": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "lightmap": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "metallic": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png",
+        "normal": "game\\textures\\930\\textures\\930_tire_normal.png",
+        "roughness": "game\\textures\\930\\textures\\930_tire_metallicRoughness.png"
+    }
+}

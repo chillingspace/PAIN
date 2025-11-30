@@ -1,0 +1,113 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": -1,
+                    "localAABB": {
+                        "max": [
+                            0.5,
+                            0.009999999776482582,
+                            0.5
+                        ],
+                        "min": [
+                            -0.5,
+                            -0.009999999776482582,
+                            -0.5
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.5,
+                            0.009999999776482582,
+                            0.5
+                        ],
+                        "min": [
+                            -0.5,
+                            -0.009999999776482582,
+                            -0.5
+                        ]
+                    }
+                },
+                "Collider": {
+                    "box_size": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collision_layer": 0,
+                    "friction": 0.5,
+                    "is_trigger": false,
+                    "restitution": 0.10000000149011612,
+                    "shape": 0
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "476662dc-9a7b-2243-97be-6e01bceeb854",
+                            "aoTextureOverride": "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "4b1f318e-49f7-1545-bb84-b9c6608f3471",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
+                            "normalTextureOverride": "351d0711-28db-d346-81fe-fe5904ff854a",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "4525969c-730e-6d40-aef8-43390fef9c6e",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Floor"
+                }
+            },
+            "entityGUID": "e9f38ce8-eeec-ff48-ad3c-10fe34f87139"
+        }
+    ],
+    "prefabName": "Floor",
+    "rootEntityGUID": "e9f38ce8-eeec-ff48-ad3c-10fe34f87139"
+}

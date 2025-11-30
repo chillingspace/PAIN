@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Pallet_baseColor.png",
+        "ao": "game\\textures\\Pallet_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Pallet_emissive.png",
+        "lightmap": "game\\textures\\Pallet_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Pallet_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Pallet_normal.png",
+        "roughness": "game\\textures\\Pallet_occlusionRoughnessMetallic.png"
+    }
+}

@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 19,
+                    "localAABB": {
+                        "max": [
+                            69.66659545898438,
+                            69.85763549804688,
+                            40.19990921020508
+                        ],
+                        "min": [
+                            -34.33774185180664,
+                            -0.5009422302246094,
+                            -71.30400085449219
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.2984395921230316,
+                            0.10548503696918488,
+                            0.7133870124816895
+                        ],
+                        "min": [
+                            0.1413930356502533,
+                            -0.0007564228144474328,
+                            0.5450161099433899
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.19324302673339844,
+                        0.0,
+                        0.6526851654052734
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0015100000891834497,
+                        0.0015100000891834497,
+                        0.0015100000891834497
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                            "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                            "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Tires"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
+        }
+    ],
+    "prefabName": "Tires",
+    "rootEntityGUID": "623b193d-a4d0-684d-bf12-d30bbadfabfc"
+}

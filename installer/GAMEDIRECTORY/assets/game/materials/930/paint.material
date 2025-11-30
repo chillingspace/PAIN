@@ -1,0 +1,27 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            0.09587153792381287,
+            0.08885756134986877,
+            0.08620800822973251
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 1.0,
+        "roughness": 0.42480701208114624
+    },
+    "textures": {
+        "ao": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "clearCoat": "game\\textures\\930\\textures\\paint_clearcoat.png",
+        "lightmap": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "metallic": "game\\textures\\930\\textures\\paint_metallicRoughness.png",
+        "roughness": "game\\textures\\930\\textures\\paint_metallicRoughness.png"
+    }
+}

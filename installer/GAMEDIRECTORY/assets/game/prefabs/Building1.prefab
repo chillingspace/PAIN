@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 119,
+                    "localAABB": {
+                        "max": [
+                            423.7960205078125,
+                            211.10305786132813,
+                            204.6681671142578
+                        ],
+                        "min": [
+                            -423.7960205078125,
+                            0.0,
+                            -204.66815185546875
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            2.3197879791259766,
+                            0.21110916137695313,
+                            3.8652100563049316
+                        ],
+                        "min": [
+                            1.4721940755844116,
+                            -6.11036921327468e-06,
+                            3.4558703899383545
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        1.8959918022155762,
+                        -3.1127964650323747e-09,
+                        3.660538673400879
+                    ],
+                    "rotation": [
+                        7.082387583068339e-06,
+                        1.830364624311187e-07,
+                        3.7849085856578313e-06,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "19c6aae9-108a-7d45-937d-bbd0c891a9cb",
+                            "aoTextureOverride": "ba0c5258-4554-c14c-a4ee-8814e088cab2",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "0973caab-44f6-834a-8b63-b2ab319c8eaa",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "ba0c5258-4554-c14c-a4ee-8814e088cab2",
+                            "normalTextureOverride": "296fa841-931e-664c-b744-fe3b3558b5c5",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "ba0c5258-4554-c14c-a4ee-8814e088cab2",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "61599017-a38c-ff4c-9a02-0b353f879dee",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Building1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "d205dc07-fd62-4a4a-ab77-940aeaa10828"
+        }
+    ],
+    "prefabName": "Building1",
+    "rootEntityGUID": "d205dc07-fd62-4a4a-ab77-940aeaa10828"
+}
