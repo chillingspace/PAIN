@@ -30,13 +30,6 @@
                         ]
                     }
                 },
-                "Collider": {
-                    "collision_layer": 0,
-                    "friction": 0.5,
-                    "is_trigger": false,
-                    "restitution": 0.10000000149011612,
-                    "shape": 3
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -98,6 +91,33 @@
                 },
                 "Name": {
                     "name": "Platform1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"

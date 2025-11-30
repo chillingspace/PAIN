@@ -30,18 +30,6 @@
                         ]
                     }
                 },
-                "Collider": {
-                    "box_size": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "collision_layer": 0,
-                    "friction": 0.5,
-                    "is_trigger": false,
-                    "restitution": 0.10000000149011612,
-                    "shape": 0
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -103,6 +91,33 @@
                 },
                 "Name": {
                     "name": "BigGround"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133"

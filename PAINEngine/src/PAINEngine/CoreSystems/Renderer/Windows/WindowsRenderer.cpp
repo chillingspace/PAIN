@@ -1022,6 +1022,9 @@ namespace PAIN {
 				}
 
 			}
+            else {
+                PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
+            }
 
 			// debug
 			geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);

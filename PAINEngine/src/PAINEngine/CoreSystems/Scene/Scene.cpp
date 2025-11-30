@@ -42,7 +42,10 @@ namespace PAIN {
 				anim.PlayAnimation(0);  // Start first animation
 				ecs->addEntityComponent(entity, static_cast<Animation>(anim));
 
-
+				PN_CORE_INFO("Added {} to scene with animation playing", mdl->vpath);
+			}
+			else {
+				PN_CORE_INFO("Added {} to scene", mdl->vpath);
 			}
 
 			if (meta) meta->setEntityName(entity, name);
@@ -583,6 +586,7 @@ namespace PAIN {
 				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
 #endif
 				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
 				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
@@ -597,6 +601,7 @@ namespace PAIN {
 				std::filesystem::path tc_path = "game\\models\\toycar\\ToyCar.mesh";
 #endif
 				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", tc_path.string());
 				mdl_opt = asset_manager->getAsset<Assets::Model>(tc_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
@@ -606,12 +611,13 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
-#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
 				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
 #endif
 				//Get model
+
+				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
 				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
@@ -630,6 +636,7 @@ namespace PAIN {
 				std::filesystem::path fh_path = "game\\models\\Frog_Hopping.mesh";
 #endif
 				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
 				mdl_opt = asset_manager->getAsset<Assets::Model>(fh_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
@@ -641,7 +648,6 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
-#endif
 			}
 
 			//Create default scene asset
