@@ -67,23 +67,27 @@ registerUpdate(function(dt)
     local oy = baseOffset.y
     local oz = baseOffset.z
 
-    -- yaw around Y axis
-    local rx = ox * cosY + oz * sinY
-    local rz = -ox * sinY + oz * cosY
-    local ry = oy
+    -- STEP 1: Pitch first (Rotate around Local X axis)
+    -- We rotate the base offset vector by pitch. 
+    -- This ensures "Up" is always "Up" relative to the camera view.
+    local pitchX = ox 
+    local pitchY = oy * cosP - oz * sinP
+    local pitchZ = oy * sinP + oz * cosP
 
-    -- pitch around X axis
-    local ryp = ry * cosP - rz * sinP
-    local rzp = ry * sinP + rz * cosP
+    -- STEP 2: Yaw second (Rotate around Global Y axis)
+    -- Now we spin that pitched vector around the player.
+    local rx = pitchX * cosY + pitchZ * sinY
+    local rz = -pitchX * sinY + pitchZ * cosY
+    local ry = pitchY
 
     -- final camera position (player + rotated offset)
     local cx = px + rx
-    local cy = py + ryp
-    local cz = pz + rzp
+    local cy = py + ry
+    local cz = pz + rz
 
-    -- aim camera at player (slightly above feet)
+    -- aim camera at player (Looking at head/center is usually better than feet)
     local targetX = px
-    local targetY = py 
+    local targetY = py -- + 1.0 (Optional: Look at head instead of feet)
     local targetZ = pz
 
     cameraSetTransform(

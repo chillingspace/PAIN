@@ -88,7 +88,11 @@ namespace PAIN {
 			glm::uvec2 getFrameBuffer() const override;
 
 			void safeShutdown() override;
-		};
+
+            bool isMinimized() const override;
+
+            void setCursorMode(bool locked) override;
+        };
 	}
 }
 

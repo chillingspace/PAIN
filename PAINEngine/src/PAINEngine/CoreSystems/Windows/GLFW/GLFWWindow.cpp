@@ -91,6 +91,18 @@ namespace PAIN {
 			return (width == 0 || height == 0);
 		}
 
+		void GLFW_Window::setCursorMode(bool locked)
+		{
+			if (locked) {
+				// Hides cursor and locks it to center
+				glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			}
+			else {
+				// Shows cursor and allows free movement
+				glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+		}
+
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
 
 			//Fetch window class

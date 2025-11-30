@@ -69,6 +69,8 @@ namespace PAIN {
 			void safeShutdown() override;
 
 			bool isMinimized() const override;
+
+			void setCursorMode(bool locked) override;
 		};
 	}
 }

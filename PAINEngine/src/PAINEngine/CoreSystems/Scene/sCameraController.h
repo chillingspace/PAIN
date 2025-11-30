@@ -8,9 +8,15 @@
 #include "CoreSystems/Events/Android/TouchEvents.h"
 #include "CoreSystems/Events/Android/OtherEvents.h"
 #include "CoreSystems/Events/Android/SurfaceEvents.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
+
+#ifdef PN_PLATFORM_WINDOWS
+#include "CoreSystems/Windows/Window.h"
+#endif
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
 #endif
+
 
 namespace PAIN {
 

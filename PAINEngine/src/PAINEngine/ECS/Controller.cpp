@@ -485,9 +485,8 @@ namespace PAIN {
             registerSystem<PAIN::Scripting::GameScriptingSystem>();
             registerSystem<PAIN::AI::System>();
             registerSystem<AnimationSystem::System>();
-#ifdef PN_PLATFORM_WINDOWS	
             registerSystem<Audio::System>();
-#endif
+
             registerSystem<sBVHSystem>();
             // UI Systems reg
             registerSystem<UI::LayoutSystem>();

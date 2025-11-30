@@ -61,9 +61,14 @@ namespace PAIN {
 			//Get window height and width
 			virtual glm::uvec2 getFrameBuffer() const = 0;
 
+			//Safe shutdown
 			virtual void safeShutdown() = 0;
 
-			virtual bool isMinimized() const { return false; }
+			//Get is minimized
+			virtual bool isMinimized() const = 0;
+
+			//Set cursor mode
+			virtual void setCursorMode(bool locked) = 0;
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
