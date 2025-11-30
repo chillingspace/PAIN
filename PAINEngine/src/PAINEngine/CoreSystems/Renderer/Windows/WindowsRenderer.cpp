@@ -1023,7 +1023,7 @@ namespace PAIN {
 
 			}
             else {
-                PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
+                //PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
             }
 
 			// debug

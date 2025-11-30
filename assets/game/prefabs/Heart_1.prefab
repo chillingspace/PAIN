@@ -34,7 +34,10 @@
                 },
                 "Texture2D": {
                     "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
-                    "texture_scale": 0.03999999910593033
+                    "texture_scale": [
+                        0.05000000074505806,
+                        0.05000000074505806
+                    ]
                 },
                 "UIElement": {
                     "b_is_enabled": true,
