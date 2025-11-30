@@ -109,6 +109,7 @@ namespace PAIN {
 
 			const i32 collision_steps;
 
+			glm::vec3 current_gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
 			// Jolt init setup
 			void joltSetup();

@@ -119,7 +119,7 @@ namespace PAIN {
 			jolt_physics->SetPhysicsSettings(physics_settings);
 
 			// Set gravity
-			jolt_physics->SetGravity(JPH::Vec3(0, -9.81f, 0));
+			jolt_physics->SetGravity(JPH::Vec3(current_gravity.x, current_gravity.y, current_gravity.z));
 
 			// Get body interface
 			body_interface = &jolt_physics->GetBodyInterface();
@@ -270,6 +270,9 @@ namespace PAIN {
 
 					// Check if layer needs updating
 					if (!rigidBody.bodyID.IsInvalid()) {
+						float gravity_factor = rigidBody.use_gravity ? 1.0f : 0.0f;
+						body_interface.SetGravityFactor(rigidBody.bodyID, gravity_factor);
+
 						JPH::ObjectLayer current_layer = body_interface.GetObjectLayer(rigidBody.bodyID);
 
 						if (current_layer != rigidBody.layer.value) {
@@ -382,6 +385,16 @@ namespace PAIN {
 
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;
+
+					// Cache the values we just used so we can detect future changes
+					rigidBody.last_applied_scale = rigidBody.collider_scale;
+					rigidBody.last_applied_offset = rigidBody.collider_offset;
+
+					float gravity_factor = rigidBody.use_gravity ? 1.0f : 0.0f;
+					body_interface->SetGravityFactor(body_id, gravity_factor);
+
+					body_interface->SetLinearVelocity(body_id, JPH::Vec3::sZero());
+					body_interface->SetAngularVelocity(body_id, JPH::Vec3::sZero());
 
 					PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
 								   (uint32_t)entity,

@@ -42,6 +42,35 @@ namespace PAIN {
             Kinematic
         };
 
+        enum class PhysicsBehavior {
+            Static,      
+            Dynamic,     
+            Debris,     
+            Sensor      
+        };
+
+        struct LayerMapping {
+            PhysicsBehavior behavior = PhysicsBehavior::Dynamic;
+
+            // Convert to Jolt layer
+            JPH::ObjectLayer toJoltLayer() const {
+                switch (behavior) {
+                case PhysicsBehavior::Static:  return Layer::NON_MOVING;
+                case PhysicsBehavior::Dynamic: return Layer::MOVING;
+                case PhysicsBehavior::Debris:  return Layer::DEBRIS;
+                case PhysicsBehavior::Sensor:  return Layer::SENSOR;
+                default:                       return Layer::MOVING;
+                }
+            }
+        };
+
+        struct PhysicsSettings {
+            glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+            bool enable_gravity = true;
+
+            static constexpr bool ShouldSerialize = true;
+        };
+
         struct PhysicsLayer {
             JPH::ObjectLayer value = Layer::MOVING;
             JPH::BodyID* bodyID_ptr = nullptr;  // Pointer to parent's bodyID
@@ -68,8 +97,24 @@ namespace PAIN {
 			bool b_is_dynamic;  
             PhysicsLayer layer = Layer::MOVING;
             MotionType motion_type = MotionType::Dynamic;
-            // Constructor to link layer to bodyID
-            RigidBody3D() {
+            Physics::LayerMapping physics_behavior;
+
+            // Scale modifier for the collider (multiplies with transform scale)
+            glm::vec3 collider_scale = glm::vec3(1.0f);
+            
+            // Helper to detect changes in editor (do not serialize this)
+            glm::vec3 last_applied_scale = glm::vec3(1.0f);
+
+            // Displacement of the collider from the entity center
+            glm::vec3 collider_offset = glm::vec3(0.0f);
+
+            // Helper to detect changes in editor (do not serialize this)
+            glm::vec3 last_applied_offset = glm::vec3(0.0f);
+
+            bool use_gravity = true;
+
+            // link layer to bodyID
+            /*RigidBody3D() {
                 layer.setBodyReference(bodyID);
             }
 
@@ -248,6 +293,14 @@ REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Joint>);
 
+// Physics settings
+REFL_TYPE(PAIN::Physics::PhysicsSettings)
+REFL_FIELD(gravity)
+REFL_FIELD(enable_gravity)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Physics::PhysicsSettings>);
+
 // Rigid Body 3D
 REFL_TYPE(PAIN::Physics::RigidBody3D)
 REFL_FIELD(velocity)
@@ -257,6 +310,10 @@ REFL_FIELD(mass)
 REFL_FIELD(b_is_dynamic)
 REFL_FIELD(layer)
 REFL_FIELD(motion_type)
+REFL_FIELD(physics_behavior)
+REFL_FIELD(collider_scale) // Currently only for Jolt rigidbody
+REFL_FIELD(collider_offset) // Currently only for Joly rigidbody
+REFL_FIELD(use_gravity)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
