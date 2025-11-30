@@ -51,6 +51,13 @@ namespace PAIN {
 			glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
+			// Get the primary monitor
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+			// Get the video mode of the monitor
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+#ifdef _DEBUG
 			//Create window
 			ptr_window = glfwCreateWindow(static_cast<int>(frame_buffer.x), static_cast<int>(frame_buffer.y), package.title.c_str(), nullptr, nullptr);
 			if (!ptr_window) {
@@ -58,6 +65,20 @@ namespace PAIN {
 				glfwTerminate();
 				throw std::exception();
 			}
+#else
+			// Create fullscreen window
+			ptr_window = glfwCreateWindow(
+				mode->width,
+				mode->height,
+				"My Fullscreen Window",
+				monitor,  // Pass monitor for fullscreen
+				nullptr
+			);
+
+			int w, h;
+			glfwGetFramebufferSize(ptr_window, &w, &h);
+			frame_buffer = { w, h };
+#endif
 
 			//Create rendering context
 			m_Context = std::make_unique<OpenGLContext>(ptr_window);

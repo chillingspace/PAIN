@@ -4,8 +4,17 @@
 
 	extern PAIN::Application* PAIN::CreateApplication();
 
-
-	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+#ifdef _DEBUG
+	int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) 
+#else
+	int WINAPI WinMain(
+		HINSTANCE hInstance,
+		HINSTANCE hPrevInstance,
+		LPSTR lpCmdLine,
+		int nCmdShow
+	)
+#endif
+	{
 
 		//// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
