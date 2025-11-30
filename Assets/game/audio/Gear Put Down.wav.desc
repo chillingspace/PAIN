@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Gear Put Down.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6289218935433575292
+  },
+  "descriptor_version": 1,
+  "guid": "feb46661-0d8d-d947-ac9f-881f436feda7",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\Gear Put Down.wav"
+  }
+}
