@@ -3,41 +3,41 @@
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 4536,
+      "count": 4650,
       "type": "SCALAR"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 1319,
+      "count": 1380,
       "max": [
-        100.0,
-        261.113525390625,
-        220.531448364258
+        163.632614135742,
+        615.516418457031,
+        163.632629394531
       ],
       "min": [
-        -100.000030517578,
-        -7.4373779296875,
-        -220.531448364258
+        -163.63264465332,
+        0.0,
+        -163.632675170898
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 1319,
+      "count": 1380,
       "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5126,
-      "count": 1319,
+      "count": 1380,
       "type": "VEC4"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 1319,
+      "count": 1380,
       "type": "VEC2"
     }
   ],
@@ -48,52 +48,52 @@
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 18144,
+      "byteLength": 18600,
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 15828,
-      "byteOffset": 18144,
+      "byteLength": 16560,
+      "byteOffset": 18600,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 15828,
-      "byteOffset": 33972,
+      "byteLength": 16560,
+      "byteOffset": 35160,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 21104,
-      "byteOffset": 49800,
+      "byteLength": 22080,
+      "byteOffset": 51720,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 10552,
-      "byteOffset": 70904,
+      "byteLength": 11040,
+      "byteOffset": 73800,
       "target": 34962
     }
   ],
   "buffers": [
     {
-      "byteLength": 81456,
+      "byteLength": 84840,
       "uri": "Enemy1.bin"
     }
   ],
   "images": [
     {
-      "uri": "Enemy1_baseColor.png"
+      "uri": "Enemy2_baseColor.png"
     },
     {
-      "uri": "Enemy1_occlusionRoughnessMetallic.png"
+      "uri": "Enemy2_occlusionRoughnessMetallic.png"
     },
     {
-      "uri": "Enemy1_normal.png"
+      "uri": "Enemy2_normal.png"
     },
     {
-      "uri": "Enemy1_emissive.png"
+      "uri": "Enemy2_emissive.png"
     }
   ],
   "materials": [
@@ -107,7 +107,7 @@
       "emissiveTexture": {
         "index": 3
       },
-      "name": "Enemy1",
+      "name": "Enemy2",
       "normalTexture": {
         "index": 2
       },
@@ -160,9 +160,9 @@
         0.00999999977648258
       ],
       "translation": [
-        1.6940658945086e-21,
         0.0,
-        0.0
+        -5.6843418860808e-14,
+        3.3881317890172e-21
       ]
     },
     {

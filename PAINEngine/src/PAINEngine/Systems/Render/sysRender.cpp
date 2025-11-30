@@ -487,7 +487,7 @@ namespace PAIN {
             if (!rendererService || !rendererService->w_renderer) return;
 
             //Texture and text groups
-            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform>);
+            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform, UIRectTransform>);
             auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
 
             //Get scn services
@@ -498,7 +498,7 @@ namespace PAIN {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_DEPTH_TEST);  // UI doesn't need depth
 
-            for (auto [entity, texture_comp, ui_elem, trans_comp] : texture_group.each()) {
+            for (auto [entity, texture_comp, ui_elem, trans_comp, rect_comp] : texture_group.each()) {
 
                 // Layer check
                 auto layerComp = registry.try_get<Entity::Layer>(entity);
@@ -510,6 +510,10 @@ namespace PAIN {
 
                 auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
                 if (!texture_opt.has_value()) continue;
+
+                // Get texture size and update rect transform comp
+                rect_comp.size_delta.x = texture_opt.value().get()->width;
+                rect_comp.size_delta.y = texture_opt.value().get()->height;
 
                 rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
             }

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Enemy2_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17334251805108625712
+  },
+  "descriptor_version": 1,
+  "guid": "d74f079a-b298-8147-b9fc-44372b1fccf9",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Enemy2_normal.png"
+  }
+}

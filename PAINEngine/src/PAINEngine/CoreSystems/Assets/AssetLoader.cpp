@@ -297,7 +297,7 @@ namespace PAIN {
                         if (err != GL_NO_ERROR) {
                             throw std::runtime_error("OpenGL error uploading mip " +
                                 std::to_string(mip) + ": 0x" +
-                                std::to_string(err));
+                                std::to_string(err) + " for file " + virtual_path);
                         }
 
                         offset += mipSize;
@@ -344,7 +344,7 @@ namespace PAIN {
                     if (err != GL_NO_ERROR) {
                         throw std::runtime_error("OpenGL error uploading mip " +
                             std::to_string(mip) + ": 0x" +
-                            std::to_string(err));
+                            std::to_string(err) + " for file " + virtual_path);
                     }
 
                     mipW = std::max(1, mipW / 2);

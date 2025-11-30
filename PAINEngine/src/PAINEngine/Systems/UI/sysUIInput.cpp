@@ -422,6 +422,11 @@ namespace PAIN {
 						}
 					}
 
+					PN_CORE_INFO("[UIInput] Mouse ({}, {}), Rect min=({}, {}) max=({}, {})",
+						mouse_pos.x, mouse_pos.y,
+						rect_min.x, rect_min.y,
+						rect_max.x, rect_max.y);
+
 
 					candidates.push_back({ entity, canvas_sort, sibling_index });
 				}

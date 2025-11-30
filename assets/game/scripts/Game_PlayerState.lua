@@ -16,8 +16,8 @@ _G.PlayerState = {
 
     player = nil, -- cache the player entity
     carriedLetter = nil, -- entity id of letter currently on back
-    pickupRadius = 0.5,  -- how close player must be to pick up letter
-    deliveryRadius  = 0.5, --  to drop off at collection point
+    pickupRadius = 0.2,  -- how close player must be to pick up letter
+    deliveryRadius  = 0.2, --  to drop off at collection point
     lettersDelivered = 0,  -- letters delivered so far
     lettersToWin = 3,  -- how many letters needed to win
     carriedOffset = {   -- offset of letter on the player's back
@@ -28,7 +28,7 @@ _G.PlayerState = {
 
     hidden = false, -- is player hiding
     hiddenIn = nil, -- which spot
-    hideRadius = 0.5,  -- how close to hide
+    hideRadius = 0.2,  -- how close to hide
     playerBaseScale = nil,   -- original scale of player
     letterBaseScale = nil,
     hideScaleFactor = 0.1,   -- how small when hiding 
