@@ -51,7 +51,11 @@ namespace PAIN {
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
             // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
+#ifdef _DEBUG
             std::filesystem::path project_root = Assets::findProjectRoot();
+#else
+            std::filesystem::path project_root = ".";
+#endif
             std::string project_root_str = normalizePath(project_root.string());
 
             //Register default virtual paths

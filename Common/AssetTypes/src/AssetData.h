@@ -330,6 +330,7 @@ namespace PAIN {
                 }
             }
 
+            std::cerr << "Could not find project root containing Assets/ directory" << std::endl;
             throw std::runtime_error("Could not find project root containing Assets/ directory");
         }
 
