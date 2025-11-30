@@ -1,5 +1,6 @@
 
--- radius/proximity-based (enemy detection) script 
+-- radius/proximity-based (enemy detection) script
+ 
 
 local player = nil
 
@@ -21,7 +22,7 @@ registerUpdate(function(dt)
     local dx, dy, dz = px - ex, py - ey, pz - ez
     local dist2 = dx*dx + dy*dy + dz*dz
 
-    if dist2 < 3*3 then
+    if dist2 < 0.35*0.35 then
         -- player in detection range
         log("[enemyDetection_radius] I see the player!")
         

@@ -17,6 +17,13 @@ _G_root.JumpButton_OnClick = function()
     jumpPressed = true
 end
 
+_G_root.ActionButton_OnClick = function()
+    printLog("[UI] Action button pressed (hide / collect)")
+    if PlayerState and PlayerState.onActionButton then
+        PlayerState.onActionButton()
+    end
+end
+
 registerKeyDown("W", function() moveUp = true end)
 registerKeyDown("S", function() moveDown = true end)
 registerKeyDown("A", function() moveLeft = true end)

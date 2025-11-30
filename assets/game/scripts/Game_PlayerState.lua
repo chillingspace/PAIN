@@ -16,8 +16,8 @@ _G.PlayerState = {
 
     player = nil, -- cache the player entity
     carriedLetter = nil, -- entity id of letter currently on back
-    pickupRadius = 2.0,  -- how close player must be to pick up letter
-    deliveryRadius  = 4.0, --  to drop off at collection point
+    pickupRadius = 0.5,  -- how close player must be to pick up letter
+    deliveryRadius  = 0.5, --  to drop off at collection point
     lettersDelivered = 0,  -- letters delivered so far
     lettersToWin = 3,  -- how many letters needed to win
     carriedOffset = {   -- offset of letter on the player's back
@@ -28,7 +28,7 @@ _G.PlayerState = {
 
     hidden = false, -- is player hiding
     hiddenIn = nil, -- which spot
-    hideRadius = 4.5,  -- how close to hide
+    hideRadius = 0.5,  -- how close to hide
     playerBaseScale = nil,   -- original scale of player
     letterBaseScale = nil,
     hideScaleFactor = 0.1,   -- how small when hiding 
@@ -115,6 +115,55 @@ local function playSfx(e)
         audioPlay(e)
     end
 end
+
+-- called by ui button, decides whether this press should hide/unhide or collect/deliver
+function S.onActionButton()
+    if not S.player then return end
+    local px, py, pz = getPosition(S.player)
+
+    ----------------------------------------------------------------
+    -- 1) If already hidden, always treat as "unhide"
+    ----------------------------------------------------------------
+    if S.hidden then
+        hidePressed = true
+        return
+    end
+
+    ----------------------------------------------------------------
+    -- 2) Check if we're close enough to a hiding_spot
+    ----------------------------------------------------------------
+    local nearHideSpot = false
+    local spots = getEntitiesByTag("hiding_spot")
+    if spots and #spots > 0 then
+        local bestDistSq = S.hideRadius * S.hideRadius
+
+        for _, spot in ipairs(spots) do
+            local bx, by, bz = getPosition(spot)
+            local dx = px - bx
+            local dy = py - by
+            local dz = pz - bz
+            local distSq = dx*dx + dy*dy + dz*dz
+
+            if distSq <= bestDistSq then
+                nearHideSpot = true
+                break
+            end
+        end
+    end
+
+    if nearHideSpot then
+        ----------------------------------------------------------------
+        -- 3) If near a hiding spot, treat this press as "hide"
+        ----------------------------------------------------------------
+        hidePressed = true
+    else
+        ----------------------------------------------------------------
+        -- 4) Otherwise, treat this press as "collect / deliver letter"
+        ----------------------------------------------------------------
+        collectPressed = true
+    end
+end
+
 
 function S.update(dt)
     -- cooldown
@@ -466,9 +515,9 @@ end
 -- local GREY_HEART_PATH   = "game/textures/heart grey.png"
 
 local function updateHeartsUI()
-    -- if S.heart1 then setUITexture(S.heart1, "game/textures/heart normal.png") end
-    -- if S.heart2 then setUITexture(S.heart2, "game/textures/heart normal.png") end
-    -- if S.heart3 then setUITexture(S.heart3, "game/textures/heart normal.png") end
+    if S.heart1 then setUITexture(S.heart1, "game/textures/heart normal.png") end
+    if S.heart2 then setUITexture(S.heart2, "game/textures/heart normal.png") end
+    if S.heart3 then setUITexture(S.heart3, "game/textures/heart normal.png") end
 
     -- hide hearts if > lives
     if S.lives <= 2 and S.heart3 then
