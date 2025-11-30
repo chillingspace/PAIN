@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "sCameraController.h"
-#include "CoreSystems/Renderer/GraphicsSettings.h"
+
 
 namespace PAIN {
     MobileMoveAxes g_MobileMoveAxes;
@@ -213,6 +213,7 @@ namespace PAIN {
         if (!camera) return;
 
 
+
         // -------- GAME MODE --------
 #ifdef _DEBUG
         bool gameMode = !editor_visible;
@@ -221,12 +222,26 @@ namespace PAIN {
         bool gameMode = true;
 #endif
 
+#ifdef PN_PLATFORM_WINDOWS
+        // Disable cursor (WINDOWS ONLY)
+        auto window = services->get<Window::Window>();
+
+        if (gameMode) {
+            window->setCursorMode(true);
+
+        }
+        else {
+            window->setCursorMode(false);
+        }
+#endif
+
         if (gameMode) {
             // active camera is driven by lua (thirdPersonCamera.lua) in game mode
             xOffset = 0.f;
             yOffset = 0.f;
             return;
         }
+
 
         // -------- EDITOR CAMERA --------
 
