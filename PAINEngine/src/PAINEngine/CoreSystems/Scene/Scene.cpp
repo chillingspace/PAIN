@@ -655,19 +655,21 @@ namespace PAIN {
 			//Create default scene asset
 			SceneAsset default_scene_config;
 
-			// Prep for subs
-			//std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
-
-			//auto scn_opt = asset_manager->getAssetData(init_scn_path);
-
-			//if (scn_opt) {
-
-			//	loadScene(scn_opt.get()->guid);
-			//}
-
-
 			//Configure scene with default settings
 			configScene(default_scene_config);
+
+#ifndef _DEBUG
+			// Prep for subs
+			std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+
+			auto scn_opt = asset_manager->getAssetData(init_scn_path);
+
+			if (scn_opt) {
+
+				loadScene(scn_opt.get()->guid);
+				//SetGameCamera();
+			}
+#endif
 
 			//Craft skybox path and get GUID
 			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
@@ -699,7 +701,12 @@ namespace PAIN {
 			//		}
 			//#endif
 
-					// Daytime / Nighttime setting
+#ifndef _DEBUG
+			// !TODO: fix this impl for release
+			SetGameCamera();
+#endif
+
+			// Daytime / Nighttime setting
 			{
 				if (gs.world_light) {
 
@@ -1039,6 +1046,9 @@ namespace PAIN {
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
+			}
+			else {
+				PN_CORE_ERROR("Game camera not found");
 			}
 
 		}
