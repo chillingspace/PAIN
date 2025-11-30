@@ -80,6 +80,12 @@ namespace PAIN {
 				glm::vec2 canvas_pos(0, 0);
 				glm::vec2 canvas_size = screen_size;
 
+				if (ui_canvas.render_mode == CanvasRenderMode::ScreenSpaceOverlay) {
+					canvas_pos = glm::vec2(0.0f, 0.0f);
+					canvas_size = viewport;
+				}
+
+
 				// For WorldSpace mode, position is from world transform
 				if (ui_canvas.render_mode == CanvasRenderMode::WorldSpace) {
 					if (registry.all_of<WorldTransform>(entity)) {
@@ -117,35 +123,34 @@ namespace PAIN {
 
 			auto& rect = registry.get<UIRectTransform>(entity);
 
-			// Calculate anchor points in parent space
+			// Calculate anchor points in parent space (already in pixel space)
 			glm::vec2 anchor_min_pos = parent_pos + rect.anchor_min * parent_size;
 			glm::vec2 anchor_max_pos = parent_pos + rect.anchor_max * parent_size;
 
-			// Calculate size based on anchors
 			glm::vec2 calculated_size;
 			glm::vec2 calculated_pos;
 
 			if (rect.anchor_min == rect.anchor_max) {
 				// Anchors together - use size_delta as absolute size
 				calculated_size = rect.size_delta;
-				calculated_pos = anchor_min_pos + rect.anchored_position;
+				calculated_pos = anchor_min_pos + rect.anchored_position + glm::vec2(rect.local_position);
 			}
 			else {
 				// Anchors apart - stretch between them with offsets
 				calculated_size = anchor_max_pos - anchor_min_pos +
 					glm::vec2(rect.offset_max.x - rect.offset_min.x,
 						rect.offset_max.y - rect.offset_min.y);
-				calculated_pos = anchor_min_pos + rect.offset_min;
+				calculated_pos = anchor_min_pos + rect.offset_min + glm::vec2(rect.local_position);
 			}
 
 			// Apply pivot (adjust position based on pivot point)
+			// Pivot (0,0) = bottom-left, (0.5,0.5) = center, (1,1) = top-right
 			calculated_pos -= rect.pivot * calculated_size;
 
-			// Apply local position, rotation, scale
-			calculated_pos += glm::vec2(rect.local_position);
+			// Apply scale
 			calculated_size *= glm::vec2(rect.scale);
 
-			// Write back calculated values
+			// Write back calculated values (in pixel space, bottom-left origin)
 			rect.calculated_world_position = calculated_pos;
 			rect.calculated_world_size = calculated_size;
 
@@ -162,6 +167,8 @@ namespace PAIN {
 				}
 			}
 		}
+
+
 
 
 		// Check if position is behind camera
