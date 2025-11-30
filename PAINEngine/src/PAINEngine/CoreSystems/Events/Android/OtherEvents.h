@@ -16,7 +16,18 @@ namespace PAIN {
         protected:
             AInputEvent* ai_event;
         public:
-            AllEvent(AInputEvent* ai_event) : ai_event(ai_event) {}
+            AllEvent(AInputEvent* event) {
+                //Validate before storing
+                if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+                    int32_t pointerCount = AMotionEvent_getPointerCount(event);
+
+                    if (pointerCount == 0) {
+                        return;
+                    }
+                }
+
+                ai_event = event;
+            }
             AInputEvent* getEvent() const { return ai_event; }
             EVENT_CLASS_TYPE(All);
             EVENT_CLASS_CATEGORY(Category::All)

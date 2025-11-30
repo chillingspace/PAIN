@@ -225,40 +225,140 @@ namespace PAIN {
             e_app->pushEventQueue(std::make_shared<Event::AllEvent>(event));
 
             const int32_t type = AInputEvent_getType(event);
+
             if (type == AINPUT_EVENT_TYPE_MOTION)
             {
-                const int32_t action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
-                const float x = AMotionEvent_getX(event, 0);
-                const float y = AMotionEvent_getY(event, 0);
-                const int32_t pointerId = AMotionEvent_getPointerId(event, 0);
+                // ========================================
+                // VALIDATE POINTER COUNT FIRST
+                // ========================================
+                const int32_t pointerCount = AMotionEvent_getPointerCount(event);
 
-                switch (action) {
+                if (pointerCount == 0) {
+                    PN_CORE_WARN("MotionEvent has 0 pointers - ignoring");
+                    return 0;
+                }
+
+                const int32_t action = AMotionEvent_getAction(event);
+                if (action < 0) {
+                    PN_CORE_WARN("Rejecting motion event with invalid action: {}", action);
+                    return 1;
+                }
+                const int32_t actionMasked = action & AMOTION_EVENT_ACTION_MASK;
+                const int32_t actionIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+                    >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+
+                // ========================================
+                // VALIDATE ACTION INDEX
+                // ========================================
+                if (actionIndex < 0 || actionIndex >= pointerCount) {
+                    PN_CORE_ERROR("Invalid action index {} (pointer count: {})", actionIndex, pointerCount);
+                    return 0;
+                }
+
+                switch (actionMasked) {
                 case AMOTION_EVENT_ACTION_DOWN:
-                case AMOTION_EVENT_ACTION_POINTER_DOWN:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchDown>(x, y, pointerId));
+                case AMOTION_EVENT_ACTION_POINTER_DOWN: {
+                    // Use the specific pointer that went down
+                    const float x = AMotionEvent_getX(event, actionIndex);
+                    const float y = AMotionEvent_getY(event, actionIndex);
+                    const int32_t pointerId = AMotionEvent_getPointerId(event, actionIndex);
+
+                    // Validate coordinates
+                    if (std::isfinite(x) && std::isfinite(y)) {
+                        e_app->pushEventQueue(std::make_shared<Event::TouchDown>(x, y, pointerId));
+                        PN_CORE_TRACE("TouchDown: id={}, pos=({}, {})", pointerId, x, y);
+                    }
+                    else {
+                        PN_CORE_WARN("Invalid touch down coordinates: ({}, {})", x, y);
+                    }
                     break;
+                }
+
                 case AMOTION_EVENT_ACTION_UP:
-                case AMOTION_EVENT_ACTION_POINTER_UP:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchUp>(x, y, pointerId));
+                case AMOTION_EVENT_ACTION_POINTER_UP: {
+                    // Use the specific pointer that went up
+                    const float x = AMotionEvent_getX(event, actionIndex);
+                    const float y = AMotionEvent_getY(event, actionIndex);
+                    const int32_t pointerId = AMotionEvent_getPointerId(event, actionIndex);
+
+                    if (std::isfinite(x) && std::isfinite(y)) {
+                        e_app->pushEventQueue(std::make_shared<Event::TouchUp>(x, y, pointerId));
+                        PN_CORE_TRACE("TouchUp: id={}", pointerId);
+                    }
+                    else {
+                        PN_CORE_WARN("Invalid touch up coordinates: ({}, {})", x, y);
+                    }
                     break;
-                case AMOTION_EVENT_ACTION_MOVE:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                }
+
+                case AMOTION_EVENT_ACTION_MOVE: {
+                    // ========================================
+                    // MOVE EVENTS: PROCESS ALL ACTIVE POINTERS
+                    // ========================================
+                    for (int32_t i = 0; i < pointerCount; i++) {
+                        const float x = AMotionEvent_getX(event, i);
+                        const float y = AMotionEvent_getY(event, i);
+                        const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                        if (std::isfinite(x) && std::isfinite(y)) {
+                            e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                        }
+                        else {
+                            PN_CORE_WARN("Invalid touch move coordinates for pointer {}: ({}, {})",
+                                pointerId, x, y);
+                        }
+                    }
+
+                    // ========================================
+                    // OPTIONAL: PROCESS HISTORICAL DATA
+                    // (Provides smoother input for fast movements)
+                    // ========================================
+                    size_t historySize = AMotionEvent_getHistorySize(event);
+
+                    if (historySize > 0) {
+                        for (size_t h = 0; h < historySize; h++) {
+                            for (int32_t i = 0; i < pointerCount; i++) {
+                                const float x = AMotionEvent_getHistoricalX(event, i, h);
+                                const float y = AMotionEvent_getHistoricalY(event, i, h);
+                                const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                                if (std::isfinite(x) && std::isfinite(y)) {
+                                    e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                                }
+                            }
+                        }
+                    }
                     break;
-                case AMOTION_EVENT_ACTION_CANCEL:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchCancel>(x, y, pointerId));
+                }
+
+                case AMOTION_EVENT_ACTION_CANCEL: {
+                    // ========================================
+                    // CANCEL: END ALL ACTIVE POINTERS
+                    // ========================================
+                    for (int32_t i = 0; i < pointerCount; i++) {
+                        const float x = AMotionEvent_getX(event, i);
+                        const float y = AMotionEvent_getY(event, i);
+                        const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                        if (std::isfinite(x) && std::isfinite(y)) {
+                            e_app->pushEventQueue(std::make_shared<Event::TouchCancel>(x, y, pointerId));
+                            PN_CORE_WARN("TouchCancel: id={}", pointerId);
+                        }
+                    }
                     break;
+                }
+
                 default:
-                    // Unrecognized motion action; keep the AllEvent
+                    PN_CORE_TRACE("Unhandled motion action: 0x{:X}", actionMasked);
                     break;
                 }
             }
             else if (type == AINPUT_EVENT_TYPE_KEY)
             {
-                // No dedicated key event class provided; keep raw for now
-                // The AllEvent already covers this case
+                // Key events - future implementation
             }
 
-            return 0; // not consumed here
+            return 0; // not consumed
         }
 
 
