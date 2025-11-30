@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "win screen.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3086195996018070905
+  },
+  "descriptor_version": 1,
+  "guid": "f30e4128-4a66-8e4c-8633-ca92f325342b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\win screen.png"
+  }
+}

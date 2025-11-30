@@ -1674,7 +1674,7 @@
                 "Entity": {
                     "Components": {
                         "Animation": {
-                            "animationTime": 0.7204816937446594,
+                            "animationTime": 0.6738384962081909,
                             "currentAnimationIndex": 0,
                             "isPlaying": true,
                             "loopAnimation": true,
