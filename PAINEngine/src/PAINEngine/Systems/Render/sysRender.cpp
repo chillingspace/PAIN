@@ -169,11 +169,14 @@ namespace PAIN {
                 if (err != GL_NO_ERROR) {
                     PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
                 }
+
+#ifdef PN_PLATFORM_WINDOWS
                 uiPass(registry);
                 err = glGetError();
                 if (err != GL_NO_ERROR) {
                     PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
                 }
+#endif
                 services.lock()->get<sRenderer>()->postProcessPass();
                 err = glGetError();
                 if (err != GL_NO_ERROR) {
@@ -480,6 +483,7 @@ namespace PAIN {
             }
         }
 
+#ifdef PN_PLATFORM_WINDOWS
         void System::uiPass(entt::registry& registry) {
 
             //Get render service
@@ -540,6 +544,7 @@ namespace PAIN {
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
         }
+#endif
 
     } // namespace Render
 } // namespace PAIN
