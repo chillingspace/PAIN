@@ -30,18 +30,6 @@
                         ]
                     }
                 },
-                "Collider": {
-                    "box_size": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "collision_layer": 0,
-                    "friction": 0.5,
-                    "is_trigger": false,
-                    "restitution": 0.10000000149011612,
-                    "shape": 0
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -59,9 +47,9 @@
                     ],
                     "rotation": [
                         0.0,
-                        0.7071067690849304,
+                        0.7071068286895752,
                         0.0,
-                        0.7071067690849304
+                        0.7071068286895752
                     ],
                     "scale": [
                         0.0010000000474974513,
@@ -103,6 +91,33 @@
                 },
                 "Name": {
                     "name": "ContainerRed"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "2c6594f5-d020-e84c-a2de-20e17b656841"

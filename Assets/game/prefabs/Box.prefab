@@ -30,21 +30,9 @@
                         ]
                     }
                 },
-                "Collider": {
-                    "box_size": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "collision_layer": 0,
-                    "friction": 0.5,
-                    "is_trigger": false,
-                    "restitution": 0.10000000149011612,
-                    "shape": 0
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
-                    "parentGUID": "dd325b13-bcea-b748-af59-bd03e4e59451",
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
                     "siblingIndex": 0
                 },
                 "Layer": {
@@ -103,6 +91,33 @@
                 },
                 "Name": {
                     "name": "Box"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "81d7f475-5f23-5f45-a182-bcf8928fcd87"
