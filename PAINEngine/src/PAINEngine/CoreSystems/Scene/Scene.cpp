@@ -670,7 +670,7 @@ namespace PAIN {
 			configScene(default_scene_config);
 
 			//Craft skybox path and get GUID
-			std::filesystem::path skybox_path = "engine/textures/skybox.hdr";
+			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
 
 			//Set skybox
 			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
