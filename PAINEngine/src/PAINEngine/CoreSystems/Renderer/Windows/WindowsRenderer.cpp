@@ -936,7 +936,7 @@ namespace PAIN {
 			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
 			int bones_skipped{};
 			if (component.isPlaying) {
-				PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
+				//PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
 
 				static std::vector<glm::mat4> boneMatrices;
 				static constexpr int MAX_BONES = 100;
