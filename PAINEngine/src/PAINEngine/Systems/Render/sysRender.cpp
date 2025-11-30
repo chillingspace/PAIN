@@ -240,6 +240,7 @@ namespace PAIN {
         }
 
         void System::geometryPass(entt::registry& registry) {
+
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
@@ -290,8 +291,8 @@ namespace PAIN {
             rendererService->w_renderer->EndGeometryPass();
         }
 
-
         void System::reflectionPass(entt::registry& registry) {
+
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
@@ -306,6 +307,7 @@ namespace PAIN {
         }
 
         void System::lightingPass(entt::registry& registry) {
+
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
@@ -358,6 +360,7 @@ namespace PAIN {
         }
 
         void System::debugPass(entt::registry& registry, int debug_mode) {
+
             auto rendererService = services.lock()->get<sRenderer>();
             if (debug_mode == 0 || !rendererService || !rendererService->w_renderer) {
                 return;
@@ -486,24 +489,36 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
         void System::uiPass(entt::registry& registry) {
 
-            //Get render service
             auto rendererService = services.lock()->get<sRenderer>();
             if (!rendererService || !rendererService->w_renderer) return;
 
             //Texture and text groups
             auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform, UIRectTransform>);
             auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
-
-            //Get scn services
             auto scn_service = services.lock()->get<Scene::SceneManager>();
 
-            //Enable blending and depth mode
+            // ========================================
+            // CLEAR ANY PRE-EXISTING ERRORS
+            // ========================================
+            GLenum err;
+            while ((err = glGetError()) != GL_NO_ERROR) {
+                PN_CORE_WARN("[UI Pass] Clearing pre-existing GL error: 0x{:X}", err);
+            }
+
+            // ========================================
+            // SET GL STATE ONCE FOR ENTIRE UI PASS
+            // ========================================
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_DEPTH_TEST);  // UI doesn't need depth
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);  // UI usually doesn't need culling
+
+            err = glGetError();
+            if (err != GL_NO_ERROR) {
+                PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
+            }
 
             for (auto [entity, texture_comp, ui_elem, trans_comp, rect_comp] : texture_group.each()) {
-
                 // Layer check
                 auto layerComp = registry.try_get<Entity::Layer>(entity);
                 if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
@@ -522,8 +537,10 @@ namespace PAIN {
                 rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
             }
 
+            // ========================================
+            // RENDER TEXT
+            // ========================================
             for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
-
                 // Layer check
                 auto layerComp = registry.try_get<Entity::Layer>(entity);
                 if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
@@ -535,16 +552,35 @@ namespace PAIN {
                 auto font_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
                 if (!font_opt.has_value()) continue;
 
+                PN_CORE_INFO("[Render System] Rendering Font: {}", font_opt.value()->name);
+
                 text_comp.text_pos = rect_comp.calculated_world_position;
-                // For text, only one var, can jsut either x or y
                 text_comp.scale_factor = rect_comp.scale.x;
+
                 TextRenderer::get().renderText(text_comp);
+
+                // CHECK FOR ERRORS AFTER EACH TEXT RENDER
+                err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    PN_CORE_ERROR("[Render System] GL error after rendering font '{}': 0x{:X}",
+                        font_opt.value()->name, err);
+                }
             }
 
+            // ========================================
+            // RESTORE GL STATE ONCE AFTER UI PASS
+            // ========================================
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
+            glEnable(GL_CULL_FACE);
+
+            err = glGetError();
+            if (err != GL_NO_ERROR) {
+                PN_CORE_ERROR("[UI Pass] Error restoring GL state: 0x{:X}", err);
+            }
         }
 #endif
+
 
     } // namespace Render
 } // namespace PAIN

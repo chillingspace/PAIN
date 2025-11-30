@@ -573,28 +573,64 @@ namespace PAIN {
 			return;
 		}
 
-		// Use aspect ratio to scale as well
-		auto window_service = services->get<Window::Window>();
-		window_service->getFrameBuffer();
+		// ========================================
+		// SAVE STATE
+		// ========================================
+		GLint currentActiveTexture;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
 
+		GLint currentTexture;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
+
+		GLint currentVAO;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+
+		GLint currentProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
+		// ========================================
+		// RENDER
+		// ========================================
+		auto window_service = services->get<Window::Window>();
 		auto framebuffer = window_service->getFrameBuffer();
 
 		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
-
-		// Apply aspect correction only to X component
 		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
 
 		texture2d_shader->Bind();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after shader bind: 0x{:X}", err);
+		}
+
 		texture2d_shader->SetUniform("pos", pos);
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		texture2d_shader->SetUniform("tex", 6);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after texture bind: 0x{:X}", err);
+		}
+
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		glBindVertexArray(0);
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after draw call: 0x{:X}", err);
+		}
+
+		// ========================================
+		// RESTORE STATE
+		// ========================================
+		glActiveTexture(currentActiveTexture);
+		glBindTexture(GL_TEXTURE_2D, currentTexture);
+		glBindVertexArray(currentVAO);
+		glUseProgram(currentProgram);
 	}
 
 	void WindowsRenderer::BeginShadowPass(const Light& l)

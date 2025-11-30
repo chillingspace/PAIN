@@ -16,7 +16,7 @@ namespace PAIN {
 
         //Texture format
         enum class TextureFormat {
-            UNKNOWN, BC6H, BC7, ASTC, // add more as needed
+            UNKNOWN, BC1, BC3, BC6H, BC7, ASTC, // add more as needed
         };
 
         //Texture class
@@ -25,7 +25,6 @@ namespace PAIN {
             int width = 0, height = 0, mips = 1;
             int getWidth() { return width;  }
             int getHeight() { return height; }
-            std::vector<size_t> mipOffsets;
 #ifdef PN_PLATFORM_ANDROID
             TextureFormat format = TextureFormat::ASTC;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
@@ -34,8 +33,15 @@ namespace PAIN {
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
 #endif
             bool is_cube_map = false;
-            std::vector<uint8_t> data;
             GLuint gl_texture = 0;
+
+            int blockWidth = 4;
+            int blockHeight = 4;
+            int blockSize = 16;
+
+            std::vector<size_t> mipOffsets;
+            std::vector<size_t> mipSizes;
+            std::vector<uint8_t> data;
 
             ~Texture() { if (gl_texture) glDeleteTextures(1, &gl_texture); }
         };

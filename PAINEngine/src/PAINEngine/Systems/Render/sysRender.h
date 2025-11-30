@@ -22,7 +22,7 @@ namespace PAIN {
             void reflectionPass(entt::registry& registry);
             void lightingPass(entt::registry& registry);
             void debugPass(entt::registry& registry, int debug_mode);
-            void uiPass(entt::registry& registry); //TBC
+            void uiPass(entt::registry& registry);
 
         public:
             explicit System(std::shared_ptr<Services> svc);

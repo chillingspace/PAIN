@@ -3,6 +3,66 @@
 
 #ifdef PN_PLATFORM_ANDROID
 #include <ktx.h>
+
+// ========================================
+// DEFINE MISSING ASTC sRGB CONSTANTS
+// ========================================
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR   0x93D0
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR   0x93D1
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR   0x93D2
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR   0x93D3
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR   0x93D4
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR   0x93D5
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR   0x93D6
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR   0x93D7
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR  0x93D8
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR  0x93D9
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR  0x93DA
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR 0x93DB
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR 0x93DC
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR 0x93DD
+#endif
+
 #endif
 
 #undef max
@@ -101,7 +161,7 @@ namespace PAIN {
                 throw std::runtime_error("Failed to read all KTX data: " + virtual_path);
             stream = nullptr;
 
-            //KTX loader
+            // Load KTX texture
             ktxTexture* kTexture = nullptr;
             KTX_error_code result = ktxTexture_CreateFromMemory(
                 data.data(),
@@ -113,67 +173,241 @@ namespace PAIN {
             if (result != KTX_SUCCESS || !kTexture)
                 throw std::runtime_error("Failed to parse KTX from memory: " + virtual_path);
 
-            //Basic metadata
+            // ========================================
+            // VERIFY KTX FILE INTEGRITY
+            // ========================================
+            PN_CORE_INFO("KTX file info for '{}':", virtual_path);
+            PN_CORE_INFO("  Base dimensions: {}x{}", kTexture->baseWidth, kTexture->baseHeight);
+            PN_CORE_INFO("  Mip levels: {}", kTexture->numLevels);
+            PN_CORE_INFO("  Faces: {}", kTexture->numFaces);
+            PN_CORE_INFO("  Data size: {}", kTexture->dataSize);
+            PN_CORE_INFO("  Is array: {}", kTexture->isArray);
+            PN_CORE_INFO("  Is compressed: {}", kTexture->isCompressed);
+
+            if (kTexture->classId == ktxTexture1_c) {
+                ktxTexture1* ktx1 = reinterpret_cast<ktxTexture1*>(kTexture);
+                PN_CORE_INFO("  GL internal format: 0x{:X}", ktx1->glInternalformat);
+                PN_CORE_INFO("  GL format: 0x{:X}", ktx1->glFormat);
+                PN_CORE_INFO("  GL type: 0x{:X}", ktx1->glType);
+                PN_CORE_INFO("  GL base internal format: 0x{:X}", ktx1->glBaseInternalformat);
+            }
+
+            // Extract metadata
             tex->width = static_cast<int>(kTexture->baseWidth);
             tex->height = static_cast<int>(kTexture->baseHeight);
             tex->mips = kTexture->numLevels ? static_cast<int>(kTexture->numLevels) : 1;
             int numFaces = kTexture->numFaces ? kTexture->numFaces : 1;
-            
-            //Set format
-            tex->format = TextureFormat::ASTC;
 
-            //Check if is a cubemap
+            tex->format = TextureFormat::ASTC;
             tex->is_cube_map = (numFaces == 6);
 
-            //Detect if KTX1 or KTX2 (see ktx.h for class ids)
+            // Get OpenGL format
             if (kTexture->classId == ktxTexture1_c) {
                 tex->glTexFormat = reinterpret_cast<ktxTexture1*>(kTexture)->glInternalformat;
             }
             else {
-                throw std::runtime_error("Unknown KTX texture class!");
+                ktxTexture_Destroy(kTexture);
+                throw std::runtime_error("Only KTX1 format is supported!");
+            }
+
+            // ========================================
+            // SET BLOCK DIMENSIONS BASED ON FORMAT
+            // ========================================
+            bool formatRecognized = true;
+
+            switch (tex->glTexFormat) {
+            case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+                tex->blockWidth = 4;
+                tex->blockHeight = 4;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 4x4 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+                tex->blockWidth = 5;
+                tex->blockHeight = 4;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 5x4 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+                tex->blockWidth = 5;
+                tex->blockHeight = 5;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 5x5 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+                tex->blockWidth = 6;
+                tex->blockHeight = 5;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 6x5 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+                tex->blockWidth = 6;
+                tex->blockHeight = 6;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 6x6 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+                tex->blockWidth = 8;
+                tex->blockHeight = 5;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 8x5 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+                tex->blockWidth = 8;
+                tex->blockHeight = 6;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 8x6 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+                tex->blockWidth = 8;
+                tex->blockHeight = 8;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 8x8 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+                tex->blockWidth = 10;
+                tex->blockHeight = 5;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 10x5 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+                tex->blockWidth = 10;
+                tex->blockHeight = 6;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 10x6 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+                tex->blockWidth = 10;
+                tex->blockHeight = 8;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 10x8 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+                tex->blockWidth = 10;
+                tex->blockHeight = 10;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 10x10 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+                tex->blockWidth = 12;
+                tex->blockHeight = 10;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 12x10 RGBA");
+                break;
+
+            case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+                tex->blockWidth = 12;
+                tex->blockHeight = 12;
+                tex->blockSize = 16;
+                PN_CORE_INFO("KTX Format: ASTC 12x12 RGBA");
+                break;
+
+            default:
+                PN_CORE_WARN("Unknown ASTC format 0x{:X}, defaulting to 4x4", tex->glTexFormat);
+                tex->blockWidth = 4;
+                tex->blockHeight = 4;
+                tex->blockSize = 16;
+                formatRecognized = false;
+                break;
             }
 
             tex->mipOffsets.clear();
+            tex->mipSizes.clear();
             tex->data.clear();
 
-            //Iterate through mips
+            PN_CORE_INFO("Loading KTX: '{}' {}x{}, {} mips, {} faces",
+                virtual_path, tex->width, tex->height, tex->mips, numFaces);
+
+            // ========================================
+            //  USE KTX API TO GET ACTUAL MIP SIZES
+            // ========================================
             for (uint32_t face = 0; face < numFaces; ++face) {
                 for (uint32_t mip = 0; mip < static_cast<uint32_t>(tex->mips); ++mip) {
+                    // Get offset
                     ktx_size_t imageOffset = 0;
                     KTX_error_code ofsResult = ktxTexture_GetImageOffset(
                         kTexture, mip, 0, face, &imageOffset);
 
-                    if (ofsResult != KTX_SUCCESS)
-                        throw std::runtime_error("Failed to get image offset for mip " + std::to_string(mip) + ", face " + std::to_string(face));
+                    if (ofsResult != KTX_SUCCESS) {
+                        ktxTexture_Destroy(kTexture);
+                        throw std::runtime_error("Failed to get image offset for mip " +
+                            std::to_string(mip) + ", face " + std::to_string(face));
+                    }
 
+                    // GET ACTUAL SIZE FROM KTX
                     ktx_size_t mipSize = ktxTexture_GetImageSize(kTexture, mip);
-                    if (mipSize == 0)
-                        throw std::runtime_error("No data for KTX mip level " + std::to_string(mip) + " face " + std::to_string(face));
+                    if (mipSize == 0) {
+                        ktxTexture_Destroy(kTexture);
+                        throw std::runtime_error("No data for KTX mip level " +
+                            std::to_string(mip) + " face " + std::to_string(face));
+                    }
 
+                    // Store offset and size
                     tex->mipOffsets.push_back(tex->data.size());
+                    tex->mipSizes.push_back(static_cast<size_t>(mipSize));
 
+                    // Copy mip data
                     const uint8_t* mipData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture)) + imageOffset;
                     tex->data.insert(tex->data.end(), mipData, mipData + mipSize);
+
+                    PN_CORE_TRACE("  Mip {} face {}: offset {}, size {} bytes",
+                        mip, face, tex->mipOffsets.back(), mipSize);
                 }
             }
+
+            PN_CORE_INFO("Total KTX data: {} bytes", tex->data.size());
 
             ktxTexture_Destroy(kTexture);
         }
 #else
         void Loader::extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
             auto stream = path_service->createFileStream(virtual_path, Path::FileMode::Read);
-            if (!stream || !stream->good()) throw std::runtime_error("Failed to open DDS file: " + virtual_path);
+            if (!stream || !stream->good())
+                throw std::runtime_error("Failed to open DDS file: " + virtual_path);
 
             std::vector<uint8_t> data(stream->size());
             size_t read = stream->read(data.data(), data.size());
-            if (read != data.size()) throw std::runtime_error("Failed to read full DDS file: " + virtual_path);
+            if (read != data.size())
+                throw std::runtime_error("Failed to read full DDS file: " + virtual_path);
 
             size_t offset = 0;
-            if (data.size() < 4) throw std::runtime_error("DDS file data too small for magic number!");
-            if (std::memcmp(data.data(), "DDS ", 4) != 0) throw std::runtime_error("Not a DDS file!");
+
+            // Verify magic
+            if (data.size() < 4)
+                throw std::runtime_error("DDS file data too small for magic number!");
+            if (std::memcmp(data.data(), "DDS ", 4) != 0)
+                throw std::runtime_error("Not a DDS file!");
             offset += 4;
 
-            if (data.size() < offset + 124) throw std::runtime_error("DDS file header too small");
+            // Read header
+            if (data.size() < offset + 124)
+                throw std::runtime_error("DDS file header too small");
             const uint32_t* header = reinterpret_cast<const uint32_t*>(data.data() + offset);
 
             tex->height = header[2];
@@ -181,65 +415,124 @@ namespace PAIN {
             uint32_t mipMapCount = header[7] ? header[7] : 1;
             tex->mips = mipMapCount;
 
-            uint32_t pixelFormatFlags = header[19];
-            bool isDX10 = (header[20] == 0x30315844);
+            bool isDX10 = (header[20] == 0x30315844);  // 'DX10'
             offset += 124;
 
+            // Parse format
             if (isDX10) {
                 if (data.size() < offset + 20)
                     throw std::runtime_error("DDS file too small for DX10 header");
                 const uint32_t* dx10Header = reinterpret_cast<const uint32_t*>(data.data() + offset);
 
                 uint32_t dxgiFormat = dx10Header[0];
-                if (dxgiFormat == 98) {
+
+                // ========================================
+                // SET FORMAT AND BLOCK INFO
+                // ========================================
+                switch (dxgiFormat) {
+                case 98:  // DXGI_FORMAT_BC7_UNORM
                     tex->format = TextureFormat::BC7;
                     tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
-                }
-                else if (dxgiFormat == 99) {
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 16;
+                    PN_CORE_INFO("DDS Format: BC7 RGBA");
+                    break;
+
+                case 99:  // DXGI_FORMAT_BC7_UNORM_SRGB
                     tex->format = TextureFormat::BC7;
                     tex->glTexFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB;
-                }
-                else if (dxgiFormat == 97) {
-                    tex->format = TextureFormat::BC7;
-                    tex->glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
-                }
-                else if (dxgiFormat == 95) { // DXGI_FORMAT_BC6H_UF16
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 16;
+                    PN_CORE_INFO("DDS Format: BC7 sRGB RGBA");
+                    break;
+
+                case 77:  // DXGI_FORMAT_BC3_UNORM (DXT5)
+                    tex->format = TextureFormat::BC3;
+                    tex->glTexFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 16;
+                    PN_CORE_INFO("DDS Format: BC3/DXT5 RGBA");
+                    break;
+
+                case 95:  // DXGI_FORMAT_BC6H_UF16
                     tex->format = TextureFormat::BC6H;
                     tex->glTexFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB;
-                }
-                else if (dxgiFormat == 96) { // DXGI_FORMAT_BC6H_SF16
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 16;
+                    PN_CORE_INFO("DDS Format: BC6H HDR (NO ALPHA)");
+                    break;
+
+                case 96:  // DXGI_FORMAT_BC6H_SF16
                     tex->format = TextureFormat::BC6H;
                     tex->glTexFormat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB;
-                }
-                else {
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 16;
+                    PN_CORE_INFO("DDS Format: BC6H Signed HDR (NO ALPHA)");
+                    break;
+
+                case 71:  // DXGI_FORMAT_BC1_UNORM (DXT1)
+                    tex->format = TextureFormat::BC1;
+                    tex->glTexFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+                    tex->blockWidth = 4;
+                    tex->blockHeight = 4;
+                    tex->blockSize = 8;  // BC1 is 8 bytes!
+                    PN_CORE_INFO("DDS Format: BC1/DXT1 RGB (NO ALPHA)");
+                    break;
+
+                default:
                     throw std::runtime_error("Unsupported DXGI format: " + std::to_string(dxgiFormat));
                 }
+
                 offset += 20;
             }
             else {
-                throw std::runtime_error("Legacy DDS format detected. BC7 requires DX10 header!");
+                throw std::runtime_error("Legacy DDS format detected. Only DX10 format supported!");
             }
 
             tex->data.clear();
             tex->mipOffsets.clear();
+            tex->mipSizes.clear();
 
             uint32_t dwCaps2 = header[28];
             tex->is_cube_map = (dwCaps2 & 0x200) != 0;
             int faces = tex->is_cube_map ? 6 : 1;
+
+            PN_CORE_INFO("Loading DDS: '{}' {}x{}, {} mips, {} faces",
+                virtual_path, tex->width, tex->height, tex->mips, faces);
+
+            // ========================================
+            // READ MIP DATA WITH CORRECT BLOCK SIZE
+            // ========================================
             for (int face = 0; face < faces; ++face) {
                 int mipW = tex->width;
                 int mipH = tex->height;
-                for (uint32_t mip = 0; mip < mipMapCount; ++mip) {
-                    int blocks_w = (mipW + 3) / 4;
-                    int blocks_h = (mipH + 3) / 4;
-                    size_t mipSize = blocks_w * blocks_h * 16; // 16 bytes/block for BC7/BC6H
-                    if (data.size() < offset + mipSize)
-                        throw std::runtime_error("DDS too small for mip " + std::to_string(mip) + ", face " + std::to_string(face));
 
+                for (uint32_t mip = 0; mip < mipMapCount; ++mip) {
+                    // Calculate blocks using actual block dimensions
+                    int blocks_w = (mipW + tex->blockWidth - 1) / tex->blockWidth;
+                    int blocks_h = (mipH + tex->blockHeight - 1) / tex->blockHeight;
+                    size_t mipSize = blocks_w * blocks_h * tex->blockSize;
+
+                    if (data.size() < offset + mipSize)
+                        throw std::runtime_error("DDS too small for mip " + std::to_string(mip) +
+                            ", face " + std::to_string(face));
+
+                    // Store offset and size
                     tex->mipOffsets.push_back(tex->data.size());
+                    tex->mipSizes.push_back(mipSize);
+
+                    // Copy data
                     size_t currentOffset = tex->data.size();
                     tex->data.resize(tex->data.size() + mipSize);
                     std::memcpy(tex->data.data() + currentOffset, data.data() + offset, mipSize);
+
+                    PN_CORE_TRACE("  Mip {} face {}: offset {}, size {} bytes ({}x{} blocks)",
+                        mip, face, tex->mipOffsets.back(), mipSize, blocks_w, blocks_h);
 
                     offset += mipSize;
                     mipW = std::max(1, mipW / 2);
@@ -247,20 +540,49 @@ namespace PAIN {
                 }
             }
 
+            PN_CORE_INFO("Total DDS data: {} bytes", tex->data.size());
+
             stream = nullptr;
         }
 #endif
 
         std::shared_ptr<Texture> Loader::ImportTexture(std::string const& virtual_path) const {
 
-            //Create default texture
+            // ========================================
+            // SAVE ACTIVE TEXTURE UNIT
+            // ========================================
+            GLint activeTextureUnit;
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
+
+            PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
+
+            // ========================================
+            // RESET TO TEXTURE UNIT 0 FOR LOADING
+            // ========================================
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            // Clear any errors
+            while (glGetError() != GL_NO_ERROR);
+
             auto tex = std::make_shared<Texture>();
 
+            // EXTRACT DATA (PLATFORM-SPECIFIC)
 #ifdef PN_PLATFORM_ANDROID
             extractKTX(virtual_path, tex);
 #else
             extractDDS(virtual_path, tex);
 #endif
+
+            // VALIDATE EXTRACTED DATA
+            if (tex->mipOffsets.size() != tex->mipSizes.size()) {
+                throw std::runtime_error("Mip offset/size mismatch!");
+            }
+
+            size_t expectedMips = tex->is_cube_map ? (tex->mips * 6) : tex->mips;
+            if (tex->mipOffsets.size() != expectedMips) {
+                PN_CORE_WARN("Expected {} mip entries, got {}", expectedMips, tex->mipOffsets.size());
+            }
 
             //Generate textures
             glGenTextures(1, &tex->gl_texture);
@@ -279,32 +601,47 @@ namespace PAIN {
                 glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
                 glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
 
-                size_t offset = 0;
+                size_t dataIndex = 0;
                 for (int face = 0; face < 6; ++face) {
-                    int mipW = tex->width, mipH = tex->height;
                     for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                        int blocks_w = (mipW + 3) / 4;
-                        int blocks_h = (mipH + 3) / 4;
-                        size_t mipSize = blocks_w * blocks_h * 16;
-                        if (offset + mipSize > tex->data.size()) {
-                            std::cerr << "Upload would overflow data at face " << face << " mip " << mip << "\n";
-                            throw std::runtime_error("Upload would overflow data");
+                        if (dataIndex >= tex->mipOffsets.size()) {
+                            throw std::runtime_error("Ran out of mip data for cubemap!");
                         }
-                        glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mip, tex->glTexFormat,
-                            mipW, mipH, 0, mipSize, &tex->data[offset]);
+
+                        // USE STORED SIZES FROM EXTRACTION
+                        size_t offset = tex->mipOffsets[dataIndex];
+                        size_t mipSize = tex->mipSizes[dataIndex];
+
+                        int mipW = std::max(1, tex->width >> mip);
+                        int mipH = std::max(1, tex->height >> mip);
+
+                        if (offset + mipSize > tex->data.size()) {
+                            throw std::runtime_error("Mip data overflow at face " +
+                                std::to_string(face) + " mip " + std::to_string(mip));
+                        }
+
+                        glCompressedTexImage2D(
+                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+                            mip,
+                            tex->glTexFormat,
+                            mipW,
+                            mipH,
+                            0,
+                            static_cast<GLsizei>(mipSize),
+                            tex->data.data() + offset
+                        );
 
                         GLenum err = glGetError();
                         if (err != GL_NO_ERROR) {
                             throw std::runtime_error("OpenGL error uploading mip " +
                                 std::to_string(mip) + ": 0x" +
-                                std::to_string(err) + " for file " + virtual_path);
+                                std::to_string(err));
                         }
 
-                        offset += mipSize;
-                        mipW = std::max(1, mipW / 2);
-                        mipH = std::max(1, mipH / 2);
+                        dataIndex++;
                     }
                 }
+
                 glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             }
             else {
@@ -320,14 +657,24 @@ namespace PAIN {
                 glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
                 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
 
-                int mipW = tex->width;
-                int mipH = tex->height;
-
                 for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                    int blocks_w = (mipW + 3) / 4;
-                    int blocks_h = (mipH + 3) / 4;
-                    size_t mipSize = blocks_w * blocks_h * 16;
+                    if (mip >= tex->mipOffsets.size()) {
+                        throw std::runtime_error("Missing mip data for level " + std::to_string(mip));
+                    }
+
+                    // USE STORED SIZES FROM EXTRACTION
                     size_t offset = tex->mipOffsets[mip];
+                    size_t mipSize = tex->mipSizes[mip];
+
+                    int mipW = std::max(1, tex->width >> mip);
+                    int mipH = std::max(1, tex->height >> mip);
+
+                    PN_CORE_TRACE("Uploading mip {}: {}x{}, {} bytes at offset {}",
+                        mip, mipW, mipH, mipSize, offset);
+
+                    if (offset + mipSize > tex->data.size()) {
+                        throw std::runtime_error("Mip data overflow at mip " + std::to_string(mip));
+                    }
 
                     glCompressedTexImage2D(
                         GL_TEXTURE_2D,
@@ -336,24 +683,31 @@ namespace PAIN {
                         mipW,
                         mipH,
                         0,
-                        mipSize,
+                        static_cast<GLsizei>(mipSize),
                         tex->data.data() + offset
                     );
 
                     GLenum err = glGetError();
                     if (err != GL_NO_ERROR) {
-                        throw std::runtime_error("OpenGL error uploading mip " +
-                            std::to_string(mip) + ": 0x" +
-                            std::to_string(err) + " for file " + virtual_path);
+                        PN_CORE_ERROR("OpenGL error uploading mip {}: 0x{:X}", mip, err);
+                        PN_CORE_ERROR("  Dimensions: {}x{}", mipW, mipH);
+                        PN_CORE_ERROR("  Size: {} bytes", mipSize);
+                        PN_CORE_ERROR("  Offset: {}", offset);
+                        PN_CORE_ERROR("  Format: 0x{:X}", tex->glTexFormat);
+                        throw std::runtime_error("OpenGL error uploading mip " + std::to_string(mip) +
+                            ": 0x" + std::to_string(err));
                     }
-
-                    mipW = std::max(1, mipW / 2);
-                    mipH = std::max(1, mipH / 2);
                 }
 
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
 
+            // ========================================
+            // RESTORE ACTIVE TEXTURE UNIT
+            // ========================================
+            glActiveTexture(activeTextureUnit);
+
+            PN_CORE_TRACE("Texture load complete, restored unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
             return tex;
         }
 

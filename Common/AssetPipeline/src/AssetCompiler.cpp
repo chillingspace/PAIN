@@ -428,8 +428,13 @@ namespace PAIN {
             int width, height, channels;
             bool compression_success = false;
 
-            if (higher_quality) {
+            // DETERMINE BLOCK SIZE BASED ON PLATFORM
+            constexpr int BLOCK_SIZE_ASTC = 4;
+            constexpr int BLOCK_SIZE_BC = 4;
 
+            int block_size = (platform == Platform::Android) ? BLOCK_SIZE_ASTC : BLOCK_SIZE_BC;
+
+            if (higher_quality) {
                 //Load image as float for higher quality textures
                 float* raw_pixels = stbi_loadf(asset_info.raw_path.string().c_str(),
                     &width, &height, &channels, 0);
@@ -440,30 +445,73 @@ namespace PAIN {
                 }
                 std::cout << "Loaded HDR texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
 
-                //Resize HDR
-                int target_width = width, target_height = height;
+                // ========================================
+                // STEP 1: ENSURE BLOCK ALIGNMENT (HDR)
+                // ========================================
+                int aligned_width = ((width + block_size - 1) / block_size) * block_size;
+                int aligned_height = ((height + block_size - 1) / block_size) * block_size;
+
+                if (width != aligned_width || height != aligned_height) {
+                    std::cout << "Aligning HDR texture from " << width << "x" << height
+                        << " to " << aligned_width << "x" << aligned_height << std::endl;
+
+                    float* aligned_pixels = (float*)malloc(aligned_width * aligned_height * channels * sizeof(float));
+
+                    stbir_pixel_layout layout = (channels == 3) ? STBIR_RGB : STBIR_RGBA;
+
+                    if (stbir_resize_float_linear(
+                        raw_pixels, width, height, 0,
+                        aligned_pixels, aligned_width, aligned_height, 0,
+                        layout
+                    )) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = aligned_pixels;
+                        width = aligned_width;
+                        height = aligned_height;
+                        std::cout << "HDR alignment successful: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: HDR alignment resize failed!" << std::endl;
+                        free(aligned_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
+                // ========================================
+                // STEP 2: MAX SIZE LIMIT (HDR)
+                // ========================================
                 int max_size = desc_file.import_settings.value("max_size", 2048);
-                float* resized_pixels = nullptr;
 
                 if (width > max_size || height > max_size) {
                     float scale = static_cast<float>(max_size) / std::max(width, height);
-                    target_width = static_cast<int>(width * scale);
-                    target_height = static_cast<int>(height * scale);
-                    resized_pixels = (float*)malloc(target_width * target_height * channels * sizeof(float));
-                    
-                    //Resize float
+                    int target_width = static_cast<int>(width * scale);
+                    int target_height = static_cast<int>(height * scale);
+
+                    // ENSURE RESULT IS STILL BLOCK-ALIGNED
+                    target_width = ((target_width + block_size - 1) / block_size) * block_size;
+                    target_height = ((target_height + block_size - 1) / block_size) * block_size;
+
+                    float* resized_pixels = (float*)malloc(target_width * target_height * channels * sizeof(float));
+
                     stbir_pixel_layout layout = (channels == 3) ? STBIR_RGB : STBIR_RGBA;
-                    if (stbir_resize_float_linear(raw_pixels, width, height, 0,
+
+                    if (stbir_resize_float_linear(
+                        raw_pixels, width, height, 0,
                         resized_pixels, target_width, target_height, 0,
-                        layout)) {
+                        layout
+                    )) {
                         stbi_image_free(raw_pixels);
                         raw_pixels = resized_pixels;
-                        width = target_width; height = target_height;
+                        width = target_width;
+                        height = target_height;
                         std::cout << "Resized HDR to: " << width << "x" << height << std::endl;
                     }
                     else {
                         std::cout << "ERROR: HDR resize failed!" << std::endl;
                         free(resized_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
                     }
                 }
 
@@ -473,44 +521,99 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress texture
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, channels,
+                //Compress HDR texture
+                compression_success = CuttlefishCompressor(
+                    raw_pixels, width, height, channels,
                     asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
+                    compression_format, desc_file.import_settings
+                );
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
             }
             else {
                 //Load image as png for ldr
-                unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
-                    &width, &height, &channels, STBI_rgb_alpha);
+                int original_channels;
+                unsigned char* raw_pixels = stbi_load(
+                    asset_info.raw_path.string().c_str(),
+                    &width, &height, &original_channels,
+                    STBI_rgb_alpha  // Force to RGBA
+                );
+
                 if (!raw_pixels) {
                     std::cout << "ERROR: Failed to load texture: " << asset_info.raw_path
                         << " - " << stbi_failure_reason() << std::endl;
                     return;
                 }
-                std::cout << "Loaded texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
 
-                //Resize png
-                int target_width = width, target_height = height;
+                channels = 4;  // Always RGBA after STBI_rgb_alpha
+
+                std::cout << "Loaded texture: " << width << "x" << height
+                    << " (original: " << original_channels << " channels, loaded as RGBA)" << std::endl;
+
+                // ========================================
+                // STEP 1: ENSURE BLOCK ALIGNMENT (LDR)
+                // ========================================
+                int aligned_width = ((width + block_size - 1) / block_size) * block_size;
+                int aligned_height = ((height + block_size - 1) / block_size) * block_size;
+
+                if (width != aligned_width || height != aligned_height) {
+                    std::cout << "Aligning texture from " << width << "x" << height
+                        << " to " << aligned_width << "x" << aligned_height << std::endl;
+
+                    unsigned char* aligned_pixels = (unsigned char*)malloc(aligned_width * aligned_height * 4);
+
+                    if (stbir_resize(
+                        raw_pixels, width, height, 0,
+                        aligned_pixels, aligned_width, aligned_height, 0,
+                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT
+                    )) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = aligned_pixels;
+                        width = aligned_width;
+                        height = aligned_height;
+                        std::cout << "Alignment successful: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: Alignment resize failed!" << std::endl;
+                        free(aligned_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
+                // ========================================
+                // STEP 2: MAX SIZE LIMIT (LDR)
+                // ========================================
                 int max_size = desc_file.import_settings.value("max_size", 2048);
+
                 if (width > max_size || height > max_size) {
                     float scale = static_cast<float>(max_size) / std::max(width, height);
-                    target_width = static_cast<int>(width * scale);
-                    target_height = static_cast<int>(height * scale);
+                    int target_width = static_cast<int>(width * scale);
+                    int target_height = static_cast<int>(height * scale);
+
+                    // ENSURE RESULT IS STILL BLOCK-ALIGNED
+                    target_width = ((target_width + block_size - 1) / block_size) * block_size;
+                    target_height = ((target_height + block_size - 1) / block_size) * block_size;
+
                     unsigned char* resized_pixels = (unsigned char*)malloc(target_width * target_height * 4);
-                    if (stbir_resize(raw_pixels, width, height, 0,
+
+                    if (stbir_resize(
+                        raw_pixels, width, height, 0,
                         resized_pixels, target_width, target_height, 0,
-                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT)) {
+                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT
+                    )) {
                         stbi_image_free(raw_pixels);
                         raw_pixels = resized_pixels;
-                        width = target_width; height = target_height;
+                        width = target_width;
+                        height = target_height;
                         std::cout << "Resized texture to: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: STB resize failed!" << std::endl;
+                        std::cout << "ERROR: Resize failed!" << std::endl;
                         free(resized_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
                     }
                 }
 
@@ -520,10 +623,12 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress asset
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
+                //Compress LDR asset
+                compression_success = CuttlefishCompressor(
+                    raw_pixels, width, height, 4,  // Always 4 channels (RGBA)
                     asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
+                    compression_format, desc_file.import_settings
+                );
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
