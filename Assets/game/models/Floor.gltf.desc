@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Floor.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 13241550213639326756
+  },
+  "descriptor_version": 1,
+  "guid": "4525969c-730e-6d40-aef8-43390fef9c6e",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": true,
+    "import_skeleton": true,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Floor.gltf"
+  }
+}

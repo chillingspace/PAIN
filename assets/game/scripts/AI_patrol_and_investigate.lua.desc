@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "AI_patrol_and_investigate.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 17366163462540915470
+  },
+  "descriptor_version": 1,
+  "guid": "b50b7c18-6450-3142-9125-a93e6ccd2dfd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\AI_patrol_and_investigate.lua"
+  }
+}

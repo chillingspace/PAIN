@@ -13,6 +13,8 @@
 namespace PAIN {
 	namespace Editor {
 		namespace Panel {
+			class EntityPanel;
+			class ComponentsPanel;
 
 			class Tools : public IPanel {
 			private:
@@ -23,6 +25,11 @@ namespace PAIN {
 				std::function<void(std::any const&)> settingsPopUp(std::string const& popup_id);
 				std::function<void(std::any const&)> unsavedChangesPopUp(std::string const& popup_id);
 				std::function<void(std::any const&)> unsavedScenePopUp(std::string const& popup_id);
+
+				std::function<void(std::any const&)> addComponentPopUp(std::string const& popup_id);
+
+				std::weak_ptr<EntityPanel> entities_panel;
+				std::weak_ptr<ComponentsPanel> components_panel;
 
 			public:
 				Tools();

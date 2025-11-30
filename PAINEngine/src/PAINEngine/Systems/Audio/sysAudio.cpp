@@ -16,7 +16,7 @@ namespace PAIN {
         void System::onUpdate(AppTiming timing, entt::registry& registry)
         {
             auto audioService = getServices()->get<PAIN::Audio::Audio>();
-            auto scene = getServices()->get<Scene>();
+            auto scene = getServices()->get<Scene::SceneManager>();
             auto pathService = getServices()->get<Path::Path>();
             auto asset_service = getServices()->get<Assets::Manager>();
 
@@ -31,16 +31,17 @@ namespace PAIN {
             }
 
             // 2. Iterate all entities with AudioSource and Transform
-            auto view = registry.view<AudioSource, Transform>();
-            for (auto [entity, audioSrc, transform] : view.each())
+            // Optimized using group
+            auto group = registry.group<AudioSource>(entt::get<LocalTransform, WorldTransform>);
+            
+            for (auto [entity, audioSrc, transform, worldtransform] : group.each())
             {
                 //auto& audioSrc = view.get<AudioSource>(entity);
                 //auto& transform = view.get<Transform>(entity);
 
-                static std::unordered_set<entt::entity> initialized;
-                if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
+                if (audioSrc.playOnStart && !audioSrc.hasStarted) {
                     audioSrc.playTrigger = true;
-                    initialized.insert(entity);
+                    audioSrc.hasStarted = true;
                 }
 
                 // 3. Handle Play/Stop Triggers
@@ -78,6 +79,7 @@ namespace PAIN {
                     }
                     audioSrc.playTrigger = false;
                     audioSrc.stopTrigger = false;
+                    audioSrc.playOnStart = false;
                 }
                 else if (audioSrc.stopTrigger)
                 {

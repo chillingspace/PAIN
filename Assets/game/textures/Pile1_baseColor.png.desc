@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pile1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7270519439867883258
+  },
+  "descriptor_version": 1,
+  "guid": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pile1_baseColor.png"
+  }
+}

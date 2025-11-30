@@ -52,11 +52,11 @@ namespace PAIN {
 			void compileTexture(Descriptor& desc_file, Info& asset_info) const;
 			void compileAudio(Descriptor& desc_file, Info& asset_info) const;
 			void compileModel(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets);
+			void compileScene(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets);
 			std::string GetCuttlefishExecutable() const;
 			bool CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			bool CuttlefishCompressor(float* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetFFMPEGExecutable() const;
-			void ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const;
 			void ExportModel(const Model& asset, const std::filesystem::path& out_path) const;
 
 			//Recompilation check
@@ -70,6 +70,9 @@ namespace PAIN {
 			Compiler(std::filesystem::path const& input_path, std::filesystem::path const& output_path, Platform const& platform, std::filesystem::path const& exec_path) : assets_root{ input_path }, output_dir{ output_path }, platform{ platform }, exec_path{ exec_path }, desc_ext{ Assets::descriptor_ext } {
 			}
 			~Compiler() = default;
+
+			//Public export material
+			bool ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const;
 
 			//Public process asset
 			std::optional<std::vector<IAsset>> processAsset(Info& asset_info);

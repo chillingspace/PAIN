@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "NewTestScn.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 16926989815844175391
+  },
+  "descriptor_version": 1,
+  "guid": "333faf41-faed-fb40-b6aa-1a340a6e9947",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\NewTestScn.scn"
+  }
+}

@@ -2,7 +2,6 @@
 
 #include "Panels.h"
 #include "CoreSystems/Scene/Scene.h"
-
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Command.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -18,24 +17,33 @@ namespace PAIN {
             public:
                 EntityPanel();
 
-
                 void onAttach() override;
                 void onUpdate(PAIN::AppTiming timing) override;
+                void nextWindowSettings() override {}
 
-                void nextWindowSettings() override;
-
-                //Get selected entity
+                // Core API
                 entt::entity getSelectedEntity() const;
-
                 void setSelectedEntity(entt::entity entity);
-
-                //Unselect entity
                 void unselectEntity();
-
-                //Check entity changed
                 bool isEntityChanged() const;
 
+                bool isEntityAndScriptSwitched() const;
+                void setEntityAndScriptSwitched(bool is_switched);
+
+                void setRegistry(ECS::RegistryID registryID) {
+                    currentRegistryID = registryID;
+                }
+
+                ECS::RegistryID getCurrentRegistry() const {
+                    return currentRegistryID;
+                }
+
             private:
+
+                //Set registry ID
+                ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
+
+                // State
                 std::vector<std::pair<entt::entity, std::string>> editor_entities;
 
                 //Selected entity
@@ -49,7 +57,7 @@ namespace PAIN {
 
                 //Entity changed event boolean
                 bool b_entity_changed;
-
+                bool b_entity_script_switched = false;
 
                 int total_entities;
                 int selectedEntityIndex = -1;       // Selected entity index
@@ -61,49 +69,41 @@ namespace PAIN {
                 //Remove tag popup
                 std::function<void(std::any const&)> removeTagPopUp(std::string const& popup_id);
 
-                //Create entity popup
-                std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
-
-                std::function<void(std::any const&)> removeEntityPopUp(std::string const& popup_id);
-
-                //Clone entity popup
-                std::function<void(std::any const&)> cloneEntityPopUp(std::string const& popup_id);
-
                 char search_buffer[256] = "";
                 bool sort_alphabetically = false;
                 bool force_refresh = false;
 
-                // Helper methods for hierarchy
-                void drawEntityNode(entt::entity entity);
+                // Popup functions
+                std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
+                std::function<void(std::any const&)> removeEntityPopUp(std::string const& popup_id);
+                std::function<void(std::any const&)> cloneEntityPopUp(std::string const& popup_id);
+
+                // Core hierarchy operations (GUID-based)
+                void drawEntityHierarchy(entt::entity entity, int depth);
                 std::vector<entt::entity> getRootEntities();
                 std::vector<entt::entity> getEntityChildren(entt::entity parent);
-                std::string getEntityName(entt::entity entity);
+
                 void setEntityParent(entt::entity child, entt::entity parent);
+                void removeParent(entt::entity child);
                 bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
+
                 void removeEntityWithChildren(entt::entity entity);
-                void cloneEntityChildren(entt::entity source, entt::entity cloned_parent);
-
-                // Prefab helper functions
-                std::string generateUniquePrefabName(const std::string& base_name);
-                void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
+                void cloneEntityWithChildren(entt::entity source, entt::entity cloned_parent);
                 void ungroupEntity(entt::entity entity);
-                void unparentEntity(entt::entity entity);
 
-                std::function<void()> createEmptyEntityPopUp(std::string const& popup_id);
-                std::function<void()> createChildEntityPopUp(std::string const& popup_id);
+                // Prefab helpers
+#ifdef PN_PLATFORM_WINDOWS
+                std::string generateUniquePrefabName(const std::string& base_name);
+                std::string generateUniqueTemplateName(const std::string& base_name);
+#endif
+                void collectEntityHierarchy(entt::entity entity, std::vector<entt::entity>& out_entities);
 
-                entt::entity entity_pending_delete = entt::null;
-
-                // Member variables
-                std::vector<entt::entity> multi_selected_entities;
-
-                // Member functions
-                std::function<void()> groupEntitiesPopUp(std::string const& popup_id);
-
-                void drawEntityHierarchy(entt::entity entity_id, int depth);
+                // Utility
+                std::string getEntityName(entt::entity entity);
             };
 
-        } // namespace Panel
-    } // namespace Editor
-} // namespace PAIN
+        }
+    }
+}
+
 #endif

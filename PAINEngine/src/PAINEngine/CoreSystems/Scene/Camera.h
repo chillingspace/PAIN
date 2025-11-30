@@ -1,5 +1,6 @@
 #pragma once
-#include "pch.h"
+
+#include <glm/glm.hpp>
 
 namespace PAIN {
 	class Camera {
@@ -13,7 +14,6 @@ namespace PAIN {
 
 		enum MOVE_MODES {
 			FPS,
-			ORBIT_ORIGIN,
 			NUM_MOVE_MODES,
 		};
 
@@ -25,6 +25,7 @@ namespace PAIN {
 		glm::vec3 pos;
 		glm::vec3 forward;
 		glm::vec3 up;
+		glm::vec3 right;
 
 		float fov;
 		float near_plane;		// closest distance camera can see
@@ -40,5 +41,11 @@ namespace PAIN {
 		glm::mat4 view() const;
 		glm::mat4 projection() const;
 
+		void debugPrintFOV() const {
+			std::cout << "Vertical FOV: " << fov << " degrees" << std::endl;
+			std::cout << "Aspect Ratio: " << aspect_ratio << std::endl;
+			float hFOV = 2.0f * glm::degrees(glm::atan(glm::tan(glm::radians(fov) / 2.0f) * aspect_ratio));
+			std::cout << "Horizontal FOV: " << hFOV << " degrees" << std::endl;
+		}
 	};
 }

@@ -19,7 +19,7 @@ namespace PAIN {
 			unsigned int width;
 			unsigned int height;
 
-			Package(std::string const& title = "Pain Engine", unsigned int width = 1600, unsigned int height = 900) : title{ title }, width{ width }, height{ height } {}
+			Package(std::string const& title = ENGINE_NAME, unsigned int width = DEF_ENGINE_WIDTH, unsigned int height = DEF_ENGINE_HEIGHT) : title{ title }, width{ width }, height{ height } {}
 		};
 
 		//Virtual window class
@@ -61,10 +61,18 @@ namespace PAIN {
 			//Get window height and width
 			virtual glm::uvec2 getFrameBuffer() const = 0;
 
+			//Safe shutdown
 			virtual void safeShutdown() = 0;
+
+			//Get is minimized
+			virtual bool isMinimized() const = 0;
+
+			//Set cursor mode
+			virtual void setCursorMode(bool locked) = 0;
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
+
 		};
 	}
 }

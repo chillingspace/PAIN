@@ -3,44 +3,164 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include "pch.h"
 #include "Applications/AppSystem.h"
 #include "System/ISystem.h"
+#include "CoreSystems/Serialization/sSerialization.h"
+#include <unordered_set>
+#include "Utility/Log.h"
+
+#include <entt/entt.hpp>
 
 namespace PAIN {
 	namespace ECS {
 
+		 // Trait detection for ShouldSerialize flag
+		template <typename T, typename = void>
+		struct has_should_serialize : std::false_type {};
+
+		template <typename T>
+		struct has_should_serialize<T, std::void_t<decltype(T::ShouldSerialize)>> : std::true_type {};
+
+		// Safe compile-time accessor for ShouldSerialize
+		template<typename T>
+		constexpr bool getShouldSerialize() {
+			if constexpr (has_should_serialize<T>::value) {
+				return T::ShouldSerialize;
+			}
+			else {
+				return true; // Default: serialize unless explicitly disabled
+			}
+		}
+
+		template<typename... Components>
+		nlohmann::json serializeAllComponentsImpl(
+			entt::entity entity,
+			const entt::registry& registry,
+			std::tuple<Components...>,
+			const std::unordered_set<std::string>& filter = {}
+		);
+
+		template<typename... Components>
+		void deserializeAllComponentsImpl(
+			entt::entity entity,
+			entt::registry& registry,
+			const nlohmann::json& components,
+			std::tuple<Components...>,
+			const std::unordered_set<std::string>& filter = {}
+		);
+
+		class EntityGUIDRegistry {
+		private:
+
+			//Bidirectional Mapping
+			std::unordered_map<Assets::GUID, entt::entity> guid_to_entity;
+			std::unordered_map<entt::entity, Assets::GUID> entity_to_guid;
+		public:
+			EntityGUIDRegistry() = default;
+			~EntityGUIDRegistry() = default;
+
+			//Get or create a new GUID
+			Assets::GUID getOrCreateGUID(entt::entity e, entt::registry& registry);
+
+			//Resolve GUID
+			entt::entity resolveGUID(const Assets::GUID& guid) const;
+
+			//Update GUID
+			void remapGUID(const Assets::GUID& oldGuid, const Assets::GUID& newGuid);
+
+			//Register an entity
+			void registerEntity(entt::entity e, const Assets::GUID& guid);
+
+			//Unregister an entity
+			void unregisterEntity(entt::entity e);
+
+			//Check for GUID
+			bool hasGUID(const Assets::GUID& guid) const;
+
+			//Check for entity
+			bool hasEntity(entt::entity e) const;
+
+			//Clear everything
+			void clear();
+		};
+
+		//Registry type alias
+		using RegistryID = uint32_t;
+		const RegistryID MAIN_REGISTRY_ID = 0;
+
+		//Registry context
+		struct RegistryContext {
+			std::string name;
+			entt::registry registry;
+			EntityGUIDRegistry guid_registry;
+			size_t entity_count = 0;
+			bool auto_simulate = false;
+		};
+
+		//Improved controller with optional registry usage
 		class Controller : public AppSystem {
 		private:
 
-			size_t entity_count = 0;
-
-			entt::registry entt_registry;
+			//Multi-registry support
+			std::unordered_map<RegistryID, RegistryContext> registries;
+			RegistryID next_registry_id = 1;
 
 			std::vector<std::shared_ptr<System::ISystem>> systems;
 
-			std::unordered_map<std::string, std::function<void(entt::entity)>> component_factories;
+			std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>> component_factories;
 
 			// Map component names to type check functions
-			std::unordered_map<std::string, std::function<bool(entt::entity)>> component_checkers;
+			std::unordered_map<std::string, std::function<bool(entt::entity, RegistryID)>> component_checkers;
 
 			// Map component names to removal functions
-			std::unordered_map<std::string, std::function<void(entt::entity)>> component_removers;
+			std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>> component_removers;
 
 			// Map component names to getter functions (returns void*)
-			std::unordered_map<std::string, std::function<void* (entt::entity)>> component_getters;
+			std::unordered_map<std::string, std::function<void* (entt::entity, RegistryID)>> component_getters;
 
-			//boom
-			template<typename ...Components>
-			void deserializeComponentsImpl(entt::entity entity, const nlohmann::json& comps, std::tuple<Components...>);
+			// Map component names to serialization functions
+			std::unordered_map<std::string, std::function<nlohmann::json(entt::entity, RegistryID)>> component_serializers;
 
+			// Helper methods for multi-registry support
+			RegistryContext* getRegistryContext(RegistryID id);
+			const RegistryContext* getRegistryContext(RegistryID id) const;
+			
+			// Update systems for a specific registry
+			void updateSystemsForRegistry(RegistryID id, AppTiming timing, bool isFixed);
 
 		public:
-			explicit Controller(std::shared_ptr<Services> svc) {
-				services = svc;
-			}
+			explicit Controller(std::shared_ptr<Services> svc);
 
-			int getEntitiesCount() const { return static_cast<int>(entity_count); }
+			/*****************************************************************//**
+			* Registry Management Methods
+			*********************************************************************/
+			//Create a new registry with optional name and auto-simulate flag
+			RegistryID createRegistry(const std::string& name = "", bool autoSimulate = false);
+			
+			//Destroy a registry (cannot destroy main registry)
+			void destroyRegistry(RegistryID id);
+
+			//Check if registry exists
+			bool hasRegistry(RegistryID id) const;
+
+			//Registry configuration
+			void setRegistryAutoSimulate(RegistryID id, bool autoSimulate);
+			bool isRegistryAutoSimulate(RegistryID id) const;
+			std::string getRegistryName(RegistryID id) const;
+
+			//Registry updates
+			void updateRegistry(RegistryID id, AppTiming timing);
+			void fixedUpdateRegistry(RegistryID id, AppTiming timing);
+
+			/*****************************************************************//**
+			* GUID Registry Methods
+			*********************************************************************/
+			//Public access to the GUID registry
+			EntityGUIDRegistry& getGUIDRegistry(RegistryID registryId = MAIN_REGISTRY_ID);
+			const EntityGUIDRegistry& getGUIDRegistry(RegistryID registryId = MAIN_REGISTRY_ID) const;
+			Assets::GUID getOrCreateEntityGUID(entt::entity e, RegistryID registryId = MAIN_REGISTRY_ID);
+			entt::entity resolveGUID(const Assets::GUID& guid, RegistryID registryId = MAIN_REGISTRY_ID) const;
+			int getEntitiesCount(RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			//Dispatch events to layers
 			void dispatchToLayers(Event::Event& e);
@@ -54,31 +174,36 @@ namespace PAIN {
 
 			void registerAllComponents();
 
+			void registerAllSystems();
+
 			//Event callback
 			void onEvent(Event::Event& e) override;
 
-			// Direct registry access for advanced use cases
-			entt::registry& getRegistry() { return entt_registry; }
-			const entt::registry& getRegistry() const { return entt_registry; }
+			//Overloaded to support multi-registry
+			entt::registry& getRegistry(RegistryID id = MAIN_REGISTRY_ID);
+			const entt::registry& getRegistry(RegistryID id = MAIN_REGISTRY_ID) const;
 
 			/*****************************************************************//**
 			* Entity Methods
 			*********************************************************************/
 
 			//Create Entity
-			entt::entity createEntity();
-
-			//Clone entity ( ID of clone returned )
-			entt::entity cloneEntity(entt::entity copy);
-
+			entt::entity createEntity(RegistryID registryId = MAIN_REGISTRY_ID);
+			
+			//Create Entity with GUID
+			entt::entity createEntity(Assets::GUID const& e_id, RegistryID registryId = MAIN_REGISTRY_ID);
+			
+			//Clone entity (supports cross-registry cloning)
+			entt::entity cloneEntity(entt::entity copy, RegistryID srcRegistry = MAIN_REGISTRY_ID, RegistryID dstRegistry = MAIN_REGISTRY_ID);
+			
 			//Destroy Entity
-			void destroyEntity(entt::entity entity);
-
+			void destroyEntity(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID);
+			
 			//Check entity
-			bool checkEntity(entt::entity entity) const;
-
-			//Destroy Entity
-			void destroyAllEntities();
+			bool checkEntity(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
+			
+			//Destroy all entities in a registry
+			void destroyAllEntities(RegistryID registryId = MAIN_REGISTRY_ID);
 
 			template<typename Tuple, typename F>
 			void tuple_for_each(F&& f)
@@ -93,24 +218,61 @@ namespace PAIN {
 			*********************************************************************/
 			template<typename T>
 			void registerComponent(const std::string& name) {
+				// Note: These lambdas work with MAIN_REGISTRY_ID for backward compatibility
+				// For multi-registry support, use the template component methods with registryId parameter
+				
 				// Factory for creating by name
-				component_factories[name] = [this](entt::entity e) {
-					entt_registry.emplace<T>(e);
+				component_factories[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					getRegistry(registry_id).emplace<T>(e);
 					};
-
 				// Checker for hasComponentByName
-				component_checkers[name] = [this](entt::entity e) {
-					return entt_registry.all_of<T>(e);
+				component_checkers[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					return getRegistry(registry_id).all_of<T>(e);
 					};
-
 				// Remover for removeComponentByName
-				component_removers[name] = [this](entt::entity e) {
-					entt_registry.remove<T>(e);
+				component_removers[name] = [this](entt::entity e, RegistryID const& registry_id) {
+					getRegistry(registry_id).remove<T>(e);
 					};
-
 				// Getter for editor UI (type-erased)
-				component_getters[name] = [this](entt::entity e) -> void* {
-					return static_cast<void*>(entt_registry.try_get<T>(e));
+				component_getters[name] = [this](entt::entity e, RegistryID const& registry_id) -> void* {
+					return static_cast<void*>(getRegistry(registry_id).try_get<T>(e));
+					};
+				// Getter for comp serializers
+				component_serializers[name] = [this, name](entt::entity e, RegistryID const& registry_id) -> nlohmann::json {
+
+					constexpr bool type_should_deserialize = getShouldSerialize<T>();
+
+					// CRITICAL: Wrap entire deserialization logic in if constexpr
+					if constexpr (type_should_deserialize) {
+
+						T* comp_ptr = getRegistry(registry_id).try_get<T>(e);
+
+						// Try reflection first, then fallback to JSON
+						if constexpr (refl::trait::is_reflectable_v<T>) {
+							try {
+								return PAIN::Serialization::to_json_reflected(*comp_ptr);
+							}
+							catch (const std::exception& e) {
+								PN_CORE_ERROR("Failed to serialize {} using reflection: {}", name, e.what());
+							}
+						}
+						else {
+							// Only compile this if type is convertible to JSON
+							if constexpr (std::is_constructible_v<nlohmann::json, T>) {
+								try {
+									return nlohmann::json(*comp_ptr);
+								}
+								catch (const std::exception& e) {
+									PN_CORE_WARN("Failed to serialize {}: {}", name, e.what());
+								}
+							}
+							else {
+								PN_CORE_WARN("Component {} is not serializable (no reflection or JSON converter)", name);
+							}
+						}
+					}
+
+					return nlohmann::json();
 					};
 			}
 
@@ -120,34 +282,39 @@ namespace PAIN {
 			}
 
 			// Create component by string name (for editor/serialization)
-			void addComponentByName(entt::entity entity, const std::string& name) {
+			void addComponentByName(entt::entity entity, const std::string& name, RegistryID registry_id = MAIN_REGISTRY_ID) {
 				auto it = component_factories.find(name);
 				if (it != component_factories.end()) {
-					it->second(entity);
+					it->second(entity, registry_id);
 				}
 			}
 
 			// Get all component names registered for an entity
-			std::vector<std::string> getEntityComponentNames(entt::entity entity) const;
+			std::vector<std::string> getEntityComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
+
+			//Get component name
+			std::vector<std::string> getComponentNames(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			// Get all components as JSON (for serialization)
-			nlohmann::json getAllComponentsAsJson(entt::entity entity) const;
+			nlohmann::json getAllComponentsAsJson(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
+			//Get components as json
+			nlohmann::json getComponentAsJson(entt::entity entity, std::string const& comp_name, RegistryID registryId) const;
 
 			// Deserialize all components from JSON
-			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps);
+			void loadAllComponentsFromJson(entt::entity entity, const nlohmann::json& comps, RegistryID registryId = MAIN_REGISTRY_ID);
 
 
 			// Check if entity has a component by name (uses registered factories)
-			bool hasComponentByName(entt::entity entity, const std::string& name) const;
+			bool hasComponentByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID) const;
 
 			// Remove component by name (for editor use)
-			void removeComponentByName(entt::entity entity, const std::string& name);
+			void removeComponentByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID);
 
 			// Get component pointer by name (type-erased for editor)
-			void* getComponentPtrByName(entt::entity entity, const std::string& name);
+			void* getComponentPtrByName(entt::entity entity, const std::string& name, RegistryID registryId = MAIN_REGISTRY_ID);
 
-			const std::unordered_map<std::string, std::function<void(entt::entity)>>& getComponentFactories() const;
+			const std::unordered_map<std::string, std::function<void(entt::entity, RegistryID)>>& getComponentFactories() const;
 
 			/*****************************************************************//**
 			* Template Component Methods (Type-Safe)
@@ -155,17 +322,17 @@ namespace PAIN {
 
 			// Check if entity has a specific component type
 			template<typename T>
-			bool hasEntityComponent(entt::entity entity) const {
-				return entt_registry.all_of<T>(entity);
+			bool hasEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				return getRegistry(registryId).all_of<T>(entity);
 			}
 
 			// Get component (non-const version)
 			template<typename T>
-			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity) {
-				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+			std::optional<std::reference_wrapper<T>> getEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (!checkEntity(entity, registryId) || !getRegistry(registryId).all_of<T>(entity)) {
 					return std::nullopt;
 				}
-				return std::ref(entt_registry.get<T>(entity));
+				return std::ref(getRegistry(registryId).get<T>(entity));
 			}
 
 			// Get All Entity's Component 
@@ -176,38 +343,36 @@ namespace PAIN {
 
 			// Get component (const version)
 			template<typename T>
-			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity) const {
-				if (!checkEntity(entity) || !entt_registry.all_of<T>(entity)) {
+			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				if (!checkEntity(entity, registryId) || !getRegistry(registryId).all_of<T>(entity)) {
 					return std::nullopt;
 				}
-				return std::ref(entt_registry.get<T>(entity));
+				return std::ref(getRegistry(registryId).get<T>(entity));
 			}
 
 			// Add component to entity (move semantics for efficiency)
 			template<typename T>
-			void addEntityComponent(entt::entity entity, T&& component) {
-				// Safety checks to check for valid entity before adding comp to the entity
-				if (!checkEntity(entity)) {
+			void addEntityComponent(entt::entity entity, T&& component, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (!checkEntity(entity, registryId)) {
 					PN_CORE_ERROR("Cannot add component to invalid entity: {}",
 						static_cast<uint32_t>(entity));
 					return;
 				}
-
-				entt_registry.emplace_or_replace<T>(entity, std::forward<T>(component));
+				getRegistry(registryId).emplace_or_replace<T>(entity, std::forward<T>(component));
 			}
 
 			// Remove component from entity
 			template<typename T>
-			void removeEntityComponent(entt::entity entity) {
-				if (entt_registry.all_of<T>(entity)) {
-					entt_registry.remove<T>(entity);
+			void removeEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) {
+				if (getRegistry(registryId).all_of<T>(entity)) {
+					getRegistry(registryId).remove<T>(entity);
 				}
 			}
 
 			// Alternative name for consistency (checks component mesh_id)
 			template<typename T>
-			bool checkEntityComponent(entt::entity entity) const {
-				return entt_registry.all_of<T>(entity);
+			bool checkEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {
+				return getRegistry(registryId).all_of<T>(entity);
 			}
 
 
@@ -216,7 +381,7 @@ namespace PAIN {
 			*********************************************************************/
 
 			// Register a system
-			template<typename T> void registerSystem() {
+					template<typename T> void registerSystem() {
 				systems.push_back(std::make_shared<T>(services));
 			}
 
@@ -235,9 +400,28 @@ namespace PAIN {
 			const std::vector<std::shared_ptr<System::ISystem>>& getAllSystems() const {
 				return systems;
 			}
-};
+		};
 
+		//Utility function
+		static std::string convertTypeString(std::string&& str_type) {
+			size_t first_colon = str_type.find_first_of(':');
+
+			// Check if colon mesh_id
+			if (first_colon == std::string::npos) {
+				return str_type; // No colon found, return original string
+			}
+
+			size_t start_pos = str_type.find_first_not_of(':', first_colon);
+
+			// Check if any non-colon character mesh_id after the colon
+			if (start_pos == std::string::npos) {
+				return ""; // Only colons after first colon, return empty string
+			}
+
+			// Safely extract substring
+			return str_type.substr(start_pos);
 		}
+	}
 }
 
 #endif

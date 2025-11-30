@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Green.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 8022553424785267193
+  },
+  "descriptor_version": 1,
+  "guid": "6e16abbc-88b9-a949-894b-964040759757",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\acc\\Green.material"
+  }
+}

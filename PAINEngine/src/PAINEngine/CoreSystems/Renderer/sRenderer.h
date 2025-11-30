@@ -16,26 +16,22 @@ namespace PAIN {
 		sRenderer() = default;
 		~sRenderer() = default;
 
-		std::shared_ptr<Scene> m_Scene;
-
-		void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);
+		std::shared_ptr<Scene::SceneManager> m_Scene;
 
 		void onDetach() override;
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
-
-		void shadowPass();
-		void geometryPass();
-		void reflectionPass();
-		void lightingPass();
-		void debugPass(int debug_mode);
 		void postProcessPass();
-		void uiPass();
 
         void onUpdate(AppTiming timing) override;
 
 
 		void onEvent([[maybe_unused]] Event::Event& e) override;
+
+		//Get final fbo
+		unsigned int getFinalFbo() const {
+			return w_renderer->getFinalFbo();
+		}
 
 		// Framebuffer for IMGUI Viewport
 		ImTextureID getFramebufferTexture() const {
@@ -43,6 +39,10 @@ namespace PAIN {
 		}
 		int getFramebufferWidth() const { return services->get<Window::Window>()->getFrameBuffer().x; }
 		int getFramebufferHeight() const { return services->get<Window::Window>()->getFrameBuffer().y; }
+
+		void initSceneVbo(const std::vector<ModelRenderer>& models) { w_renderer->initSceneVbo(models); }
+
+		void setScene(std::shared_ptr<Scene::SceneManager> scn) { m_Scene = scn; }
 
 		std::unique_ptr<WindowsRenderer> w_renderer;
 

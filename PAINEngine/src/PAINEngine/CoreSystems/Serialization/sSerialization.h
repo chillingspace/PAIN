@@ -10,12 +10,15 @@
 #pragma once
 #ifndef SERIALIZATION_SERVICE_H
 #define SERIALIZATION_SERVICE_H
-#include "pch.h"
 #include "Applications/AppSystem.h"
-#include "PAINEngine/ECS/Controller.h"
-#include "PAINEngine/ECS/Components/cTransform.h"
-
 #include "AssetData.h"
+#include "refl.hpp"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/constants.hpp>
 
 namespace PAIN {
     namespace Serialization {
@@ -47,11 +50,6 @@ namespace PAIN {
             std::vector<std::vector<bool>> mask_matrix;
             bool dirty = false;
         };
-
-        struct EntityPrefab {
-            std::string name;
-            std::vector<nlohmann::json> entities;
-        };  
             
         // ----------------------------
         // Service (inherits AppSystem)

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pipe1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5553822043839918501
+  },
+  "descriptor_version": 1,
+  "guid": "60d237d0-60e1-c146-86e6-e76c967840d4",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pipe1_baseColor.png"
+  }
+}

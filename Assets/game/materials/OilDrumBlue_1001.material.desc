@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "OilDrumBlue_1001.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 15025619635032880662
+  },
+  "descriptor_version": 1,
+  "guid": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\OilDrumBlue_1001.material"
+  }
+}

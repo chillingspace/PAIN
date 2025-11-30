@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "BoxSG_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 416997715481112065
+  },
+  "descriptor_version": 1,
+  "guid": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\BoxSG_baseColor.png"
+  }
+}

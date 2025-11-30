@@ -259,7 +259,9 @@ namespace PAIN {
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.hash = build_data.value("hash", std::size_t(0));
+                
+                //Explicitly read as uint64_t to match new Descriptor struct
+                desc.hash = build_data.value("hash", (uint64_t)0);
 
                 //Verify import settings
                 if (!verifyCompileSettings(asset.type, desc.import_settings)) {
@@ -313,7 +315,9 @@ namespace PAIN {
                 //Settings and build data
                 desc.import_settings = desc_json.value("import_settings", nlohmann::json{});
                 auto build_data = desc_json["build_data"];
-                desc.hash = build_data.value("hash", std::size_t(0));
+                
+                //Explicitly read as uint64_t
+                desc.hash = build_data.value("hash", (uint64_t)0);
 
                 desc.meta_data = desc_json.value("meta_data", nlohmann::json{});
                 desc.meta_data["source_file"] = desc.meta_data.value("source_file", "");
@@ -424,8 +428,13 @@ namespace PAIN {
             int width, height, channels;
             bool compression_success = false;
 
-            if (higher_quality) {
+            // DETERMINE BLOCK SIZE BASED ON PLATFORM
+            constexpr int BLOCK_SIZE_ASTC = 4;
+            constexpr int BLOCK_SIZE_BC = 4;
 
+            int block_size = (platform == Platform::Android) ? BLOCK_SIZE_ASTC : BLOCK_SIZE_BC;
+
+            if (higher_quality) {
                 //Load image as float for higher quality textures
                 float* raw_pixels = stbi_loadf(asset_info.raw_path.string().c_str(),
                     &width, &height, &channels, 0);
@@ -436,30 +445,73 @@ namespace PAIN {
                 }
                 std::cout << "Loaded HDR texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
 
-                //Resize HDR
-                int target_width = width, target_height = height;
+                // ========================================
+                // STEP 1: ENSURE BLOCK ALIGNMENT (HDR)
+                // ========================================
+                int aligned_width = ((width + block_size - 1) / block_size) * block_size;
+                int aligned_height = ((height + block_size - 1) / block_size) * block_size;
+
+                if (width != aligned_width || height != aligned_height) {
+                    std::cout << "Aligning HDR texture from " << width << "x" << height
+                        << " to " << aligned_width << "x" << aligned_height << std::endl;
+
+                    float* aligned_pixels = (float*)malloc(aligned_width * aligned_height * channels * sizeof(float));
+
+                    stbir_pixel_layout layout = (channels == 3) ? STBIR_RGB : STBIR_RGBA;
+
+                    if (stbir_resize_float_linear(
+                        raw_pixels, width, height, 0,
+                        aligned_pixels, aligned_width, aligned_height, 0,
+                        layout
+                    )) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = aligned_pixels;
+                        width = aligned_width;
+                        height = aligned_height;
+                        std::cout << "HDR alignment successful: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: HDR alignment resize failed!" << std::endl;
+                        free(aligned_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
+                // ========================================
+                // STEP 2: MAX SIZE LIMIT (HDR)
+                // ========================================
                 int max_size = desc_file.import_settings.value("max_size", 2048);
-                float* resized_pixels = nullptr;
 
                 if (width > max_size || height > max_size) {
                     float scale = static_cast<float>(max_size) / std::max(width, height);
-                    target_width = static_cast<int>(width * scale);
-                    target_height = static_cast<int>(height * scale);
-                    resized_pixels = (float*)malloc(target_width * target_height * channels * sizeof(float));
-                    
-                    //Resize float
+                    int target_width = static_cast<int>(width * scale);
+                    int target_height = static_cast<int>(height * scale);
+
+                    // ENSURE RESULT IS STILL BLOCK-ALIGNED
+                    target_width = ((target_width + block_size - 1) / block_size) * block_size;
+                    target_height = ((target_height + block_size - 1) / block_size) * block_size;
+
+                    float* resized_pixels = (float*)malloc(target_width * target_height * channels * sizeof(float));
+
                     stbir_pixel_layout layout = (channels == 3) ? STBIR_RGB : STBIR_RGBA;
-                    if (stbir_resize_float_linear(raw_pixels, width, height, 0,
+
+                    if (stbir_resize_float_linear(
+                        raw_pixels, width, height, 0,
                         resized_pixels, target_width, target_height, 0,
-                        layout)) {
+                        layout
+                    )) {
                         stbi_image_free(raw_pixels);
                         raw_pixels = resized_pixels;
-                        width = target_width; height = target_height;
+                        width = target_width;
+                        height = target_height;
                         std::cout << "Resized HDR to: " << width << "x" << height << std::endl;
                     }
                     else {
                         std::cout << "ERROR: HDR resize failed!" << std::endl;
                         free(resized_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
                     }
                 }
 
@@ -469,44 +521,99 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress texture
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, channels,
+                //Compress HDR texture
+                compression_success = CuttlefishCompressor(
+                    raw_pixels, width, height, channels,
                     asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
+                    compression_format, desc_file.import_settings
+                );
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
             }
             else {
                 //Load image as png for ldr
-                unsigned char* raw_pixels = stbi_load(asset_info.raw_path.string().c_str(),
-                    &width, &height, &channels, STBI_rgb_alpha);
+                int original_channels;
+                unsigned char* raw_pixels = stbi_load(
+                    asset_info.raw_path.string().c_str(),
+                    &width, &height, &original_channels,
+                    STBI_rgb_alpha  // Force to RGBA
+                );
+
                 if (!raw_pixels) {
                     std::cout << "ERROR: Failed to load texture: " << asset_info.raw_path
                         << " - " << stbi_failure_reason() << std::endl;
                     return;
                 }
-                std::cout << "Loaded texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
 
-                //Resize png
-                int target_width = width, target_height = height;
+                channels = 4;  // Always RGBA after STBI_rgb_alpha
+
+                std::cout << "Loaded texture: " << width << "x" << height
+                    << " (original: " << original_channels << " channels, loaded as RGBA)" << std::endl;
+
+                // ========================================
+                // STEP 1: ENSURE BLOCK ALIGNMENT (LDR)
+                // ========================================
+                int aligned_width = ((width + block_size - 1) / block_size) * block_size;
+                int aligned_height = ((height + block_size - 1) / block_size) * block_size;
+
+                if (width != aligned_width || height != aligned_height) {
+                    std::cout << "Aligning texture from " << width << "x" << height
+                        << " to " << aligned_width << "x" << aligned_height << std::endl;
+
+                    unsigned char* aligned_pixels = (unsigned char*)malloc(aligned_width * aligned_height * 4);
+
+                    if (stbir_resize(
+                        raw_pixels, width, height, 0,
+                        aligned_pixels, aligned_width, aligned_height, 0,
+                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT
+                    )) {
+                        stbi_image_free(raw_pixels);
+                        raw_pixels = aligned_pixels;
+                        width = aligned_width;
+                        height = aligned_height;
+                        std::cout << "Alignment successful: " << width << "x" << height << std::endl;
+                    }
+                    else {
+                        std::cout << "ERROR: Alignment resize failed!" << std::endl;
+                        free(aligned_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
+                // ========================================
+                // STEP 2: MAX SIZE LIMIT (LDR)
+                // ========================================
                 int max_size = desc_file.import_settings.value("max_size", 2048);
+
                 if (width > max_size || height > max_size) {
                     float scale = static_cast<float>(max_size) / std::max(width, height);
-                    target_width = static_cast<int>(width * scale);
-                    target_height = static_cast<int>(height * scale);
+                    int target_width = static_cast<int>(width * scale);
+                    int target_height = static_cast<int>(height * scale);
+
+                    // ENSURE RESULT IS STILL BLOCK-ALIGNED
+                    target_width = ((target_width + block_size - 1) / block_size) * block_size;
+                    target_height = ((target_height + block_size - 1) / block_size) * block_size;
+
                     unsigned char* resized_pixels = (unsigned char*)malloc(target_width * target_height * 4);
-                    if (stbir_resize(raw_pixels, width, height, 0,
+
+                    if (stbir_resize(
+                        raw_pixels, width, height, 0,
                         resized_pixels, target_width, target_height, 0,
-                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT)) {
+                        STBIR_RGBA, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT
+                    )) {
                         stbi_image_free(raw_pixels);
                         raw_pixels = resized_pixels;
-                        width = target_width; height = target_height;
+                        width = target_width;
+                        height = target_height;
                         std::cout << "Resized texture to: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: STB resize failed!" << std::endl;
+                        std::cout << "ERROR: Resize failed!" << std::endl;
                         free(resized_pixels);
+                        stbi_image_free(raw_pixels);
+                        return;
                     }
                 }
 
@@ -516,10 +623,12 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress asset
-                compression_success = CuttlefishCompressor(raw_pixels, width, height, 4,
+                //Compress LDR asset
+                compression_success = CuttlefishCompressor(
+                    raw_pixels, width, height, 4,  // Always 4 channels (RGBA)
                     asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings);
+                    compression_format, desc_file.import_settings
+                );
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
@@ -607,7 +716,10 @@ namespace PAIN {
             bool triangulate = desc_file.import_settings.value("triangulate", true);
             bool import_animations = desc_file.import_settings.value("import_animations", true);
             bool import_skeleton = desc_file.import_settings.value("import_skeleton", true);
-            int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+
+            // dont get from settings. needs to match shader.
+            //int max_bone_weights = desc_file.import_settings.value("max_bone_weights", 4);
+            const int max_bone_weights = 4;
 
             // Configure Assimp post-processing flags
             unsigned int ppFlags = 0;
@@ -657,6 +769,23 @@ namespace PAIN {
                 }
             }
 
+            // resolve bone parents
+            for (size_t i = 0; i < asset.skeleton.size(); ++i) {
+                // get bone
+                aiNode* boneNode = scene->mRootNode->FindNode(asset.skeleton[i].name.c_str());
+
+                //
+                if (boneNode && boneNode->mParent) {
+                    std::string parentName = boneNode->mParent->mName.C_Str();
+
+                    // check if parent is bone
+                    auto it = boneNameToIndex.find(parentName);
+                    if (it != boneNameToIndex.end()) {
+                        asset.skeleton[i].parent = it->second;
+                    }
+                }
+            }
+
             size_t vertexBase = 0;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
                 aiMesh* mesh = scene->mMeshes[m];
@@ -700,7 +829,8 @@ namespace PAIN {
                     if (weights.size() > max_bone_weights) weights.resize(max_bone_weights);
 
                     for (int i = 0; i < max_bone_weights; ++i) {
-                        vert.boneIndices[i] = (uint8_t)weights[i].first;
+                        vert.boneIndices[i] = weights[i].first;
+                        vert.boneIndices_f[i] = static_cast<float>(weights[i].first);
                         vert.boneWeights[i] = weights[i].second;
                     }
 
@@ -763,8 +893,11 @@ namespace PAIN {
                     clip.duration = static_cast<float>(anim->mDuration) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
                     for (unsigned int c = 0; c < anim->mNumChannels; ++c) {
                         aiNodeAnim* chan = anim->mChannels[c];
-                        AnimationTrack track;
-                        track.boneName = chan->mNodeName.C_Str();
+                        //AnimationTrack track;
+
+                        const std::string boneName = chan->mNodeName.C_Str();
+                        auto& track = clip.track_map[boneName];
+
                         for (unsigned int k = 0; k < chan->mNumPositionKeys; ++k) {
                             AnimationKey key;
                             key.time = static_cast<float>(chan->mPositionKeys[k].mTime) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
@@ -780,9 +913,9 @@ namespace PAIN {
                                 key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
                             }
                             // Morph target weights can be set here if you support animated blend shapes
-                            track.keys.push_back(key);
+                            track.push_back(key);
                         }
-                        clip.tracks.push_back(track);
+                        //clip.tracks.push_back(track);
                     }
                     asset.animations.push_back(clip);
                 }
@@ -797,15 +930,14 @@ namespace PAIN {
                 mat.name = mat.name.empty() ? "UnamedMaterial_" + std::to_string(def_name_count++) : mat.name;
 
                 //Identify the nested folder
-                std::filesystem::path relative_path;
-
-                //Get relative path
-                relative_path = std::filesystem::relative(asset_info.relative_folder, getAllGameFolders()[Assets::Type::Model]);
+                std::filesystem::path relative_path = extractSubfolderPath(asset_info, assets_root);
                 bool game_folder = true;
                 if (relative_path.empty()) {
-                    relative_path = std::filesystem::relative(asset_info.relative_folder, getAllEngineFolders()[Assets::Type::Model]);
                     game_folder = false;
                 }
+
+                //Reset relative path properly
+                relative_path = relative_path.string() == "." || relative_path.empty() ? "" : relative_path;
 
                 //Get material textures
                 {
@@ -1014,32 +1146,33 @@ namespace PAIN {
                 mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
                 
                 //Export material
-                ExportMaterial(mat, mat_path);
+                if (ExportMaterial(mat, mat_path)) {
 
-                //Process asset
-                Info mat_asset;
-                mat_asset.raw_path = mat_path;
-                mat_asset.name = mat_asset.raw_path.filename().string();
-                mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
-                mat_asset.type = getAssetType(mat_asset.raw_path);
-                mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
-                processAsset(mat_asset);
+                    //Process asset
+                    Info mat_asset;
+                    mat_asset.raw_path = mat_path;
+                    mat_asset.name = mat_asset.raw_path.filename().string();
+                    mat_asset.relative_folder = std::filesystem::relative(mat_asset.raw_path, assets_root).parent_path();
+                    mat_asset.type = getAssetType(mat_asset.raw_path);
+                    mat_asset.relative_path = std::filesystem::relative(mat_asset.raw_path, assets_root);
+                    processAsset(mat_asset);
 
-                //Craft asset interface
-                IAsset asset_interface;
-                asset_interface.guid = mat_asset.guid;
-                asset_interface.name = mat_asset.shipped_path.filename().string();
-                asset_interface.type = mat_asset.type;
-                asset_interface.main_relative_path = mat_asset.relative_path;
-                asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
+                    //Craft asset interface
+                    IAsset asset_interface;
+                    asset_interface.guid = mat_asset.guid;
+                    asset_interface.name = mat_asset.shipped_path.filename().string();
+                    asset_interface.type = mat_asset.type;
+                    asset_interface.main_relative_path = mat_asset.relative_path;
+                    asset_interface.shipped_relative_path = mat_asset.relative_path.parent_path() / mat_asset.shipped_path.filename();
 
-                //Add into optional assets
-                opt_assets.push_back(asset_interface);
+                    //Add into optional assets
+                    opt_assets.push_back(asset_interface);
 
-                //Export material
-                std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
-                relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
-                asset.materials.push_back(relative_mat_path.lexically_normal());
+                    //Export material
+                    std::filesystem::path relative_mat_path = material_folder / relative_path / mat.name;
+                    relative_mat_path.replace_extension(*getAllExtensions()[Assets::Type::Material].begin());
+                    asset.materials.push_back(relative_mat_path.lexically_normal());
+                }
             }
 
             //Export model
@@ -1049,6 +1182,227 @@ namespace PAIN {
 
             //Update desc file with hashing
             desc_file.hash = fileHashing(asset_info.raw_path);
+        }
+
+        // Helper function: Convert aiMatrix4x4 to position, rotation, scale
+        struct Transform {
+            glm::vec3 position;
+            glm::quat rotation;
+            glm::vec3 scale;
+        };
+
+        static Transform aiMatrixToTransform(const aiMatrix4x4& matrix) {
+            Transform transform;
+            
+            // Extract translation
+            transform.position = glm::vec3(matrix.a4, matrix.b4, matrix.c4);
+            
+            // Extract rotation and scale
+            aiVector3D aiScale, aiPos;
+            aiQuaternion aiRot;
+            matrix.Decompose(aiScale, aiRot, aiPos);
+            
+            transform.scale = glm::vec3(aiScale.x, aiScale.y, aiScale.z);
+            transform.rotation = glm::quat(aiRot.w, aiRot.x, aiRot.y, aiRot.z);
+            
+            return transform;
+        }
+
+        // Helper function: Create entity JSON with components
+        static nlohmann::json createEntityJSON(
+            const std::string& name,
+            const GUID& guid,
+            const Transform& transform,
+            const GUID& parentGUID,
+            int siblingIndex,
+            const GUID& modelGUID = GUID{},
+            uint32_t materialIndex = 0
+        ) {
+            nlohmann::json entity;
+            entity["Entity"]["Name"] = name;
+            
+            // Components
+            auto& components = entity["Entity"]["Components"];
+            
+            // GUID component
+            components["GUID"]["guid"] = guid.ToString();
+            
+            // Name component
+            components["Name"]["name"] = name;
+            
+            // LocalTransform component
+            components["LocalTransform"]["position"] = {
+                transform.position.x, transform.position.y, transform.position.z
+            };
+            components["LocalTransform"]["rotation"] = {
+                transform.rotation.x, transform.rotation.y, 
+                transform.rotation.z, transform.rotation.w
+            };
+            components["LocalTransform"]["scale"] = {
+                transform.scale.x, transform.scale.y, transform.scale.z
+            };
+            
+            // Hierarchy component
+            components["Hierarchy"]["parentGUID"] = parentGUID.ToString();
+            components["Hierarchy"]["childrenGUIDs"] = nlohmann::json::array();
+            components["Hierarchy"]["siblingIndex"] = siblingIndex;
+            
+            // Layer component (default layer)
+            components["Layer"]["layer_id"] = 0;
+            components["Layer"]["layer_mask"] = 1;
+            
+            // If has mesh, add ModelRenderer component
+            if (modelGUID.IsValid()) {
+                components["ModelRenderer"]["modelGUID"] = modelGUID.ToString();
+                components["ModelRenderer"]["materials"] = nlohmann::json::array();
+                components["ModelRenderer"]["visible"] = true;
+                components["ModelRenderer"]["castShadows"] = true;
+                components["ModelRenderer"]["receiveShadows"] = true;
+            }
+            
+            return entity;
+        }
+
+        // Helper function: Recursively process aiNode tree
+        static void processNodeRecursive(
+            const aiNode* node,
+            const aiScene* scene,
+            const GUID& parentGUID,
+            int siblingIndex,
+            nlohmann::json& entitiesArray,
+            std::unordered_map<std::string, GUID>& nodeNameToGUID,
+            const std::filesystem::path& modelFolder
+        ) {
+            if (!node) return;
+            
+            // Generate GUID for this node
+            GUID nodeGUID = GUID::Generate();
+            std::string nodeName = node->mName.C_Str();
+            nodeNameToGUID[nodeName] = nodeGUID;
+            
+            // Extract transform from node
+            Transform transform = aiMatrixToTransform(node->mTransformation);
+            
+            // Check if node has mesh
+            GUID modelGUID{};
+            if (node->mNumMeshes > 0) {
+                // For now, we'll set a placeholder - in full implementation
+                // this would reference the actual model asset created from the mesh
+                // TODO: Create or reference model asset
+                modelGUID = GUID::Generate();  // Placeholder
+            }
+            
+            // Create entity JSON
+            nlohmann::json entityJSON = createEntityJSON(
+                nodeName,
+                nodeGUID,
+                transform,
+                parentGUID,
+                siblingIndex,
+                modelGUID
+            );
+            
+            // Add to entities array
+            entitiesArray.push_back(entityJSON);
+            
+            // Process children recursively
+            for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+                processNodeRecursive(
+                    node->mChildren[i],
+                    scene,
+                    nodeGUID,  // This node becomes the parent
+                    i,
+                    entitiesArray,
+                    nodeNameToGUID,
+                    modelFolder
+                );
+            }
+        }
+
+        void Compiler::compileScene(Descriptor& desc_file, Info& asset_info, std::vector<IAsset>& opt_assets) {
+            
+            // Set output extension to .scn
+            asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + ".scn");
+            
+            // Create output directory
+            std::filesystem::create_directories(asset_info.shipped_path.parent_path());
+            
+            // Check if recompilation is needed
+            if (!needsRecompilation(asset_info, desc_file)) return;
+            
+            std::cout << "[Scene] Compiling scene from GLTF: " << asset_info.raw_path.filename() << std::endl;
+            
+            // Load with Assimp
+            Assimp::Importer importer;
+            unsigned int ppFlags = aiProcess_Triangulate | aiProcess_GenNormals;
+            const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);
+            
+            if (!scene || !scene->mRootNode) {
+                std::cerr << "Failed to load GLTF scene: " << importer.GetErrorString() << std::endl;
+                return;
+            }
+            
+            std::cout << "[Scene] Found " << scene->mNumMeshes << " meshes, " 
+                      << scene->mNumMaterials << " materials" << std::endl;
+            
+            // Prepare scene JSON structure
+            nlohmann::json sceneJSON;
+            
+            // Camera settings (use defaults for now, can be enhanced later)
+            sceneJSON["camera"]["active_game_cam"] = "MainCamera";
+            sceneJSON["camera"]["position"] = {0.0f, 2.0f, 4.0f};
+            sceneJSON["camera"]["forward"] = {0.0f, 0.0f, -1.0f};
+            sceneJSON["camera"]["up"] = {0.0f, 1.0f, 0.0f};
+            sceneJSON["camera"]["fov"] = 90.0f;
+            sceneJSON["camera"]["nearPlane"] = 0.1f;
+            sceneJSON["camera"]["farPlane"] = 100.0f;
+            sceneJSON["camera"]["aspectRatioW"] = 16.0f;
+            sceneJSON["camera"]["aspectRatioH"] = 9.0f;
+            
+            // TODO: Extract camera from scene if available
+            if (scene->HasCameras()) {
+                std::cout << "[Scene] Found " << scene->mNumCameras << " cameras (camera import not yet implemented)" << std::endl;
+            }
+            
+            // Entity system
+            nlohmann::json entitiesArray = nlohmann::json::array();
+            std::unordered_map<std::string, GUID> nodeNameToGUID;
+            
+            // Process scene hierarchy starting from root
+            GUID nullGUID{};  // Represents no parent (root entities)
+            processNodeRecursive(
+                scene->mRootNode,
+                scene,
+                nullGUID,
+                0,
+                entitiesArray,
+                nodeNameToGUID,
+                assets_root / getAllGameFolders()[Type::Model]
+            );
+            
+            sceneJSON["ecs"]["Entities"] = entitiesArray;
+            
+            std::cout << "[Scene] Created " << entitiesArray.size() << " entities from scene graph" << std::endl;
+            
+            // Write scene JSON to file
+            try {
+                std::ofstream outFile(asset_info.shipped_path);
+                if (!outFile.is_open()) {
+                    std::cerr << "Failed to open output file: " << asset_info.shipped_path << std::endl;
+                    return;
+                }
+                
+                outFile << sceneJSON.dump(4);  // Pretty print with 4-space indent
+                outFile.close();
+                
+                std::cout << "[Scene] Successfully compiled scene to: " << asset_info.shipped_path << std::endl;
+                
+                // Update desc file with hashing
+                desc_file.hash = fileHashing(asset_info.raw_path);
+                
+            } catch (const std::exception& e) {
+                std::cerr << "Error writing scene file: " << e.what() << std::endl;
+            }
         }
 
         std::string Compiler::GetCuttlefishExecutable() const {
@@ -1203,7 +1557,7 @@ namespace PAIN {
             return "ffmpeg.exe"; // Fallback
         }
 
-        void Compiler::ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const {
+        bool Compiler::ExportMaterial(Material const& asset, std::filesystem::path const& out_path) const {
             try {
                 nlohmann::json j;
 
@@ -1268,9 +1622,10 @@ namespace PAIN {
                 file.close();
 
                 std::cout << "Material saved: " << out_path.string() << std::endl;
+                return true;
             }
             catch (const std::exception& e) {
-                throw std::runtime_error(e.what());
+                return false;
             }
         }
 
@@ -1342,16 +1697,16 @@ namespace PAIN {
                 out.write((char*)&anim.duration, sizeof(anim.duration));
                 out.write((char*)&anim.isAdditive, sizeof(anim.isAdditive));
 
-                uint32_t trackCount = (uint32_t)anim.tracks.size();
+                uint32_t trackCount = (uint32_t)anim.track_map.size();
                 out.write((char*)&trackCount, sizeof(trackCount));
-                for (const AnimationTrack& track : anim.tracks) {
-                    uint32_t boneLen = (uint32_t)track.boneName.size();
+                for (const auto& [bone_name, track] : anim.track_map) {
+                    uint32_t boneLen = (uint32_t)bone_name.size();
                     out.write((char*)&boneLen, sizeof(boneLen));
-                    out.write(track.boneName.data(), boneLen);
+                    out.write(bone_name.data(), boneLen);
 
-                    uint32_t keyCount = (uint32_t)track.keys.size();
+                    uint32_t keyCount = (uint32_t)track.size();
                     out.write((char*)&keyCount, sizeof(keyCount));
-                    for (const AnimationKey& key : track.keys) {
+                    for (const AnimationKey& key : track) {
                         out.write((char*)&key.time, sizeof(key.time));
                         out.write((char*)&key.translation, sizeof(key.translation));
                         out.write((char*)&key.rotation, sizeof(key.rotation));

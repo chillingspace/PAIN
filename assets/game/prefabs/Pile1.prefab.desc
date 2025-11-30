@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pile1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 6582788938834538047
+  },
+  "descriptor_version": 1,
+  "guid": "65593ba1-3e64-5e49-8273-2e6ace4e597a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Pile1.prefab"
+  }
+}

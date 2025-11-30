@@ -11,6 +11,7 @@ namespace PAIN {
 
 	struct AppTiming {
 		float dt = 0.0f;
+		float unscaled_dt = 0.0f;  // Real Time: ALWAYS tracking (use for Editor Camera/UI)
 		float fixed_dt = 1.0f / 60.0f;
 		float alpha = 0.0f;
 		int steps_this_frame = 0;
@@ -36,7 +37,7 @@ namespace PAIN {
 		virtual void onAttach() {}
 		virtual void onDetach() {}
 
-		// Ngl if AppTiming has fixed_dt, i dont think onFixedUpdate is needed anymore 
+		// Runs exactly enough times to catch up to real time, onFixedUpdate is required for stable physics collisions.
 		virtual void onFixedUpdate(AppTiming timing) {};
 		virtual void onUpdate(AppTiming timing) {};
 		virtual void onAppPause() {}

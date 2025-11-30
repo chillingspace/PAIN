@@ -8,11 +8,15 @@
 #include "CoreSystems/Scene/sCameraController.h"
 #include "ImGuizmo.h"
 
-// Forward declaration
+#include "ComponentsPanel.h"
+#include "EntityPanel.h"
+#include "PrefabsPanel.h"
+
+// Forward declarations - no include needed
 namespace PAIN {
     namespace Editor {
         namespace Panel {
-            class EntityPanel;
+            struct File;  // Forward declare File here
         }
     }
 }
@@ -32,15 +36,28 @@ namespace PAIN {
                 float getTimeScale() const;
                 void setRenderTexture(ImTextureID texID, int width, int height);
 
+                glm::vec3 getWorldPositionAtMouse(ImVec2 localMousePos, ImVec2 viewportSize, float defaultDistance);
+                void handlePrefabDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize);
+                void handleTemplateDrop(File* prefabFile, ImVec2 localMousePos, ImVec2 viewportSize);
+
                 bool wantsInput() const { return contentHovered && isFocused; }
 
                 void setSimulationState(bool isPaused) {
                     isSimulationPaused = isPaused;
                 }
 
-                void setEntityPanel(std::shared_ptr<EntityPanel> panel) { m_EntityPanel = panel; }
+                void setRegistry(ECS::RegistryID registryID) {
+                    currentRegistryID = registryID;
+                }
+
+                ECS::RegistryID getCurrentRegistry() const {
+                    return currentRegistryID;
+                }
 
             private:
+
+                //Set registry ID
+                ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
                 ImTextureID renderTexture;
                 int texWidth, texHeight;
 
@@ -54,20 +71,32 @@ namespace PAIN {
                 ImGuizmo::MODE m_GizmoMode;
 
                 entt::entity m_HoveredEntity = entt::null;
-                entt::entity findEntityUnderMouse(ImVec2 localMousePos, ImVec2 viewportSize);
 
                 std::shared_ptr<EntityPanel> m_EntityPanel;
+#ifdef PN_PLATFORM_WINDOWS
+                std::shared_ptr<ComponentsPanel> m_comp_panel;
+                std::shared_ptr<PrefabPanel> m_prefab_panel;
+#endif
+
+                entt::entity m_DragHoveredEntity = entt::null;  // Add this
+                entt::entity findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize);
 
                 // Ray casting methods
                 glm::vec3 screenToWorldRay(ImVec2 mousePos, ImVec2 viewportSize,
                     const glm::mat4& view, const glm::mat4& projection);
                 glm::vec3 getCameraPosition(const glm::mat4& viewMatrix);
                 void performMousePicking(ImVec2 localMousePos, ImVec2 viewportSize);
+
+                // Use forward declared File struct
+                void handleMaterialDrop(File* materialFile,
+                    ImVec2 localMousePos,
+                    ImVec2 viewportSize);
+
                 bool rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
                     const glm::vec3& sphereCenter, float sphereRadius,
                     float& distance);
                 bool rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-                    const Transform& transform, float& distance);
+                    const LocalTransform& transform, float& distance);
             };
 
         } // namespace Panel

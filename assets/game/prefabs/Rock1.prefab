@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 109,
+                    "localAABB": {
+                        "max": [
+                            0.8660253286361694,
+                            0.8660253882408142,
+                            0.6648486256599426
+                        ],
+                        "min": [
+                            -0.9999998807907104,
+                            -0.8660253286361694,
+                            -0.8896207809448242
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            -0.4129072427749634,
+                            0.8660253882408142,
+                            -0.5217829346656799
+                        ],
+                        "min": [
+                            -2.278932571411133,
+                            -0.8660253286361694,
+                            -2.0762524604797363
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -1.2789332866668701,
+                        0.0,
+                        -1.1866315603256226
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "1a732a46-6d9f-2e4d-beb7-74a9b73c9a0c",
+                            "aoTextureOverride": "28d9ab9c-e577-4a44-bf43-2a8a977e4390",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "60701c0b-f0c8-4e41-bed6-fdf6b1c986eb",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "28d9ab9c-e577-4a44-bf43-2a8a977e4390",
+                            "normalTextureOverride": "9a12556f-14ee-654b-86d6-7b230b0505f2",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "28d9ab9c-e577-4a44-bf43-2a8a977e4390",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "67ced56e-3594-3f44-851e-1ea0e2aabb2c",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Rock1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "abb67c27-41cc-ff4b-bcc7-bfef8a232f82"
+        }
+    ],
+    "prefabName": "Rock1",
+    "rootEntityGUID": "abb67c27-41cc-ff4b-bcc7-bfef8a232f82"
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "MetalPillar1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 10709069338016684495
+  },
+  "descriptor_version": 1,
+  "guid": "04a181ef-234c-2045-945f-0053f79a7033",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\MetalPillar1.material"
+  }
+}

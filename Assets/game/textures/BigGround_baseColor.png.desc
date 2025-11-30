@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "BigGround_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11525402323453418969
+  },
+  "descriptor_version": 1,
+  "guid": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\BigGround_baseColor.png"
+  }
+}

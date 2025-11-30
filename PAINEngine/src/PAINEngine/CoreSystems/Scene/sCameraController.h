@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 
 #include "Camera.h"
 #include "Scene.h"
@@ -9,9 +8,15 @@
 #include "CoreSystems/Events/Android/TouchEvents.h"
 #include "CoreSystems/Events/Android/OtherEvents.h"
 #include "CoreSystems/Events/Android/SurfaceEvents.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
+
+#ifdef PN_PLATFORM_WINDOWS
+#include "CoreSystems/Windows/Window.h"
+#endif
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
 #endif
+
 
 namespace PAIN {
 
@@ -29,6 +34,10 @@ namespace PAIN {
         void beginTouchControls(int pointerId, float x, float y);
         void updateTouchControls(int pointerId, float x, float y);
         void endTouchControls(int pointerId);
+
+		glm::mat4 getViewMatrix() const;
+		glm::mat4 getProjectionMatrix() const;
+
 
 		float m_vpWidth = 0.f;
 		float m_vpHeight = 0.f;
@@ -50,14 +59,14 @@ namespace PAIN {
 		float yOffset = 0.0f;
 
 		enum MOVE_MODES {
-			CAMERA,
-			NUM_MOVE_MODES
+			FREE_FLY,
+			FIRST_PERSON
 		};
-		MOVE_MODES move_mode = CAMERA;
+		MOVE_MODES move_mode = FREE_FLY;
 
 	private:
 		Camera* camera;
-		std::shared_ptr<Scene> m_Scene;
+		std::shared_ptr<Scene::SceneManager> m_Scene;
 
 		bool m_isMuted = false; // For toggling all audio (testing)
 
@@ -87,4 +96,17 @@ namespace PAIN {
         float m_moveRadiusPx = 120.f, m_moveDeadzonePx = 10.f, m_lookSensitivity = 1.0f, m_moveScale = 1.0f;
         float m_cachedMoveX = 0.f, m_cachedMoveY = 0.f;
 	};
+
+	struct MobileMoveAxes {
+		float x = 0.f;
+		float y = 0.f;
+	};
+	extern MobileMoveAxes g_MobileMoveAxes;
+
+	struct MobileLookDelta {
+		float dx = 0.f;  
+		float dy = 0.f;  
+	};
+	extern MobileLookDelta g_MobileLookDelta;
+
 }

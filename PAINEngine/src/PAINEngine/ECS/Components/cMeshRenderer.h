@@ -3,6 +3,7 @@
 #include "pch.h"
 
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
+#include "AssetTypes.h"
 
 namespace PAIN {
 
@@ -30,7 +31,18 @@ namespace PAIN {
         bool useOverrides = false;
     };
 
+    //Texture 2d instance
+    struct Texture2D {
+        //material GUID
+        Assets::GUID texture_guid;
+        glm::vec2 texture_scale{ 1 };
+    };
+
     struct ModelRenderer {
+
+        //Serialization flag
+        static constexpr bool ShouldSerialize = true;
+
         // Asset reference
         Assets::GUID prevModelGUID;
         Assets::GUID modelGUID;
@@ -68,33 +80,6 @@ namespace PAIN {
             return (index < materials.size()) ? &materials[index] : nullptr;
         }
 
-        void PlayAnimation(int animIndex, bool loop = true, float speed = 1.0f) {
-            currentAnimationIndex = animIndex;
-            animationTime = 0.0f;
-            isPlaying = true;
-            loopAnimation = loop;
-            playbackSpeed = speed;
-        }
-
-        void UpdateAnimation(float deltaTime) {
-            if (!isPlaying || currentAnimationIndex < 0 || !cachedModelAsset) return;
-
-            if (currentAnimationIndex >= cachedModelAsset->animations.size()) return;
-
-            const auto& anim = cachedModelAsset->animations[currentAnimationIndex];
-            animationTime += deltaTime * playbackSpeed;
-
-            if (animationTime >= anim.duration) {
-                if (loopAnimation) {
-                    animationTime = fmod(animationTime, anim.duration);
-                    currentAnimationIndex++;
-                }
-                else {
-                    animationTime = anim.duration;
-                    isPlaying = false;
-                }
-            }
-        }
     };
 }
 
@@ -118,6 +103,8 @@ REFL_FIELD(roughnessOverride, PAIN::Editor::Attributes::Range(0.0f, 1.0f), PAIN:
 REFL_FIELD(emissiveOverride, PAIN::Editor::Attributes::DisplayName("Emissive Color"))
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::MaterialInstance>);
+
 REFL_TYPE(PAIN::ModelRenderer)
 REFL_FIELD(modelGUID, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Model))
 REFL_FIELD(materials)
@@ -126,3 +113,11 @@ REFL_FIELD(castShadows)
 REFL_FIELD(receiveShadows)
 REFL_END
 
+static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);
+
+REFL_TYPE(PAIN::Texture2D)
+REFL_FIELD(texture_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(texture_scale)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Texture2D>);

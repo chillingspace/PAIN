@@ -392,8 +392,16 @@ namespace PAIN {
         glm::uvec2 Android_Window::getFrameBuffer() const {
             return frame_buffer;
         }
-
+        //
         void Android_Window::safeShutdown() {
+
+        }
+
+        bool Android_Window::isMinimized() const {
+            return false;
+        }
+
+        void Android_Window::setCursorMode(bool locked) {
 
         }
 	}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 5400570548042523942
+  },
+  "descriptor_version": 1,
+  "guid": "ae3e7e7f-5c23-0b4f-8d21-2ca7114b157c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Rock1.glb"
+  }
+}

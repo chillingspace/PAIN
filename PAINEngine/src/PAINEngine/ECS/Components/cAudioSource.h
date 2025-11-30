@@ -6,7 +6,7 @@
 #include "pch.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "GLMSerialization.h"
-#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+#include <refl.hpp>
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
 
 namespace PAIN {
@@ -36,12 +36,13 @@ namespace PAIN {
             // --- STATE (Managed by AudioSystem) ---
             AudioState state = AudioState::Stopped;
 
-            bool playOnStart = true;  // NEW: Serialized - determines if sound plays when scene loads
+            bool playOnStart = false;  // NEW: Serialized - determines if sound plays when scene loads
 
+            bool hasStarted = false; // internal
             // --- TRIGGERS (Set by other systems/scripts) ---
             // Set to true to make the AudioSystem play this sound.
             // The system will reset this to false after processing.
-            bool playTrigger = true;
+            bool playTrigger = false;
 
             // Set to true to make the AudioSystem stop this sound.
             // The system will reset this to false after processing.
@@ -50,6 +51,9 @@ namespace PAIN {
             // --- RUNTIME (Internal handle) ---
             // Do not serialize or edit
             PAIN::Audio::AudioChannelId channelId{ -1 };
+
+            //Serialization flag
+            static constexpr bool ShouldSerialize = true;
         };
 
     } // namespace Audio
@@ -59,7 +63,7 @@ namespace PAIN {
 REFL_TYPE(PAIN::Audio::AudioSource)
     REFL_FIELD(selected_audio,
     PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Audio),
-    PAIN::Editor::Attributes::DisplayName("Audio Asset"),
+    PAIN::Editor::Attributes::DisplayName("Select a Audio asset"),
     PAIN::Editor::Attributes::Tooltip("Select a Audio asset"))
     REFL_FIELD(group_name)
     REFL_FIELD(is3D)          // Serialized
@@ -77,5 +81,7 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     // - channelId
     // These will be default-initialized when the component is loaded
 REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::Audio::AudioSource>);
 
 #endif // C_AUDIO_SOURCE_H

@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 85,
+                    "localAABB": {
+                        "max": [
+                            263.8702392578125,
+                            80.76731872558594,
+                            40.38367462158203
+                        ],
+                        "min": [
+                            -263.8702392578125,
+                            3.814697265625e-06,
+                            -40.38367462158203
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.8336532711982727,
+                            0.08076732605695724,
+                            2.846653938293457
+                        ],
+                        "min": [
+                            0.35402804613113403,
+                            3.814697446813398e-09,
+                            2.4794349670410156
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.5938406586647034,
+                        0.0,
+                        2.663043975830078
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.2986817955970764,
+                        0.0,
+                        0.954352855682373
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "60d237d0-60e1-c146-86e6-e76c967840d4",
+                            "aoTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+                            "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Pipe1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "76f95440-ba1d-674c-aa35-2706638fd2ea"
+        }
+    ],
+    "prefabName": "Pipe1",
+    "rootEntityGUID": "76f95440-ba1d-674c-aa35-2706638fd2ea"
+}

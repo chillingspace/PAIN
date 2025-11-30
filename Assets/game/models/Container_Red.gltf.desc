@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Container_Red.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 14380535601514526960
+  },
+  "descriptor_version": 1,
+  "guid": "c3240e7d-4066-2444-a024-c1d31c71a299",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": true,
+    "import_skeleton": true,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Container_Red.gltf"
+  }
+}

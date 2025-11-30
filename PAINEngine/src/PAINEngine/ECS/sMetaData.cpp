@@ -26,6 +26,13 @@ namespace PAIN {
             registerTag("Player");
             registerTag("Enemy");
             registerTag("Environment");
+
+            registerTag("letter_collectible");
+            registerTag("letter_carried");
+            registerTag("letter_collection");
+            registerTag("hiding_spot");
+            registerTag("enemy_patrol_start");
+            registerTag("enemy_patrol_end");
         }
 
         void Service::onDetach() {
@@ -65,10 +72,10 @@ namespace PAIN {
         }
 
         void Service::setEntityName(entt::entity entity, std::string const& name) {
-            auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
+            auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<Entity::Name>(entity);
 
             if (!name_comp_opt.has_value()) {
-                MetaData::EntityName new_name;
+                Entity::Name new_name;
                 new_name.name = generateUniqueName(name);
                 name_lookup[new_name.name] = entity;
                 PN_ECS_SERVICE->addEntityComponent(entity, std::move(new_name));
@@ -87,7 +94,7 @@ namespace PAIN {
         }
 
         std::string Service::getEntityName(entt::entity entity) const {
-            auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::EntityName>(entity);
+            auto name_comp_opt = PN_ECS_SERVICE->getEntityComponent<Entity::Name>(entity);
             return name_comp_opt.has_value() ? name_comp_opt->get().name : "";
         }
 
@@ -206,90 +213,90 @@ namespace PAIN {
         * Hierarchy System
         **************************************************************/
 
-        bool Service::hasParent(entt::entity entity) const {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            return relation_opt.has_value() &&
-                relation_opt->get().parent != entt::null;
-        }
+        //bool Service::hasParent(entt::entity entity) const {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
+        //    return relation_opt.has_value() &&
+        //        relation_opt->get().parent != entt::null;
+        //}
 
-        bool Service::hasChildren(entt::entity entity) const {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            return relation_opt.has_value() &&
-                !relation_opt->get().children.empty();
-        }
+        //bool Service::hasChildren(entt::entity entity) const {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
+        //    return relation_opt.has_value() &&
+        //        !relation_opt->get().children.empty();
+        //}
 
-        void Service::addChild(entt::entity parent, entt::entity child) {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
+        //void Service::addChild(entt::entity parent, entt::entity child) {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
 
-            if (!relation_opt.has_value()) {
-                MetaData::Relation new_relation;
-                new_relation.parent = entt::null;
-                new_relation.children.push_back(child);
-                PN_ECS_SERVICE->addEntityComponent(parent, std::move(new_relation));
-            }
-            else {
-                auto& children = relation_opt->get().children;
-                if (std::find(children.begin(), children.end(), child) == children.end()) {
-                    children.push_back(child);
-                }
-            }
-        }
+        //    if (!relation_opt.has_value()) {
+        //        MetaData::Relation new_relation;
+        //        new_relation.parent = entt::null;
+        //        new_relation.children.push_back(child);
+        //        PN_ECS_SERVICE->addEntityComponent(parent, std::move(new_relation));
+        //    }
+        //    else {
+        //        auto& children = relation_opt->get().children;
+        //        if (std::find(children.begin(), children.end(), child) == children.end()) {
+        //            children.push_back(child);
+        //        }
+        //    }
+        //}
 
-        void Service::removeChild(entt::entity parent, entt::entity child) {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
-            if (relation_opt.has_value()) {
-                auto& children = relation_opt->get().children;
-                children.erase(
-                    std::remove(children.begin(), children.end(), child),
-                    children.end()
-                );
-            }
-        }
+        //void Service::removeChild(entt::entity parent, entt::entity child) {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(parent);
+        //    if (relation_opt.has_value()) {
+        //        auto& children = relation_opt->get().children;
+        //        children.erase(
+        //            std::remove(children.begin(), children.end(), child),
+        //            children.end()
+        //        );
+        //    }
+        //}
 
-        void Service::setParent(entt::entity child, entt::entity parent) {
-            auto child_relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(child);
+        //void Service::setParent(entt::entity child, entt::entity parent) {
+        //    auto child_relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(child);
 
-            if (!child_relation_opt.has_value()) {
-                MetaData::Relation new_relation;
-                new_relation.parent = parent;
-                PN_ECS_SERVICE->addEntityComponent(child, std::move(new_relation));
-            }
-            else {
-                if (child_relation_opt->get().parent != entt::null) {
-                    removeChild(child_relation_opt->get().parent, child);
-                }
-                child_relation_opt->get().parent = parent;
-            }
+        //    if (!child_relation_opt.has_value()) {
+        //        MetaData::Relation new_relation;
+        //        new_relation.parent = parent;
+        //        PN_ECS_SERVICE->addEntityComponent(child, std::move(new_relation));
+        //    }
+        //    else {
+        //        if (child_relation_opt->get().parent != entt::null) {
+        //            removeChild(child_relation_opt->get().parent, child);
+        //        }
+        //        child_relation_opt->get().parent = parent;
+        //    }
 
-            addChild(parent, child);
-        }
+        //    addChild(parent, child);
+        //}
 
-        void Service::detachFromParent(entt::entity entity) {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            if (!relation_opt.has_value()) return;
+        //void Service::detachFromParent(entt::entity entity) {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
+        //    if (!relation_opt.has_value()) return;
 
-            auto& relation = relation_opt->get();
-            if (relation.parent == entt::null) return;
+        //    auto& relation = relation_opt->get();
+        //    if (relation.parent == entt::null) return;
 
-            removeChild(relation.parent, entity);
-            relation.parent = entt::null;
-        }
+        //    removeChild(relation.parent, entity);
+        //    relation.parent = entt::null;
+        //}
 
-        std::optional<entt::entity> Service::getParent(entt::entity entity) const {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            if (relation_opt.has_value() &&
-                relation_opt->get().parent != entt::null) {
-                return relation_opt->get().parent;
-            }
-            return std::nullopt;
-        }
+        //std::optional<entt::entity> Service::getParent(entt::entity entity) const {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
+        //    if (relation_opt.has_value() &&
+        //        relation_opt->get().parent != entt::null) {
+        //        return relation_opt->get().parent;
+        //    }
+        //    return std::nullopt;
+        //}
 
-        std::vector<entt::entity> Service::getChildren(entt::entity entity) const {
-            auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
-            return relation_opt.has_value() ?
-                relation_opt->get().children :
-                std::vector<entt::entity>{};
-        }
+        //std::vector<entt::entity> Service::getChildren(entt::entity entity) const {
+        //    auto relation_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Relation>(entity);
+        //    return relation_opt.has_value() ?
+        //        relation_opt->get().children :
+        //        std::vector<entt::entity>{};
+        //}
 
         /****************************************************************
         * Editor Visibility
@@ -337,101 +344,101 @@ namespace PAIN {
         * Group System
         **************************************************************/
 
-        bool Service::createGroup(std::string const& group_name, std::optional<std::string> parent_group) {
-            if (groups.find(group_name) != groups.end()) return false;
+        //bool Service::createGroup(std::string const& group_name, std::optional<std::string> parent_group) {
+        //    if (groups.find(group_name) != groups.end()) return false;
 
-            GroupData group;
-            group.name = group_name;
-            group.parent_group = parent_group;
-            group.expanded = true;
+        //    GroupData group;
+        //    group.name = group_name;
+        //    group.parent_group = parent_group;
+        //    group.expanded = true;
 
-            if (parent_group.has_value()) {
-                auto parent_it = groups.find(parent_group.value());
-                if (parent_it != groups.end()) {
-                    parent_it->second.child_groups.insert(group_name);
-                }
-            }
+        //    if (parent_group.has_value()) {
+        //        auto parent_it = groups.find(parent_group.value());
+        //        if (parent_it != groups.end()) {
+        //            parent_it->second.child_groups.insert(group_name);
+        //        }
+        //    }
 
-            groups[group_name] = group;
-            return true;
-        }
+        //    groups[group_name] = group;
+        //    return true;
+        //}
 
-        bool Service::deleteGroup(std::string const& group_name, bool remove_entities) {
-            auto it = groups.find(group_name);
-            if (it == groups.end()) return false;
+        //bool Service::deleteGroup(std::string const& group_name, bool remove_entities) {
+        //    auto it = groups.find(group_name);
+        //    if (it == groups.end()) return false;
 
-            if (remove_entities) {
+        //    if (remove_entities) {
 
-                auto& registry = PN_ECS_SERVICE->getRegistry();
-                auto view = registry.view<MetaData::Group>();
+        //        auto& registry = PN_ECS_SERVICE->getRegistry();
+        //        auto view = registry.view<MetaData::Group>();
 
-                for (auto entity : view) {
-                    auto& group_comp = view.get<MetaData::Group>(entity);
-                    if (group_comp.group_name == group_name) {
-                        PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
-                    }
-                }
-                
-            }
+        //        for (auto entity : view) {
+        //            auto& group_comp = view.get<MetaData::Group>(entity);
+        //            if (group_comp.group_name == group_name) {
+        //                PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
+        //            }
+        //        }
+        //        
+        //    }
 
-            groups.erase(it);
-            return true;
-        }
+        //    groups.erase(it);
+        //    return true;
+        //}
 
-        void Service::assignToGroup(entt::entity entity, std::string const& group_name) {
-            auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
+        //void Service::assignToGroup(entt::entity entity, std::string const& group_name) {
+        //    auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
 
-            if (!group_opt.has_value()) {
-                MetaData::Group new_group;
-                new_group.group_name = group_name;
-                PN_ECS_SERVICE->addEntityComponent(entity, std::move(new_group));
-            }
-            else {
-                group_opt->get().group_name = group_name;
-            }
+        //    if (!group_opt.has_value()) {
+        //        MetaData::Group new_group;
+        //        new_group.group_name = group_name;
+        //        PN_ECS_SERVICE->addEntityComponent(entity, std::move(new_group));
+        //    }
+        //    else {
+        //        group_opt->get().group_name = group_name;
+        //    }
 
-            auto it = groups.find(group_name);
-            if (it != groups.end()) {
-                it->second.entities.insert(entity);
-            }
-        }
+        //    auto it = groups.find(group_name);
+        //    if (it != groups.end()) {
+        //        it->second.entities.insert(entity);
+        //    }
+        //}
 
-        void Service::unassignFromGroup(entt::entity entity) {
-            auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
-            if (group_opt.has_value()) {
-                auto it = groups.find(group_opt->get().group_name);
-                if (it != groups.end()) {
-                    it->second.entities.erase(entity);
-                }
-                PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
-            }
-        }
+        //void Service::unassignFromGroup(entt::entity entity) {
+        //    auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
+        //    if (group_opt.has_value()) {
+        //        auto it = groups.find(group_opt->get().group_name);
+        //        if (it != groups.end()) {
+        //            it->second.entities.erase(entity);
+        //        }
+        //        PN_ECS_SERVICE->removeEntityComponent<MetaData::Group>(entity);
+        //    }
+        //}
 
-        std::optional<std::string> Service::getEntityGroup(entt::entity entity) const {
-            auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
-            if (group_opt.has_value()) {
-                return group_opt->get().group_name;
-            }
-            return std::nullopt;
-        }
+        //std::optional<std::string> Service::getEntityGroup(entt::entity entity) const {
+        //    auto group_opt = PN_ECS_SERVICE->getEntityComponent<MetaData::Group>(entity);
+        //    if (group_opt.has_value()) {
+        //        return group_opt->get().group_name;
+        //    }
+        //    return std::nullopt;
+        //}
 
-        std::set<std::string> Service::getAllGroups() const {
-            std::set<std::string> result;
-            for (auto const& [name, group] : groups) {
-                result.insert(name);
-            }
-            return result;
-        }
+        //std::set<std::string> Service::getAllGroups() const {
+        //    std::set<std::string> result;
+        //    for (auto const& [name, group] : groups) {
+        //        result.insert(name);
+        //    }
+        //    return result;
+        //}
 
-        std::set<std::string> Service::getRootGroups() const {
-            std::set<std::string> result;
-            for (auto const& [name, group] : groups) {
-                if (!group.parent_group.has_value()) {
-                    result.insert(name);
-                }
-            }
-            return result;
-        }
+        //std::set<std::string> Service::getRootGroups() const {
+        //    std::set<std::string> result;
+        //    for (auto const& [name, group] : groups) {
+        //        if (!group.parent_group.has_value()) {
+        //            result.insert(name);
+        //        }
+        //    }
+        //    return result;
+        //}
 
         /****************************************************************
         * Serialization

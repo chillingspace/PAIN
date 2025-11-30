@@ -405,7 +405,7 @@ namespace PAIN {
 			return parseVirtualPath(virtualPath).first == assets_alias || parseVirtualPath(virtualPath).first == engine_assets_alias || parseVirtualPath(virtualPath).first == game_assets_alias;
 		}
 
-		std::unique_ptr<IFileStream> AndroidPath::createFileStream(const std::string& virtualPath, FileMode mode) {
+		std::unique_ptr<IFileStream> AndroidPath::createFileStream(const std::string& virtualPath, FileMode mode, bool bin) {
 
 			//Resolve path and create stream
 			auto path = resolvePath(virtualPath);

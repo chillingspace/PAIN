@@ -48,14 +48,17 @@ namespace PAIN {
 
 		void renderQuad();
 
-
 	public:
+
 		static Skybox& get() {
 			static Skybox instance;
 			return instance;
 		}
 
-		void init(const std::shared_ptr<Services>& services, const std::filesystem::path& skybox_path);
+		void init(const std::shared_ptr<Services>& services);
+
+		void setTexture(Assets::GUID const& id);
+		void setTexture(const std::filesystem::path& skybox_path);
 
 		unsigned int getSkyboxTex() const {
 			return skybox_tex;

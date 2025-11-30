@@ -1,10 +1,11 @@
 ﻿#pragma once
 #ifdef _DEBUG
+
 #ifndef PAIN_EDITOR_COMPONENTS_PANEL_HPP
 #define PAIN_EDITOR_COMPONENTS_PANEL_HPP
 
 #include "Panels.h"
-#include "Utility/ECSUtility.h"
+#include "ECS/Controller.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -31,11 +32,11 @@ namespace PAIN {
 				//Add component UI function (by type-derived key)
 				template<typename T>
 				void registerCompUIFunc(std::function<void(ComponentsPanel&, T&)> comp_func) {
-					if (comps_ui.find(ECS::Utility::convertTypeString(typeid(T).name())) != comps_ui.end()) {
+					if (comps_ui.find(ECS::convertTypeString(typeid(T).name())) != comps_ui.end()) {
 						throw std::runtime_error("Component UI function already registered");
 					}
 
-					comps_ui.emplace(ECS::Utility::convertTypeString(typeid(T).name()), [comp_func](ComponentsPanel& comp_panel, void* comp) { comp_func(comp_panel, *static_cast<T*>(comp)); });
+					comps_ui.emplace(ECS::convertTypeString(typeid(T).name()), [comp_func](ComponentsPanel& comp_panel, void* comp) { comp_func(comp_panel, *static_cast<T*>(comp)); });
 				}
 
 				// overload (by explicit ECS key)
@@ -55,7 +56,20 @@ namespace PAIN {
 				//Expose services
 				std::shared_ptr<Services> services;
 
+				void setRegistry(ECS::RegistryID registryID) {
+					currentRegistryID = registryID;
+				}
+
+				ECS::RegistryID getCurrentRegistry() const {
+					return currentRegistryID;
+				}
+
 			private:
+
+				//Set registry ID
+				ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
+
+				//COmp string ref
 				std::string comp_string_ref;
 
 				//Component setting error message ( Usage: Editing error popup message )

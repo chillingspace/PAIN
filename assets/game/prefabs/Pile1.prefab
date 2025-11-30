@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 36,
+                    "localAABB": {
+                        "max": [
+                            9.290358543395996,
+                            7.747631072998047,
+                            9.775418281555176
+                        ],
+                        "min": [
+                            -9.290358543395996,
+                            -2.384185791015625e-07,
+                            -9.775418281555176
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            1.1098458766937256,
+                            0.2423025220632553,
+                            0.9360253214836121
+                        ],
+                        "min": [
+                            0.4412212371826172,
+                            -7.456398165572864e-09,
+                            0.24211485683918
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.7755335569381714,
+                        0.0,
+                        0.5890700817108154
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.07751553505659103,
+                        0.0,
+                        0.9969911575317383
+                    ],
+                    "scale": [
+                        0.031274400651454926,
+                        0.031274400651454926,
+                        0.031274400651454926
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Pile1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
+        }
+    ],
+    "prefabName": "Pile1",
+    "rootEntityGUID": "72c4dbff-dc0d-2245-82a7-d7d1463cb35a"
+}

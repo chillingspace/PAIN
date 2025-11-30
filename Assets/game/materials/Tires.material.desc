@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tires.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 15187000826686030130
+  },
+  "descriptor_version": 1,
+  "guid": "41022c20-5591-324d-80ff-f14090e5e9d3",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Tires.material"
+  }
+}

@@ -151,6 +151,7 @@ namespace PAIN {
 			void uncacheAsset(GUID const& id);
 #ifdef PN_PLATFORM_WINDOWS
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
+			void reshipAsset(GUID const& id);
 #endif
 			bool checkAssetCached(GUID const& id) const;
 
@@ -167,11 +168,17 @@ namespace PAIN {
 			//Move file function
 			void moveFile(std::filesystem::path const& from, std::filesystem::path const& to);
 
+			//Delete fil overload
+			void removeFile(Assets::GUID const& id);
+
 			//Delete file function
 			void removeFile(std::filesystem::path const& file_path);
 
 			//Duplicate file function
 			void duplicateFile(std::filesystem::path const& file_path);
+
+			//Create new material function
+			void saveMaterial(Material const& mat, std::filesystem::path const& out_path);
 #endif
 #endif
 

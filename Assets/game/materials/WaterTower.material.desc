@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "WaterTower.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 15066056271763659913
+  },
+  "descriptor_version": 1,
+  "guid": "14377587-a8fe-2b47-9f46-dad6bdad2753",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\WaterTower.material"
+  }
+}

@@ -51,7 +51,7 @@ namespace PAIN {
 
             template<typename T>
             std::weak_ptr<T> getPanelWeak() const {
-                return getPanel<T>();
+                return panels->get<T>();
             }
 
         private:

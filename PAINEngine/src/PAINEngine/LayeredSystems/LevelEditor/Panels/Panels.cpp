@@ -15,20 +15,27 @@ namespace PAIN {
 
                 //Draw window
                 bool b_check_active = true;
-                if (ImGui::Begin(name.c_str(), &b_check_active, flags)) {
+				if (ImGui::Begin(name.c_str(), &b_check_active, flags)) {
+					panel_hidden = false;
+				}
+				else {
+					panel_hidden = true;
+				}
 
-                    //Set window dock id
-                    dock_id = ImGui::GetWindowDockID();
+				//Render only when panel is not hidden or always active flag is set
+				if (!panel_hidden || always_active) {
+					//Set window dock id
+					dock_id = ImGui::GetWindowDockID();
 
-                    //Early exit if window is not active
-                    if (!b_check_active) { ImGui::End(); return; }
+					//Early exit if window is not active
+					if (!b_check_active) { ImGui::End(); return; }
 
-                    //Update panel
-                    onUpdate(timing);
+					//Update panel
+					onUpdate(timing);
 
-                    // Popups requested during OnGUI()/Update()
-                    drawPopUps();
-                }
+					// Popups requested during OnGUI()/Update()
+					drawPopUps();
+				}
 
                 ImGui::End();
 			}
@@ -182,6 +189,12 @@ namespace PAIN {
 							//Show message
 							ImGui::Text("%s", text.c_str());
 						}
+					}
+					else if (data.has_value() && data.type() == typeid(std::shared_ptr<std::string>)) {
+						auto str = std::any_cast<std::shared_ptr<std::string>>(data);
+
+						//Show message
+						ImGui::Text("%s", str->c_str());
 					}
 					else {
 						//Show message

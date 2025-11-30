@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Floor_baseColor.png",
+        "ao": "game\\textures\\Floor_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Floor_emissive.png",
+        "lightmap": "game\\textures\\Floor_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Floor_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Floor_normal.png",
+        "roughness": "game\\textures\\Floor_occlusionRoughnessMetallic.png"
+    }
+}

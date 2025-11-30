@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "OilDrumBlue_occlusionRoughnessMetallic_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18108377344202855696
+  },
+  "descriptor_version": 1,
+  "guid": "3688e05d-7434-b849-8904-1d7884ad053f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png"
+  }
+}

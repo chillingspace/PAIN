@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 11,
+                    "localAABB": {
+                        "max": [
+                            35.818092346191406,
+                            97.5758056640625,
+                            35.81809997558594
+                        ],
+                        "min": [
+                            -35.81809616088867,
+                            0.0,
+                            -35.818092346191406
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.629583477973938,
+                            0.09757581353187561,
+                            0.13504602015018463
+                        ],
+                        "min": [
+                            0.5579472780227661,
+                            0.0,
+                            0.06340982764959335
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.593765377998352,
+                        0.0,
+                        0.0992279201745987
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                            "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "OilDrumRed"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
+        }
+    ],
+    "prefabName": "OilDrumRed",
+    "rootEntityGUID": "5ca2c6b5-7526-be46-b481-2e79da77202a"
+}

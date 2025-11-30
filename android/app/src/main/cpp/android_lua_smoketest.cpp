@@ -1,12 +1,12 @@
 #include <android/asset_manager.h>
-#include "PAINEngine/CoreSystems/Scripting/luaManager.h"
+//#include "PAINEngine/CoreSystems/Scripting/luaManager.h"
 //#include "PAINEngine/CoreSystems/Scripting/EngineAPIAdapter.h"
 #include "PAINEngine/CoreSystems/Scripting/Bridge.h"
 
 extern AAssetManager* g_AssetMgr;
 
 //static std::optional<PAIN::Scripting::EngineWiring> gWiring;
-static LuaManager gLua;
+//static PAIN::LuaManager gLua;
 
 //-----------------------------------------------
 // Basic sol2 LuaState test (no LuaManager)

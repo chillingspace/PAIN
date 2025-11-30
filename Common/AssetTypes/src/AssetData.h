@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <thread> // For std::this_thread::sleep_for
 
 #ifdef _WIN32
 #include <windows.h>
@@ -71,6 +72,7 @@ namespace PAIN {
             Scenes,
             Font,
             Prefabs, // .prefab
+            Templates,
             Material,
             Other
         };
@@ -87,6 +89,7 @@ namespace PAIN {
             temp[Type::Scenes] = "Scenes";
             temp[Type::Font] = "Font";
             temp[Type::Prefabs] = "Prefabs";
+            temp[Type::Templates] = "Templates";
             temp[Type::Material] = "Materials";
             temp[Type::Other] = "Other";
 
@@ -138,6 +141,7 @@ namespace PAIN {
             temp[Type::Shader] = { ".vert", ".frag" };
             temp[Type::Scenes] = { ".scn" };
             temp[Type::Prefabs] = { ".prefab" };
+            temp[Type::Templates] = { ".tmpl" };
             temp[Type::Material] = { ".material" };
             temp[Type::Font] = { ".ttf" };
 
@@ -160,6 +164,7 @@ namespace PAIN {
             temp[Type::Data] = game_assets_folder / "data";
             temp[Type::Scenes] = game_assets_folder / "scenes";
             temp[Type::Prefabs] = game_assets_folder / "prefabs";
+            temp[Type::Templates] = game_assets_folder / "templates";
             temp[Type::Material] = game_assets_folder / "materials";
             temp[Type::Other] = game_assets_folder / "others";
 
@@ -219,27 +224,38 @@ namespace PAIN {
             }
         }
 
-        static std::size_t fileHashing(const std::filesystem::path& path) {
-            // FNV-1a 64-bit constants
-            const std::size_t fnv_offset_basis = 14695981039346656037ULL;
-            const std::size_t fnv_prime = 1099511628211ULL;
+        static uint64_t fileHashing(const std::filesystem::path& path) {
+            const uint64_t fnv_offset_basis = 14695981039346656037ULL;
+            const uint64_t fnv_prime = 1099511628211ULL;
 
-            std::size_t hash = fnv_offset_basis;
-            std::ifstream file(path, std::ios::binary);
+            // Retry parameters
+            const int max_attempts = 10;
+            const auto retry_delay = std::chrono::milliseconds(10);
 
-            if (!file)
-                return 0; // or handle error
-
-            char buffer[4096];
-            while (file) {
-                file.read(buffer, sizeof(buffer));
-                std::streamsize count = file.gcount();
-                for (std::streamsize i = 0; i < count; ++i) {
-                    hash ^= static_cast<unsigned char>(buffer[i]);
-                    hash *= fnv_prime;
+            for (int attempt = 0; attempt < max_attempts; ++attempt) {
+                std::ifstream file(path, std::ios::binary);
+                
+                if (file.is_open()) {
+                    uint64_t hash = fnv_offset_basis;
+                    char buffer[4096];
+                    while (file) {
+                        file.read(buffer, sizeof(buffer));
+                        std::streamsize count = file.gcount();
+                        for (std::streamsize i = 0; i < count; ++i) {
+                            hash ^= static_cast<unsigned char>(buffer[i]);
+                            hash *= fnv_prime;
+                        }
+                    }
+                    return hash;
                 }
+
+                // File failed to open (likely locked by antivirus or build process). Wait and retry.
+                std::this_thread::sleep_for(retry_delay);
             }
-            return hash;
+
+            // If we get here, the file is genuinely inaccessible
+            std::cerr << "[Warning] fileHashing failed to open file after retries: " << path << std::endl;
+            return 0;
         }
 
         static bool deleteFile(std::filesystem::path const& file_path) {
@@ -368,6 +384,56 @@ namespace PAIN {
             std::filesystem::path relative_path;
         };
 
+        static std::filesystem::path extractSubfolderPath(Info& asset, std::filesystem::path const& assets_root) {
+            std::error_code ec;
+
+            // Get the directory containing the asset file
+            auto assetDir = std::filesystem::weakly_canonical(
+                asset.raw_path.parent_path(), ec);
+
+            if (ec) {
+                std::cerr << "Could not canonicalize asset directory: " << asset.raw_path.string() << std::endl;
+                return std::filesystem::path();
+            }
+
+            // Check game folders (Prefabs, Scenes, etc.)
+            for (const auto& [type, folder] : getAllGameFolders()) {
+                // Build full path to the fixed folder
+                auto fixedFolderPath = std::filesystem::weakly_canonical(
+                    assets_root / folder, ec);
+
+                if (ec) continue;
+
+                // Check if asset is within this fixed folder
+                if (isSubPath(assetDir, fixedFolderPath)) {
+                    // Extract the path RELATIVE to the fixed folder
+                    auto relativePath = std::filesystem::relative(assetDir, fixedFolderPath, ec);
+
+                    if (!ec) {
+                        return relativePath;
+                    }
+                }
+            }
+
+            // Check engine folders
+            for (const auto& [type, folder] : getAllEngineFolders()) {
+                auto fixedFolderPath = std::filesystem::weakly_canonical(
+                    assets_root / folder, ec);
+
+                if (ec) continue;
+
+                if (isSubPath(assetDir, fixedFolderPath)) {
+                    auto relativePath = std::filesystem::relative(assetDir, fixedFolderPath, ec);
+
+                    if (!ec) {
+                        return relativePath;
+                    }
+                }
+            }
+
+            return std::filesystem::path();
+        }
+
         struct Descriptor {
 
             //Identity
@@ -382,7 +448,8 @@ namespace PAIN {
             nlohmann::json import_settings;
 
             //Build data
-            std::size_t hash;
+            // CHANGED: strictly 64-bit to avoid 32-bit/64-bit build inconsistencies
+            uint64_t hash; 
 
             //Dependencies
             std::vector<GUID> dependencies;

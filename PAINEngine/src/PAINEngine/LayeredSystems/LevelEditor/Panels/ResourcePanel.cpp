@@ -3,10 +3,22 @@
 
 #include "pch.h"
 #include "ResourcePanel.h"
+#include "../Editor.h"
 
 #include "Applications/AppSystem.h"
 #include "Applications/Application.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
+#include "ECS/Controller.h"
+#include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+
+std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
+std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
+std::weak_ptr<PAIN::Services> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::services;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vao = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_vbo = 0;
+unsigned int PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_ebo = 0;
 
 namespace PAIN {
     namespace Editor {
@@ -25,6 +37,9 @@ namespace PAIN {
                 // Search filter
                 search_filter.resize(32);
                 search_filter = "";
+
+				//Set to alw active
+				always_active = true;
             }
 
             void ResourcePanel::nextWindowSettings() {
@@ -176,7 +191,6 @@ namespace PAIN {
 					temp.path = file;
 
 					//Get root folder path
-					
 					auto relative = std::filesystem::relative(temp.path, root);
 
 					//Find asset GUID
@@ -293,10 +307,39 @@ namespace PAIN {
 				if (ImGui::BeginPopupContextItem("AssetContextMenu##file")) {
 
 					if (ImGui::MenuItem("Open##file")) {
-						open_files.push_back(file);
+						addFilesToOpen(file);
 					}
 					if (ImGui::MenuItem("Rename##file")) {
 						openPopUp("Rename File", std::make_shared<File>(file));
+					}
+					if (file.type == Assets::Type::Material && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
+					}
+					if (file.type == Assets::Type::Prefabs && ImGui::MenuItem("Instantiate Prefab Entity")) {
+						// Instantiate prefab in scene
+						auto prefab_service = services->get<Prefab::Service>();
+
+						//Create instance
+						entt::entity instance = prefab_service->instantiatePrefab(file.id);
+
+						//Check for null instance
+						if (instance != entt::null) {
+							PN_CORE_INFO("Instantiated prefab: {}", file.file_name);
+						}
+					}
+					if (file.type == Assets::Type::Templates && ImGui::MenuItem("Instantiate Template Entity")) {
+						// Instantiate prefab in scene
+						auto template_service = services->get<EntityTemplate::Service>();
+
+						//Create instance
+						entt::entity instance = template_service->spawn(file.id);
+
+						//Check for null instance
+						if (instance != entt::null) {
+							PN_CORE_INFO("Instantiated prefab: {}", file.file_name);
+						}
 					}
 					if (ImGui::MenuItem("Delete##file")) {
 						openPopUp("Delete File", std::make_shared<File>(file));
@@ -352,6 +395,35 @@ namespace PAIN {
 				return b_break;
 			}
 
+			bool ResourcePanel::renderPopUpContext(std::string const& virtual_path) {
+
+				//Boolean break
+				bool b_break = false;
+
+				//Push ID
+				ImGui::PushID(virtual_path.c_str());
+
+				//Right-click context
+				if (ImGui::BeginPopupContextWindow("AssetContextMenu##VirtualDirectory")) {
+					//Decide the directory it is in
+					auto relative = std::filesystem::relative(path_service->resolvePath(virtual_path), root);
+					auto engine_material = Assets::getAllEngineFolders()[Assets::Type::Material];
+					auto game_material = Assets::getAllGameFolders()[Assets::Type::Material];
+					if ((relative == engine_material || relative == game_material) && ImGui::MenuItem("New Material")) {
+
+						//Create new default material
+						openPopUp("New Material");
+					}
+					if (ImGui::MenuItem("New Folder##dir")) {
+						openPopUp("New Folder");
+					}
+					ImGui::EndPopup();
+				}
+
+				ImGui::PopID();
+				return b_break;
+			}
+
 			unsigned int ResourcePanel::fileIcon(std::filesystem::path const& relative_path) {
 
 				//Icon path
@@ -368,6 +440,16 @@ namespace PAIN {
 
 					//Get file path
 					icon_path = parent_path / (relative_path.filename());
+				}
+				else if (Assets::getAssetType(relative_path) == Assets::Type::Material) {
+
+					//Return material icon
+					auto id = services->get<Assets::Manager>()->findGUID(relative_path);
+					auto mat_opt = services->get<Assets::Manager>()->getAsset<Assets::Material>(id);
+					if (mat_opt.has_value()) {
+						mat_previews[id].render(mat_opt.value());
+						return static_cast<ImTextureID>(mat_previews[id].getPreviewTexture());
+					}
 				}
 				else {
 					//Def icon ref
@@ -421,6 +503,9 @@ namespace PAIN {
 
 				//Local shown count
 				int shown_count = 0;
+
+				//General context
+				renderPopUpContext(virtual_path);
 
 				//Display all directories
 				for (const auto& dir : directories) {
@@ -524,7 +609,7 @@ namespace PAIN {
 						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 						ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 						if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-							open_files.push_back(file);
+							addFilesToOpen(file);
 						}
 						ImGui::PopStyleColor();
 
@@ -556,8 +641,16 @@ namespace PAIN {
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-						open_files.push_back(file);
+						addFilesToOpen(file);
 					}
+					
+					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
+
+						openPopUp("Script Editor");
+						current_script_file = file.path.string();
+						setScriptSaved(true);
+					}
+
 					ImGui::PopStyleColor();
 
 					//Render context
@@ -604,6 +697,532 @@ namespace PAIN {
 				}
 			}
 
+			void ResourcePanel::setScriptSaved(bool is_script_changed) {
+				is_script_loaded = is_script_changed;
+			}
+
+			bool ResourcePanel::getScriptSaved() {
+				return is_script_loaded;
+			}
+
+			std::function<void(std::any const&)> ResourcePanel::scriptEditorPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					static char script_buffer[65536] = "";
+
+					std::ifstream file_(current_script_file, std::ios::in | std::ios::binary);
+					if (file_) {
+						file_.read(script_buffer, sizeof(script_buffer) - 1);
+						std::streamsize count = file_.gcount();
+						script_buffer[count] = '\0';
+						file_.close();
+					}
+					else {
+						script_buffer[0] = '\0';
+
+						PN_CORE_WARN("Failed to open file: ", current_script_file);
+					}
+
+					// Editable text Input
+					if (ImGui::InputTextMultiline("##Script", script_buffer, sizeof(script_buffer),
+						ImVec2(-1.0f, 400), ImGuiInputTextFlags_AllowTabInput)) {
+						setScriptSaved(false);
+					}
+
+					// Save button (TODO: Check if it updates real time.)
+					if (!getScriptSaved()) {
+						if (ImGui::Button("Save Script")) {
+							std::ofstream file_(current_script_file, std::ios::out | std::ios::binary);
+							if (file_) {
+								file_.write(script_buffer, strlen(script_buffer));
+								file_.close();
+								setScriptSaved(true);
+							}
+							else {
+								PN_CORE_WARN("Failed to save file: ", current_script_file);
+							}
+						}
+					}
+					else {
+						ImGui::BeginDisabled();
+						ImGui::Button("Save Script");
+						ImGui::EndDisabled();
+					}
+
+					ImGui::SameLine();
+
+					// Open in Visual Studio Code button
+					if (ImGui::Button("Open in VS Code")) {
+						std::string command = "code \"" + current_script_file + "\"";
+						system(command.c_str());
+					}
+
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
+			ResourcePanel::MaterialPreview::MaterialPreview() {
+				glGenFramebuffers(1, &preview_fbo);
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+
+				glGenTextures(1, &preview_texture);
+				glBindTexture(GL_TEXTURE_2D, preview_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, preview_size.x, preview_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, preview_texture, 0);
+
+				glGenRenderbuffers(1, &preview_depth_rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, preview_depth_rbo);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, preview_size.x, preview_size.y);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, preview_depth_rbo);
+
+				assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after Binding frame buffer: {}", err);
+				}
+
+			}
+
+			void ResourcePanel::MaterialPreview::init(std::weak_ptr<Services> service) {
+
+				//Init services
+				services = service;
+
+				//Setup sphere and shaders
+				auto sphere_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Model>("engine\\models\\sphere.obj");
+				sphere_model = sphere_opt.has_value() ? sphere_opt.value() : nullptr;
+				auto shader_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Shader>("engine\\shaders\\pbr_preview.vert");
+				shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+
+				// Generate and bind VAO
+				glGenVertexArrays(1, &sphere_vao);
+				glGenBuffers(1, &sphere_vbo);
+				glGenBuffers(1, &sphere_ebo);
+				glBindVertexArray(sphere_vao);
+
+				glBindBuffer(GL_ARRAY_BUFFER, sphere_vbo);
+				glBufferData(GL_ARRAY_BUFFER,
+					sphere_model->vertices.size() * sizeof(Assets::Vertex),
+					sphere_model->vertices.data(), GL_STATIC_DRAW);
+
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphere_ebo);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					sphere_model->indices.size() * sizeof(unsigned int),
+					sphere_model->indices.data(), GL_STATIC_DRAW);
+
+				// Position attribute, layout(location = 0)
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
+				glEnableVertexAttribArray(0);
+
+				// Normal attribute, layout(location = 1)
+				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
+				glEnableVertexAttribArray(1);
+
+				// texcoords attribute, layout(location = 2)
+				glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
+				glEnableVertexAttribArray(2);
+
+				//Tangent (location = 3)
+				glEnableVertexAttribArray(3);
+				glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+					(void*)offsetof(Assets::Vertex, tangent));
+
+				//Bitangent (location = 4)
+				glEnableVertexAttribArray(4);
+				glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
+					(void*)offsetof(Assets::Vertex, bitangent));
+
+				// Unbind VAO
+				glBindVertexArray(0);
+
+				auto err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL error after initializing sphere vao/vbo/ebo: {}", err);
+				}
+			}
+
+			void ResourcePanel::MaterialPreview::render(std::shared_ptr<const Assets::Material> material) {
+				if (sphere_vao == 0) {
+					PN_CORE_ERROR("Sphere VAO not initialized!");
+					return;
+				}
+
+				// Save previous state
+				GLint prev_viewport[4];
+				GLint prev_fbo;
+				glGetIntegerv(GL_VIEWPORT, prev_viewport);
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
+
+				// Bind preview FBO
+				glBindFramebuffer(GL_FRAMEBUFFER, preview_fbo);
+				glViewport(0, 0, preview_size.x, preview_size.y);
+
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
+
+				glClearColor(0.08f, 0.08f, 0.1f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// === PROJECTION (Orthographic or Perspective) ===
+				glm::mat4 proj;
+				if (preview_settings.use_orthographic) {
+					// Orthographic projection (no perspective distortion)
+					float ortho_size = preview_settings.ortho_size;
+					proj = glm::ortho(
+						-ortho_size, ortho_size,
+						-ortho_size, ortho_size,
+						0.1f, 10.0f
+					);
+				}
+				else {
+					// Perspective projection
+					proj = glm::perspective(
+						glm::radians(preview_settings.fov),
+						float(preview_size.x) / float(preview_size.y),
+						0.1f,
+						10.0f
+					);
+				}
+
+				// === VIEW (Camera) ===
+				glm::vec3 cam_pos = glm::vec3(0.0f, 0.3f, preview_settings.camera_distance);
+				glm::vec3 look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+				glm::mat4 view = glm::lookAt(cam_pos, look_at, glm::vec3(0, 1, 0));
+
+				// === MODEL (Rotation) ===
+				glm::mat4 model = glm::mat4(1.0f);
+
+				// Apply X rotation
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_x), glm::vec3(0, 1, 0));
+
+				// Apply Y rotation
+				model = glm::rotate(model, glm::radians(preview_settings.rotation_y), glm::vec3(1, 0, 0));
+
+				//Bind shader
+				shader->Bind();
+
+				// Matrices
+				shader->SetUniform("u_M", model);
+				shader->SetUniform("u_V", view);
+				shader->SetUniform("u_P", proj);
+
+				// Camera
+				shader->SetUniform("u_CamPos", cam_pos);
+
+				//Set preview settings light intensity
+				shader->SetUniform("u_AmbientLight", glm::vec3(preview_settings.ambient_intensity));
+				shader->SetUniform("u_LightPos", preview_settings.light_position);
+				shader->SetUniform("u_LightColor", glm::vec3(preview_settings.light_intensity));
+
+				// Material properties
+				shader->SetUniform("u_BaseColor", material->baseColor);
+				shader->SetUniform("u_Metallic", material->metallic);
+				shader->SetUniform("u_Roughness", material->roughness);
+				
+				//Get asset service
+				auto assetManager = services.lock()->get<Assets::Manager>();
+
+				//Albedo Texture
+				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = assetManager->getAsset<Assets::Texture>(material->albedoTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_AlbedoMap", 0);
+					shader->SetUniform("u_UseAlbedoMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseAlbedoMap", false);
+				}
+
+				//Normal texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->normalTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_NormalMap", 1);
+					shader->SetUniform("u_UseNormalMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseNormalMap", false);
+				}
+
+				//Metallic texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->metallicTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_MetallicMap", 2);
+					shader->SetUniform("u_UseMetallicMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseMetallicMap", false);
+				}
+
+				//Roughness texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->roughnessTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE3);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_RoughnessMap", 3);
+					shader->SetUniform("u_UseRoughnessMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseRoughnessMap", false);
+				}
+
+				//AO texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->aoTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_AOMap", 4);
+					shader->SetUniform("u_UseAOMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseAOMap", false);
+				}
+
+				//Emissive texture
+				tex_opt = assetManager->getAsset<Assets::Texture>(material->emissiveTexturePath);
+				if (tex_opt.has_value()) {
+					glActiveTexture(GL_TEXTURE5);
+					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
+					shader->SetUniform("u_EmissiveMap", 5);
+					shader->SetUniform("u_UseEmissiveMap", true);
+				}
+				else {
+					shader->SetUniform("u_UseEmissiveMap", false);
+				}
+
+				//Bind vertex array
+				glBindVertexArray(sphere_vao);
+
+				//Render sphere model
+				if (sphere_model->submeshes.empty()) {
+					glDrawElements(GL_TRIANGLES, sphere_model->indices.size(),
+						GL_UNSIGNED_INT, 0);
+				}
+				else {
+					for (const auto& submesh : sphere_model->submeshes) {
+						glDrawElements(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
+							(void*)(submesh.firstIndex * sizeof(unsigned int)));
+					}
+				}
+
+				//Unbind frame buffer
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+				// Restore previous state
+				glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+				glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3]);
+			}
+
+			void ResourcePanel::renderMaterial(std::shared_ptr<Assets::Material> material, File const& file) {
+				
+				ImVec2 icon_size(mat_previews[file.id].preview_settings.display_size.x, mat_previews[file.id].preview_settings.display_size.y);
+				ImGui::BeginChild((std::string("Material Preview##") + file.id.ToString()).c_str(), icon_size);
+				mat_previews[file.id].render(material);
+				ImGui::Image(static_cast<ImTextureID>(mat_previews[file.id].getPreviewTexture()), icon_size);
+				ImGui::EndChild();
+
+				ImGui::SameLine();
+
+				ImGui::BeginChild((std::string("Material Settings##") + file.id.ToString()).c_str(), icon_size);
+
+				//Preview settings
+				if (ImGui::CollapsingHeader("Preview Settings")) {
+					ImGui::PushItemWidth(150);
+
+					// Projection Type
+					ImGui::Text("Projection");
+					ImGui::Checkbox("Orthographic", &mat_previews[file.id].preview_settings.use_orthographic);
+
+					ImGui::Separator();
+
+					// Camera Settings
+					ImGui::Text("Camera");
+					ImGui::SliderFloat("Distance", &mat_previews[file.id].preview_settings.camera_distance, 1.0f, 6.0f);
+
+					if (!mat_previews[file.id].preview_settings.use_orthographic) {
+						ImGui::SliderFloat("FOV", &mat_previews[file.id].preview_settings.fov, 20.0f, 90.0f);
+					}
+					else {
+						ImGui::SliderFloat("Ortho Size", &mat_previews[file.id].preview_settings.ortho_size, 0.5f, 2.0f);
+					}
+
+					ImGui::Separator();
+
+					// Rotation
+					ImGui::Text("Rotation");
+					ImGui::SliderFloat("Rotate Y", &mat_previews[file.id].preview_settings.rotation_y, -180.0f, 180.0f);
+					ImGui::SliderFloat("Rotate X", &mat_previews[file.id].preview_settings.rotation_x, -180.0f, 180.0f);
+
+					if (ImGui::Button("Reset Rotation")) {
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 0.0f;
+					}
+
+					ImGui::Separator();
+
+					// Lighting
+					ImGui::Text("Lighting");
+					ImGui::SliderFloat("Ambient", &mat_previews[file.id].preview_settings.ambient_intensity, 0.0f, 1.0f);
+					ImGui::SliderFloat("Light Intensity", &mat_previews[file.id].preview_settings.light_intensity, 1.0f, 50.0f);
+					ImGui::DragFloat3("Light Position", glm::value_ptr(mat_previews[file.id].preview_settings.light_position), 0.1f);
+
+					if (ImGui::Button("Reset Lighting")) {
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[file.id].preview_settings.light_intensity = 15.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+					}
+
+					ImGui::Separator();
+
+					// Presets
+					ImGui::Text("Presets");
+					if (ImGui::Button("Unity Style")) {
+						mat_previews[file.id].preview_settings.use_orthographic = true;
+						mat_previews[file.id].preview_settings.ortho_size = 1.1f;
+						mat_previews[file.id].preview_settings.camera_distance = 3.0f;
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 0.0f;
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.15f;
+						mat_previews[file.id].preview_settings.light_intensity = 15.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Unreal Style")) {
+						mat_previews[file.id].preview_settings.use_orthographic = false;
+						mat_previews[file.id].preview_settings.fov = 35.0f;
+						mat_previews[file.id].preview_settings.camera_distance = 3.2f;
+						mat_previews[file.id].preview_settings.rotation_y = -25.0f;
+						mat_previews[file.id].preview_settings.rotation_x = 10.0f;
+						mat_previews[file.id].preview_settings.ambient_intensity = 0.1f;
+						mat_previews[file.id].preview_settings.light_intensity = 20.0f;
+						mat_previews[file.id].preview_settings.light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+					}
+
+					ImGui::PopItemWidth();
+				}
+
+				//Material settings
+				if (ImGui::CollapsingHeader("Material Settings")) {
+					ImGui::PushItemWidth(150);
+					ImGui::Indent(10.0f);
+
+					//Textures override dropdown
+					if (ImGui::CollapsingHeader("Textures")) {
+						DrawAssetSelectorField("Albedo Texture Override",
+							material->albedoTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Normal Texture Override",
+							material->normalTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Metallic Texture Override",
+							material->metallicTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Roughness Texture Override",
+							material->roughnessTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("AO Texture Override",
+							material->aoTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						DrawAssetSelectorField("Emissive Texture Override",
+							material->emissiveTexturePath,
+							PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+							services);
+
+						//DrawAssetSelectorField("Height Texture Override",
+						//	material->heightTexturePath,
+						//	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+						//	services);
+
+						//DrawAssetSelectorField("Opacity Texture Override",
+						//	material->opacityTexturePath,
+						//	PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+						//	services);
+					}
+
+					// Base Color Override
+					ImGui::ColorEdit3("Base Color", glm::value_ptr(material->baseColor));
+
+					// Metallic Override
+					ImGui::SliderFloat("Metallic", &material->metallic, 0.0f, 1.0f, "%.2f");
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("0 = Dielectric (non-metal), 1 = Metallic");
+					}
+
+					// Roughness Override
+					ImGui::SliderFloat("Roughness", &material->roughness, 0.0f, 1.0f, "%.2f");
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("0 = Smooth/Shiny, 1 = Rough/Matte");
+					}
+
+					// Emissive Override
+					ImGui::ColorEdit3("Emissive Color", glm::value_ptr(material->emissive));
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("Self-illumination color (HDR values supported)");
+					}
+
+					//Save material settings
+					if (ImGui::Button("Save Material")) {
+						asset_service->saveMaterial(*material.get(), file.path);
+					}
+				}
+				ImGui::EndChild();
+
+				//Preview sizing
+				ImGui::Text("Preview Sizing: "); ImGui::SameLine();
+				if (ImGui::Button("Small")) {
+					mat_previews[file.id].preview_settings.display_size.y = 256;
+					mat_previews[file.id].preview_settings.display_size.x = 256;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Medium")) {
+					mat_previews[file.id].preview_settings.display_size.y = 384;
+					mat_previews[file.id].preview_settings.display_size.x = 384;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Large")) {
+					mat_previews[file.id].preview_settings.display_size.y = 512;
+					mat_previews[file.id].preview_settings.display_size.x = 512;
+				}
+			}
+
+			void ResourcePanel::addFilesToOpen(File const& file) {
+				if (open_files.find(file) != open_files.end()) {
+					return;
+				}
+				else if (open_files.size() < 5) {
+					open_files.insert(file);
+				}
+				else {
+					std::vector<std::string> msg = { "Limit of 5 files open at a time has been hit." };
+					openPopUp("Info", std::make_shared<std::vector<std::string>>(msg));
+				}
+			}
+
 			void ResourcePanel::renderOpenFiles() {
 
 				//Local files to close
@@ -615,10 +1234,25 @@ namespace PAIN {
 					//Begin window
 					ImGui::Begin(file.file_name.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-					//Display icon
-					{
+					//Render asset type
+					switch (file.type) {
+					case Assets::Type::Material: {
+						auto mat_opt = asset_service->getAsset<Assets::Material>(file.id);
+						if (mat_opt.has_value()) {
+							renderMaterial(mat_opt.value(), file);
+						}
+						else {
+							//Display icon
+							ImVec2 icon_size(256, 256);
+							ImGui::Image(file.icon, icon_size);
+						}
+						break;
+					}
+					default: {
+						//Display icon
 						ImVec2 icon_size(256, 256);
 						ImGui::Image(file.icon, icon_size);
+					}
 					}
 
 					ImGui::Spacing();
@@ -730,6 +1364,7 @@ namespace PAIN {
 					}
 				}*/
 			}
+
 
 			void ResourcePanel::renderFileEditor() {
 				for (decltype(file_editing_map)::iterator it = file_editing_map.begin(); it != file_editing_map.end(); ++it) {
@@ -1104,6 +1739,57 @@ namespace PAIN {
 					};
 			}
 
+			std::function<void(std::any const&)> ResourcePanel::newMaterialPopup(std::string const& popup_id) {
+				return [this, popup_id](std::any const& data) {
+
+					//Select a component to add
+					ImGui::Text("New material name without extension: ");
+
+					//New folder name
+					static std::string mat_name = "";
+					mat_name.resize(32);
+					ImGui::InputText("##Newmat_name", mat_name.data(), mat_name.capacity() + 1);
+
+					//Add spacing
+					ImGui::Spacing();
+
+					//Display each component as a button
+					if (ImGui::Button("Create")) {
+
+						//Craft outpath
+						std::filesystem::path out_path = path_service->resolvePath(current_path);
+						out_path /= mat_name.c_str();
+						out_path.replace_extension(*Assets::getAllExtensions()[Assets::Type::Material].begin());
+
+						//Create material
+						Assets::Material def_material;
+						asset_service->saveMaterial(def_material, out_path);
+
+						//Update directories & files
+						populateFiles(current_path);
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+
+					//Same line
+					ImGui::SameLine();
+
+					//Cancel deleting asset
+					if (ImGui::Button("Cancel")) {
+
+						//Reset folder name buffer
+						mat_name.assign("");
+
+						//Close popup
+						closePopUp(popup_id);
+					}
+					};
+			}
+
 			void ResourcePanel::pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback) {
 
 				std::lock_guard<std::mutex> lock(file_event_mutex);
@@ -1117,13 +1803,20 @@ namespace PAIN {
 				path_service = services->get<Path::Path>();
 				asset_service = services->get<Assets::Manager>();
 
+				//Init material preview
+				MaterialPreview temp_mat_prev;
+				temp_mat_prev.init(services);
+
 				//Pop UP
 				registerPopUp("Delete File", deleteFilePopup("Delete File"));
 				registerPopUp("Rename File", renameFilePopup("Rename File"));
 				registerPopUp("Delete Folder", deleteFolderPopup("Delete Folder"));
 				registerPopUp("Rename Folder", renameFolderPopup("Rename Folder"));
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
+				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
+
+				registerPopUp("Script Editor", scriptEditorPopup("Script Editor"));
 
 				//Initialize root and current path
 #ifdef PN_PLATFORM_ANDROID
@@ -1246,9 +1939,15 @@ namespace PAIN {
 								//Get GUID
 								auto id = asset_service->findGUID(relative);
 
-								//Check if cached
-								if (asset_service->checkAssetCached(id)) {
-									asset_service->recacheAsset(id);
+								//Check if asset is cachable
+								if (!Assets::isAssetCacheable(Assets::getAssetType(file))) {
+									asset_service->reshipAsset(id);
+								}
+								else {
+									//Check if cached
+									if (asset_service->checkAssetCached(id)) {
+										asset_service->recacheAsset(id);
+									}
 								}
 							}
 
@@ -1383,6 +2082,9 @@ namespace PAIN {
 						}
 					}
 				}
+
+				//Early return flag if panel is hidden
+				if (panel_hidden) return;
 
 				//Get the available width at the start of your layout
 				float totalWidth = ImGui::GetContentRegionAvail().x;

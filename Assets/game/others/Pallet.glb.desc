@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pallet.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 15414195455216540543
+  },
+  "descriptor_version": 1,
+  "guid": "6cf2bf89-b178-9042-aaa0-17e49b44d09b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Pallet.glb"
+  }
+}

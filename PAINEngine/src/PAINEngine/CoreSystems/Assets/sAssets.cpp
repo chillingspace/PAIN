@@ -3,7 +3,10 @@
 #include "Applications/Application.h"
 #include "sAssets.h"
 
+#include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -118,13 +121,52 @@ namespace PAIN {
 
 				//Get audio service
 				auto audio_service = services->get<Audio::Audio>();
-				return audio_service->createSound(virtual_path);
+				if (audio_service) {
+					return audio_service->createSound(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Audio service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::Audio::Sound>();
+				}
 				});
 
 			//Register Material loader
 			asset_loader->RegisterLoader(Type::Material, [this](std::string const& virtual_path) {
 
 				return asset_loader->ImportMaterial(virtual_path);
+				});
+
+			//Register Prefab loader
+			asset_loader->RegisterLoader(Type::Prefabs, [this](std::string const& virtual_path) {
+
+				auto prefab_service = services->get<Prefab::Service>();
+
+				if (prefab_service) {
+					return prefab_service->loadPrefabFromFile(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Prefab service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::Prefab::PrefabAsset>();
+				}
+				});
+
+			//Register Templates loader
+			asset_loader->RegisterLoader(Type::Templates, [this](std::string const& virtual_path) {
+
+				auto template_service = services->get<EntityTemplate::Service>();
+
+				if (template_service) {
+					return template_service->loadTemplateFromFile(virtual_path);
+				}
+				else {
+					PN_CORE_WARN("Prefab service not ready yet, or not initialized.");
+					return std::shared_ptr<PAIN::EntityTemplate::TemplateAsset>();
+				}
+				});
+
+			//Registry scene loader
+			asset_loader->RegisterLoader(Type::Scenes, [this](std::string const& virtual_path) {
+				return asset_loader->ImportScene(virtual_path);
 				});
 
 			//Import asset registry
@@ -148,7 +190,19 @@ namespace PAIN {
 
 		GUID Manager::findByName(const std::string& name) 
 		{
-			return findGUID(name);
+			GUID g = findGUID(name);
+			if (g.IsValid())
+				return g;
+
+			// search by asset "name" field from the registry
+			for (const auto& [guid, asset] : asset_registry) {
+				if (asset && asset->name == name) {
+					return guid;
+				}
+			}
+
+			// Nothing found
+			return GUID();
 		}
 
 		Type Manager::getTypeByGUID(const GUID& id) const
@@ -363,6 +417,21 @@ namespace PAIN {
 			//Cache asset
 			return cacheAsset(id);
 		}
+
+		void Manager::reshipAsset(GUID const& id) {
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//Re process asset and ship
+			auto data = asset_registry[id];
+			Info asset;
+			asset.raw_path = path_service->resolvePath(Path::main_assets_alias, "");
+			asset.raw_path /= data->main_relative_path;
+			asset.name = asset.raw_path.filename().string();
+			asset.relative_folder = data->main_relative_path.parent_path();
+			asset.type = data->type;
+			asset_compiler->processAsset(asset);
+		}
 #endif
 		bool Manager::checkAssetCached(GUID const& id) const {
 			//Check asset cache
@@ -435,6 +504,35 @@ namespace PAIN {
 			}
 		}
 
+		void Manager::removeFile(Assets::GUID const& id) {
+
+			//Get main relative path
+			auto it = asset_registry.find(id);
+			if (it != asset_registry.end()) {
+
+				//Get main relative path
+				auto relative = it->second->main_relative_path;
+
+				//Ensure relative
+				if (relative.empty() || relative.extension() == Assets::descriptor_ext) return;
+
+				//Get file path
+				std::filesystem::path file_path = services->get<Path::Path>()->resolvePath(Path::main_assets_alias, "");
+				file_path /= relative;
+
+				//Check if from is a directory
+				if (std::filesystem::is_directory(file_path)) {
+
+					//File operations to delete all
+					std::filesystem::remove_all(file_path);
+				}
+				else {
+					//Remove file
+					asset_organizer->removeFile(file_path);
+				}
+			}
+		}
+
 		void Manager::removeFile(std::filesystem::path const& file_path) {
 
 			//Get path service
@@ -477,6 +575,22 @@ namespace PAIN {
 
 			//Actually copy the file
 			std::filesystem::copy_file(file_path, destination);
+		}
+
+		void Manager::saveMaterial(Material const& mat, std::filesystem::path const& out_path) {
+
+			//Get path service
+			auto path_service = services->get<Path::Path>();
+
+			//if export succeedds
+			if (asset_compiler->ExportMaterial(mat, out_path)) {
+
+				//Get relative
+				auto relative = std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, ""));
+
+				//Register asset
+				if(checkAssetRegistered(relative))registerAsset(relative);
+			}
 		}
 #endif
 #endif

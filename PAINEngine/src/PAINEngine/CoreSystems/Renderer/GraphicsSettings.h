@@ -50,12 +50,13 @@ namespace PAIN {
 		}
 
 		// actual settings
+		bool draw_floor = false;
+
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
-		bool daytime = true;
-		float fov = 90.f;
-		bool ao = true;		// ambient occlusion
+		bool world_light = true;
+		float fov = 60.0f;
 		
 		int blur_quality = 4;	// number of blur passes. higher = blurrier, BUT SLOWER, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2. too high won't help. sublinear growth.
 		// using hdr, so range of [0,inf)
@@ -73,5 +74,51 @@ namespace PAIN {
 
 		// image based lighting
 		bool ibl = true;
+
+		// animation
+		bool interpolate_animation{ true };		// smoother animations at the expense of performance
+
+		
+		// debug settings
+		bool DEBUG_USE_DIFFUSE_MAP{ true };
+		bool DEBUG_USE_AO_MAP{ true };
+		bool DEBUG_USE_NORMAL_MAP{ true };
+		bool DEBUG_USE_ROUGHNESSMETALLIC_MAP{ true };
+		bool DEBUG_USE_EMISSION_MAP{ true };
+
+		enum DEBUG_PBR_MAP_TYPES {
+			NONE = 0,
+			OBJECT_ONLY,
+			DIFFUSE,
+			AO,
+			NORMAL,
+			ROUGHNESS,
+			METALLIC,
+			EMISSION,
+			IBL_IRRADIANCE,
+			IBL_PREFILTER,
+			IBL_BRDFLUT,
+			NUM_PBR_MAP_TYPES,
+		};
+
+		std::vector<const char*> DEBUG_PBR_MAP_STRING{
+			"NONE",
+			"OBJECT_ONLY",
+			"DIFFUSE",
+			"AO",
+			"NORMAL",
+			"ROUGHNESS",
+			"METALLIC",
+			"EMISSION",
+			"IBL_IRRADIANCE",
+			"IBL_PREFILTER",
+			"IBL_BRDFLUT",
+			"NUM_PBR_MAP_TYPES",
+		};
+
+		DEBUG_PBR_MAP_TYPES DEBUG_PBR_MAP_TYPE = DEBUG_PBR_MAP_TYPES::NONE;
+
+		// optimisation
+		bool use_instanced_rendering = false;
 	};
 }

@@ -57,7 +57,11 @@ namespace PAIN {
 
 			void updateBodyLayer(JPH::BodyID bodyID, JPH::ObjectLayer newLayer);
 
-			void teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb);
+			void teleportBodyToTransform(entt::entity e, const LocalTransform& tr, Physics::RigidBody3D& rb);
+
+			void setVelocity(entt::entity e, const glm::vec3& v);
+
+			glm::vec3 getVelocity(entt::entity e) const;
 
 		private:
 			struct LuaContactListener; // fwd decl for jolt lua bridge
@@ -115,6 +119,9 @@ namespace PAIN {
 			void joltSetup();
 
 			void notifyContact(const JPH::Body& b1, const JPH::Body& b2); // @TODO change to only enqueue collision, no lua
+
+			bool shouldLayersCollide(entt::entity a, entt::entity b);
+
 			void dispatchCollisionEvents(entt::registry& reg);
 		};
 

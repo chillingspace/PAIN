@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "BigGround.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 1467018749395682189
+  },
+  "descriptor_version": 1,
+  "guid": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\BigGround.prefab"
+  }
+}

@@ -1,0 +1,23 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 0.07900000363588333
+    },
+    "textures": {
+        "albedo": "game\\textures\\animatedcube\\AnimatedCube_BaseColor.png"
+    }
+}

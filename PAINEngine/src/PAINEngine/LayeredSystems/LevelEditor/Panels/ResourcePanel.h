@@ -1,31 +1,58 @@
-#ifdef PN_PLATFORM_WINDOWS
+#pragma once
+
 #ifdef _DEBUG
 
-#pragma once
 #include "Panels.h"
-
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
-
 #include <chrono>
+#include <queue>
+
+// ========================================
+// Move File and Dir structs OUTSIDE platform guards
+// so they're accessible to other headers
+// ========================================
+namespace PAIN::Editor::Panel {
+
+    //Global files and directories for payload
+    struct Dir {
+        std::filesystem::path path;
+        ImTextureID icon;
+        std::string file_name;
+    };
+
+    struct File {
+        std::filesystem::path path;
+        Assets::GUID id;
+        Assets::Type type;
+        ImTextureID icon;
+        std::string file_name;
+
+        // Use GUID for equality (most efficient)
+        bool operator==(const File& other) const {
+            return id == other.id;
+        }
+    };
+}
+
+namespace std {
+    template<>
+    struct hash<PAIN::Editor::Panel::File> {
+        size_t operator()(const PAIN::Editor::Panel::File& file) const noexcept {
+            // Assuming GUID already has a hash function
+            return std::hash<PAIN::Assets::GUID>{}(file.id);
+        }
+    };
+}
+
+// ========================================
+// Platform-specific ResourcePanel class
+// ========================================
+#ifdef PN_PLATFORM_WINDOWS
 
 namespace PAIN {
     namespace Editor {
         namespace Panel {
-
-            //Global files and directories for payload
-            struct Dir {
-                std::filesystem::path path;
-                ImTextureID icon;
-                std::string file_name;
-            };
-            struct File {
-                std::filesystem::path path;
-                Assets::GUID id;
-                Assets::Type type;
-                ImTextureID icon;
-                std::string file_name;
-            };
 
             class ResourcePanel : public IPanel {
             public:
@@ -62,6 +89,10 @@ namespace PAIN {
                 void pushFileEvent(std::filesystem::path const& file, filewatch::Event const& event, std::function<void()>&& callback); //Thread safe insertion for file event queue
                 void onEvent(Event::Event& event) override;
 
+                // Script Saving
+                void setScriptSaved(bool is_script_changed);
+                bool getScriptSaved();
+
             private:
 
                 // ----------------------------
@@ -92,9 +123,6 @@ namespace PAIN {
 
                 //Payload
                 std::string payload_typestring;
-
-                //Vector of opened files
-                std::vector<File> open_files;
 
                 //Assets auto refresh timer
                 float auto_refresh_timer = 0.0f;
@@ -128,7 +156,6 @@ namespace PAIN {
                 void extractCurrentWord(std::string const& content, size_t cursor_pos, std::string& buffer); //Extract current word being edited
                 void showLuaIntellisense(std::string& content, size_t cursor_pos, std::string& buffer); //Lua intellisense
 
-
                 // ----------------------------
                 // Internal Helpers
                 // ----------------------------
@@ -139,9 +166,86 @@ namespace PAIN {
                 void DrawDirectoryTree(std::filesystem::path const& path);
                 bool renderPopUpContext(File const& file);
                 bool renderPopUpContext(Dir const& file);
+                bool renderPopUpContext(std::string const& virtual_path);
                 unsigned int fileIcon(std::filesystem::path const& relative_path); //Internal asset icon picking
                 void renderAssetsBrowser(std::string const& virtual_path); //Internal rendering of an asset browser
 
+                // Script Saving
+                std::string current_script_file;
+                bool is_script_loaded;
+
+                // ----------------------------
+                // File Render
+                // ----------------------------
+                class MaterialPreview {
+                private:
+                    unsigned int preview_fbo = 0;
+                    unsigned int preview_texture = 0;
+                    unsigned int preview_depth_rbo = 0;
+                    const glm::ivec2 preview_size{ 512, 512 };
+
+                    struct PreviewSettings {
+                        // Camera
+                        float camera_distance = 3.0f;
+                        float fov = 35.0f;
+
+                        // Rotation
+                        float rotation_y = -25.0f;
+                        float rotation_x = 0.0f;
+
+                        // Projection
+                        bool use_orthographic = true;
+                        float ortho_size = 1.1f;
+
+                        // Lighting
+                        float ambient_intensity = 0.15f;
+                        float light_intensity = 15.0f;
+                        glm::vec3 light_position = glm::vec3(2.0f, 3.0f, 2.0f);
+
+                        //Preview disply size
+                        glm::ivec2 display_size{ 256, 256 };
+                    };
+
+                    //Static sphere model
+                    static std::shared_ptr<Assets::Model> sphere_model;
+
+                    //Static shader
+                    static std::shared_ptr<Assets::Shader> shader;
+
+                    //Services
+                    static std::weak_ptr<Services> services;
+
+                    //Simple sphere mesh for preview
+                    static unsigned int sphere_vao;
+                    static unsigned int sphere_vbo;
+                    static unsigned int sphere_ebo;
+
+                public:
+
+                    //Material preview contructor
+                    MaterialPreview();
+
+                    //Set preview settings
+                    PreviewSettings preview_settings;
+
+                    //Called only once for statics
+                    void init(std::weak_ptr<Services> service);
+                    void render(std::shared_ptr<const Assets::Material> material);
+                    unsigned int getPreviewTexture() const {
+                        return preview_texture;
+                    }
+                };
+
+                //Create mat preview
+                std::unordered_map<Assets::GUID, MaterialPreview> mat_previews;
+
+                //Render material file functionality
+                void renderMaterial(std::shared_ptr<Assets::Material> material, File const& file);
+
+                //Open files manager
+                const int MAX_FILES_OPEN = 5;
+                std::unordered_set<File> open_files;
+                void addFilesToOpen(File const& file);
                 void renderOpenFiles();
                 void renderFileEditor(); //Internal rendering of a file editor
 
@@ -153,17 +257,21 @@ namespace PAIN {
                 std::function<void(std::any const&)> deleteFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> renameFolderPopup(std::string const& popup_id);
                 std::function<void(std::any const&)> newFolderPopup(std::string const& popup_id);
-
+                std::function<void(std::any const&)> newMaterialPopup(std::string const& popup_id);
+                std::function<void(std::any const&)> scriptEditorPopup(std::string const& popup_id);
 
                 // ----------------------------
                 // File Operations
                 // ----------------------------
                 void moveFileAcceptPayload(std::string const& virtual_path); //Moving file accept payload
+
+                std::weak_ptr<EntityPanel> entities_panel;
+                std::weak_ptr<ComponentsPanel> components_panel;
             };
 
         } // namespace Panel
     } // namespace Editor
 } // namespace PAIN
 
-#endif
-#endif
+#endif // PN_PLATFORM_WINDOWS
+#endif // _DEBUG

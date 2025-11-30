@@ -136,10 +136,43 @@ namespace PAIN {
 			//PN_CORE_WARN("[PHYSICS] Contact b1={}, b2={}", (uint32_t)a, (uint32_t)b);
 			if (a == entt::null || b == entt::null) return;
 
+			// Check scene layer collision rules
+			if (!shouldLayersCollide(a, b)) return;
+
 			{
 				std::lock_guard<std::mutex> lock(collisionMutex_);
 				pendingCollisions_.push_back({ a, b });
 			}
+		}
+
+		bool System::shouldLayersCollide(entt::entity a, entt::entity b) {
+			auto svc = services.lock();
+			if (!svc) return true;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return true;
+
+			auto& registry = ecs->getRegistry();
+
+			// Get scene layers
+			if (!registry.all_of<Entity::Layer>(a) || !registry.all_of<Entity::Layer>(b))
+				return true;  // No layer component = allow collision
+
+			auto& layerA = registry.get<Entity::Layer>(a);
+			auto& layerB = registry.get<Entity::Layer>(b);
+
+			// Get scene manager for mask matrix
+			auto sceneMgr = svc->get<Scene::SceneManager>();
+			if (!sceneMgr) return true;
+
+			// Check mask matrix
+			const auto& mask_matrix = sceneMgr->getMaskMatrix();
+			if (layerA.layer_id < mask_matrix.size() &&
+				layerB.layer_id < mask_matrix[layerA.layer_id].size()) {
+				return mask_matrix[layerA.layer_id][layerB.layer_id];
+			}
+
+			return true;
 		}
 
 		void System::dispatchCollisionEvents(entt::registry& reg)
@@ -256,30 +289,37 @@ namespace PAIN {
             // }
             // ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
 
+			{ // make Physics::System discoverable via registry context
+				auto& ctx = registry.ctx();
+				if (!ctx.contains<PAIN::Physics::System*>()) {
+					ctx.emplace<PAIN::Physics::System*>(this);
+				}
+			}
+
             // onUpdate is now ONLY responsible for syncing the physics state back to the transforms for rendering.
 			if (temp_allocator && job_system && jolt_physics)
 			{
 				auto& body_interface = jolt_physics->GetBodyInterface();
 
 				// Find all entities with Transform and RigidBody3D components
-				auto view = registry.view<Transform, Physics::RigidBody3D>();
-				for (auto&& [entity, transform, rigidBody] : view.each()) {
+				// Optimized using group
+				auto group = registry.group<Physics::RigidBody3D>(entt::get<LocalTransform, WorldTransform>);
+				
+				for (auto&& [entity, rigidBody, transform, world] : group.each()) {
 
-					transform = view.get<Transform>(entity);
-					rigidBody = view.get<Physics::RigidBody3D>(entity);
-
-					// Check if layer needs updating
 					if (!rigidBody.bodyID.IsInvalid()) {
 						float gravity_factor = rigidBody.use_gravity ? 1.0f : 0.0f;
 						body_interface.SetGravityFactor(rigidBody.bodyID, gravity_factor);
 
 						JPH::ObjectLayer current_layer = body_interface.GetObjectLayer(rigidBody.bodyID);
+						JPH::ObjectLayer desired_layer = rigidBody.physics_behavior.toJoltLayer();
 
-						if (current_layer != rigidBody.layer.value) {
+						if (current_layer != desired_layer) {
 							// Layer changed in component, update physics body
-							updateBodyLayer(rigidBody.bodyID, rigidBody.layer.value);
+							updateBodyLayer(rigidBody.bodyID, desired_layer);
 						}
 					}
+
 
 					// Check and apply motion type update
 					JPH::EMotionType desired_motion_type;
@@ -306,6 +346,12 @@ namespace PAIN {
 
 							transform.position = glm::vec3(position.GetX(), position.GetY(), position.GetZ());
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
+							world.dirty = true;
+
+							const JPH::Vec3 velocity = body.GetLinearVelocity();
+							const JPH::Vec3 angVel = body.GetAngularVelocity();
+							rigidBody.velocity = glm::vec3(velocity.GetX(), velocity.GetY(), velocity.GetZ());
+							rigidBody.angular_velocity = glm::vec3(angVel.GetX(), angVel.GetY(), angVel.GetZ());
 						}
 						else {
 							PN_CORE_ERROR("Failed to lock body for reading");
@@ -318,8 +364,8 @@ namespace PAIN {
 						body_interface.SetMotionType(rigidBody.bodyID, desired_motion_type, JPH::EActivation::Activate);
 					}
 
-					if (registry.all_of<Audio::AudioSource, MetaData::EntityName>(entity)) {
-						auto& name = registry.get<MetaData::EntityName>(entity);
+					if (registry.all_of<Audio::AudioSource, Entity::Name>(entity)) {
+						auto& name = registry.get<Entity::Name>(entity);
 						if (name.name == "screen") {
 							applyBounce(registry, entity, 50.f);
 						}
@@ -333,12 +379,22 @@ namespace PAIN {
 		}
 
 		void System::syncNewBodies(entt::registry& registry) {
-			auto view = registry.view<Transform, Physics::RigidBody3D>();
-			for (auto&& [entity, transform, rigidBody] : view.each()) {
-				transform = view.get<Transform>(entity);
-				rigidBody = view.get<Physics::RigidBody3D>(entity);
+			// Use view to avoid group ownership conflict with onUpdate
+			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
+			for (auto&& [entity, rigidBody, transform] : view.each()) {
 				
-				// Only create if not already created
+				// Check if scale OR offset changed in editor
+				// If so, destroy the existing body so it can be recreated below with new settings
+				if (!rigidBody.bodyID.IsInvalid() && 
+					(rigidBody.collider_scale != rigidBody.last_applied_scale || 
+					 rigidBody.collider_offset != rigidBody.last_applied_offset)) {
+					
+					body_interface->RemoveBody(rigidBody.bodyID);
+					body_interface->DestroyBody(rigidBody.bodyID);
+					rigidBody.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+				}
+
+				// Only create if not already created (or just destroyed above)
 				if (rigidBody.bodyID.IsInvalid()) {
 					// Get rotation
 					const glm::quat& q = glm::normalize(transform.rotation);
@@ -349,12 +405,25 @@ namespace PAIN {
 										   q.w); // Jolt uses x, y, z, w order
 
 					// Create Jolt body settings
-					// Create BoxShape
-					JPH::Ref<JPH::BoxShape> boxShape = new JPH::BoxShape(
-						JPH::Vec3(.5f * transform.scale.x, 
-								  .5f * transform.scale.y,
-								  .5f * transform.scale.z),
+					
+					// 1. Create the base BoxShape (Apply Scale)
+					// Note: Jolt BoxShape takes half-extents
+					JPH::Ref<JPH::Shape> finalShape = new JPH::BoxShape(
+						JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x, 
+								  .5f * transform.scale.y * rigidBody.collider_scale.y,
+								  .5f * transform.scale.z * rigidBody.collider_scale.z),
 								  .0f);
+
+					// 2. Apply Offset using RotatedTranslatedShape if needed
+					// We wrap the box shape in a transform shape to offset it from the entity center
+					if (rigidBody.collider_offset != glm::vec3(0.0f)) {
+						JPH::Vec3 offset(
+							rigidBody.collider_offset.x * transform.scale.x,
+							rigidBody.collider_offset.y * transform.scale.y,
+							rigidBody.collider_offset.z * transform.scale.z
+						);
+						finalShape = new JPH::RotatedTranslatedShape(offset, JPH::Quat::sIdentity(), finalShape);
+					}
 
 					JPH::EMotionType motion_type;
 					switch (rigidBody.motion_type) {
@@ -363,15 +432,17 @@ namespace PAIN {
 					default:                    motion_type = JPH::EMotionType::Dynamic; break;
 					}
 
+					JPH::ObjectLayer jolt_layer = rigidBody.physics_behavior.toJoltLayer();
+
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(
-						boxShape,
+						finalShape,
 						JPH::RVec3(transform.position.x, 
 								   transform.position.y, 
 								   transform.position.z),
 						rotationQuat,
 						motion_type,
-						rigidBody.layer
+						jolt_layer
 					);
 
 					settings.mAllowDynamicOrKinematic = true;  // Allow runtime motion type changes
@@ -405,12 +476,12 @@ namespace PAIN {
 
 		void System::applyBounce(entt::registry& registry, entt::entity targetEntity, float jumpImpulse)
 		{
-			auto view = registry.view<Transform, Physics::RigidBody3D, Audio::AudioSource>();
-			if (!view.contains(targetEntity))
+			// Optimized for single entity lookup
+			if (!registry.all_of<LocalTransform, Physics::RigidBody3D, Audio::AudioSource>(targetEntity))
 				return;
 
-			auto& transform = view.get<Transform>(targetEntity);
-			auto& rigidBody = view.get<RigidBody3D>(targetEntity);
+			auto& transform = registry.get<LocalTransform>(targetEntity);
+			auto& rigidBody = registry.get<RigidBody3D>(targetEntity);
 
 			// Ground check
 			glm::f32 half_height = 0.5f * transform.scale.y;
@@ -443,7 +514,7 @@ namespace PAIN {
 			body_interface->AddBody(bodyID, JPH::EActivation::Activate);
 		}
 
-		void System::teleportBodyToTransform(entt::entity e, const Transform& tr, Physics::RigidBody3D& rb)
+		void System::teleportBodyToTransform(entt::entity e, const LocalTransform& tr, Physics::RigidBody3D& rb)
 		{
 			if (!body_interface || rb.bodyID.IsInvalid()) return;
 
@@ -458,6 +529,51 @@ namespace PAIN {
 			// optional: stop any residual motion
 			body_interface->SetLinearVelocity(rb.bodyID, JPH::Vec3::sZero());
 			body_interface->SetAngularVelocity(rb.bodyID, JPH::Vec3::sZero());
+		}
+
+		// In your engine API / physics bridge
+		void System::setVelocity(entt::entity e, const glm::vec3& v) {
+			if (!body_interface) return;
+
+			// Get registry from services
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+
+			auto& registry = ecs->getRegistry();
+
+			// Safety checks
+			if (!registry.valid(e)) return;
+			if (!registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid() || !body_interface) return;
+			body_interface->SetLinearVelocity(rb.bodyID, JPH::Vec3(v.x, v.y, v.z));
+		}
+
+		glm::vec3 System::getVelocity(entt::entity e) const {
+			if (!body_interface) return { 0.f, 0.f, 0.f };
+
+			auto svc = services.lock();
+			if (!svc) return { 0.f, 0.f, 0.f };
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return { 0.f, 0.f, 0.f };
+
+			auto& registry = ecs->getRegistry();
+
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e))
+				return { 0.f, 0.f, 0.f };
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid()) return { 0.f, 0.f, 0.f };
+
+			// Read from Jolt
+			JPH::Vec3 vel = body_interface->GetLinearVelocity(rb.bodyID);
+			return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());
 		}
 
 		void System::create_floor()

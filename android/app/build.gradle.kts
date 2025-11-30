@@ -47,11 +47,10 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        val abiEnv = System.getenv("CI_ABI")
-        ndk {
-            abiFilters.addAll(if (abiEnv != null) listOf(abiEnv) else 
-            listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-        }
+        
+        // DON'T set ABI filters here - KTX library can't compile for x86
+        // Instead, we'll set them per build type below
+        
         externalNativeBuild {
             cmake {
                 cppFlags.addAll(listOf("-std=c++17"))
@@ -67,7 +66,8 @@ android {
         create("release") {
             val storeFilePath = keystoreProperties["storeFile"] as String?
             if (!storeFilePath.isNullOrBlank()) {
-                storeFile = file(storeFilePath)
+                // Use rootProject.file() to resolve from android/ folder
+                storeFile = rootProject.file(storeFilePath)
             }
             storePassword = keystoreProperties["storePassword"] as String?
             keyAlias = keystoreProperties["keyAlias"] as String?
@@ -82,11 +82,52 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    
     buildTypes {
-        debug { isJniDebuggable = true }
-        release { isMinifyEnabled = false
-        signingConfig = signingConfigs.getByName("release") }
+        debug { 
+            isJniDebuggable = true
+            
+            // DUAL BUILD SUPPORT: Different app ID so debug and release can coexist
+            applicationIdSuffix = ".debug"  // Makes it: com.game.pain.debug
+            versionNameSuffix = "-DEBUG"    // Version shows as "1.0-DEBUG"
+            
+            // Different app name in launcher to distinguish them
+            manifestPlaceholders["appName"] = "PAIN (Debug)"
+            
+            // For debug/emulator: Only ARM to avoid KTX x86 compilation error
+            // Modern emulators can use ARM via translation
+            ndk {
+                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            }
+        }
+        
+        release { 
+            isMinifyEnabled = true  // Enable code shrinking
+            isShrinkResources = true  // Remove unused resources
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+            
+            // Production app name
+            manifestPlaceholders["appName"] = "PAIN"
+            
+            // Optimize native builds
+            externalNativeBuild {
+                cmake {
+                    cppFlags.addAll(listOf("-O3", "-DNDEBUG"))  // Maximum optimization
+                    arguments.add("-DCMAKE_BUILD_TYPE=Release")
+                }
+            }
+            
+            // ARM only for release
+            ndk {
+                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            }
+        }
     }
+    
     externalNativeBuild {
         cmake {
             path = file("../../CMakeLists.txt")

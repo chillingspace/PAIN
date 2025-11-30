@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "MetalPillar2.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 1677233557100006777
+  },
+  "descriptor_version": 1,
+  "guid": "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\MetalPillar2.prefab"
+  }
+}

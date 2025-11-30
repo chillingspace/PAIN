@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "ToyCar_basecolor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1460384785135355199
+  },
+  "descriptor_version": 1,
+  "guid": "e9b6116d-a93f-764f-b05f-d68e653e3878",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\game\\models\\toycar\\ToyCar_basecolor.png"
+  }
+}

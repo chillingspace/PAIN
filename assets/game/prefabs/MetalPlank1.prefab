@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": 21,
+                    "localAABB": {
+                        "max": [
+                            57.97823715209961,
+                            211.10305786132813,
+                            5.444207191467285
+                        ],
+                        "min": [
+                            -57.97823715209961,
+                            0.0,
+                            -0.7065536975860596
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.2541748881340027,
+                            0.21110306680202484,
+                            0.7221170663833618
+                        ],
+                        "min": [
+                            0.13821841776371002,
+                            0.0,
+                            0.7159662842750549
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.19619666039943695,
+                        0.0,
+                        0.7166728377342224
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+                            "aoTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "266caf71-f83f-9e4a-b789-333e707a570f",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                            "normalTextureOverride": "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "090f5424-a7e5-a44c-adf1-bf54ac246837",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "MetalPlank1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e"
+        }
+    ],
+    "prefabName": "MetalPlank1",
+    "rootEntityGUID": "46cdc014-de87-0848-b490-9817e8c6cc5e"
+}

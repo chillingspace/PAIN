@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Frog_Frog_Material_BaseColor.1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17001592502642883597
+  },
+  "descriptor_version": 1,
+  "guid": "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Frog_Frog_Material_BaseColor.1001.png"
+  }
+}

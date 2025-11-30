@@ -12,7 +12,7 @@
 #include "WindowsRenderer.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
-
+#include "ECS/Controller.h"
 #include "CoreSystems/Windows/Window.h"
 
 
@@ -25,11 +25,83 @@ namespace PAIN {
 	//};
 
 	WindowsRenderer::WindowsRenderer() {
-
+		PN_CORE_INFO("WindowsRenderer ctor");
 	}
 
 	WindowsRenderer::~WindowsRenderer() {
 		Cleanup();
+	}
+
+	void WindowsRenderer::initSceneVbo(const std::vector<PAIN::ModelRenderer>& models) {
+		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
+
+		//GS.use_instanced_rendering = false;
+
+		glBindVertexArray(geometry_vao);
+
+		if (!GS.use_instanced_rendering) {
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			glBindVertexArray(shadow_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			return;
+		}
+
+		unsigned int total_vertices{};
+		unsigned int total_indices{};
+		std::vector<Assets::Vertex> vertices;
+		unsigned int offset{};
+		std::vector<unsigned int> indices;
+		std::unordered_set<std::string> referenced{};
+
+		auto ecs = services->get<ECS::Controller>();
+
+		for (const auto& mdl : models) {
+			if (!mdl.cachedModelAsset || referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
+				continue;
+			}
+
+			const auto& m = mdl.cachedModelAsset;
+
+			referenced.insert(m->vpath);
+			total_vertices += m->vertices.size();
+			total_indices += m->indices.size();
+			vertices.insert(vertices.end(), m->vertices.begin(), m->vertices.end());
+			instanced_offsets[m->vpath] = { offset, (unsigned int)m->indices.size() };
+
+			// translate indices
+			std::vector<unsigned int> translated_indices{};
+			translated_indices.reserve(m->indices.size());
+			for (unsigned int idx : m->indices) {
+				translated_indices.push_back(offset + idx);
+			}
+			offset += m->vertices.size();		// yes vertices not indices. this isnt a bug.
+
+			indices.insert(indices.end(), translated_indices.begin(), translated_indices.end());
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(Assets::Vertex), vertices.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_indices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+		// create instance buffer
+
+		//glCreateBuffers(1, &geometry_ibo);
+		glGenBuffers(1, &geometry_ibo);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
+		glBufferData(GL_ARRAY_BUFFER, referenced.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_DRAW);
+
+		// cleanup
+
+		glBindVertexArray(0);
 	}
 
 	void WindowsRenderer::initShaders()
@@ -67,12 +139,24 @@ namespace PAIN {
 		//Get assets loader
 		auto assets_loader = services->get<Assets::Manager>();
 
+
+		//FLoor shader
+		auto shader_opt = assets_loader->getAsset<Assets::Shader>(floor_path);
+		floor_shader = shader_opt.has_value() ? shader_opt.value() : floor_shader;
+
+		if (!floor_shader || floor_shader->GetRendererID() == 0) {
+			PN_CORE_ERROR("Failed to create shader program for floor");
+			throw std::runtime_error("");
+			return;
+		}
+
 		//PBR Shader
-		auto shader_opt = assets_loader->getAsset<Assets::Shader>(pbr_path);
+		shader_opt = assets_loader->getAsset<Assets::Shader>(pbr_path);
 		pbr_shader = shader_opt.has_value() ? shader_opt.value() : pbr_shader;
 
 		if (!pbr_shader || pbr_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for pbr");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -81,16 +165,8 @@ namespace PAIN {
 		geometry_shader = shader_opt.has_value() ? shader_opt.value() : geometry_shader;
 
 		if (!geometry_shader || geometry_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
-			return;
-		}
-
-		//FLoor shader
-		shader_opt = assets_loader->getAsset<Assets::Shader>(floor_path);
-		floor_shader = shader_opt.has_value() ? shader_opt.value() : floor_shader;
-
-		if (!floor_shader || floor_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for geometry");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -99,7 +175,8 @@ namespace PAIN {
 		passthrough_shader = shader_opt.has_value() ? shader_opt.value() : passthrough_shader;
 
 		if (!passthrough_shader || passthrough_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for passthrough");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -108,7 +185,8 @@ namespace PAIN {
 		shadow_shader = shader_opt.has_value() ? shader_opt.value() : shadow_shader;
 
 		if (!shadow_shader || shadow_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for shadow");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -117,7 +195,8 @@ namespace PAIN {
 		texture2d_shader = shader_opt.has_value() ? shader_opt.value() : texture2d_shader;
 
 		if (!texture2d_shader || texture2d_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for texture2d");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -126,7 +205,8 @@ namespace PAIN {
 		tone_shader = shader_opt.has_value() ? shader_opt.value() : tone_shader;
 
 		if (!tone_shader || tone_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for tone");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -135,7 +215,8 @@ namespace PAIN {
 		bloom_shader = shader_opt.has_value() ? shader_opt.value() : bloom_shader;
 
 		if (!bloom_shader || bloom_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for bloom");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -144,7 +225,8 @@ namespace PAIN {
 		bloom_blend_shader = shader_opt.has_value() ? shader_opt.value() : bloom_blend_shader;
 
 		if (!bloom_blend_shader || bloom_blend_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for bloom blend");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -153,7 +235,8 @@ namespace PAIN {
 		blur_shader = shader_opt.has_value() ? shader_opt.value() : blur_shader;
 
 		if (!blur_shader || blur_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for blur");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -162,7 +245,8 @@ namespace PAIN {
 		gamma_shader = shader_opt.has_value() ? shader_opt.value() : gamma_shader;
 
 		if (!gamma_shader || gamma_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for gamma");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -171,7 +255,8 @@ namespace PAIN {
 		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
 		if (!debug_shader || debug_shader->GetRendererID() == 0) {
-			PN_CORE_ERROR("Failed to create shader program");
+			PN_CORE_ERROR("Failed to create shader program for debug");
+			throw std::runtime_error("");
 			return;
 		}
 	}
@@ -181,6 +266,7 @@ namespace PAIN {
 		glGenTextures(1, &tex);
 		if (!tex) {
 			PN_CORE_ERROR("Failed to gen texture");
+			throw std::runtime_error("");
 			return;
 		}
 
@@ -227,14 +313,18 @@ namespace PAIN {
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
 
-			unsigned int attachments[4] = {
+			static constexpr int NUM_GBUFFERS = 5;
+
+			unsigned int attachments[NUM_GBUFFERS] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3,
+				GL_COLOR_ATTACHMENT4,
 			};
-			glDrawBuffers(4, attachments);
+			glDrawBuffers(NUM_GBUFFERS, attachments);
 
 			glGenRenderbuffers(1, &ds_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
@@ -352,12 +442,60 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &geometry_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &geometry_ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+
+			// Position attribute, layout(location = 0)
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
+			glEnableVertexAttribArray(0);
+
+			// Normal attribute, layout(location = 1)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
+			glEnableVertexAttribArray(1);
+
+			// texcoords attribute, layout(location = 2)
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
+			glEnableVertexAttribArray(2);
+
+			// bone indices
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices_f));
+			glEnableVertexAttribArray(3);
+
+			// bone weights
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
+			glEnableVertexAttribArray(4);
+
+			// tangent
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, tangent));
+			glEnableVertexAttribArray(5);
+
+			// bitangent
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
+			glEnableVertexAttribArray(6);
+
+			// Unbind VAO
+			glBindVertexArray(0);
+		}
+
+		// for shadow
+		{
+			// Generate and bind VAO
+			glGenVertexArrays(1, &shadow_vao);
+			glBindVertexArray(shadow_vao);
+
+			// Generate and bind VBO
+			glGenBuffers(1, &shadow_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+			// glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+			// Generate and bind EBO (index buffer)
+			glGenBuffers(1, &shadow_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+			// glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
@@ -386,7 +524,7 @@ namespace PAIN {
 			// Generate and bind VBO
 			glGenBuffers(1, &debug_VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
 			// Position attribute, layout(location = 0)
 			glEnableVertexAttribArray(0);
@@ -424,7 +562,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale) {
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale) {
 		if (texture_id == 0) {
 			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
 			return;
@@ -435,17 +573,64 @@ namespace PAIN {
 			return;
 		}
 
+		// ========================================
+		// SAVE STATE
+		// ========================================
+		GLint currentActiveTexture;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
+
+		GLint currentTexture;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
+
+		GLint currentVAO;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+
+		GLint currentProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
+		// ========================================
+		// RENDER
+		// ========================================
+		auto window_service = services->get<Window::Window>();
+		auto framebuffer = window_service->getFrameBuffer();
+
+		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
+
 		texture2d_shader->Bind();
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after shader bind: 0x{:X}", err);
+		}
+
 		texture2d_shader->SetUniform("pos", pos);
-		texture2d_shader->SetUniform("ndc_scale", scale);
+		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		texture2d_shader->SetUniform("tex", 6);
+
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after texture bind: 0x{:X}", err);
+		}
+
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		glBindVertexArray(0);
+		err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("Error after draw call: 0x{:X}", err);
+		}
+
+		// ========================================
+		// RESTORE STATE
+		// ========================================
+		glActiveTexture(currentActiveTexture);
+		glBindTexture(GL_TEXTURE_2D, currentTexture);
+		glBindVertexArray(currentVAO);
+		glUseProgram(currentProgram);
 	}
 
 	void WindowsRenderer::BeginShadowPass(const Light& l)
@@ -474,10 +659,10 @@ namespace PAIN {
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
-		glBindVertexArray(geometry_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBindVertexArray(shadow_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
 		if (component.cachedModelAsset->submeshes.empty()) {
@@ -515,7 +700,7 @@ namespace PAIN {
 #endif
 	}
 
-	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene> scene)
+	void WindowsRenderer::BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene)
 	{
 		//PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
 
@@ -538,6 +723,7 @@ namespace PAIN {
 		//}
 
 		// draw floor
+		if (GraphicsSettings::get().draw_floor)
 		{
 			if (!floor_shader) {
 				PN_CORE_ERROR("Unable to find floor_shader");
@@ -564,8 +750,10 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M)
+	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
+		//auto& gs = GraphicsSettings::get();
+
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
@@ -584,14 +772,21 @@ namespace PAIN {
 
 		// Bind component's VAO (already has vertex data uploaded)
 		glBindVertexArray(geometry_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
+
+		//if (!GS.use_instanced_rendering) 
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
+		}
+
+		if (GS.use_instanced_rendering) {
+
+		}
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
-			// TEMPORARY: Only render first submesh
 			const auto& submesh = modelAsset->submeshes[i];
 
 			//Check out of bounds
@@ -622,116 +817,253 @@ namespace PAIN {
 			//Check material asset
 			if (materialAsset) {
 
-				//Albedo Texture
-				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+				{
+					//Albedo Texture
+					std::optional<std::shared_ptr<Assets::Texture>> tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->albedoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
 
-				if (tex_opt.has_value()) {
-					albedoTexture = tex_opt.value()->gl_texture;
+					if (tex_opt.has_value() && GS.DEBUG_USE_DIFFUSE_MAP) {
+						albedoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Normal texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+					if (tex_opt.has_value() && GS.DEBUG_USE_NORMAL_MAP) {
+						normalTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Metallic texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						metallicTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Roughness texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+						roughnessTexture = tex_opt.value()->gl_texture;
+					}
+
+					//AO texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+					if (tex_opt.has_value() && GS.DEBUG_USE_AO_MAP) {
+						aoTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Emissive texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+					if (tex_opt.has_value() && GS.DEBUG_USE_EMISSION_MAP) {
+						emissiveTexture = tex_opt.value()->gl_texture;
+					}
+
+					//Height texture
+					/*
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+					if (tex_opt.has_value()) {
+						heightTexture = tex_opt.value()->gl_texture;
+					}
+					*/
+
+					//Opacity texture
+					tex_opt = material->useOverrides ?
+						assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
+						: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+					if (tex_opt.has_value()) {
+						opacityTexture = tex_opt.value()->gl_texture;
+					}
+
+
+					// Use override or asset default
+					glm::vec3 baseColor = material->useOverrides
+						? material->baseColorOverride
+						: materialAsset->baseColor;
+
+					float metallic = material->useOverrides
+						? material->metallicOverride
+						: materialAsset->metallic;
+
+					float roughness = material->useOverrides
+						? material->roughnessOverride
+						: materialAsset->roughness;
+
+					geometry_shader->SetUniform("material.rough", roughness);
+					geometry_shader->SetUniform("material.metal", metallic);
+					geometry_shader->SetUniform("material.color", baseColor);
 				}
-
-				//Normal texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->normalTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
-
-				if (tex_opt.has_value()) {
-					normalTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Metallic texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->metallicTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
-
-				if (tex_opt.has_value()) {
-					metallicTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Roughness texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->roughnessTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
-
-				if (tex_opt.has_value()) {
-					roughnessTexture = tex_opt.value()->gl_texture;
-				}
-
-				//AO texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->aoTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
-
-				if (tex_opt.has_value()) {
-					aoTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Emissive texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->emissiveTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
-
-				if (tex_opt.has_value()) {
-					emissiveTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Height texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
-
-				if (tex_opt.has_value()) {
-					heightTexture = tex_opt.value()->gl_texture;
-				}
-
-				//Opacity texture
-				tex_opt = material->useOverrides ?
-					assetManager->getAsset<Assets::Texture>(material->opacityTextureOverride)
-					: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
-
-				if (tex_opt.has_value()) {
-					opacityTexture = tex_opt.value()->gl_texture;
-				}
-
-				// Use override or asset default
-				glm::vec3 baseColor = material->useOverrides
-					? material->baseColorOverride
-					: materialAsset->baseColor;
-
-				float metallic = material->useOverrides
-					? material->metallicOverride
-					: materialAsset->metallic;
-
-				float roughness = material->useOverrides
-					? material->roughnessOverride
-					: materialAsset->roughness;
-
-				geometry_shader->SetUniform("material.rough", roughness);
-				geometry_shader->SetUniform("material.metal", metallic);
-				geometry_shader->SetUniform("material.color", baseColor);
 			}
 
 			// Bind textures from MaterialInstance
 			bool hasTexture = albedoTexture != 0;
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
-			geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
+			//geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f : 0.f);
 
-			if (hasTexture) {
+			if (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) {
 				glActiveTexture(GL_TEXTURE6);
 				glBindTexture(GL_TEXTURE_2D, albedoTexture);
 				geometry_shader->SetUniform("material.tex", 6);
-
-				if (GraphicsSettings::get().ao && aoTexture != 0) {
-					glActiveTexture(GL_TEXTURE7);
-					glBindTexture(GL_TEXTURE_2D, aoTexture);
-					geometry_shader->SetUniform("material.ao_map", 7);
-					geometry_shader->SetUniform("material.use_ao", 1.0f);
-				}
-				else {
-					geometry_shader->SetUniform("material.use_ao", 0.0f);
-				}
 			}
+			else {
+				geometry_shader->SetUniform("material.useTex", 0.f);
+			}
+
+			if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, aoTexture);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.0f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_ao", 0.0f);
+			}
+
+			if (GS.DEBUG_USE_NORMAL_MAP && normalTexture) {
+				glActiveTexture(GL_TEXTURE8);
+				glBindTexture(GL_TEXTURE_2D, normalTexture);
+				geometry_shader->SetUniform("material.normal_map", 8);
+				geometry_shader->SetUniform("material.use_normal", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_normal", 0.f);
+			}
+
+			if (GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, roughnessTexture);
+				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
+			}
+
+			if (GS.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, emissiveTexture);
+				geometry_shader->SetUniform("material.use_emission", 1.f);
+				geometry_shader->SetUniform("material.emission_map", 10);
+			}
+			else {
+				geometry_shader->SetUniform("material.use_emission", 0.f);
+			}
+
+
+
+			// animation
+			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
+			int bones_skipped{};
+			if (component.isPlaying) {
+				//PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
+
+				static std::vector<glm::mat4> boneMatrices;
+				static constexpr int MAX_BONES = 100;
+				boneMatrices.resize(MAX_BONES, glm::mat4(1.f));
+
+				// find local bone xforms relative to parent
+				// these mtx move this particular bone the specific amount RELATIVE to it's parent
+				// eg. how much a finger moves relative to the hand bone (not absolute positioning)
+				std::vector<glm::mat4> relative_poses(modelAsset->skeleton.size(), glm::mat4(1.f));
+
+				// each track controls a single bone's animation
+				for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
+					// find the animation keyframe corresponding to current animation time
+					const auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+					if (key_it == track.end())	PN_CORE_ERROR("Invalid iterator key_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+
+					// find the bone idx affected by current track
+					std::string bone_name_copy = bone_name;  // Create copy for lambda
+					const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(),
+						[&bone_name_copy](const Assets::Bone& b) {return b.name == bone_name_copy; });
+					if (bone_it == modelAsset->skeleton.end()) {
+						//PN_CORE_WARN("Bone does not exist for animation track {} for model {}. Skipped: {}", component.currentAnimationIndex, modelAsset->vpath, ++bones_skipped);
+						//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+						continue;
+
+					}
+					const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
+
+					// get the xform matrix that applies to current vertex from current animation key
+					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
+					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
+					const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
+					glm::mat4 animated_pose = translate * rotate * scale;
+
+					if (GraphicsSettings::get().interpolate_animation) {
+						auto next_key_it = std::next(key_it);
+						if (next_key_it != track.end()) {
+							// interpolate between current keyframe pose and next keyframe pose
+							const float t = (component.animationTime - key_it->time) / (next_key_it->time - key_it->time);
+							const glm::vec3 i_scale = glm::mix(key_it->scale, next_key_it->scale, t);
+							const glm::quat i_rotate = glm::slerp(key_it->rotation, next_key_it->rotation, t);
+							const glm::vec3 i_translate = glm::mix(key_it->translation, next_key_it->translation, t);
+
+							const glm::mat4 i_scale_mtx = glm::scale(glm::mat4(1.f), i_scale);
+							const glm::mat4 i_rotate_mtx = glm::mat4_cast(i_rotate);
+							const glm::mat4 i_translate_mtx = glm::translate(glm::mat4(1.f), i_translate);
+
+							// update interpolated matrix
+							animated_pose = i_translate_mtx * i_rotate_mtx * i_scale_mtx;
+						}
+					}
+
+					relative_poses[bone_idx] = animated_pose;
+
+					// multiply with bind pose mtx(the T shape thingy) for final xform matrix
+					//boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
+				}
+
+				// account for parent bone transformation
+				std::vector<glm::mat4> poses(modelAsset->skeleton.size());
+				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+					// if is parent, no need
+					if (modelAsset->skeleton[i].parent == -1) {
+						poses[i] = relative_poses[i];
+						continue;
+					}
+
+					// account for parent's xform
+					poses[i] = poses[modelAsset->skeleton[i].parent] * relative_poses[i];
+					//poses[i] = relative_poses[i] * poses[modelAsset->skeleton[i].parent];
+				}
+
+				// apply to bind pose (T pose)
+				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+					boneMatrices[i] = poses[i] * modelAsset->skeleton[i].bindPose;
+					//boneMatrices[i] = glm::inverse(modelAsset->skeleton[i].bindPose) * poses[i];
+				}
+
+				// populate animated bone xforms in shader
+				for (size_t i{}; i < boneMatrices.size(); ++i) {
+					const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
+					geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
+				}
+
+			}
+            else {
+                //PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
+            }
+
+			// debug
+			geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
 
 			// Draw this submesh
 			glDrawElements(
@@ -764,7 +1096,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights)
+	void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene, const LightSources& lights)
 	{
 		//{
 		//	/* this block is for debug tracing. print color texture(buffer) straight to screen */
@@ -808,24 +1140,30 @@ namespace PAIN {
 
 			pbr_shader->Bind();
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, pos_texture);
+			{
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, pos_texture);
 
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, col_texture);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, col_texture);
 
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, norm_texture);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, norm_texture);
 
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, material_properties_texture);
+
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, emission_texture);
+			}
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
 
-			int tex_id = 4;
+			static constexpr int NEXT_VALID_TEXID = 5;		// increment this after adding new texture bindings above
+			int tex_id = NEXT_VALID_TEXID;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
@@ -834,9 +1172,9 @@ namespace PAIN {
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
 #ifdef PN_PLATFORM_WINDOWS
-					ss << "u_ShadowMaps[" << (tex_id - 4) << "]";
+					ss << "u_ShadowMaps[" << (tex_id - NEXT_VALID_TEXID) << "]";
 #else
-					ss << "u_ShadowMap" << (tex_id - 4);
+					ss << "u_ShadowMap" << (tex_id - NEXT_VALID_TEXID);
 #endif
 
 					pbr_shader->SetUniform(ss.str(), tex_id);
@@ -844,7 +1182,7 @@ namespace PAIN {
 					ss.clear();
 
 					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), tex_id - 4.f);
+					pbr_shader->SetUniform(ss.str(), tex_id - static_cast<float>(NEXT_VALID_TEXID));
 					ss.str("");
 					ss.clear();
 
@@ -892,12 +1230,16 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
 			}
 
-			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - 4) * 1.f);
+			pbr_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
+
+			pbr_shader->SetUniform("u_NumShadowMaps", (tex_id - NEXT_VALID_TEXID) * 1.f);
 
 			pbr_shader->SetUniform("gPos", 0);
 			pbr_shader->SetUniform("gCol", 1);
 			pbr_shader->SetUniform("gNorm", 2);
 			pbr_shader->SetUniform("gMaterial", 3);
+			pbr_shader->SetUniform("gEmission", 4);
+
 			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
 			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
@@ -975,7 +1317,7 @@ namespace PAIN {
 	}
 
 
-	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene)
+	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene)
 	{
 		if (!debug_VAO || !debug_shader) return;
 
@@ -1215,47 +1557,6 @@ namespace PAIN {
 		;		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, final_texture, 0);
 
-		{
-			glDisable(GL_DEPTH_TEST);
-			glDepthMask(GL_TRUE);
-
-			// render 2D textures onto screen
-			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path texture_path = "engine/textures/sunshine.png";
-#else	
-				std::filesystem::path texture_path = "engine\\textures\\sunshine.png";
-#endif
-				// !TODO: add queue and iterate through all 2D textures to be rendered last
-				auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_path);
-				if(texture_opt.has_value()) Render2DTexture(texture_opt.value()->gl_texture, {0.85f, -0.85f}, 0.1f);
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after Render2DTexture in PostProcessPass: {}", err);
-			}
-
-			// render text onto screen
-			{
-				//Get font to render
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
-#else	
-				std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
-#endif
-				auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(font_path);
-				if (font_opt.has_value()) TextRenderer::get().renderText(font_opt.value()->getFont(), "Pantat", 100.f, 100.f, 1.f, {1.f, 1.f, 1.f});
-				if (font_opt.has_value()) TextRenderer::get().debugRenderQuad();
-			}
-			err = glGetError();
-			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after TextRenderer in PostProcessPass: {}", err);
-			}
-
-			glEnable(GL_DEPTH_TEST);
-		}
-
 		// render to actual screen
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		passthrough_shader->Bind();
@@ -1289,6 +1590,26 @@ namespace PAIN {
 		if (geometry_ebo != 0) {
 			glDeleteBuffers(1, &geometry_ebo);
 			geometry_ebo = 0;
+		}
+
+		if (geometry_ibo) {
+			glDeleteBuffers(1, &geometry_ibo);
+			geometry_ibo = 0;
+		}
+
+		if (shadow_vao != 0) {
+			glDeleteVertexArrays(1, &shadow_vao);
+			shadow_vao = 0;
+		}
+
+		if (shadow_vbo != 0) {
+			glDeleteBuffers(1, &shadow_vbo);
+			shadow_vbo = 0;
+		}
+
+		if (shadow_ebo != 0) {
+			glDeleteBuffers(1, &shadow_ebo);
+			shadow_ebo = 0;
 		}
 
 		if (debug_VAO) {

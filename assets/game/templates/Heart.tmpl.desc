@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Heart.tmpl",
+    "type": "Templates"
+  },
+  "build_data": {
+    "hash": 2725423298225728295
+  },
+  "descriptor_version": 1,
+  "guid": "467c98fc-0978-eb48-82cf-5ff77d2dd93f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\templates\\Heart.tmpl"
+  }
+}

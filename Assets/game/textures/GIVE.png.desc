@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GIVE.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15115876212428908342
+  },
+  "descriptor_version": 1,
+  "guid": "c976f342-deeb-7f42-859a-faceb89d2ce8",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\GIVE.png"
+  }
+}

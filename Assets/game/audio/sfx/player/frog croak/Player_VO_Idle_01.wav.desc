@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Player_VO_Idle_01.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 4225726559475065940
+  },
+  "descriptor_version": 1,
+  "guid": "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_01.wav"
+  }
+}

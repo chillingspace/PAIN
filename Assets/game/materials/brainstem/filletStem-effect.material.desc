@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "filletStem-effect.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13813480576534077276
+  },
+  "descriptor_version": 1,
+  "guid": "2b43d943-6ddf-1b4e-bdf6-d494ef0fbf4e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\brainstem\\filletStem-effect.material"
+  }
+}

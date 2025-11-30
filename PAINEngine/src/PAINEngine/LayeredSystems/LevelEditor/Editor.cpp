@@ -13,6 +13,8 @@
 #include "Panels/ViewportPanel.h"
 #include "Panels/EntityPanel.h"
 #include "Panels/DebugPanel.h"
+#include "Panels/PrefabsPanel.h"
+#include "Panels/AnimationPanel.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -53,96 +55,32 @@ namespace PAIN {
             auto ser = services->get<PAIN::Serialization::Service>();
             PN_CORE_ASSERT(ser, "Serialization::Service not found in services");
 
-            // if ScenesPanel uses a hooks struct, fill it:
-            Panel::ScenesHooks hooks{};
-
-            hooks.onCreate = [ser](const std::string& base) {
-                if (!ser->createNewScene(base)) {
-                    PN_CORE_WARN("[ScenesPanel] createNewScene failed: {}", base.c_str());
-                }
-                };
-            hooks.onSaveAs = [ser](const std::string& base) -> bool {
-                if (!ser->saveSceneAs(base)) {
-                    PN_CORE_WARN("[ScenesPanel] saveSceneAs failed: {}", base.c_str());
-                    return false;
-                }
-                return true;
-                };
-            hooks.onSaveCurrent = [ser](const std::string& currSceneId) -> bool {
-                if (!ser->saveCurrentScene()) {
-                    PN_CORE_WARN("[ScenesPanel] saveCurrentScene failed");
-                    return false;
-                }
-                return true;
-                };
-            hooks.onDelete = [ser](const std::string& sceneId) -> bool {
-                if (!ser->deleteSceneById(sceneId)) {
-                    PN_CORE_WARN("[ScenesPanel] deleteSceneById failed: {}", sceneId.c_str());
-                    return false;
-                }
-                return true;
-                };
-            hooks.onChange = [ser](const std::string& sceneId) -> bool {
-                if (!ser->loadSceneById(sceneId)) {
-                    PN_CORE_WARN("[ScenesPanel] loadSceneById failed: {}", sceneId.c_str());
-                    return false;
-                }
-                PN_CORE_INFO("[ScenesPanel] Loaded {}", sceneId.c_str());
-                return true;
-                };
-            hooks.onModifyScene = [ser](const std::string& sceneId) { ser->modifyScene(); };
-            hooks.onMaskChanged = [ser](unsigned i, unsigned j, bool v) {
-                ser->setMask(i, j, v);      
-                ser->modifyScene();         
-                };
-
-            hooks.onLayerVisibleChanged = [ser](unsigned idx, bool vis) {
-                ser->setLayerVisible(idx, vis); 
-                ser->modifyScene();
-                };
-            hooks.onDirty = [ser]() { ser->modifyScene(); };
-
-
-
-
-            auto scenesPanel = std::make_shared<Panel::ScenesPanel>(hooks);
-
             // Create EntityPanel first and keep a reference
             auto entity_panel = std::make_shared<Panel::EntityPanel>();
             registerPanel(entity_panel);
 
-            registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::AudioPanel>());
             registerPanel(std::make_shared<Panel::ScenesPanel>());
-            registerPanel(scenesPanel);
-            registerPanel(std::make_shared<Panel::ComponentsPanel>());
+
+            auto components_panel = std::make_shared<Panel::ComponentsPanel>();
+            registerPanel(components_panel);
 
             // Create ViewportPanel and link it to EntityPanel
             auto viewport_panel = std::make_shared<Panel::ViewportPanel>();
-            viewport_panel->setEntityPanel(entity_panel);  // LINK THEM TOGETHER
             registerPanel(viewport_panel);
+
+            auto animation_panel = std::make_shared<Panel::AnimationPanel>();
+            registerPanel(animation_panel);
 
             registerPanel(std::make_shared<Panel::DebugPanel>());
 
 
-            //Register resource panel
 #ifdef PN_PLATFORM_WINDOWS
+            registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::ResourcePanel>());
+            registerPanel(std::make_shared<Panel::PrefabPanel>());
 #endif
-
-            // Use weak ptr to prevent mem leak
-            auto weakScenesPanel = std::weak_ptr<Panel::ScenesPanel>(scenesPanel);
-
-            command_manager->onModifySceneHook = [weakScenesPanel]() {
-                if (auto sp = weakScenesPanel.lock()) {  // convert to shared_ptr safely
-
-                    sp->notifyModifyScene();
-                }
-            };
-
             
-            
-
             // Call onAttach on all registered panels
             panels->forEachOfType<Panel::IPanel>([](std::shared_ptr<Panel::IPanel> panel) {
                 panel->onAttach();
@@ -231,14 +169,19 @@ namespace PAIN {
                 if (!editor_visible) {
                     if (auto viewport = services->get<Panel::ViewportPanel>()) {
                         viewport->setSimulationState(false); // false = playing
+                       
+                    }
+                    if (isPaused()) {
+                        togglePause();
                     }
                 }
             }
             if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
-                editor_debug_mode = (editor_debug_mode + 1) % 3; // Cycles 0 -> 1 -> 2 -> 0
+                editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0
                 if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
-                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
-                else PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
+                else if (editor_debug_mode == 2) PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                else PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
             }
 
 #endif
@@ -274,21 +217,24 @@ namespace PAIN {
                 }
 
                 const char* debug_mode_labels[] = {
-                "Show Debug Lines (Entity AABBs)",
-                "Show Debug Lines (BVH Tree)",
+                "Show Physics Colliders",
+                "Show BVH Tree",
+                "Show Original AABBs",
                 "Hide Debug Lines"
                 };
 
                 // Button to toggle debug lines in andriod
                 if (ImGui::Button(debug_mode_labels[editor_debug_mode])) {
-                    editor_debug_mode = (editor_debug_mode + 1) % 3;
+                    editor_debug_mode = (editor_debug_mode + 1) % 4;
 
                     if (editor_debug_mode == 0)
                         PN_CORE_INFO("Editor debug rendering: OFF");
                     else if (editor_debug_mode == 1)
-                        PN_CORE_INFO("Editor debug rendering: ON (Entity AABBs)");
-                    else
+                        PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
+                    else if (editor_debug_mode == 2)
                         PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                    else
+                        PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
                 }
 
                 ImGui::End();

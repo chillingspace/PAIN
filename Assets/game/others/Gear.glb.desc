@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Gear.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 9371958930198180736
+  },
+  "descriptor_version": 1,
+  "guid": "b931e05c-ce66-a949-bdd5-c64653a4df0c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Gear.glb"
+  }
+}

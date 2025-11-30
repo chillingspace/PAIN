@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Cube.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 812375297031628667
+  },
+  "descriptor_version": 1,
+  "guid": "e1fbf2f4-909d-4b4a-8bee-8b886cd0838e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Cube.material"
+  }
+}

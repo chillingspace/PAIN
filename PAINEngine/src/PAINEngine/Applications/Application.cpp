@@ -7,6 +7,11 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
+#include "CoreSystems/Prefabs/sPrefab.h"
+#include "CoreSystems/EntityTemplate/sEntityTemplate.h"
+
+#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
+#include "CoreSystems/Renderer/text.h"
 
 // Serialization
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -21,18 +26,9 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
-// Systems
-#include "Systems/Physics/sysPhysics.h"
-#include "Systems/AI/sysAI.h" 
-#include "Systems/Animation/sysAnimation.h" 
-#include "Systems/Logic/sysLogic.h"
-#include "Systems/Audio/sysAudio.h"
-#include "Systems/Collision/sBVHSystem.h"
-#include "Systems/Scripting/GameScriptingSystem.h"
 
-#include "LayeredSystems/LevelEditor/Panels/ViewportPanel.h"
 
-#include "CoreSystems/Renderer/text.h"
+
 
 namespace PAIN {
 
@@ -63,17 +59,17 @@ namespace PAIN {
 
 	template<typename T>
 	void Application::addCoreSystem(std::shared_ptr<T> core_system) {
+		services->set<T>(core_system);
 		core_system->services = services;
 		core_system->onAttach();
-		services->set<T>(core_system);
 		core_stack.push_back(services->get<T>());
 	}
 
 	template<typename T>
 	void Application::addLayerSystem(std::shared_ptr<T> layer_system) {
+		services->set<T>(layer_system);
 		layer_system->services = services;
 		layer_system->onAttach();
-		services->set<T>(layer_system);
 		layer_stack.push_back(services->get<T>());
 	}
 
@@ -113,34 +109,26 @@ namespace PAIN {
 		addCoreSystem(std::make_shared<ECS::Controller>(services));
 		addCoreSystem(std::make_shared<MetaData::Service>());
 
+		//Create entity template and prefab service
+		services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
+		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
+
 		// Add Serialization
 		addCoreSystem(std::make_shared<Serialization::Service>());
 
-		// Physics system cross platform
-		services->get<ECS::Controller>()->registerSystem<Physics::System>();
-
-		services->get<ECS::Controller>()->registerSystem<PAIN::Scripting::GameScriptingSystem>();
-
-#ifdef PN_PLATFORM_WINDOWS	
-		services->get<ECS::Controller>()->registerSystem<AI::System>();
-		services->get<ECS::Controller>()->registerSystem<Animation::System>();
-		services->get<ECS::Controller>()->registerSystem<Logic::System>();
-		services->get<ECS::Controller>()->registerSystem<Audio::System>();
-#endif
-		services->get<ECS::Controller>()->registerSystem<sBVHSystem>();
-
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
-
-		// Scenes
-		addCoreSystem(std::make_shared<Scene>());
-
-		// Camera System
-		addCoreSystem(std::make_shared<sCameraController>());
+		// Register all systems here
+		services->get<ECS::Controller>()->registerAllSystems();
 
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
+		// Scenes
+		addCoreSystem(std::make_shared<Scene::SceneManager>());
+
+		// Camera System
+		addCoreSystem(std::make_shared<sCameraController>());
 
 		//Editor only added when debug mode
 #ifdef _DEBUG
@@ -172,21 +160,29 @@ namespace PAIN {
 		auto window = services->get<Window::Window>();
 		if (window) window->pollEvents();
 
+		if (window->isMinimized()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue; // Go back to start of while loop
+		}
+
 		//Drain all events in queue
 		drainEventQueue();
 
 		//Update delta time
 		auto now = std::chrono::steady_clock::now();
-		timing.dt = std::chrono::duration<float>(now - last_time).count();
+		float real_dt = std::chrono::duration<float>(now - last_time).count();
 		last_time = now;
 
-		auto fps = static_cast<int>(1.f / timing.dt);
+		// Store Unscaled Time (Always ticking even when paused)
+		timing.unscaled_dt = real_dt;
+
+		auto fps = static_cast<int>(1.f / timing.unscaled_dt);
 #ifdef PN_PLATFORM_WINDOWS
 		static float avgFps = 0.f;
 		static float timeSinceLastUpdate = 0.0f;
 
 		avgFps = avgFps * 0.95f + fps * 0.05f;
-		timeSinceLastUpdate += timing.dt;
+		timeSinceLastUpdate += timing.unscaled_dt;
 
 		if (timeSinceLastUpdate >= 0.5f) {
 			timeSinceLastUpdate = 0.0f;
@@ -198,16 +194,20 @@ namespace PAIN {
 			);
 		}
 #endif
-	
 #ifdef _DEBUG
 		if (services->get<Editor::Editor>()->isPaused()) {
 			timing.dt = 0.0f;
 			services->get<Audio::Audio>()->pauseAll();
 		}
 		else {
+			timing.dt = real_dt;
 			services->get<Audio::Audio>()->resumeAll();
 		}
+#else
+		timing.dt = real_dt;
 #endif
+
+
 
 		//Accumulate for fixed updates (use scaled time)
 		accumulator += timing.dt;  // Changed from timing.dt

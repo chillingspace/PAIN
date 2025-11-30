@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "OilDrumRed_1001.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12922785542812774513
+  },
+  "descriptor_version": 1,
+  "guid": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\OilDrumRed_1001.material"
+  }
+}

@@ -33,6 +33,59 @@ namespace PAIN {
 namespace PAIN {
 
 	class WindowsRenderer {
+	private:
+		// for instanced rendering
+
+		// scene vbo stuff
+		struct SceneVboOffset {
+			unsigned int idx_offset{};
+			unsigned int idx_count{};
+		};
+
+		std::unordered_map<std::string, SceneVboOffset> instanced_offsets{};
+
+		struct IBOData {
+			glm::mat4 model_xform;
+
+			float base_rough;
+			float base_metal;
+			glm::vec3 base_color;
+
+			bool use_tex;
+			bool use_ao;
+			bool use_normal;
+			bool use_roughnessmetallic;
+			bool use_emissive;
+			bool is_animating;
+		};
+
+		// for batching materials
+		struct MaterialKey {
+			unsigned int albedoTexture = 0;
+			unsigned int normalTexture = 0;
+			unsigned int metallicTexture = 0;
+			unsigned int roughnessTexture = 0;
+			unsigned int aoTexture = 0;
+			unsigned int emissiveTexture = 0;
+			unsigned int heightTexture = 0;
+			unsigned int opacityTexture = 0;
+
+			bool operator==(const MaterialKey& mk) {
+				return mk.albedoTexture == albedoTexture
+					&& mk.normalTexture == normalTexture
+					&& mk.metallicTexture == metallicTexture
+					&& mk.roughnessTexture == roughnessTexture
+					&& mk.aoTexture == aoTexture
+					&& mk.emissiveTexture == emissiveTexture
+					&& mk.heightTexture == heightTexture
+					&& mk.opacityTexture == opacityTexture;
+			}
+
+			bool operator!=(const MaterialKey& mk) {
+				return !(*this == mk);
+			}
+		};
+
 
 	public:
 		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
@@ -44,23 +97,24 @@ namespace PAIN {
 		~WindowsRenderer();
 
 		void Init(std::shared_ptr<Services> app_services);
+		void initSceneVbo(const std::vector<PAIN::ModelRenderer>& models);
 
 		// PASSES
 		void BeginShadowPass(const Light& l);
 		void DrawShadows(const ModelRenderer& component, const glm::mat4& M, const Light& l);
 		void EndShadowPass();
 
-		void BeginGeometryPass(std::shared_ptr<Scene> scene);
-		void DrawGeometry(std::shared_ptr<Scene> scene, ModelRenderer& component, const glm::mat4& M);
+		void BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene);
+		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
 
 
 		void ReflectionPass(const ModelRenderer& component);
-		void LightingPass(std::shared_ptr<Scene> scene, const LightSources& lights);
-		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene> scene);
+		void LightingPass(std::shared_ptr<Scene::SceneManager> scene, const LightSources& lights);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene);
 		void PostProcessPass();
 
-		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, float scale);
+		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale);
 
 		void Cleanup();
 
@@ -73,7 +127,7 @@ namespace PAIN {
 		}
 
 		static constexpr int MAX_VERTICES = 1000000;
-		static constexpr int MAX_INDICES = 1000000;
+		static constexpr int MAX_INDICES = MAX_VERTICES;
 
 	private:
 		/*
@@ -98,11 +152,17 @@ namespace PAIN {
 		unsigned int norm_texture = 0;
 		//unsigned int shadow_texture = 0;					// shadow map
 		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
+		unsigned int emission_texture = 0;
 
+		// !TODO: jspoh cleanup memory
 		// === Geometry Buffers ===
 		unsigned int geometry_vao = 0;
 		unsigned int geometry_vbo = 0;
 		unsigned int geometry_ebo = 0;
+		unsigned int geometry_ibo = 0;
+		unsigned int shadow_vao = 0;
+		unsigned int shadow_vbo = 0;
+		unsigned int shadow_ebo = 0;
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
@@ -138,11 +198,12 @@ namespace PAIN {
 			&pp2_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
-		std::array<unsigned int*, 7> texs{
+		std::array<unsigned int*, 8> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
+			&emission_texture,
 			//&shadow_texture,
 			&final_texture,
 			&pp_texture,

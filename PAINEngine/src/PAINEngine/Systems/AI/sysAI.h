@@ -15,41 +15,119 @@
 
 #include "pch.h"
 #include "ECS/System/ISystem.h"
+#include "PAINEngine/Systems/Physics/sysPhysics.h" 
+#include "PAINEngine/CoreSystems/Scripting/IEngineAPI.h"
+#include "PAINEngine/CoreSystems/Scripting/luaManager.h"
+#include "PAINEngine/CoreSystems/Scripting/LuaAIBindings.h"
+#include "PAINEngine/Systems/Scripting/GameScriptingSystem.h"
+#include "PAINEngine/ECS/Controller.h"
+//#include <entt/entt.hpp>
 
 namespace PAIN {
 
+	class Services; 
+	namespace Physics { class System; }
+
 	namespace AI {
 
-		class System : public ECS::System::ISystem
-		{
-		public:
-			explicit System(std::shared_ptr<Services> svc);
-			~System();
+        class PerceptionSystem {
+        public:
+            explicit PerceptionSystem(Physics::System* physics);
+            void onUpdate(float dt, entt::registry& reg);
+            void setPhysics(Physics::System* physics) { physics_ = physics; }
 
-			void onUpdate(AppTiming timing, entt::registry& reg) override;
-			// Event handler for app layer
-			void onEvent(Event::Event& e) override;
-			std::string getSysName() const override { return "AI System"; }
+        private:
+            Physics::System* physics_ = nullptr;  
+            bool canSee(entt::entity self, entt::entity other, entt::registry& reg,
+                        float fovDeg, float range, bool requireLOS);
+        };
 
-			// external
-			void enableAI(bool enable);
-			bool isAIEnabled() const;
+        class BehaviorRuntimeSystem {
+        public:
+            BehaviorRuntimeSystem() = default;
+            BehaviorRuntimeSystem(IEngineAPI* api, LuaManager* luaMgr)
+                : api_(api), luaMgr_(luaMgr) {
+            }
+
+            void setDependencies(IEngineAPI* api, LuaManager* luaMgr) {
+                api_ = api;
+                luaMgr_ = luaMgr;
+            }
+
+            void onUpdate(float dt, entt::registry& reg);
+
+        private:
+            IEngineAPI* api_ = nullptr;
+            LuaManager* luaMgr_ = nullptr;
+
+            void tickEntity(float dt, entt::entity e, entt::registry& reg);
+            bool lua_decide(entt::entity e, entt::registry& reg, float dt);
+        };
+
+        class NavigationSystem {
+        public:
+            explicit NavigationSystem(Physics::System* physics);
+            void onUpdate(float dt, entt::registry& reg);
+            void setPhysics(Physics::System* physics) { physics_ = physics; }
+
+        private:
+            Physics::System* physics_ = nullptr;
+            void startOrUpdatePath(entt::entity e, entt::registry& reg, const glm::vec3& goal);
+            void advanceAlongPath(float dt,
+                entt::entity e,
+                entt::registry& reg);
+        };
+
+        class SteeringSystem {
+        public:
+            explicit SteeringSystem(IEngineAPI* api);
+            void onUpdate(float dt, entt::registry& reg);
+            void setAPI(IEngineAPI* api) { api_ = api; }
+
+        private:
+            IEngineAPI* api_ = nullptr;
+            void applyMotion(entt::entity e,
+                entt::registry& reg,
+                const glm::vec3& vel,
+                float dt);
+        };
+
+        class AICommandFlushSystem {
+        public:
+            explicit AICommandFlushSystem(IEngineAPI* api);
+            void onUpdate(float dt, entt::registry& reg);
+            void setAPI(IEngineAPI* api) { api_ = api; }
+
+        private:
+            IEngineAPI* api_ = nullptr;
+            void execute(entt::entity e, entt::registry& reg);
+        };
+
+        class System : public ECS::System::ISystem {
+        public:
+            explicit System(std::shared_ptr<Services> svc);
+
+            std::string getSysName() const override { return "AI System"; }
+
+            void onUpdate(AppTiming timing, entt::registry& reg) override;
+
+            void enableAI(bool enable) { b_ai_enabled = enable; }
+            bool isAIEnabled() const { return b_ai_enabled; }
 
 		private:
+			Physics::System* physics_ = nullptr; // non-owning
+			IEngineAPI* engineApi_ = nullptr; // non-owning
+            LuaManager* luaMgr_ = nullptr;
 
-			// AI system configuration values
-			const int c_max_ai_entities;
-			const float c_ai_update_interval; // Time between AI updates in seconds
+			PerceptionSystem      perception_;
+			BehaviorRuntimeSystem behavior_;
+			NavigationSystem      navigation_;
+			SteeringSystem        steering_;
+			AICommandFlushSystem  commandFlush_;
 
-			// AI update tracking
-			float accumulated_time;
+			bool b_ai_enabled = true;
 
-			// AI state control
-			bool b_ai_enabled;
-
-			// AI initialization setup
-			void aiSetup();
-
+            void refreshDependencies(entt::registry& reg);
 		};
 	}
 
