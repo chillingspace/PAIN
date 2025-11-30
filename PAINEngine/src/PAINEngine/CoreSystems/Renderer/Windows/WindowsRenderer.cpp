@@ -1556,6 +1556,26 @@ namespace PAIN {
 			geometry_ebo = 0;
 		}
 
+		if (geometry_ibo) {
+			glDeleteBuffers(1, &geometry_ibo);
+			geometry_ibo = 0;
+		}
+
+		if (shadow_vao != 0) {
+			glDeleteVertexArrays(1, &shadow_vao);
+			shadow_vao = 0;
+		}
+
+		if (shadow_vbo != 0) {
+			glDeleteBuffers(1, &shadow_vbo);
+			shadow_vbo = 0;
+		}
+
+		if (shadow_ebo != 0) {
+			glDeleteBuffers(1, &shadow_ebo);
+			shadow_ebo = 0;
+		}
+
 		if (debug_VAO) {
 			glDeleteVertexArrays(1, &debug_VAO);
 			debug_VAO = 0;
