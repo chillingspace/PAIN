@@ -57,6 +57,8 @@ namespace PAIN {
             std::filesystem::path project_root = ".";
 #endif
 
+// dont know if this breaks android release
+// !TODO: need to test
 #ifdef PN_PLATFORM_ANDROID
             project_root = Assets::findProjectRoot();
 #endif
