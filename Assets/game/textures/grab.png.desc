@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "grab.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3758989702291769243
+  },
+  "descriptor_version": 1,
+  "guid": "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\grab.png"
+  }
+}
