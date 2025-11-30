@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Enemy1_occlusionRoughnessMetallic.png",
+    "name": "Enemy2_normal.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 11434161530004127713
+    "hash": 17334251805108625712
   },
   "descriptor_version": 1,
-  "guid": "16eab8bd-530f-764a-ae87-aa360bb51e17",
+  "guid": "d74f079a-b298-8147-b9fc-44372b1fccf9",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Enemy1_occlusionRoughnessMetallic.png"
+    "source_file": "game\\textures\\Enemy2_normal.png"
   }
 }

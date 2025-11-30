@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Enemy1_normal.png",
+    "name": "Enemy2_baseColor.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 3801810141551430150
+    "hash": 12424098357409678083
   },
   "descriptor_version": 1,
-  "guid": "65c37d69-9391-304c-852a-4e53b98e31e4",
+  "guid": "4549f189-13af-ca43-a393-a5a1c4a80cc4",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Enemy1_normal.png"
+    "source_file": "game\\textures\\Enemy2_baseColor.png"
   }
 }

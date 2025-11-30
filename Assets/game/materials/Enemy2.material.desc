@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Enemy2.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 13112543797997194983
+  },
+  "descriptor_version": 1,
+  "guid": "a5b680b5-a1c0-d34b-8d6e-b31daadd0a5c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Enemy2.material"
+  }
+}
