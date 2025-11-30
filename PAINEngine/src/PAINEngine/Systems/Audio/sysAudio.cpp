@@ -39,10 +39,9 @@ namespace PAIN {
                 //auto& audioSrc = view.get<AudioSource>(entity);
                 //auto& transform = view.get<Transform>(entity);
 
-                static std::unordered_set<entt::entity> initialized;
-                if (audioSrc.playOnStart && initialized.find(entity) == initialized.end()) {
+                if (audioSrc.playOnStart && !audioSrc.hasStarted) {
                     audioSrc.playTrigger = true;
-                    initialized.insert(entity);
+                    audioSrc.hasStarted = true;
                 }
 
                 // 3. Handle Play/Stop Triggers
@@ -80,6 +79,7 @@ namespace PAIN {
                     }
                     audioSrc.playTrigger = false;
                     audioSrc.stopTrigger = false;
+                    audioSrc.playOnStart = false;
                 }
                 else if (audioSrc.stopTrigger)
                 {

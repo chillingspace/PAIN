@@ -36,8 +36,8 @@ namespace PAIN {
             // --- STATE (Managed by AudioSystem) ---
             AudioState state = AudioState::Stopped;
 
-            bool playOnStart = true;  // NEW: Serialized - determines if sound plays when scene loads
-
+            bool playOnStart = false;  // NEW: Serialized - determines if sound plays when scene loads
+            bool hasStarted = false; // internal
             // --- TRIGGERS (Set by other systems/scripts) ---
             // Set to true to make the AudioSystem play this sound.
             // The system will reset this to false after processing.

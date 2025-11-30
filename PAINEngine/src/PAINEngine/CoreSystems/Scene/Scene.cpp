@@ -611,6 +611,7 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
 				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
@@ -629,6 +630,7 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
+#endif
 
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path fh_path = "game/models/Frog_Hopping.mesh";
