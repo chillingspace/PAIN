@@ -56,6 +56,11 @@ namespace PAIN {
 #else
             std::filesystem::path project_root = ".";
 #endif
+
+#ifdef PN_PLATFORM_ANDROID
+            project_root = Assets::findProjectRoot();
+#endif
+
             std::string project_root_str = normalizePath(project_root.string());
 
             //Register default virtual paths
