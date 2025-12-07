@@ -35,6 +35,7 @@ namespace PAIN {
     struct Texture2D {
         //material GUID
         Assets::GUID texture_guid;
+        glm::vec2 pos;
         glm::vec2 texture_scale{ 1 };
     };
 
@@ -117,6 +118,7 @@ static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);
 
 REFL_TYPE(PAIN::Texture2D)
 REFL_FIELD(texture_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(pos)
 REFL_FIELD(texture_scale)
 REFL_END
 

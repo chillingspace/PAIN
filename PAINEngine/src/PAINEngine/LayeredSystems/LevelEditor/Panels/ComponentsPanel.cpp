@@ -224,6 +224,7 @@ namespace PAIN {
                         }
 
                         changed |= ImGui::DragFloat2("Texture Scale", &texture_comp.texture_scale.x, 0.02f, 0.2f, 4.0f, "%.2f");
+                        changed |= ImGui::DragFloat2("Texture Position", &texture_comp.pos.x);
 
                         ImGui::PopStyleVar();
 
@@ -300,7 +301,6 @@ namespace PAIN {
 
                         // Word wrap & Rich Text
                         changed |= ImGui::Checkbox("Word Wrap", &text.word_wrap);
-                        changed |= ImGui::Checkbox("Rich Text", &text.rich_text);
 
                         changed |= ImGui::DragFloat("Line Height", &text.line_height, 0.02f, 0.2f, 4.0f, "%.2f");
 
@@ -314,6 +314,100 @@ namespace PAIN {
                         return changed;
                     }
                 );
+
+                registerCompUIFunc<PAIN::UIButton>("UIButton",
+                    [this](ComponentsPanel& panel, PAIN::UIButton& button) {
+                        bool changed = false;
+
+                        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                        // ── Script Callback ──
+                        ImGui::SeparatorText("Callback");
+
+                        // Function name input
+                        char funcName[128];
+                        strncpy(funcName, button.on_click_callback_lua.c_str(), sizeof(funcName) - 1);
+                        funcName[sizeof(funcName) - 1] = '\0';
+
+                        if (ImGui::InputText("Function Name", funcName, sizeof(funcName))) {
+                            button.on_click_callback_lua = funcName;
+                            changed = true;
+                        }
+                        ImGui::TextDisabled("(e.g., OnPlayButtonClick)");
+                        ImGui::TextDisabled("Function must be defined in a loaded script");
+
+                        // ── Button State (Read-only display) ──
+                        ImGui::SeparatorText("State");
+
+                        const char* state_names[] = { "Normal", "Highlighted", "Pressed", "Disabled" };
+                        int current_state = static_cast<int>(button.state);
+
+                        ImGui::BeginDisabled(); // Make it read-only (runtime state)
+                        ImGui::Combo("Current State", &current_state, state_names, IM_ARRAYSIZE(state_names));
+                        ImGui::EndDisabled();
+
+                        ImGui::TextDisabled("(Runtime state - updates automatically)");
+
+                        // ── State Colors ──
+                        ImGui::SeparatorText("State Colors");
+
+                        auto editColor = [&](const char* label, int& color) -> bool {
+                            // Convert 0xAARRGGBB to ImVec4
+                            float a = ((color >> 24) & 0xFF) / 255.0f;
+                            float r = ((color >> 16) & 0xFF) / 255.0f;
+                            float g = ((color >> 8) & 0xFF) / 255.0f;
+                            float b = ((color >> 0) & 0xFF) / 255.0f;
+                            ImVec4 col(r, g, b, a);
+
+                            bool color_changed = ImGui::ColorEdit4(label, (float*)&col,
+                                ImGuiColorEditFlags_AlphaBar |
+                                ImGuiColorEditFlags_AlphaPreview |
+                                ImGuiColorEditFlags_DisplayHex);
+
+                            if (color_changed) {
+                                int na = static_cast<int>(col.w * 255.0f) & 0xFF;
+                                int nr = static_cast<int>(col.x * 255.0f) & 0xFF;
+                                int ng = static_cast<int>(col.y * 255.0f) & 0xFF;
+                                int nb = static_cast<int>(col.z * 255.0f) & 0xFF;
+                                color = (na << 24) | (nr << 16) | (ng << 8) | nb;
+                            }
+
+                            return color_changed;
+                            };
+
+                        changed |= editColor("Normal Color##normal", button.normal_color);
+                        changed |= editColor("Highlighted Color##highlighted", button.highlighted_color);
+                        changed |= editColor("Pressed Color##pressed", button.pressed_color);
+                        changed |= editColor("Disabled Color##disabled", button.disabled_color);
+
+                        // ── Optional: Preview current state color ──
+                        ImGui::Spacing();
+                        ImGui::Text("Current State Preview:");
+
+                        int preview_color = button.normal_color;
+                        switch (button.state) {
+                        case UIButtonState::Normal:      preview_color = button.normal_color; break;
+                        case UIButtonState::Highlighted: preview_color = button.highlighted_color; break;
+                        case UIButtonState::Pressed:     preview_color = button.pressed_color; break;
+                        case UIButtonState::Disabled:    preview_color = button.disabled_color; break;
+                        }
+
+                        float pa = ((preview_color >> 24) & 0xFF) / 255.0f;
+                        float pr = ((preview_color >> 16) & 0xFF) / 255.0f;
+                        float pg = ((preview_color >> 8) & 0xFF) / 255.0f;
+                        float pb = ((preview_color >> 0) & 0xFF) / 255.0f;
+                        ImVec4 preview_col(pr, pg, pb, pa);
+
+                        ImGui::ColorButton("##preview", preview_col,
+                            ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoPicker,
+                            ImVec2(ImGui::GetContentRegionAvail().x, 30));
+
+                        ImGui::PopStyleVar();
+
+                        return changed;
+                    }
+                );
+
 
                 registerCompUIFunc<PAIN::Cam>("Camera",
                     [](ComponentsPanel&, PAIN::Cam& as) { DrawWithReflection(as); });
@@ -432,8 +526,8 @@ namespace PAIN {
                 registerCompUIFunc<PAIN::UIRectTransform>("UIRectTransform",
                     [this](ComponentsPanel&, PAIN::UIRectTransform& transform_ui) { DrawWithReflection(transform_ui, static_cast<ComponentsPanel*>(this)); });
 
-                registerCompUIFunc<PAIN::UIButton>("UIButton",
-                    [this](ComponentsPanel&, PAIN::UIButton& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
+                //registerCompUIFunc<PAIN::UIButton>("UIButton",
+                //    [this](ComponentsPanel&, PAIN::UIButton& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
 
                 registerCompUIFunc<PAIN::UIElement>("UIElement",
                     [this](ComponentsPanel&, PAIN::UIElement& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });

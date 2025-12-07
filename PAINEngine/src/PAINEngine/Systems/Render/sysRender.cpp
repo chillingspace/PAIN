@@ -489,7 +489,7 @@ namespace PAIN {
             if (!rendererService || !rendererService->w_renderer) return;
 
             //Texture and text groups
-            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform, UIRectTransform>);
+            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, UIRectTransform>);
             auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
             auto scn_service = services.lock()->get<Scene::SceneManager>();
 
@@ -514,7 +514,7 @@ namespace PAIN {
                 PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
             }
 
-            for (auto [entity, texture_comp, ui_elem, trans_comp, rect_comp] : texture_group.each()) {
+            for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
                 // Layer check
                 auto layerComp = registry.try_get<Entity::Layer>(entity);
                 if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
@@ -530,7 +530,7 @@ namespace PAIN {
                 rect_comp.size_delta.x = texture_opt.value().get()->width;
                 rect_comp.size_delta.y = texture_opt.value().get()->height;
 
-                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
+                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, texture_comp.pos, texture_comp.texture_scale);
             }
 
             // ========================================
