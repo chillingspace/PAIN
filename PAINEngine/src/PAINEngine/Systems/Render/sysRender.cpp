@@ -526,9 +526,11 @@ namespace PAIN {
                 auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
                 if (!texture_opt.has_value()) continue;
 
-                // Get texture size and update rect transform comp
-                rect_comp.size_delta.x = texture_opt.value().get()->width;
-                rect_comp.size_delta.y = texture_opt.value().get()->height;
+                // Only auto-set size_delta if it's not already set
+                if (rect_comp.size_delta.x == 0.0f || rect_comp.size_delta.y == 0.0f) {
+                    rect_comp.size_delta.x = texture_opt.value().get()->width;
+                    rect_comp.size_delta.y = texture_opt.value().get()->height;
+                }
 
                 rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, texture_comp.pos, texture_comp.texture_scale);
             }

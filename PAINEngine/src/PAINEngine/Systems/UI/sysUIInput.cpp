@@ -146,7 +146,13 @@ namespace PAIN {
             if (event.getType() == Event::Type::TouchMove) {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-                    m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
+                    glm::vec2 raw_touch(e.getX(), e.getY());
+                    m_mouse_position = convertToCenterOrigin(raw_touch);
+                    glm::vec2 norm_mouse_position = normalizeScreenPosition(m_mouse_position);
+                    PN_CORE_INFO("[UIInput] Touch: raw=({:.0f}, {:.0f}) center=({:.0f}, {:.0f}) normalized=({:.3f}, {:.3f})",
+                        raw_touch.x, raw_touch.y,
+                        m_mouse_position.x, m_mouse_position.y,
+                        norm_mouse_position.x, norm_mouse_position.y);
                     return false;
                     });
             }
@@ -230,19 +236,38 @@ namespace PAIN {
             glm::vec2 normalized_mouse = normalizeScreenPosition(mouse_pos);
 
             // Query all UI elements with Texture2D (the actual rendered texture holds position)
-            auto view = registry.view<Texture2D, UIElement>();
+            auto view = registry.view<Texture2D, UIElement, UIRectTransform>();
 
             //PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.3f}, {:.3f}) (normalized)",
             //    normalized_mouse.x, normalized_mouse.y);
 
             std::vector<std::tuple<entt::entity, int, int>> candidates;
 
-            for (auto [entity, tex, element] : view.each()) {
+            for (auto [entity, tex, element, rect] : view.each()) {
                 if (!element.b_is_enabled || !element.b_is_interactable) continue;
 
-                // Use Texture2D's position and scale for hit testing
-                glm::vec2 rect_min = tex.pos;
-                glm::vec2 rect_max = tex.pos + tex.texture_scale;
+                // Actual rendered size = base size * scale multiplier
+                glm::vec2 actual_pixel_size = rect.size_delta * tex.texture_scale;
+
+                //PN_CORE_INFO("[UIInput]   size_delta=({:.1f}, {:.1f}) texture_scale=({:.3f}, {:.3f}) actual_pixel_size=({:.1f}, {:.1f})",
+                //    rect.size_delta.x, rect.size_delta.y,
+                //    tex.texture_scale.x, tex.texture_scale.y,
+                //    actual_pixel_size.x, actual_pixel_size.y);
+
+                // Convert size to normalized space
+                glm::vec2 normalized_size = normalizeSize(actual_pixel_size);
+
+                //PN_CORE_INFO("[UIInput] AFTER normalizeSize: normalized_size=({:.3f}, {:.3f})",
+                //    normalized_size.x, normalized_size.y);
+
+                // tex.pos is the CENTER of the texture, so calculate min/max from center
+                glm::vec2 half_size = normalized_size * 0.5f;
+                //PN_CORE_INFO("[UIInput] half_size=({:.3f}, {:.3f})", half_size.x, half_size.y);
+                //PN_CORE_INFO("[UIInput] tex.pos=({:.3f}, {:.3f})", tex.pos.x, tex.pos.y);
+                glm::vec2 rect_min = tex.pos - half_size;  // Center - half size
+                glm::vec2 rect_max = tex.pos + half_size;  // Center + half size
+                //PN_CORE_INFO("[UIInput] FINAL rect_min=({:.3f}, {:.3f}) rect_max=({:.3f}, {:.3f})",
+                //    rect_min.x, rect_min.y, rect_max.x, rect_max.y);
 
                 // DEBUG: Log every UI element being tested
                 //PN_CORE_INFO("[UIInput]   Entity {:08X}: enabled={} interactable={} rect_min=({:.1f}, {:.1f}) rect_max=({:.1f}, {:.1f})",
@@ -251,6 +276,11 @@ namespace PAIN {
                 //    element.b_is_interactable,
                 //    rect_min.x, rect_min.y,
                 //    rect_max.x, rect_max.y);
+
+                //PN_CORE_INFO("[UIInput]   mouse=({:.3f}, {:.3f}) in_x={} in_y={}",
+                //    normalized_mouse.x, normalized_mouse.y,
+                //    (normalized_mouse.x >= rect_min.x && normalized_mouse.x <= rect_max.x),
+                //    (normalized_mouse.y >= rect_min.y && normalized_mouse.y <= rect_max.y))
 
                 if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 
@@ -348,6 +378,23 @@ namespace PAIN {
             glm::vec2 normalized{};
             normalized.x = (center_origin_pos.x / (fb.x * 0.5f));  // Map to -1 to 1
             normalized.y = (center_origin_pos.y / (fb.y * 0.5f)); // Map to -1 to 1
+
+            return normalized;
+        }
+
+        glm::vec2 InputSystem::normalizeSize(const glm::vec2& pixel_size)
+        {
+            auto svc = services.lock();
+            auto window = svc->get<Window::Window>();
+
+            if (!window) return glm::vec2(0.0f);
+
+            glm::vec2 fb = window->getFrameBuffer();
+
+            // Convert pixel size to normalized size in -1 to 1 space
+            glm::vec2 normalized;
+            normalized.x = (pixel_size.x / fb.x) * 2.0f;  // Total span is 2 (from -1 to 1)
+            normalized.y = (pixel_size.y / fb.y) * 2.0f;
 
             return normalized;
         }

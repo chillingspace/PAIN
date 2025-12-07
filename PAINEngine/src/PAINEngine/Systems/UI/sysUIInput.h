@@ -38,6 +38,7 @@ namespace PAIN {
             void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
             glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
             glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos); 
+            glm::vec2 normalizeSize(const glm::vec2& pixel_size);
 
 
             entt::entity m_hovered_entity = entt::null;
