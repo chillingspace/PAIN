@@ -60,19 +60,7 @@ namespace PAIN {
             if (event.getType() == Event::Type::MouseMove) {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-                    auto svc = services.lock();
-                    auto window = svc->get<Window::Window>();
-                    if (window) {
-                        glm::vec2 fb = window->getFrameBuffer();
-                        glm::vec2 winPos = e.getWindowPos(); // Top-left origin
-
-                        m_mouse_position.x = winPos.x - (fb.x * 0.5f);
-                        m_mouse_position.y = (fb.y * 0.5f) - winPos.y;
-
-                    }
-                    else {
-                        m_mouse_position = glm::vec2(e.getWindowPos());
-                    }
+                    m_mouse_position = convertToCenterOrigin(e.getWindowPos());
                     return false;
                     });
             }
@@ -158,7 +146,7 @@ namespace PAIN {
             if (event.getType() == Event::Type::TouchMove) {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-                    m_mouse_position = glm::vec2(e.getX(), e.getY());
+                    m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
                     return false;
                     });
             }
@@ -166,12 +154,13 @@ namespace PAIN {
             if (event.getType() == Event::Type::TouchDown) {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
-                    m_mouse_position = glm::vec2(e.getX(), e.getY());
+                    m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
                     auto ecs = services.lock()->get<ECS::Controller>();
                     auto& registry = ecs->getRegistry();
                     auto hit_entity = raycastUI(m_mouse_position, registry);
 
                     if (hit_entity.has_value()) {
+                        PN_CORE_INFO("hit detected");
                         m_hovered_entity = hit_entity.value();
                         m_pressed_entity = m_hovered_entity;
                         updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
@@ -187,11 +176,12 @@ namespace PAIN {
                     if (m_pressed_entity != entt::null) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        m_mouse_position = glm::vec2(e.getX(), e.getY());
+                        m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
                         auto hit_entity = raycastUI(m_mouse_position, registry);
 
                         if (hit_entity.has_value() && hit_entity.value() == m_pressed_entity &&
                             registry.all_of<UIButton>(m_pressed_entity)) {
+                            PN_CORE_INFO("hit detected");
                             auto& button = registry.get<UIButton>(m_pressed_entity);
                             if (!button.on_click_callback_lua.empty()) {
                                 auto& ctx = registry.ctx();
@@ -237,11 +227,13 @@ namespace PAIN {
         std::optional<entt::entity> InputSystem::raycastUI(const glm::vec2& mouse_pos, entt::registry& registry) {
             auto ecs = services.lock()->get<ECS::Controller>();
 
+            glm::vec2 normalized_mouse = normalizeScreenPosition(mouse_pos);
+
             // Query all UI elements with Texture2D (the actual rendered texture holds position)
             auto view = registry.view<Texture2D, UIElement>();
 
-            // DEBUG: Log mouse position
-            PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.1f}, {:.1f})", mouse_pos.x, mouse_pos.y);
+            //PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.3f}, {:.3f}) (normalized)",
+            //    normalized_mouse.x, normalized_mouse.y);
 
             std::vector<std::tuple<entt::entity, int, int>> candidates;
 
@@ -260,7 +252,7 @@ namespace PAIN {
                 //    rect_min.x, rect_min.y,
                 //    rect_max.x, rect_max.y);
 
-                if (isPointInRect(mouse_pos, rect_min, rect_max)) {
+                if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 
                     PN_CORE_INFO("point in button");
 
@@ -324,6 +316,40 @@ namespace PAIN {
                 button.state = new_state;
                 // TODO: Apply color tinting if needed
             }
+        }
+
+        glm::vec2 InputSystem::convertToCenterOrigin(const glm::vec2& screen_pos)
+        {
+            auto svc = services.lock();
+            auto window = svc->get<Window::Window>();
+
+            if (window) {
+                glm::vec2 fb = window->getFrameBuffer();
+                glm::vec2 center_pos;
+                center_pos.x = screen_pos.x - (fb.x * 0.5f);
+                center_pos.y = (fb.y * 0.5f) - screen_pos.y;
+                return center_pos;
+            }
+
+            // Fallback: return as-is
+            return screen_pos;
+        }
+
+        glm::vec2 InputSystem::normalizeScreenPosition(const glm::vec2& center_origin_pos)
+        {
+            auto svc = services.lock();
+            auto window = svc->get<Window::Window>();
+
+            if (!window) return center_origin_pos;
+
+            glm::vec2 fb = window->getFrameBuffer();
+
+            // Convert from center-origin pixels to normalized -1 to 1 range
+            glm::vec2 normalized{};
+            normalized.x = (center_origin_pos.x / (fb.x * 0.5f));  // Map to -1 to 1
+            normalized.y = (center_origin_pos.y / (fb.y * 0.5f)); // Map to -1 to 1
+
+            return normalized;
         }
 
     } // namespace UI

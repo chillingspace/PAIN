@@ -36,6 +36,9 @@ namespace PAIN {
             std::optional<entt::entity> raycastUI(const glm::vec2& mouse_pos,
                 entt::registry& registry);
             void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
+            glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
+            glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos); 
+
 
             entt::entity m_hovered_entity = entt::null;
             entt::entity m_pressed_entity = entt::null;
