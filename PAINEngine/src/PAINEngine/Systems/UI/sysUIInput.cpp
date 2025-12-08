@@ -261,7 +261,7 @@ namespace PAIN {
                 //    normalized_size.x, normalized_size.y);
 
                 // tex.pos is the CENTER of the texture, so calculate min/max from center
-                glm::vec2 half_size = normalized_size * 0.5f;
+                glm::vec2 half_size = normalized_size;
                 //PN_CORE_INFO("[UIInput] half_size=({:.3f}, {:.3f})", half_size.x, half_size.y);
                 //PN_CORE_INFO("[UIInput] tex.pos=({:.3f}, {:.3f})", tex.pos.x, tex.pos.y);
                 glm::vec2 rect_min = tex.pos - half_size;  // Center - half size
