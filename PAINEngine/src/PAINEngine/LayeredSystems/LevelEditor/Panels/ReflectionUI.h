@@ -466,28 +466,6 @@ inline bool DrawField(const char* label, PAIN::UIButtonState& v) {
     return changed;
 }
 
-inline bool DrawField(const char* label, PAIN::CanvasRenderMode& v) {
-    const char* names[] = { "ScreenSpaceOverlay", "ScreenSpaceCamera", "WorldSpace" };
-    int idx = static_cast<int>(v);
-    const int count = 3; // keep in sync
-    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
-    bool changed = false;
-
-    if (ImGui::BeginCombo(label, preview)) {
-        for (int i = 0; i < count; ++i) {
-            bool selected = (i == idx);
-            if (ImGui::Selectable(names[i], selected)) {
-                idx = i;
-                v = static_cast<PAIN::CanvasRenderMode>(i);
-                changed = true;
-            }
-            if (selected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
-}
-
 // ----- PAIN::AABB drawer (read-only UI) -----
  namespace PAIN { struct AABB; } // For Bounding Volume
 
