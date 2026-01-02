@@ -667,6 +667,35 @@ namespace PAIN {
 								}
 							}
 						}
+
+						// Focus on entity 
+						if (ImGui::IsKeyPressed(ImGuiKey_F)) {
+
+							entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+
+							if (selectedEntity != entt::null) {
+								auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
+								auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
+
+								if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
+									LocalTransform& localTransform = localTransformOpt.value().get();
+									WorldTransform& worldTransform = worldTransformOpt.value().get();
+									auto camera = scene->GetActiveCamera();
+
+									if (camera) {
+
+										glm::vec3 targetPos = glm::vec3(worldTransform.matrix[3]);
+										camera->pos = targetPos - camera->forward;
+									}
+								}
+								PN_CORE_INFO("FOCUSED ON ENTITY");
+							}
+							else {
+								PN_CORE_INFO("NO ENTITY TO FOCUS ON");
+							}
+
+						}
+
 					}
 
                     // ========================================

@@ -484,7 +484,7 @@ namespace PAIN {
                 PN_CORE_INFO("Toggled interpolate_animation: {}", gs.interpolate_animation);
                 break;
 
-            case PAIN_KEY_F:
+            case PAIN_KEY_G:
                 gs.draw_floor = !gs.draw_floor;
                 PN_CORE_INFO("Toggled draw_floor: {}", gs.draw_floor);
                 break;
