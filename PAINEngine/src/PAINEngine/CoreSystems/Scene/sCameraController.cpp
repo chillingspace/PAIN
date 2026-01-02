@@ -261,30 +261,40 @@ namespace PAIN {
             camera->pos += (m_cachedMoveX)*right * speed * dt;
         }
 
+        float speedMultiplier = 1.0f;
+        if (LSHIFT_KEYDOWN) {
+            speedMultiplier = 2.0f; // FAST
+        }
+        else if (LCTRL_KEYDOWN) {
+            speedMultiplier = 0.5f; // SLOW
+        }
+
+        float currentMoveSpeed = camera->speed * speedMultiplier * dt;
+
         switch (move_mode) {
         case FREE_FLY:
             // Move forward/backward directly in camera forward direction
             if (W_KEYDOWN) {
-                glm::vec3 offset = camera->forward * camera->speed * dt;
+                glm::vec3 offset = camera->forward * currentMoveSpeed;
                 camera->pos += offset;
             }
             if (S_KEYDOWN) {
-                glm::vec3 offset = camera->forward * camera->speed * dt;
+                glm::vec3 offset = camera->forward * currentMoveSpeed;
                 camera->pos -= offset;
             }
             if (A_KEYDOWN) {
-                camera->pos -= right * camera->speed * dt;
+                camera->pos -= right * currentMoveSpeed;
             }
             if (D_KEYDOWN) {
-                camera->pos += right * camera->speed * dt;
+                camera->pos += right * currentMoveSpeed;
             }
 
             // Move up/down along camera up vector
-            if (SPACE_KEYDOWN) {
-                camera->pos += camera->up * camera->speed * dt;
+            if (E_KEYDOWN) {
+                camera->pos += camera->up * currentMoveSpeed;
             }
-            if (LCTRL_KEYDOWN) {
-                camera->pos -= camera->up * camera->speed * dt;
+            if (Q_KEYDOWN) {
+                camera->pos -= camera->up * currentMoveSpeed;
             }
 
 
@@ -293,29 +303,29 @@ namespace PAIN {
         case FIRST_PERSON:
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
             if (W_KEYDOWN) {
-                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
+                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
                 camera->pos += offset;
             }
             if (S_KEYDOWN) {
-                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * camera->speed * dt;
+                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
                 camera->pos -= offset;
             }
             if (A_KEYDOWN) {
-                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
+                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
                 camera->pos -= offset;
             }
             if (D_KEYDOWN) {
-                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * camera->speed * dt;
+                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
                 camera->pos += offset;
             }
-            if (SPACE_KEYDOWN) {
-                glm::vec3 offset = camera->up * camera->speed * dt;
-                camera->pos += offset;
-            }
-            if (LCTRL_KEYDOWN) {
-                glm::vec3 offset = camera->up * camera->speed * dt;
-                camera->pos -= offset;
-            }
+            //if (SPACE_KEYDOWN) {
+            //    glm::vec3 offset = camera->up * currentMoveSpeed;
+            //    camera->pos += offset;
+            //}
+            //if (LCTRL_KEYDOWN) {
+            //    glm::vec3 offset = camera->up * currentMoveSpeed;
+            //    camera->pos -= offset;
+            //}
             break;
 
         }
@@ -366,8 +376,14 @@ namespace PAIN {
                 case PAIN_KEY_D:
                     D_KEYDOWN = true;
                     break;
-                case PAIN_KEY_SPACE:
-                    SPACE_KEYDOWN = true;
+                case PAIN_KEY_E:
+                    E_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_Q:
+                    Q_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_LEFT_SHIFT:
+                    LSHIFT_KEYDOWN = true;
                     break;
                 case PAIN_KEY_LEFT_CONTROL:
                     LCTRL_KEYDOWN = true;
@@ -392,8 +408,14 @@ namespace PAIN {
                 case PAIN_KEY_D:
                     D_KEYDOWN = false;
                     break;
-                case PAIN_KEY_SPACE:
-                    SPACE_KEYDOWN = false;
+                case PAIN_KEY_E:
+                    E_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_Q:
+                    Q_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_LEFT_SHIFT:
+                    LSHIFT_KEYDOWN = false;
                     break;
                 case PAIN_KEY_LEFT_CONTROL:
                     LCTRL_KEYDOWN = false;
