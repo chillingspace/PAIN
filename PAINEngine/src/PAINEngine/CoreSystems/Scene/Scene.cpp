@@ -313,7 +313,7 @@ namespace PAIN {
 					LightSources::get().create(world_light_name);
 				}
 				getWorldLight()->L_intensity = env.worldLightIntensity;
-				getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
+				getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 			}
@@ -715,12 +715,12 @@ namespace PAIN {
 					if (!olc) {
 						LightSources::get().create("world");
 						getWorldLight()->L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
-						getWorldLight()->forward = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
+						getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 					}
 					else {
-						olc->position = GetActiveCamera()->pos - glm::normalize(olc->forward) * olc->shadow_source_follow_distance;
+						olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
 					}
 				}
 				else {

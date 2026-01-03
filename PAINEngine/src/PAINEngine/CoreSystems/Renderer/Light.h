@@ -95,21 +95,25 @@ namespace PAIN {
 		float far_plane{ 30.f };		// furthest distance light can see(for shadows)
 
 		// not required for point lights
-		glm::vec3 forward{0 , -1, 0};	// looking down by default
+		glm::vec3 direction{0 , -1, 0};	// looking down by default (previously named forward)
 		float fov{ 120.f };				// dont set larger values
 		float shadow_source_follow_distance{ far_plane * 0.75f };	// how far away should shadow map frustum origin be placed from camera
+
+		// spotlight settings (in deg)
+		float inner_angle = 12.5f;
+		float outer_angle = 17.5f;
 
 		glm::mat4 view() const {
 			glm::vec3 up_vec = glm::vec3(0.f, 1.f, 0.f);
 
 			// forward is parallel to up, use a different up vector
-			if (glm::abs(glm::dot(glm::normalize(forward), up_vec)) > 0.99f) {
+			if (glm::abs(glm::dot(glm::normalize(direction), up_vec)) > 0.99f) {
 				up_vec = glm::vec3(0.f, 0.f, 1.f);  // Use Z-axis as up instead
 			}
 
 			return glm::lookAt(
 				position,
-				position + glm::normalize(forward),
+				position + glm::normalize(direction),
 				up_vec
 			);
 		}

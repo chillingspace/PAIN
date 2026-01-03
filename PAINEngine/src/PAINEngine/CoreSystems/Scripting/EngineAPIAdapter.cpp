@@ -668,9 +668,9 @@ namespace PAIN {
         }
         l->light_type = static_cast<PAIN::TYPES>(ty);*/
     }
-    void EngineAPIAdapter::SetLightForward(entt::entity entityId, float x, float y, float z) {
+    void EngineAPIAdapter::SetLightDirection(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
-        l.forward = glm::normalize(glm::vec3{ x,y,z });
+        l.direction = glm::normalize(glm::vec3{ x,y,z });
 
         /*PAIN::Lighting* l = nullptr;
         if (!try_get<PAIN::Lighting>(entityId, l)) {

@@ -461,10 +461,38 @@ namespace PAIN {
                         }
                     });
 
-                // ---- Light ---- (UNCHANGED)
+                // ---- Light ----
                 registerCompUIFunc<PAIN::Lighting>("Lighting",
-                    [](ComponentsPanel&, PAIN::Lighting& as) { DrawWithReflection(as); });
+                    [](ComponentsPanel&, PAIN::Lighting& light) { 
+                        // Draw refl variables
+                        DrawWithReflection(light);
 
+                        // Direction lighting (Only for Directional & Spotlight)
+                        if (light.light_type != PAIN::TYPES::POINT) {
+                            ImGui::Separator();
+                            ImGui::Text("Direction Settings");
+
+                            if (ImGui::DragFloat3("Direction", glm::value_ptr(light.direction), 0.01f, -1.0f, 1.0f)) {
+                                if (glm::length(light.direction) > 0.0001f)
+                                    light.direction = glm::normalize(light.direction);
+                            }
+                        }
+
+                        // Spotlight variables
+                        if (light.light_type == PAIN::TYPES::SPOTLIGHT) {
+                            ImGui::Separator();
+                            ImGui::Text("Spotlight Cone");
+
+                            ImGui::DragFloat("Inner Angle", &light.inner_angle, 0.5f, 0.0f, 89.0f, "%.1f deg");
+
+                            float minOuter = light.inner_angle + 0.1f;
+                            if (ImGui::DragFloat("Outer Angle", &light.outer_angle, 0.5f, minOuter, 179.0f, "%.1f deg")) {
+                                if (light.outer_angle < minOuter) light.outer_angle = minOuter;                     
+                            }
+                        }
+
+                    }
+                );
                 // ---- AudioSource ---- 
                 registerCompUIFunc<PAIN::Audio::AudioSource>("AudioSource",
                     [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) { DrawWithReflection(as, static_cast<ComponentsPanel*>(this)); });

@@ -189,7 +189,7 @@ namespace PAIN {
             lcam.position = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->pos;
             lcam.position.y += 0.1f;	// light on camera = grainy
             lcam.fov = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->fov;
-            lcam.forward = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
+            lcam.direction = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
             lcam.aspect_ratio = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->aspect_ratio;
 
             GLenum err = glGetError();
@@ -335,6 +335,13 @@ namespace PAIN {
                     light.L_intensity = lighting.light_intensity;
                     light.type = static_cast<Light::TYPES>(lighting.light_type);
                     light.setShadowType(static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
+
+                    // works for non point light
+                    light.direction = lighting.direction;
+
+                    // for spotlight only
+                    light.inner_angle = lighting.inner_angle;
+                    light.outer_angle = lighting.outer_angle;
                 }
             }
 

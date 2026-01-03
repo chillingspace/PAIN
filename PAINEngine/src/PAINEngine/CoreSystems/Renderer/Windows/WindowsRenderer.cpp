@@ -1215,6 +1215,22 @@ namespace PAIN {
 				ss.str("");
 				ss.clear();
 
+				// For spotlights
+				ss << "u_Lights[" << i << "].innerCutoff";
+				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.inner_angle)));
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].outerCutoff";
+				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.outer_angle)));
+				ss.str("");
+				ss.clear();
+
+				ss << "u_Lights[" << i << "].direction";
+				pbr_shader->SetUniform(ss.str(), l.direction); // or l.direction if you renamed it
+				ss.str("");
+				ss.clear();
+
 				if (LightSources::get().lightsOn) {
 					ss << "u_Lights[" << i << "].L";
 					pbr_shader->SetUniform(ss.str(), l.L_intensity);

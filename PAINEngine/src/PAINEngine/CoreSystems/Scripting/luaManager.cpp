@@ -686,7 +686,7 @@ namespace PAIN {
         lua_.set_function("setLightPosition", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightPosition(entityId, x, y, z); });
         lua_.set_function("setLightIntensity", [this](entt::entity entityId, float r, float g, float b) {if (api_) api_->SetLightIntensity(entityId, r, g, b); });
         lua_.set_function("setLightType", [this](entt::entity entityId, int typeInt) {if (api_) api_->SetLightType(entityId, typeInt);});
-        lua_.set_function("setLightForward", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightForward(entityId, x, y, z); });
+        lua_.set_function("setLightDirection", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightDirection(entityId, x, y, z); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
     }
