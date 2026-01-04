@@ -51,6 +51,12 @@ namespace PAIN {
             ensureInit();
             if (!init_) return;
 
+            // IF GAME IS STOPPED
+            if (timing.dt <= 0.0001f) {
+                return;
+            }
+
+
             // --- publish LuaManager* into this registry's context once ---
             {
                 auto& ctx = reg.ctx();

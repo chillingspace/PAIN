@@ -507,8 +507,8 @@ namespace PAIN {
 					// Toolbar
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
 					{
-						if (ImGui::Button(editor->isPaused() ? "Play Scene" : "Pause Scene")) {
-							editor->togglePause();
+						if (ImGui::Button(!scene->isPlaying() ? "Play Scene" : "Stop Scene")) {
+							!scene->isPlaying() ? scene->onPlay() : scene->onStop();
 						}
 
 						ImGui::SameLine();

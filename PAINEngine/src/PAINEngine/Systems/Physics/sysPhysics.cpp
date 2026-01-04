@@ -289,6 +289,11 @@ namespace PAIN {
             // }
             // ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
 
+			// IF GAME IS STOPPED
+			if (timing.dt <= 0.0001f) {
+				return;
+			}
+
 			{ // make Physics::System discoverable via registry context
 				auto& ctx = registry.ctx();
 				if (!ctx.contains<PAIN::Physics::System*>()) {

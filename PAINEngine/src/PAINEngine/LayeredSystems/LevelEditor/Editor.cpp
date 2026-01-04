@@ -150,31 +150,27 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+
+                auto scene = services->get<Scene::SceneManager>();
+
+                // When hiding editor, auto-play the scene
+                editor_visible ? scene->onPlay() : scene->onStop();
+
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
 
-                // When hiding editor, auto-play the scene
-                if (!editor_visible) {
-                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
-                        viewport->setSimulationState(false); // false = playing
-                    }
-                }
             }
 #else
             if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
+
+                auto scene = services->get<Scene::SceneManager>();
+
+                // When hiding editor, auto-play the scene
+                editor_visible ? scene->onPlay() : scene->onStop();
+
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
 
-                // When hiding editor, auto-play the scene
-                if (!editor_visible) {
-                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
-                        viewport->setSimulationState(false); // false = playing
-                       
-                    }
-                    if (isPaused()) {
-                        togglePause();
-                    }
-                }
             }
             if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
                 editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0

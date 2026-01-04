@@ -149,10 +149,10 @@ namespace PAIN {
                     glm::vec2 raw_touch(e.getX(), e.getY());
                     m_mouse_position = convertToCenterOrigin(raw_touch);
                     glm::vec2 norm_mouse_position = normalizeScreenPosition(m_mouse_position);
-                    PN_CORE_INFO("[UIInput] Touch: raw=({:.0f}, {:.0f}) center=({:.0f}, {:.0f}) normalized=({:.3f}, {:.3f})",
+                   /* PN_CORE_INFO("[UIInput] Touch: raw=({:.0f}, {:.0f}) center=({:.0f}, {:.0f}) normalized=({:.3f}, {:.3f})",
                         raw_touch.x, raw_touch.y,
                         m_mouse_position.x, m_mouse_position.y,
-                        norm_mouse_position.x, norm_mouse_position.y);
+                        norm_mouse_position.x, norm_mouse_position.y);*/
                     return false;
                     });
             }

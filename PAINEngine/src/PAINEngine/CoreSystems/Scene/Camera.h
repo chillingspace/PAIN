@@ -9,6 +9,8 @@ namespace PAIN {
 		Camera(const glm::vec3& pos, const glm::vec3& forward, const glm::vec3& up, float fov, float near_pl, float far_pl, float width_ratio, float height_ratio) :
 			pos(pos), forward(forward), up(up), fov(fov), near_plane(near_pl), far_plane(far_pl), width_ratio(width_ratio), height_ratio(height_ratio) {
 			aspect_ratio = width_ratio / height_ratio;
+			// FIX: Initialize 'right' immediately
+			right = glm::normalize(glm::cross(forward, up));
 		};
 		~Camera() = default;
 
