@@ -79,6 +79,7 @@ namespace PAIN {
             registerVirtualPath(roaming_alias, roamingdata_path + "/" + app_name, true);
             registerVirtualPath(documents_alias, documents_path + "/" + app_name, true);
             registerVirtualPath(temp_alias, localdata_path + "/" + app_name + "/temp", true);
+            registerVirtualPath(game_folder_alias, project_root_str + "/Game", false);
         }
 
         void WindowsPath::destroy() {
