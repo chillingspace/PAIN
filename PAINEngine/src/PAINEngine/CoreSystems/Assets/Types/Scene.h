@@ -27,11 +27,14 @@ namespace PAIN {
                 glm::vec3 position{ 0.f, 2.f, 4.f };
                 glm::vec3 forward{ 0.f, 0.f, -1.f };
                 glm::vec3 up{ 0.f, 1.f, 0.f };
+                glm::vec3 right{ 0.f, 1.f, 0.f };
                 float fov = GraphicsSettings::get().fov;
                 float nearPlane{ 0.1f };
                 float farPlane{ 100.f };
                 float aspectRatioW{ 16.f };
                 float aspectRatioH{ 9.f };
+                float speed{ 15.f };
+                float sensitivity{ 0.1f };
             } camera;
 
             //Environment settings

@@ -38,9 +38,13 @@ namespace PAIN {
 			void onUpdate(AppTiming timing, entt::registry& reg) override;
 
 			void onFixedUpdate(AppTiming timing, entt::registry& reg) override;
-			
+
 			//Event handler for app layer
 			void onEvent(Event::Event& e) override;
+
+			void onEntityDestroyed(entt::registry& registry, entt::entity entity);
+
+			void logAllBodies();
 
 			void syncNewBodies(entt::registry& registry);
 
