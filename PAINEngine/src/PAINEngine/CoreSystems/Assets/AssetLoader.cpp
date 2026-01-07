@@ -1259,6 +1259,14 @@ namespace PAIN {
                 if (cam.contains("aspectRatioH")) {
                     sceneAsset->camera.aspectRatioH = cam["aspectRatioH"].get<float>();
                 }
+
+                if (cam.contains("sensitivity")) {
+                    sceneAsset->camera.sensitivity = cam["sensitivity"].get<float>();
+                }
+
+                if (cam.contains("speed")) {
+                    sceneAsset->camera.speed = cam["speed"].get<float>();
+                }
             }
 
             // Parse environment settings

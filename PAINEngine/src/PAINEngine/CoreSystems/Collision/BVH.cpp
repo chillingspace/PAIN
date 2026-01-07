@@ -649,7 +649,9 @@ namespace PAIN {
         // Ensure child indices are valid
         if (child1Idx < 0 || child1Idx >= m_nodeCapacity || m_nodes[child1Idx].height == -1 ||
             child2Idx < 0 || child2Idx >= m_nodeCapacity || m_nodes[child2Idx].height == -1) {
+            #ifdef PN_PLATFORM_WINDOWS
              PN_CORE_WARN("BVH::computeAABB: Invalid child index for node {}. Child1: {}, Child2: {}", nodeIndex, child1Idx, child2Idx);
+            #endif
              // Assign a default state to prevent further issues
              node.aabb = AABB();
              node.height = 0; // Treat as leaf in error case?

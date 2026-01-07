@@ -1,9 +1,4 @@
 
-
--- thirdPersonCamera.lua
-
-local playerId = nil
-
 -- offset of camera relative to player in *player space*
 local baseOffset = { x = 0.0, y = 0.25, z = -0.5 }
 
@@ -19,13 +14,7 @@ local lastMouseY = nil
 _G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }
 
 registerUpdate(function(dt)
-    if not playerId then
-        local id = findEntity("Player")  
-        if id == nil then
-            return
-        end
-        playerId = id
-    end
+    local playerId = entityId
 
     local px, py, pz = getPosition(playerId)
 

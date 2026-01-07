@@ -84,8 +84,9 @@ REFL_TYPE(PAIN::Lighting)
 REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
-//REFL_FIELD(direction)
 REFL_FIELD(shadow_type)
+//these are added manually in components panel
+//REFL_FIELD(direction)
 //REFL_FIELD(inner_angle)
 //REFL_FIELD(outer_angle)
 REFL_END

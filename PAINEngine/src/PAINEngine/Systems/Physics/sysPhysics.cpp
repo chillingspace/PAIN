@@ -223,6 +223,12 @@ namespace PAIN {
 
 			create_floor();
 
+			auto ecs = svc->get<ECS::Controller>();
+			if (ecs) {
+				// Connect the OnDestroy signal for RigidBody3D components
+				ecs->getRegistry().on_destroy<Physics::RigidBody3D>()
+					.connect<&System::onEntityDestroyed>(this);
+			}
 		}
 
 		System::~System()
@@ -235,6 +241,14 @@ namespace PAIN {
 
 			// Clear body interface reference
 			body_interface = nullptr;
+
+			// Disconnect signal
+			if (auto svc = services.lock()) {
+				if (auto ecs = svc->get<ECS::Controller>()) {
+					ecs->getRegistry().on_destroy<Physics::RigidBody3D>()
+						.disconnect<&System::onEntityDestroyed>(this);
+				}
+			}
 
 			// Destroy physics system FIRST
 			if (jolt_physics) {
@@ -288,6 +302,11 @@ namespace PAIN {
             //    jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(), job_system.get());
             // }
             // ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
+
+			// IF GAME IS STOPPED
+			if (timing.dt <= 0.0001f) {
+				return;
+			}
 
 			{ // make Physics::System discoverable via registry context
 				auto& ctx = registry.ctx();
@@ -374,6 +393,74 @@ namespace PAIN {
 		void System::onEvent(Event::Event& e)
 		{
 		}
+
+		// Added to clear ridgid bodies on destruction of the entity
+		void System::onEntityDestroyed(entt::registry& registry, entt::entity entity)
+		{
+			// Check if it has a RigidBody
+			if (registry.all_of<Physics::RigidBody3D>(entity)) {
+				auto& rb = registry.get<Physics::RigidBody3D>(entity);
+
+				if (!rb.bodyID.IsInvalid() && body_interface) {
+					body_interface->RemoveBody(rb.bodyID);
+					body_interface->DestroyBody(rb.bodyID);
+
+					// Invalidate the ID
+					rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+
+					PN_CORE_TRACE("Destroyed Jolt body for entity {}", (uint32_t)entity);
+				}
+			}
+		}
+
+		// Print all ridgid bodies to console
+		void System::logAllBodies()
+		{
+			if (!jolt_physics) {
+				PN_CORE_ERROR("Cannot log bodies: Jolt system is null");
+				return;
+			}
+
+			// 1. Get total count
+			uint32_t count = jolt_physics->GetNumBodies();
+
+			PN_CORE_WARN("=== JOLT PHYSICS DIAGNOSTICS ===");
+			PN_CORE_WARN("Total Bodies in Simulation: {}", count);
+
+			// 2. Retrieve all Body IDs (Active and Inactive)
+			JPH::BodyIDVector bodyIDs;
+			jolt_physics->GetBodies(bodyIDs);
+
+			// 3. Iterate and print details
+			auto& lockInterface = jolt_physics->GetBodyLockInterface(); // Need lock to read data safely
+
+			for (const auto& id : bodyIDs) {
+				// Lock body for reading
+				JPH::BodyLockRead lock(lockInterface, id);
+				if (lock.Succeeded()) {
+					const JPH::Body& body = lock.GetBody();
+
+					// Get the Entity ID we stored in UserData
+					uint64_t userData = body.GetUserData();
+					uint32_t entityID = static_cast<uint32_t>(userData);
+
+					// Get Position for context
+					const JPH::RVec3& pos = body.GetPosition();
+
+					// Check if it's the floor (usually static, no entity ID or specific ID)
+					std::string typeStr = (body.GetMotionType() == JPH::EMotionType::Static) ? "Static" : "Dynamic";
+
+					PN_CORE_TRACE("BodyID [{}] | EntityID [{}] | Type: {} | Pos: ({:.2f}, {:.2f}, {:.2f})",
+						id.GetIndexAndSequenceNumber(),
+						entityID,
+						typeStr,
+						(float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ()
+					);
+				}
+			}
+			PN_CORE_WARN("================================");
+		}
+
 
 		void System::syncNewBodies(entt::registry& registry) {
 			// Use view to avoid group ownership conflict with onUpdate

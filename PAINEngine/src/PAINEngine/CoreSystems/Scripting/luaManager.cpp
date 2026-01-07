@@ -220,6 +220,8 @@ namespace PAIN {
         pendingSceneChange_.reset();
 
         api_.reset();
+
+        lua_ = sol::state();
     }
 
     void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {

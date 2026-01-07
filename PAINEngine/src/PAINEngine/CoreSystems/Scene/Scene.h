@@ -3,6 +3,7 @@
 #include "CoreSystems/Renderer/Mesh.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Renderer/Light.h"
+
 #include "Camera.h"
 
 #include "CoreSystems/Assets/Types/Scene.h"
@@ -54,6 +55,10 @@ namespace PAIN {
             bool saveSceneToPath(SceneAsset& scn_asset, std::filesystem::path const& relative);
 #endif
 
+            //Scene Snapshot for play/stop scene
+            SceneAsset scene_snapshot;
+            bool is_playing = false;
+
             //Scene configuration
             void configScene(SceneAsset const& scn_asset);
 
@@ -95,6 +100,11 @@ namespace PAIN {
 
             //Unload scene
             void unloadScene();
+
+            //Play / Stop scene
+            bool isPlaying() const { return is_playing; }
+            void onPlay();
+            void onStop();
 
             //Accessor
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
