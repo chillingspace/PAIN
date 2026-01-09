@@ -316,6 +316,19 @@ namespace PAIN {
 
     }
 
+    bool EngineAPIAdapter::IsGrounded(entt::entity entityId, float maxDistance) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return false;
+
+		auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);       
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+			return phys->isGrounded(rb.bodyID, maxDistance);
+        }
+
+        return false;
+    }
+
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */

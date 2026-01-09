@@ -65,6 +65,8 @@ namespace PAIN {
 
 			void setVelocity(entt::entity e, const glm::vec3& v);
 
+			bool isGrounded(JPH::BodyID body_id, float maxDistance);
+
 			glm::vec3 getVelocity(entt::entity e) const;
 
 		private:

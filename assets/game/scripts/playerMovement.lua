@@ -50,6 +50,8 @@ local idleTimer     = 0.0
 local idleInterval  = 5.0   -- seconds between idle sounds when not moving
 local S = nil -- will grab _G.PlayerState
 
+-- For ground check
+local maxGroundCheckDist = 0.25
 
 registerUpdate(function(dt)
     local id = entityId -- the entity script is attached to
@@ -107,7 +109,7 @@ registerUpdate(function(dt)
 
     -- 2. Android: left side of screen controls player movement
     if getMobileMoveAxes ~= nil then
-        local mx, my = getMobileMoveAxes()
+        local mx, my = getMobileMoveAxes()  
         dx = dx + mx
         dz = dz - my
     end
@@ -189,7 +191,7 @@ registerUpdate(function(dt)
     -- ground check based on physics
     local groundedEpsPos = 0.05
     local groundedEpsVel = 0.1
-    isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
+    isGrounded = isGrounded_(id, maxGroundCheckDist)
 
     -- jump, modify vertical vel -> physics handle gravity
     --local doubleTapJump = (I and I.doubleTapped) or false
