@@ -98,7 +98,7 @@ namespace PAIN {
             // Check if user's ini file mesh_id; if not, copy default from config folder
             if (!std::filesystem::exists(m_imgui_ini_path)) {
 #ifdef PN_PLATFORM_WINDOWS
-                auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
+                auto default_ini_path = services->get<Path::Path>()->resolvePath("game_folder://imgui.ini");
                 if (std::filesystem::exists(default_ini_path)) {
                     std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
                 }
