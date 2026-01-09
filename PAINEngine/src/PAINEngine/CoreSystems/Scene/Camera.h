@@ -6,10 +6,10 @@ namespace PAIN {
 	class Camera {
 	private:
 	public:
-		Camera(const glm::vec3& pos, const glm::vec3& forward, const glm::vec3& up, float fov, float near_pl, float far_pl, float width_ratio, float height_ratio) :
-			pos(pos), forward(forward), up(up), fov(fov), near_plane(near_pl), far_plane(far_pl), width_ratio(width_ratio), height_ratio(height_ratio) {
+		Camera(const glm::vec3& pos, const glm::vec3& forward, const glm::vec3& up, float fov, float near_pl, float far_pl, float width_ratio, float height_ratio, float speed = 15.f, float sens = 0.1f) :
+			pos(pos), forward(forward), up(up), fov(fov), near_plane(near_pl), far_plane(far_pl), width_ratio(width_ratio), height_ratio(height_ratio), speed(speed), sensitivity(sens) {
 			aspect_ratio = width_ratio / height_ratio;
-			// FIX: Initialize 'right' immediately
+
 			right = glm::normalize(glm::cross(forward, up));
 		};
 		~Camera() = default;
@@ -20,9 +20,6 @@ namespace PAIN {
 		};
 
 		MOVE_MODES move_mode = FPS;
-
-		float speed = 15.f;
-		float sensitivity = 0.1f;
 
 		glm::vec3 pos;
 		glm::vec3 forward;
@@ -36,6 +33,9 @@ namespace PAIN {
 		float width_ratio;
 		float height_ratio;
 		float aspect_ratio;
+
+		float speed;
+		float sensitivity;
 
 		// temp
 		glm::mat4 model() const;

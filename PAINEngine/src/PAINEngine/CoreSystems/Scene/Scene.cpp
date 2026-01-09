@@ -274,13 +274,15 @@ namespace PAIN {
 				camSettings.nearPlane,
 				camSettings.farPlane,
 				camSettings.aspectRatioW,
-				camSettings.aspectRatioH
+				camSettings.aspectRatioH,
+				camSettings.speed,
+				camSettings.sensitivity
 			);
 			SetEditorCamera();
 
-			PN_CORE_INFO("[SceneManager] Camera setup: pos({}, {}, {}), fov={}",
+			PN_CORE_ERROR("[SceneManager] Camera setup: pos({}, {}, {}), fov={} , speed={}, sens={}",
 				camSettings.position.x, camSettings.position.y, camSettings.position.z,
-				camSettings.fov);
+				camSettings.fov, camSettings.speed, camSettings.sensitivity);
 		}
 
 		void SceneManager::setupEnvironment(SceneAsset const& scene_asset) {
@@ -429,6 +431,9 @@ namespace PAIN {
 				scene_asset.camera.fov = active_camera->fov;
 				scene_asset.camera.aspectRatioW = active_camera->width_ratio;
 				scene_asset.camera.aspectRatioH = active_camera->height_ratio;
+				scene_asset.camera.speed = active_camera->speed;
+				scene_asset.camera.sensitivity = active_camera->sensitivity;
+
 			}
 
 			//Capture all graphics and env variables
@@ -464,7 +469,9 @@ namespace PAIN {
 				{"nearPlane", scn_asset.camera.nearPlane},
 				{"farPlane", scn_asset.camera.farPlane},
 				{"aspectRatioW", scn_asset.camera.aspectRatioW},
-				{"aspectRatioH", scn_asset.camera.aspectRatioH}
+				{"aspectRatioH", scn_asset.camera.aspectRatioH},
+				{"speed", scn_asset.camera.speed},
+				{"sensitivity", scn_asset.camera.sensitivity}
 			};
 
 			//Environment settings
@@ -531,6 +538,8 @@ namespace PAIN {
 #endif
 
 		void SceneManager::configScene(SceneAsset const& scn_asset) {
+			PN_CORE_ERROR("[SceneManager] CONFIGING SCENE");
+
 			//Build new scene
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
@@ -1001,7 +1010,7 @@ namespace PAIN {
 
 			// Reset camera (but don't destroy it - we'll reuse it)
 			active_game_cam = "";
-
+			
 			// Clear scene asset reference (but keep the object if we're reloading)
 			// currentSceneAsset.reset();
 		}
