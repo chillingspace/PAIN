@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\BoxSG_baseColor.png",
+        "ao": "game\\textures\\BoxSG_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\BoxSG_emissive.png",
+        "lightmap": "game\\textures\\BoxSG_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\BoxSG_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\BoxSG_normal.png",
+        "roughness": "game\\textures\\BoxSG_occlusionRoughnessMetallic.png"
+    }
+}

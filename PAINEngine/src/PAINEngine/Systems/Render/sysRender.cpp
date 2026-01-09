@@ -189,7 +189,7 @@ namespace PAIN {
             lcam.position = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->pos;
             lcam.position.y += 0.1f;	// light on camera = grainy
             lcam.fov = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->fov;
-            lcam.forward = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
+            lcam.direction = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
             lcam.aspect_ratio = services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->aspect_ratio;
 
             GLenum err = glGetError();
@@ -335,6 +335,13 @@ namespace PAIN {
                     light.L_intensity = lighting.light_intensity;
                     light.type = static_cast<Light::TYPES>(lighting.light_type);
                     light.setShadowType(static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
+
+                    // works for non point light
+                    light.direction = lighting.direction;
+
+                    // for spotlight only
+                    light.inner_angle = lighting.inner_angle;
+                    light.outer_angle = lighting.outer_angle;
                 }
             }
 
@@ -489,7 +496,7 @@ namespace PAIN {
             if (!rendererService || !rendererService->w_renderer) return;
 
             //Texture and text groups
-            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, LocalTransform, UIRectTransform>);
+            auto texture_group = registry.group<Texture2D>(entt::get<UIElement, UIRectTransform>);
             auto text_group = registry.group<UIElement>(entt::get<UIText, UIRectTransform>);
             auto scn_service = services.lock()->get<Scene::SceneManager>();
 
@@ -514,7 +521,7 @@ namespace PAIN {
                 PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
             }
 
-            for (auto [entity, texture_comp, ui_elem, trans_comp, rect_comp] : texture_group.each()) {
+            for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
                 // Layer check
                 auto layerComp = registry.try_get<Entity::Layer>(entity);
                 if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
@@ -526,11 +533,13 @@ namespace PAIN {
                 auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(texture_comp.texture_guid);
                 if (!texture_opt.has_value()) continue;
 
-                // Get texture size and update rect transform comp
-                rect_comp.size_delta.x = texture_opt.value().get()->width;
-                rect_comp.size_delta.y = texture_opt.value().get()->height;
+                // Only auto-set size_delta if it's not already set
+                if (rect_comp.size_delta.x == 0.0f || rect_comp.size_delta.y == 0.0f) {
+                    rect_comp.size_delta.x = texture_opt.value().get()->width;
+                    rect_comp.size_delta.y = texture_opt.value().get()->height;
+                }
 
-                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, trans_comp.position, texture_comp.texture_scale);
+                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, texture_comp.pos, texture_comp.texture_scale);
             }
 
             // ========================================

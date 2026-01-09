@@ -330,6 +330,7 @@ namespace PAIN {
                 }
             }
 
+            std::cerr << "Could not find project root containing Assets/ directory" << std::endl;
             throw std::runtime_error("Could not find project root containing Assets/ directory");
         }
 
@@ -361,10 +362,14 @@ namespace PAIN {
             }
 
             if (path.string().find("/music/") != std::string::npos) return true;
+            if (path.string().find("/bgm/") != std::string::npos) return true;
+            if (path.string().find("/ambience/") != std::string::npos) return true;
 
-            uintmax_t fileSize = std::filesystem::file_size(path);
-            constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024;
-            return fileSize > MUSIC_FILESIZE_THRESHOLD;
+            //uintmax_t fileSize = std::filesystem::file_size(path);
+            //constexpr uintmax_t MUSIC_FILESIZE_THRESHOLD = 1 * 1024 * 1024;
+            //return fileSize > MUSIC_FILESIZE_THRESHOLD;
+
+            return false;
         }
 
         //Asset info

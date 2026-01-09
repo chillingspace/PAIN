@@ -157,7 +157,7 @@ namespace PAIN {
         void SetLightPosition(entt::entity entityId, float x, float y, float z) override;
         void SetLightIntensity(entt::entity entityId, float r, float g, float b) override;
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
-        void SetLightForward(entt::entity entityId, float x, float y, float z) override;
+        void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
 
     private:

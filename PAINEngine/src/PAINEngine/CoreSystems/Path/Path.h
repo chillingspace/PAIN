@@ -23,6 +23,7 @@ namespace PAIN {
 		static std::string roaming_alias = "roaming";
 		static std::string documents_alias = "documents";
 		static std::string temp_alias = "temp";
+		static std::string game_folder_alias = "game_folder";
 
 		#include "FileWatch.hpp"
 #endif

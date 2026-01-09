@@ -42,10 +42,6 @@ namespace PAIN {
 
                 bool wantsInput() const { return contentHovered && isFocused; }
 
-                void setSimulationState(bool isPaused) {
-                    isSimulationPaused = isPaused;
-                }
-
                 void setRegistry(ECS::RegistryID registryID) {
                     currentRegistryID = registryID;
                 }

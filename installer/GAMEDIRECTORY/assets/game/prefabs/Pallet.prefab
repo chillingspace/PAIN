@@ -1,0 +1,128 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "bvhNodeIndex": -1,
+                    "localAABB": {
+                        "max": [
+                            100.36543273925781,
+                            20.727630615234375,
+                            84.21436309814453
+                        ],
+                        "min": [
+                            -100.0,
+                            -9.5367431640625e-07,
+                            -84.21436309814453
+                        ]
+                    },
+                    "needsUpdate": false,
+                    "worldAABB": {
+                        "max": [
+                            0.28263890743255615,
+                            0.135856494307518,
+                            0.40992966294288635
+                        ],
+                        "min": [
+                            0.1216854527592659,
+                            -0.015646472573280334,
+                            0.24150094389915466
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.19497784972190857,
+                        0.05263344943523407,
+                        0.3257153034210205
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.3654301166534424,
+                        0.9308387637138367
+                    ],
+                    "scale": [
+                        0.0010000000474974513,
+                        0.0010000000474974513,
+                        0.0010000000474974513
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "c60c8f27-fe85-4546-8281-deaab9d87acc",
+                            "aoTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "normalTextureOverride": "19d818f3-a8fc-1b4a-bf95-b233da10f329",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "f79091e8-3999-8543-a6da-c631ad94a064",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Pallet"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127"
+        }
+    ],
+    "prefabName": "Pallet",
+    "rootEntityGUID": "68fc7fe8-e6a2-c14e-b93a-ecc62d4d6127"
+}

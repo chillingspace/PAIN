@@ -98,7 +98,7 @@ namespace PAIN {
             // Check if user's ini file mesh_id; if not, copy default from config folder
             if (!std::filesystem::exists(m_imgui_ini_path)) {
 #ifdef PN_PLATFORM_WINDOWS
-                auto default_ini_path = services->get<Path::Path>()->resolvePath("config://imgui_layout.ini");
+                auto default_ini_path = services->get<Path::Path>()->resolvePath("game_folder://imgui.ini");
                 if (std::filesystem::exists(default_ini_path)) {
                     std::filesystem::copy_file(default_ini_path, m_imgui_ini_path);
                 }
@@ -148,43 +148,26 @@ namespace PAIN {
             // Begin IMGUI Frame
             platform->beginFrame();
 
-#ifdef PN_PLATFORM_ANDROID
-            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
-                toggleVisible();
-                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+
+            if (ImGui::IsKeyPressed(ImGuiKey_F1, false)) {
+
+                auto scene = services->get<Scene::SceneManager>();
 
                 // When hiding editor, auto-play the scene
-                if (!editor_visible) {
-                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
-                        viewport->setSimulationState(false); // false = playing
-                    }
+                if (!scene->isPlaying()) {
+                    editor_visible ? scene->onPlay() : scene->onStop();
                 }
-            }
-#else
-            if (ImGui::IsKeyPressed(ImGuiKey_F1)) {
                 toggleVisible();
                 PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
-
-                // When hiding editor, auto-play the scene
-                if (!editor_visible) {
-                    if (auto viewport = services->get<Panel::ViewportPanel>()) {
-                        viewport->setSimulationState(false); // false = playing
-                       
-                    }
-                    if (isPaused()) {
-                        togglePause();
-                    }
-                }
             }
-            if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
+
+            if (ImGui::IsKeyPressed(ImGuiKey_F2 , false)) {
                 editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0
                 if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
                 else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
                 else if (editor_debug_mode == 2) PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
                 else PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
             }
-
-#endif
 
 #ifdef PN_PLATFORM_ANDROID
             // --- ADD BUTTON HERE ---
@@ -205,15 +188,15 @@ namespace PAIN {
                     ImGuiWindowFlags_NoMove);
 
                 if (ImGui::Button(editor_visible ? "Hide Editor" : "Show Editor")) {
-                    toggleVisible();
-                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
+                    auto scene = services->get<Scene::SceneManager>();
 
                     // When hiding editor, auto-play the scene
-                    if (!editor_visible) {
-                        if (auto viewport = services->get<Panel::ViewportPanel>()) {
-                            viewport->setSimulationState(false); // false = playing
-                        }
+                    if (!scene->isPlaying()) {
+                        editor_visible ? scene->onPlay() : scene->onStop();
                     }
+
+                    toggleVisible();
+                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
                 }
 
                 const char* debug_mode_labels[] = {

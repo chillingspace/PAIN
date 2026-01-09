@@ -507,8 +507,8 @@ namespace PAIN {
 					// Toolbar
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
 					{
-						if (ImGui::Button(editor->isPaused() ? "Play Scene" : "Pause Scene")) {
-							editor->togglePause();
+						if (ImGui::Button(!scene->isPlaying() ? "Play Scene" : "Stop Scene")) {
+							!scene->isPlaying() ? scene->onPlay() : scene->onStop();
 						}
 
 						ImGui::SameLine();
@@ -625,8 +625,11 @@ namespace PAIN {
 							cameraController->A_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_A);
 							cameraController->S_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_S);
 							cameraController->D_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_D);
-							cameraController->SPACE_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Space);
+							cameraController->E_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_E);
+							cameraController->Q_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_Q);
+
 							cameraController->LCTRL_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+							cameraController->LSHIFT_KEYDOWN = ImGui::IsKeyDown(ImGuiKey_LeftShift);
 
 							cameraController->mouseButtonDown = true;
 
@@ -640,33 +643,64 @@ namespace PAIN {
 							cameraController->A_KEYDOWN = false;
 							cameraController->S_KEYDOWN = false;
 							cameraController->D_KEYDOWN = false;
-							cameraController->SPACE_KEYDOWN = false;
+							cameraController->E_KEYDOWN = false;
+							cameraController->Q_KEYDOWN = false;
 							cameraController->LCTRL_KEYDOWN = false;
+							cameraController->LSHIFT_KEYDOWN = false;
 							cameraController->mouseButtonDown = false;
 							cameraController->xOffset = 0.0f;
 							cameraController->yOffset = 0.0f;
 						}
 
+						// Zoom
 						if (contentHovered && !gizmoActive && io.MouseWheel != 0.0f) {
 							float mouseWheel = io.MouseWheel;
 							float zoomSpeed = 0.1f;
 							auto activeCamera = scene->GetActiveCamera();
 
 							if (activeCamera) {
-								glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
 
-								if (mouseWheel > 0.0f) {
-									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-										* activeCamera->speed * zoomSpeed * mouseWheel;
-									activeCamera->pos += offset;
+								if (ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+									zoomSpeed *= 2.0f;
 								}
-								else if (mouseWheel < 0.0f) {
-									glm::vec3 offset = glm::vec3(mmtx * glm::vec4(activeCamera->forward, 1.f))
-										* activeCamera->speed * zoomSpeed * abs(mouseWheel);
-									activeCamera->pos -= offset;
+								else if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+									zoomSpeed /= 2.0f;
 								}
+
+								glm::vec3 offset = activeCamera->forward * activeCamera->speed * zoomSpeed * mouseWheel;
+								activeCamera->pos += offset;
+
 							}
 						}
+
+						// Focus on entity 
+						if (ImGui::IsKeyPressed(ImGuiKey_F)) {
+
+							entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+
+							if (selectedEntity != entt::null) {
+								auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
+								auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
+
+								if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
+									LocalTransform& localTransform = localTransformOpt.value().get();
+									WorldTransform& worldTransform = worldTransformOpt.value().get();
+									auto camera = scene->GetActiveCamera();
+
+									if (camera) {
+
+										glm::vec3 targetPos = glm::vec3(worldTransform.matrix[3]);
+										camera->pos = targetPos - camera->forward;
+									}
+								}
+								PN_CORE_INFO("FOCUSED ON ENTITY");
+							}
+							else {
+								PN_CORE_INFO("NO ENTITY TO FOCUS ON");
+							}
+
+						}
+
 					}
 
                     // ========================================

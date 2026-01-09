@@ -28,12 +28,16 @@ namespace PAIN {
         glm::vec3 light_intensity;
         TYPES light_type;
 
-        glm::vec3 forward; // Direction the light points, relevant for non - point lights
+        glm::vec3 direction = { 0 , -1, 0 }; // Direction the light points, relevant for non - point lights (previously named forward)
         // float fov; 
         //	float aspect_ratio;
         //	float near_plane;
         //	float far_plane;
         SHADOW_TYPES shadow_type;
+
+        //spotlight
+        float inner_angle = 12.5f;
+        float outer_angle = 17.5f;
 
         //Serialization flag
         static constexpr bool ShouldSerialize = true;
@@ -80,8 +84,11 @@ REFL_TYPE(PAIN::Lighting)
 REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
-REFL_FIELD(forward)
 REFL_FIELD(shadow_type)
+//these are added manually in components panel
+//REFL_FIELD(direction)
+//REFL_FIELD(inner_angle)
+//REFL_FIELD(outer_angle)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Lighting>);

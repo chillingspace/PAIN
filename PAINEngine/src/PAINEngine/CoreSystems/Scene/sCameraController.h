@@ -51,7 +51,10 @@ namespace PAIN {
 		bool S_KEYDOWN = false;
 		bool D_KEYDOWN = false;
 
-		bool SPACE_KEYDOWN = false;
+		bool E_KEYDOWN = false;
+		bool Q_KEYDOWN = false;
+
+		bool LSHIFT_KEYDOWN = false;
 		bool LCTRL_KEYDOWN = false;
 
 		bool mouseButtonDown = false;

@@ -36,11 +36,9 @@ namespace PAIN {
 
             void onEvent(Event::Event& event) override;
             bool isVisible() const { return editor_visible; }
-            bool isPaused() const { return editor_paused; }
             int getDebugMode() const { return editor_debug_mode; }
 
             void toggleVisible() { editor_visible = !editor_visible; }
-            void togglePause() { editor_paused = !editor_paused; }
             void toggleDebugMode() { editor_debug_mode = (editor_debug_mode + 1) % 3; } // Toggle between 0-1-2
 
             // Template implementations must be in header or included .inl file
@@ -78,7 +76,6 @@ namespace PAIN {
             void buildDockspace();
 
             bool editor_visible = true;
-            bool editor_paused = false;
             int editor_debug_mode = 0; // (0=Off, 1=BV, 2=BVH)
 
             bool showCloseConfirmPopup = false;

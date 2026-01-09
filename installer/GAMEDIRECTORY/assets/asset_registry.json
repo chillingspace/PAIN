@@ -1,0 +1,2816 @@
+{
+  "00a2355b-6870-b04b-949c-1255805a7711": {
+    "main_relative_path": "engine\\shaders\\android_irradiance_convolution.frag",
+    "name": "android_irradiance_convolution.frag",
+    "shipped_relative_path": "engine\\shaders\\android_irradiance_convolution.frag",
+    "type": "Shader"
+  },
+  "0212bc2b-e21d-0442-9d07-814fb591d583": {
+    "main_relative_path": "game\\materials\\brainstem\\calfCoverStem-effect.material",
+    "name": "calfCoverStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\calfCoverStem-effect.material",
+    "type": "Materials"
+  },
+  "0233de13-3dfd-6c46-af5c-7dcff632346d": {
+    "main_relative_path": "game\\materials\\Fence_1001.material",
+    "name": "Fence_1001.material",
+    "shipped_relative_path": "game\\materials\\Fence_1001.material",
+    "type": "Materials"
+  },
+  "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d": {
+    "main_relative_path": "game\\prefabs\\BigGround.prefab",
+    "name": "BigGround.prefab",
+    "shipped_relative_path": "game\\prefabs\\BigGround.prefab",
+    "type": "Prefabs"
+  },
+  "03321040-e7ec-9c48-8058-9f7ba5144b37": {
+    "main_relative_path": "game\\others\\Enemy2.glb",
+    "name": "Enemy2.glb",
+    "shipped_relative_path": "game\\others\\Enemy2.glb",
+    "type": "Other"
+  },
+  "03832487-2245-0347-8311-8f26590de2fc": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_04.wav",
+    "name": "Footstep_Metal_04.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_04.ogg",
+    "type": "Audio"
+  },
+  "041f02c6-debb-2a44-841d-1ee91e88baf1": {
+    "main_relative_path": "game\\scenes\\prototype.scn",
+    "name": "prototype.scn",
+    "shipped_relative_path": "game\\scenes\\prototype.scn",
+    "type": "Scenes"
+  },
+  "048332cb-8316-bb4d-a9c1-6f7c2c57acbe": {
+    "main_relative_path": "game\\prefabs\\Tire.prefab",
+    "name": "Tire.prefab",
+    "shipped_relative_path": "game\\prefabs\\Tire.prefab",
+    "type": "Prefabs"
+  },
+  "04a181ef-234c-2045-945f-0053f79a7033": {
+    "main_relative_path": "game\\materials\\MetalPillar1.material",
+    "name": "MetalPillar1.material",
+    "shipped_relative_path": "game\\materials\\MetalPillar1.material",
+    "type": "Materials"
+  },
+  "055992f3-a208-554c-9c7a-1a10ee9f41c0": {
+    "main_relative_path": "engine\\textures\\wav_icon.png",
+    "name": "wav_icon.dds",
+    "shipped_relative_path": "engine\\textures\\wav_icon.dds",
+    "type": "Texture"
+  },
+  "059b7e8f-68ba-6942-9533-2d3d25bd5b9d": {
+    "main_relative_path": "game\\materials\\brainstem\\armTrussStem-effect.material",
+    "name": "armTrussStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\armTrussStem-effect.material",
+    "type": "Materials"
+  },
+  "06cab9b7-c91a-6948-bb59-426b8032ea12": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_02.wav",
+    "name": "Player_Hop_02.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_02.ogg",
+    "type": "Audio"
+  },
+  "06da4c22-7a34-094b-ae7c-37fbfa61a0a2": {
+    "main_relative_path": "engine\\shaders\\android_pbr.vert",
+    "name": "android_pbr.vert",
+    "shipped_relative_path": "engine\\shaders\\android_pbr.vert",
+    "type": "Shader"
+  },
+  "0885891e-ae2a-044d-8ab1-44f86fb18b86": {
+    "main_relative_path": "engine\\shaders\\skybox.frag",
+    "name": "skybox.frag",
+    "shipped_relative_path": "engine\\shaders\\skybox.frag",
+    "type": "Shader"
+  },
+  "088b2b68-e158-6047-aa81-a0d12e9c768c": {
+    "main_relative_path": "game\\prefabs\\Tires.prefab",
+    "name": "Tires.prefab",
+    "shipped_relative_path": "game\\prefabs\\Tires.prefab",
+    "type": "Prefabs"
+  },
+  "08ce3705-e3db-1a42-a2b6-f7c1ab7e8e7f": {
+    "main_relative_path": "engine\\shaders\\android_shadow.vert",
+    "name": "android_shadow.vert",
+    "shipped_relative_path": "engine\\shaders\\android_shadow.vert",
+    "type": "Shader"
+  },
+  "090f5424-a7e5-a44c-adf1-bf54ac246837": {
+    "main_relative_path": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.png",
+    "name": "MetalPlank1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\MetalPlank1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "0973caab-44f6-834a-8b63-b2ab319c8eaa": {
+    "main_relative_path": "game\\materials\\Building1.material",
+    "name": "Building1.material",
+    "shipped_relative_path": "game\\materials\\Building1.material",
+    "type": "Materials"
+  },
+  "097c7989-d493-1b44-90c4-c1b70de874a1": {
+    "main_relative_path": "game\\materials\\standardSurface3SG.material",
+    "name": "standardSurface3SG.material",
+    "shipped_relative_path": "game\\materials\\standardSurface3SG.material",
+    "type": "Materials"
+  },
+  "09b7b014-c88d-cd41-adc0-4b5b60e59959": {
+    "main_relative_path": "engine\\shaders\\android_shadow.frag",
+    "name": "android_shadow.frag",
+    "shipped_relative_path": "engine\\shaders\\android_shadow.frag",
+    "type": "Shader"
+  },
+  "0a04abe3-b196-f140-bd8b-5260eefcce6e": {
+    "main_relative_path": "game\\materials\\assets\\initialShadingGroup.material",
+    "name": "initialShadingGroup.material",
+    "shipped_relative_path": "game\\materials\\assets\\initialShadingGroup.material",
+    "type": "Materials"
+  },
+  "0aa0481b-72e4-9d4d-b672-0ff0a54f9fb4": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_07.wav",
+    "name": "Footstep_Grass_07.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_07.ogg",
+    "type": "Audio"
+  },
+  "0ab12b46-3b63-2143-8863-042d7302bdb8": {
+    "main_relative_path": "game\\scripts\\enemyDetection_radius.lua",
+    "name": "enemyDetection_radius.lua",
+    "shipped_relative_path": "game\\scripts\\enemyDetection_radius.lua",
+    "type": "Script"
+  },
+  "0adf25b3-5c9e-594f-8302-9ec9fc716dfd": {
+    "main_relative_path": "game\\materials\\brainstem\\radiatorStem-effect.material",
+    "name": "radiatorStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\radiatorStem-effect.material",
+    "type": "Materials"
+  },
+  "0b225644-5cc3-5b4e-b949-ae84aa6ecc7f": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_02.wav",
+    "name": "Player_VO_Idle_02.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_02.ogg",
+    "type": "Audio"
+  },
+  "0b56d504-b974-0347-bbad-0aa5f0216a98": {
+    "main_relative_path": "game\\materials\\brainstem\\ankleStem-effect.material",
+    "name": "ankleStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\ankleStem-effect.material",
+    "type": "Materials"
+  },
+  "0c154bdd-8598-4d40-9f94-e56e81dea37d": {
+    "main_relative_path": "game\\materials\\at\\UnamedMaterial_0.material",
+    "name": "UnamedMaterial_0.material",
+    "shipped_relative_path": "game\\materials\\at\\UnamedMaterial_0.material",
+    "type": "Materials"
+  },
+  "0c2ba523-5de4-cc4b-a43e-806d24489ebb": {
+    "main_relative_path": "game\\models\\ogre_smile.obj",
+    "name": "ogre_smile.mesh",
+    "shipped_relative_path": "game\\models\\ogre_smile.mesh",
+    "type": "Model"
+  },
+  "0cc0adb7-2bdd-504f-ac88-1d37a1d8f45f": {
+    "main_relative_path": "game\\textures\\toycar\\Fabric_baseColor.png",
+    "name": "Fabric_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\Fabric_baseColor.dds",
+    "type": "Texture"
+  },
+  "0d00cd3a-fe0a-1d46-8aa5-b4b45650c94c": {
+    "main_relative_path": "game\\materials\\acc\\Blue.material",
+    "name": "Blue.material",
+    "shipped_relative_path": "game\\materials\\acc\\Blue.material",
+    "type": "Materials"
+  },
+  "0e281a68-2ccc-5741-9582-f3b716139dc6": {
+    "main_relative_path": "game\\textures\\ogre_ao_angry.png",
+    "name": "ogre_ao_angry.dds",
+    "shipped_relative_path": "game\\textures\\ogre_ao_angry.dds",
+    "type": "Texture"
+  },
+  "0eebe7de-442f-b740-ad64-a954ea7cf05c": {
+    "main_relative_path": "game\\materials\\brainstem\\Stem-effect.material",
+    "name": "Stem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\Stem-effect.material",
+    "type": "Materials"
+  },
+  "0f8d5053-e799-004e-9035-1c7ba7a9fc5d": {
+    "main_relative_path": "game\\models\\ogre.obj",
+    "name": "ogre.mesh",
+    "shipped_relative_path": "game\\models\\ogre.mesh",
+    "type": "Model"
+  },
+  "109609fb-8283-1842-98a5-02d63caf9f67": {
+    "main_relative_path": "game\\models\\brainstem\\BrainStem.gltf",
+    "name": "BrainStem.mesh",
+    "shipped_relative_path": "game\\models\\brainstem\\BrainStem.mesh",
+    "type": "Model"
+  },
+  "11171e40-d7c5-ee48-8e30-8bde6f10b948": {
+    "main_relative_path": "game\\materials\\930\\plate.material",
+    "name": "plate.material",
+    "shipped_relative_path": "game\\materials\\930\\plate.material",
+    "type": "Materials"
+  },
+  "11600979-c014-514a-9f4c-9acbb32ce137": {
+    "main_relative_path": "game\\materials\\brainstem\\frameInStem-effect.material",
+    "name": "frameInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\frameInStem-effect.material",
+    "type": "Materials"
+  },
+  "11f20ced-0a55-f344-a74e-7a57022bd83e": {
+    "main_relative_path": "game\\audio\\sfx\\player\\hide\\Box Out.wav",
+    "name": "Box Out.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\hide\\Box Out.ogg",
+    "type": "Audio"
+  },
+  "125f2dd2-7cf3-d248-a340-92bd044edd01": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_03.wav",
+    "name": "Footstep_Grass_03.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_03.ogg",
+    "type": "Audio"
+  },
+  "1292d5ca-de45-a94b-a441-44719a08361e": {
+    "main_relative_path": "engine\\shaders\\android_text.vert",
+    "name": "android_text.vert",
+    "shipped_relative_path": "engine\\shaders\\android_text.vert",
+    "type": "Shader"
+  },
+  "13870814-7a75-2f48-96db-c9054f81df17": {
+    "main_relative_path": "game\\models\\2ce\\2CylinderEngine.gltf",
+    "name": "2CylinderEngine.mesh",
+    "shipped_relative_path": "game\\models\\2ce\\2CylinderEngine.mesh",
+    "type": "Model"
+  },
+  "14377587-a8fe-2b47-9f46-dad6bdad2753": {
+    "main_relative_path": "game\\materials\\WaterTower.material",
+    "name": "WaterTower.material",
+    "shipped_relative_path": "game\\materials\\WaterTower.material",
+    "type": "Materials"
+  },
+  "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6": {
+    "main_relative_path": "game\\models\\OilDrum_Red.gltf",
+    "name": "OilDrum_Red.mesh",
+    "shipped_relative_path": "game\\models\\OilDrum_Red.mesh",
+    "type": "Model"
+  },
+  "15051f9c-aca9-9d45-9b1d-f76ec6b11edc": {
+    "main_relative_path": "engine\\shaders\\android_floor.vert",
+    "name": "android_floor.vert",
+    "shipped_relative_path": "engine\\shaders\\android_floor.vert",
+    "type": "Shader"
+  },
+  "15d07ef6-eadd-cf49-bf8f-8825d014f2c5": {
+    "main_relative_path": "game\\materials\\Pallet.material",
+    "name": "Pallet.material",
+    "shipped_relative_path": "game\\materials\\Pallet.material",
+    "type": "Materials"
+  },
+  "163a51d7-15ef-cc46-83bd-db476f7d1f14": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_07.wav",
+    "name": "Player_Hop_07.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_07.ogg",
+    "type": "Audio"
+  },
+  "163da0e7-00d9-0541-a470-a859fd023b6b": {
+    "main_relative_path": "game\\textures\\BoxSG_normal.png",
+    "name": "BoxSG_normal.dds",
+    "shipped_relative_path": "game\\textures\\BoxSG_normal.dds",
+    "type": "Texture"
+  },
+  "164de26f-1403-e146-8a76-735d5dc42155": {
+    "main_relative_path": "game\\textures\\Watertower_BaseColor.png",
+    "name": "Watertower_BaseColor.dds",
+    "shipped_relative_path": "game\\textures\\Watertower_BaseColor.dds",
+    "type": "Texture"
+  },
+  "16ce9fd3-18bd-8f4d-9172-fc09afd84131": {
+    "main_relative_path": "engine\\shaders\\brdf.frag",
+    "name": "brdf.frag",
+    "shipped_relative_path": "engine\\shaders\\brdf.frag",
+    "type": "Shader"
+  },
+  "1708e4d2-69c9-ba43-9ef6-85d417b11f01": {
+    "main_relative_path": "game\\textures\\ContainerRed_baseColor.png",
+    "name": "ContainerRed_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\ContainerRed_baseColor.dds",
+    "type": "Texture"
+  },
+  "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f": {
+    "main_relative_path": "game\\textures\\Pile1_normal.png",
+    "name": "Pile1_normal.dds",
+    "shipped_relative_path": "game\\textures\\Pile1_normal.dds",
+    "type": "Texture"
+  },
+  "18526b71-f639-e645-b798-b527f4fb507b": {
+    "main_relative_path": "engine\\shaders\\android_geometry.frag",
+    "name": "android_geometry.frag",
+    "shipped_relative_path": "engine\\shaders\\android_geometry.frag",
+    "type": "Shader"
+  },
+  "19c6aae9-108a-7d45-937d-bbd0c891a9cb": {
+    "main_relative_path": "game\\textures\\Building1_baseColor.png",
+    "name": "Building1_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Building1_baseColor.dds",
+    "type": "Texture"
+  },
+  "19d818f3-a8fc-1b4a-bf95-b233da10f329": {
+    "main_relative_path": "game\\textures\\Pallet_normal.png",
+    "name": "Pallet_normal.dds",
+    "shipped_relative_path": "game\\textures\\Pallet_normal.dds",
+    "type": "Texture"
+  },
+  "1a732a46-6d9f-2e4d-beb7-74a9b73c9a0c": {
+    "main_relative_path": "game\\textures\\Rock1_baseColor_1001.png",
+    "name": "Rock1_baseColor_1001.dds",
+    "shipped_relative_path": "game\\textures\\Rock1_baseColor_1001.dds",
+    "type": "Texture"
+  },
+  "1a8c5b9d-e7be-4a43-8e28-7d040efc9d15": {
+    "main_relative_path": "game\\textures\\gameover.png",
+    "name": "gameover.dds",
+    "shipped_relative_path": "game\\textures\\gameover.dds",
+    "type": "Texture"
+  },
+  "1c349059-b8fe-7a43-9d6c-ed3b33bfa577": {
+    "main_relative_path": "game\\materials\\brainstem\\canisterInStem-effect.material",
+    "name": "canisterInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\canisterInStem-effect.material",
+    "type": "Materials"
+  },
+  "1c9b3f0c-fa0d-bc43-8087-c3396d26d225": {
+    "main_relative_path": "game\\prefabs\\ContainerBlue.prefab",
+    "name": "ContainerBlue.prefab",
+    "shipped_relative_path": "game\\prefabs\\ContainerBlue.prefab",
+    "type": "Prefabs"
+  },
+  "1d0df484-fdad-7c48-985b-aeb3a4c907e5": {
+    "main_relative_path": "game\\scripts\\Checkpoint.lua",
+    "name": "Checkpoint.lua",
+    "shipped_relative_path": "game\\scripts\\Checkpoint.lua",
+    "type": "Script"
+  },
+  "1d27c3bd-1376-b846-ac23-63dfa7a2e619": {
+    "main_relative_path": "engine\\shaders\\shadow.frag",
+    "name": "shadow.frag",
+    "shipped_relative_path": "engine\\shaders\\shadow.frag",
+    "type": "Shader"
+  },
+  "1d6d1d08-54e3-0342-80bc-de9dfd8c30d5": {
+    "main_relative_path": "game\\textures\\toycar\\ToyCar_clearcoat.png",
+    "name": "ToyCar_clearcoat.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\ToyCar_clearcoat.dds",
+    "type": "Texture"
+  },
+  "1e4c2108-a5ba-b342-b118-948be9c98ca8": {
+    "main_relative_path": "game\\materials\\brainstem\\shockInStem-effect.material",
+    "name": "shockInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\shockInStem-effect.material",
+    "type": "Materials"
+  },
+  "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b": {
+    "main_relative_path": "game\\prefabs\\OilDrumRed.prefab",
+    "name": "OilDrumRed.prefab",
+    "shipped_relative_path": "game\\prefabs\\OilDrumRed.prefab",
+    "type": "Prefabs"
+  },
+  "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4": {
+    "main_relative_path": "game\\textures\\OilDrumBlue_baseColor_1001.png",
+    "name": "OilDrumBlue_baseColor_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumBlue_baseColor_1001.dds",
+    "type": "Texture"
+  },
+  "1ecb9576-af24-084d-ac1d-05f681ab6929": {
+    "main_relative_path": "game\\materials\\brainstem\\discStem-effect.material",
+    "name": "discStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\discStem-effect.material",
+    "type": "Materials"
+  },
+  "1fe7b95c-7093-7f44-8aac-322eae96b634": {
+    "main_relative_path": "engine\\textures\\skybox2.hdr",
+    "name": "skybox2.dds",
+    "shipped_relative_path": "engine\\textures\\skybox2.dds",
+    "type": "Texture"
+  },
+  "205873b4-17b4-ea4f-a4e4-8b1ff7d7236c": {
+    "main_relative_path": "game\\textures\\Fence_occlusionRoughnessMetallic_1001.png",
+    "name": "Fence_occlusionRoughnessMetallic_1001.dds",
+    "shipped_relative_path": "game\\textures\\Fence_occlusionRoughnessMetallic_1001.dds",
+    "type": "Texture"
+  },
+  "20975c5e-11d9-f44b-b540-5b8dc153666f": {
+    "main_relative_path": "engine\\textures\\grid_icon.png",
+    "name": "grid_icon.dds",
+    "shipped_relative_path": "engine\\textures\\grid_icon.dds",
+    "type": "Texture"
+  },
+  "213895bd-3c32-4d41-898d-721469e136c6": {
+    "main_relative_path": "engine\\shaders\\android_bloom_blend.frag",
+    "name": "android_bloom_blend.frag",
+    "shipped_relative_path": "engine\\shaders\\android_bloom_blend.frag",
+    "type": "Shader"
+  },
+  "219eea7f-9de2-074f-8d41-b1540dd26587": {
+    "main_relative_path": "game\\materials\\brainstem\\kneeStem-effect.material",
+    "name": "kneeStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\kneeStem-effect.material",
+    "type": "Materials"
+  },
+  "21fda66c-c116-1e49-887c-4e9a4245e8d9": {
+    "main_relative_path": "engine\\shaders\\blur.frag",
+    "name": "blur.frag",
+    "shipped_relative_path": "engine\\shaders\\blur.frag",
+    "type": "Shader"
+  },
+  "22345232-e154-f042-9c56-3391fb5e3164": {
+    "main_relative_path": "game\\scripts\\enemyDetection_collision.lua",
+    "name": "enemyDetection_collision.lua",
+    "shipped_relative_path": "game\\scripts\\enemyDetection_collision.lua",
+    "type": "Script"
+  },
+  "22cc4a7f-f69f-d04d-9b9c-63e9752bac13": {
+    "main_relative_path": "engine\\shaders\\bloom.vert",
+    "name": "bloom.vert",
+    "shipped_relative_path": "engine\\shaders\\bloom.vert",
+    "type": "Shader"
+  },
+  "2326e79e-5094-4049-bd4b-80bf061a8c38": {
+    "main_relative_path": "game\\materials\\brainstem\\footFlangeStem-effect.material",
+    "name": "footFlangeStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\footFlangeStem-effect.material",
+    "type": "Materials"
+  },
+  "240193c1-8d67-9d49-90be-9258c88659d1": {
+    "main_relative_path": "engine\\shaders\\android_gamma.vert",
+    "name": "android_gamma.vert",
+    "shipped_relative_path": "engine\\shaders\\android_gamma.vert",
+    "type": "Shader"
+  },
+  "25439f8e-f984-6045-9a3c-92d96c732c3e": {
+    "main_relative_path": "engine\\shaders\\prefilter.vert",
+    "name": "prefilter.vert",
+    "shipped_relative_path": "engine\\shaders\\prefilter.vert",
+    "type": "Shader"
+  },
+  "256aaf03-37ee-654a-947b-dba5e889cb54": {
+    "main_relative_path": "game\\textures\\MetalPillar1_baseColor.png",
+    "name": "MetalPillar1_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar1_baseColor.dds",
+    "type": "Texture"
+  },
+  "25761c8e-c7df-b34c-9aa3-8773404367e8": {
+    "main_relative_path": "game\\materials\\MetalPillar2.material",
+    "name": "MetalPillar2.material",
+    "shipped_relative_path": "game\\materials\\MetalPillar2.material",
+    "type": "Materials"
+  },
+  "25c6e2c3-b701-4c43-b049-8c9b21a29441": {
+    "main_relative_path": "game\\textures\\Gear_BaseColor.png",
+    "name": "Gear_BaseColor.dds",
+    "shipped_relative_path": "game\\textures\\Gear_BaseColor.dds",
+    "type": "Texture"
+  },
+  "25d87724-a979-2e4a-ba23-db0ad9e97b60": {
+    "main_relative_path": "game\\materials\\assets\\lambert1SG.material",
+    "name": "lambert1SG.material",
+    "shipped_relative_path": "game\\materials\\assets\\lambert1SG.material",
+    "type": "Materials"
+  },
+  "266caf71-f83f-9e4a-b789-333e707a570f": {
+    "main_relative_path": "game\\materials\\MetalPlank1.material",
+    "name": "MetalPlank1.material",
+    "shipped_relative_path": "game\\materials\\MetalPlank1.material",
+    "type": "Materials"
+  },
+  "28d9ab9c-e577-4a44-bf43-2a8a977e4390": {
+    "main_relative_path": "game\\textures\\Rock1_occlusionRoughnessMetallic_1001.png",
+    "name": "Rock1_occlusionRoughnessMetallic_1001.dds",
+    "shipped_relative_path": "game\\textures\\Rock1_occlusionRoughnessMetallic_1001.dds",
+    "type": "Texture"
+  },
+  "296fa841-931e-664c-b744-fe3b3558b5c5": {
+    "main_relative_path": "game\\textures\\Building1_normal.png",
+    "name": "Building1_normal.dds",
+    "shipped_relative_path": "game\\textures\\Building1_normal.dds",
+    "type": "Texture"
+  },
+  "29fe999b-d257-bf41-879d-6d7578d43734": {
+    "main_relative_path": "game\\textures\\city.png",
+    "name": "city.dds",
+    "shipped_relative_path": "game\\textures\\city.dds",
+    "type": "Texture"
+  },
+  "2a9248b9-b337-1841-87eb-5d9846943935": {
+    "main_relative_path": "engine\\shaders\\android_prefilter.vert",
+    "name": "android_prefilter.vert",
+    "shipped_relative_path": "engine\\shaders\\android_prefilter.vert",
+    "type": "Shader"
+  },
+  "2b43d943-6ddf-1b4e-bdf6-d494ef0fbf4e": {
+    "main_relative_path": "game\\materials\\brainstem\\filletStem-effect.material",
+    "name": "filletStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\filletStem-effect.material",
+    "type": "Materials"
+  },
+  "2b6519b3-ce38-2742-832f-770f9cd47346": {
+    "main_relative_path": "engine\\textures\\Cube_BaseColor.png",
+    "name": "Cube_BaseColor.dds",
+    "shipped_relative_path": "engine\\textures\\Cube_BaseColor.dds",
+    "type": "Texture"
+  },
+  "2b7885e9-c76a-8d49-a913-08a379dc917a": {
+    "main_relative_path": "engine\\shaders\\text.frag",
+    "name": "text.frag",
+    "shipped_relative_path": "engine\\shaders\\text.frag",
+    "type": "Shader"
+  },
+  "2bc1a90f-8bfa-4b4b-b8d9-3e0966d945ee": {
+    "main_relative_path": "game\\materials\\2ce\\Material_16.material",
+    "name": "Material_16.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_16.material",
+    "type": "Materials"
+  },
+  "2c168fa7-1319-2140-a4df-9cdb657fac01": {
+    "main_relative_path": "game\\scenes\\Physics.scn",
+    "name": "Physics.scn",
+    "shipped_relative_path": "game\\scenes\\Physics.scn",
+    "type": "Scenes"
+  },
+  "2d06bdcb-57a9-7542-9c5d-c1d306544516": {
+    "main_relative_path": "game\\materials\\brainstem\\filterInStem-effect.material",
+    "name": "filterInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\filterInStem-effect.material",
+    "type": "Materials"
+  },
+  "2d6d9af2-8bd1-034b-b62a-eefabd3aaa7d": {
+    "main_relative_path": "engine\\shaders\\blur.vert",
+    "name": "blur.vert",
+    "shipped_relative_path": "engine\\shaders\\blur.vert",
+    "type": "Shader"
+  },
+  "2ded95f0-b919-c640-89e0-fc3a2c17a6db": {
+    "main_relative_path": "game\\materials\\930\\930_rim.material",
+    "name": "930_rim.material",
+    "shipped_relative_path": "game\\materials\\930\\930_rim.material",
+    "type": "Materials"
+  },
+  "2eec9e49-61a9-fd40-b4e5-921f9a33df10": {
+    "main_relative_path": "game\\models\\Frog_Idle.gltf",
+    "name": "Frog_Idle.mesh",
+    "shipped_relative_path": "game\\models\\Frog_Idle.mesh",
+    "type": "Model"
+  },
+  "2fa6ed64-f88d-2f4c-bf34-3dc6725d022f": {
+    "main_relative_path": "engine\\shaders\\shadow.vert",
+    "name": "shadow.vert",
+    "shipped_relative_path": "engine\\shaders\\shadow.vert",
+    "type": "Shader"
+  },
+  "2fbc28da-81b5-f445-a612-b6d6399e9b73": {
+    "main_relative_path": "game\\materials\\brainstem\\componentsStem-effect.material",
+    "name": "componentsStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\componentsStem-effect.material",
+    "type": "Materials"
+  },
+  "30cd3b32-bce1-564e-8046-1204bbfee443": {
+    "main_relative_path": "game\\textures\\robot_Robot_Metallic-robot_Robot_Roughness.png",
+    "name": "robot_Robot_Metallic-robot_Robot_Roughness.dds",
+    "shipped_relative_path": "game\\textures\\robot_Robot_Metallic-robot_Robot_Roughness.dds",
+    "type": "Texture"
+  },
+  "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e": {
+    "main_relative_path": "game\\textures\\Gear_Normal.png",
+    "name": "Gear_Normal.dds",
+    "shipped_relative_path": "game\\textures\\Gear_Normal.dds",
+    "type": "Texture"
+  },
+  "325510fd-4a0a-3041-a608-7bd19d01786f": {
+    "main_relative_path": "game\\materials\\toycar\\Glass.material",
+    "name": "Glass.material",
+    "shipped_relative_path": "game\\materials\\toycar\\Glass.material",
+    "type": "Materials"
+  },
+  "3271387d-704a-074b-b0e9-b644ae09c07c": {
+    "main_relative_path": "engine\\shaders\\geometry.frag",
+    "name": "geometry.frag",
+    "shipped_relative_path": "engine\\shaders\\geometry.frag",
+    "type": "Shader"
+  },
+  "33175c33-50ea-da41-a2b2-56c611b0e030": {
+    "main_relative_path": "game\\textures\\ogre_gi.png",
+    "name": "ogre_gi.dds",
+    "shipped_relative_path": "game\\textures\\ogre_gi.dds",
+    "type": "Texture"
+  },
+  "333cff79-ab50-6642-a67c-a713f6d8888d": {
+    "main_relative_path": "game\\materials\\brainstem\\componentStem-effect.material",
+    "name": "componentStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\componentStem-effect.material",
+    "type": "Materials"
+  },
+  "333faf41-faed-fb40-b6aa-1a340a6e9947": {
+    "main_relative_path": "game\\scenes\\NewTestScn.scn",
+    "name": "NewTestScn.scn",
+    "shipped_relative_path": "game\\scenes\\NewTestScn.scn",
+    "type": "Scenes"
+  },
+  "3372e083-42f5-7f43-adbe-cd12d7e0dcbf": {
+    "main_relative_path": "engine\\shaders\\irradiance_convolution.vert",
+    "name": "irradiance_convolution.vert",
+    "shipped_relative_path": "engine\\shaders\\irradiance_convolution.vert",
+    "type": "Shader"
+  },
+  "338bae14-156d-5948-a488-ecda1c3ec6cf": {
+    "main_relative_path": "game\\materials\\brainstem\\TubeStem-effect.material",
+    "name": "TubeStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\TubeStem-effect.material",
+    "type": "Materials"
+  },
+  "34618c84-1a57-7647-a194-e1cc9b50a0bf": {
+    "main_relative_path": "game\\materials\\UnamedMaterial_0.material",
+    "name": "UnamedMaterial_0.material",
+    "shipped_relative_path": "game\\materials\\UnamedMaterial_0.material",
+    "type": "Materials"
+  },
+  "34a04a28-cef4-224f-be7b-f95b18dcd319": {
+    "main_relative_path": "game\\models\\930\\930.gltf",
+    "name": "930.mesh",
+    "shipped_relative_path": "game\\models\\930\\930.mesh",
+    "type": "Model"
+  },
+  "351d0711-28db-d346-81fe-fe5904ff854a": {
+    "main_relative_path": "game\\textures\\Floor_normal.png",
+    "name": "Floor_normal.dds",
+    "shipped_relative_path": "game\\textures\\Floor_normal.dds",
+    "type": "Texture"
+  },
+  "357b46b8-a3a2-8949-b1d6-18f5727d71b5": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_06.wav",
+    "name": "Footstep_Grass_06.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_06.ogg",
+    "type": "Audio"
+  },
+  "359c11cc-32c8-184e-bc39-45a579620d60": {
+    "main_relative_path": "engine\\textures\\Cube_MetallicRoughness.png",
+    "name": "Cube_MetallicRoughness.dds",
+    "shipped_relative_path": "engine\\textures\\Cube_MetallicRoughness.dds",
+    "type": "Texture"
+  },
+  "3688e05d-7434-b849-8904-1d7884ad053f": {
+    "main_relative_path": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.png",
+    "name": "OilDrumBlue_occlusionRoughnessMetallic_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumBlue_occlusionRoughnessMetallic_1001.dds",
+    "type": "Texture"
+  },
+  "36dca42d-85e0-7c49-82ba-174115421759": {
+    "main_relative_path": "game\\textures\\damagedhelmet\\Default_normal.jpg",
+    "name": "Default_normal.dds",
+    "shipped_relative_path": "game\\textures\\damagedhelmet\\Default_normal.dds",
+    "type": "Texture"
+  },
+  "378c4193-ec03-ce4d-b3cf-e4452ab6e40e": {
+    "main_relative_path": "engine\\shaders\\texture2d.frag",
+    "name": "texture2d.frag",
+    "shipped_relative_path": "engine\\shaders\\texture2d.frag",
+    "type": "Shader"
+  },
+  "37c49916-23b6-f946-b585-7337fa486f18": {
+    "main_relative_path": "engine\\shaders\\pbr_preview.frag",
+    "name": "pbr_preview.frag",
+    "shipped_relative_path": "engine\\shaders\\pbr_preview.frag",
+    "type": "Shader"
+  },
+  "37cc2290-763b-5b41-802b-adce3c1cbdca": {
+    "main_relative_path": "engine\\shaders\\skybox.vert",
+    "name": "skybox.vert",
+    "shipped_relative_path": "engine\\shaders\\skybox.vert",
+    "type": "Shader"
+  },
+  "38f12f60-a084-3746-9d72-41632d9f14d2": {
+    "main_relative_path": "game\\textures\\cancel hide.png",
+    "name": "cancel hide.dds",
+    "shipped_relative_path": "game\\textures\\cancel hide.dds",
+    "type": "Texture"
+  },
+  "3a537495-6e65-4542-ae8a-f48632f27d33": {
+    "main_relative_path": "game\\materials\\brainstem\\headFilletStem-effect.material",
+    "name": "headFilletStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\headFilletStem-effect.material",
+    "type": "Materials"
+  },
+  "3a5c03f0-d776-2a44-ba91-1b088c4a4bb5": {
+    "main_relative_path": "game\\textures\\robot_Robot_Emissive.png",
+    "name": "robot_Robot_Emissive.dds",
+    "shipped_relative_path": "game\\textures\\robot_Robot_Emissive.dds",
+    "type": "Texture"
+  },
+  "3aef61f2-2d56-c646-8a14-1f9d81e57e79": {
+    "main_relative_path": "engine\\shaders\\android_tone.frag",
+    "name": "android_tone.frag",
+    "shipped_relative_path": "engine\\shaders\\android_tone.frag",
+    "type": "Shader"
+  },
+  "3b2d4292-f67b-a14d-b1a9-3482d40af945": {
+    "main_relative_path": "game\\materials\\930\\material_0.material",
+    "name": "material_0.material",
+    "shipped_relative_path": "game\\materials\\930\\material_0.material",
+    "type": "Materials"
+  },
+  "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c": {
+    "main_relative_path": "game\\textures\\grab.png",
+    "name": "grab.dds",
+    "shipped_relative_path": "game\\textures\\grab.dds",
+    "type": "Texture"
+  },
+  "3cf1fb7d-12f3-8647-a482-0f5659064c19": {
+    "main_relative_path": "game\\materials\\brainstem\\hexStem-effect.material",
+    "name": "hexStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\hexStem-effect.material",
+    "type": "Materials"
+  },
+  "3d877464-9e2f-9b43-8d34-e84f1602469f": {
+    "main_relative_path": "game\\textures\\damagedhelmet\\Default_metalRoughness.jpg",
+    "name": "Default_metalRoughness.dds",
+    "shipped_relative_path": "game\\textures\\damagedhelmet\\Default_metalRoughness.dds",
+    "type": "Texture"
+  },
+  "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae": {
+    "main_relative_path": "game\\materials\\Gear.material",
+    "name": "Gear.material",
+    "shipped_relative_path": "game\\materials\\Gear.material",
+    "type": "Materials"
+  },
+  "3e1bed01-56de-1b43-9134-1ae7de7f7226": {
+    "main_relative_path": "game\\prefabs\\Gear.prefab",
+    "name": "Gear.prefab",
+    "shipped_relative_path": "game\\prefabs\\Gear.prefab",
+    "type": "Prefabs"
+  },
+  "3e8dc653-3d17-ab42-bb53-da040f01f965": {
+    "main_relative_path": "game\\materials\\Frog_Material.material",
+    "name": "Frog_Material.material",
+    "shipped_relative_path": "game\\materials\\Frog_Material.material",
+    "type": "Materials"
+  },
+  "3f07c536-9f68-1144-a9e7-bc68705f2f72": {
+    "main_relative_path": "engine\\textures\\model_icon.png",
+    "name": "model_icon.dds",
+    "shipped_relative_path": "engine\\textures\\model_icon.dds",
+    "type": "Texture"
+  },
+  "3f426811-d7c6-1849-888b-342ad606febc": {
+    "main_relative_path": "game\\prefabs\\ContainerRed.prefab",
+    "name": "ContainerRed.prefab",
+    "shipped_relative_path": "game\\prefabs\\ContainerRed.prefab",
+    "type": "Prefabs"
+  },
+  "3f9f9668-49c4-b042-9f3f-c2157add307b": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_03.wav",
+    "name": "Player_Hop_03.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_03.ogg",
+    "type": "Audio"
+  },
+  "40444285-5787-df4f-a3b0-18b0a2d6ae3d": {
+    "main_relative_path": "game\\prefabs\\MetalPlank1.prefab",
+    "name": "MetalPlank1.prefab",
+    "shipped_relative_path": "game\\prefabs\\MetalPlank1.prefab",
+    "type": "Prefabs"
+  },
+  "41022c20-5591-324d-80ff-f14090e5e9d3": {
+    "main_relative_path": "game\\materials\\Tires.material",
+    "name": "Tires.material",
+    "shipped_relative_path": "game\\materials\\Tires.material",
+    "type": "Materials"
+  },
+  "41741f51-6589-fa47-84e4-ab0ae2c1ceba": {
+    "main_relative_path": "engine\\shaders\\texture2d.vert",
+    "name": "texture2d.vert",
+    "shipped_relative_path": "engine\\shaders\\texture2d.vert",
+    "type": "Shader"
+  },
+  "4229e570-db3e-f248-97ad-5ad7ae05bb7a": {
+    "main_relative_path": "game\\others\\MetalPlank1.glb",
+    "name": "MetalPlank1.glb",
+    "shipped_relative_path": "game\\others\\MetalPlank1.glb",
+    "type": "Other"
+  },
+  "436aa7ae-eb90-d04c-9e90-1b62eb28fd88": {
+    "main_relative_path": "engine\\shaders\\android_text.frag",
+    "name": "android_text.frag",
+    "shipped_relative_path": "engine\\shaders\\android_text.frag",
+    "type": "Shader"
+  },
+  "43a3b828-5c85-ad46-a434-7cea082d0856": {
+    "main_relative_path": "game\\textures\\toycar\\ToyCar_normal.png",
+    "name": "ToyCar_normal.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\ToyCar_normal.dds",
+    "type": "Texture"
+  },
+  "43dea636-43ff-864f-b059-bf1f4999b063": {
+    "main_relative_path": "game\\textures\\ogre_ao_rest.png",
+    "name": "ogre_ao_rest.dds",
+    "shipped_relative_path": "game\\textures\\ogre_ao_rest.dds",
+    "type": "Texture"
+  },
+  "443a2cb0-5def-da40-92eb-3cdef9b65ed8": {
+    "main_relative_path": "game\\textures\\Tires_occlusionRoughnessMetallic.png",
+    "name": "Tires_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Tires_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c": {
+    "main_relative_path": "game\\materials\\DefaultMaterial.material",
+    "name": "DefaultMaterial.material",
+    "shipped_relative_path": "game\\materials\\DefaultMaterial.material",
+    "type": "Materials"
+  },
+  "4525969c-730e-6d40-aef8-43390fef9c6e": {
+    "main_relative_path": "game\\models\\Floor.gltf",
+    "name": "Floor.mesh",
+    "shipped_relative_path": "game\\models\\Floor.mesh",
+    "type": "Model"
+  },
+  "4549f189-13af-ca43-a393-a5a1c4a80cc4": {
+    "main_relative_path": "game\\textures\\Enemy2_baseColor.png",
+    "name": "Enemy2_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Enemy2_baseColor.dds",
+    "type": "Texture"
+  },
+  "45fa720b-bdbf-b249-9c9b-961773316633": {
+    "main_relative_path": "game\\models\\Fence1.gltf",
+    "name": "Fence1.mesh",
+    "shipped_relative_path": "game\\models\\Fence1.mesh",
+    "type": "Model"
+  },
+  "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4": {
+    "main_relative_path": "game\\textures\\Watertower_Normal.png",
+    "name": "Watertower_Normal.dds",
+    "shipped_relative_path": "game\\textures\\Watertower_Normal.dds",
+    "type": "Texture"
+  },
+  "467c98fc-0978-eb48-82cf-5ff77d2dd93f": {
+    "main_relative_path": "game\\templates\\Heart.tmpl",
+    "name": "Heart.tmpl",
+    "shipped_relative_path": "game\\templates\\Heart.tmpl",
+    "type": "Templates"
+  },
+  "475915ed-d570-8f4a-b03d-895c09738fae": {
+    "main_relative_path": "engine\\shaders\\gamma.frag",
+    "name": "gamma.frag",
+    "shipped_relative_path": "engine\\shaders\\gamma.frag",
+    "type": "Shader"
+  },
+  "476662dc-9a7b-2243-97be-6e01bceeb854": {
+    "main_relative_path": "game\\textures\\Floor_baseColor.png",
+    "name": "Floor_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Floor_baseColor.dds",
+    "type": "Texture"
+  },
+  "486e3cda-0b61-bf4e-a33d-1d9469c685d2": {
+    "main_relative_path": "game\\materials\\brainstem\\thighPadStem-effect.material",
+    "name": "thighPadStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\thighPadStem-effect.material",
+    "type": "Materials"
+  },
+  "4879b7a0-e038-2741-a71b-e8ef06b820fc": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_03.wav",
+    "name": "Footstep_Metal_03.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_03.ogg",
+    "type": "Audio"
+  },
+  "487f8299-9cd2-e843-bf41-4791a0866f8d": {
+    "main_relative_path": "engine\\shaders\\android_skybox.frag",
+    "name": "android_skybox.frag",
+    "shipped_relative_path": "engine\\shaders\\android_skybox.frag",
+    "type": "Shader"
+  },
+  "48ae6798-0194-ae4c-89c1-c9d8ba1c016d": {
+    "main_relative_path": "game\\textures\\Pile1_baseColor.png",
+    "name": "Pile1_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Pile1_baseColor.dds",
+    "type": "Texture"
+  },
+  "492de631-29ad-6244-aa9b-a6b8785c0606": {
+    "main_relative_path": "game\\materials\\brainstem\\footStem-effect.material",
+    "name": "footStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\footStem-effect.material",
+    "type": "Materials"
+  },
+  "4945253a-9d78-a64d-bfde-f561856fcf5f": {
+    "main_relative_path": "game\\textures\\toycar\\ToyCar_emissive.png",
+    "name": "ToyCar_emissive.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\ToyCar_emissive.dds",
+    "type": "Texture"
+  },
+  "49acf26b-945c-1940-b34c-7fc07043105d": {
+    "main_relative_path": "engine\\shaders\\android_brdf.frag",
+    "name": "android_brdf.frag",
+    "shipped_relative_path": "engine\\shaders\\android_brdf.frag",
+    "type": "Shader"
+  },
+  "4abba89c-2728-1a4b-bf13-c88751021af2": {
+    "main_relative_path": "game\\models\\MetalPillar1.gltf",
+    "name": "MetalPillar1.mesh",
+    "shipped_relative_path": "game\\models\\MetalPillar1.mesh",
+    "type": "Model"
+  },
+  "4ad77538-55dd-0549-b0cd-59b7f3ac8e50": {
+    "main_relative_path": "game\\textures\\MetalPillar1_occlusionRoughnessMetallic.png",
+    "name": "MetalPillar1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "4b1f318e-49f7-1545-bb84-b9c6608f3471": {
+    "main_relative_path": "game\\materials\\Floor.material",
+    "name": "Floor.material",
+    "shipped_relative_path": "game\\materials\\Floor.material",
+    "type": "Materials"
+  },
+  "4b27a579-5e9f-a04e-b4c3-e0e592c1b2dd": {
+    "main_relative_path": "game\\materials\\initialShadingGroup.material",
+    "name": "initialShadingGroup.material",
+    "shipped_relative_path": "game\\materials\\initialShadingGroup.material",
+    "type": "Materials"
+  },
+  "4e3c7a13-5e5f-dc41-a28e-6a83e238d0c1": {
+    "main_relative_path": "game\\others\\Container_Blue.glb",
+    "name": "Container_Blue.glb",
+    "shipped_relative_path": "game\\others\\Container_Blue.glb",
+    "type": "Other"
+  },
+  "4e937e21-0623-ad45-ad95-e4c416c20b1b": {
+    "main_relative_path": "game\\textures\\BigGround_occlusionRoughnessMetallic.png",
+    "name": "BigGround_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\BigGround_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "510e3ede-f637-c448-99e8-7dc200d60c8f": {
+    "main_relative_path": "game\\models\\platform1.gltf",
+    "name": "platform1.mesh",
+    "shipped_relative_path": "game\\models\\platform1.mesh",
+    "type": "Model"
+  },
+  "514ec937-7a2b-c949-8d8d-6a6e2fde6a5e": {
+    "main_relative_path": "game\\materials\\brainstem\\hipSphereStem-effect.material",
+    "name": "hipSphereStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\hipSphereStem-effect.material",
+    "type": "Materials"
+  },
+  "518e2990-cdef-2f40-84f6-8550a53f323d": {
+    "main_relative_path": "engine\\textures\\folder_icon.png",
+    "name": "folder_icon.dds",
+    "shipped_relative_path": "engine\\textures\\folder_icon.dds",
+    "type": "Texture"
+  },
+  "5196e609-0b34-0742-87ec-b0260a14c392": {
+    "main_relative_path": "game\\textures\\jump.png",
+    "name": "jump.dds",
+    "shipped_relative_path": "game\\textures\\jump.dds",
+    "type": "Texture"
+  },
+  "5247a57c-9aa7-9840-9796-1ad71757bd01": {
+    "main_relative_path": "game\\models\\at\\AnimatedTriangle.gltf",
+    "name": "AnimatedTriangle.mesh",
+    "shipped_relative_path": "game\\models\\at\\AnimatedTriangle.mesh",
+    "type": "Model"
+  },
+  "52740f63-961d-9c49-b85a-553777cd8be9": {
+    "main_relative_path": "game\\others\\Container_Red.glb",
+    "name": "Container_Red.glb",
+    "shipped_relative_path": "game\\others\\Container_Red.glb",
+    "type": "Other"
+  },
+  "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a": {
+    "main_relative_path": "game\\models\\Pipe1.gltf",
+    "name": "Pipe1.mesh",
+    "shipped_relative_path": "game\\models\\Pipe1.mesh",
+    "type": "Model"
+  },
+  "54f9e5c6-e976-fe4d-beb9-0d08d8662f83": {
+    "main_relative_path": "game\\textures\\Box_AO.png",
+    "name": "Box_AO.dds",
+    "shipped_relative_path": "game\\textures\\Box_AO.dds",
+    "type": "Texture"
+  },
+  "55d9375f-557f-5847-8363-eb1a092b798f": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_10.wav",
+    "name": "Footstep_Metal_10.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_10.ogg",
+    "type": "Audio"
+  },
+  "56926a47-f97e-7e41-a3cc-54c694cfae98": {
+    "main_relative_path": "engine\\shaders\\android_bloom.frag",
+    "name": "android_bloom.frag",
+    "shipped_relative_path": "engine\\shaders\\android_bloom.frag",
+    "type": "Shader"
+  },
+  "56c73a46-53fe-ca4a-84ec-604b8cd4aab9": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_01.wav",
+    "name": "Footstep_Metal_01.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_01.ogg",
+    "type": "Audio"
+  },
+  "57242baf-a6af-5646-bbc2-858308aa22a9": {
+    "main_relative_path": "game\\models\\Enemy2.gltf",
+    "name": "Enemy2.mesh",
+    "shipped_relative_path": "game\\models\\Enemy2.mesh",
+    "type": "Model"
+  },
+  "5923aab8-5293-f945-958e-496acd0218c3": {
+    "main_relative_path": "game\\textures\\ogre_diffuse.png",
+    "name": "ogre_diffuse.dds",
+    "shipped_relative_path": "game\\textures\\ogre_diffuse.dds",
+    "type": "Texture"
+  },
+  "5936ba72-6cad-7a4a-8039-d1614e5a9719": {
+    "main_relative_path": "game\\materials\\ContainerBlue.material",
+    "name": "ContainerBlue.material",
+    "shipped_relative_path": "game\\materials\\ContainerBlue.material",
+    "type": "Materials"
+  },
+  "59aacb3d-9431-0941-afc6-6704ae96e924": {
+    "main_relative_path": "engine\\shaders\\android_debug_geometry.frag",
+    "name": "android_debug_geometry.frag",
+    "shipped_relative_path": "engine\\shaders\\android_debug_geometry.frag",
+    "type": "Shader"
+  },
+  "5a721b58-58c7-b94c-a7a1-3179ce4707ee": {
+    "main_relative_path": "game\\others\\robot.glb",
+    "name": "robot.glb",
+    "shipped_relative_path": "game\\others\\robot.glb",
+    "type": "Other"
+  },
+  "5aa8f938-deee-7048-9a6b-33482dd8252b": {
+    "main_relative_path": "game\\textures\\MetalPillar1_normal.png",
+    "name": "MetalPillar1_normal.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar1_normal.dds",
+    "type": "Texture"
+  },
+  "5b56b753-ec3a-0f47-a329-5c898f7b58a2": {
+    "main_relative_path": "game\\models\\damagedhelmet\\DamagedHelmet.gltf",
+    "name": "DamagedHelmet.mesh",
+    "shipped_relative_path": "game\\models\\damagedhelmet\\DamagedHelmet.mesh",
+    "type": "Model"
+  },
+  "5b5bb6db-b292-b941-9897-0b1744c738b1": {
+    "main_relative_path": "game\\others\\Tires.glb",
+    "name": "Tires.glb",
+    "shipped_relative_path": "game\\others\\Tires.glb",
+    "type": "Other"
+  },
+  "5c48f024-c5f0-8640-b287-c0ef9db0daa6": {
+    "main_relative_path": "game\\textures\\BoxSG_occlusionRoughnessMetallic.png",
+    "name": "BoxSG_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\BoxSG_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "5c92853b-80f7-d143-b788-14bfa64f7d2d": {
+    "main_relative_path": "game\\textures\\ogre_normalmap.png",
+    "name": "ogre_normalmap.dds",
+    "shipped_relative_path": "game\\textures\\ogre_normalmap.dds",
+    "type": "Texture"
+  },
+  "5ccceeb5-887c-db4c-8cae-0efe9e91b198": {
+    "main_relative_path": "game\\textures\\BoxSG_baseColor.png",
+    "name": "BoxSG_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\BoxSG_baseColor.dds",
+    "type": "Texture"
+  },
+  "5cd73fd6-5603-044f-a6d3-8df76c6aa5d9": {
+    "main_relative_path": "engine\\shaders\\floor.frag",
+    "name": "floor.frag",
+    "shipped_relative_path": "engine\\shaders\\floor.frag",
+    "type": "Shader"
+  },
+  "5d46bba2-ab81-064e-bab5-2517c42f6aca": {
+    "main_relative_path": "game\\textures\\Platform1_BaseColor.png",
+    "name": "Platform1_BaseColor.dds",
+    "shipped_relative_path": "game\\textures\\Platform1_BaseColor.dds",
+    "type": "Texture"
+  },
+  "5dbc2f57-64e8-d242-8aaa-e4244c67e866": {
+    "main_relative_path": "game\\audio\\sfx\\enemy\\Ball enemy walking.wav",
+    "name": "Ball enemy walking.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\enemy\\Ball enemy walking.ogg",
+    "type": "Audio"
+  },
+  "5dd2effc-4009-f24c-8882-615037f7a9d3": {
+    "main_relative_path": "engine\\shaders\\android_passthrough.frag",
+    "name": "android_passthrough.frag",
+    "shipped_relative_path": "engine\\shaders\\android_passthrough.frag",
+    "type": "Shader"
+  },
+  "5df6242d-fe1e-8a4f-990a-c6539d0d730c": {
+    "main_relative_path": "game\\others\\OilDrum_Blue.glb",
+    "name": "OilDrum_Blue.glb",
+    "shipped_relative_path": "game\\others\\OilDrum_Blue.glb",
+    "type": "Other"
+  },
+  "5e8c4035-f927-6c48-82a1-12fddd04e83f": {
+    "main_relative_path": "engine\\shaders\\tone.frag",
+    "name": "tone.frag",
+    "shipped_relative_path": "engine\\shaders\\tone.frag",
+    "type": "Shader"
+  },
+  "5f7f4de2-f195-0d49-97d1-5a1159e35a94": {
+    "main_relative_path": "engine\\textures\\night_skybox.hdr",
+    "name": "night_skybox.dds",
+    "shipped_relative_path": "engine\\textures\\night_skybox.dds",
+    "type": "Texture"
+  },
+  "60701c0b-f0c8-4e41-bed6-fdf6b1c986eb": {
+    "main_relative_path": "game\\materials\\Rock1_1001.material",
+    "name": "Rock1_1001.material",
+    "shipped_relative_path": "game\\materials\\Rock1_1001.material",
+    "type": "Materials"
+  },
+  "60c2d2ac-e845-4a45-817d-403500a0dcd4": {
+    "main_relative_path": "game\\materials\\acc\\AnimatedColorMaterial.material",
+    "name": "AnimatedColorMaterial.material",
+    "shipped_relative_path": "game\\materials\\acc\\AnimatedColorMaterial.material",
+    "type": "Materials"
+  },
+  "60d237d0-60e1-c146-86e6-e76c967840d4": {
+    "main_relative_path": "game\\textures\\Pipe1_baseColor.png",
+    "name": "Pipe1_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Pipe1_baseColor.dds",
+    "type": "Texture"
+  },
+  "61599017-a38c-ff4c-9a02-0b353f879dee": {
+    "main_relative_path": "game\\models\\Building1.gltf",
+    "name": "Building1.mesh",
+    "shipped_relative_path": "game\\models\\Building1.mesh",
+    "type": "Model"
+  },
+  "61c0fb4c-013a-f640-8a5e-10972aa13973": {
+    "main_relative_path": "game\\others\\BigGround.glb",
+    "name": "BigGround.glb",
+    "shipped_relative_path": "game\\others\\BigGround.glb",
+    "type": "Other"
+  },
+  "61f3c20b-d44c-544d-9a0d-d130e05c67a9": {
+    "main_relative_path": "game\\textures\\Pile1_occlusionRoughnessMetallic.png",
+    "name": "Pile1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Pile1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "624c1ce2-9350-534d-a799-0be6b15dc161": {
+    "main_relative_path": "engine\\textures\\ttf_icon.png",
+    "name": "ttf_icon.dds",
+    "shipped_relative_path": "engine\\textures\\ttf_icon.dds",
+    "type": "Texture"
+  },
+  "62586f37-2b0f-0e4e-8617-781fc1a1207b": {
+    "main_relative_path": "game\\materials\\brainstem\\armPlateStem-effect.material",
+    "name": "armPlateStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\armPlateStem-effect.material",
+    "type": "Materials"
+  },
+  "626410d0-f893-4d45-a4bd-b48df7ac6a33": {
+    "main_relative_path": "game\\textures\\MetalPlank1_baseColor.png",
+    "name": "MetalPlank1_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\MetalPlank1_baseColor.dds",
+    "type": "Texture"
+  },
+  "629b1dea-bd33-c44c-968d-ff8b78d7b0ad": {
+    "main_relative_path": "game\\models\\Tires.gltf",
+    "name": "Tires.mesh",
+    "shipped_relative_path": "game\\models\\Tires.mesh",
+    "type": "Model"
+  },
+  "633f661d-20e5-3b45-b5a5-299f91b71e17": {
+    "main_relative_path": "game\\materials\\BoxSG.material",
+    "name": "BoxSG.material",
+    "shipped_relative_path": "game\\materials\\BoxSG.material",
+    "type": "Materials"
+  },
+  "63d34c4b-6847-324c-8470-30196b67331d": {
+    "main_relative_path": "engine\\shaders\\android_texture2d.vert",
+    "name": "android_texture2d.vert",
+    "shipped_relative_path": "engine\\shaders\\android_texture2d.vert",
+    "type": "Shader"
+  },
+  "63f3e24e-3457-9b4b-ba27-d5b5a1bf77d6": {
+    "main_relative_path": "game\\materials\\930\\glass.material",
+    "name": "glass.material",
+    "shipped_relative_path": "game\\materials\\930\\glass.material",
+    "type": "Materials"
+  },
+  "63fd7e93-e495-9745-a7fd-821c6373c2d9": {
+    "main_relative_path": "game\\others\\OilDrum_Red.glb",
+    "name": "OilDrum_Red.glb",
+    "shipped_relative_path": "game\\others\\OilDrum_Red.glb",
+    "type": "Other"
+  },
+  "642564f5-0d21-da4e-918a-b4d788c00c43": {
+    "main_relative_path": "game\\materials\\brainstem\\plugStem-effect.material",
+    "name": "plugStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\plugStem-effect.material",
+    "type": "Materials"
+  },
+  "64501ccf-367f-304f-85fb-c1daa43b448f": {
+    "main_relative_path": "engine\\shaders\\android_pbr.frag",
+    "name": "android_pbr.frag",
+    "shipped_relative_path": "engine\\shaders\\android_pbr.frag",
+    "type": "Shader"
+  },
+  "6459d5e7-ae6b-a344-b481-e2ca21a1934a": {
+    "main_relative_path": "game\\scripts\\AI_chase_simple.lua",
+    "name": "AI_chase_simple.lua",
+    "shipped_relative_path": "game\\scripts\\AI_chase_simple.lua",
+    "type": "Script"
+  },
+  "6466af7c-6447-2043-b9f5-6fd7dfada5d4": {
+    "main_relative_path": "game\\materials\\BigGround.material",
+    "name": "BigGround.material",
+    "shipped_relative_path": "game\\materials\\BigGround.material",
+    "type": "Materials"
+  },
+  "646cd13b-bbcb-2f45-be64-51867ea39369": {
+    "main_relative_path": "game\\others\\MetalPillar1.glb",
+    "name": "MetalPillar1.glb",
+    "shipped_relative_path": "game\\others\\MetalPillar1.glb",
+    "type": "Other"
+  },
+  "6487b1f5-f45a-4d47-bdcc-fd75ac2078cf": {
+    "main_relative_path": "game\\textures\\toycar\\Fabric_occlusion.png",
+    "name": "Fabric_occlusion.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\Fabric_occlusion.dds",
+    "type": "Texture"
+  },
+  "6507b7bd-5e3a-a84a-bcc8-855a31a0d519": {
+    "main_relative_path": "engine\\shaders\\debug_geometry.frag",
+    "name": "debug_geometry.frag",
+    "shipped_relative_path": "engine\\shaders\\debug_geometry.frag",
+    "type": "Shader"
+  },
+  "650aecab-c5b3-a842-b82e-8853feba31b7": {
+    "main_relative_path": "game\\materials\\brainstem\\shockOutStem-effect.material",
+    "name": "shockOutStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\shockOutStem-effect.material",
+    "type": "Materials"
+  },
+  "65593ba1-3e64-5e49-8273-2e6ace4e597a": {
+    "main_relative_path": "game\\prefabs\\Pile1.prefab",
+    "name": "Pile1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Pile1.prefab",
+    "type": "Prefabs"
+  },
+  "671b9c4a-183e-784f-a372-ac80073166e1": {
+    "main_relative_path": "game\\materials\\brainstem\\headGrillStem-effect.material",
+    "name": "headGrillStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\headGrillStem-effect.material",
+    "type": "Materials"
+  },
+  "67ced56e-3594-3f44-851e-1ea0e2aabb2c": {
+    "main_relative_path": "game\\models\\Rock1.gltf",
+    "name": "Rock1.mesh",
+    "shipped_relative_path": "game\\models\\Rock1.mesh",
+    "type": "Model"
+  },
+  "67d5b038-68c7-4a46-9a46-9eee99d3ee10": {
+    "main_relative_path": "game\\materials\\brainstem\\headCaseStem-effect.material",
+    "name": "headCaseStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\headCaseStem-effect.material",
+    "type": "Materials"
+  },
+  "6b190122-ff58-a944-b6ca-7ba6874884eb": {
+    "main_relative_path": "game\\materials\\930\\930_stickers.material",
+    "name": "930_stickers.material",
+    "shipped_relative_path": "game\\materials\\930\\930_stickers.material",
+    "type": "Materials"
+  },
+  "6b3acb62-beb6-b048-a068-71342ae8888d": {
+    "main_relative_path": "game\\textures\\toycar\\Fabric_normal.png",
+    "name": "Fabric_normal.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\Fabric_normal.dds",
+    "type": "Texture"
+  },
+  "6b58ba55-1033-8142-99d5-be2e990fc2ff": {
+    "main_relative_path": "game\\prefabs\\Pallet.prefab",
+    "name": "Pallet.prefab",
+    "shipped_relative_path": "game\\prefabs\\Pallet.prefab",
+    "type": "Prefabs"
+  },
+  "6cc62f73-a17a-b74e-a216-a15e9ec82e9b": {
+    "main_relative_path": "game\\others\\Floor.glb",
+    "name": "Floor.glb",
+    "shipped_relative_path": "game\\others\\Floor.glb",
+    "type": "Other"
+  },
+  "6cf2bf89-b178-9042-aaa0-17e49b44d09b": {
+    "main_relative_path": "game\\others\\Pallet.glb",
+    "name": "Pallet.glb",
+    "shipped_relative_path": "game\\others\\Pallet.glb",
+    "type": "Other"
+  },
+  "6d0d03d4-6f55-9f45-b2de-e14ec2b4842a": {
+    "main_relative_path": "game\\materials\\brainstem\\armBoltStem-effect.material",
+    "name": "armBoltStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\armBoltStem-effect.material",
+    "type": "Materials"
+  },
+  "6d22a8ce-cf49-4347-acb9-1bb72dfe5eb1": {
+    "main_relative_path": "game\\prefabs\\Floor.prefab",
+    "name": "Floor.prefab",
+    "shipped_relative_path": "game\\prefabs\\Floor.prefab",
+    "type": "Prefabs"
+  },
+  "6df15c02-4436-c748-a14f-1a088e984d2f": {
+    "main_relative_path": "game\\others\\Pile1.glb",
+    "name": "Pile1.glb",
+    "shipped_relative_path": "game\\others\\Pile1.glb",
+    "type": "Other"
+  },
+  "6e16abbc-88b9-a949-894b-964040759757": {
+    "main_relative_path": "game\\materials\\acc\\Green.material",
+    "name": "Green.material",
+    "shipped_relative_path": "game\\materials\\acc\\Green.material",
+    "type": "Materials"
+  },
+  "6e8bd183-c6e9-6944-a48b-2cc053a2fed1": {
+    "main_relative_path": "game\\textures\\heart grey.png",
+    "name": "heart grey.dds",
+    "shipped_relative_path": "game\\textures\\heart grey.dds",
+    "type": "Texture"
+  },
+  "6eabf9ac-77ce-754c-9479-f8f2bc5731d9": {
+    "main_relative_path": "game\\scripts\\test.lua",
+    "name": "test.lua",
+    "shipped_relative_path": "game\\scripts\\test.lua",
+    "type": "Script"
+  },
+  "6ecbd5ca-5074-ee4e-9f81-627671cc6e73": {
+    "main_relative_path": "game\\prefabs\\ogre_right.prefab",
+    "name": "ogre_right.prefab",
+    "shipped_relative_path": "game\\prefabs\\ogre_right.prefab",
+    "type": "Prefabs"
+  },
+  "6ed2160a-e832-1f4b-9ff7-1278724e2cc9": {
+    "main_relative_path": "game\\prefabs\\OilDrumBlue.prefab",
+    "name": "OilDrumBlue.prefab",
+    "shipped_relative_path": "game\\prefabs\\OilDrumBlue.prefab",
+    "type": "Prefabs"
+  },
+  "6f80f4ba-d003-2c41-aa74-2535221b1df7": {
+    "main_relative_path": "game\\textures\\Tires_baseColor.png",
+    "name": "Tires_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Tires_baseColor.dds",
+    "type": "Texture"
+  },
+  "6fc0ccbc-ae9d-a948-9557-6140470621c4": {
+    "main_relative_path": "game\\textures\\Platform1_Normal.png",
+    "name": "Platform1_Normal.dds",
+    "shipped_relative_path": "game\\textures\\Platform1_Normal.dds",
+    "type": "Texture"
+  },
+  "70e060fa-e805-a24b-8f37-cce5a7a9fc73": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_01.wav",
+    "name": "Player_VO_Idle_01.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_01.ogg",
+    "type": "Audio"
+  },
+  "7129d520-3db3-df41-988f-3139b8e775b8": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_02.wav",
+    "name": "Footstep_Metal_02.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_02.ogg",
+    "type": "Audio"
+  },
+  "74153c7b-e243-7546-99ce-55380e74dae3": {
+    "main_relative_path": "game\\scripts\\test_2.lua",
+    "name": "test_2.lua",
+    "shipped_relative_path": "game\\scripts\\test_2.lua",
+    "type": "Script"
+  },
+  "74197a93-dcf5-4b4c-9956-f4f17d4641f0": {
+    "main_relative_path": "engine\\textures\\json_icon.png",
+    "name": "json_icon.dds",
+    "shipped_relative_path": "engine\\textures\\json_icon.dds",
+    "type": "Texture"
+  },
+  "74a9c580-38c3-6d4c-9248-4fe78020061d": {
+    "main_relative_path": "game\\materials\\brainstem\\bracketStem-effect.material",
+    "name": "bracketStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\bracketStem-effect.material",
+    "type": "Materials"
+  },
+  "74cbabf6-b80c-914a-a413-418713c11054": {
+    "main_relative_path": "game\\models\\toycar\\ToyCar.gltf",
+    "name": "ToyCar.mesh",
+    "shipped_relative_path": "game\\models\\toycar\\ToyCar.mesh",
+    "type": "Model"
+  },
+  "7555c2b8-dfee-174c-b955-e7c939d7b8f0": {
+    "main_relative_path": "game\\textures\\ContainerBlue_occlusionRoughnessMetallic.png",
+    "name": "ContainerBlue_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\ContainerBlue_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "756957da-49d8-c147-9914-8cc89846c7c3": {
+    "main_relative_path": "engine\\materials\\Cube.material",
+    "name": "Cube.material",
+    "shipped_relative_path": "engine\\materials\\Cube.material",
+    "type": "Materials"
+  },
+  "765609f4-639f-2540-8697-3a663a808caf": {
+    "main_relative_path": "game\\materials\\2ce\\Material_22.material",
+    "name": "Material_22.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_22.material",
+    "type": "Materials"
+  },
+  "76a6e7b5-0080-8f40-a715-876d840fd87b": {
+    "main_relative_path": "game\\others\\MetalPillar2.glb",
+    "name": "MetalPillar2.glb",
+    "shipped_relative_path": "game\\others\\MetalPillar2.glb",
+    "type": "Other"
+  },
+  "779184ca-0e23-1645-a45c-578516e12f40": {
+    "main_relative_path": "game\\materials\\930\\black.material",
+    "name": "black.material",
+    "shipped_relative_path": "game\\materials\\930\\black.material",
+    "type": "Materials"
+  },
+  "77d8f413-df11-3040-92f3-d470263ed446": {
+    "main_relative_path": "engine\\shaders\\pbr.frag",
+    "name": "pbr.frag",
+    "shipped_relative_path": "engine\\shaders\\pbr.frag",
+    "type": "Shader"
+  },
+  "785142ca-b075-ef4e-8432-52a2cdef2d38": {
+    "main_relative_path": "engine\\shaders\\passthrough.vert",
+    "name": "passthrough.vert",
+    "shipped_relative_path": "engine\\shaders\\passthrough.vert",
+    "type": "Shader"
+  },
+  "78b33bfd-4293-2a4d-b505-2801421e312b": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_08.wav",
+    "name": "Footstep_Grass_08.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_08.ogg",
+    "type": "Audio"
+  },
+  "78c2311f-0c18-ce4f-a52e-1e2f1aa5264e": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_06.wav",
+    "name": "Player_Hop_06.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_06.ogg",
+    "type": "Audio"
+  },
+  "78e8dbb8-cf88-b849-9215-5eac08f9707f": {
+    "main_relative_path": "engine\\shaders\\android_eqr_to_skybox.vert",
+    "name": "android_eqr_to_skybox.vert",
+    "shipped_relative_path": "engine\\shaders\\android_eqr_to_skybox.vert",
+    "type": "Shader"
+  },
+  "796cf7f1-0fe5-234b-b1a8-a602d3da43dc": {
+    "main_relative_path": "engine\\textures\\sunshine.png",
+    "name": "sunshine.dds",
+    "shipped_relative_path": "engine\\textures\\sunshine.dds",
+    "type": "Texture"
+  },
+  "7b6d729f-2477-6e43-a93a-4a9f65732f3d": {
+    "main_relative_path": "game\\textures\\BigGround_baseColor.png",
+    "name": "BigGround_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\BigGround_baseColor.dds",
+    "type": "Texture"
+  },
+  "7d8bffc6-b461-c14a-9401-6124713c0747": {
+    "main_relative_path": "game\\materials\\Pipe1.material",
+    "name": "Pipe1.material",
+    "shipped_relative_path": "game\\materials\\Pipe1.material",
+    "type": "Materials"
+  },
+  "81117530-de12-7b4c-a0e5-6ebc94459e26": {
+    "main_relative_path": "game\\models\\Frog_Hopping.gltf",
+    "name": "Frog_Hopping.mesh",
+    "shipped_relative_path": "game\\models\\Frog_Hopping.mesh",
+    "type": "Model"
+  },
+  "81707e30-5d89-714b-8e4f-6ad66b7cc17b": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_06.wav",
+    "name": "Footstep_Metal_06.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_06.ogg",
+    "type": "Audio"
+  },
+  "82416aef-a4ed-614a-8e4c-6d2873653ae4": {
+    "main_relative_path": "game\\prefabs\\Pipe1.prefab",
+    "name": "Pipe1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Pipe1.prefab",
+    "type": "Prefabs"
+  },
+  "82bb33a4-ab3b-254d-b093-b2b9d7ab363d": {
+    "main_relative_path": "game\\audio\\ambience\\Ambient Wind Loop 1.wav",
+    "name": "Ambient Wind Loop 1.ogg",
+    "shipped_relative_path": "game\\audio\\ambience\\Ambient Wind Loop 1.ogg",
+    "type": "Audio"
+  },
+  "82cfb8a4-a723-474b-8b71-7b749c05a906": {
+    "main_relative_path": "engine\\textures\\ini_icon.png",
+    "name": "ini_icon.dds",
+    "shipped_relative_path": "engine\\textures\\ini_icon.dds",
+    "type": "Texture"
+  },
+  "8357e7de-3280-bb42-a13e-05a73647f537": {
+    "main_relative_path": "engine\\materials\\DefaultMaterial.material",
+    "name": "DefaultMaterial.material",
+    "shipped_relative_path": "engine\\materials\\DefaultMaterial.material",
+    "type": "Materials"
+  },
+  "841995a2-c3bd-e242-924c-e5d2491c6978": {
+    "main_relative_path": "engine\\shaders\\android_passthrough.vert",
+    "name": "android_passthrough.vert",
+    "shipped_relative_path": "engine\\shaders\\android_passthrough.vert",
+    "type": "Shader"
+  },
+  "847d9563-8623-6c41-9e21-baa65c113360": {
+    "main_relative_path": "game\\scripts\\Test_AI_Self.lua",
+    "name": "Test_AI_Self.lua",
+    "shipped_relative_path": "game\\scripts\\Test_AI_Self.lua",
+    "type": "Script"
+  },
+  "848a13b7-895c-4f47-bc41-78bbea2e1284": {
+    "main_relative_path": "engine\\shaders\\geometry.vert",
+    "name": "geometry.vert",
+    "shipped_relative_path": "engine\\shaders\\geometry.vert",
+    "type": "Shader"
+  },
+  "86166f81-7e25-b44c-ac06-b85fc4b45e31": {
+    "main_relative_path": "game\\models\\ogre_angry.obj",
+    "name": "ogre_angry.mesh",
+    "shipped_relative_path": "game\\models\\ogre_angry.mesh",
+    "type": "Model"
+  },
+  "89cc077e-4973-8549-9783-1fb2f71e676e": {
+    "main_relative_path": "game\\materials\\930\\930_wunderbaum.material",
+    "name": "930_wunderbaum.material",
+    "shipped_relative_path": "game\\materials\\930\\930_wunderbaum.material",
+    "type": "Materials"
+  },
+  "8c81ab4c-86c2-1248-8092-30c6e99421a5": {
+    "main_relative_path": "game\\audio\\Gear Pick Up.wav",
+    "name": "Gear Pick Up.ogg",
+    "shipped_relative_path": "game\\audio\\Gear Pick Up.ogg",
+    "type": "Audio"
+  },
+  "8d96994e-590a-f245-8136-dbbccb8cbdde": {
+    "main_relative_path": "game\\materials\\lambert1SG.material",
+    "name": "lambert1SG.material",
+    "shipped_relative_path": "game\\materials\\lambert1SG.material",
+    "type": "Materials"
+  },
+  "8dd07ba9-f750-7445-93aa-f8f72393ff06": {
+    "main_relative_path": "game\\prefabs\\Heart_1.prefab",
+    "name": "Heart_1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Heart_1.prefab",
+    "type": "Prefabs"
+  },
+  "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4": {
+    "main_relative_path": "game\\textures\\ContainerBlue_baseColor.png",
+    "name": "ContainerBlue_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\ContainerBlue_baseColor.dds",
+    "type": "Texture"
+  },
+  "8e26f21e-f0ca-5448-a80f-70f21e165ec6": {
+    "main_relative_path": "game\\materials\\OilDrumBlue_1001.material",
+    "name": "OilDrumBlue_1001.material",
+    "shipped_relative_path": "game\\materials\\OilDrumBlue_1001.material",
+    "type": "Materials"
+  },
+  "90300ff3-4619-e148-a760-8207ca3ae381": {
+    "main_relative_path": "game\\materials\\brainstem\\barStem-effect.material",
+    "name": "barStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\barStem-effect.material",
+    "type": "Materials"
+  },
+  "9113ffd8-18d1-c14f-a6f8-0ed9bb9d5a82": {
+    "main_relative_path": "engine\\textures\\prefab_icon.png",
+    "name": "prefab_icon.dds",
+    "shipped_relative_path": "engine\\textures\\prefab_icon.dds",
+    "type": "Texture"
+  },
+  "91d325a0-263c-9147-8948-81a5f637bdc5": {
+    "main_relative_path": "engine\\shaders\\android_brdf.vert",
+    "name": "android_brdf.vert",
+    "shipped_relative_path": "engine\\shaders\\android_brdf.vert",
+    "type": "Shader"
+  },
+  "91dc35d4-67df-e64e-bf66-e02240a8daab": {
+    "main_relative_path": "game\\materials\\animatedcube\\AnimatedCube.material",
+    "name": "AnimatedCube.material",
+    "shipped_relative_path": "game\\materials\\animatedcube\\AnimatedCube.material",
+    "type": "Materials"
+  },
+  "91decdb8-51ee-b642-8013-042034d23774": {
+    "main_relative_path": "game\\scripts\\enemyPatrol.lua",
+    "name": "enemyPatrol.lua",
+    "shipped_relative_path": "game\\scripts\\enemyPatrol.lua",
+    "type": "Script"
+  },
+  "91e02ba2-c6b8-184f-bd48-b59674946972": {
+    "main_relative_path": "game\\textures\\Tire_normal.png",
+    "name": "Tire_normal.dds",
+    "shipped_relative_path": "game\\textures\\Tire_normal.dds",
+    "type": "Texture"
+  },
+  "925acc14-8b33-fc49-8d41-949a76258936": {
+    "main_relative_path": "game\\textures\\Enemy2_occlusionRoughnessMetallic.png",
+    "name": "Enemy2_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Enemy2_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "931913db-35c2-f044-b648-e07fd4f1b456": {
+    "main_relative_path": "game\\textures\\joystick.png",
+    "name": "joystick.dds",
+    "shipped_relative_path": "game\\textures\\joystick.dds",
+    "type": "Texture"
+  },
+  "93ea4881-56a8-7148-b064-8198de76cad3": {
+    "main_relative_path": "engine\\textures\\txt_icon.png",
+    "name": "txt_icon.dds",
+    "shipped_relative_path": "engine\\textures\\txt_icon.dds",
+    "type": "Texture"
+  },
+  "95c6e4e5-ed89-f641-b4cb-52cc203b02b0": {
+    "main_relative_path": "game\\others\\Crate.glb",
+    "name": "Crate.glb",
+    "shipped_relative_path": "game\\others\\Crate.glb",
+    "type": "Other"
+  },
+  "960c2863-2f85-b542-a63d-9271f0d5437f": {
+    "main_relative_path": "game\\materials\\brainstem\\calfStem-effect.material",
+    "name": "calfStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\calfStem-effect.material",
+    "type": "Materials"
+  },
+  "9679f581-d33b-d44d-ae70-30f076c3dca3": {
+    "main_relative_path": "game\\textures\\Tires_normal.png",
+    "name": "Tires_normal.dds",
+    "shipped_relative_path": "game\\textures\\Tires_normal.dds",
+    "type": "Texture"
+  },
+  "9832794d-0293-2e44-b458-43dcc4343a04": {
+    "main_relative_path": "engine\\shaders\\bloom_blend.vert",
+    "name": "bloom_blend.vert",
+    "shipped_relative_path": "engine\\shaders\\bloom_blend.vert",
+    "type": "Shader"
+  },
+  "9927db1c-9aff-be47-a5dc-3068b2c9f8f9": {
+    "main_relative_path": "game\\textures\\Tire_baseColor.png",
+    "name": "Tire_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Tire_baseColor.dds",
+    "type": "Texture"
+  },
+  "9977f9b9-4de6-a447-ad52-05999ef61e31": {
+    "main_relative_path": "engine\\shaders\\android_irradiance_convolution.vert",
+    "name": "android_irradiance_convolution.vert",
+    "shipped_relative_path": "engine\\shaders\\android_irradiance_convolution.vert",
+    "type": "Shader"
+  },
+  "9a12556f-14ee-654b-86d6-7b230b0505f2": {
+    "main_relative_path": "game\\textures\\Rock1_normal_1001.png",
+    "name": "Rock1_normal_1001.dds",
+    "shipped_relative_path": "game\\textures\\Rock1_normal_1001.dds",
+    "type": "Texture"
+  },
+  "9a15367b-5f69-fc47-8525-72999ec050ad": {
+    "main_relative_path": "engine\\shaders\\android_gamma.frag",
+    "name": "android_gamma.frag",
+    "shipped_relative_path": "engine\\shaders\\android_gamma.frag",
+    "type": "Shader"
+  },
+  "9a2ae795-193b-ea47-9376-0106acb9aeb6": {
+    "main_relative_path": "engine\\shaders\\android_skybox.vert",
+    "name": "android_skybox.vert",
+    "shipped_relative_path": "engine\\shaders\\android_skybox.vert",
+    "type": "Shader"
+  },
+  "9aac41f9-737d-d540-a485-7155b0011394": {
+    "main_relative_path": "game\\materials\\UnamedMaterial_1.material",
+    "name": "UnamedMaterial_1.material",
+    "shipped_relative_path": "game\\materials\\UnamedMaterial_1.material",
+    "type": "Materials"
+  },
+  "9b225db9-ed0b-8943-98c3-5a1e3379e70a": {
+    "main_relative_path": "engine\\shaders\\debug_geometry.vert",
+    "name": "debug_geometry.vert",
+    "shipped_relative_path": "engine\\shaders\\debug_geometry.vert",
+    "type": "Shader"
+  },
+  "9bc1e511-f6a7-9d48-9723-5cd1200ca942": {
+    "main_relative_path": "game\\materials\\Tire.material",
+    "name": "Tire.material",
+    "shipped_relative_path": "game\\materials\\Tire.material",
+    "type": "Materials"
+  },
+  "9da056a0-d46c-664b-a2bd-9ba986135c23": {
+    "main_relative_path": "game\\textures\\Pallet_occlusionRoughnessMetallic.png",
+    "name": "Pallet_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Pallet_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "9e09a106-5562-d744-9cfc-933ff86e1533": {
+    "main_relative_path": "game\\textures\\space key.png",
+    "name": "space key.dds",
+    "shipped_relative_path": "game\\textures\\space key.dds",
+    "type": "Texture"
+  },
+  "9e1f366a-db3f-7e4f-9c0c-f849c8500038": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_07.wav",
+    "name": "Footstep_Metal_07.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_07.ogg",
+    "type": "Audio"
+  },
+  "9f996287-3788-6f40-8272-4a4128eaf5a1": {
+    "main_relative_path": "engine\\shaders\\android_blur.frag",
+    "name": "android_blur.frag",
+    "shipped_relative_path": "engine\\shaders\\android_blur.frag",
+    "type": "Shader"
+  },
+  "a03aa1fd-1d3b-ae4b-b48f-b4c06d7aa1c6": {
+    "main_relative_path": "game\\scripts\\playerMovement.lua",
+    "name": "playerMovement.lua",
+    "shipped_relative_path": "game\\scripts\\playerMovement.lua",
+    "type": "Script"
+  },
+  "a1252741-5857-cb46-b30b-f3ff938bf9b8": {
+    "main_relative_path": "game\\textures\\damagedhelmet\\Default_AO.jpg",
+    "name": "Default_AO.dds",
+    "shipped_relative_path": "game\\textures\\damagedhelmet\\Default_AO.dds",
+    "type": "Texture"
+  },
+  "a1e37cd2-5348-ca4b-9140-b37a59f9115e": {
+    "main_relative_path": "game\\scripts\\Test_AI_BlackBoard.lua",
+    "name": "Test_AI_BlackBoard.lua",
+    "shipped_relative_path": "game\\scripts\\Test_AI_BlackBoard.lua",
+    "type": "Script"
+  },
+  "a273b4d3-8ab4-f64d-a903-559c6dafdc0b": {
+    "main_relative_path": "engine\\shaders\\brdf.vert",
+    "name": "brdf.vert",
+    "shipped_relative_path": "engine\\shaders\\brdf.vert",
+    "type": "Shader"
+  },
+  "a420d8b0-4125-dd45-a4f1-62df5efd4c5c": {
+    "main_relative_path": "game\\textures\\robot_Robot_Height.png",
+    "name": "robot_Robot_Height.dds",
+    "shipped_relative_path": "game\\textures\\robot_Robot_Height.dds",
+    "type": "Texture"
+  },
+  "a4ed5ea7-b1c9-4a4d-a26a-edf56203aaf2": {
+    "main_relative_path": "game\\others\\Building1.glb",
+    "name": "Building1.glb",
+    "shipped_relative_path": "game\\others\\Building1.glb",
+    "type": "Other"
+  },
+  "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222": {
+    "main_relative_path": "game\\textures\\OilDrumBlue_normal_1001.png",
+    "name": "OilDrumBlue_normal_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumBlue_normal_1001.dds",
+    "type": "Texture"
+  },
+  "a5b680b5-a1c0-d34b-8d6e-b31daadd0a5c": {
+    "main_relative_path": "game\\materials\\Enemy2.material",
+    "name": "Enemy2.material",
+    "shipped_relative_path": "game\\materials\\Enemy2.material",
+    "type": "Materials"
+  },
+  "a5da16f2-5ae1-f948-b834-a09a0a888aea": {
+    "main_relative_path": "engine\\shaders\\passthrough.frag",
+    "name": "passthrough.frag",
+    "shipped_relative_path": "engine\\shaders\\passthrough.frag",
+    "type": "Shader"
+  },
+  "a67656ca-15a5-d441-b14d-dae036e5245e": {
+    "main_relative_path": "game\\models\\Pile1.gltf",
+    "name": "Pile1.mesh",
+    "shipped_relative_path": "game\\models\\Pile1.mesh",
+    "type": "Model"
+  },
+  "a728ce77-318a-f74a-9225-f710eeecbb57": {
+    "main_relative_path": "engine\\shaders\\pbr_preview.vert",
+    "name": "pbr_preview.vert",
+    "shipped_relative_path": "engine\\shaders\\pbr_preview.vert",
+    "type": "Shader"
+  },
+  "a77749e3-6c15-7446-a792-5609dd96b391": {
+    "main_relative_path": "game\\models\\Watertower.gltf",
+    "name": "Watertower.mesh",
+    "shipped_relative_path": "game\\models\\Watertower.mesh",
+    "type": "Model"
+  },
+  "a78b68cb-9f85-bd42-ac40-11329f02a070": {
+    "main_relative_path": "game\\others\\Pipe1.glb",
+    "name": "Pipe1.glb",
+    "shipped_relative_path": "game\\others\\Pipe1.glb",
+    "type": "Other"
+  },
+  "a7a05a5f-0601-4d44-9058-dedca1b645c2": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_02.wav",
+    "name": "Footstep_Grass_02.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_02.ogg",
+    "type": "Audio"
+  },
+  "a8977689-ded0-fa41-9efb-33354e83dec7": {
+    "main_relative_path": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
+    "name": "Gear_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Gear_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "a8a9e677-4cd6-524b-b77b-0227fe39f7a2": {
+    "main_relative_path": "game\\materials\\OilDrumRed_1001.material",
+    "name": "OilDrumRed_1001.material",
+    "shipped_relative_path": "game\\materials\\OilDrumRed_1001.material",
+    "type": "Materials"
+  },
+  "a8e7f637-646c-d746-b1d4-baefff90d632": {
+    "main_relative_path": "game\\materials\\damagedhelmet\\Material_MR.material",
+    "name": "Material_MR.material",
+    "shipped_relative_path": "game\\materials\\damagedhelmet\\Material_MR.material",
+    "type": "Materials"
+  },
+  "a8e88812-9f4d-4043-921b-de02bdb00264": {
+    "main_relative_path": "game\\others\\Tire.glb",
+    "name": "Tire.glb",
+    "shipped_relative_path": "game\\others\\Tire.glb",
+    "type": "Other"
+  },
+  "ab9bcfe9-af67-0c4b-a8aa-23bfe237f351": {
+    "main_relative_path": "game\\materials\\brainstem\\barrel1Stem-effect.material",
+    "name": "barrel1Stem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\barrel1Stem-effect.material",
+    "type": "Materials"
+  },
+  "abba3c7a-6b36-5c44-9188-57ff495b10c3": {
+    "main_relative_path": "engine\\textures\\scn_icon.png",
+    "name": "scn_icon.dds",
+    "shipped_relative_path": "engine\\textures\\scn_icon.dds",
+    "type": "Texture"
+  },
+  "ac24e4a9-a066-254a-8a85-e5bdd9189197": {
+    "main_relative_path": "game\\scripts\\thirdPersonCamera.lua",
+    "name": "thirdPersonCamera.lua",
+    "shipped_relative_path": "game\\scripts\\thirdPersonCamera.lua",
+    "type": "Script"
+  },
+  "ac7775c2-ce14-d14b-84f9-ee350b08a665": {
+    "main_relative_path": "game\\textures\\MetalPillar2_normal.png",
+    "name": "MetalPillar2_normal.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar2_normal.dds",
+    "type": "Texture"
+  },
+  "ad27e286-c4a0-dc47-a282-3106f4b522a4": {
+    "main_relative_path": "engine\\shaders\\android_debug_geometry.vert",
+    "name": "android_debug_geometry.vert",
+    "shipped_relative_path": "engine\\shaders\\android_debug_geometry.vert",
+    "type": "Shader"
+  },
+  "ad95c15c-a360-f548-8f9e-f7cab095c869": {
+    "main_relative_path": "game\\textures\\OilDrumRed_occlusionRoughnessMetallic_1001.png",
+    "name": "OilDrumRed_occlusionRoughnessMetallic_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumRed_occlusionRoughnessMetallic_1001.dds",
+    "type": "Texture"
+  },
+  "adb4c3f4-7a3b-734f-bfb7-398071f586b8": {
+    "main_relative_path": "game\\models\\Crate.gltf",
+    "name": "Crate.mesh",
+    "shipped_relative_path": "game\\models\\Crate.mesh",
+    "type": "Model"
+  },
+  "ae3211bc-164a-bb41-897c-8b6d485124e0": {
+    "main_relative_path": "engine\\shaders\\bloom.frag",
+    "name": "bloom.frag",
+    "shipped_relative_path": "engine\\shaders\\bloom.frag",
+    "type": "Shader"
+  },
+  "ae3a0a6b-31b6-784c-a377-b551352c4e18": {
+    "main_relative_path": "game\\textures\\hide.png",
+    "name": "hide.dds",
+    "shipped_relative_path": "game\\textures\\hide.dds",
+    "type": "Texture"
+  },
+  "ae3e7e7f-5c23-0b4f-8d21-2ca7114b157c": {
+    "main_relative_path": "game\\others\\Rock1.glb",
+    "name": "Rock1.glb",
+    "shipped_relative_path": "game\\others\\Rock1.glb",
+    "type": "Other"
+  },
+  "af199ca9-656f-c947-8157-ec53e77e4816": {
+    "main_relative_path": "game\\textures\\Enemy2_emissive.png",
+    "name": "Enemy2_emissive.dds",
+    "shipped_relative_path": "game\\textures\\Enemy2_emissive.dds",
+    "type": "Texture"
+  },
+  "b0ff88c0-1025-204c-90c3-a13e88d95735": {
+    "main_relative_path": "game\\textures\\damagedhelmet\\Default_albedo.jpg",
+    "name": "Default_albedo.dds",
+    "shipped_relative_path": "game\\textures\\damagedhelmet\\Default_albedo.dds",
+    "type": "Texture"
+  },
+  "b1efb887-fc4c-cc45-9de3-74ecb3311e35": {
+    "main_relative_path": "game\\models\\robot.gltf",
+    "name": "robot.mesh",
+    "shipped_relative_path": "game\\models\\robot.mesh",
+    "type": "Model"
+  },
+  "b22dae53-c16f-8045-ba99-9d395a5d7459": {
+    "main_relative_path": "engine\\shaders\\android_texture2d.frag",
+    "name": "android_texture2d.frag",
+    "shipped_relative_path": "engine\\shaders\\android_texture2d.frag",
+    "type": "Shader"
+  },
+  "b2963c62-fd69-7d4e-8ea6-4be8d66c1b66": {
+    "main_relative_path": "game\\materials\\brainstem\\bStem-effect.material",
+    "name": "bStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\bStem-effect.material",
+    "type": "Materials"
+  },
+  "b2a1d4fa-0b99-fa44-b03d-fc4b6845d7af": {
+    "main_relative_path": "game\\materials\\brainstem\\filterOutStem-effect.material",
+    "name": "filterOutStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\filterOutStem-effect.material",
+    "type": "Materials"
+  },
+  "b2ac1acf-5c9d-574c-8a73-280f6d57c8aa": {
+    "main_relative_path": "game\\others\\platform1.glb",
+    "name": "platform1.glb",
+    "shipped_relative_path": "game\\others\\platform1.glb",
+    "type": "Other"
+  },
+  "b38a054c-ce95-c249-b4f7-de49964db64f": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_01.wav",
+    "name": "Player_Hop_01.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_01.ogg",
+    "type": "Audio"
+  },
+  "b3ec7aee-c5ff-af48-9aa1-f912f843a888": {
+    "main_relative_path": "game\\models\\OilDrum_Blue.gltf",
+    "name": "OilDrum_Blue.mesh",
+    "shipped_relative_path": "game\\models\\OilDrum_Blue.mesh",
+    "type": "Model"
+  },
+  "b3fabc5f-cc26-894c-be9d-96a9f432c627": {
+    "main_relative_path": "game\\scripts\\Test_AI_CommandQueue.lua",
+    "name": "Test_AI_CommandQueue.lua",
+    "shipped_relative_path": "game\\scripts\\Test_AI_CommandQueue.lua",
+    "type": "Script"
+  },
+  "b4a81861-94f2-584b-9da1-dbb24a91f93c": {
+    "main_relative_path": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.png",
+    "name": "ContainerRed_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\ContainerRed_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "b50b7c18-6450-3142-9125-a93e6ccd2dfd": {
+    "main_relative_path": "game\\scripts\\AI_patrol_and_investigate.lua",
+    "name": "AI_patrol_and_investigate.lua",
+    "shipped_relative_path": "game\\scripts\\AI_patrol_and_investigate.lua",
+    "type": "Script"
+  },
+  "b5f33fbe-eadf-bf46-9329-26bbad7a5e72": {
+    "main_relative_path": "game\\audio\\sfx\\player\\hide\\Box In.wav",
+    "name": "Box In.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\hide\\Box In.ogg",
+    "type": "Audio"
+  },
+  "b931e05c-ce66-a949-bdd5-c64653a4df0c": {
+    "main_relative_path": "game\\others\\Gear.glb",
+    "name": "Gear.glb",
+    "shipped_relative_path": "game\\others\\Gear.glb",
+    "type": "Other"
+  },
+  "b9bb361b-c38b-1a4d-a32f-a06af71f248a": {
+    "main_relative_path": "engine\\shaders\\android_bloom_blend.vert",
+    "name": "android_bloom_blend.vert",
+    "shipped_relative_path": "engine\\shaders\\android_bloom_blend.vert",
+    "type": "Shader"
+  },
+  "ba0c5258-4554-c14c-a4ee-8814e088cab2": {
+    "main_relative_path": "game\\textures\\Building1_occlusionRoughnessMetallic.png",
+    "name": "Building1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Building1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "ba252a2e-1ee1-a045-914d-1f8ad2e4d2bf": {
+    "main_relative_path": "engine\\shaders\\prefilter.frag",
+    "name": "prefilter.frag",
+    "shipped_relative_path": "engine\\shaders\\prefilter.frag",
+    "type": "Shader"
+  },
+  "ba73fe52-685e-a543-a37b-3044d30fc9b1": {
+    "main_relative_path": "game\\materials\\brainstem\\pipeStem-effect.material",
+    "name": "pipeStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\pipeStem-effect.material",
+    "type": "Materials"
+  },
+  "ba75d69b-b965-fa4a-a87d-bb62ae5960db": {
+    "main_relative_path": "game\\materials\\brainstem\\intestineInStem-effect.material",
+    "name": "intestineInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\intestineInStem-effect.material",
+    "type": "Materials"
+  },
+  "ba8ea99f-16b6-da48-9465-54f48d7cd3a7": {
+    "main_relative_path": "game\\textures\\Pipe1_occlusionRoughnessMetallic.png",
+    "name": "Pipe1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Pipe1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "bab0b4bd-8b26-ad4d-9adf-b5154080442d": {
+    "main_relative_path": "game\\materials\\brainstem\\exhaustGunStem-effect.material",
+    "name": "exhaustGunStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\exhaustGunStem-effect.material",
+    "type": "Materials"
+  },
+  "bb0200be-089b-ad40-aa64-84926a4e0404": {
+    "main_relative_path": "engine\\shaders\\pbr.vert",
+    "name": "pbr.vert",
+    "shipped_relative_path": "engine\\shaders\\pbr.vert",
+    "type": "Shader"
+  },
+  "bb4113e4-7d1e-e449-a116-f6e0703a566d": {
+    "main_relative_path": "engine\\shaders\\android_prefilter.frag",
+    "name": "android_prefilter.frag",
+    "shipped_relative_path": "engine\\shaders\\android_prefilter.frag",
+    "type": "Shader"
+  },
+  "bb6d037b-4004-3b40-8eac-253cbe07beac": {
+    "main_relative_path": "game\\models\\MetalPillar2.gltf",
+    "name": "MetalPillar2.mesh",
+    "shipped_relative_path": "game\\models\\MetalPillar2.mesh",
+    "type": "Model"
+  },
+  "bc501408-10cb-1c4c-9689-06e4e5e1f7c5": {
+    "main_relative_path": "game\\materials\\930\\coat.material",
+    "name": "coat.material",
+    "shipped_relative_path": "game\\materials\\930\\coat.material",
+    "type": "Materials"
+  },
+  "bcb077d2-0c76-594d-b95e-8ddb0a5e1ce2": {
+    "main_relative_path": "game\\materials\\brainstem\\headHornStem-effect.material",
+    "name": "headHornStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\headHornStem-effect.material",
+    "type": "Materials"
+  },
+  "bd0a49e9-5411-cf4a-ab01-33d1b318e15d": {
+    "main_relative_path": "game\\textures\\Fence_baseColor_1001.png",
+    "name": "Fence_baseColor_1001.dds",
+    "shipped_relative_path": "game\\textures\\Fence_baseColor_1001.dds",
+    "type": "Texture"
+  },
+  "bd95ca8e-40a8-1241-afc9-6c7c818fffd1": {
+    "main_relative_path": "game\\models\\CrumpledDevelopable.obj",
+    "name": "CrumpledDevelopable.mesh",
+    "shipped_relative_path": "game\\models\\CrumpledDevelopable.mesh",
+    "type": "Model"
+  },
+  "bd96c200-45b1-f744-8861-43edd2e18077": {
+    "main_relative_path": "game\\others\\Watertower.glb",
+    "name": "Watertower.glb",
+    "shipped_relative_path": "game\\others\\Watertower.glb",
+    "type": "Other"
+  },
+  "bded14d8-007d-2944-873f-27a05e7575ff": {
+    "main_relative_path": "game\\materials\\brainstem\\shoulderBStem-effect.material",
+    "name": "shoulderBStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\shoulderBStem-effect.material",
+    "type": "Materials"
+  },
+  "be682648-fcd7-2b47-b7bf-3faea372c733": {
+    "main_relative_path": "game\\models\\Container_Blue.gltf",
+    "name": "Container_Blue.mesh",
+    "shipped_relative_path": "game\\models\\Container_Blue.mesh",
+    "type": "Model"
+  },
+  "bef30695-7400-6a4a-8cb8-560a65188620": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_08.wav",
+    "name": "Footstep_Metal_08.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_08.ogg",
+    "type": "Audio"
+  },
+  "bf2edb34-b988-ed4b-bcc1-56093e4611e4": {
+    "main_relative_path": "game\\materials\\930\\930_lights_refraction.material",
+    "name": "930_lights_refraction.material",
+    "shipped_relative_path": "game\\materials\\930\\930_lights_refraction.material",
+    "type": "Materials"
+  },
+  "bf702447-9ef7-514c-a3cd-4f585db234b0": {
+    "main_relative_path": "game\\materials\\brainstem\\off-effect.material",
+    "name": "off-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\off-effect.material",
+    "type": "Materials"
+  },
+  "c0baaed2-d818-9d47-84ad-339768d40e62": {
+    "main_relative_path": "game\\textures\\Pipe1_normal.png",
+    "name": "Pipe1_normal.dds",
+    "shipped_relative_path": "game\\textures\\Pipe1_normal.dds",
+    "type": "Texture"
+  },
+  "c0f01955-e038-8548-968f-6f4dbf2756d1": {
+    "main_relative_path": "game\\scenes\\lua_audio.scn",
+    "name": "lua_audio.scn",
+    "shipped_relative_path": "game\\scenes\\lua_audio.scn",
+    "type": "Scenes"
+  },
+  "c18ed641-a2fd-8e49-9719-da033c6a663e": {
+    "main_relative_path": "game\\textures\\restart button.png",
+    "name": "restart button.dds",
+    "shipped_relative_path": "game\\textures\\restart button.dds",
+    "type": "Texture"
+  },
+  "c1fd1311-6d3e-404d-b14d-2068225a3354": {
+    "main_relative_path": "game\\textures\\exit.png",
+    "name": "exit.dds",
+    "shipped_relative_path": "game\\textures\\exit.dds",
+    "type": "Texture"
+  },
+  "c24f240c-2c8f-e747-afa2-21cd4f69b366": {
+    "main_relative_path": "game\\others\\Fence1.glb",
+    "name": "Fence1.glb",
+    "shipped_relative_path": "game\\others\\Fence1.glb",
+    "type": "Other"
+  },
+  "c3240e7d-4066-2444-a024-c1d31c71a299": {
+    "main_relative_path": "game\\models\\Container_Red.gltf",
+    "name": "Container_Red.mesh",
+    "shipped_relative_path": "game\\models\\Container_Red.mesh",
+    "type": "Model"
+  },
+  "c3d6c353-3ce0-2140-93f7-6438980f79a9": {
+    "main_relative_path": "game\\materials\\brainstem\\barrel2Stem-effect.material",
+    "name": "barrel2Stem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\barrel2Stem-effect.material",
+    "type": "Materials"
+  },
+  "c3d79dd1-cd12-c747-b934-05587b54f0e6": {
+    "main_relative_path": "game\\textures\\e key.png",
+    "name": "e key.dds",
+    "shipped_relative_path": "game\\textures\\e key.dds",
+    "type": "Texture"
+  },
+  "c43905ab-cdaa-1747-ac78-c1da0ed346f2": {
+    "main_relative_path": "game\\prefabs\\Rock1.prefab",
+    "name": "Rock1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Rock1.prefab",
+    "type": "Prefabs"
+  },
+  "c49ebb97-d7ba-f148-9e46-16d6c5543147": {
+    "main_relative_path": "game\\textures\\WaterTower_occlusionRoughnessMetallic.png",
+    "name": "WaterTower_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\WaterTower_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "c555a71e-90fb-e743-83ad-9746ba0b5816": {
+    "main_relative_path": "game\\scenes\\entity_test.scn",
+    "name": "entity_test.scn",
+    "shipped_relative_path": "game\\scenes\\entity_test.scn",
+    "type": "Scenes"
+  },
+  "c599a3b8-d997-1840-a311-456d47e77247": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_03.wav",
+    "name": "Player_VO_Idle_03.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_03.ogg",
+    "type": "Audio"
+  },
+  "c5cee638-7346-db46-a99d-dbcf1705d814": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_04.wav",
+    "name": "Footstep_Grass_04.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_04.ogg",
+    "type": "Audio"
+  },
+  "c60c8f27-fe85-4546-8281-deaab9d87acc": {
+    "main_relative_path": "game\\textures\\Pallet_baseColor.png",
+    "name": "Pallet_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\Pallet_baseColor.dds",
+    "type": "Texture"
+  },
+  "c68160de-59ae-b640-b479-6b1df64559bf": {
+    "main_relative_path": "game\\materials\\930\\930_lights.material",
+    "name": "930_lights.material",
+    "shipped_relative_path": "game\\materials\\930\\930_lights.material",
+    "type": "Materials"
+  },
+  "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd": {
+    "main_relative_path": "game\\textures\\ContainerBlue_normal.png",
+    "name": "ContainerBlue_normal.dds",
+    "shipped_relative_path": "game\\textures\\ContainerBlue_normal.dds",
+    "type": "Texture"
+  },
+  "c7685566-a3eb-4b4f-a630-7d08fedb36e5": {
+    "main_relative_path": "game\\textures\\Frog_Frog_Material_BaseColor.1001.png",
+    "name": "Frog_Frog_Material_BaseColor.1001.dds",
+    "shipped_relative_path": "game\\textures\\Frog_Frog_Material_BaseColor.1001.dds",
+    "type": "Texture"
+  },
+  "c785b686-6362-e347-a2d6-96a3b22a0a13": {
+    "main_relative_path": "engine\\models\\sphere.obj",
+    "name": "sphere.mesh",
+    "shipped_relative_path": "engine\\models\\sphere.mesh",
+    "type": "Model"
+  },
+  "c79c529b-71e5-164c-854d-f8cf076f5318": {
+    "main_relative_path": "game\\textures\\ContainerRed_normal.png",
+    "name": "ContainerRed_normal.dds",
+    "shipped_relative_path": "game\\textures\\ContainerRed_normal.dds",
+    "type": "Texture"
+  },
+  "c7dd9100-5906-ae47-adf0-2f9046b976e4": {
+    "main_relative_path": "engine\\shaders\\android_eqr_to_skybox.frag",
+    "name": "android_eqr_to_skybox.frag",
+    "shipped_relative_path": "engine\\shaders\\android_eqr_to_skybox.frag",
+    "type": "Shader"
+  },
+  "c7fa7be4-588b-0143-b83b-192a6dc9a2f7": {
+    "main_relative_path": "engine\\shaders\\text.vert",
+    "name": "text.vert",
+    "shipped_relative_path": "engine\\shaders\\text.vert",
+    "type": "Shader"
+  },
+  "c843fe05-c479-5649-87c2-1acd911e62b6": {
+    "main_relative_path": "game\\materials\\930\\930_plastics.material",
+    "name": "930_plastics.material",
+    "shipped_relative_path": "game\\materials\\930\\930_plastics.material",
+    "type": "Materials"
+  },
+  "c976f342-deeb-7f42-859a-faceb89d2ce8": {
+    "main_relative_path": "game\\textures\\GIVE.png",
+    "name": "GIVE.dds",
+    "shipped_relative_path": "game\\textures\\GIVE.dds",
+    "type": "Texture"
+  },
+  "cb4f12f2-ee24-f145-8c48-9cab6179e963": {
+    "main_relative_path": "game\\textures\\OilDrumRed_baseColor_1001.png",
+    "name": "OilDrumRed_baseColor_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumRed_baseColor_1001.dds",
+    "type": "Texture"
+  },
+  "cbb9fe6d-0115-dc43-a36a-e54441847c9d": {
+    "main_relative_path": "engine\\shaders\\android_bloom.vert",
+    "name": "android_bloom.vert",
+    "shipped_relative_path": "engine\\shaders\\android_bloom.vert",
+    "type": "Shader"
+  },
+  "cc4071a7-9223-6e4e-bab8-da7e8df1b667": {
+    "main_relative_path": "game\\textures\\BigGround_normal.png",
+    "name": "BigGround_normal.dds",
+    "shipped_relative_path": "game\\textures\\BigGround_normal.dds",
+    "type": "Texture"
+  },
+  "cee03212-928a-6347-9d55-07fe46ac3ea1": {
+    "main_relative_path": "game\\textures\\ogre_ao_smile.png",
+    "name": "ogre_ao_smile.dds",
+    "shipped_relative_path": "game\\textures\\ogre_ao_smile.dds",
+    "type": "Texture"
+  },
+  "cf15ebf1-3c0e-d341-b9c7-44121d571eb4": {
+    "main_relative_path": "game\\materials\\Material.material",
+    "name": "Material.material",
+    "shipped_relative_path": "game\\materials\\Material.material",
+    "type": "Materials"
+  },
+  "cf2cb32f-ae7d-3645-98e5-bd88229f81e1": {
+    "main_relative_path": "game\\others\\Box.glb",
+    "name": "Box.glb",
+    "shipped_relative_path": "game\\others\\Box.glb",
+    "type": "Other"
+  },
+  "cf544224-562f-ef40-a492-e747267abfe6": {
+    "main_relative_path": "game\\materials\\2ce\\Material_17.material",
+    "name": "Material_17.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_17.material",
+    "type": "Materials"
+  },
+  "cff4914f-5fb7-ae4e-9d22-814985ca8a66": {
+    "main_relative_path": "engine\\models\\Cube.gltf",
+    "name": "Cube.mesh",
+    "shipped_relative_path": "engine\\models\\Cube.mesh",
+    "type": "Model"
+  },
+  "d0e3b51c-f383-e648-8727-242f9a34160f": {
+    "main_relative_path": "game\\prefabs\\Building1.prefab",
+    "name": "Building1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Building1.prefab",
+    "type": "Prefabs"
+  },
+  "d10428c7-2588-974f-8592-6495962e9af3": {
+    "main_relative_path": "game\\materials\\brainstem\\skeletonStem-effect.material",
+    "name": "skeletonStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\skeletonStem-effect.material",
+    "type": "Materials"
+  },
+  "d25ebdd4-8084-994a-91ef-dc5d38e4f789": {
+    "main_relative_path": "game\\materials\\930\\930_chromes.material",
+    "name": "930_chromes.material",
+    "shipped_relative_path": "game\\materials\\930\\930_chromes.material",
+    "type": "Materials"
+  },
+  "d2d544d5-3f80-c846-8d02-b2a94dd961ce": {
+    "main_relative_path": "game\\textures\\Fence_normal_1001.png",
+    "name": "Fence_normal_1001.dds",
+    "shipped_relative_path": "game\\textures\\Fence_normal_1001.dds",
+    "type": "Texture"
+  },
+  "d35c7f8f-6ff9-2140-ab6b-319215aea71f": {
+    "main_relative_path": "engine\\shaders\\tone.vert",
+    "name": "tone.vert",
+    "shipped_relative_path": "engine\\shaders\\tone.vert",
+    "type": "Shader"
+  },
+  "d41f76a2-b04b-bc45-b804-3e814898dbc5": {
+    "main_relative_path": "engine\\textures\\jpg_icon.png",
+    "name": "jpg_icon.dds",
+    "shipped_relative_path": "engine\\textures\\jpg_icon.dds",
+    "type": "Texture"
+  },
+  "d424e7f7-8f25-a94f-94bd-ec11c29f63be": {
+    "main_relative_path": "game\\materials\\brainstem\\boltStem-effect.material",
+    "name": "boltStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\boltStem-effect.material",
+    "type": "Materials"
+  },
+  "d4a1d8e4-f82b-d845-a6a0-c004d860fb33": {
+    "main_relative_path": "engine\\shaders\\android_tone.vert",
+    "name": "android_tone.vert",
+    "shipped_relative_path": "engine\\shaders\\android_tone.vert",
+    "type": "Shader"
+  },
+  "d581ecc8-3155-e543-9438-5e38ba0956d3": {
+    "main_relative_path": "game\\audio\\sfx\\player\\Player_Respawn_01.wav",
+    "name": "Player_Respawn_01.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\Player_Respawn_01.ogg",
+    "type": "Audio"
+  },
+  "d60926ba-e8d0-0a4f-9642-706d64c94707": {
+    "main_relative_path": "game\\materials\\brainstem\\canisterOutStem-effect.material",
+    "name": "canisterOutStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\canisterOutStem-effect.material",
+    "type": "Materials"
+  },
+  "d673873b-8700-6f45-80a4-4b8c06d76caa": {
+    "main_relative_path": "game\\textures\\heart normal.png",
+    "name": "heart normal.dds",
+    "shipped_relative_path": "game\\textures\\heart normal.dds",
+    "type": "Texture"
+  },
+  "d74f079a-b298-8147-b9fc-44372b1fccf9": {
+    "main_relative_path": "game\\textures\\Enemy2_normal.png",
+    "name": "Enemy2_normal.dds",
+    "shipped_relative_path": "game\\textures\\Enemy2_normal.dds",
+    "type": "Texture"
+  },
+  "d7806020-67fa-c143-a09a-eb3ea6c07f30": {
+    "main_relative_path": "engine\\textures\\lua_icon.png",
+    "name": "lua_icon.dds",
+    "shipped_relative_path": "engine\\textures\\lua_icon.dds",
+    "type": "Texture"
+  },
+  "d8686eae-3f4c-d948-9902-6c9942842042": {
+    "main_relative_path": "engine\\fonts\\OpenSans-Regular.ttf",
+    "name": "OpenSans-Regular.ttf",
+    "shipped_relative_path": "engine\\fonts\\OpenSans-Regular.ttf",
+    "type": "Font"
+  },
+  "d8f1f7af-e67c-4445-a55c-4c540a39b92b": {
+    "main_relative_path": "engine\\textures\\skybox.hdr",
+    "name": "skybox.dds",
+    "shipped_relative_path": "engine\\textures\\skybox.dds",
+    "type": "Texture"
+  },
+  "d9977322-f31e-bc4c-b298-fbcd6690c4ba": {
+    "main_relative_path": "game\\models\\Gear.gltf",
+    "name": "Gear.mesh",
+    "shipped_relative_path": "game\\models\\Gear.mesh",
+    "type": "Model"
+  },
+  "d9a10e76-3db1-0c41-9368-c476a1845c40": {
+    "main_relative_path": "game\\textures\\Crate_normal_1001.png",
+    "name": "Crate_normal_1001.dds",
+    "shipped_relative_path": "game\\textures\\Crate_normal_1001.dds",
+    "type": "Texture"
+  },
+  "d9eeea8a-2cf6-3849-8511-2e6c3be0f011": {
+    "main_relative_path": "game\\textures\\Platform1_occlusionRoughnessMetallic.png",
+    "name": "Platform1_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Platform1_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "dbc4819b-63fb-3442-9b75-e783c48569a9": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_05.wav",
+    "name": "Footstep_Grass_05.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_05.ogg",
+    "type": "Audio"
+  },
+  "dd3797a7-90a6-494b-93b7-b722741806c5": {
+    "main_relative_path": "game\\textures\\MetalPillar2_baseColor.png",
+    "name": "MetalPillar2_baseColor.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar2_baseColor.dds",
+    "type": "Texture"
+  },
+  "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd": {
+    "main_relative_path": "game\\models\\Tire.gltf",
+    "name": "Tire.mesh",
+    "shipped_relative_path": "game\\models\\Tire.mesh",
+    "type": "Model"
+  },
+  "de09e11b-2544-0445-87a4-68be33b4a7b7": {
+    "main_relative_path": "game\\materials\\930\\paint.material",
+    "name": "paint.material",
+    "shipped_relative_path": "game\\materials\\930\\paint.material",
+    "type": "Materials"
+  },
+  "deabbe64-b4f3-ae47-a0cc-b719970f9df1": {
+    "main_relative_path": "game\\materials\\2ce\\Material_18.material",
+    "name": "Material_18.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_18.material",
+    "type": "Materials"
+  },
+  "df12f04f-34c5-644d-980a-c8251d57cd55": {
+    "main_relative_path": "game\\textures\\Tire_occlusionRoughnessMetallic.png",
+    "name": "Tire_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Tire_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "df460aa4-4d26-5b4e-bf5d-55d6ea04f4da": {
+    "main_relative_path": "game\\prefabs\\MetalPillar2.prefab",
+    "name": "MetalPillar2.prefab",
+    "shipped_relative_path": "game\\prefabs\\MetalPillar2.prefab",
+    "type": "Prefabs"
+  },
+  "df7c9ed7-0f4f-a646-974c-3ece974cf161": {
+    "main_relative_path": "game\\models\\city.obj",
+    "name": "city.mesh",
+    "shipped_relative_path": "game\\models\\city.mesh",
+    "type": "Model"
+  },
+  "dfdac0dc-b634-3b40-844e-bbaee046d603": {
+    "main_relative_path": "engine\\shaders\\bloom_blend.frag",
+    "name": "bloom_blend.frag",
+    "shipped_relative_path": "engine\\shaders\\bloom_blend.frag",
+    "type": "Shader"
+  },
+  "e01c794e-0add-d542-9860-03f63c3193ab": {
+    "main_relative_path": "game\\textures\\Crate_baseColor_1001.png",
+    "name": "Crate_baseColor_1001.dds",
+    "shipped_relative_path": "game\\textures\\Crate_baseColor_1001.dds",
+    "type": "Texture"
+  },
+  "e0487308-b21c-a64c-9083-3532a127b118": {
+    "main_relative_path": "game\\templates\\Gear.tmpl",
+    "name": "Gear.tmpl",
+    "shipped_relative_path": "game\\templates\\Gear.tmpl",
+    "type": "Templates"
+  },
+  "e05f4bc5-9556-924e-aef7-8e2b74c61301": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_05.wav",
+    "name": "Player_VO_Idle_05.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_05.ogg",
+    "type": "Audio"
+  },
+  "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2": {
+    "main_relative_path": "game\\textures\\robot_Robot_BaseColor.png",
+    "name": "robot_Robot_BaseColor.dds",
+    "shipped_relative_path": "game\\textures\\robot_Robot_BaseColor.dds",
+    "type": "Texture"
+  },
+  "e1fbf2f4-909d-4b4a-8bee-8b886cd0838e": {
+    "main_relative_path": "game\\materials\\Cube.material",
+    "name": "Cube.material",
+    "shipped_relative_path": "game\\materials\\Cube.material",
+    "type": "Materials"
+  },
+  "e2c34590-4336-eb47-b2a0-6f0958889e0d": {
+    "main_relative_path": "game\\prefabs\\Platform1.prefab",
+    "name": "Platform1.prefab",
+    "shipped_relative_path": "game\\prefabs\\Platform1.prefab",
+    "type": "Prefabs"
+  },
+  "e3384f44-ebec-b140-ab57-4c7be2c71dc0": {
+    "main_relative_path": "engine\\shaders\\eqr_to_skybox.vert",
+    "name": "eqr_to_skybox.vert",
+    "shipped_relative_path": "engine\\shaders\\eqr_to_skybox.vert",
+    "type": "Shader"
+  },
+  "e3c50a66-69d0-534d-84eb-9171cf379d8d": {
+    "main_relative_path": "game\\scripts\\PlayerController.lua",
+    "name": "PlayerController.lua",
+    "shipped_relative_path": "game\\scripts\\PlayerController.lua",
+    "type": "Script"
+  },
+  "e3c50ccd-4dd5-024b-bde1-eb1f473cb339": {
+    "main_relative_path": "game\\textures\\OilDrumRed_normal_1001.png",
+    "name": "OilDrumRed_normal_1001.dds",
+    "shipped_relative_path": "game\\textures\\OilDrumRed_normal_1001.dds",
+    "type": "Texture"
+  },
+  "e485d7b6-c3cf-b840-8e9c-7284b36cf0bb": {
+    "main_relative_path": "game\\textures\\gear nav.png",
+    "name": "gear nav.dds",
+    "shipped_relative_path": "game\\textures\\gear nav.dds",
+    "type": "Texture"
+  },
+  "e4a800a6-7f97-b244-9c59-dcdbf97e1b4b": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_05.wav",
+    "name": "Footstep_Metal_05.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_05.ogg",
+    "type": "Audio"
+  },
+  "e51250aa-015b-8e47-a844-cb5ed70bbecf": {
+    "main_relative_path": "game\\materials\\toycar\\Fabric.material",
+    "name": "Fabric.material",
+    "shipped_relative_path": "game\\materials\\toycar\\Fabric.material",
+    "type": "Materials"
+  },
+  "e51b7e41-e344-3048-9c3e-edb08fad3fa6": {
+    "main_relative_path": "game\\audio\\music\\Boss_Music.wav",
+    "name": "Boss_Music.ogg",
+    "shipped_relative_path": "game\\audio\\music\\Boss_Music.ogg",
+    "type": "Audio"
+  },
+  "e62e6dda-7b72-444b-ac56-86615cfa6370": {
+    "main_relative_path": "game\\textures\\pause.png",
+    "name": "pause.dds",
+    "shipped_relative_path": "game\\textures\\pause.dds",
+    "type": "Texture"
+  },
+  "e65e4858-d371-c142-8857-4f39f5d654fb": {
+    "main_relative_path": "game\\models\\Box.gltf",
+    "name": "Box.mesh",
+    "shipped_relative_path": "game\\models\\Box.mesh",
+    "type": "Model"
+  },
+  "e67d7fe6-960e-b144-a9ee-0f21262ddd71": {
+    "main_relative_path": "game\\textures\\MetalPlank1_normal.png",
+    "name": "MetalPlank1_normal.dds",
+    "shipped_relative_path": "game\\textures\\MetalPlank1_normal.dds",
+    "type": "Texture"
+  },
+  "e6c68a3a-b82a-2b44-9620-61212aa85171": {
+    "main_relative_path": "game\\prefabs\\Box.prefab",
+    "name": "Box.prefab",
+    "shipped_relative_path": "game\\prefabs\\Box.prefab",
+    "type": "Prefabs"
+  },
+  "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb": {
+    "main_relative_path": "game\\textures\\Crate_occlusionRoughnessMetallic_1001.png",
+    "name": "Crate_occlusionRoughnessMetallic_1001.dds",
+    "shipped_relative_path": "game\\textures\\Crate_occlusionRoughnessMetallic_1001.dds",
+    "type": "Texture"
+  },
+  "e7826c06-5d67-ff4b-b786-b855882392a9": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_05.wav",
+    "name": "Player_Hop_05.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_05.ogg",
+    "type": "Audio"
+  },
+  "e78f7d71-feee-564e-9ab2-5c2f3ae87948": {
+    "main_relative_path": "game\\textures\\game\\models\\animatedcube\\AnimatedCube_BaseColor.png",
+    "name": "AnimatedCube_BaseColor.dds",
+    "shipped_relative_path": "game\\textures\\game\\models\\animatedcube\\AnimatedCube_BaseColor.dds",
+    "type": "Texture"
+  },
+  "e7ef8409-62f9-114e-a7cb-bcde381f94a1": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_04.wav",
+    "name": "Player_Hop_04.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog hop\\Player_Hop_04.ogg",
+    "type": "Audio"
+  },
+  "e853a9d4-d916-5742-b883-808559f112f5": {
+    "main_relative_path": "engine\\shaders\\android_geometry.vert",
+    "name": "android_geometry.vert",
+    "shipped_relative_path": "engine\\shaders\\android_geometry.vert",
+    "type": "Shader"
+  },
+  "e87054db-0ef8-f34b-96a0-e2fede943a49": {
+    "main_relative_path": "game\\audio\\bgm\\Haunted Holly_BGM_Loop_110bpm_MASTER.wav",
+    "name": "Haunted Holly_BGM_Loop_110bpm_MASTER.ogg",
+    "shipped_relative_path": "game\\audio\\bgm\\Haunted Holly_BGM_Loop_110bpm_MASTER.ogg",
+    "type": "Audio"
+  },
+  "e9b6116d-a93f-764f-b05f-d68e653e3878": {
+    "main_relative_path": "game\\textures\\toycar\\ToyCar_basecolor.png",
+    "name": "ToyCar_basecolor.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\ToyCar_basecolor.dds",
+    "type": "Texture"
+  },
+  "eb0d9fb3-a21c-4f49-87e8-c225bd47653e": {
+    "main_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_04.wav",
+    "name": "Player_VO_Idle_04.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\player\\frog croak\\Player_VO_Idle_04.ogg",
+    "type": "Audio"
+  },
+  "eb85745d-92e9-2645-873e-176722a30b6e": {
+    "main_relative_path": "game\\materials\\2ce\\Material_23.material",
+    "name": "Material_23.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_23.material",
+    "type": "Materials"
+  },
+  "eb88041e-bf8c-694d-b32b-72008213234b": {
+    "main_relative_path": "engine\\shaders\\eqr_to_skybox.frag",
+    "name": "eqr_to_skybox.frag",
+    "shipped_relative_path": "engine\\shaders\\eqr_to_skybox.frag",
+    "type": "Shader"
+  },
+  "ec65dc46-5bab-fc48-975b-768ca1f3ff3d": {
+    "main_relative_path": "game\\models\\MetalPlank1.gltf",
+    "name": "MetalPlank1.mesh",
+    "shipped_relative_path": "game\\models\\MetalPlank1.mesh",
+    "type": "Model"
+  },
+  "ec6d2ba2-bfee-cf42-870e-ee2c25049905": {
+    "main_relative_path": "game\\materials\\ContainerRed.material",
+    "name": "ContainerRed.material",
+    "shipped_relative_path": "game\\materials\\ContainerRed.material",
+    "type": "Materials"
+  },
+  "ecbe0cc4-0ec4-7948-b1eb-b26d71ea129c": {
+    "main_relative_path": "game\\materials\\brainstem\\thighStem-effect.material",
+    "name": "thighStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\thighStem-effect.material",
+    "type": "Materials"
+  },
+  "ed2429ae-24ad-1e46-9c39-e9536db2dc27": {
+    "main_relative_path": "game\\textures\\damagedhelmet\\Default_emissive.jpg",
+    "name": "Default_emissive.dds",
+    "shipped_relative_path": "game\\textures\\damagedhelmet\\Default_emissive.dds",
+    "type": "Texture"
+  },
+  "ed87d956-cf59-3c4f-ab23-639f04e53783": {
+    "main_relative_path": "game\\scripts\\Game_PlayerState.lua",
+    "name": "Game_PlayerState.lua",
+    "shipped_relative_path": "game\\scripts\\Game_PlayerState.lua",
+    "type": "Script"
+  },
+  "edbc454f-50f9-c241-9163-1830205ab030": {
+    "main_relative_path": "game\\materials\\Enemy1.material",
+    "name": "Enemy1.material",
+    "shipped_relative_path": "game\\materials\\Enemy1.material",
+    "type": "Materials"
+  },
+  "ee4d5a08-f7c6-f742-93ab-2fa6949ebe2c": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_01.wav",
+    "name": "Footstep_Grass_01.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Grass_01.ogg",
+    "type": "Audio"
+  },
+  "ee65299b-47d9-4648-ae3d-7a9e1ae75012": {
+    "main_relative_path": "game\\materials\\Platform1.material",
+    "name": "Platform1.material",
+    "shipped_relative_path": "game\\materials\\Platform1.material",
+    "type": "Materials"
+  },
+  "ef65df1f-7117-9347-8fdd-9b3e08511f29": {
+    "main_relative_path": "engine\\textures\\def_icon.png",
+    "name": "def_icon.dds",
+    "shipped_relative_path": "engine\\textures\\def_icon.dds",
+    "type": "Texture"
+  },
+  "ef77c8ba-f035-8f43-a5c3-714af6765496": {
+    "main_relative_path": "game\\textures\\ogre_bump.png",
+    "name": "ogre_bump.dds",
+    "shipped_relative_path": "game\\textures\\ogre_bump.dds",
+    "type": "Texture"
+  },
+  "efa9a424-7f68-ad4d-8490-a835b3147d60": {
+    "main_relative_path": "game\\materials\\brainstem\\canInnerStem-effect.material",
+    "name": "canInnerStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\canInnerStem-effect.material",
+    "type": "Materials"
+  },
+  "efff96ab-9011-d248-a0e3-56bb0e76f8e6": {
+    "main_relative_path": "game\\models\\BigGround.gltf",
+    "name": "BigGround.mesh",
+    "shipped_relative_path": "game\\models\\BigGround.mesh",
+    "type": "Model"
+  },
+  "f0c138c9-abd6-c94b-8e69-ed98e971cbb2": {
+    "main_relative_path": "game\\materials\\brainstem\\neckSinkStem-effect.material",
+    "name": "neckSinkStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\neckSinkStem-effect.material",
+    "type": "Materials"
+  },
+  "f1e2f7aa-3905-534b-afa1-e98a5441b09a": {
+    "main_relative_path": "game\\materials\\brainstem\\intestineOutStem-effect.material",
+    "name": "intestineOutStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\intestineOutStem-effect.material",
+    "type": "Materials"
+  },
+  "f1e69f8d-673c-7d42-8609-8b972ba029a5": {
+    "main_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_09.wav",
+    "name": "Footstep_Metal_09.ogg",
+    "shipped_relative_path": "game\\audio\\sfx\\movingsfx\\Footstep_Metal_09.ogg",
+    "type": "Audio"
+  },
+  "f30e4128-4a66-8e4c-8633-ca92f325342b": {
+    "main_relative_path": "game\\textures\\win screen.png",
+    "name": "win screen.dds",
+    "shipped_relative_path": "game\\textures\\win screen.dds",
+    "type": "Texture"
+  },
+  "f328749f-ec16-8f4b-850d-d10d46084a0c": {
+    "main_relative_path": "engine\\shaders\\gamma.vert",
+    "name": "gamma.vert",
+    "shipped_relative_path": "engine\\shaders\\gamma.vert",
+    "type": "Shader"
+  },
+  "f356b05f-3ced-8047-a6d7-453b267f6047": {
+    "main_relative_path": "game\\materials\\930\\930_tire.material",
+    "name": "930_tire.material",
+    "shipped_relative_path": "game\\materials\\930\\930_tire.material",
+    "type": "Materials"
+  },
+  "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5": {
+    "main_relative_path": "game\\materials\\Pile1.material",
+    "name": "Pile1.material",
+    "shipped_relative_path": "game\\materials\\Pile1.material",
+    "type": "Materials"
+  },
+  "f44386fa-3ea0-3147-b982-f7d516e882ba": {
+    "main_relative_path": "game\\textures\\MetalPillar2_occlusionRoughnessMetallic.png",
+    "name": "MetalPillar2_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\MetalPillar2_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "f5984def-94f2-6a43-82db-b96f46c26e92": {
+    "main_relative_path": "game\\materials\\2ce\\Material_19.material",
+    "name": "Material_19.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_19.material",
+    "type": "Materials"
+  },
+  "f5c43f58-5e29-2345-8bf0-c59ee7399aa7": {
+    "main_relative_path": "engine\\shaders\\floor.vert",
+    "name": "floor.vert",
+    "shipped_relative_path": "engine\\shaders\\floor.vert",
+    "type": "Shader"
+  },
+  "f5ed9ef3-b376-ec4e-ac89-a1aca8a00101": {
+    "main_relative_path": "game\\prefabs\\MetalPillar1.prefab",
+    "name": "MetalPillar1.prefab",
+    "shipped_relative_path": "game\\prefabs\\MetalPillar1.prefab",
+    "type": "Prefabs"
+  },
+  "f61ce6f4-f97e-a549-92f9-288fdf0c1314": {
+    "main_relative_path": "game\\materials\\Crate_1001.material",
+    "name": "Crate_1001.material",
+    "shipped_relative_path": "game\\materials\\Crate_1001.material",
+    "type": "Materials"
+  },
+  "f764ba91-97e0-8447-9d82-1f2206dc0b4b": {
+    "main_relative_path": "game\\materials\\2ce\\Material_21.material",
+    "name": "Material_21.material",
+    "shipped_relative_path": "game\\materials\\2ce\\Material_21.material",
+    "type": "Materials"
+  },
+  "f79091e8-3999-8543-a6da-c631ad94a064": {
+    "main_relative_path": "game\\models\\Pallet.gltf",
+    "name": "Pallet.mesh",
+    "shipped_relative_path": "game\\models\\Pallet.mesh",
+    "type": "Model"
+  },
+  "f7b10479-d177-5a4e-bcb3-85762720f571": {
+    "main_relative_path": "game\\materials\\brainstem\\discInStem-effect.material",
+    "name": "discInStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\discInStem-effect.material",
+    "type": "Materials"
+  },
+  "f8f9abf4-39b2-3f41-9e00-4bdfd4476881": {
+    "main_relative_path": "game\\textures\\Floor_occlusionRoughnessMetallic.png",
+    "name": "Floor_occlusionRoughnessMetallic.dds",
+    "shipped_relative_path": "game\\textures\\Floor_occlusionRoughnessMetallic.dds",
+    "type": "Texture"
+  },
+  "fa59bdcb-5827-ca43-af38-2c9faa522fb2": {
+    "main_relative_path": "engine\\shaders\\irradiance_convolution.frag",
+    "name": "irradiance_convolution.frag",
+    "shipped_relative_path": "engine\\shaders\\irradiance_convolution.frag",
+    "type": "Shader"
+  },
+  "fa5a4964-92d3-a54f-be14-f85167d12582": {
+    "main_relative_path": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.png",
+    "name": "ToyCar_occlusion_roughness_metallic.dds",
+    "shipped_relative_path": "game\\textures\\toycar\\ToyCar_occlusion_roughness_metallic.dds",
+    "type": "Texture"
+  },
+  "fa6c4df5-9994-cb4a-a64e-75ca65f492db": {
+    "main_relative_path": "engine\\shaders\\android_blur.vert",
+    "name": "android_blur.vert",
+    "shipped_relative_path": "engine\\shaders\\android_blur.vert",
+    "type": "Shader"
+  },
+  "fb7a3066-8736-0246-84b6-14b0b6e1d9ec": {
+    "main_relative_path": "engine\\shaders\\android_floor.frag",
+    "name": "android_floor.frag",
+    "shipped_relative_path": "engine\\shaders\\android_floor.frag",
+    "type": "Shader"
+  },
+  "fd11b906-3bd3-4e40-bbf8-acae9eb918eb": {
+    "main_relative_path": "game\\materials\\brainstem\\pinStem-effect.material",
+    "name": "pinStem-effect.material",
+    "shipped_relative_path": "game\\materials\\brainstem\\pinStem-effect.material",
+    "type": "Materials"
+  },
+  "feb46661-0d8d-d947-ac9f-881f436feda7": {
+    "main_relative_path": "game\\audio\\Gear Put Down.wav",
+    "name": "Gear Put Down.ogg",
+    "shipped_relative_path": "game\\audio\\Gear Put Down.ogg",
+    "type": "Audio"
+  },
+  "ff3bf2e5-81af-3649-bb01-dd2ef12f8500": {
+    "main_relative_path": "game\\materials\\toycar\\ToyCar.material",
+    "name": "ToyCar.material",
+    "shipped_relative_path": "game\\materials\\toycar\\ToyCar.material",
+    "type": "Materials"
+  }
+}

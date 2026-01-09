@@ -51,7 +51,18 @@ namespace PAIN {
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
             // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
+#ifdef _DEBUG
             std::filesystem::path project_root = Assets::findProjectRoot();
+#else
+            std::filesystem::path project_root = ".";
+#endif
+
+// dont know if this breaks android release
+// !TODO: need to test
+#ifdef PN_PLATFORM_ANDROID
+            project_root = Assets::findProjectRoot();
+#endif
+
             std::string project_root_str = normalizePath(project_root.string());
 
             //Register default virtual paths
@@ -68,6 +79,7 @@ namespace PAIN {
             registerVirtualPath(roaming_alias, roamingdata_path + "/" + app_name, true);
             registerVirtualPath(documents_alias, documents_path + "/" + app_name, true);
             registerVirtualPath(temp_alias, localdata_path + "/" + app_name + "/temp", true);
+            registerVirtualPath(game_folder_alias, project_root_str + "/Game", false);
         }
 
         void WindowsPath::destroy() {
