@@ -7,14 +7,14 @@
     "hash": 11758374438502736790
   },
   "descriptor_version": 1,
-  "guid": "5247a57c-9aa7-9840-9796-1ad71757bd01",
+  "guid": "7d21a891-6e00-c949-a7e8-266c1981a89f",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
     "import_animations": true,
-    "import_skeleton": true,
+    "import_skeleton": false,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
