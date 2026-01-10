@@ -91,6 +91,10 @@ namespace PAIN {
                 void cloneEntityWithChildren(entt::entity source, entt::entity cloned_parent);
                 void ungroupEntity(entt::entity entity);
 
+                // Siblings index (ordering)
+                void normalizeSiblings(std::vector<entt::entity>& siblings);
+                std::vector<entt::entity> getSiblings(entt::entity e);
+
                 // Prefab helpers
 #ifdef PN_PLATFORM_WINDOWS
                 std::string generateUniquePrefabName(const std::string& base_name);

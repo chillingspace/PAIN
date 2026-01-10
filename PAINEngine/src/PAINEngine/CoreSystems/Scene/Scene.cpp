@@ -171,8 +171,8 @@ namespace PAIN {
 					// ========================================
 					// PREFAB INSTANCE: Load from prefab + apply overrides
 					// ========================================
-					PN_CORE_TRACE("[SceneManager] Loading prefab instance entity {}",
-						static_cast<uint32_t>(info.entity));
+					//PN_CORE_TRACE("[SceneManager] Loading prefab instance entity {}", static_cast<uint32_t>(info.entity));
+
 					// Get prefab asset
 					auto assetManager = services->get<Assets::Manager>();
 					auto prefabAssetOpt = assetManager->getAsset<Prefab::PrefabAsset>(info.sourcePrefabGUID);
@@ -208,8 +208,7 @@ namespace PAIN {
 					// Load components from prefab
 					if (prefabEntityData->contains("components") && (*prefabEntityData)["components"].is_object()) {
 						controller->loadAllComponentsFromJson(info.entity, (*prefabEntityData)["components"]);
-						PN_CORE_TRACE("[SceneManager] Loaded {} components from prefab",
-							(*prefabEntityData)["components"].size());
+						//PN_CORE_TRACE("[SceneManager] Loaded {} components from prefab", (*prefabEntityData)["components"].size());
 					}
 					// Apply overrides
 					if (!info.componentOverrides.empty()) {
@@ -221,7 +220,7 @@ namespace PAIN {
 							componentJson[componentName] = overrideData;
 							controller->loadAllComponentsFromJson(info.entity, componentJson);
 						}
-						PN_CORE_TRACE("[SceneManager] Applied {} overrides", info.componentOverrides.size());
+						//PN_CORE_TRACE("[SceneManager] Applied {} overrides", info.componentOverrides.size());
 					}
 					// Re-add PrefabInstance component (reload from scene)
 					if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
@@ -385,34 +384,115 @@ namespace PAIN {
 			}
 
 			auto& registry = controller->getRegistry();
-			auto view = registry.view<Entity::Name>();
 
-			for (auto e : view) {
-				nlohmann::json E = nlohmann::json::object();
+			// Identify Root Entities (No Parent)
+			std::vector<entt::entity> roots;
+			auto view = registry.view<Entity::Hierarchy>();
 
-				// Get entity name
-				if (auto nameOpt = controller->getEntityComponent<Entity::Name>(e)) {
-					E["Name"] = nameOpt->get().name;
+			for (auto [entity, hierarchy] : view.each()) {
+				if (!hierarchy.parentGUID.IsValid()) {
+					roots.push_back(entity);
 				}
+			}
 
-				// Detect and save overrides for prefab instances
-				if (prefabService && registry.any_of<Prefab::PrefabInstance>(e)) {
-					prefabService->updateAllOverrides(e, ECS::MAIN_REGISTRY_ID);
-				}
+			// Sort roots by sibling index
+			std::stable_sort(roots.begin(), roots.end(), [&](entt::entity a, entt::entity b) {
+				auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
+				auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
+				int idxA = hA ? hA->get().siblingIndex : 0;
+				int idxB = hB ? hB->get().siblingIndex : 0;
+				return idxA < idxB;
+			});
 
-				// Serialize all components
-				E["Components"] = controller->getAllComponentsAsJson(e);
-
-
-				// Wrap in Entity object
-				ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+			for (auto root : roots) {
+				recursiveCapture( root, ents);
 			}
 
 			ecs["Entities"] = std::move(ents);
 
-			PN_CORE_INFO("[SceneManager] Captured {} entities", ents.size());
+			PN_CORE_INFO("[SceneManager] Captured {} entities ", ents.size());
 
 			return ecs;
+
+			//auto view = registry.view<Entity::Name>();
+
+			//for (auto e : view) {
+			//	nlohmann::json E = nlohmann::json::object();
+
+			//	// Get entity name
+			//	if (auto nameOpt = controller->getEntityComponent<Entity::Name>(e)) {
+			//		E["Name"] = nameOpt->get().name;
+			//	}
+
+			//	// Detect and save overrides for prefab instances
+			//	if (prefabService && registry.any_of<Prefab::PrefabInstance>(e)) {
+			//		prefabService->updateAllOverrides(e, ECS::MAIN_REGISTRY_ID);
+			//	}
+
+			//	// Serialize all components
+			//	E["Components"] = controller->getAllComponentsAsJson(e);
+
+
+			//	// Wrap in Entity object
+			//	ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+			//}
+
+			//ecs["Entities"] = std::move(ents);
+
+			//PN_CORE_INFO("[SceneManager] Captured {} entities", ents.size());
+
+			//return ecs;
+		}
+
+		void SceneManager::recursiveCapture(entt::entity entity, nlohmann::json& jsonArray)
+		{
+
+			auto controller = services->get<ECS::Controller>();
+			auto prefabService = services->get<Prefab::Service>();
+
+			// 1. Serialize THIS entity
+			nlohmann::json E = nlohmann::json::object();
+
+			// Name
+			if (auto nameOpt = controller->getEntityComponent<Entity::Name>(entity)) {
+				E["Name"] = nameOpt->get().name;
+			}
+
+			// Prefab Overrides
+			if (prefabService && controller->getRegistry().any_of<Prefab::PrefabInstance>(entity)) {
+				prefabService->updateAllOverrides(entity, ECS::MAIN_REGISTRY_ID);
+			}
+
+			// Components (This includes siblingIndex automatically via reflection)
+			E["Components"] = controller->getAllComponentsAsJson(entity);
+
+			// Add to main JSON Array
+			jsonArray.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+
+			// 2. Find and Sort Children
+			if (auto h = controller->getEntityComponent<Entity::Hierarchy>(entity)) {
+				std::vector<entt::entity> children;
+				for (const auto& childGUID : h.value().get().childrenGUIDs) {
+					entt::entity child = controller->resolveGUID(childGUID);
+					if (controller->checkEntity(child)) {
+						children.push_back(child);
+					}
+				}
+
+				// [CRITICAL] Sort Children by Sibling Index before saving
+				std::stable_sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
+					auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
+					auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
+					int idxA = hA ? hA->get().siblingIndex : 0;
+					int idxB = hB ? hB->get().siblingIndex : 0;
+					return idxA < idxB;
+					});
+
+				// 3. Recurse
+				for (auto child : children) {
+					recursiveCapture(child, jsonArray);
+				}
+			}
 		}
 
 		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
@@ -877,6 +957,9 @@ namespace PAIN {
 			//Scene loaded successfully
 			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
 			curr_scene_id = sceneGUID;
+
+			services->get<Serialization::Service>()->markSceneChanged();
+
 		}
 
 		void SceneManager::loadScene(std::filesystem::path const& relative_path) {
@@ -944,6 +1027,11 @@ namespace PAIN {
 				return;
 			}
 
+			if (is_playing) {
+				PN_CORE_WARN("[SceneManager] Cannot save scene while Game is Playing! Please Stop first.");
+				return;
+			}
+
 			//Create a scene class to be saved
 			Scene::SceneAsset* currentSceneAsset;
 
@@ -993,6 +1081,10 @@ namespace PAIN {
 
 		void SceneManager::unloadScene() {
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
+
+			if (is_playing) {
+				is_playing = false;
+			}
 
 			// Destroy all ECS entities
 			auto controller = services->get<ECS::Controller>();

@@ -49,6 +49,7 @@ namespace PAIN {
             void setupEnvironment(SceneAsset const& scene_asset);
             void setupLayers(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
+            void recursiveCapture(entt::entity entity, nlohmann::json& jsonArray);
             void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
 #ifdef PN_PLATFORM_WINDOWS

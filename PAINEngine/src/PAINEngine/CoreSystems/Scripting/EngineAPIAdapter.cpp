@@ -138,9 +138,8 @@ namespace PAIN {
 
         // 2) Fallback: scan the registry for Entity::Name
         auto& reg = ecs_.getRegistry();
-        PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}",
-            (void*)&reg,
-            reg.view<PAIN::Entity::Name>().size());
+        //PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}", (void*)&reg, reg.view<PAIN::Entity::Name>().size());
+
         auto view = reg.view<PAIN::Entity::Name>();
         for (auto e : view) {
             const auto& n = view.get<PAIN::Entity::Name>(e).name;
@@ -149,7 +148,7 @@ namespace PAIN {
                 meta_.setEntityName(e, std::string{ name });
                 return asInt(e);
             }
-            PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);
+            /*PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);*/
         }
 
         return std::nullopt;

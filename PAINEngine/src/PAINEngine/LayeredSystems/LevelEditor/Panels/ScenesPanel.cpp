@@ -956,8 +956,14 @@ namespace PAIN {
                     else {
 #ifdef PN_PLATFORM_WINDOWS
                         if (ImGui::Button("Save")) {
-                            scn_service->saveActiveScene(selected);
-                            openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
+                            if (scn_service->isPlaying()) {
+                                openPopUp("Info", std::make_shared<std::string>("Cannot save scene while Game is Playing! Please Stop first."));
+                            }
+                            else {
+                                scn_service->saveActiveScene(selected);
+                                openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
+                            }
+
                         }
                         ImGui::SameLine();
 #endif
