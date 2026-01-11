@@ -406,6 +406,15 @@ namespace PAIN {
                     force_refresh = true;
                 }
                 ImGui::Spacing();
+                
+                // Search bar
+                ImGui::Text("Search:");
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(-1);
+                if (ImGui::InputText("##EntitySearch", search_buffer, sizeof(search_buffer))) {
+                    // Search changed - will filter on next frame
+                }
+                ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
 
@@ -429,9 +438,20 @@ namespace PAIN {
                         });
                 }
 
-                // Render hierarchy
+                // Get search filter (convert to lowercase for case-insensitive search)
+                std::string search_filter = search_buffer;
+                std::transform(search_filter.begin(), search_filter.end(), search_filter.begin(), ::tolower);
+
+                // Render hierarchy (filter if search is active)
                 for (auto entity : root_entities) {
-                    drawEntityHierarchy(entity, 0);
+                    if (search_filter.empty()) {
+                        drawEntityHierarchy(entity, 0, search_filter);
+                    } else {
+                        // Check if this entity or any of its children match the search
+                        if (entityMatchesSearch(entity, search_filter)) {
+                            drawEntityHierarchy(entity, 0, search_filter);
+                        }
+                    }
                 }
 
                 ImGui::Spacing();
@@ -463,7 +483,7 @@ namespace PAIN {
                 }
             }
 
-            void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth) {
+            void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth, const std::string& search_filter) {
                 auto ecs = PN_ECS_SERVICE;
 
                 if (!ecs->checkEntity(entity, currentRegistryID)) return;
@@ -482,6 +502,10 @@ namespace PAIN {
                         return idxA < idxB;
                         });
                 }
+                // Check if this entity matches the search filter
+                std::string entity_name_lower = entity_name;
+                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
+                bool matches_search = search_filter.empty() || entity_name_lower.find(search_filter) != std::string::npos;
 
                 // Create indentation
                 std::string indent(depth * 2, ' ');
@@ -497,10 +521,22 @@ namespace PAIN {
                 // Add icon or indicator for prefab instances
                 if (is_prefab_instance) {
                     unique_label = "[P] " + unique_label;
+                }
+
+                // Apply color styling (search match takes priority for highlighting)
+                bool color_pushed = false;
+                if (!search_filter.empty() && matches_search) {
+                    // Highlight matching entities in yellow/gold color
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.9f, 0.3f, 1.0f));
+                    color_pushed = true;
+                }
+                else if (is_prefab_instance) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                    color_pushed = true;
                 }
                 else if (depth > 0) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
+                    color_pushed = true;
                 }
 
                 // Render selectable
@@ -510,7 +546,7 @@ namespace PAIN {
                     b_entity_changed = true;
                 }
 
-                if (depth > 0 || is_prefab_instance) {
+                if (color_pushed) {
                     ImGui::PopStyleColor();
                 }
 
@@ -651,12 +687,44 @@ namespace PAIN {
                     ImGui::EndPopup();
                 }
 
-                // Recursively draw children
+                // Recursively draw children (filter if search is active)
                 if (has_children) {
                     for (auto child : children) {
-                        drawEntityHierarchy(child, depth + 1);
+                        if (search_filter.empty()) {
+                            drawEntityHierarchy(child, depth + 1, search_filter);
+                        } else {
+                            // Only draw children that match the search or have matching descendants
+                            if (entityMatchesSearch(child, search_filter)) {
+                                drawEntityHierarchy(child, depth + 1, search_filter);
+                            }
+                        }
                     }
                 }
+            }
+
+            bool EntityPanel::entityMatchesSearch(entt::entity entity, const std::string& search_filter) {
+                auto ecs = PN_ECS_SERVICE;
+                
+                if (!ecs->checkEntity(entity, currentRegistryID)) return false;
+                
+                // Check if this entity's name matches
+                std::string entity_name = getEntityName(entity);
+                std::string entity_name_lower = entity_name;
+                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
+                
+                if (entity_name_lower.find(search_filter) != std::string::npos) {
+                    return true;
+                }
+                
+                // Check if any children match
+                std::vector<entt::entity> children = getEntityChildren(entity);
+                for (auto child : children) {
+                    if (entityMatchesSearch(child, search_filter)) {
+                        return true;
+                    }
+                }
+                
+                return false;
             }
 
             std::vector<entt::entity> EntityPanel::getRootEntities() {
