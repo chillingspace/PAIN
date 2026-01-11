@@ -505,7 +505,7 @@ namespace PAIN {
                 // Check if this entity matches the search filter
                 std::string entity_name_lower = entity_name;
                 std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
-                bool matches_search = search_filter.empty() || entity_name_lower.find(search_filter) != std::string::npos;
+                bool matches_search = search_filter.empty() || entity_name_lower.rfind(search_filter, 0) == 0;
 
                 // Create indentation
                 std::string indent(depth * 2, ' ');
@@ -712,7 +712,7 @@ namespace PAIN {
                 std::string entity_name_lower = entity_name;
                 std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
                 
-                if (entity_name_lower.find(search_filter) != std::string::npos) {
+                if (entity_name_lower.rfind(search_filter, 0) == 0) {
                     return true;
                 }
                 
