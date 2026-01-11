@@ -21,15 +21,21 @@ registerUpdate(function(dt)
     local px, py, pz = getPosition(player)
     local dx, dy, dz = px - ex, py - ey, pz - ez
     local dist2 = dx*dx + dy*dy + dz*dz
+    local radius = 0.35
 
-    if dist2 < 0.35*0.35 then
-        -- player in detection range
-        log("[enemyDetection_radius] I see the player!")
-        
+    if dist2 < radius*radius then
+        -- 1) If the game is already ended, do nothing.
+        if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
+            return
+        end
+
         -- so player not detected when hiding and cooldown
         if PlayerState and PlayerState.canBeCaught and not PlayerState.canBeCaught() then
             return
         end
+
+        -- player in detection range
+        log("[enemyDetection_radius] I see the player!")      
 
         if PlayerState and PlayerState.onCaught then
             PlayerState.onCaught(player)

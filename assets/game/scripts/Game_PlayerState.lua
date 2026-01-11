@@ -41,6 +41,12 @@ _G.PlayerState = {
     sfxJump    = nil,
     sfxDrop    = nil,
 
+    -- end-game state
+    gameEnded   = false,
+    gameWon     = false,
+    uiEndScreen = nil,
+    spawnGraceTime = 0.0,
+
     _keysRegistered = false
 }
 
@@ -55,12 +61,19 @@ local S = _G.PlayerState
 local collectPressed = false
 local hidePressed = false
 
+-- paths for end screens
+local GAMEOVER_TEX = "game/textures/gameover.png"
+local WIN_TEX = "game/textures/win screen.png"
+local CURRENT_SCENE_PATH = "prototype.scn"  
+local restartPressed = false
+
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
     registerKeyDown("H", function() hidePressed = true end)
     registerKeyUp("H",   function() hidePressed = false end)
+    registerKeyDown("R", function() restartPressed = true end)
     
     -- mouse click and press (android) treated as a generic action
     if registerOnClick then
@@ -77,6 +90,39 @@ end
 
 -- called once when we first find the player
 function S.init(player)
+    if S.player ~= player then
+        S.player = player
+    end
+
+    -- If we are coming into a freshly loaded scene after game over/win,
+    -- reset the core game state
+    if S.gameEnded or S.gameWon then
+        S.lives = 3
+        S.lettersDelivered = 0
+        S.carriedLetter = nil
+        S.hidden = false
+        S.hiddenIn = nil
+        S.respawnCooldown = 0.0
+        S.pendingRespawn = nil
+        S.gameEnded = false
+        S.gameWon = false
+
+        S.spawnGraceTime = 5.0
+
+         -- IMPORTANT: clear restart input so it doesn't instantly re-trigger
+        restartPressed = false
+        if I then
+            I.tapCount = 0
+            I.tapTimer = 0.0
+            I.doubleTapped = false
+        end
+
+        -- also clear any local action flags
+        collectPressed = false
+        hidePressed = false
+        
+    end
+
     if not S.player then
         S.player = player
         -- log("[PlayerState] S.player set to", tostring(player))
@@ -108,6 +154,16 @@ function S.init(player)
     if not S.sfxJump    then S.sfxJump    = findEntity("sfx_jump") end
     if not S.sfxDrop    then S.sfxDrop    = findEntity("sfx_drop_collectible") end
 
+    -- end screen UI
+    if not S.uiEndScreen then
+        S.uiEndScreen = findEntity("end_screen")
+        -- ensure it starts blank
+        if S.uiEndScreen and setUITexture then
+            setUITexture(S.uiEndScreen, "")
+        end
+    end
+
+
 end
 
 local function playSfx(e)
@@ -115,6 +171,31 @@ local function playSfx(e)
         audioPlay(e)
     end
 end
+
+local function showEndScreen(texPath)
+    if S.uiEndScreen and setUITexture then
+        setUITexture(S.uiEndScreen, texPath)
+    end
+end
+
+local function triggerGameOver()
+    if S.gameEnded then return end  
+    S.gameEnded = true
+    S.gameWon   = false
+    showEndScreen(GAMEOVER_TEX)
+end
+
+local function triggerGameWin()
+    if S.gameEnded then return end
+    S.gameEnded = true
+    S.gameWon   = true
+    showEndScreen(WIN_TEX)
+end
+
+function S.isGameEnded()
+    return S.gameEnded
+end
+
 
 -- called by ui button, decides whether this press should hide/unhide or collect/deliver
 function S.onActionButton()
@@ -174,6 +255,13 @@ function S.update(dt)
         end
     end
 
+    if S.spawnGraceTime and S.spawnGraceTime > 0 then
+        S.spawnGraceTime = S.spawnGraceTime - dt
+        if S.spawnGraceTime < 0 then
+            S.spawnGraceTime = 0
+        end
+    end
+
     -- teleport here, outside the contact callback
     if S.pendingRespawn then
         local pr = S.pendingRespawn
@@ -186,6 +274,27 @@ function S.update(dt)
     if not S.player then
         return
     end
+
+    -- if the game has ended, wait for restart input only
+    if S.gameEnded then
+        -- simple restart triggers:
+        --   - R key on PC
+        --   - any tap/click on mobile (using the same tap system)
+        local wantRestart = restartPressed
+
+        if wantRestart and changeScene then
+            -- reset tap/input state so it doesn't re-trigger
+            restartPressed = false
+            I.tapCount = 0
+            I.tapTimer = 0.0
+            I.doubleTapped = false
+
+            changeScene(CURRENT_SCENE_PATH)
+        end
+
+        return -- don't run normal gameplay while on end screen
+    end
+
 
     ----------------------------------------------------------------
     -- tap / double-tap handling for generic input (click/touch)
@@ -412,10 +521,7 @@ function S.update(dt)
                 -- WIN CHECK
                 if S.lettersDelivered >= (S.lettersToWin or 3) then
                     log("[PlayerState] All letters delivered! YOU WIN")
-
-                    -- @TODO: hook win behaviour here
-                    -- changeScene("WinScene")
-
+                    triggerGameWin()
                 end
             end
         end
@@ -488,6 +594,14 @@ function S.canBeCaught()
         return false
     end
 
+    if S.gameEnded then
+        return false
+    end
+
+    if S.spawnGraceTime and S.spawnGraceTime > 0 then
+        return false
+    end
+
     return S.respawnCooldown <= 0
 end
 
@@ -548,6 +662,7 @@ function S.onCaught(player)
     if S.lives < 0 then S.lives = 0 end
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
+    if S.lives <= 0 then triggerGameOver() return end
     playSfx(S.sfxRespawn)
 
     -- drop carried letter

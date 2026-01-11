@@ -59,16 +59,38 @@ registerUpdate(function(dt)
         I = _G.Input
     end
 
-    if not playerStateInited then
-        if PlayerState and PlayerState.init then
+    -- if not playerStateInited then
+    --     if PlayerState and PlayerState.init then
+    --         PlayerState.init(entityId)
+    --     end
+    --     playerStateInited = true
+    -- end
+
+    if PlayerState and PlayerState.init then
+        if not PlayerState.player or PlayerState.player ~= entityId then
             PlayerState.init(entityId)
         end
-        playerStateInited = true
     end
+
 
         if not S and _G.PlayerState then
         S = _G.PlayerState
     end
+
+    -- freeze player when game has ended (game over or win)
+    if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
+        -- stop walking audio
+        if walkingSoundPlaying and audioStop then
+            audioStop(id)
+            walkingSoundPlaying = false
+        end
+
+        -- stop movement
+        setVelocity(id, 0.0, 0.0, 0.0)
+        jumpPressed = false
+        return
+    end
+
 
     -- while hiding: stop movement + stop audio 
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
