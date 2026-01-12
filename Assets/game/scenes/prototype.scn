@@ -695,13 +695,13 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "music",
                             "is3D": false,
                             "looping": true,
                             "maxDistance": 50.0,
                             "minDistance": 1.0,
                             "pitchDb": 0.0,
-                            "playOnStart": false,
+                            "playOnStart": true,
                             "pos": [
                                 0.0,
                                 0.0,
@@ -779,13 +779,13 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "music",
                             "is3D": false,
                             "looping": true,
                             "maxDistance": 50.0,
                             "minDistance": 1.0,
                             "pitchDb": 0.0,
-                            "playOnStart": false,
+                            "playOnStart": true,
                             "pos": [
                                 0.0,
                                 0.0,
@@ -968,7 +968,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1052,7 +1052,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1136,7 +1136,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1220,7 +1220,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1304,7 +1304,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1388,7 +1388,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -2687,7 +2687,7 @@
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
                             "maxDistance": 50.0,
