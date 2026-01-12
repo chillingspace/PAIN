@@ -443,7 +443,6 @@ namespace PAIN {
 		{
 			if (!impl_->initialized) return;
 			for (auto& pair : impl_->groups) {
-				if (pair.first == "master") continue;
 				auto& g = pair.second;
 				if (g.cg) g.cg->setPaused(true);
 			}
@@ -454,7 +453,6 @@ namespace PAIN {
 			if (!impl_->initialized) return;
 			for (auto& pair : impl_->groups) 
 			{
-				if (pair.first == "master") continue;
 				auto& g = pair.second;
 				if (g.cg) g.cg->setPaused(false);
 			}
