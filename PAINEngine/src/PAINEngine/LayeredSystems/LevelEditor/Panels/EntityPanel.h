@@ -65,6 +65,7 @@ namespace PAIN {
                 char search_buffer[256] = "";
                 bool sort_alphabetically = false;
                 bool force_refresh = false;
+                std::set<entt::entity> collapsed_groups;  // Tracks which groups are collapsed
 
                 // Popup functions
                 std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);

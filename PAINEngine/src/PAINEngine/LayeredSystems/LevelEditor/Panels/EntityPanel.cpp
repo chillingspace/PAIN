@@ -507,21 +507,46 @@ namespace PAIN {
                 std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
                 bool matches_search = search_filter.empty() || entity_name_lower.rfind(search_filter, 0) == 0;
 
-                // Create indentation
-                std::string indent(depth * 2, ' ');
-                std::string prefix = depth > 0 ? "-> " : "";
-                if (has_children) prefix += "[G] ";
-
-                std::string display_label = indent + prefix + entity_name;
-                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
-
                 // Check if entity is a prefab instance
                 bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry(currentRegistryID).any_of<Prefab::PrefabInstance>(entity);
+                
+                // Check if this group is collapsed
+                bool is_collapsed = collapsed_groups.find(entity) != collapsed_groups.end();
 
-                // Add icon or indicator for prefab instances
-                if (is_prefab_instance) {
-                    unique_label = "[P] " + unique_label;
+                // Create indentation
+                float indent_width = depth * 20.0f;
+                ImGui::Dummy(ImVec2(indent_width, 0));
+                ImGui::SameLine(0, 0);
+
+                // Draw collapse toggle for entities with children
+                if (has_children) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.5f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.5f));
+                    
+                    std::string arrow_label = std::string(is_collapsed ? ">" : "v") + "##toggle" + std::to_string(static_cast<uint32_t>(entity));
+                    if (ImGui::SmallButton(arrow_label.c_str())) {
+                        if (is_collapsed) {
+                            collapsed_groups.erase(entity);
+                        } else {
+                            collapsed_groups.insert(entity);
+                        }
+                    }
+                    ImGui::PopStyleColor(3);
+                    ImGui::SameLine();
+                } else if (depth > 0) {
+                    // Add spacing to align with siblings that have toggle buttons
+                    ImGui::Dummy(ImVec2(20.0f, 0));
+                    ImGui::SameLine(0, 0);
                 }
+
+                // Build display label
+                std::string prefix = "";
+                if (has_children) prefix += "[G] ";
+                if (is_prefab_instance) prefix = "[P] " + prefix;
+
+                std::string display_label = prefix + entity_name;
+                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
 
                 // Apply color styling (search match takes priority for highlighting)
                 bool color_pushed = false;
@@ -688,7 +713,7 @@ namespace PAIN {
                 }
 
                 // Recursively draw children (filter if search is active)
-                if (has_children) {
+                if (has_children && (!is_collapsed || !search_filter.empty())) {
                     for (auto child : children) {
                         if (search_filter.empty()) {
                             drawEntityHierarchy(child, depth + 1, search_filter);
