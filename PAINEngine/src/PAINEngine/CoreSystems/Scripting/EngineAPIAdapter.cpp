@@ -399,7 +399,19 @@ namespace PAIN {
         PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
             name, targetGuid.ToString());
 
+        // Preserve play state (Not sure if this function is called somewhere else)
+        bool wasPlaying = scene_->isPlaying();
+
         scene_->loadScene(targetGuid);
+
+        // Set scene to play
+        if (wasPlaying) {
+            scene_->onPlay();
+        }
+
+        // Set Camera to game camera
+        scene_->SetGameCamera();
+
         return true;
     }
 
