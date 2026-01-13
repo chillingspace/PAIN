@@ -90,13 +90,15 @@ end
 
 -- called once when we first find the player
 function S.init(player)
-    if S.player ~= player then
-        S.player = player
-    end
+    -- Check if current player is same as previous player (Respawn)
+    -- or non-existent (Fresh load)
+    local playerChanged = (S.player ~= player)
+
+    S.player = player
 
     -- If we are coming into a freshly loaded scene after game over/win,
     -- reset the core game state
-    if S.gameEnded or S.gameWon then
+    if playerChanged or S.gameEnded or S.gameWon then
         S.lives = 3
         S.lettersDelivered = 0
         S.carriedLetter = nil
@@ -106,7 +108,6 @@ function S.init(player)
         S.pendingRespawn = nil
         S.gameEnded = false
         S.gameWon = false
-
         S.spawnGraceTime = 5.0
 
          -- IMPORTANT: clear restart input so it doesn't instantly re-trigger
@@ -625,23 +626,24 @@ function S.setCheckpoint(player, checkpointEntity)
     --log("[PlayerState] Checkpoint set at:", x, y, z)
 end
 
--- local NORMAL_HEART_PATH = "game/textures/heart normal.png"
--- local GREY_HEART_PATH   = "game/textures/heart grey.png"
+local normalHeartTexture = "game/textures/heart normal.png"
+local greyHeartTexture   = "game/textures/heart grey.png"
 
 local function updateHeartsUI()
-    if S.heart1 then setUITexture(S.heart1, "game/textures/heart normal.png") end
-    if S.heart2 then setUITexture(S.heart2, "game/textures/heart normal.png") end
-    if S.heart3 then setUITexture(S.heart3, "game/textures/heart normal.png") end
+    -- Store the player's lives
+    local hearts = {S.heart1, S.heart2, S.heart3}
 
-    -- hide hearts if > lives
-    if S.lives <= 2 and S.heart3 then
-        setUITexture(S.heart3, "game/textures/heart grey.png")
-    end
-    if S.lives <= 1 and S.heart2 then
-        setUITexture(S.heart2, "game/textures/heart grey.png")
-    end
-    if S.lives <= 0 and S.heart1 then
-        setUITexture(S.heart1, "game/textures/heart grey.png")
+    -- Update each heart
+    for i = 1,3 do
+        local heart = hearts[i]
+        if heart then
+            -- Set to normal heart if true, grey if false
+            if i <= S.lives then
+                setUITexture(heart, normalHeartTexture)
+            else
+                setUITexture(heart, greyHeartTexture)
+            end
+        end
     end
 end
 
