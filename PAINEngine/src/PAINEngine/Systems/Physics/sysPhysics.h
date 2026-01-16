@@ -67,6 +67,8 @@ namespace PAIN {
 
 			bool isGrounded(JPH::BodyID body_id, float maxDistance);
 
+			glm::vec3 getNormal(entt::entity e) const;
+
 			glm::vec3 getVelocity(entt::entity e) const;
 
 		private:

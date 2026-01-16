@@ -42,7 +42,6 @@ local groundY = nil -- will be set from initial position
 local I = nil -- will be hooked to _G.Input once PlayerState has created it
 
 -- grab initial rotation 
-local baseRx, baseRy, baseRz = getRotation(entityId)
 local currentYaw = baseRy or 0.0
 local playerStateInited = false
 
@@ -54,6 +53,8 @@ local S = nil -- will grab _G.PlayerState
 local maxGroundCheckDist = 0.25
 
 registerUpdate(function(dt)
+    local baseRx, baseRy, baseRz = getRotation(entityId)
+    
     local id = entityId -- the entity script is attached to
 
     -- make sure see Input even if PlayerState loaded later

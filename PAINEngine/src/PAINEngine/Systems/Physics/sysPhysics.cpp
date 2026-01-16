@@ -36,25 +36,25 @@
 
 			// jolt lua bridge
 			struct System::LuaContactListener : public JPH::ContactListener {
-				System * owner{};
-				explicit LuaContactListener(System * s) : owner{ s } {}
-			
+				System* owner{};
+				explicit LuaContactListener(System* s) : owner{ s } {}
+
 				void OnContactAdded(const JPH::Body& b1,
-									const JPH::Body& b2,
-									const JPH::ContactManifold&,
-									JPH::ContactSettings&) override
+					const JPH::Body& b2,
+					const JPH::ContactManifold&,
+					JPH::ContactSettings&) override
 				{
 					if (owner) owner->notifyContact(b1, b2);
 				}
-			
+
 				// forward persisted contacts for continuous events
-				void OnContactPersisted(const JPH::Body & b1,
-										const JPH::Body & b2,
-										const JPH::ContactManifold&,
-										JPH::ContactSettings&) override {
+				void OnContactPersisted(const JPH::Body& b1,
+					const JPH::Body& b2,
+					const JPH::ContactManifold&,
+					JPH::ContactSettings&) override {
 					if (owner) owner->notifyContact(b1, b2);
 				}
-			
+
 			};
 
 			// Jolt Physics setup
@@ -77,22 +77,22 @@
 
 				// Allocator + job system inits to run jolt update
 				// Windows can spare more memory for temp allocator
-	#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 				temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(32 * 1024 * 1024);
 				unsigned numThreads = std::thread::hardware_concurrency() - 1;
 
-	#else
-				// Android does not have that much memory to spare, so allocate lesser (1MB), and make sure at least 1 thread
-				// To test: allocate 2MB 
+#else
+			// Android does not have that much memory to spare, so allocate lesser (1MB), and make sure at least 1 thread
+			// To test: allocate 2MB 
 				temp_allocator = std::make_unique<JPH::TempAllocatorImpl>(1 * 1024 * 1024);
 				unsigned numThreads = std::max<unsigned>(1u, std::thread::hardware_concurrency() - 1);
-	#endif
+#endif
 
 				job_system = std::make_unique<JPH::JobSystemThreadPool>(
 					JPH::cMaxPhysicsJobs,
 					JPH::cMaxPhysicsBarriers,
 					numThreads);
-	
+
 				if (temp_allocator == nullptr) PN_CORE_WARN("Temp Alloc failed!");
 				if (job_system == nullptr) PN_CORE_WARN("Job System failed!");
 
@@ -208,12 +208,12 @@
 				}
 			}
 
-			System::System(std::shared_ptr<Services> svc) : ISystem(svc), 
-															c_max_bodies{ 512 },				// These values work for android implementation, increasing it would cause crashes due to memory constraints
-															c_num_body_mutexes{ 64 },			// To test: increase these values and see if it still works on android devices
-															c_max_body_pairs{ 2048 }, 
-															c_max_contact_constraints{ 1024 }, 
-															collision_steps{ 2 }
+			System::System(std::shared_ptr<Services> svc) : ISystem(svc),
+				c_max_bodies{ 512 },				// These values work for android implementation, increasing it would cause crashes due to memory constraints
+				c_num_body_mutexes{ 64 },			// To test: increase these values and see if it still works on android devices
+				c_max_body_pairs{ 2048 },
+				c_max_contact_constraints{ 1024 },
+				collision_steps{ 2 }
 			{
 				PN_CORE_TRACE("Physics::System constructor");
 
@@ -297,7 +297,7 @@
 			{
 				// To get fixed delta time here
 				// const float delta_time = 1.f / 60.f; // <-- REMOVE THISf
-            
+
 				// The main simulation step is no longer here.
 				// if (temp_allocator && job_system && jolt_physics)
 				// {
@@ -326,7 +326,7 @@
 					// Find all entities with Transform and RigidBody3D components
 					// Optimized using group
 					auto group = registry.group<Physics::RigidBody3D>(entt::get<LocalTransform, WorldTransform>);
-				
+
 					for (auto&& [entity, rigidBody, transform, world] : group.each()) {
 
 						if (!rigidBody.bodyID.IsInvalid()) {
@@ -472,13 +472,13 @@
 				// Use view to avoid group ownership conflict with onUpdate
 				auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 				for (auto&& [entity, rigidBody, transform] : view.each()) {
-				
+
 					// Check if scale OR offset changed in editor
 					// If so, destroy the existing body so it can be recreated below with new settings
-					if (!rigidBody.bodyID.IsInvalid() && 
-						(rigidBody.collider_scale != rigidBody.last_applied_scale || 
-						 rigidBody.collider_offset != rigidBody.last_applied_offset)) {
-					
+					if (!rigidBody.bodyID.IsInvalid() &&
+						(rigidBody.collider_scale != rigidBody.last_applied_scale ||
+							rigidBody.collider_offset != rigidBody.last_applied_offset)) {
+
 						body_interface->RemoveBody(rigidBody.bodyID);
 						body_interface->DestroyBody(rigidBody.bodyID);
 						rigidBody.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
@@ -489,20 +489,20 @@
 						// Get rotation
 						const glm::quat& q = glm::normalize(transform.rotation);
 
-						JPH::Quat rotationQuat(q.x, 
-											   q.y, 
-											   q.z, 
-											   q.w); // Jolt uses x, y, z, w order
+						JPH::Quat rotationQuat(q.x,
+							q.y,
+							q.z,
+							q.w); // Jolt uses x, y, z, w order
 
 						// Create Jolt body settings
-					
+
 						// 1. Create the base BoxShape (Apply Scale)
 						// Note: Jolt BoxShape takes half-extents
 						JPH::Ref<JPH::Shape> finalShape = new JPH::BoxShape(
-							JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x, 
-									  .5f * transform.scale.y * rigidBody.collider_scale.y,
-									  .5f * transform.scale.z * rigidBody.collider_scale.z),
-									  .0f);
+							JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x,
+								.5f * transform.scale.y * rigidBody.collider_scale.y,
+								.5f * transform.scale.z * rigidBody.collider_scale.z),
+							.0f);
 
 						// 2. Apply Offset using RotatedTranslatedShape if needed
 						// We wrap the box shape in a transform shape to offset it from the entity center
@@ -527,9 +527,9 @@
 						// Create Jolt body settings
 						JPH::BodyCreationSettings settings(
 							finalShape,
-							JPH::RVec3(transform.position.x, 
-									   transform.position.y, 
-									   transform.position.z),
+							JPH::RVec3(transform.position.x,
+								transform.position.y,
+								transform.position.z),
 							rotationQuat,
 							motion_type,
 							jolt_layer
@@ -560,8 +560,8 @@
 						body_interface->SetAngularVelocity(body_id, JPH::Vec3::sZero());
 
 						PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
-									   (uint32_t)entity,
-									   rigidBody.bodyID.GetIndexAndSequenceNumber());
+							(uint32_t)entity,
+							rigidBody.bodyID.GetIndexAndSequenceNumber());
 					}
 				}
 			}
@@ -693,6 +693,7 @@
 				body_interface->AddBody(floorBody->GetID(), JPH::EActivation::DontActivate);
 			}
 
+			// Check if on object
 			bool System::isGrounded(JPH::BodyID body_id, float maxDistance) {
 				if (!jolt_physics || body_id.IsInvalid())
 					return false;
@@ -721,6 +722,35 @@
 				return hit;
 				PN_CORE_ERROR("Failed to get hit");
 				return false;
+			}
+
+			// For setting player object normal to match the normal of the object below it when colliding
+			glm::vec3 System::getNormal(entt::entity e) const { 
+
+				glm::vec3 n{};
+
+				if (!body_interface) return { 0.f, 0.f, 0.f };
+
+				auto svc = services.lock();
+				if (!svc) return { 0.f, 0.f, 0.f };
+
+				auto ecs = svc->get<ECS::Controller>();
+				if (!ecs) return { 0.f, 0.f, 0.f };
+
+				auto& registry = ecs->getRegistry();
+
+				if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e))
+					return { 0.f, 0.f, 0.f };
+
+				auto& rb = registry.get<Physics::RigidBody3D>(e);
+				if (rb.bodyID.IsInvalid()) return { 0.f, 0.f, 0.f };
+
+				// Calculate normal here
+				/*JPH::Vec3 vel = body_interface->GetLinearVelocity(rb.bodyID);
+
+				return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());*/
+
+				return {0.f, 0.f, 0.f}; // Placeholder
 			}
 		} // Physics
 	} // PAIN
