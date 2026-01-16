@@ -101,8 +101,7 @@ namespace PAIN {
                 component.morphWeights.resize(modelAsset->morphTargets.size(), 0.0f);
             }
 
-            PN_CORE_INFO("Initialized ModelRenderer for entity {} with {} submeshes",
-                (uint32_t)entity, component.materials.size());
+            //PN_CORE_INFO("[Render System] Initialized ModelRenderer for entity {} with {} submeshes", (uint32_t)entity, component.materials.size());
         }
 
         void System::onUpdate(AppTiming timing, entt::registry& registry) {

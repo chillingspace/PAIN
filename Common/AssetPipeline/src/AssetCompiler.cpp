@@ -129,8 +129,32 @@ namespace PAIN {
                 settings["lod_reduction"] = 0.5f;  // 50% reduction per level
 
                 // Animation/skeleton
-                settings["import_animations"] = true;
-                settings["import_skeleton"] = true;
+                bool has_animations = false;
+                bool has_skeleton = false;
+
+                // Check if there is animations (this step is needed if not the scaling will break animation)
+                Assimp::Importer peekImporter;
+                const aiScene* scene = peekImporter.ReadFile(asset.raw_path.string(), 0);
+
+                if (scene) {
+                    // Check for explicit animation tracks
+                    if (scene->HasAnimations()) {
+                        has_animations = true;
+                    }
+
+                    // Check for bones (skeleton)
+                    if (scene->HasMeshes()) {
+                        for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+                            const aiMesh* mesh = scene->mMeshes[m];
+                            if (mesh->HasBones()) {
+                                has_skeleton = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                settings["import_animations"] = has_animations;
+                settings["import_skeleton"] = has_skeleton;
                 settings["max_bone_weights"] = 4;
                 break;
             }
@@ -734,6 +758,11 @@ namespace PAIN {
             ppFlags |= aiProcess_GenSmoothNormals;
             ppFlags |= aiProcess_FlipUVs;
 
+            if (!import_animations && !import_skeleton) {
+                ppFlags |= aiProcess_PreTransformVertices;
+                ppFlags |= aiProcess_GlobalScale;
+            }
+
             // Load with Assimp
             Assimp::Importer importer;
             const aiScene* scene = importer.ReadFile(asset_info.raw_path.string(), ppFlags);
@@ -743,7 +772,7 @@ namespace PAIN {
                 return;
             }
 
-            Model asset;
+            Model asset; 
 
             // First, extract bone names and bind poses (for skeleton)
             std::unordered_map<std::string, int> boneNameToIndex;

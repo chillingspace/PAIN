@@ -62,16 +62,10 @@ namespace PAIN {
                 int total_entities;
                 int selectedEntityIndex = -1;       // Selected entity index
 
-
-                //Add tag popup
-                std::function<void(std::any const&)> addTagPopUp(std::string const& popup_id);
-
-                //Remove tag popup
-                std::function<void(std::any const&)> removeTagPopUp(std::string const& popup_id);
-
                 char search_buffer[256] = "";
                 bool sort_alphabetically = false;
                 bool force_refresh = false;
+                std::set<entt::entity> collapsed_groups;  // Tracks which groups are collapsed
 
                 // Popup functions
                 std::function<void(std::any const&)> createEntityPopUp(std::string const& popup_id);
@@ -79,9 +73,12 @@ namespace PAIN {
                 std::function<void(std::any const&)> cloneEntityPopUp(std::string const& popup_id);
 
                 // Core hierarchy operations (GUID-based)
-                void drawEntityHierarchy(entt::entity entity, int depth);
+                void drawEntityHierarchy(entt::entity entity, int depth, const std::string& search_filter = "");
                 std::vector<entt::entity> getRootEntities();
                 std::vector<entt::entity> getEntityChildren(entt::entity parent);
+
+                // Search helper
+                bool entityMatchesSearch(entt::entity entity, const std::string& search_filter);
 
                 void setEntityParent(entt::entity child, entt::entity parent);
                 void removeParent(entt::entity child);
@@ -90,6 +87,10 @@ namespace PAIN {
                 void removeEntityWithChildren(entt::entity entity);
                 void cloneEntityWithChildren(entt::entity source, entt::entity cloned_parent);
                 void ungroupEntity(entt::entity entity);
+
+                // Siblings index (ordering)
+                void normalizeSiblings(std::vector<entt::entity>& siblings);
+                std::vector<entt::entity> getSiblings(entt::entity e);
 
                 // Prefab helpers
 #ifdef PN_PLATFORM_WINDOWS

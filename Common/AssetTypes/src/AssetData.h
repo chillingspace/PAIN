@@ -323,6 +323,13 @@ namespace PAIN {
                     std::cout << "Found project root: " << currentPath << std::endl;
                     return currentPath;
                 }
+                
+                // Check for "assets" folder for portable/release builds
+                std::filesystem::path asset_dir = currentPath / "assets";
+                if (std::filesystem::exists(asset_dir) && std::filesystem::is_directory(asset_dir)) {
+                     std::cout << "Found project root (via assets): " << currentPath << std::endl;
+                     return currentPath;
+                }
 
                 currentPath = currentPath.parent_path();
                 if (currentPath.empty() || currentPath == currentPath.root_path()) {

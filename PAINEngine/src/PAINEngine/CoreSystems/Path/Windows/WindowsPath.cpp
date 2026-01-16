@@ -50,18 +50,8 @@ namespace PAIN {
             roamingdata_path = getKnownFolderPath(FOLDERID_RoamingAppData);
             documents_path = getKnownFolderPath(FOLDERID_Documents);
 
-            // Calculate project root (two levels up from bin/Debug, bin/debug is the current_path)
-#ifdef _DEBUG
+            // Calculate project root
             std::filesystem::path project_root = Assets::findProjectRoot();
-#else
-            std::filesystem::path project_root = ".";
-#endif
-
-// dont know if this breaks android release
-// !TODO: need to test
-#ifdef PN_PLATFORM_ANDROID
-            project_root = Assets::findProjectRoot();
-#endif
 
             std::string project_root_str = normalizePath(project_root.string());
 
