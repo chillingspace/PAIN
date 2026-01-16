@@ -213,7 +213,7 @@
 															c_num_body_mutexes{ 64 },			// To test: increase these values and see if it still works on android devices
 															c_max_body_pairs{ 2048 }, 
 															c_max_contact_constraints{ 1024 }, 
-															collision_steps{ 1 }
+															collision_steps{ 2 }
 			{
 				PN_CORE_TRACE("Physics::System constructor");
 
@@ -278,6 +278,9 @@
 				// Use the fixed delta time from the application loop
 				const float delta_time = timing.fixed_dt;
 
+				// test
+				//delta_time = (1 / 30.f);
+
 				if (temp_allocator && job_system && jolt_physics)
 				{
 					// Only update if time has actually passed
@@ -293,7 +296,7 @@
 			void System::onUpdate(AppTiming timing, entt::registry& registry)
 			{
 				// To get fixed delta time here
-				// const float delta_time = 1.f / 60.f; // <-- REMOVE THIS
+				// const float delta_time = 1.f / 60.f; // <-- REMOVE THISf
             
 				// The main simulation step is no longer here.
 				// if (temp_allocator && job_system && jolt_physics)
@@ -540,6 +543,8 @@
 						settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
 						settings.mMassPropertiesOverride.mMass = 10.0f; // any positive number
 						settings.mMassPropertiesOverride.mInertia = JPH::Mat44::sScale(1.0f); // placeholder inertia tensor
+
+						settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
 
 						JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 						rigidBody.bodyID = body_id;
