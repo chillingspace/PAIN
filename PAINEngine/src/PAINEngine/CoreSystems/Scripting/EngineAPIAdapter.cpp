@@ -239,6 +239,28 @@ namespace PAIN {
         }
     }
 
+    glm::vec2 EngineAPIAdapter::Get2DPosition(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Texture2D>(entityId)) {
+            return opt->get().pos;
+        }
+        return { 0.f, 0.f};
+    }
+
+    void EngineAPIAdapter::Set2DPosition(entt::entity entityId, glm::vec2 p) {
+        /*auto& t = ensure<PAIN::Transform>(entityId);
+        t.position = { p.x, p.y, p.z };*/
+
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Texture2D>(entityId)) return;
+
+        auto& t = reg.get<PAIN::Texture2D>(entityId);
+        t.pos = p;
+
+        if (auto ts = ecs_.getSystem<PAIN::Transform::System>()) { //recompute worldtransform
+            ts->markDirty(entityId, reg);
+        }
+    }
+
     glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
         if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
             return opt->get().scale;

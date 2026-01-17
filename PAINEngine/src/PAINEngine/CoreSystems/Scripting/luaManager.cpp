@@ -504,6 +504,17 @@ namespace PAIN {
             return std::make_tuple(p.x, p.y, p.z);
             });
         lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
+
+        lua_.set_function("get2DPosition", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                return std::make_tuple(0.f, 0.f);
+            }
+            auto p = api_->Get2DPosition(entityId);
+            return std::make_tuple(p.x, p.y);
+            });
+        lua_.set_function("set2DPosition", [this](entt::entity entityId, float x, float y) { if (api_) api_->Set2DPosition(entityId, { x,y }); });
+
         lua_.set_function("getScale", [this](entt::entity entityId) {
             if (!api_) return std::make_tuple(1.f, 1.f, 1.f);
             auto s = api_->GetScale(entityId);

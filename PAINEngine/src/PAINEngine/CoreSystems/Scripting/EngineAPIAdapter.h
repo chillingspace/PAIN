@@ -79,6 +79,9 @@ namespace PAIN {
         /* =========================================================================== */
         glm::vec3 GetPosition(entt::entity entityId) override;
         void SetPosition(entt::entity entityId, glm::vec3 p) override;
+        glm::vec2 Get2DPosition(entt::entity entityId);
+        void Set2DPosition(entt::entity entityId, glm::vec2 p);
+
         glm::vec3 GetScale(entt::entity entityId) override;
         void SetScale(entt::entity entityId, glm::vec3 s) override;
         glm::vec3 GetRotation(entt::entity entityId) override;
