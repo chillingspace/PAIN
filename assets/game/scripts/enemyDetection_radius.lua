@@ -5,17 +5,41 @@
 local player = nil
 
 registerUpdate(function(dt)
-    if not player then
-        player = findEntity("Player")
-        if not player then 
-            return 
-        end
+    -- if not player then
+    --     local found = findEntity("Player")
+    --     if not found then 
+    --         return 
+    --     end
 
-        -- ensure PlayerState knows the start/checkpoint
-        if PlayerState and PlayerState.init then
-            PlayerState.init(player)
-        end
+    --     player = found
+
+    --     -- ensure PlayerState knows the start/checkpoint
+    --     if PlayerState and PlayerState.init then
+    --         PlayerState.init(player)
+    --     end
+    -- end
+
+    -- local found = findEntity("Player")
+    -- if not found then
+    --     return
+    -- end
+
+    -- -- If player changed (scene reload), rebind
+    -- if player ~= found then
+    --     player = found
+
+    --     if PlayerState and PlayerState.init then
+    --         PlayerState.init(player)
+    --     end
+    -- end
+
+    local p = _G.PlayerEntity
+    if not p then
+        return
     end
+    player = p
+
+    -- log("[EnemyDetection] player cached:", tostring(player), "found:", tostring(_G.PlayerEntity))
 
     local ex, ey, ez = getPosition(entityId)
     local px, py, pz = getPosition(player)

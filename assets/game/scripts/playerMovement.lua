@@ -53,6 +53,10 @@ local S = nil -- will grab _G.PlayerState
 
 registerUpdate(function(dt)
     local id = entityId -- the entity script is attached to
+    
+    _G.PlayerEntity = id
+
+    -- log("[PlayerMovement] player:", tostring(_G.PlayerEntity))
 
     -- make sure see Input even if PlayerState loaded later
     if not I and _G.Input then
