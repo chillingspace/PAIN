@@ -421,7 +421,16 @@ namespace PAIN {
         PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
             name, targetGuid.ToString());
 
+        bool previousSceneState = scene_->isPlaying();
         scene_->loadScene(targetGuid);
+
+        if (previousSceneState) {
+            scene_->onPlay();
+        }
+        else {
+            scene_->onStop();
+        }
+
         return true;
     }
 

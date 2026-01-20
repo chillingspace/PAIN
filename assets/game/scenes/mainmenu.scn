@@ -12,9 +12,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            1.4773874282836914,
-            0.10881739854812622,
-            1.1522985696792603
+            1.503820538520813,
+            0.11211930215358734,
+            1.1800947189331055
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -36,8 +36,7 @@
                             "childrenGUIDs": [
                                 "90c6755e-f09f-8e41-9dec-23817187f379",
                                 "0b69e1f9-d8bf-094e-b8ed-df87ab9d7b6e",
-                                "7beaa535-462c-7f45-9d6d-4090ca227034",
-                                "0b180e20-a7c6-2c4d-aa8e-e1e28cf97c7e"
+                                "7beaa535-462c-7f45-9d6d-4090ca227034"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
@@ -124,122 +123,12 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "0b180e20-a7c6-2c4d-aa8e-e1e28cf97c7e"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.999083936214447
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.10000000149011612,
-                                0.10000000149011612,
-                                0.10000000149011612
-                            ]
-                        },
-                        "Name": {
-                            "name": "mouse"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "ee274d28-f002-3d4e-9aa0-663238b662e1"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.0,
-                                0.0
-                            ],
-                            "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
-                            "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "mouse"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "90c6755e-f09f-8e41-9dec-23817187f379"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 1
+                            "siblingIndex": 0
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -349,7 +238,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -476,7 +365,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -511,6 +400,44 @@
                                 }
                             ]
                         },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "7a4b0369-55bd-034d-bf03-baf1ee0fa117",
+                            "texture_scale": [
+                                1.5,
+                                0.12999999523162842
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": true,
+                            "duration": 0.20000000298023224,
+                            "end_color": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "end_vec3": [
+                                0.0,
+                                1.0,
+                                1.0
+                            ],
+                            "start_color": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "start_vec3": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "UIButton": {
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
@@ -538,8 +465,8 @@
                                 0.0
                             ],
                             "local_position": [
-                                560.0,
-                                620.0,
+                                0.0,
+                                0.0,
                                 0.0
                             ],
                             "offset_max": [
@@ -566,45 +493,9 @@
                                 1.0
                             ],
                             "size_delta": [
-                                0.0,
-                                0.0
+                                1024.0,
+                                88.0
                             ]
-                        },
-                        "UIText": {
-                            "alignment": 1,
-                            "color": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "display_text": "Start",
-                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
-                            "font_size": 2.0,
-                            "line_height": 1.2000000476837158,
-                            "max_length": 0,
-                            "outline_color": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "outline_thickness": 5.0,
-                            "shadow_color": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.5
-                            ],
-                            "shadow_offset": [
-                                0.0,
-                                0.0
-                            ],
-                            "text_pos": [
-                                510.0,
-                                570.0
-                            ],
-                            "word_wrap": false,
-                            "wrap_width": 0.0
                         }
                     },
                     "Name": "start_button"
