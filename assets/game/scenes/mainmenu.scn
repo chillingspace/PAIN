@@ -168,7 +168,7 @@
                         "Texture2D": {
                             "pos": [
                                 -0.05000000074505806,
-                                0.44999998807907104
+                                0.5
                             ],
                             "texture_guid": "7a4b0369-55bd-034d-bf03-baf1ee0fa117",
                             "texture_scale": [
@@ -193,7 +193,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Button_OnClick",
+                            "on_click_callback_lua": "StartButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -324,7 +324,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Button_OnClick",
+                            "on_click_callback_lua": "HowToPlayButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -455,7 +455,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Button_OnClick",
+                            "on_click_callback_lua": "SettingsButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -586,7 +586,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Button_OnClick",
+                            "on_click_callback_lua": "CreditsButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -717,7 +717,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Button_OnClick",
+                            "on_click_callback_lua": "QuitButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },

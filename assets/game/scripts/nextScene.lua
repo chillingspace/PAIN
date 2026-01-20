@@ -3,43 +3,49 @@
 local sceneChange = false
 local nextScene = nil
 
--- for UI button (on_click_callback_lua = "Button_OnClick")
-_G_root.Button_OnClick = function()
+-- for UI button (on_click_callback_lua = "StartButton_OnClick")
+_G_root.StartButton_OnClick = function()
     sceneChange = true
+    nextScene = "prototype.scn"
+end
+
+-- for UI button (on_click_callback_lua = "HowToPlayButton_OnClick")
+_G_root.HowToPlayButton_OnClick = function()
+    sceneChange = true
+    nextScene = "howtoplay.scn"
+end
+
+-- for UI button (on_click_callback_lua = "SettingsButton_OnClick")
+_G_root.SettingsButton_OnClick = function()
+    sceneChange = true
+    --nextScene = "settings.scn"
+end
+
+-- for UI button (on_click_callback_lua = "CreditsButton_OnClick")
+_G_root.CreditsButton_OnClick = function()
+    sceneChange = true
+    --nextScene = "credits.scn"
+end
+
+-- for UI button (on_click_callback_lua = "QuitButton_OnClick")
+_G_root.QuitButton_OnClick = function()
+    --quit game
+end
+
+-- for UI button (on_click_callback_lua = "QuitToStartButton_OnClick")
+_G_root.QuitToStartButton_OnClick = function()
+    sceneChange = true
+    nextScene = "mainmenu.scn"
+end
+
+-- for UI button (on_click_callback_lua = "BackButton_OnClick")
+_G_root.BackButton_OnClick = function()
+    sceneChange = true
+    nextScene = "mainmenu.scn"
 end
 
 registerUpdate(function(dt)
     if sceneChange then
-
-        -- Main Menu Buttons
-        if getEntityName(entityId) == "start_button" then
-            printLog("[UI] Start button pressed")
-            nextScene = "prototype.scn"
-        end
-        if getEntityName(entityId) == "how_to_play_button" then
-            printLog("[UI] How To Play button pressed")
-            nextScene = "howtoplay.scn"
-        end
-        if getEntityName(entityId) == "settings_button" then
-            printLog("[UI] Settings button pressed")
-            --nextScene = "settings.scn"
-        end
-        if getEntityName(entityId) == "credits_button" then
-            printLog("[UI] Credits button pressed")
-            --nextScene = "credits.scn"
-        end
-        if getEntityName(entityId) == "quit_button" then
-            printLog("[UI] Quit button pressed")
-            --exit app
-        end
-
-
-        -- Back Button
-        if getEntityName(entityId) == "back_button" then
-            printLog("[UI] Start button pressed")
-            nextScene = "mainmenu.scn"
-        end
-
 
         if nextScene == nil then
             return
@@ -47,5 +53,6 @@ registerUpdate(function(dt)
 
         changeScene(nextScene)
         sceneChange = false
+        nextScene = nil
     end
 end)
