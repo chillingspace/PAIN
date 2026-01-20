@@ -3,7 +3,7 @@
 local baseOffset = { x = 0.1, y = 0.0, z = 0.3 }
 
 local yaw   = 0.0   -- horizontal angle (radians)
-local pitch = -0.2   -- slight downward tilt
+local pitch = -0.3   -- slight downward tilt
 
 -- shared so movement can be camera-relative
 _G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }

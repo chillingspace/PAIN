@@ -185,10 +185,8 @@ namespace PAIN {
         bool b_loop = false;
         
         // Start/end values (use based on animation type)
-        glm::vec3 start_vec3{ 0 };
-        glm::vec3 end_vec3{ 0 };
-        glm::vec4 start_color{ 1 };
-        glm::vec4 end_color{ 1 };
+        glm::vec2 start_vec2{ 0 };
+        glm::vec2 end_vec2{ 0 };
         
         // Runtime state (do not set)
         float elapsed = 0.0f;
@@ -264,10 +262,8 @@ REFL_TYPE(PAIN::UIAnimation)
 REFL_FIELD(duration)
 REFL_FIELD(b_playing)
 REFL_FIELD(b_loop)
-REFL_FIELD(start_vec3)
-REFL_FIELD(end_vec3)
-REFL_FIELD(start_color)
-REFL_FIELD(end_color)
+REFL_FIELD(start_vec2)
+REFL_FIELD(end_vec2)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIAnimation>);
