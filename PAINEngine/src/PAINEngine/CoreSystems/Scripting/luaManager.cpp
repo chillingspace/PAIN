@@ -927,4 +927,23 @@ namespace PAIN {
         if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
     }
 
+    void LuaManager::callGlobalWithVec2(const std::string& name, float x, float y) {
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' is not a function", name);
+            return;
+        }
+        
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn(x, y);
+        if (!r.valid()) { 
+            sol::error e = r; 
+            logError("Global(" + name + ")", e); 
+        }
+    }
+
 }

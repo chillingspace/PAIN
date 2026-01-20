@@ -44,6 +44,12 @@ namespace PAIN {
             entt::entity m_hovered_entity = entt::null;
             entt::entity m_pressed_entity = entt::null;
             glm::vec2 m_mouse_position{ -1.f, -1.f };
+
+            // Joystick drag state
+            entt::entity m_dragging_joystick = entt::null;
+            glm::vec2 m_joystick_center{ 0.f, 0.f };
+            float m_joystick_max_radius = 0.15f;
+            int m_joystick_pointer_id = -1;
         };
 
     }
