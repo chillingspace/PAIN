@@ -227,7 +227,7 @@ namespace PAIN {
         auto window = services->get<Window::Window>();
 
         if (gameMode) {
-            window->setCursorMode(true);
+            window->setCursorMode(b_hide_mouse);
 
         }
         else {
@@ -382,6 +382,9 @@ namespace PAIN {
                 case PAIN_KEY_Q:
                     Q_KEYDOWN = true;
                     break;
+                case PAIN_KEY_ESCAPE:
+                    ESC_KEYDOWN = true;
+                    break;
                 case PAIN_KEY_LEFT_SHIFT:
                     LSHIFT_KEYDOWN = true;
                     break;
@@ -419,6 +422,9 @@ namespace PAIN {
                     break;
                 case PAIN_KEY_LEFT_CONTROL:
                     LCTRL_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_ESCAPE:
+                    ESC_KEYDOWN = false;
                     break;
                 default:
                     break;
@@ -465,6 +471,7 @@ namespace PAIN {
         // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
             auto& gs = GraphicsSettings::get();
+            auto window = services->get<Window::Window>();
 
             switch (e.getKeyCode()) {
 
@@ -483,6 +490,13 @@ namespace PAIN {
                 }
                 break;
             }
+            case PAIN_KEY_ESCAPE:
+                if (window) {
+                    b_hide_mouse = !b_hide_mouse;
+                    window->setCursorMode(true);
+                    PN_CORE_INFO("Cursor Mode: {}", b_hide_mouse ? "Hidden" : "Visible");
+                }
+                break;
             case PAIN_KEY_EQUAL: // '+' key in many layouts (with shift)
             case PAIN_KEY_KP_ADD: // Numpad +
                 if (camera) {
