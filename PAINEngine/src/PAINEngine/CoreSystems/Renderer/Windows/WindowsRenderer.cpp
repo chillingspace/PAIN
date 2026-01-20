@@ -752,7 +752,6 @@ namespace PAIN {
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M)
 	{
-		//auto& gs = GraphicsSettings::get();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -770,16 +769,38 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_M", M);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
+		//LogMemoryFullDiagnostic("Before GL Sub Model.");
+
 		// Bind component's VAO (already has vertex data uploaded)
 		glBindVertexArray(geometry_vao);
 
 		//if (!GS.use_instanced_rendering) 
 		{
+			// === OPTIMIZED BUFFER UPDATE ===
+			const size_t vertexDataSize = modelAsset->vertices.size() * sizeof(Assets::Vertex);
+			const size_t indexDataSize = modelAsset->indices.size() * sizeof(unsigned int);
+
+#ifdef PN_PLATFORM_ANDROID
+			// Android-specific: Use buffer orphaning to avoid memory leaks on Mali GPUs
+			// This forces the driver to allocate new memory instead of stalling
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, modelAsset->vertices.size() * sizeof(Assets::Vertex), modelAsset->vertices.data());
+			glBufferData(GL_ARRAY_BUFFER, vertexDataSize, nullptr, GL_STREAM_DRAW);  // Orphan
+			glBufferData(GL_ARRAY_BUFFER, vertexDataSize, modelAsset->vertices.data(), GL_STREAM_DRAW);
+
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, modelAsset->indices.size() * sizeof(unsigned int), modelAsset->indices.data());
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, nullptr, GL_STREAM_DRAW);  // Orphan
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, modelAsset->indices.data(), GL_STREAM_DRAW);
+#else
+			// Desktop: glBufferSubData is efficient
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, modelAsset->vertices.data());
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexDataSize, modelAsset->indices.data());
+#endif
 		}
+
+		//LogMemoryFullDiagnostic("After GL Sub Model.");
 
 		if (GS.use_instanced_rendering) {
 
@@ -1073,6 +1094,8 @@ namespace PAIN {
 				(void*)(submesh.firstIndex * sizeof(unsigned int))
 			);
 		}
+
+		//LogMemoryFullDiagnostic("After Rendering Sub Meshes.");
 
 		glBindVertexArray(0);
 
