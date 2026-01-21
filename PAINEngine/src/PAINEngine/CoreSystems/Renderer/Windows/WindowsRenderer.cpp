@@ -69,6 +69,9 @@ namespace PAIN {
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			if (!mdl.has_value()) continue;
 
+			//Invalidate Cached Buffer Offsets
+			mdl.value().get().bufferOffset.isUploaded = false;
+
 			//Retrieve model asset with validation
 			auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl.value().get().modelGUID);
 			if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model) continue;
