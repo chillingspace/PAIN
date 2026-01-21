@@ -34,7 +34,8 @@ namespace PAIN {
 
 	void WindowsRenderer::initSceneVbo() {
 
-		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
+		//Skip if VBO is not initialized
+		if (!geometry_vbo) return;
 
 		//Initialize Buffers
 		PN_CORE_INFO("Initializing New Buffers");
@@ -67,6 +68,9 @@ namespace PAIN {
 			//Get mdl asset
 			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
 			if (!mdl.has_value()) continue;
+
+			//Invalidate Cached Buffer Offsets
+			mdl.value().get().bufferOffset.isUploaded = false;
 
 			//Retrieve model asset with validation
 			auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl.value().get().modelGUID);
