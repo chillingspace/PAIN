@@ -7,7 +7,7 @@
     "hash": 304747694832462496
   },
   "descriptor_version": 1,
-  "guid": "c7fa7be4-588b-0143-b83b-192a6dc9a2f7",
+  "guid": "5b658d78-a469-bc48-8ad9-954c7804f656",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\text.vert"

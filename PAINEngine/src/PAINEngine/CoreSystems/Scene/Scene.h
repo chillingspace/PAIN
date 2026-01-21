@@ -106,6 +106,7 @@ namespace PAIN {
             bool isPlaying() const { return is_playing; }
             void onPlay();
             void onStop();
+            void setPlaying(bool playing) { if (playing) is_playing = true; else is_playing = false; }
 
             //Accessor
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }

@@ -203,6 +203,14 @@ namespace PAIN {
 
     void LuaManager::onDetach() {
         // clear script environments, timers, and callback vectors
+        resetForSceneReload();
+
+        api_.reset();
+
+        lua_ = sol::state();
+    }
+
+    void LuaManager::resetForSceneReload() {
         updates_.clear();
         keyDown_.clear();
         keyUp_.clear();
@@ -217,12 +225,10 @@ namespace PAIN {
         collisionInterests_.clear();
         delayedOps_.clear();
         while (!timeoutHeap_.empty()) timeoutHeap_.pop();
+
         pendingSceneChange_.reset();
-
-        api_.reset();
-
-        lua_ = sol::state();
     }
+
 
     void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {
         instantiatePrefab_ = std::move(fn);
@@ -814,7 +820,8 @@ namespace PAIN {
         if (pendingSceneChange_ && !sceneChangeQueued_) {
             sceneChangeQueued_ = true;
             (*pendingSceneChange_)();
-            pendingSceneChange_.reset();
+            //pendingSceneChange_.reset();
+            resetForSceneReload();
             sceneChangeQueued_ = false;
         }
     }

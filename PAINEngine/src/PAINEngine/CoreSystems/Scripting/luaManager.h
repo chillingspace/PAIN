@@ -66,6 +66,7 @@ namespace PAIN {
         void Input_OnEvent(PAIN::Event::Event& e);
         void Input_EndFrame();
         void onDetach();
+        void resetForSceneReload();
 
     public:
         sol::state& state() { return lua_; } // so AI can call into Lua directly

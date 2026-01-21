@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "prefilter.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 10755960163824095152
+  },
+  "descriptor_version": 1,
+  "guid": "04ba1cb4-83e8-be46-86ec-1751ec6c2b43",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\prefilter.vert"
+  }
+}

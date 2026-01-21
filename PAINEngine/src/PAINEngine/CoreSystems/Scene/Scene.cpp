@@ -635,21 +635,8 @@ namespace PAIN {
 			auto renderer = services->get<sRenderer>();
 			renderer->setScene(services->get<Scene::SceneManager>());
 
-
 			// init vbo for scene
-			{
-				std::vector<ModelRenderer> models{};
-
-				auto ecs = services->get<ECS::Controller>();
-				auto& registry = ecs->getRegistry();
-				auto view = registry.view<ModelRenderer>();
-				for (auto e : view) {
-					auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-					if (mdl.has_value()) models.push_back(mdl.value());
-				}
-
-				renderer->initSceneVbo(models);
-			}
+			renderer->initSceneVbo();
 		}
 
 		void SceneManager::onAttach() {

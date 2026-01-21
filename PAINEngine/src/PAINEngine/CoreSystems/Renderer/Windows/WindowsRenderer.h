@@ -97,7 +97,8 @@ namespace PAIN {
 		~WindowsRenderer();
 
 		void Init(std::shared_ptr<Services> app_services);
-		void initSceneVbo(const std::vector<PAIN::ModelRenderer>& models);
+		void initSceneVbo();
+		void clearBuffers();
 
 		// PASSES
 		void BeginShadowPass(const Light& l);

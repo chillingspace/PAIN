@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_bloom.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 186341511423148874
+  },
+  "descriptor_version": 1,
+  "guid": "f5a7ccff-57c9-2848-bfd9-2bf25f67452d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_bloom.frag"
+  }
+}
