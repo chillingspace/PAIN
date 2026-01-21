@@ -2,10 +2,10 @@
  * \file   cUIComps.h
  * \brief  All UI comps
  *
- * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \author Bryan Lim, 2301214, [bryanlicheng.l@digipen.edu](mailto:bryanlicheng.l@digipen.edu) (100%)
  * \co-author
  * \date   September 2025
- * All content � 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+ * All content © 2024 DigiPen Institute of Technology Singapore, all rights reserved.
  *********************************************************************/
 
 #pragma once
@@ -46,25 +46,25 @@ namespace PAIN {
         // (0,0) = bottom-left, (1,1) = top-right, (0.5,0.5) = center
         glm::vec2 anchor_min{ 0.5f, 0.5f };  // Default: center anchor
         glm::vec2 anchor_max{ 0.5f, 0.5f };  // If same as min = point anchor, if different = stretch
-        
+
         // ─── Positioning ───
         glm::vec2 anchored_position{ 0, 0 };  // Offset in pixels from anchor point
         glm::vec2 size_delta{ 100, 100 };     // Width/height in pixels (when anchors are together)
-        
+
         // ─── Pivot point (0-1 normalized within the rect itself) ───
         // (0,0) = bottom-left corner, (0.5,0.5) = center, (1,1) = top-right corner
         glm::vec2 pivot{ 0.5f, 0.5f };  // Default: center pivot
-        
+
         // ─── Advanced: Stretch mode offsets (only used when anchor_min != anchor_max) ───
         // Use these to add padding when stretching between anchors
         glm::vec2 offset_min{ 0, 0 };  // Left/Bottom padding in pixels
         glm::vec2 offset_max{ 0, 0 };  // Right/Top padding in pixels (negative values)
-        
+
         // ─── Transform (rarely needed for UI, usually leave at defaults) ───
         glm::vec3 local_position{ 0, 0, 0 };  // Extra offset (usually leave at 0)
         glm::quat rotation{ 1, 0, 0, 0 };     // Rotation (usually not used for UI)
         glm::vec3 scale{ 1, 1, 1 };           // Scale multiplier
-        
+
         // ─── Calculated values (DO NOT SET - computed by layout system) ───
         glm::vec2 calculated_world_position{ 0, 0 };
         glm::vec2 calculated_world_size{ 100, 100 };
@@ -96,15 +96,33 @@ namespace PAIN {
 
     struct UIButton {
         UIButtonState state = UIButtonState::Normal;
-        
+
         // State colors (ARGB format: 0xAARRGGBB)
         int normal_color = 0xFFFFFFFF;       // White
         int highlighted_color = 0xFFCCCCCC;  // Light gray
         int pressed_color = 0xFFAAAAAA;      // Darker gray
         int disabled_color = 0xFF666666;     // Very dark gray
-        
+
         // Lua callback - function name to call on click (e.g., "OnButtonClick")
         std::string on_click_callback_lua;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // UIJoystick - Virtual joystick drag behavior for mobile/touch controls
+    // ═══════════════════════════════════════════════════════════════════════
+    // USAGE:
+    //   1. Add UIJoystick + UIButton + UIElement + UIRectTransform + Texture2D
+    //   2. Set max_radius to control how far the joystick can be dragged (normalized space)
+    //   3. The joystick will return to center when released
+    //   4. Lua callback receives (x, y) direction vector normalized to -1 to 1 range
+    //   5. When released, callback receives (0, 0)
+    // EXAMPLE:
+    //   max_radius = 0.15 means joystick can move 15% of screen width/height
+    // ═══════════════════════════════════════════════════════════════════════
+    struct UIJoystick {
+        float max_radius = 0.15f;           // Maximum drag distance in normalized space (0-1)
+        bool is_dragging = false;           // Runtime state - currently being dragged?
+        glm::vec2 center_position{ 0.f, 0.f };  // Runtime state - initial position when pressed
     };
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -135,26 +153,26 @@ namespace PAIN {
     struct UIText {
         std::string display_text;             // The text to display
         Assets::GUID font_guid;               // Font asset to use
-        
+
         // ─── Appearance ───
         glm::vec3 color{ 1, 1, 1 };          // Text color (RGB, white by default)
         float font_size = 24.0f;              // Font size in pixels
         TextAlignment alignment = TextAlignment::Left;
-        
+
         // ─── Layout ───
         float wrap_width = 0.0f;              // 0 = no wrapping, >0 = wrap at this pixel width
         bool word_wrap = true;                // Wrap at word boundaries?
         float line_height = 1.2f;             // Line spacing multiplier
-        
+
         // ─── Effects (optional) ───
         float outline_thickness = 0.0f;       // 0 = no outline
         glm::vec4 outline_color{ 0,0,0,1 };   // Outline color (RGBA)
         glm::vec2 shadow_offset{ 0, 0 };      // Shadow offset in pixels (0,0 = no shadow)
         glm::vec4 shadow_color{ 0,0,0,0.5f }; // Shadow color (RGBA)
-        
+
         // ─── Advanced ───
         int max_length = 0;                   // 0 = unlimited, >0 = truncate text
-        
+
         // ─── Internal (do not set manually) ───
         glm::vec2 text_pos{ 0, 0 };          // Calculated by renderer
         float scale_factor = 1.0f;            // Calculated by layout system
@@ -183,11 +201,11 @@ namespace PAIN {
         AnimationType anim_type = AnimationType::Position;
         float duration = 1.0f;
         bool b_loop = false;
-        
+
         // Start/end values (use based on animation type)
         glm::vec2 start_vec2{ 0 };
         glm::vec2 end_vec2{ 0 };
-        
+
         // Runtime state (do not set)
         float elapsed = 0.0f;
         bool b_playing = false;
@@ -200,38 +218,38 @@ namespace PAIN {
 
 // Enum Serializers 
 NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIButtonState, {
-	{PAIN::UIButtonState::Normal, "Normal"},
-	{PAIN::UIButtonState::Highlighted, "Highlighted"},
-	{PAIN::UIButtonState::Pressed, "Pressed"},
-	{PAIN::UIButtonState::Disabled, "Disabled"}
-	})
+    {PAIN::UIButtonState::Normal, "Normal"},
+    {PAIN::UIButtonState::Highlighted, "Highlighted"},
+    {PAIN::UIButtonState::Pressed, "Pressed"},
+    {PAIN::UIButtonState::Disabled, "Disabled"}
+    })
 
-NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::AnimationType, {
-{PAIN::AnimationType::Position, "Position"},
-{PAIN::AnimationType::Scale, "Scale"},
-{PAIN::AnimationType::Color, "Color"},
-{PAIN::AnimationType::Rotation, "Rotation"}
-	})
+    NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::AnimationType, {
+    {PAIN::AnimationType::Position, "Position"},
+    {PAIN::AnimationType::Scale, "Scale"},
+    {PAIN::AnimationType::Color, "Color"},
+    {PAIN::AnimationType::Rotation, "Rotation"}
+        })
 
-NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
-{PAIN::TextAlignment::Left, "Left"},
-{PAIN::TextAlignment::Center, "Center"},
-{PAIN::TextAlignment::Right, "Right"}})
+    NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
+    {PAIN::TextAlignment::Left, "Left"},
+    {PAIN::TextAlignment::Center, "Center"},
+    {PAIN::TextAlignment::Right, "Right"} })
 
-REFL_TYPE(PAIN::UIRectTransform)
-REFL_FIELD(local_position)
-REFL_FIELD(rotation)
-REFL_FIELD(scale)
-REFL_FIELD(anchor_min)
-REFL_FIELD(anchor_max)
-REFL_FIELD(pivot)
-REFL_FIELD(anchored_position)
-REFL_FIELD(size_delta)
-REFL_FIELD(offset_min)
-REFL_FIELD(offset_max)
-REFL_END
+    REFL_TYPE(PAIN::UIRectTransform)
+    REFL_FIELD(local_position)
+    REFL_FIELD(rotation)
+    REFL_FIELD(scale)
+    REFL_FIELD(anchor_min)
+    REFL_FIELD(anchor_max)
+    REFL_FIELD(pivot)
+    REFL_FIELD(anchored_position)
+    REFL_FIELD(size_delta)
+    REFL_FIELD(offset_min)
+    REFL_FIELD(offset_max)
+    REFL_END
 
-static_assert(refl::trait::is_reflectable_v<PAIN::UIRectTransform>);
+    static_assert(refl::trait::is_reflectable_v<PAIN::UIRectTransform>);
 
 REFL_TYPE(PAIN::UIElement)
 REFL_FIELD(b_is_enabled)
@@ -251,6 +269,14 @@ REFL_FIELD(on_click_callback_lua)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIButton>);
+
+REFL_TYPE(PAIN::UIJoystick)
+REFL_FIELD(max_radius)
+REFL_FIELD(is_dragging)
+REFL_FIELD(center_position)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::UIJoystick>);
 
 REFL_TYPE(PAIN::UICanvas)
 REFL_FIELD(sort_order)

@@ -557,6 +557,32 @@ namespace PAIN {
                 //registerCompUIFunc<PAIN::UIButton>("UIButton",
                 //    [this](ComponentsPanel&, PAIN::UIButton& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
 
+                // ---- UIJoystick ----
+                registerCompUIFunc<PAIN::UIJoystick>("UIJoystick", [this](ComponentsPanel& panel, PAIN::UIJoystick& joystick) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                    // Max radius
+                    ImGui::SeparatorText("Joystick Settings");
+                    ImGui::DragFloat("Max Radius", &joystick.max_radius, 0.01f, 0.05f, 0.5f, "%.3f");
+
+                    // Runtime state (read-only)
+                    ImGui::SeparatorText("Runtime State (Read-Only)");
+                    ImGui::BeginDisabled();
+                    ImGui::Checkbox("Is Dragging", &joystick.is_dragging);
+                    ImGui::DragFloat2("Center Position", &joystick.center_position.x, 0.01f);
+                    ImGui::EndDisabled();
+
+                    if (joystick.is_dragging) {
+                        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Currently dragging!");
+                    }
+                    else {
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Not dragging");
+                    }
+
+                    ImGui::PopStyleVar();
+                    });
+
+
                 registerCompUIFunc<PAIN::UIElement>("UIElement",
                     [this](ComponentsPanel&, PAIN::UIElement& ui) { DrawWithReflection(ui, static_cast<ComponentsPanel*>(this)); });
 

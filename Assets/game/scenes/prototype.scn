@@ -291,6 +291,14 @@
                             "b_is_interactable": true,
                             "layer": 0
                         },
+                        "UIJoystick": {
+                            "center_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "is_dragging": false,
+                            "max_radius": 0.15000000596046448
+                        },
                         "UIRectTransform": {
                             "anchor_max": [
                                 0.5,
