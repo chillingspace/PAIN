@@ -52,11 +52,6 @@ namespace PAIN {
         std::vector<MaterialInstance> materials;
 
         // Animation state
-        int currentAnimationIndex = -1;
-        float animationTime = 0.0f;
-        bool isPlaying = false;
-        bool loopAnimation = true;
-        float playbackSpeed = 1.0f;
         std::vector<glm::mat4> boneTransforms;
         std::vector<float> morphWeights;
 

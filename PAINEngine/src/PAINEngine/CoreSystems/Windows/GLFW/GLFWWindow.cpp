@@ -125,6 +125,10 @@ namespace PAIN {
 		}
 
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
+			// Ignore 0x0 resize events
+			if (width == 0 || height == 0) {
+				return;
+			}
 
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));

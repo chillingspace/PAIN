@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Frog_Hopping.gltf",
+    "name": "Fox.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 5876472927984034210
+    "hash": 1820688139465659699
   },
   "descriptor_version": 1,
-  "guid": "81117530-de12-7b4c-a0e5-6ebc94459e26",
+  "guid": "375cf278-f420-9b4a-978e-c6c960c561bd",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Hopping.gltf"
+    "source_file": "game\\models\\Fox.gltf"
   }
 }
