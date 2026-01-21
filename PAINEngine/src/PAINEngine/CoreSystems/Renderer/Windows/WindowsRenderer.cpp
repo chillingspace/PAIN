@@ -34,7 +34,8 @@ namespace PAIN {
 
 	void WindowsRenderer::initSceneVbo() {
 
-		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
+		//Skip if VBO is not initialized
+		if (!geometry_vbo) return;
 
 		//Initialize Buffers
 		PN_CORE_INFO("Initializing New Buffers");
