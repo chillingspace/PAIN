@@ -30,6 +30,7 @@ end
 -- for UI button (on_click_callback_lua = "QuitButton_OnClick")
 _G_root.QuitButton_OnClick = function()
     --quit game
+    quitApplication()
 end
 
 -- for UI button (on_click_callback_lua = "QuitToStartButton_OnClick")

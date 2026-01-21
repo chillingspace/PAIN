@@ -311,7 +311,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "StartButton_OnClick",
+                            "on_click_callback_lua": "ContinueButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -442,7 +442,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "HowToPlayButton_OnClick",
+                            "on_click_callback_lua": "RestartButton_OnClick",
                             "pressed_color": -5592406,
                             "state": 0
                         },
