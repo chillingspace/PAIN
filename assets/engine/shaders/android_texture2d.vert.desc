@@ -4,10 +4,10 @@
     "type": "Shader"
   },
   "build_data": {
-    "hash": 10220754470876645442
+    "hash": 3962151587910562466
   },
   "descriptor_version": 1,
-  "guid": "63d34c4b-6847-324c-8470-30196b67331d",
+  "guid": "e29a4e93-0e3e-ef45-90ca-9ce3c0e53fb9",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_texture2d.vert"

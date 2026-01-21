@@ -4,10 +4,10 @@
     "type": "Shader"
   },
   "build_data": {
-    "hash": 7751206606218636594
+    "hash": 13212737224192442523
   },
   "descriptor_version": 1,
-  "guid": "3271387d-704a-074b-b0e9-b644ae09c07c",
+  "guid": "d206546c-3b9d-7443-8462-9d729158b5d7",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\geometry.frag"

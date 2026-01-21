@@ -40,7 +40,7 @@ namespace PAIN {
 		int getFramebufferWidth() const { return services->get<Window::Window>()->getFrameBuffer().x; }
 		int getFramebufferHeight() const { return services->get<Window::Window>()->getFrameBuffer().y; }
 
-		void initSceneVbo(const std::vector<ModelRenderer>& models) { w_renderer->initSceneVbo(models); }
+		void initSceneVbo() { w_renderer->initSceneVbo(); }
 
 		void setScene(std::shared_ptr<Scene::SceneManager> scn) { m_Scene = scn; }
 

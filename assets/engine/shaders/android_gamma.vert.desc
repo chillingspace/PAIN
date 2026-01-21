@@ -4,10 +4,10 @@
     "type": "Shader"
   },
   "build_data": {
-    "hash": 9754739447987181452
+    "hash": 5477650024012556561
   },
   "descriptor_version": 1,
-  "guid": "240193c1-8d67-9d49-90be-9258c88659d1",
+  "guid": "62efc2d9-32e2-ec4d-90ba-2ee210e2fa17",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_gamma.vert"

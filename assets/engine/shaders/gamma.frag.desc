@@ -4,10 +4,10 @@
     "type": "Shader"
   },
   "build_data": {
-    "hash": 16103175080570290649
+    "hash": 10525063925384860127
   },
   "descriptor_version": 1,
-  "guid": "475915ed-d570-8f4a-b03d-895c09738fae",
+  "guid": "0cfe6a08-93e3-5a4b-a734-0cd874155c20",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\gamma.frag"

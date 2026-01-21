@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "AnimatedCube.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16744996819716434781
+  },
+  "descriptor_version": 1,
+  "guid": "c5f73e52-ee93-384e-9a95-f5d8dd266897",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\animatedcube\\AnimatedCube.material"
+  }
+}

@@ -4,10 +4,10 @@
     "type": "Shader"
   },
   "build_data": {
-    "hash": 1259955305141729358
+    "hash": 1257230923435633932
   },
   "descriptor_version": 1,
-  "guid": "08ce3705-e3db-1a42-a2b6-f7c1ab7e8e7f",
+  "guid": "099bc6ae-eb83-d14e-9d3d-7dd73c32f554",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_shadow.vert"

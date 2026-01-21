@@ -23,6 +23,7 @@ namespace PAIN {
 
 	};
 
+	void LogMemoryFullDiagnostic(const char* label);
 }
 
 

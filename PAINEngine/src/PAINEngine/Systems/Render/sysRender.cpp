@@ -35,6 +35,9 @@ namespace PAIN {
             //Set prev GUID
             component.prevModelGUID = component.modelGUID;
 
+            //Initiate scene VBO update
+            services.lock()->get<sRenderer>()->initSceneVbo();
+
             //Boolean for checking for material updates
             bool material_updates = false;
             if (component.cachedModelAsset || component.materials.empty()) material_updates = true;
@@ -89,6 +92,80 @@ namespace PAIN {
                     component.materials.push_back(std::move(matInstance));
                 }
 
+            }
+
+            // ========================================
+            // PERFORMANCE OPTIMIZATION: Cache Texture Handles
+            // ========================================
+            // Cache GL texture handles to avoid AssetManager lookups every frame in DrawGeometry
+            component.submeshCaches.clear();
+            component.submeshCaches.resize(modelAsset->submeshes.size());
+
+            for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
+                const auto& submesh = modelAsset->submeshes[i];
+
+                if (submesh.materialIndex >= component.materials.size()) {
+                    continue;
+                }
+
+                auto& cache = component.submeshCaches[i];
+                MaterialInstance* material = &component.materials[submesh.materialIndex];
+
+                // Look up material asset once
+                auto materialAssetOpt = assetManager->getAsset<Assets::Material>(material->materialGUID);
+                auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+                if (materialAsset) {
+                    // Cache base material properties
+                    cache.baseColor = material->useOverrides ? material->baseColorOverride : materialAsset->baseColor;
+                    cache.metallic = material->useOverrides ? material->metallicOverride : materialAsset->metallic;
+                    cache.roughness = material->useOverrides ? material->roughnessOverride : materialAsset->roughness;
+
+                    // Helper lambda to get GL texture handle from GUID
+                    auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
+                        if (!guid.IsValid()) return 0;
+                        auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
+                        return (texOpt.has_value() && texOpt.value()) ? texOpt.value()->gl_texture : 0;
+                    };
+
+                    // Cache all texture handles (look up ONCE during initialization)
+                    cache.albedoTexture = getTextureHandle(
+                        material->useOverrides ? material->albedoTextureOverride :
+                        assetManager->findGUID(materialAsset->albedoTexturePath)
+                    );
+
+                    cache.normalTexture = getTextureHandle(
+                        material->useOverrides ? material->normalTextureOverride :
+                        assetManager->findGUID(materialAsset->normalTexturePath)
+                    );
+
+                    cache.metallicTexture = getTextureHandle(
+                        material->useOverrides ? material->metallicTextureOverride :
+                        assetManager->findGUID(materialAsset->metallicTexturePath)
+                    );
+
+                    cache.roughnessTexture = getTextureHandle(
+                        material->useOverrides ? material->roughnessTextureOverride :
+                        assetManager->findGUID(materialAsset->roughnessTexturePath)
+                    );
+
+                    cache.aoTexture = getTextureHandle(
+                        material->useOverrides ? material->aoTextureOverride :
+                        assetManager->findGUID(materialAsset->aoTexturePath)
+                    );
+
+                    cache.emissiveTexture = getTextureHandle(
+                        material->useOverrides ? material->emissiveTextureOverride :
+                        assetManager->findGUID(materialAsset->emissiveTexturePath)
+                    );
+
+                    cache.opacityTexture = getTextureHandle(
+                        material->useOverrides ? material->opacityTextureOverride :
+                        assetManager->findGUID(materialAsset->opacityTexturePath)
+                    );
+
+                    cache.cacheValid = true;
+                }
             }
 
             // Initialize bone transforms if animated

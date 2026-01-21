@@ -38,10 +38,6 @@ namespace PAIN {
 
 		public:
 
-			//static GLFWwindow* getWindow() {
-			//	return ptr_window;
-			//}
-
 			//Constructors & Destructors
 			GLFW_Window(Package const& package);
 			~GLFW_Window() override;	

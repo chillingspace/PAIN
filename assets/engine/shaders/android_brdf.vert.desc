@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_brdf.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 11361698230115329134
+  },
+  "descriptor_version": 1,
+  "guid": "322c7a93-7cc4-a244-bbea-0763ab26b00b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_brdf.vert"
+  }
+}
