@@ -3712,6 +3712,77 @@
                                 ]
                             }
                         },
+                        "CompoundCollider": {
+                            "shapes": [
+                                {
+                                    "boxHalfExtents": [
+                                        200.0,
+                                        6.800000190734863,
+                                        100.0
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        6.800000190734863,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                },
+                                {
+                                    "boxHalfExtents": [
+                                        200.0,
+                                        38.5,
+                                        5.0
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        45.29999923706055,
+                                        -95.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                },
+                                {
+                                    "boxHalfExtents": [
+                                        200.0,
+                                        38.5,
+                                        5.0
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        45.29999923706055,
+                                        95.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                }
+                            ],
+                            "useCompoundCollider": true
+                        },
                         "GUID": {
                             "guid": "9f07ccba-f14e-434b-a15f-e36eeb02c6ef"
                         },
@@ -3804,6 +3875,77 @@
                                             -6.638830184936523
                                         ]
                                     }
+                                },
+                                "CompoundCollider": {
+                                    "shapes": [
+                                        {
+                                            "boxHalfExtents": [
+                                                200.0,
+                                                6.800000190734863,
+                                                100.0
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                6.800000190734863,
+                                                0.0
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        },
+                                        {
+                                            "boxHalfExtents": [
+                                                200.0,
+                                                38.5,
+                                                5.0
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                45.29999923706055,
+                                                -95.0
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        },
+                                        {
+                                            "boxHalfExtents": [
+                                                200.0,
+                                                38.5,
+                                                5.0
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                45.29999923706055,
+                                                95.0
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        }
+                                    ],
+                                    "useCompoundCollider": true
                                 },
                                 "Hierarchy": {
                                     "childrenGUIDs": [],

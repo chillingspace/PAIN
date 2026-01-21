@@ -1,47 +1,3 @@
-/*****************************************************************/ /**
-                                                                     * \file
-                                                                     * cCompoundCollider.h
-                                                                     * \brief
-                                                                     * Compound
-                                                                     * collider
-                                                                     * component
-                                                                     * for
-                                                                     * custom
-                                                                     * multi-shape
-                                                                     * collision
-                                                                     *
-                                                                     * \date
-                                                                     * January
-                                                                     * 2026 All
-                                                                     * content
-                                                                     * DigiPen
-                                                                     * Institute
-                                                                     * of
-                                                                     * Technology
-                                                                     * Singapore,
-                                                                     * all
-                                                                     * rights
-                                                                     * reserved.
-                                                                     *
-                                                                     * NOTE:
-                                                                     * This
-                                                                     * header is
-                                                                     * designed
-                                                                     * to be
-                                                                     * included
-                                                                     * AFTER
-                                                                     * pch.h
-                                                                     * processing.
-                                                                     *       Do
-                                                                     * NOT add
-                                                                     * this to
-                                                                     * Core.h -
-                                                                     * include
-                                                                     * it in
-                                                                     * AllComponents.h
-                                                                     * instead.
-                                                                     *********************************************************************/
-
 #pragma once
 
 #ifndef C_COMPOUND_COLLIDER_H
@@ -52,7 +8,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
-
 
 namespace PAIN {
 

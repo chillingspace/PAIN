@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "PrefabEditing.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 4764754236463882679
+  },
+  "descriptor_version": 1,
+  "guid": "32ce2b6c-681e-4945-ae0c-ac6a6f183350",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\PrefabEditing.scn"
+  }
+}

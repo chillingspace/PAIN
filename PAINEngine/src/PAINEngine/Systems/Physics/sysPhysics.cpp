@@ -1,40 +1,12 @@
-﻿/*****************************************************************/ /**
-                                                                     * \file
-                                                                     * sysPhysics.cpp
-                                                                     * \brief
-                                                                     * Definition
-                                                                     * of
-                                                                     * physics
-                                                                     * system
-                                                                     * states
-                                                                     *
-                                                                     * \author
-                                                                     * Bryan
-                                                                     * Lim,
-                                                                     * 2301214,
-                                                                     * bryanlicheng.l@digipen.edu
-                                                                     * (5%)
-                                                                     * \co-author
-                                                                     * Ong Jun
-                                                                     * Han,
-                                                                     * Benjamin,
-                                                                     * 2301532,
-                                                                     * o.junhanbenjamin@digipen.edu
-                                                                     * (95%)
-                                                                     * \date
-                                                                     * September
-                                                                     * 2025 All
-                                                                     * content �
-                                                                     * 2025
-                                                                     * DigiPen
-                                                                     * Institute
-                                                                     * of
-                                                                     * Technology
-                                                                     * Singapore,
-                                                                     * all
-                                                                     * rights
-                                                                     * reserved.
-                                                                     *********************************************************************/
+﻿/*****************************************************************//**
+ * \file   sysPhysics.cpp
+ * \brief  Definition of physics system states
+ *
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (5%)
+ * \co-author Ong Jun Han, Benjamin, 2301532, o.junhanbenjamin@digipen.edu (95%)
+ * \date   September 2025
+ * All content � 2025 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
 
 #include "sysPhysics.h"
 #include "ECS/Controller.h"

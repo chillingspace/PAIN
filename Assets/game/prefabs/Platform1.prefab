@@ -118,6 +118,38 @@
                         0.0,
                         0.0
                     ]
+                },
+                "CompoundCollider": {
+                    "useCompoundCollider": true,
+                    "shapes": [
+                        {
+                            "type": 0,
+                            "offset": [0.0, 6.8, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "boxHalfExtents": [200.0, 6.8, 100.0],
+                            "sphereRadius": 0.5,
+                            "capsuleRadius": 0.25,
+                            "capsuleHalfHeight": 0.5
+                        },
+                        {
+                            "type": 0,
+                            "offset": [0.0, 45.3, -95.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "boxHalfExtents": [200.0, 38.5, 5.0],
+                            "sphereRadius": 0.5,
+                            "capsuleRadius": 0.25,
+                            "capsuleHalfHeight": 0.5
+                        },
+                        {
+                            "type": 0,
+                            "offset": [0.0, 45.3, 95.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "boxHalfExtents": [200.0, 38.5, 5.0],
+                            "sphereRadius": 0.5,
+                            "capsuleRadius": 0.25,
+                            "capsuleHalfHeight": 0.5
+                        }
+                    ]
                 }
             },
             "entityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
