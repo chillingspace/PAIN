@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "back sprite_sheet.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4552670094437729713
+  },
+  "descriptor_version": 1,
+  "guid": "73ea63fd-0085-db41-aded-621f0552c524",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\back sprite_sheet.png"
+  }
+}
