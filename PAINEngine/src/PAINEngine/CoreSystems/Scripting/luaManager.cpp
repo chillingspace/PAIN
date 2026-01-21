@@ -203,21 +203,7 @@ namespace PAIN {
 
     void LuaManager::onDetach() {
         // clear script environments, timers, and callback vectors
-        updates_.clear();
-        keyDown_.clear();
-        keyUp_.clear();
-        onClick_.clear();
-        onCollision_.clear();
-        pauseHandlers_.clear();
-        timeouts_.clear();
-
-        inputQueue_.clear();
-        collisionQueue_.clear();
-        mouseInOut_.clear();
-        collisionInterests_.clear();
-        delayedOps_.clear();
-        while (!timeoutHeap_.empty()) timeoutHeap_.pop();
-        pendingSceneChange_.reset();
+        resetForSceneReload();
 
         api_.reset();
 
