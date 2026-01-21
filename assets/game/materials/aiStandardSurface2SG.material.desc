@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "aiStandardSurface2SG.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 6361441181414400984
+  },
+  "descriptor_version": 1,
+  "guid": "f59cb348-a265-d247-a92e-b77b18e1acef",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\aiStandardSurface2SG.material"
+  }
+}
