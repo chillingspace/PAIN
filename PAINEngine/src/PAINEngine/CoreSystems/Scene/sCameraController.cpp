@@ -363,6 +363,15 @@ namespace PAIN {
         // ===== CAMERA CONTROLS: Active in Release OR when Editor is hidden in Debug =====
         if (!editorIsVisible) {
             dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
+
+                if (e.getKeyCode() == PAIN_KEY_Q && LCTRL_KEYDOWN) {
+                    PN_CORE_INFO("Ctrl+Q pressed - Quitting application");
+                    // Access application through services if available
+                    // OR set a quit flag in your application
+                    g_shouldQuitApplication = true; // If you have this global flag
+                    return true; // Event handled
+                }
+
                 switch (e.getKeyCode()) {
                 case PAIN_KEY_W:
                     W_KEYDOWN = true;
