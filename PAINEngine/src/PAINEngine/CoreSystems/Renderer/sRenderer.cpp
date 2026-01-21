@@ -65,27 +65,26 @@ namespace PAIN {
 			//w_renderer->Cleanup();
 			//w_renderer->Init(services);
 
-			//Create event dispatcher
-			Event::Dispatcher dispatcher(e);
+			//auto ecs = services->get<ECS::Controller>();
+			auto window_sys = services->get<Window::Window>();
+			void* void_p_window = window_sys->getNativeWindow();
 
-			//Dispatch window resized event
-			dispatcher.Dispatch<Event::WindowResized>([&](Event::WindowResized& e) -> bool {
+			if (void_p_window) {
+				GLFWwindow* p_window = reinterpret_cast<GLFWwindow*>(void_p_window);
 
-				//Update frame buffer size
-				WindowsRenderer::winWidth = e.getFrameBuffer().x;
-				WindowsRenderer::winHeight = e.getFrameBuffer().y;
+				glfwGetWindowSize(p_window, &WindowsRenderer::winWidth, &WindowsRenderer::winHeight);
 
-				//Clean up renderer and init again
 				w_renderer->Cleanup();
 				w_renderer->Init(services);
 
 				if (!GS.use_instanced_rendering) {
 					w_renderer->initSceneVbo();
 				}
-
-				//Return false: continue dispatching, true = stop dispatching 
-				return false;
-				});
+			}
+			else {
+				PN_CORE_ERROR("Cannot get wwindow pointer on window resize in sRender::onEvent!");
+				throw std::runtime_error("");
+			}
 
 		}
 #endif

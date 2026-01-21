@@ -633,7 +633,7 @@ namespace PAIN {
                 auto font_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
                 if (!font_opt.has_value()) continue;
 
-                PN_CORE_INFO("[Render System] Rendering Font: {}", font_opt.value()->name);
+                //PN_CORE_INFO("[Render System] Rendering Font: {}", font_opt.value()->name);
 
                 text_comp.text_pos = rect_comp.calculated_world_position;
                 text_comp.scale_factor = rect_comp.scale.x;

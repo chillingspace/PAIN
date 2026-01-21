@@ -2,7 +2,7 @@
  * \file   sysUILayout.h
  * \brief  Declaration of UI layout system
  *
- * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \author Bryan Lim, 2301214, [bryanlicheng.l@digipen.edu](mailto:bryanlicheng.l@digipen.edu) (100%)
  * \co-author
  * \date   September 2025
  * All content 2025 DigiPen Institute of Technology Singapore, all rights reserved.
@@ -61,59 +61,61 @@ namespace PAIN {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
                     m_mouse_position = convertToCenterOrigin(e.getWindowPos());
-                    
-                    // Handle joystick drag
+
+                    // Handle joystick drag - ONLY if entity has UIJoystick component
                     if (m_pressed_entity != entt::null) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        
-                        if (registry.valid(m_pressed_entity) && 
-                            registry.all_of<Texture2D, UIButton>(m_pressed_entity)) {
-                            
+
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<Texture2D, UIButton, UIJoystick>(m_pressed_entity)) {
+
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+
                             glm::vec2 normalized_mouse = normalizeScreenPosition(m_mouse_position);
-                            glm::vec2 drag_offset = normalized_mouse - m_joystick_center;
+                            glm::vec2 drag_offset = normalized_mouse - joystick.center_position;
                             float distance = glm::length(drag_offset);
-                            
-                            // Start drag if moved beyond small threshold
+
+                            // Start drag if moved beyond threshold
                             const float drag_threshold = 0.01f;
-                            if (distance > drag_threshold && m_dragging_joystick == entt::null) {
-                                m_dragging_joystick = m_pressed_entity;
+                            if (distance > drag_threshold && !joystick.is_dragging) {
+                                joystick.is_dragging = true;
                             }
-                            
+
                             // If dragging, update position and call callback
-                            if (m_dragging_joystick == m_pressed_entity) {
+                            if (joystick.is_dragging) {
                                 // Clamp to max radius
-                                if (distance > m_joystick_max_radius) {
-                                    drag_offset = glm::normalize(drag_offset) * m_joystick_max_radius;
-                                    distance = m_joystick_max_radius;
+                                if (distance > joystick.max_radius) {
+                                    drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
+                                    distance = joystick.max_radius;
                                 }
-                                
+
                                 // Update joystick visual position
-                                auto& tex = registry.get<Texture2D>(m_dragging_joystick);
-                                tex.pos = m_joystick_center + drag_offset;
-                                
-                                // Calculate normalized direction (-1 to 1 range based on max radius)
+                                tex.pos = joystick.center_position + drag_offset;
+
+                                // Calculate normalized direction (-1 to 1 range)
                                 glm::vec2 direction(0.f, 0.f);
                                 if (distance > 0.001f) {
-                                    direction = drag_offset / m_joystick_max_radius;
+                                    direction = drag_offset / joystick.max_radius;
                                 }
-                                
+
                                 // Call Lua callback with direction
-                                auto& button = registry.get<UIButton>(m_dragging_joystick);
+                                auto& button = registry.get<UIButton>(m_pressed_entity);
                                 if (!button.on_click_callback_lua.empty()) {
                                     auto& ctx = registry.ctx();
                                     if (ctx.contains<LuaManager*>()) {
                                         auto& luaMgr = ctx.get<LuaManager*>();
                                         if (luaMgr) {
-                                            luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 
-                                                                       direction.x, direction.y);
+                                            luaMgr->callGlobalWithVec2(button.on_click_callback_lua,
+                                                direction.x, direction.y);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    
+
                     return false;
                     });
             }
@@ -139,18 +141,16 @@ namespace PAIN {
                         m_pressed_entity = m_hovered_entity;
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        
-                        // Store center position in case this becomes a joystick drag
-                        if (registry.all_of<UIButton, Texture2D>(m_pressed_entity)) {
-                            auto& button = registry.get<UIButton>(m_pressed_entity);
-                            if (!button.on_click_callback_lua.empty()) {
-                                auto& tex = registry.get<Texture2D>(m_pressed_entity);
-                                m_joystick_center = tex.pos;
-                            }
+
+                        // ✅ Store center position ONLY if this is a joystick
+                        if (registry.all_of<UIButton, Texture2D, UIJoystick>(m_pressed_entity)) {
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+                            joystick.center_position = tex.pos;
+                            joystick.is_dragging = false;
                         }
-                        
+
                         updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
-                        // DEBUG: log which entity we pressed on
                         PN_CORE_INFO("[UIInput] MouseDown on UI entity id = {}",
                             static_cast<uint32_t>(m_pressed_entity));
 
@@ -169,37 +169,42 @@ namespace PAIN {
                     if (m_pressed_entity != entt::null) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        
-                        bool was_dragging = (m_dragging_joystick != entt::null);
 
-                        // If was dragging, reset joystick and send zero direction
-                        if (was_dragging && registry.valid(m_dragging_joystick) &&
-                            registry.all_of<Texture2D, UIButton>(m_dragging_joystick)) {
-                            
-                            // Reset joystick to center
-                            auto& tex = registry.get<Texture2D>(m_dragging_joystick);
-                            tex.pos = m_joystick_center;
-                            
-                            // Notify Lua that movement stopped
-                            auto& button = registry.get<UIButton>(m_dragging_joystick);
-                            if (!button.on_click_callback_lua.empty()) {
-                                auto& ctx = registry.ctx();
-                                if (ctx.contains<LuaManager*>()) {
-                                    auto& luaMgr = ctx.get<LuaManager*>();
-                                    if (luaMgr) {
-                                        luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
+                        bool was_joystick_drag = false;
+
+                        // If this was a joystick, reset it
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<UIJoystick, Texture2D, UIButton>(m_pressed_entity)) {
+
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            was_joystick_drag = joystick.is_dragging;
+
+                            if (was_joystick_drag) {
+                                // Reset joystick to center
+                                auto& tex = registry.get<Texture2D>(m_pressed_entity);
+                                tex.pos = joystick.center_position;
+
+                                // Notify Lua that movement stopped
+                                auto& button = registry.get<UIButton>(m_pressed_entity);
+                                if (!button.on_click_callback_lua.empty()) {
+                                    auto& ctx = registry.ctx();
+                                    if (ctx.contains<LuaManager*>()) {
+                                        auto& luaMgr = ctx.get<LuaManager*>();
+                                        if (luaMgr) {
+                                            luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
+                                        }
                                     }
                                 }
+
+                                joystick.is_dragging = false;
                             }
-                            
-                            m_dragging_joystick = entt::null;
                         }
-                        // If NOT dragging, treat as normal click (existing behavior)
-                        else if (m_pressed_entity == m_hovered_entity &&
-                                 registry.all_of<UIButton>(m_pressed_entity)) {
+
+                        // If NOT a joystick drag, treat as normal button click
+                        if (!was_joystick_drag && m_pressed_entity == m_hovered_entity &&
+                            registry.all_of<UIButton>(m_pressed_entity)) {
                             auto& button = registry.get<UIButton>(m_pressed_entity);
 
-                            // DEBUG:
                             PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
                                 static_cast<uint32_t>(m_pressed_entity),
                                 static_cast<uint32_t>(m_hovered_entity),
@@ -235,70 +240,78 @@ namespace PAIN {
                 dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
                     glm::vec2 raw_touch(e.getX(), e.getY());
                     m_mouse_position = convertToCenterOrigin(raw_touch);
-                    
-                    // Handle joystick drag ONLY for the correct pointer ID
-                    if (m_dragging_joystick != entt::null && e.getPointerId() == m_joystick_pointer_id) {
-                         auto ecs = services.lock()->get<ECS::Controller>();
-                         auto& registry = ecs->getRegistry();
-                         
-                         if (registry.valid(m_dragging_joystick) && registry.all_of<Texture2D, UIButton>(m_dragging_joystick)) {
-                             glm::vec2 normalized_touch = normalizeScreenPosition(m_mouse_position);
-                             glm::vec2 drag_offset = normalized_touch - m_joystick_center;
-                             float distance = glm::length(drag_offset);
-                             
-                             // Clamp to max radius
-                             if (distance > m_joystick_max_radius) {
-                                  drag_offset = glm::normalize(drag_offset) * m_joystick_max_radius;
-                                  distance = m_joystick_max_radius;
-                             }
-                             
-                             // Update joystick visual position
-                             auto& tex = registry.get<Texture2D>(m_dragging_joystick);
-                             tex.pos = m_joystick_center + drag_offset;
-                             
-                             // Calculate normalized direction
-                             glm::vec2 direction(0.f, 0.f);
-                             if (distance > 0.001f) {
-                                  direction = drag_offset / m_joystick_max_radius;
-                             }
-                             
-                             // Call Lua callback
-                             auto& button = registry.get<UIButton>(m_dragging_joystick);
-                             if (!button.on_click_callback_lua.empty()) {
-                                  auto& ctx = registry.ctx();
-                                  if (ctx.contains<LuaManager*>()) {
-                                      auto& luaMgr = ctx.get<LuaManager*>();
-                                      if (luaMgr) {
-                                          luaMgr->callGlobalWithVec2(button.on_click_callback_lua, direction.x, direction.y);
-                                      }
-                                  }
-                             }
-                        }
-                        return true; // Consume event if joystick handled it
-                    }
-                    
-                    // If not joystick drag, check if we need to START dragging
-                    if (m_pressed_entity != entt::null && m_dragging_joystick == entt::null) {
+
+                    // Handle joystick drag ONLY for correct pointer ID and UIJoystick component
+                    if (m_pressed_entity != entt::null && e.getPointerId() == m_joystick_pointer_id) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        
-                        if (registry.valid(m_pressed_entity) && registry.all_of<Texture2D, UIButton>(m_pressed_entity)) {
+
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<Texture2D, UIButton, UIJoystick>(m_pressed_entity)) {
+
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+
+                            // Check if already dragging
+                            if (joystick.is_dragging) {
+                                auto& tex = registry.get<Texture2D>(m_pressed_entity);
+
+                                glm::vec2 normalized_touch = normalizeScreenPosition(m_mouse_position);
+                                glm::vec2 drag_offset = normalized_touch - joystick.center_position;
+                                float distance = glm::length(drag_offset);
+
+                                // Clamp to max radius
+                                if (distance > joystick.max_radius) {
+                                    drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
+                                    distance = joystick.max_radius;
+                                }
+
+                                // Update joystick visual position
+                                tex.pos = joystick.center_position + drag_offset;
+
+                                // Calculate normalized direction
+                                glm::vec2 direction(0.f, 0.f);
+                                if (distance > 0.001f) {
+                                    direction = drag_offset / joystick.max_radius;
+                                }
+
+                                // Call Lua callback
+                                auto& button = registry.get<UIButton>(m_pressed_entity);
+                                if (!button.on_click_callback_lua.empty()) {
+                                    auto& ctx = registry.ctx();
+                                    if (ctx.contains<LuaManager*>()) {
+                                        auto& luaMgr = ctx.get<LuaManager*>();
+                                        if (luaMgr) {
+                                            luaMgr->callGlobalWithVec2(button.on_click_callback_lua, direction.x, direction.y);
+                                        }
+                                    }
+                                }
+                                return true;
+                            }
+                        }
+                    }
+
+                    // Check if we need to START dragging (only for joysticks)
+                    if (m_pressed_entity != entt::null && m_joystick_pointer_id == -1) {
+                        auto ecs = services.lock()->get<ECS::Controller>();
+                        auto& registry = ecs->getRegistry();
+
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<Texture2D, UIButton, UIJoystick>(m_pressed_entity)) {
+
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+
                             glm::vec2 normalized_touch = normalizeScreenPosition(m_mouse_position);
-                            glm::vec2 drag_offset = normalized_touch - m_joystick_center;
+                            glm::vec2 drag_offset = normalized_touch - joystick.center_position;
                             float distance = glm::length(drag_offset);
-                            
+
                             const float drag_threshold = 0.01f;
-                            // NOTE: We don't check pointer ID strictly on start because m_pressed_entity is global,
-                            // but once it starts, we MUST lock the ID.
-                            // Ideally we check if this touch event corresponds to the press.
-                            // For simplicity, if we start dragging, we lock THIS event's pointer ID.
-                            if (distance > drag_threshold) {
-                                m_dragging_joystick = m_pressed_entity;
+                            if (distance > drag_threshold && !joystick.is_dragging) {
+                                joystick.is_dragging = true;
                                 m_joystick_pointer_id = e.getPointerId(); // LOCK POINTER ID
                             }
                         }
                     }
-                    
+
                     return false;
                     });
             }
@@ -315,20 +328,15 @@ namespace PAIN {
                         PN_CORE_INFO("hit detected id={}", e.getPointerId());
                         m_hovered_entity = hit_entity.value();
                         m_pressed_entity = m_hovered_entity;
-                        
-                        // Store center position in case this becomes a joystick drag
-                        if (registry.all_of<UIButton, Texture2D>(m_pressed_entity)) {
-                            auto& button = registry.get<UIButton>(m_pressed_entity);
-                            if (!button.on_click_callback_lua.empty()) {
-                                auto& tex = registry.get<Texture2D>(m_pressed_entity);
-                                
-                                // Reset behavior: If we touch another button, m_joystick_center might get overwritten
-                                if (m_dragging_joystick == entt::null) {
-                                     m_joystick_center = tex.pos;
-                                }
-                            }
+
+                        // Store center position ONLY if this is a joystick
+                        if (registry.all_of<UIButton, Texture2D, UIJoystick>(m_pressed_entity)) {
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+                            joystick.center_position = tex.pos;
+                            joystick.is_dragging = false;
                         }
-                        
+
                         updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
                         return true;
                     }
@@ -339,53 +347,59 @@ namespace PAIN {
             if (event.getType() == Event::Type::TouchUp) {
                 Event::Dispatcher dispatcher(event);
                 dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
-                    // Check if this touch up corresponds to the joystick being dragged
-                    if (m_dragging_joystick != entt::null && e.getPointerId() == m_joystick_pointer_id) {
-                         auto ecs = services.lock()->get<ECS::Controller>();
-                         auto& registry = ecs->getRegistry();
-                         
-                         if (registry.valid(m_dragging_joystick) && registry.all_of<Texture2D, UIButton>(m_dragging_joystick)) {
-                              // Reset joystick to center
-                              auto& tex = registry.get<Texture2D>(m_dragging_joystick);
-                              tex.pos = m_joystick_center;
-                              
-                              // Stop movement
-                              auto& button = registry.get<UIButton>(m_dragging_joystick);
-                              if (!button.on_click_callback_lua.empty()) {
-                                   auto& ctx = registry.ctx();
-                                   if (ctx.contains<LuaManager*>()) {
-                                       auto& luaMgr = ctx.get<LuaManager*>();
-                                       if (luaMgr) {
-                                           luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
-                                       }
-                                   }
-                              }
-                         }
-                         m_dragging_joystick = entt::null;
-                         // Reset pointer ID
-                         m_joystick_pointer_id = -1; 
-                         // Clear pressed entity too if it was this one
-                         m_pressed_entity = entt::null;
-                         return true;
+                    // ✅ Check if this touch up corresponds to a joystick
+                    if (m_pressed_entity != entt::null && e.getPointerId() == m_joystick_pointer_id) {
+                        auto ecs = services.lock()->get<ECS::Controller>();
+                        auto& registry = ecs->getRegistry();
+
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<Texture2D, UIButton, UIJoystick>(m_pressed_entity)) {
+
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+
+                            // Reset joystick to center
+                            tex.pos = joystick.center_position;
+
+                            // Stop movement
+                            auto& button = registry.get<UIButton>(m_pressed_entity);
+                            if (!button.on_click_callback_lua.empty()) {
+                                auto& ctx = registry.ctx();
+                                if (ctx.contains<LuaManager*>()) {
+                                    auto& luaMgr = ctx.get<LuaManager*>();
+                                    if (luaMgr) {
+                                        luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
+                                    }
+                                }
+                            }
+
+                            joystick.is_dragging = false;
+                            m_joystick_pointer_id = -1; // Reset pointer ID
+                            m_pressed_entity = entt::null;
+                            return true;
+                        }
                     }
 
+                    // Normal click logic (non-joystick buttons)
                     if (m_pressed_entity != entt::null) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
                         m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
                         auto hit_entity = raycastUI(m_mouse_position, registry);
 
-                        // Normal click logic
                         if (hit_entity.has_value() && hit_entity.value() == m_pressed_entity &&
                             registry.all_of<UIButton>(m_pressed_entity)) {
-                            PN_CORE_INFO("hit detected up");
-                            auto& button = registry.get<UIButton>(m_pressed_entity);
-                            if (!button.on_click_callback_lua.empty()) {
-                                auto& ctx = registry.ctx();
-                                if (ctx.contains<LuaManager*>()) {
-                                    auto& luaMgr = ctx.get<LuaManager*>();
-                                    // Make sure this is a CLICK, not a joystick 
-                                    if (luaMgr) luaMgr->callGlobal(button.on_click_callback_lua);
+
+                            // Only trigger click if NOT a joystick
+                            if (!registry.all_of<UIJoystick>(m_pressed_entity)) {
+                                PN_CORE_INFO("hit detected up");
+                                auto& button = registry.get<UIButton>(m_pressed_entity);
+                                if (!button.on_click_callback_lua.empty()) {
+                                    auto& ctx = registry.ctx();
+                                    if (ctx.contains<LuaManager*>()) {
+                                        auto& luaMgr = ctx.get<LuaManager*>();
+                                        if (luaMgr) luaMgr->callGlobal(button.on_click_callback_lua);
+                                    }
                                 }
                             }
                         }
@@ -407,18 +421,20 @@ namespace PAIN {
                     if (m_pressed_entity != entt::null) {
                         auto ecs = services.lock()->get<ECS::Controller>();
                         auto& registry = ecs->getRegistry();
-                        
+
                         // Reset joystick if was dragging
-                        if (m_dragging_joystick != entt::null && registry.valid(m_dragging_joystick) &&
-                            registry.all_of<Texture2D>(m_dragging_joystick)) {
-                            auto& tex = registry.get<Texture2D>(m_dragging_joystick);
-                            tex.pos = m_joystick_center;
-                            m_dragging_joystick = entt::null;
+                        if (registry.valid(m_pressed_entity) &&
+                            registry.all_of<Texture2D, UIJoystick>(m_pressed_entity)) {
+                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+                            tex.pos = joystick.center_position;
+                            joystick.is_dragging = false;
                         }
-                        
+
                         updateButtonState(m_pressed_entity, registry, UIButtonState::Normal);
                         m_pressed_entity = entt::null;
                         m_hovered_entity = entt::null;
+                        m_joystick_pointer_id = -1;
                         return true;
                     }
                     return false;
@@ -439,9 +455,6 @@ namespace PAIN {
             // Query all UI elements with Texture2D (the actual rendered texture holds position)
             auto view = registry.view<Texture2D, UIElement, UIRectTransform>();
 
-            //PN_CORE_INFO("[UIInput] Raycast mouse_pos = ({:.3f}, {:.3f}) (normalized)",
-            //    normalized_mouse.x, normalized_mouse.y);
-
             std::vector<std::tuple<entt::entity, int, int>> candidates;
 
             for (auto [entity, tex, element, rect] : view.each()) {
@@ -450,36 +463,11 @@ namespace PAIN {
                 // Actual rendered size = base size * scale multiplier
                 glm::vec2 actual_pixel_size = rect.size_delta * tex.texture_scale;
 
-                //PN_CORE_INFO("[UIInput]   size_delta=({:.1f}, {:.1f}) texture_scale=({:.3f}, {:.3f}) actual_pixel_size=({:.1f}, {:.1f})",
-                //    rect.size_delta.x, rect.size_delta.y,
-                //    tex.texture_scale.x, tex.texture_scale.y,
-                //    actual_pixel_size.x, actual_pixel_size.y);
-
                 // Convert size to normalized space
                 glm::vec2 normalized_size = normalizeSize(actual_pixel_size);
 
-                //PN_CORE_INFO("[UIInput] AFTER normalizeSize: normalized_size=({:.3f}, {:.3f})",
-                //    normalized_size.x, normalized_size.y);
-                // 
-                //PN_CORE_INFO("[UIInput] half_size=({:.3f}, {:.3f})", half_size.x, half_size.y);
-                //PN_CORE_INFO("[UIInput] tex.pos=({:.3f}, {:.3f})", tex.pos.x, tex.pos.y);
-                glm::vec2 rect_min = tex.pos - normalized_size;  
-                glm::vec2 rect_max = tex.pos + normalized_size;  
-                //PN_CORE_INFO("[UIInput] FINAL rect_min=({:.3f}, {:.3f}) rect_max=({:.3f}, {:.3f})",
-                //    rect_min.x, rect_min.y, rect_max.x, rect_max.y);
-
-                // DEBUG: Log every UI element being tested
-                //PN_CORE_INFO("[UIInput]   Entity {:08X}: enabled={} interactable={} rect_min=({:.1f}, {:.1f}) rect_max=({:.1f}, {:.1f})",
-                //    static_cast<uint32_t>(entity),
-                //    element.b_is_enabled,
-                //    element.b_is_interactable,
-                //    rect_min.x, rect_min.y,
-                //    rect_max.x, rect_max.y);
-
-                //PN_CORE_INFO("[UIInput]   mouse=({:.3f}, {:.3f}) in_x={} in_y={}",
-                //    normalized_mouse.x, normalized_mouse.y,
-                //    (normalized_mouse.x >= rect_min.x && normalized_mouse.x <= rect_max.x),
-                //    (normalized_mouse.y >= rect_min.y && normalized_mouse.y <= rect_max.y))
+                glm::vec2 rect_min = tex.pos - normalized_size;
+                glm::vec2 rect_max = tex.pos + normalized_size;
 
                 if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 

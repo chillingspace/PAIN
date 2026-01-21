@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "mainmenu.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 9356868452367974339
+  },
+  "descriptor_version": 1,
+  "guid": "6b13a8da-acae-6742-b5dc-7785f1599d70",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\mainmenu.scn"
+  }
+}

@@ -12,9 +12,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            1.547614336013794,
-            1.6414904594421387,
-            3.5284290313720703
+            0.9511768817901611,
+            0.5624738931655884,
+            1.8284335136413574
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 1.5,
@@ -290,6 +290,14 @@
                             "b_is_enabled": true,
                             "b_is_interactable": true,
                             "layer": 0
+                        },
+                        "UIJoystick": {
+                            "center_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "is_dragging": false,
+                            "max_radius": 0.15000000596046448
                         },
                         "UIRectTransform": {
                             "anchor_max": [

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "BigGround.gltf",
+    "name": "WallBlue2.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 15249820761726060259
+    "hash": 1081795124432811603
   },
   "descriptor_version": 1,
-  "guid": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+  "guid": "727c84f2-9736-9548-9f0f-45f80159ae7b",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\BigGround.gltf"
+    "source_file": "game\\models\\WallBlue2.obj"
   }
 }

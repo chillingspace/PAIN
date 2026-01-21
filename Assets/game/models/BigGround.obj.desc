@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "WallRed.obj",
+    "name": "BigGround.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 8540945230090593196
+    "hash": 6097119984151781334
   },
   "descriptor_version": 1,
-  "guid": "b6f4820e-c970-7f47-8ca8-8a98d6750edc",
+  "guid": "7fdce673-38d8-d940-9387-0d37a2a4081c",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\WallRed.obj"
+    "source_file": "game\\models\\BigGround.obj"
   }
 }

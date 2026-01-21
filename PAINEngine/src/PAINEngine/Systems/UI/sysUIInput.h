@@ -2,7 +2,7 @@
  * \file   sysUILayout.h
  * \brief  Declaration of UI layout system
  *
- * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \author Bryan Lim, 2301214, [bryanlicheng.l@digipen.edu](mailto:bryanlicheng.l@digipen.edu) (100%)
  * \co-author
  * \date   September 2025
  * All content 2025 DigiPen Institute of Technology Singapore, all rights reserved.
@@ -37,7 +37,7 @@ namespace PAIN {
                 entt::registry& registry);
             void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
             glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
-            glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos); 
+            glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos);
             glm::vec2 normalizeSize(const glm::vec2& pixel_size);
 
 
@@ -45,10 +45,7 @@ namespace PAIN {
             entt::entity m_pressed_entity = entt::null;
             glm::vec2 m_mouse_position{ -1.f, -1.f };
 
-            // Joystick drag state
-            entt::entity m_dragging_joystick = entt::null;
-            glm::vec2 m_joystick_center{ 0.f, 0.f };
-            float m_joystick_max_radius = 0.15f;
+            // Android multi-touch: track which pointer is controlling the joystick
             int m_joystick_pointer_id = -1;
         };
 

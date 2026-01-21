@@ -28,10 +28,12 @@ namespace PAIN {
 
                 switch (ani_comp.anim_type) {
                 case PAIN::AnimationType::Position:
-                    rect_transform.local_position = glm::mix(ani_comp.start_vec3, ani_comp.end_vec3, t);
+                    rect_transform.local_position.x = glm::mix(ani_comp.start_vec2.x, ani_comp.end_vec2.x, t);
+                    rect_transform.local_position.y = glm::mix(ani_comp.start_vec2.y, ani_comp.end_vec2.y, t);
                     break;
                 case PAIN::AnimationType::Scale:
-                    rect_transform.scale = glm::mix(ani_comp.start_vec3, ani_comp.end_vec3, t);
+                    rect_transform.scale.x = glm::mix(ani_comp.start_vec2.x, ani_comp.end_vec2.x, t);
+                    rect_transform.scale.y = glm::mix(ani_comp.start_vec2.y, ani_comp.end_vec2.y, t);
                     break;
                 case PAIN::AnimationType::Color:
 

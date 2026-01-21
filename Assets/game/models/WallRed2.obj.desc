@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "WallBlue.obj",
+    "name": "WallRed2.obj",
     "type": "Model"
   },
   "build_data": {
-    "hash": 5408408375726936852
+    "hash": 9247351319816664999
   },
   "descriptor_version": 1,
-  "guid": "7012156b-9186-fd48-b274-5dca9eadc1e7",
+  "guid": "55916641-2735-1446-96bf-8fbf12ae9fc4",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\WallBlue.obj"
+    "source_file": "game\\models\\WallRed2.obj"
   }
 }
