@@ -35,6 +35,9 @@ namespace PAIN {
             //Set prev GUID
             component.prevModelGUID = component.modelGUID;
 
+            //Initiate scene VBO update
+            services.lock()->get<sRenderer>()->initSceneVbo();
+
             //Boolean for checking for material updates
             bool material_updates = false;
             if (component.cachedModelAsset || component.materials.empty()) material_updates = true;

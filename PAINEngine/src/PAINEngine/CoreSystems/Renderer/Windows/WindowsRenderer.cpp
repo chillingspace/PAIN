@@ -32,8 +32,15 @@ namespace PAIN {
 		Cleanup();
 	}
 
-	void WindowsRenderer::initSceneVbo(const std::vector<PAIN::ModelRenderer>& models) {
+	void WindowsRenderer::initSceneVbo() {
+
 		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
+
+		//Initialize Buffers
+		PN_CORE_INFO("Initializing New Buffers");
+
+		//Clear buffers before building
+		clearBuffers();
 
 		glBindVertexArray(geometry_vao);
 
@@ -49,28 +56,22 @@ namespace PAIN {
 		std::vector<unsigned int> allIndices;
 		std::unordered_set<std::string> uploaded;
 
+		//Get all models in the current ecs registry
+		auto ecs = services->get<ECS::Controller>();
+		auto& registry = ecs->getRegistry();
+		auto view = registry.view<ModelRenderer>();
+
 		// Collect all unique models and build combined vertex/index buffers
-		for (const auto& mdl : models) {
+		for (auto e : view) {
 
-			//Check for cached model asset
-			if (!mdl.cachedModelAsset) {
+			//Get mdl asset
+			auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+			if (!mdl.has_value()) continue;
 
-				//Try to retrieve model to cache it
-				auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl.modelGUID);
-				if (mdl_opt.has_value()) {
-
-					//Retrieve model and cache it
-					mdl.cachedModelAsset = mdl_opt.value();
-				}
-				else {
-
-					//Skip model
-					continue;
-				}
-			}
-
-			//Set to model asset
-			const auto& modelAsset = mdl.cachedModelAsset;
+			//Retrieve model asset with validation
+			auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl.value().get().modelGUID);
+			if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model) continue;
+			const auto& modelAsset = mdl_opt.value();
 
 			// Skip if already uploaded (deduplicate by model path)
 			if (uploaded.find(modelAsset->vpath) != uploaded.end()) continue;
@@ -131,6 +132,42 @@ namespace PAIN {
 		}
 
 		glBindVertexArray(0);
+
+		//End log
+		PN_CORE_INFO("New buffers initialized!");
+	}
+
+	void WindowsRenderer::clearBuffers() {
+
+		//Log
+		PN_CORE_INFO("Clearing Existing Buffers To Build New Model Buffers");
+
+		// Clear the offset tracking map
+		instanced_offsets.clear();
+
+		// Reset buffers to empty state
+		glBindVertexArray(geometry_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+		glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW); // Free memory
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+
+		// Also clear shadow buffers
+		glBindVertexArray(shadow_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+		glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+
+		// Unbind
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		//Clear buffers
+		PN_CORE_INFO("Buffers cleared.");
 	}
 
 	void WindowsRenderer::initShaders()

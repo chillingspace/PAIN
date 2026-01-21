@@ -78,7 +78,7 @@ namespace PAIN {
 				w_renderer->Init(services);
 
 				if (!GS.use_instanced_rendering) {
-					w_renderer->initSceneVbo({});
+					w_renderer->initSceneVbo();
 				}
 			}
 			else {

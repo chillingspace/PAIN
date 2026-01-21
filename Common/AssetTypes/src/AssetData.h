@@ -59,6 +59,13 @@ namespace PAIN {
             bool operator!=(const GUID& other) const noexcept {
                 return !(*this == other);
             }
+
+            bool operator<(const GUID& other) const noexcept {
+                return std::lexicographical_compare(
+                    std::begin(bytes), std::end(bytes),
+                    std::begin(other.bytes), std::end(other.bytes)
+                );
+            }
         };
 
         //Asset types
