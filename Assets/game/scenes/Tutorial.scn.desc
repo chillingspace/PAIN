@@ -4,10 +4,10 @@
     "type": "Scenes"
   },
   "build_data": {
-    "hash": 500553485721649947
+    "hash": 13050850514267496082
   },
   "descriptor_version": 1,
-  "guid": "273c1c58-b5e9-2440-bce0-93920802bf8d",
+  "guid": "e1012678-4305-a144-94fa-aabd69c29837",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\scenes\\Tutorial.scn"
