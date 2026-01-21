@@ -230,7 +230,7 @@ namespace PAIN {
 
             case 67: return "C";
             case 72: return "H";
-            case 83: return "R";
+            //case 83: return "R";
 
 #endif
 

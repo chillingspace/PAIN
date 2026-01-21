@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "shadow.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 16355999939103502543
+  },
+  "descriptor_version": 1,
+  "guid": "da31d177-23fd-d14e-9621-5f48d2b53b83",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\shadow.frag"
+  }
+}

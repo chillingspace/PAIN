@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "passthrough.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17101581084094057482
+  },
+  "descriptor_version": 1,
+  "guid": "bb072a6c-5ac5-f647-b6f4-b4a7b0cae6e8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\passthrough.frag"
+  }
+}

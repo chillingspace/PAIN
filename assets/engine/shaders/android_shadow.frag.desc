@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_shadow.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 14646905730738188429
+  },
+  "descriptor_version": 1,
+  "guid": "899c066f-1327-554a-a2e9-967d98ae7396",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_shadow.frag"
+  }
+}

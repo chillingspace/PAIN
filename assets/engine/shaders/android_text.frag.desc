@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_text.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17895923432874285383
+  },
+  "descriptor_version": 1,
+  "guid": "d359fd9b-1c9f-8b4d-893e-de0ca940da68",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_text.frag"
+  }
+}

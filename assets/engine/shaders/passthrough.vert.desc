@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "passthrough.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 13476451142640612521
+  },
+  "descriptor_version": 1,
+  "guid": "cd5bf49e-774f-0a4a-a820-f362e7657baf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\passthrough.vert"
+  }
+}

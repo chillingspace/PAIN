@@ -35,71 +35,100 @@ namespace PAIN {
 	void WindowsRenderer::initSceneVbo(const std::vector<PAIN::ModelRenderer>& models) {
 		if (!geometry_vbo) throw std::runtime_error("Init not yet called!");
 
-		//GS.use_instanced_rendering = false;
-
 		glBindVertexArray(geometry_vao);
 
-		if (!GS.use_instanced_rendering) {
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+		// ========================================
+		// UNIFIED GEOMETRY UPLOAD (Instancing-Compatible)
+		// ========================================
+		// Both instanced and non-instanced rendering now upload ALL geometry ONCE
+		// This eliminates per-frame glBufferSubData calls and uses GL_STATIC_DRAW
+		
+		unsigned int vertexOffset = 0;
+		unsigned int indexOffset = 0;
+		std::vector<Assets::Vertex> allVertices;
+		std::vector<unsigned int> allIndices;
+		std::unordered_set<std::string> uploaded;
 
-			glBindVertexArray(shadow_vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
-			glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex), nullptr, GL_DYNAMIC_DRAW);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
-
-			return;
-		}
-
-		unsigned int total_vertices{};
-		unsigned int total_indices{};
-		std::vector<Assets::Vertex> vertices;
-		unsigned int offset{};
-		std::vector<unsigned int> indices;
-		std::unordered_set<std::string> referenced{};
-
-		auto ecs = services->get<ECS::Controller>();
-
+		// Collect all unique models and build combined vertex/index buffers
 		for (const auto& mdl : models) {
-			if (!mdl.cachedModelAsset || referenced.find(mdl.cachedModelAsset->vpath) != referenced.end()) {
-				continue;
+
+			//Check for cached model asset
+			if (!mdl.cachedModelAsset) {
+
+				//Try to retrieve model to cache it
+				auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(mdl.modelGUID);
+				if (mdl_opt.has_value()) {
+
+					//Retrieve model and cache it
+					mdl.cachedModelAsset = mdl_opt.value();
+				}
+				else {
+
+					//Skip model
+					continue;
+				}
 			}
 
-			const auto& m = mdl.cachedModelAsset;
+			//Set to model asset
+			const auto& modelAsset = mdl.cachedModelAsset;
 
-			referenced.insert(m->vpath);
-			total_vertices += m->vertices.size();
-			total_indices += m->indices.size();
-			vertices.insert(vertices.end(), m->vertices.begin(), m->vertices.end());
-			instanced_offsets[m->vpath] = { offset, (unsigned int)m->indices.size() };
+			// Skip if already uploaded (deduplicate by model path)
+			if (uploaded.find(modelAsset->vpath) != uploaded.end()) continue;
+			uploaded.insert(modelAsset->vpath);
 
-			// translate indices
-			std::vector<unsigned int> translated_indices{};
-			translated_indices.reserve(m->indices.size());
-			for (unsigned int idx : m->indices) {
-				translated_indices.push_back(offset + idx);
+			// Store offset for this model in the map (used by both rendering paths)
+			instanced_offsets[modelAsset->vpath] = {
+				indexOffset,
+				(unsigned int)modelAsset->indices.size()
+			};
+
+			// Add vertices
+			allVertices.insert(allVertices.end(),
+				modelAsset->vertices.begin(),
+				modelAsset->vertices.end());
+
+			// Add indices with vertex offset applied
+			for (unsigned int idx : modelAsset->indices) {
+				allIndices.push_back(vertexOffset + idx);
 			}
-			offset += m->vertices.size();		// yes vertices not indices. this isnt a bug.
 
-			indices.insert(indices.end(), translated_indices.begin(), translated_indices.end());
+			vertexOffset += modelAsset->vertices.size();
+			indexOffset += modelAsset->indices.size();
 		}
 
+		// Upload ALL geometry ONCE to main geometry buffers
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(Assets::Vertex), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER,
+			allVertices.size() * sizeof(Assets::Vertex),
+			allVertices.data(),
+			GL_STATIC_DRAW);  // STATIC_DRAW for immutable geometry
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, total_indices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			allIndices.size() * sizeof(unsigned int),
+			allIndices.data(),
+			GL_STATIC_DRAW);
 
-		// create instance buffer
+		// Also upload to shadow buffers (same geometry)
+		glBindVertexArray(shadow_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+		glBufferData(GL_ARRAY_BUFFER,
+			allVertices.size() * sizeof(Assets::Vertex),
+			allVertices.data(),
+			GL_STATIC_DRAW);
 
-		//glCreateBuffers(1, &geometry_ibo);
-		glGenBuffers(1, &geometry_ibo);
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-		glBufferData(GL_ARRAY_BUFFER, referenced.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			allIndices.size() * sizeof(unsigned int),
+			allIndices.data(),
+			GL_STATIC_DRAW);
 
-		// cleanup
+		// If instancing is enabled, create instance buffer for per-instance data
+		if (GS.use_instanced_rendering) {
+			glGenBuffers(1, &geometry_ibo);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
+			glBufferData(GL_ARRAY_BUFFER, uploaded.size() * sizeof(IBOData), nullptr, GL_DYNAMIC_DRAW);
+		}
 
 		glBindVertexArray(0);
 	}
@@ -654,29 +683,39 @@ namespace PAIN {
 			return;
 		}
 
+		// ========================================
+		// PERFORMANCE OPTIMIZATION: Offset-Based Drawing
+		// ========================================
+		// Geometry was uploaded ONCE in initSceneVbo(), check if uploaded
+		if (!component.bufferOffset.isUploaded) {
+			return; // Model not yet uploaded to buffers
+		}
+
 		shadow_shader->Bind();
 		shadow_shader->SetUniform("u_M", M);
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
 
+		// Bind shared shadow VAO (geometry already uploaded)
 		glBindVertexArray(shadow_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, component.cachedModelAsset->vertices.size() * sizeof(Assets::Vertex), component.cachedModelAsset->vertices.data());
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, component.cachedModelAsset->indices.size() * sizeof(unsigned int), component.cachedModelAsset->indices.data());
 
-		if (component.cachedModelAsset->submeshes.empty()) {
+		// Draw using offset into shared buffer
+		const auto& modelAsset = component.cachedModelAsset;
+		if (modelAsset->submeshes.empty()) {
 			// No submeshes - draw entire model
-			glDrawElements(GL_TRIANGLES, component.cachedModelAsset->indices.size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES,
+				component.bufferOffset.indexCount,
+				GL_UNSIGNED_INT,
+				(void*)(component.bufferOffset.indexOffset * sizeof(unsigned int)));
 		}
 		else {
 			// Draw each submesh with correct offset
-			for (const auto& submesh : component.cachedModelAsset->submeshes) {
+			for (const auto& submesh : modelAsset->submeshes) {
 				glDrawElements(
 					GL_TRIANGLES,
 					submesh.indexCount,
 					GL_UNSIGNED_INT,
-					(void*)(submesh.firstIndex * sizeof(unsigned int))
+					(void*)((component.bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int))
 				);
 			}
 		}
@@ -769,42 +808,29 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_M", M);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
-		//LogMemoryFullDiagnostic("Before GL Sub Model.");
+		// ========================================
+		// PERFORMANCE OPTIMIZATION: Offset-Based Drawing
+		// ========================================
+		// Geometry was uploaded ONCE in initSceneVbo(), now we just draw from offsets
+		// No more per-frame glBufferSubData or glBufferData calls!
 
-		// Bind component's VAO (already has vertex data uploaded)
+		// Ensure component has offset data populated
+		if (!component.bufferOffset.isUploaded) {
+			// Look up offset from instanced_offsets map (populated in initSceneVbo)
+			auto it = instanced_offsets.find(modelAsset->vpath);
+			if (it != instanced_offsets.end()) {
+				component.bufferOffset.indexOffset = it->second.idx_offset;
+				component.bufferOffset.indexCount = it->second.idx_count;
+				component.bufferOffset.isUploaded = true;
+			}
+			else {
+				PN_CORE_ERROR("Model {} not found in uploaded buffers! Did you call initSceneVbo()?", modelAsset->vpath);
+				return;
+			}
+		}
+
+		// Bind shared VAO (geometry already uploaded)
 		glBindVertexArray(geometry_vao);
-
-		//if (!GS.use_instanced_rendering) 
-		{
-			// === OPTIMIZED BUFFER UPDATE ===
-			const size_t vertexDataSize = modelAsset->vertices.size() * sizeof(Assets::Vertex);
-			const size_t indexDataSize = modelAsset->indices.size() * sizeof(unsigned int);
-
-#ifdef PN_PLATFORM_ANDROID
-			// Android-specific: Use buffer orphaning to avoid memory leaks on Mali GPUs
-			// This forces the driver to allocate new memory instead of stalling
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferData(GL_ARRAY_BUFFER, vertexDataSize, nullptr, GL_STREAM_DRAW);  // Orphan
-			glBufferData(GL_ARRAY_BUFFER, vertexDataSize, modelAsset->vertices.data(), GL_STREAM_DRAW);
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, nullptr, GL_STREAM_DRAW);  // Orphan
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, modelAsset->indices.data(), GL_STREAM_DRAW);
-#else
-			// Desktop: glBufferSubData is efficient
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, modelAsset->vertices.data());
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexDataSize, modelAsset->indices.data());
-#endif
-		}
-
-		//LogMemoryFullDiagnostic("After GL Sub Model.");
-
-		if (GS.use_instanced_rendering) {
-
-		}
 
 		// Render each submesh with its material
 		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
@@ -1086,12 +1112,14 @@ namespace PAIN {
 			// debug
 			geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
 
-			// Draw this submesh
+			// ========================================
+			// Draw this submesh using offset into shared buffer
+			// ========================================
 			glDrawElements(
 				GL_TRIANGLES,
 				submesh.indexCount,
 				GL_UNSIGNED_INT,
-				(void*)(submesh.firstIndex * sizeof(unsigned int))
+				(void*)((component.bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int))
 			);
 		}
 

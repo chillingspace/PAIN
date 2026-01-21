@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "text.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 304747694832462496
+  },
+  "descriptor_version": 1,
+  "guid": "5b658d78-a469-bc48-8ad9-954c7804f656",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\text.vert"
+  }
+}

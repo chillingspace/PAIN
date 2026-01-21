@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "skybox.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 18118815337253657572
+  },
+  "descriptor_version": 1,
+  "guid": "01315922-f937-6845-bcc6-bc041dd4af59",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\skybox.frag"
+  }
+}
