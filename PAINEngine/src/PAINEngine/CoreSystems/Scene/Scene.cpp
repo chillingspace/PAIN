@@ -738,7 +738,7 @@ namespace PAIN {
 
 #ifndef _DEBUG
 			// Prep for subs
-			std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+			std::filesystem::path init_scn_path = "game/scenes/mainmenu.scn";
 
 			auto scn_opt = asset_manager->getAssetData(init_scn_path);
 
