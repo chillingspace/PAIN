@@ -85,7 +85,7 @@ if(NOT jolt_POPULATED)
     
     # Set MSVC runtime library
     if(MSVC AND TARGET Jolt)
-        set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
     
     # Extra safety: add compile definitions directly to Jolt target
@@ -154,6 +154,10 @@ endif()
       GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(assimp)
+
+    if(MSVC AND TARGET assimp)
+        set_property(TARGET assimp PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
 
     # FreeType
     FetchContent_Declare(
@@ -238,7 +242,15 @@ endif()
             GIT_SUBMODULES "."
             GIT_SHALLOW TRUE
         )
+        # Disable tests for Cuttlefish to avoid GTest linkage issues
+        set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+        set(CUTTLEFISH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        
         FetchContent_MakeAvailable(cuttlefish)
+
+        if(MSVC AND TARGET cuttlefish)
+            set_property(TARGET cuttlefish PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        endif()
 
         if(TARGET cuttlefish)
             message(STATUS "Cuttlefish post build command added")

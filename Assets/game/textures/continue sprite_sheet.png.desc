@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "continue sprite_sheet.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1343051572710407923
+  },
+  "descriptor_version": 1,
+  "guid": "a6d1297d-a375-ff4b-a86e-864d6b9ffaa0",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\continue sprite_sheet.png"
+  }
+}

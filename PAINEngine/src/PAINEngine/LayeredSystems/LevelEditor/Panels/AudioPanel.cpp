@@ -123,6 +123,27 @@ namespace PAIN {
                         return;
                     }
 
+					// Quick Volume Mixer - shows all groups at once
+					ImGui::SeparatorText("Volume Mixer");
+					{
+						auto groups = audio->getAllGroups();
+						for (const auto& group : groups) {
+							float vol = audio->getGroupVolumeDb(group.c_str());
+							ImGui::PushID(group.c_str());
+							ImGui::Text("%s", group.c_str());
+							ImGui::SameLine(80);
+							ImGui::SetNextItemWidth(150);
+							if (ImGui::SliderFloat("##vol", &vol, -20.0f, 6.0f, "%.1f dB")) {
+								audio->setGroupVolumeDb(group.c_str(), vol);
+							}
+							ImGui::SameLine();
+							if (ImGui::SmallButton("Reset")) {
+								audio->setGroupVolumeDb(group.c_str(), 0.0f);
+							}
+							ImGui::PopID();
+						}
+					}
+
 					//Accepting audio payloads
 					acceptPayload();
 

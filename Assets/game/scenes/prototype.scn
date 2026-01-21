@@ -17,7 +17,7 @@
             3.5284290313720703
         ],
         "sensitivity": 0.11999999731779099,
-        "speed": 3.5,
+        "speed": 1.5,
         "up": [
             0.0,
             1.0,
@@ -37,7 +37,8 @@
                                 "90c6755e-f09f-8e41-9dec-23817187f379",
                                 "b2b19dcb-e3a1-f74f-918e-34d1acd7840d",
                                 "b3cf9179-2185-484f-8efd-0c2ae3cc45a8",
-                                "26f6c7bf-edf1-fc45-b785-3375de4ccd57"
+                                "26f6c7bf-edf1-fc45-b785-3375de4ccd57",
+                                "2cc6f41e-1a12-5945-8930-ed862a4f53cb"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
@@ -234,12 +235,122 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "b2b19dcb-e3a1-f74f-918e-34d1acd7840d"
+                            "guid": "2cc6f41e-1a12-5945-8930-ed862a4f53cb"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
                             "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "move_button"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.699999988079071,
+                                -0.699999988079071
+                            ],
+                            "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "Joystick_OnDrag",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                364.0,
+                                364.0
+                            ]
+                        }
+                    },
+                    "Name": "move_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "b2b19dcb-e3a1-f74f-918e-34d1acd7840d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -271,7 +382,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 2
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -390,7 +501,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -422,7 +533,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 3
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -545,7 +656,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -577,7 +688,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                                    "siblingIndex": 3
+                                    "siblingIndex": 4
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -695,7 +806,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "music",
                             "is3D": false,
                             "looping": true,
                             "maxDistance": 50.0,
@@ -711,7 +822,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 133,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -724,7 +834,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.0,
@@ -779,7 +888,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "music",
                             "is3D": false,
                             "looping": true,
                             "maxDistance": 50.0,
@@ -795,7 +904,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 131,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -808,7 +916,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.0,
@@ -863,7 +970,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 129,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -876,7 +982,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     -0.3344363570213318,
@@ -968,7 +1073,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -984,7 +1089,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 127,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -997,7 +1101,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1052,7 +1155,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1068,7 +1171,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 117,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1081,7 +1183,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1136,7 +1237,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1152,7 +1253,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 36,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1165,7 +1265,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1220,7 +1319,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1236,7 +1335,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 125,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1249,7 +1347,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1304,7 +1401,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1320,7 +1417,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 121,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1333,7 +1429,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1388,7 +1483,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
                             "maxDistance": 50.0,
@@ -1404,7 +1499,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 123,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1417,7 +1511,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     2.459115743637085,
@@ -1472,7 +1565,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 15,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1485,7 +1577,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.3681994676589966,
@@ -1569,7 +1660,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 135,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -1582,7 +1672,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.0,
@@ -1686,7 +1775,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 117,
                             "localAABB": {
                                 "max": [
                                     953.6362915039063,
@@ -1699,7 +1787,6 @@
                                     -946.9449462890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     190.72715759277344,
@@ -1781,7 +1868,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 117,
                                     "localAABB": {
                                         "max": [
                                             953.6362915039063,
@@ -1794,7 +1880,6 @@
                                             -946.9449462890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             190.72715759277344,
@@ -1871,7 +1956,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 117,
                             "localAABB": {
                                 "max": [
                                     953.6362915039063,
@@ -1884,7 +1968,6 @@
                                     -946.9449462890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     194.51882934570313,
@@ -1966,7 +2049,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 117,
                                     "localAABB": {
                                         "max": [
                                             953.6362915039063,
@@ -1979,7 +2061,6 @@
                                             -946.9449462890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             194.51882934570313,
@@ -2056,7 +2137,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 117,
                             "localAABB": {
                                 "max": [
                                     953.6362915039063,
@@ -2069,7 +2149,6 @@
                                     -946.9449462890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     194.51754760742188,
@@ -2151,7 +2230,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 117,
                                     "localAABB": {
                                         "max": [
                                             953.6362915039063,
@@ -2164,7 +2242,6 @@
                                             -946.9449462890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             194.51754760742188,
@@ -2241,7 +2318,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 117,
                             "localAABB": {
                                 "max": [
                                     953.6362915039063,
@@ -2254,7 +2330,6 @@
                                     -946.9449462890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     190.7272491455078,
@@ -2336,7 +2411,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 117,
                                     "localAABB": {
                                         "max": [
                                             953.6362915039063,
@@ -2349,7 +2423,6 @@
                                             -946.9449462890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             190.7272491455078,
@@ -2426,7 +2499,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 131,
                             "localAABB": {
                                 "max": [
                                     163.6326141357422,
@@ -2439,7 +2511,6 @@
                                     -163.63267517089844
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     14.923672676086426,
@@ -2553,7 +2624,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 83,
                             "localAABB": {
                                 "max": [
                                     73.85037994384766,
@@ -2566,7 +2636,6 @@
                                     -66.01360321044922
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     23.109590530395508,
@@ -2687,7 +2756,7 @@
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
-                            "group_name": "",
+                            "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
                             "maxDistance": 50.0,
@@ -2703,7 +2772,6 @@
                             "volumeDb": 1.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 4,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -2716,7 +2784,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.4891157150268555,
@@ -2887,7 +2954,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 137,
                             "localAABB": {
                                 "max": [
                                     1.0,
@@ -2900,7 +2966,6 @@
                                     -1.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     0.699999988079071,
@@ -2992,7 +3057,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 25,
                             "localAABB": {
                                 "max": [
                                     1.7023191452026367,
@@ -3005,7 +3069,6 @@
                                     -0.9306185245513916
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     0.48575514554977417,
@@ -3140,7 +3203,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 99,
                             "localAABB": {
                                 "max": [
                                     11.664676666259766,
@@ -3153,7 +3215,6 @@
                                     -11.37221908569336
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     5.044489860534668,
@@ -3251,7 +3312,6 @@
                                     "volumeDb": 0.0
                                 },
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 99,
                                     "localAABB": {
                                         "max": [
                                             11.664676666259766,
@@ -3264,7 +3324,6 @@
                                             -11.37221908569336
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             5.044489860534668,
@@ -3394,7 +3453,6 @@
                             "volumeDb": 0.0
                         },
                         "BoundingVolume": {
-                            "bvhNodeIndex": 99,
                             "localAABB": {
                                 "max": [
                                     11.664676666259766,
@@ -3407,7 +3465,6 @@
                                     -11.37221908569336
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     5.875686168670654,
@@ -3505,7 +3562,6 @@
                                     "volumeDb": 0.0
                                 },
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 99,
                                     "localAABB": {
                                         "max": [
                                             11.664676666259766,
@@ -3518,7 +3574,6 @@
                                             -11.37221908569336
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             5.875686168670654,
@@ -3632,7 +3687,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 87,
                             "localAABB": {
                                 "max": [
                                     199.99998474121094,
@@ -3645,7 +3699,6 @@
                                     -100.0
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     19.808786392211914,
@@ -3727,7 +3780,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 87,
                                     "localAABB": {
                                         "max": [
                                             199.99998474121094,
@@ -3740,7 +3792,6 @@
                                             -100.0
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             19.808786392211914,
@@ -3844,7 +3895,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 11,
                             "localAABB": {
                                 "max": [
                                     35.818092346191406,
@@ -3857,7 +3907,6 @@
                                     -35.818092346191406
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     3.713871955871582,
@@ -3939,7 +3988,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 11,
                                     "localAABB": {
                                         "max": [
                                             35.818092346191406,
@@ -3952,7 +4000,6 @@
                                             -35.818092346191406
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             3.713871955871582,
@@ -4056,7 +4103,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": -1,
                             "localAABB": {
                                 "max": [
                                     100.36543273925781,
@@ -4069,7 +4115,6 @@
                                     -84.21436309814453
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     9.017414093017578,
@@ -4151,7 +4196,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": -1,
                                     "localAABB": {
                                         "max": [
                                             100.36543273925781,
@@ -4164,7 +4208,6 @@
                                             -84.21436309814453
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             9.017414093017578,
@@ -4268,7 +4311,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 36,
                             "localAABB": {
                                 "max": [
                                     9.290358543395996,
@@ -4281,7 +4323,6 @@
                                     -9.775418281555176
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     36.18666076660156,
@@ -4363,7 +4404,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 36,
                                     "localAABB": {
                                         "max": [
                                             9.290358543395996,
@@ -4376,7 +4416,6 @@
                                             -9.775418281555176
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             36.18666076660156,
@@ -4480,7 +4519,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 119,
                             "localAABB": {
                                 "max": [
                                     423.7960205078125,
@@ -4493,7 +4531,6 @@
                                     -204.66815185546875
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     23.55085563659668,
@@ -4575,7 +4612,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 119,
                                     "localAABB": {
                                         "max": [
                                             423.7960205078125,
@@ -4588,7 +4624,6 @@
                                             -204.66815185546875
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             23.55085563659668,
@@ -4692,7 +4727,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": -1,
                             "localAABB": {
                                 "max": [
                                     34.337738037109375,
@@ -4705,7 +4739,6 @@
                                     -34.33773422241211
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     10.417222023010254,
@@ -4787,7 +4820,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": -1,
                                     "localAABB": {
                                         "max": [
                                             34.337738037109375,
@@ -4800,7 +4832,6 @@
                                             -34.33773422241211
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             10.417222023010254,
@@ -4914,7 +4945,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": -1,
                             "localAABB": {
                                 "max": [
                                     34.337738037109375,
@@ -4927,7 +4957,6 @@
                                     -34.33773422241211
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     9.438353538513184,
@@ -5009,7 +5038,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": -1,
                                     "localAABB": {
                                         "max": [
                                             34.337738037109375,
@@ -5022,7 +5050,6 @@
                                             -34.33773422241211
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             9.438353538513184,
@@ -5136,7 +5163,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 21,
                             "localAABB": {
                                 "max": [
                                     57.97823715209961,
@@ -5149,7 +5175,6 @@
                                     -0.7065536975860596
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     1.7347371578216553,
@@ -5231,7 +5256,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 21,
                                     "localAABB": {
                                         "max": [
                                             57.97823715209961,
@@ -5244,7 +5268,6 @@
                                             -0.7065536975860596
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             1.7347371578216553,
@@ -5348,7 +5371,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -5361,7 +5383,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     27.541240692138672,
@@ -5443,7 +5464,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -5456,7 +5476,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             27.541240692138672,
@@ -5533,7 +5552,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -5546,7 +5564,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     27.273595809936523,
@@ -5628,7 +5645,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -5641,7 +5657,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             27.273595809936523,
@@ -5718,7 +5733,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -5731,7 +5745,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     13.316784858703613,
@@ -5813,7 +5826,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -5826,7 +5838,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             13.316784858703613,
@@ -5903,7 +5914,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -5916,7 +5926,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     30.78489875793457,
@@ -5998,7 +6007,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6011,7 +6019,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             30.78489875793457,
@@ -6088,7 +6095,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -6101,7 +6107,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     27.465988159179688,
@@ -6183,7 +6188,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6196,7 +6200,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             27.465988159179688,
@@ -6273,7 +6276,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -6286,7 +6288,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     30.231040954589844,
@@ -6368,7 +6369,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6381,7 +6381,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             30.231040954589844,
@@ -6458,7 +6457,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -6471,7 +6469,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.027318954467773,
@@ -6553,7 +6550,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6566,7 +6562,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.027318954467773,
@@ -6643,7 +6638,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -6656,7 +6650,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.589622497558594,
@@ -6738,7 +6731,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6751,7 +6743,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.589622497558594,
@@ -6828,7 +6819,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -6841,7 +6831,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     15.792688369750977,
@@ -6923,7 +6912,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -6936,7 +6924,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             15.792688369750977,
@@ -7013,7 +7000,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7026,7 +7012,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     15.548344612121582,
@@ -7108,7 +7093,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -7121,7 +7105,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             15.548344612121582,
@@ -7198,7 +7181,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7211,7 +7193,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     31.054046630859375,
@@ -7293,7 +7274,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -7306,7 +7286,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             31.054046630859375,
@@ -7383,7 +7362,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7396,7 +7374,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     14.519891738891602,
@@ -7478,7 +7455,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -7491,7 +7467,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             14.519891738891602,
@@ -7568,7 +7543,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7581,7 +7555,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     29.967998504638672,
@@ -7663,7 +7636,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -7676,7 +7648,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             29.967998504638672,
@@ -7753,7 +7724,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7766,7 +7736,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     15.761442184448242,
@@ -7848,7 +7817,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -7861,7 +7829,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             15.761442184448242,
@@ -7938,7 +7905,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -7951,7 +7917,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     24.96918487548828,
@@ -8033,7 +7998,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8046,7 +8010,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             24.96918487548828,
@@ -8123,7 +8086,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -8136,7 +8098,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     29.7801513671875,
@@ -8218,7 +8179,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8231,7 +8191,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             29.7801513671875,
@@ -8308,7 +8267,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -8321,7 +8279,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     14.967848777770996,
@@ -8403,7 +8360,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8416,7 +8372,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             14.967848777770996,
@@ -8493,7 +8448,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -8506,7 +8460,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     27.61870574951172,
@@ -8588,7 +8541,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8601,7 +8553,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             27.61870574951172,
@@ -8678,7 +8629,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -8691,7 +8641,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     16.497905731201172,
@@ -8773,7 +8722,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8786,7 +8734,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             16.497905731201172,
@@ -8863,7 +8810,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -8876,7 +8822,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.115428924560547,
@@ -8958,7 +8903,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -8971,7 +8915,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.115428924560547,
@@ -9048,7 +8991,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9061,7 +9003,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     13.61296272277832,
@@ -9143,7 +9084,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -9156,7 +9096,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             13.61296272277832,
@@ -9233,7 +9172,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9246,7 +9184,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     29.76814842224121,
@@ -9328,7 +9265,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -9341,7 +9277,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             29.76814842224121,
@@ -9418,7 +9353,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9431,7 +9365,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.522192001342773,
@@ -9513,7 +9446,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -9526,7 +9458,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.522192001342773,
@@ -9603,7 +9534,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9616,7 +9546,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     13.551839828491211,
@@ -9698,7 +9627,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -9711,7 +9639,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             13.551839828491211,
@@ -9788,7 +9715,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9801,7 +9727,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     14.286510467529297,
@@ -9883,7 +9808,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -9896,7 +9820,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             14.286510467529297,
@@ -9973,7 +9896,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -9986,7 +9908,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.663175582885742,
@@ -10068,7 +9989,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -10081,7 +10001,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.663175582885742,
@@ -10158,7 +10077,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -10171,7 +10089,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     16.49858856201172,
@@ -10253,7 +10170,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -10266,7 +10182,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             16.49858856201172,
@@ -10343,7 +10258,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -10356,7 +10270,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     29.69740867614746,
@@ -10438,7 +10351,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -10451,7 +10363,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             29.69740867614746,
@@ -10528,7 +10439,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -10541,7 +10451,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     12.68154239654541,
@@ -10623,7 +10532,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -10636,7 +10544,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             12.68154239654541,
@@ -10713,7 +10620,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -10726,7 +10632,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     12.957890510559082,
@@ -10808,7 +10713,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -10821,7 +10725,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             12.957890510559082,
@@ -10898,7 +10801,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -10911,7 +10813,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     12.966277122497559,
@@ -10993,7 +10894,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11006,7 +10906,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             12.966277122497559,
@@ -11083,7 +10982,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -11096,7 +10994,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     16.490205764770508,
@@ -11178,7 +11075,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11191,7 +11087,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             16.490205764770508,
@@ -11268,7 +11163,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -11281,7 +11175,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     30.323362350463867,
@@ -11363,7 +11256,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11376,7 +11268,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             30.323362350463867,
@@ -11453,7 +11344,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -11466,7 +11356,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     30.375221252441406,
@@ -11548,7 +11437,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11561,7 +11449,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             30.375221252441406,
@@ -11638,7 +11525,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -11651,7 +11537,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     16.498733520507813,
@@ -11733,7 +11618,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11746,7 +11630,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             16.498733520507813,
@@ -11823,7 +11706,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 1,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -11836,7 +11718,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.98029327392578,
@@ -11918,7 +11799,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 1,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -11931,7 +11811,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.98029327392578,
@@ -12008,7 +11887,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -12021,7 +11899,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     29.20940589904785,
@@ -12103,7 +11980,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -12116,7 +11992,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             29.20940589904785,
@@ -12193,7 +12068,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -12206,7 +12080,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.090953826904297,
@@ -12288,7 +12161,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -12301,7 +12173,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.090953826904297,
@@ -12378,7 +12249,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 36,
                             "localAABB": {
                                 "max": [
                                     9.290358543395996,
@@ -12391,7 +12261,6 @@
                                     -9.775418281555176
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     31.966094970703125,
@@ -12473,7 +12342,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 36,
                                     "localAABB": {
                                         "max": [
                                             9.290358543395996,
@@ -12486,7 +12354,6 @@
                                             -9.775418281555176
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             31.966094970703125,
@@ -12590,7 +12457,6 @@
                 "Entity": {
                     "Components": {
                         "BoundingVolume": {
-                            "bvhNodeIndex": 38,
                             "localAABB": {
                                 "max": [
                                     135.75128173828125,
@@ -12603,7 +12469,6 @@
                                     -278.80621337890625
                                 ]
                             },
-                            "needsUpdate": false,
                             "worldAABB": {
                                 "max": [
                                     28.651582717895508,
@@ -12685,7 +12550,6 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
-                                    "bvhNodeIndex": 38,
                                     "localAABB": {
                                         "max": [
                                             135.75128173828125,
@@ -12698,7 +12562,6 @@
                                             -278.80621337890625
                                         ]
                                     },
-                                    "needsUpdate": false,
                                     "worldAABB": {
                                         "max": [
                                             28.651582717895508,

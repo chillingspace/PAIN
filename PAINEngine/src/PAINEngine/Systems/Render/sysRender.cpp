@@ -180,6 +180,9 @@ namespace PAIN {
                 }
 
                 glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
+
+                //Finish up rendering
+                glFinish();
             }
 
             // set cam light to cam
