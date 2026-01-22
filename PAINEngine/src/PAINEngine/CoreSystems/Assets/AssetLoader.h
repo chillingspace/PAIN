@@ -61,6 +61,9 @@ namespace PAIN {
 			}
 			~Loader() = default;
 
+			//Upload texture to GPU
+			void uploadTexture(std::shared_ptr<Assets::Texture> tex);
+
 			//Register loader
 			void RegisterLoader(Type const& type, LoaderFunc const& func);
 
@@ -89,7 +92,7 @@ namespace PAIN {
 			std::shared_ptr<Material> ImportMaterial(std::string const& virtual_path) const;
 
 			//Import scene
-			std::shared_ptr<Scene::SceneAsset> ImportScene(std::string const& virtual_path) const;
+			std::shared_ptr<Scene::SceneAsset> ImportScene(std::string const& virtual_path) const;\
 		};
 	}
 }
