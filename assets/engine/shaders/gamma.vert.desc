@@ -7,7 +7,7 @@
     "hash": 4919463888033716715
   },
   "descriptor_version": 1,
-  "guid": "f328749f-ec16-8f4b-850d-d10d46084a0c",
+  "guid": "b6959e62-61bd-9b46-9d88-0822bbb290ba",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\gamma.vert"

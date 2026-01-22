@@ -383,7 +383,10 @@ namespace PAIN {
 
             PN_CORE_INFO("Total KTX data: {} bytes", tex->data.size());
 
+            //Free up memory
             ktxTexture_Destroy(kTexture);
+            kTexture = nullptr;
+            std::vector<uint8_t>().swap(data);
         }
 #else
         void Loader::extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
@@ -395,6 +398,7 @@ namespace PAIN {
             size_t read = stream->read(data.data(), data.size());
             if (read != data.size())
                 throw std::runtime_error("Failed to read full DDS file: " + virtual_path);
+            stream = nullptr;
 
             size_t offset = 0;
 
@@ -494,10 +498,6 @@ namespace PAIN {
                 throw std::runtime_error("Legacy DDS format detected. Only DX10 format supported!");
             }
 
-            tex->data.clear();
-            tex->mipOffsets.clear();
-            tex->mipSizes.clear();
-
             uint32_t dwCaps2 = header[28];
             tex->is_cube_map = (dwCaps2 & 0x200) != 0;
             int faces = tex->is_cube_map ? 6 : 1;
@@ -542,7 +542,8 @@ namespace PAIN {
 
             PN_CORE_INFO("Total DDS data: {} bytes", tex->data.size());
 
-            stream = nullptr;
+            //Free up memory
+            std::vector<uint8_t>().swap(data);
         }
 #endif
 
@@ -701,6 +702,13 @@ namespace PAIN {
 
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
+
+            // Free CPU-side texture data after GPU upload
+            PN_CORE_INFO("Texture uploaded to GPU (ID: {}), freeing CPU data ({} bytes)",
+                tex->gl_texture, tex->data.size());
+            std::vector<uint8_t>().swap(tex->data);
+            std::vector<size_t>().swap(tex->mipOffsets);
+            std::vector<size_t>().swap(tex->mipSizes);
 
             // ========================================
             // RESTORE ACTIVE TEXTURE UNIT
@@ -1349,6 +1357,11 @@ namespace PAIN {
                     }
                     sceneAsset->mask_matrix.push_back(matrixRow);
                 }
+            }
+
+            // Parse assets
+            if (sceneJson.contains("assets") && sceneJson["assets"].is_array()) {
+                sceneAsset->assets_to_cache = sceneJson["assets"].get<std::unordered_set<Assets::GUID>>();
             }
 
             // Store entity data as-is (will be parsed by SceneManager)

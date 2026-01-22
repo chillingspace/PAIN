@@ -59,7 +59,22 @@ namespace PAIN {
             bool operator!=(const GUID& other) const noexcept {
                 return !(*this == other);
             }
+
+            bool operator<(const GUID& other) const noexcept {
+                return std::lexicographical_compare(
+                    std::begin(bytes), std::end(bytes),
+                    std::begin(other.bytes), std::end(other.bytes)
+                );
+            }
         };
+
+        inline void to_json(nlohmann::json& j, const GUID& guid) {
+            j = guid.ToString(true);
+        }
+
+        inline void from_json(const nlohmann::json& j, GUID& guid) {
+            guid = GUID(j.get<std::string>());
+        }
 
         //Asset types
         enum class Type {

@@ -11,6 +11,9 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Renderer/skybox.h"
 
+// For windows event include
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
+
 #include "ECS/Controller.h"
 #include "ECS/Components/cBoundingVolume.h"
 
@@ -78,7 +81,7 @@ namespace PAIN {
 				w_renderer->Init(services);
 
 				if (!GS.use_instanced_rendering) {
-					w_renderer->initSceneVbo({});
+					w_renderer->initSceneVbo();
 				}
 			}
 			else {

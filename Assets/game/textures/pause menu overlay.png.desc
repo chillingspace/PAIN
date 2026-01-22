@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "pause menu overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16088529446969588443
+  },
+  "descriptor_version": 1,
+  "guid": "e3ef88a4-bc32-2d49-b6dc-b4cdd0c69531",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\pause menu overlay.png"
+  }
+}

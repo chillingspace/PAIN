@@ -7,7 +7,7 @@
     "hash": 7161674116613767951
   },
   "descriptor_version": 1,
-  "guid": "a728ce77-318a-f74a-9225-f710eeecbb57",
+  "guid": "6cd61dfd-87b9-9c4c-b3c9-69c6068fed17",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\pbr_preview.vert"
