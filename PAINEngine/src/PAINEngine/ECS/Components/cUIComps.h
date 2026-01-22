@@ -193,22 +193,36 @@ namespace PAIN {
     };
 
     // ═══════════════════════════════════════════════════════════════════════
-    // UIAnimation - Simple UI animations (EXPERIMENTAL - may change)
+    // UVCoordinates - Custom UV mapping for textures (used by spritesheet animations)
     // ═══════════════════════════════════════════════════════════════════════
-    enum class AnimationType { Position, Scale, Color, Rotation };
+    // USAGE:
+    //   - Automatically managed by UIAnimation for spritesheet animations
+    //   - Can be manually set for custom UV mapping
+    //   - Format: (minU, minV, maxU, maxV) where 0,0 is top-left and 1,1 is bottom-right
+    // ═══════════════════════════════════════════════════════════════════════
+    struct UVCoordinates {
+        glm::vec4 uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);  // (minU, minV, maxU, maxV)
+    };
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // UIAnimation - Spritesheet Animation System
+    // ═══════════════════════════════════════════════════════════════════════
+    // Note: Converted to be Spritesheet-only. Previous animation types (Position, Scale, etc.) removed.
     struct UIAnimation {
-        AnimationType anim_type = AnimationType::Position;
-        float duration = 1.0f;
-        bool b_loop = false;
-
-        // Start/end values (use based on animation type)
-        glm::vec2 start_vec2{ 0 };
-        glm::vec2 end_vec2{ 0 };
-
-        // Runtime state (do not set)
-        float elapsed = 0.0f;
-        bool b_playing = false;
+        // Spritesheet animation properties
+        int spritesheet_columns = 1;     // Columns in spritesheet
+        int spritesheet_rows = 1;        // Rows in spritesheet  
+        int total_frames = 1;            // Total animation frames
+        float frame_duration = 0.1f;     // Seconds per frame
+        
+        // Animation control
+        float duration = 1.0f;           // Total animation duration (auto-calculated from total_frames * frame_duration)
+        bool b_loop = false;             // Loop animation?
+        
+        // Runtime state (do not set manually)
+        int current_frame = 0;           // Current frame index
+        float elapsed = 0.0f;            // Elapsed time
+        bool b_playing = false;          // Is animation playing?
     };
 
 } // namespace PAIN
@@ -224,12 +238,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIButtonState, {
     {PAIN::UIButtonState::Disabled, "Disabled"}
     })
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::AnimationType, {
-    {PAIN::AnimationType::Position, "Position"},
-    {PAIN::AnimationType::Scale, "Scale"},
-    {PAIN::AnimationType::Color, "Color"},
-    {PAIN::AnimationType::Rotation, "Rotation"}
-        })
 
     NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
     {PAIN::TextAlignment::Left, "Left"},
@@ -285,14 +293,22 @@ REFL_END
 static_assert(refl::trait::is_reflectable_v<PAIN::UICanvas>);
 
 REFL_TYPE(PAIN::UIAnimation)
+REFL_FIELD(spritesheet_columns)
+REFL_FIELD(spritesheet_rows)
+REFL_FIELD(total_frames)
+REFL_FIELD(frame_duration)
 REFL_FIELD(duration)
-REFL_FIELD(b_playing)
 REFL_FIELD(b_loop)
-REFL_FIELD(start_vec2)
-REFL_FIELD(end_vec2)
+REFL_FIELD(b_playing)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIAnimation>);
+
+REFL_TYPE(PAIN::UVCoordinates)
+REFL_FIELD(uv)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::UVCoordinates>);
 
 REFL_TYPE(PAIN::UIText)
 REFL_FIELD(text_pos)

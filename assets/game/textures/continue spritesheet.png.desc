@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "no sprite_sheet.png",
+    "name": "continue spritesheet.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 8638776470683504481
+    "hash": 14727158860607443047
   },
   "descriptor_version": 1,
-  "guid": "5e64ccae-9d42-a540-b42d-ceedf2af9d8f",
+  "guid": "6ef6e681-661d-af46-86b2-a425c3bc387c",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\no sprite_sheet.png"
+    "source_file": "game\\textures\\continue spritesheet.png"
   }
 }

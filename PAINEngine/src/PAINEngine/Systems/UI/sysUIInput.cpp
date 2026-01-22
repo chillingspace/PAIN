@@ -458,10 +458,33 @@ namespace PAIN {
             std::vector<std::tuple<entt::entity, int, int>> candidates;
 
             for (auto [entity, tex, element, rect] : view.each()) {
+
+
                 if (!element.b_is_enabled || !element.b_is_interactable) continue;
 
+                // Calculate actual frame size (accounting for spritesheets)
+                glm::vec2 frame_size = rect.size_delta;
+
+                if (registry.all_of<UIAnimation>(entity)) {
+                    const auto& anim = registry.get<UIAnimation>(entity);
+                    if (anim.spritesheet_columns > 0 || anim.spritesheet_rows > 0) {
+                        // Get texture dimensions from asset manager
+                        auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(tex.texture_guid);
+                        if (texture_opt.has_value()) {
+                            float width = static_cast<float>(texture_opt.value().get()->width);
+                            float height = static_cast<float>(texture_opt.value().get()->height);
+
+                            // Divide by spritesheet dimensions to get frame size
+                            if (anim.spritesheet_columns > 0) width /= anim.spritesheet_columns;
+                            if (anim.spritesheet_rows > 0) height /= anim.spritesheet_rows;
+
+                            frame_size = glm::vec2(width, height);
+                        }
+                    }
+                }
+
                 // Actual rendered size = base size * scale multiplier
-                glm::vec2 actual_pixel_size = rect.size_delta * tex.texture_scale;
+                glm::vec2 actual_pixel_size = frame_size * tex.texture_scale;
 
                 // Convert size to normalized space
                 glm::vec2 normalized_size = normalizeSize(actual_pixel_size);
@@ -471,7 +494,7 @@ namespace PAIN {
 
                 if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 
-                    PN_CORE_INFO("point in button");
+                    PN_CORE_INFO("POINT IN BUTTON");
 
                     // Get canvas sort order
                     int canvas_sort = 0;
@@ -530,8 +553,87 @@ namespace PAIN {
         void InputSystem::updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state) {
             if (registry.all_of<UIButton>(entity)) {
                 auto& button = registry.get<UIButton>(entity);
-                button.state = new_state;
-                // TODO: Apply color tinting if needed
+                if (button.state != new_state) {
+                    button.state = new_state;
+
+                    // Handle Hover Interaction (Frame Swap)
+                    if (registry.all_of<UIAnimation>(entity)) {
+                        auto& anim = registry.get<UIAnimation>(entity);
+                        
+                        // We assume Frame 0 is Normal, Frame 1 is Hover
+                        int target_frame = 0;
+                        if (new_state == UIButtonState::Highlighted || new_state == UIButtonState::Pressed) {
+                            target_frame = 1;
+                        }
+
+                        // Use 0 if we don't have enough frames
+                        if (target_frame >= anim.total_frames) {
+                            target_frame = 0;
+                        }
+                        
+                        // Set state (ensure not playing)
+                        anim.b_playing = false;
+                        anim.current_frame = target_frame;
+
+                        // Force UV update
+                        if (registry.all_of<UVCoordinates>(entity)) {
+                             auto& uv_comp = registry.get<UVCoordinates>(entity);
+                             if (anim.spritesheet_columns > 0 && anim.spritesheet_rows > 0) {
+                                // Retrieve texture dimensions for pixel padding (fixes bleeding)
+                                float padding_u = 0.0f;
+                                float padding_v = 0.0f;
+                                float tex_w = 0.0f;
+                                float tex_h = 0.0f;
+                                
+                                if (registry.all_of<Texture2D>(entity)) {
+                                    auto& tex = registry.get<Texture2D>(entity);
+                                    auto svc_lock = services.lock();
+                                     if(svc_lock) {
+                                         auto texture_opt = svc_lock->get<Assets::Manager>()->getAsset<Assets::Texture>(tex.texture_guid);
+                                         if (texture_opt.has_value()) {
+                                             tex_w = static_cast<float>(texture_opt.value().get()->width);
+                                             tex_h = static_cast<float>(texture_opt.value().get()->height);
+                                             
+                                             // 1.0 pixel padding (aggressively prevent bleeding)
+                                             if(tex_w > 0) padding_u = 1.0f / tex_w;
+                                             if(tex_h > 0) padding_v = 1.0f / tex_h;
+                                         }
+                                     }
+                                }
+
+                                 
+                                 int col = target_frame % anim.spritesheet_columns;
+                                 int row = target_frame / anim.spritesheet_columns;
+                                 row = row % anim.spritesheet_rows; // Safety
+
+                                 float frame_width = 1.0f / anim.spritesheet_columns;
+                                 float frame_height = 1.0f / anim.spritesheet_rows;
+
+                                 glm::vec4 new_uvs;
+                                 // Standard Top-Left with Inset Padding
+                                 new_uvs.x = (col * frame_width) + padding_u;
+                                 new_uvs.y = (row * frame_height) + padding_v;
+                                 new_uvs.z = ((col + 1) * frame_width) - padding_u;
+                                 new_uvs.w = ((row + 1) * frame_height) - padding_v;
+                                 
+                                 uv_comp.uv = new_uvs;
+                             }
+                        } else {
+                            // If UV component missing, create it?
+                            // Typically sysUIAnimation creates it, but if we never played, it might not exist.
+                            if (anim.spritesheet_columns > 0 && anim.spritesheet_rows > 0) {
+                                registry.emplace<UVCoordinates>(entity);
+                                // Recursively call or just copy-paste logic? Copy-paste for safety/speed now
+                                auto& uv_comp = registry.get<UVCoordinates>(entity);
+                                int col = target_frame % anim.spritesheet_columns;
+                                int row = target_frame / anim.spritesheet_columns;
+                                float frame_width = 1.0f / anim.spritesheet_columns;
+                                float frame_height = 1.0f / anim.spritesheet_rows;
+                                uv_comp.uv = glm::vec4(col * frame_width, row * frame_height, (col + 1) * frame_width, (row + 1) * frame_height);
+                            }
+                        }
+                    }
+                }
             }
         }
 

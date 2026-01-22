@@ -476,6 +476,7 @@ namespace PAIN {
             registerComponent<UICanvas>("UICanvas");
             registerComponent<UIAnimation>("UIAnimation");
             registerComponent<UIText>("UIText");
+            registerComponent<UVCoordinates>("UVCoordinates");
             registerComponent<UIFollowsWorldEntity>("UIFollowsWorldEntity");
             registerComponent<UIJoystick>("UIJoystick");
         }
