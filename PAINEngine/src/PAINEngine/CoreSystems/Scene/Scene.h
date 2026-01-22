@@ -48,8 +48,10 @@ namespace PAIN {
             void setupCamera(SceneAsset const& scene_asset);
             void setupEnvironment(SceneAsset const& scene_asset);
             void setupLayers(SceneAsset const& scene_asset);
+            void cacheSceneAssets(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
             void recursiveCapture(entt::entity entity, nlohmann::json& jsonArray);
+            void captureCachedAssets(SceneAsset& scene_asset);
             void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
 #ifdef PN_PLATFORM_WINDOWS

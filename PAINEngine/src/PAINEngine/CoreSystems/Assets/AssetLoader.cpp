@@ -1359,6 +1359,11 @@ namespace PAIN {
                 }
             }
 
+            // Parse assets
+            if (sceneJson.contains("assets") && sceneJson["assets"].is_array()) {
+                sceneAsset->assets_to_cache = sceneJson["assets"].get<std::unordered_set<Assets::GUID>>();
+            }
+
             // Store entity data as-is (will be parsed by SceneManager)
             if (sceneJson.contains("ecs")) {
                 sceneAsset->entityData = sceneJson["ecs"];
