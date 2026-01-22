@@ -470,17 +470,24 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
 
           if (hasRotation) {
             // Calculate 8 corners of OBB for oriented visualization
-            glm::vec3 corners[8];
-            for (int i = 0; i < 8; ++i) {
-              glm::vec3 corner;
-              corner.x = (i & 1) ? half_extents.x : -half_extents.x;
-              corner.y = (i & 2) ? half_extents.y : -half_extents.y;
-              corner.z = (i & 4) ? half_extents.z : -half_extents.z;
+            // Order must match edge list: back face (0,1,2,3), front face
+            // (4,5,6,7) going around each face in sequence
+            glm::vec3 he = half_extents;
+            glm::vec3 local_corners[8] = {
+                glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
+                glm::vec3(+he.x, -he.y, -he.z), // 1: back-bottom-right
+                glm::vec3(+he.x, +he.y, -he.z), // 2: back-top-right
+                glm::vec3(-he.x, +he.y, -he.z), // 3: back-top-left
+                glm::vec3(-he.x, -he.y, +he.z), // 4: front-bottom-left
+                glm::vec3(+he.x, -he.y, +he.z), // 5: front-bottom-right
+                glm::vec3(+he.x, +he.y, +he.z), // 6: front-top-right
+                glm::vec3(-he.x, +he.y, +he.z), // 7: front-top-left
+            };
 
-              // Apply combined rotation to the corner, add offset, then rotate
-              // by entity, then translate
-              glm::vec3 rotated_corner = combined_rot * corner;
-              glm::vec3 rotated_offset = entity_rot * scaled_offset;
+            glm::vec3 corners[8];
+            glm::vec3 rotated_offset = entity_rot * scaled_offset;
+            for (int i = 0; i < 8; ++i) {
+              glm::vec3 rotated_corner = combined_rot * local_corners[i];
               corners[i] = trans.position + rotated_offset + rotated_corner;
             }
 
@@ -512,14 +519,23 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
 
         if (hasRotation) {
           // Calculate 8 corners of OBB for oriented visualization
+          // Order must match edge list: back face (0,1,2,3), front face
+          // (4,5,6,7)
+          glm::vec3 he = half_extents;
+          glm::vec3 local_corners[8] = {
+              glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
+              glm::vec3(+he.x, -he.y, -he.z), // 1: back-bottom-right
+              glm::vec3(+he.x, +he.y, -he.z), // 2: back-top-right
+              glm::vec3(-he.x, +he.y, -he.z), // 3: back-top-left
+              glm::vec3(-he.x, -he.y, +he.z), // 4: front-bottom-left
+              glm::vec3(+he.x, -he.y, +he.z), // 5: front-bottom-right
+              glm::vec3(+he.x, +he.y, +he.z), // 6: front-top-right
+              glm::vec3(-he.x, +he.y, +he.z), // 7: front-top-left
+          };
+
           glm::vec3 corners[8];
           for (int i = 0; i < 8; ++i) {
-            glm::vec3 corner;
-            corner.x = (i & 1) ? half_extents.x : -half_extents.x;
-            corner.y = (i & 2) ? half_extents.y : -half_extents.y;
-            corner.z = (i & 4) ? half_extents.z : -half_extents.z;
-
-            glm::vec3 body_space_point = offset_scaled + corner;
+            glm::vec3 body_space_point = offset_scaled + local_corners[i];
             corners[i] = trans.position + (rotation * body_space_point);
           }
 
