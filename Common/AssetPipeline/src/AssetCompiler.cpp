@@ -927,21 +927,58 @@ namespace PAIN {
                         const std::string boneName = chan->mNodeName.C_Str();
                         auto& track = clip.track_map[boneName];
 
-                        for (unsigned int k = 0; k < chan->mNumPositionKeys; ++k) {
+                        // Determine the maximum number of keys (or just rely on the fact they usually align if baked)
+                        unsigned int maxKeys = std::max({ chan->mNumPositionKeys, chan->mNumRotationKeys, chan->mNumScalingKeys });
+
+                        for (unsigned int k = 0; k < maxKeys; ++k) {
                             AnimationKey key;
-                            key.time = static_cast<float>(chan->mPositionKeys[k].mTime) / static_cast<float>(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
-                            key.translation = glm::vec3(chan->mPositionKeys[k].mValue.x, chan->mPositionKeys[k].mValue.y, chan->mPositionKeys[k].mValue.z);
+
+                            // Use the LAST available key if we run out (Clamping)
+                            unsigned int posIndex = (k < chan->mNumPositionKeys) ? k : (chan->mNumPositionKeys - 1);
+                            unsigned int rotIndex = (k < chan->mNumRotationKeys) ? k : (chan->mNumRotationKeys - 1);
+                            unsigned int sclIndex = (k < chan->mNumScalingKeys) ? k : (chan->mNumScalingKeys - 1);
+
+                            // Use the time from the Rotation key if it has the most keys (common for limbs)
                             if (k < chan->mNumRotationKeys) {
-                                key.rotation = glm::quat(chan->mRotationKeys[k].mValue.w,
-                                    chan->mRotationKeys[k].mValue.x,
-                                    chan->mRotationKeys[k].mValue.y,
-                                    chan->mRotationKeys[k].mValue.z
-                                );
+                                key.time = (float)chan->mRotationKeys[rotIndex].mTime;
                             }
-                            if (k < chan->mNumScalingKeys) {
-                                key.scale = glm::vec3(chan->mScalingKeys[k].mValue.x, chan->mScalingKeys[k].mValue.y, chan->mScalingKeys[k].mValue.z);
+                            else if (k < chan->mNumPositionKeys) {
+                                key.time = (float)chan->mPositionKeys[posIndex].mTime;
                             }
-                            // Morph target weights can be set here if you support animated blend shapes
+                            else {
+                                key.time = (float)chan->mScalingKeys[sclIndex].mTime;
+                            }
+
+                            // Normalize time
+                            key.time /= (float)(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+
+                            // Position
+                            if (chan->mNumPositionKeys > 0) {
+                                auto val = chan->mPositionKeys[posIndex].mValue;
+                                key.translation = glm::vec3(val.x, val.y, val.z);
+                            }
+                            else {
+                                key.translation = glm::vec3(0.0f);
+                            }
+
+                            // Rotation
+                            if (chan->mNumRotationKeys > 0) {
+                                auto val = chan->mRotationKeys[rotIndex].mValue;
+                                key.rotation = glm::quat(val.w, val.x, val.y, val.z);
+                            }
+                            else {
+                                key.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+                            }
+
+                            // Scale
+                            if (chan->mNumScalingKeys > 0) {
+                                auto val = chan->mScalingKeys[sclIndex].mValue;
+                                key.scale = glm::vec3(val.x, val.y, val.z);
+                            }
+                            else {
+                                key.scale = glm::vec3(1.0f);
+                            }
+
                             track.push_back(key);
                         }
                         //clip.tracks.push_back(track);

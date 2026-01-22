@@ -4,17 +4,17 @@
     "type": "Model"
   },
   "build_data": {
-    "hash": 10113911274669969253
+    "hash": 11031454555972720826
   },
   "descriptor_version": 1,
-  "guid": "9a2edf44-9544-4640-a30f-bc06d74e1216",
+  "guid": "38e8f9de-b2dc-0f47-ad64-f0209917e593",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": false,
-    "import_skeleton": false,
+    "import_animations": true,
+    "import_skeleton": true,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,

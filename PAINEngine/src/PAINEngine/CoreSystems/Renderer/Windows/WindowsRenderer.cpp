@@ -528,7 +528,7 @@ namespace PAIN {
 			glEnableVertexAttribArray(2);
 
 			// bone indices
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices_f));
+			glVertexAttribIPointer(3, 4, GL_INT, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
 			glEnableVertexAttribArray(3);
 
 			// bone weights
