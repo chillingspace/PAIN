@@ -355,7 +355,7 @@ namespace PAIN {
 			//Resolve asset path
 			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, registry_it->second->shipped_relative_path.string());
 
-			//Load assset through registered loaded
+			//Load asset through registered loaded
 			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
 
 			//Init asset registry var
@@ -371,10 +371,10 @@ namespace PAIN {
 			return asset;
 		}
 
-		void Manager::batchCacheAssets(std::vector<GUID> batch_ids) {
+		void Manager::batchCacheAssets(std::unordered_set<GUID> batch_ids) {
 
 			//Get all batch ids
-			for (auto id : batch_ids) {
+			for (auto const& id : batch_ids) {
 
 				//check registration
 				if (checkAssetRegistered(id)) {
