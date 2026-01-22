@@ -1,5 +1,6 @@
  #include "luaState.h"
  #include "Utility/Log.h"
+ #include "Core.h"
  #include <fstream>
 
 // Shipping sandbox switch (default ON). In dev you can override at compile time.
