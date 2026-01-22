@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "how to play sprite_sheet.png",
+    "name": "credits spritesheet.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 5726381126886505269
+    "hash": 17533731167878870629
   },
   "descriptor_version": 1,
-  "guid": "cdcf0b72-1405-5342-b716-aa4ff96353dc",
+  "guid": "0c767eaa-0d1b-9042-b665-0c75fb70697d",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\how to play sprite_sheet.png"
+    "source_file": "game\\textures\\credits spritesheet.png"
   }
 }

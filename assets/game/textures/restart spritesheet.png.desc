@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "yes sprite_sheet.png",
+    "name": "restart spritesheet.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 1228263348330423750
+    "hash": 4242377681985025851
   },
   "descriptor_version": 1,
-  "guid": "bb972966-28e8-d947-9e02-cecf11a5a263",
+  "guid": "97d2a125-9452-e944-8004-faedf25dc26c",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\yes sprite_sheet.png"
+    "source_file": "game\\textures\\restart spritesheet.png"
   }
 }

@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "quit sprite_sheet.png",
+    "name": "no spritesheet.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 13760391993249889801
+    "hash": 72513159955282561
   },
   "descriptor_version": 1,
-  "guid": "5d87be87-b8f7-424e-8c44-c3188401b7ee",
+  "guid": "6f1d2fa9-782e-6a48-a859-15c47b6f0deb",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\quit sprite_sheet.png"
+    "source_file": "game\\textures\\no spritesheet.png"
   }
 }

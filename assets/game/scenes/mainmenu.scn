@@ -1,4 +1,36 @@
 {
+    "assets": [
+        "ec5cda66-10a9-2249-bc83-deb5a6493b10",
+        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
+        "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+        "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
+        "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
+        "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+        "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
+        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "a67656ca-15a5-d441-b14d-dae036e5245e",
+        "14377587-a8fe-2b47-9f46-dad6bdad2753",
+        "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "81117530-de12-7b4c-a0e5-6ebc94459e26",
+        "3e8dc653-3d17-ab42-bb53-da040f01f965",
+        "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
+        "9aac41f9-737d-d540-a485-7155b0011394",
+        "c3240e7d-4066-2444-a024-c1d31c71a299",
+        "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+        "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+        "c79c529b-71e5-164c-854d-f8cf076f5318",
+        "be682648-fcd7-2b47-b7bf-3faea372c733",
+        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+        "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+        "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+        "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+        "61f3c20b-d44c-544d-9a0d-d130e05c67a9"
+    ],
     "camera": {
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
@@ -286,27 +318,23 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.25,
+                                -0.30000001192092896,
                                 0.5
                             ],
                             "texture_guid": "7a4b0369-55bd-034d-bf03-baf1ee0fa117",
                             "texture_scale": [
-                                1.2999999523162842,
+                                0.4000000059604645,
                                 0.10999999940395355
                             ]
                         },
                         "UIAnimation": {
                             "b_loop": true,
-                            "b_playing": true,
+                            "b_playing": false,
                             "duration": 0.20000000298023224,
-                            "end_vec2": [
-                                0.0,
-                                0.0
-                            ],
-                            "start_vec2": [
-                                0.0,
-                                0.0
-                            ]
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
                         },
                         "UIButton": {
                             "disabled_color": -10066330,
@@ -366,6 +394,14 @@
                                 1024.0,
                                 88.0
                             ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0015625000232830644,
+                                0.011363636702299118,
+                                0.4984374940395355,
+                                0.9886363744735718
+                            ]
                         }
                     },
                     "Name": "start_button"
@@ -417,27 +453,23 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.25,
+                                -0.30000001192092896,
                                 0.20000000298023224
                             ],
-                            "texture_guid": "cdcf0b72-1405-5342-b716-aa4ff96353dc",
+                            "texture_guid": "29538ec6-34b6-a941-97ce-18d7fe930f1e",
                             "texture_scale": [
-                                1.0,
+                                0.4000000059604645,
                                 0.09000000357627869
                             ]
                         },
                         "UIAnimation": {
                             "b_loop": true,
-                            "b_playing": true,
+                            "b_playing": false,
                             "duration": 0.20000000298023224,
-                            "end_vec2": [
-                                0.0,
-                                0.0
-                            ],
-                            "start_vec2": [
-                                0.0,
-                                0.0
-                            ]
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
                         },
                         "UIButton": {
                             "disabled_color": -10066330,
@@ -497,6 +529,14 @@
                                 1024.0,
                                 88.0
                             ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0009765625,
+                                0.011904762126505375,
+                                0.4990234375,
+                                0.988095223903656
+                            ]
                         }
                     },
                     "Name": "how_to_play_button"
@@ -548,27 +588,23 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.25,
+                                -0.30000001192092896,
                                 -0.05000000074505806
                             ],
-                            "texture_guid": "d60aeb08-f45a-f54c-b7aa-583165082ddf",
+                            "texture_guid": "7016a242-0976-204e-bd84-49c06ab665a9",
                             "texture_scale": [
-                                1.0,
+                                0.4000000059604645,
                                 0.09000000357627869
                             ]
                         },
                         "UIAnimation": {
                             "b_loop": true,
-                            "b_playing": true,
+                            "b_playing": false,
                             "duration": 0.20000000298023224,
-                            "end_vec2": [
-                                0.0,
-                                0.0
-                            ],
-                            "start_vec2": [
-                                0.0,
-                                0.0
-                            ]
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
                         },
                         "UIButton": {
                             "disabled_color": -10066330,
@@ -628,6 +664,14 @@
                                 1024.0,
                                 88.0
                             ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0011627906933426857,
+                                0.011363636702299118,
+                                0.4988372027873993,
+                                0.9886363744735718
+                            ]
                         }
                     },
                     "Name": "settings_button"
@@ -679,27 +723,23 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.25,
+                                -0.30000001192092896,
                                 -0.30000001192092896
                             ],
-                            "texture_guid": "4d0504bd-8b0f-ad45-ab15-4b847cdadef2",
+                            "texture_guid": "0c767eaa-0d1b-9042-b665-0c75fb70697d",
                             "texture_scale": [
-                                1.0,
+                                0.4000000059604645,
                                 0.09000000357627869
                             ]
                         },
                         "UIAnimation": {
                             "b_loop": true,
-                            "b_playing": true,
+                            "b_playing": false,
                             "duration": 0.20000000298023224,
-                            "end_vec2": [
-                                0.0,
-                                0.0
-                            ],
-                            "start_vec2": [
-                                0.0,
-                                0.0
-                            ]
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
                         },
                         "UIButton": {
                             "disabled_color": -10066330,
@@ -759,6 +799,14 @@
                                 1024.0,
                                 88.0
                             ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0013227512827143073,
+                                0.011363636702299118,
+                                0.49867725372314453,
+                                0.9886363744735718
+                            ]
                         }
                     },
                     "Name": "credits_button"
@@ -810,27 +858,23 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.25,
+                                -0.30000001192092896,
                                 -0.550000011920929
                             ],
-                            "texture_guid": "5d87be87-b8f7-424e-8c44-c3188401b7ee",
+                            "texture_guid": "7f6c18d4-e506-cd46-8de2-c7f181a04f2f",
                             "texture_scale": [
-                                1.0,
+                                0.4000000059604645,
                                 0.09000000357627869
                             ]
                         },
                         "UIAnimation": {
                             "b_loop": true,
-                            "b_playing": true,
+                            "b_playing": false,
                             "duration": 0.20000000298023224,
-                            "end_vec2": [
-                                0.0,
-                                0.0
-                            ],
-                            "start_vec2": [
-                                0.0,
-                                0.0
-                            ]
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
                         },
                         "UIButton": {
                             "disabled_color": -10066330,
@@ -889,6 +933,14 @@
                             "size_delta": [
                                 1024.0,
                                 88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0018248175038024783,
+                                0.011363636702299118,
+                                0.49817517399787903,
+                                0.9886363744735718
                             ]
                         }
                     },

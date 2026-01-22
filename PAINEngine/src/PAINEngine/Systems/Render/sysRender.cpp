@@ -611,11 +611,31 @@ namespace PAIN {
 
                 // Only auto-set size_delta if it's not already set
                 if (rect_comp.size_delta.x == 0.0f || rect_comp.size_delta.y == 0.0f) {
-                    rect_comp.size_delta.x = texture_opt.value().get()->width;
-                    rect_comp.size_delta.y = texture_opt.value().get()->height;
+                    float width = static_cast<float>(texture_opt.value().get()->width);
+                    float height = static_cast<float>(texture_opt.value().get()->height);
+
+                    // If spritesheet, divide by columns/rows to get FRAME size
+                    if (registry.all_of<UIAnimation>(entity)) {
+                        const auto& anim = registry.get<UIAnimation>(entity);
+                        if (anim.spritesheet_columns > 0) width /= anim.spritesheet_columns;
+                        if (anim.spritesheet_rows > 0) height /= anim.spritesheet_rows;
+                    }
+
+                    rect_comp.size_delta.x = width;
+                    rect_comp.size_delta.y = height;
                 }
 
-                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, texture_comp.pos, texture_comp.texture_scale);
+                // Calculate UV transform
+                glm::vec4 uv_transform(1.0f, 1.0f, 0.0f, 0.0f); // Default: scale(1,1), offset(0,0)
+                
+                auto uv_comp = registry.try_get<UVCoordinates>(entity);
+                if (uv_comp) {
+                    float width = uv_comp->uv.z - uv_comp->uv.x;
+                    float height = uv_comp->uv.w - uv_comp->uv.y;
+                    uv_transform = glm::vec4(width, height, uv_comp->uv.x, uv_comp->uv.y);
+                }
+
+                rendererService->w_renderer->Render2DTexture(texture_opt.value()->gl_texture, texture_comp.pos, texture_comp.texture_scale, uv_transform);
             }
 
             // ========================================

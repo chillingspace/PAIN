@@ -628,7 +628,7 @@ namespace PAIN {
 
 	}
 
-	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale) {
+	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale, const glm::vec4& uv_transform) {
 		if (texture_id == 0) {
 			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
 			return;
@@ -672,9 +672,15 @@ namespace PAIN {
 
 		texture2d_shader->SetUniform("pos", pos);
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
+        texture2d_shader->SetUniform("uv_transform", uv_transform); // Pass UV transform
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
+        
+        // Force clamp to edge to prevent bleeding from wrapping
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 		texture2d_shader->SetUniform("tex", 6);
 
 		err = glGetError();

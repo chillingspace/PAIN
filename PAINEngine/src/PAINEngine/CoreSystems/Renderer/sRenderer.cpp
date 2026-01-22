@@ -11,6 +11,9 @@
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Renderer/skybox.h"
 
+// For windows event include
+#include "CoreSystems/Events/GLFW/WindowEvents.h"
+
 #include "ECS/Controller.h"
 #include "ECS/Components/cBoundingVolume.h"
 

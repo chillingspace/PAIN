@@ -54,7 +54,6 @@ namespace PAIN {
 			return entity;
 		}
 
-
 		bool SceneManager::buildEntitiesFromAsset(SceneAsset const& scene_asset) {
 			if (scene_asset.entityData.empty()) {
 				PN_CORE_WARN("[SceneManager] Scene has no entity data");
@@ -371,6 +370,21 @@ namespace PAIN {
 			}
 		}
 
+		void SceneManager::cacheSceneAssets(SceneAsset const& scene_asset) {
+
+			//Get asset manager
+			auto assetMananger = services->get<Assets::Manager>();
+
+			//Unload the cache
+			assetMananger->clearAssetCache();
+
+			//Batch cache all assets from scene
+			assetMananger->batchCacheAssets(scene_asset.assets_to_cache);
+
+			//Batch upload all textures to GPU
+			assetMananger->batchUploadAllCachedTextures();
+		}
+
 		nlohmann::json SceneManager::captureCurrentEntities() {
 			nlohmann::json ecs = nlohmann::json::object();
 			nlohmann::json ents = nlohmann::json::array();
@@ -495,6 +509,138 @@ namespace PAIN {
 			}
 		}
 
+		void SceneManager::captureCachedAssets(SceneAsset& scene_asset) {
+
+			//Clear scene asset GUIDS
+			scene_asset.assets_to_cache.clear();
+
+			//Get all models in the current ecs registry
+			auto ecs = services->get<ECS::Controller>();
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<ModelRenderer>();
+			auto assetManager = services->get<Assets::Manager>();
+
+			//Lambda to cache function
+			auto cacheAsset = [&](Assets::GUID const& id) {
+				//Insert material GUID into asset to cache
+				if (id.IsValid() && !scene_asset.assets_to_cache.count(id)) scene_asset.assets_to_cache.insert(id);
+				};
+
+			// Collect all unique models and build combined vertex/index buffers
+			for (auto e : view) {
+
+				//Get mdl asset
+				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+				if (mdl.has_value()) {
+
+					//Retrieve model GUID and insert
+					Assets::GUID mdl_id = mdl.value().get().modelGUID;
+					cacheAsset(mdl_id);
+
+					//Retrieve material
+					auto const& mat_vec = mdl.value().get().materials;
+					for (auto const& mat_inst : mat_vec) {
+
+						//optional material asset
+						auto materialAssetOpt = assetManager->getAsset<Assets::Material>(mat_inst.materialGUID);
+
+						// Load material asset
+						auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+						//Check material asset
+						if (materialAsset) {
+
+							//Insert material GUID into asset to cache
+							cacheAsset(mat_inst.materialGUID);
+
+							//Insert textures within materials to cache
+							{
+								//Albedo Texture
+								std::optional<std::shared_ptr<Assets::Texture>> tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.albedoTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Normal texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.normalTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Metallic texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.metallicTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Roughness texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.roughnessTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//AO texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.aoTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Emissive texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.emissiveTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Height texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.heightTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Opacity texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.opacityTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+							}
+						}
+					}
+				}
+
+				//Get audio asset
+				auto audio = ecs->getEntityComponent<Audio::AudioSource>(e);
+				if (audio.has_value()) {
+
+					//Cache the audio source
+					cacheAsset(audio.value().get().selected_audio);
+				}
+			}
+		}
+
 		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
 
 			//Capture all camera variables
@@ -583,6 +729,9 @@ namespace PAIN {
 			sceneJson["layers"] = layersJson;
 			sceneJson["mask_matrix"] = scn_asset.mask_matrix;
 
+			//Assets cache
+			sceneJson["assets"] = scn_asset.assets_to_cache;
+
 			// Entity data
 			sceneJson["ecs"] = scn_asset.entityData;
 
@@ -624,6 +773,9 @@ namespace PAIN {
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
+
+			//Clear existing cache and cache new assets
+			cacheSceneAssets(scn_asset);
 
 			//Failed to build entities
 			if (!buildEntitiesFromAsset(scn_asset)) {
@@ -990,7 +1142,6 @@ namespace PAIN {
 			unloadScene();
 		}
 
-
 		void SceneManager::deleteScene(Assets::GUID const& id) {
 
 			//Get asset manager
@@ -1042,6 +1193,9 @@ namespace PAIN {
 
 			//Capture current ECS state
 			currentSceneAsset->entityData = captureCurrentEntities();
+
+			//Capture assets to cache
+			captureCachedAssets(*currentSceneAsset);
 
 			//Capture the scene variables
 			captureSceneVariables(*currentSceneAsset);
