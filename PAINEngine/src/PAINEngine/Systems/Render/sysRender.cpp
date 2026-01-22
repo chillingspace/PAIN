@@ -1,7 +1,6 @@
 ﻿#include "sysRender.h"
 #include "pch.h"
 
-
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Renderer/text.h"
@@ -454,36 +453,47 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
             half_extents = glm::vec3(0.5f) * trans.scale;
           }
 
-          // Calculate scaled offset
-          glm::vec3 scaled_offset =
-              shape.offset * trans.scale * rb.collider_scale;
+          // Calculate scaled offset (note: offset does NOT scale by
+          // collider_scale per physics engine)
+          glm::vec3 scaled_offset = shape.offset * trans.scale;
 
           // Entity rotation combined with shape local rotation
           glm::quat entity_rot = glm::normalize(trans.rotation);
           glm::quat shape_rot = glm::normalize(shape.rotation);
           glm::quat combined_rot = entity_rot * shape_rot;
 
-          // Calculate 8 corners of OBB and find AABB
-          glm::vec3 min_aabb(std::numeric_limits<float>::max());
-          glm::vec3 max_aabb(std::numeric_limits<float>::lowest());
+          // Check if entity has any rotation (non-identity quaternion)
+          bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
+                             glm::abs(trans.rotation.x) > 0.0001f ||
+                             glm::abs(trans.rotation.y) > 0.0001f ||
+                             glm::abs(trans.rotation.z) > 0.0001f;
 
-          for (int i = 0; i < 8; ++i) {
-            glm::vec3 corner;
-            corner.x = (i & 1) ? half_extents.x : -half_extents.x;
-            corner.y = (i & 2) ? half_extents.y : -half_extents.y;
-            corner.z = (i & 4) ? half_extents.z : -half_extents.z;
+          if (hasRotation) {
+            // Calculate 8 corners of OBB for oriented visualization
+            glm::vec3 corners[8];
+            for (int i = 0; i < 8; ++i) {
+              glm::vec3 corner;
+              corner.x = (i & 1) ? half_extents.x : -half_extents.x;
+              corner.y = (i & 2) ? half_extents.y : -half_extents.y;
+              corner.z = (i & 4) ? half_extents.z : -half_extents.z;
 
-            // Apply shape offset + corner, then combined rotation, then entity
-            // position
-            glm::vec3 local_point = scaled_offset + corner;
-            glm::vec3 world_point = trans.position + (entity_rot * local_point);
+              // Apply combined rotation to the corner, add offset, then rotate
+              // by entity, then translate
+              glm::vec3 rotated_corner = combined_rot * corner;
+              glm::vec3 rotated_offset = entity_rot * scaled_offset;
+              corners[i] = trans.position + rotated_offset + rotated_corner;
+            }
 
-            min_aabb = glm::min(min_aabb, world_point);
-            max_aabb = glm::max(max_aabb, world_point);
+            // Use OBB rendering for rotated entities
+            rendererService->w_renderer->DebugPassOBB(corners, color, scene);
+          } else {
+            // No rotation - use faster AABB path
+            glm::vec3 center = trans.position + scaled_offset;
+            glm::vec3 min_aabb = center - half_extents;
+            glm::vec3 max_aabb = center + half_extents;
+            rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
+                                                   scene);
           }
-
-          rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
-                                                 scene);
           shapeIndex++;
         }
       } else {
@@ -494,25 +504,35 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
         glm::vec3 half_extents = 0.5f * trans.scale * rb.collider_scale;
         glm::quat rotation = glm::normalize(trans.rotation);
 
-        glm::vec3 min_aabb(std::numeric_limits<float>::max());
-        glm::vec3 max_aabb(std::numeric_limits<float>::lowest());
+        // Check if entity has any rotation (non-identity quaternion)
+        bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
+                           glm::abs(trans.rotation.x) > 0.0001f ||
+                           glm::abs(trans.rotation.y) > 0.0001f ||
+                           glm::abs(trans.rotation.z) > 0.0001f;
 
-        for (int i = 0; i < 8; ++i) {
-          glm::vec3 corner;
-          corner.x = (i & 1) ? half_extents.x : -half_extents.x;
-          corner.y = (i & 2) ? half_extents.y : -half_extents.y;
-          corner.z = (i & 4) ? half_extents.z : -half_extents.z;
+        if (hasRotation) {
+          // Calculate 8 corners of OBB for oriented visualization
+          glm::vec3 corners[8];
+          for (int i = 0; i < 8; ++i) {
+            glm::vec3 corner;
+            corner.x = (i & 1) ? half_extents.x : -half_extents.x;
+            corner.y = (i & 2) ? half_extents.y : -half_extents.y;
+            corner.z = (i & 4) ? half_extents.z : -half_extents.z;
 
-          glm::vec3 body_space_point = offset_scaled + corner;
-          glm::vec3 world_point =
-              trans.position + (rotation * body_space_point);
+            glm::vec3 body_space_point = offset_scaled + corner;
+            corners[i] = trans.position + (rotation * body_space_point);
+          }
 
-          min_aabb = glm::min(min_aabb, world_point);
-          max_aabb = glm::max(max_aabb, world_point);
+          // Use OBB rendering for rotated entities
+          rendererService->w_renderer->DebugPassOBB(corners, color, scene);
+        } else {
+          // No rotation - use faster AABB path
+          glm::vec3 center = trans.position + offset_scaled;
+          glm::vec3 min_aabb = center - half_extents;
+          glm::vec3 max_aabb = center + half_extents;
+          rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
+                                                 scene);
         }
-
-        rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
-                                               scene);
       }
     }
   }
