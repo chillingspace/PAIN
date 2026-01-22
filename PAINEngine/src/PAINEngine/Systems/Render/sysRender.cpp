@@ -1,6 +1,7 @@
 ﻿#include "sysRender.h"
 #include "pch.h"
 
+
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Renderer/text.h"
@@ -471,7 +472,7 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
           if (hasRotation) {
             // Calculate 8 corners of OBB for oriented visualization
             // Order must match edge list: back face (0,1,2,3), front face
-            // (4,5,6,7) going around each face in sequence
+            // (4,5,6,7)
             glm::vec3 he = half_extents;
             glm::vec3 local_corners[8] = {
                 glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
@@ -519,18 +520,12 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
 
         if (hasRotation) {
           // Calculate 8 corners of OBB for oriented visualization
-          // Order must match edge list: back face (0,1,2,3), front face
-          // (4,5,6,7)
           glm::vec3 he = half_extents;
           glm::vec3 local_corners[8] = {
-              glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
-              glm::vec3(+he.x, -he.y, -he.z), // 1: back-bottom-right
-              glm::vec3(+he.x, +he.y, -he.z), // 2: back-top-right
-              glm::vec3(-he.x, +he.y, -he.z), // 3: back-top-left
-              glm::vec3(-he.x, -he.y, +he.z), // 4: front-bottom-left
-              glm::vec3(+he.x, -he.y, +he.z), // 5: front-bottom-right
-              glm::vec3(+he.x, +he.y, +he.z), // 6: front-top-right
-              glm::vec3(-he.x, +he.y, +he.z), // 7: front-top-left
+              glm::vec3(-he.x, -he.y, -he.z), glm::vec3(+he.x, -he.y, -he.z),
+              glm::vec3(+he.x, +he.y, -he.z), glm::vec3(-he.x, +he.y, -he.z),
+              glm::vec3(-he.x, -he.y, +he.z), glm::vec3(+he.x, -he.y, +he.z),
+              glm::vec3(+he.x, +he.y, +he.z), glm::vec3(-he.x, +he.y, +he.z),
           };
 
           glm::vec3 corners[8];
