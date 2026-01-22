@@ -148,6 +148,7 @@ namespace PAIN {
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void batchCacheAssets(std::unordered_set<GUID> batch_ids);
 			void uncacheAsset(GUID const& id);
+			void clearAssetCache();
 #ifdef PN_PLATFORM_WINDOWS
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
 			void reshipAsset(GUID const& id);

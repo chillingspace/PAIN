@@ -396,6 +396,11 @@ namespace PAIN {
 				cache_it = asset_cache.erase(cache_it);
 			}
 		}
+
+		void Manager::clearAssetCache() {
+			asset_cache.clear();
+		}
+
 #ifdef PN_PLATFORM_WINDOWS
 		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
 			//Uncache asset

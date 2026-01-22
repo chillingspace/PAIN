@@ -68,6 +68,14 @@ namespace PAIN {
             }
         };
 
+        inline void to_json(nlohmann::json& j, const GUID& guid) {
+            j = guid.ToString(true);
+        }
+
+        inline void from_json(const nlohmann::json& j, GUID& guid) {
+            guid = GUID(j.get<std::string>());
+        }
+
         //Asset types
         enum class Type {
             Texture,    // .png, .jpg, .jpeg, .hdr, .tex
