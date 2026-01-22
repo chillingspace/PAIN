@@ -380,6 +380,9 @@ namespace PAIN {
 
 			//Batch cache all assets from scene
 			assetMananger->batchCacheAssets(scene_asset.assets_to_cache);
+
+			//Batch upload all textures to GPU
+			assetMananger->batchUploadAllCachedTextures();
 		}
 
 		nlohmann::json SceneManager::captureCurrentEntities() {

@@ -547,7 +547,7 @@ namespace PAIN {
         }
 #endif
 
-        std::shared_ptr<Texture> Loader::ImportTexture(std::string const& virtual_path) const {
+        void Loader::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
 
             // ========================================
             // SAVE ACTIVE TEXTURE UNIT
@@ -565,15 +565,6 @@ namespace PAIN {
 
             // Clear any errors
             while (glGetError() != GL_NO_ERROR);
-
-            auto tex = std::make_shared<Texture>();
-
-            // EXTRACT DATA (PLATFORM-SPECIFIC)
-#ifdef PN_PLATFORM_ANDROID
-            extractKTX(virtual_path, tex);
-#else
-            extractDDS(virtual_path, tex);
-#endif
 
             // VALIDATE EXTRACTED DATA
             if (tex->mipOffsets.size() != tex->mipSizes.size()) {
@@ -714,8 +705,20 @@ namespace PAIN {
             // RESTORE ACTIVE TEXTURE UNIT
             // ========================================
             glActiveTexture(activeTextureUnit);
+        }
 
-            PN_CORE_TRACE("Texture load complete, restored unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
+        std::shared_ptr<Texture> Loader::ImportTexture(std::string const& virtual_path) const {
+
+            auto tex = std::make_shared<Texture>();
+
+            // EXTRACT DATA (PLATFORM-SPECIFIC)
+#ifdef PN_PLATFORM_ANDROID
+            extractKTX(virtual_path, tex);
+#else
+            extractDDS(virtual_path, tex);
+#endif
+
+            PN_CORE_TRACE("Texture {} loaded, not uploaded to GPU yet.", virtual_path);
             return tex;
         }
 

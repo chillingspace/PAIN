@@ -118,10 +118,19 @@ namespace PAIN {
 					asset->type = asset_registry[id]->type;
 				}
 
+				//Check for texture assets
+				if (asset.get()->type == Assets::Type::Texture) {
+
+					//Cast and check gl texture
+					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset);
+					if (!tex->gl_texture) asset_loader->uploadTexture(tex);
+				}
+
 				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
 				if (!typed_asset) {
 					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
 				}
+
 				return typed_asset;
 			}
 
@@ -147,6 +156,7 @@ namespace PAIN {
 			//Caching of assets
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
 			void batchCacheAssets(std::unordered_set<GUID> batch_ids);
+			void batchUploadAllCachedTextures();
 			void uncacheAsset(GUID const& id);
 			void clearAssetCache();
 #ifdef PN_PLATFORM_WINDOWS

@@ -389,6 +389,18 @@ namespace PAIN {
 			}
 		}
 
+		void Manager::batchUploadAllCachedTextures() {
+			//Find all assets with type
+			for (auto const& asset : asset_cache) {
+				if (asset.second->type == Assets::Type::Texture) {
+
+					//Cast and check gl texture
+					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset.second);
+					if (!tex->gl_texture) asset_loader->uploadTexture(tex);
+				}
+			}
+		}
+
 		void Manager::uncacheAsset(GUID const& id) {
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
