@@ -12,6 +12,9 @@ namespace PAIN {
         struct Shader : public IAsset {
         private:
             uint32_t m_RendererID = 0;
+
+            //Shader loc cached
+            std::unordered_map<std::string, GLint> loc_map;
         public:
 
             Shader() = default;
@@ -32,24 +35,24 @@ namespace PAIN {
             // Set uniform helpers
 
             // Set a uniform var of type glm::mat4
-            void SetUniform(const std::string& name, const glm::mat4& m) const;
+            void SetUniform(const std::string& name, const glm::mat4& m);
 
             // Set a uniform var of type glm::vec4
-            void SetUniform(const std::string& name, const glm::vec4& val) const;
+            void SetUniform(const std::string& name, const glm::vec4& val);
 
             // Set a uniform var of type glm::vec3
-            void SetUniform(const std::string& name, const glm::vec3& val) const;
+            void SetUniform(const std::string& name, const glm::vec3& val);
 
-            void SetUniform(const std::string& name, const glm::vec2& val) const;
+            void SetUniform(const std::string& name, const glm::vec2& val);
 
             // Set a uniform var of type glm::vec3 (float x , y , z)
-            void SetUniform(const std::string& name, float x, float y, float z) const;
+            void SetUniform(const std::string& name, float x, float y, float z);
 
             // Set a uniform var of type float
-            void SetUniform(const std::string& name, float val) const;
+            void SetUniform(const std::string& name, float val);
 
             // Set a uniform var of type int
-            void SetUniform(const std::string& name, int val) const;
+            void SetUniform(const std::string& name, int val);
         };
 	}
 }

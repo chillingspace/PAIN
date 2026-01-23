@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "bloom_blend.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 5244557090097998489
+  },
+  "descriptor_version": 1,
+  "guid": "4d85fe8f-9802-8248-b502-90871f0d826f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\bloom_blend.frag"
+  }
+}

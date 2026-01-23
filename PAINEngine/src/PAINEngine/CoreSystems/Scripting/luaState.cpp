@@ -1,5 +1,6 @@
  #include "luaState.h"
  #include "Utility/Log.h"
+ #include "Core.h"
  #include <fstream>
 
 // Shipping sandbox switch (default ON). In dev you can override at compile time.
@@ -218,6 +219,13 @@ namespace {
      L_.set_function("log_info", [](const std::string& s) {
          PN_INFO("[Lua] %s\n", s.c_str());
          });
+
+     // Quit application function
+     L_.set_function("quitApplication", []() {
+         PN_INFO("[Lua] Quitting application...\n");
+         PAIN::g_shouldQuitApplication = true;
+         });
  }
+
 
  } // namespace PAIN::Scripting

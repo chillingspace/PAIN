@@ -383,7 +383,10 @@ namespace PAIN {
 
             PN_CORE_INFO("Total KTX data: {} bytes", tex->data.size());
 
+            //Free up memory
             ktxTexture_Destroy(kTexture);
+            kTexture = nullptr;
+            std::vector<uint8_t>().swap(data);
         }
 #else
         void Loader::extractDDS(std::string const& virtual_path, std::shared_ptr<Texture> tex) const {
@@ -395,6 +398,7 @@ namespace PAIN {
             size_t read = stream->read(data.data(), data.size());
             if (read != data.size())
                 throw std::runtime_error("Failed to read full DDS file: " + virtual_path);
+            stream = nullptr;
 
             size_t offset = 0;
 
@@ -494,10 +498,6 @@ namespace PAIN {
                 throw std::runtime_error("Legacy DDS format detected. Only DX10 format supported!");
             }
 
-            tex->data.clear();
-            tex->mipOffsets.clear();
-            tex->mipSizes.clear();
-
             uint32_t dwCaps2 = header[28];
             tex->is_cube_map = (dwCaps2 & 0x200) != 0;
             int faces = tex->is_cube_map ? 6 : 1;
@@ -542,28 +542,12 @@ namespace PAIN {
 
             PN_CORE_INFO("Total DDS data: {} bytes", tex->data.size());
 
-            stream = nullptr;
+            //Free up memory
+            std::vector<uint8_t>().swap(data);
         }
 #endif
 
         std::shared_ptr<Texture> Loader::ImportTexture(std::string const& virtual_path) const {
-
-            // ========================================
-            // SAVE ACTIVE TEXTURE UNIT
-            // ========================================
-            GLint activeTextureUnit;
-            glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
-
-            PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
-
-            // ========================================
-            // RESET TO TEXTURE UNIT 0 FOR LOADING
-            // ========================================
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            // Clear any errors
-            while (glGetError() != GL_NO_ERROR);
 
             auto tex = std::make_shared<Texture>();
 
@@ -574,140 +558,7 @@ namespace PAIN {
             extractDDS(virtual_path, tex);
 #endif
 
-            // VALIDATE EXTRACTED DATA
-            if (tex->mipOffsets.size() != tex->mipSizes.size()) {
-                throw std::runtime_error("Mip offset/size mismatch!");
-            }
-
-            size_t expectedMips = tex->is_cube_map ? (tex->mips * 6) : tex->mips;
-            if (tex->mipOffsets.size() != expectedMips) {
-                PN_CORE_WARN("Expected {} mip entries, got {}", expectedMips, tex->mipOffsets.size());
-            }
-
-            //Generate textures
-            glGenTextures(1, &tex->gl_texture);
-
-            if (tex->is_cube_map) {
-                glBindTexture(GL_TEXTURE_CUBE_MAP, tex->gl_texture);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                GLfloat maxAniso = 1.0f;
-                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-                glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-
-                size_t dataIndex = 0;
-                for (int face = 0; face < 6; ++face) {
-                    for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                        if (dataIndex >= tex->mipOffsets.size()) {
-                            throw std::runtime_error("Ran out of mip data for cubemap!");
-                        }
-
-                        // USE STORED SIZES FROM EXTRACTION
-                        size_t offset = tex->mipOffsets[dataIndex];
-                        size_t mipSize = tex->mipSizes[dataIndex];
-
-                        int mipW = std::max(1, tex->width >> mip);
-                        int mipH = std::max(1, tex->height >> mip);
-
-                        if (offset + mipSize > tex->data.size()) {
-                            throw std::runtime_error("Mip data overflow at face " +
-                                std::to_string(face) + " mip " + std::to_string(mip));
-                        }
-
-                        glCompressedTexImage2D(
-                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-                            mip,
-                            tex->glTexFormat,
-                            mipW,
-                            mipH,
-                            0,
-                            static_cast<GLsizei>(mipSize),
-                            tex->data.data() + offset
-                        );
-
-                        GLenum err = glGetError();
-                        if (err != GL_NO_ERROR) {
-                            throw std::runtime_error("OpenGL error uploading mip " +
-                                std::to_string(mip) + ": 0x" +
-                                std::to_string(err));
-                        }
-
-                        dataIndex++;
-                    }
-                }
-
-                glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-            }
-            else {
-                glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                GLfloat maxAniso = 1.0f;
-                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-
-                for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                    if (mip >= tex->mipOffsets.size()) {
-                        throw std::runtime_error("Missing mip data for level " + std::to_string(mip));
-                    }
-
-                    // USE STORED SIZES FROM EXTRACTION
-                    size_t offset = tex->mipOffsets[mip];
-                    size_t mipSize = tex->mipSizes[mip];
-
-                    int mipW = std::max(1, tex->width >> mip);
-                    int mipH = std::max(1, tex->height >> mip);
-
-                    PN_CORE_TRACE("Uploading mip {}: {}x{}, {} bytes at offset {}",
-                        mip, mipW, mipH, mipSize, offset);
-
-                    if (offset + mipSize > tex->data.size()) {
-                        throw std::runtime_error("Mip data overflow at mip " + std::to_string(mip));
-                    }
-
-                    glCompressedTexImage2D(
-                        GL_TEXTURE_2D,
-                        mip,
-                        tex->glTexFormat,
-                        mipW,
-                        mipH,
-                        0,
-                        static_cast<GLsizei>(mipSize),
-                        tex->data.data() + offset
-                    );
-
-                    GLenum err = glGetError();
-                    if (err != GL_NO_ERROR) {
-                        PN_CORE_ERROR("OpenGL error uploading mip {}: 0x{:X}", mip, err);
-                        PN_CORE_ERROR("  Dimensions: {}x{}", mipW, mipH);
-                        PN_CORE_ERROR("  Size: {} bytes", mipSize);
-                        PN_CORE_ERROR("  Offset: {}", offset);
-                        PN_CORE_ERROR("  Format: 0x{:X}", tex->glTexFormat);
-                        throw std::runtime_error("OpenGL error uploading mip " + std::to_string(mip) +
-                            ": 0x" + std::to_string(err));
-                    }
-                }
-
-                glBindTexture(GL_TEXTURE_2D, 0);
-            }
-
-            // ========================================
-            // RESTORE ACTIVE TEXTURE UNIT
-            // ========================================
-            glActiveTexture(activeTextureUnit);
-
-            PN_CORE_TRACE("Texture load complete, restored unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
+            PN_CORE_TRACE("Texture {} loaded, not uploaded to GPU yet.", virtual_path);
             return tex;
         }
 
@@ -1349,6 +1200,11 @@ namespace PAIN {
                     }
                     sceneAsset->mask_matrix.push_back(matrixRow);
                 }
+            }
+
+            // Parse assets
+            if (sceneJson.contains("assets") && sceneJson["assets"].is_array()) {
+                sceneAsset->assets_to_cache = sceneJson["assets"].get<std::unordered_set<Assets::GUID>>();
             }
 
             // Store entity data as-is (will be parsed by SceneManager)

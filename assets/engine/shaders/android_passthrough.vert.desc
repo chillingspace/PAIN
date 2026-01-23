@@ -7,7 +7,7 @@
     "hash": 9064804415407429110
   },
   "descriptor_version": 1,
-  "guid": "841995a2-c3bd-e242-924c-e5d2491c6978",
+  "guid": "40c32542-34a8-2040-8c50-8861f367ed40",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_passthrough.vert"

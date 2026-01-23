@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Enemy1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 3903721787539330507
+  },
+  "descriptor_version": 1,
+  "guid": "343c90d7-50e4-9443-924d-1a4099c16af5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Enemy1.glb"
+  }
+}

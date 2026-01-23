@@ -210,6 +210,7 @@ namespace PAIN {
             case GLFW_KEY_C: return "C";
             case GLFW_KEY_E: return "E";
             case GLFW_KEY_H: return "H";
+            case GLFW_KEY_R: return "R";
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -229,6 +230,7 @@ namespace PAIN {
 
             case 67: return "C";
             case 72: return "H";
+            //case 83: return "R";
 
 #endif
 

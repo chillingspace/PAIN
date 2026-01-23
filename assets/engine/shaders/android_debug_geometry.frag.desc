@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_debug_geometry.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 11694332779475703141
+  },
+  "descriptor_version": 1,
+  "guid": "1cc5a9c2-7bf3-a848-ab61-9fb3e562c760",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_debug_geometry.frag"
+  }
+}

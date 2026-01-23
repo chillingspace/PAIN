@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Enemy1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13713805776120552558
+  },
+  "descriptor_version": 1,
+  "guid": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Enemy1_baseColor.png"
+  }
+}
