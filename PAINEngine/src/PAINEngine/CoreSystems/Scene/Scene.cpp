@@ -822,8 +822,7 @@ namespace PAIN {
 					size_t loadedAssets = 0;
 					PN_CORE_INFO("[AsyncLoader] Loading {} assets", totalAssets);
 					for (const auto& guid : assetGuids) {
-						assetManager->cacheAsset(guid);
-						loadedAssets++;
+						if(assetManager->cacheAsset(guid)) loadedAssets++;
 						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
 						loadingScreen.setProgress(progress);
 						if (loadedAssets % 10 == 0) {
@@ -873,9 +872,7 @@ namespace PAIN {
 			loadingScreen.setStatus("Initializing renderer...");
 			loadingScreen.setProgress(0.98f);
 			loadingScreen.render();
-			auto renderer = services->get<sRenderer>();
-			renderer->setScene(services->get<Scene::SceneManager>());
-			renderer->initSceneVbo();
+			services->get<sRenderer>()->initSceneVbo();
 #ifdef _DEBUG
 			{
 				auto editor = services->get<Editor::Editor>();
@@ -897,6 +894,9 @@ namespace PAIN {
 
 			//Get ECS Controller
 			auto ecs = services->get<ECS::Controller>();
+
+			//Set scecne manager for renderer
+			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
 
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);
