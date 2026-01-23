@@ -1,5 +1,5 @@
-﻿#include "ComponentsPanel.h"
-#include "pch.h"
+﻿#include "pch.h"
+#include "ComponentsPanel.h"
 
 #ifdef _DEBUG
 

@@ -388,6 +388,7 @@ namespace PAIN {
 
 			//Refresh editor resources only in debug mode
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 			{
 				auto editor = services->get<Editor::Editor>();
 				if (editor) {
@@ -395,6 +396,7 @@ namespace PAIN {
 					if (resource_panel) resource_panel->refreshResources();
 				}
 			}
+#endif
 #endif
 		}
 
