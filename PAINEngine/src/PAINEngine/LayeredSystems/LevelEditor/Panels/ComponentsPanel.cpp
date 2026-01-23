@@ -1,7 +1,6 @@
 ﻿#include "ComponentsPanel.h"
 #include "pch.h"
 
-
 #ifdef _DEBUG
 
 #include "../Editor.h"
@@ -9,7 +8,6 @@
 #include "ECS/sMetaData.h"
 #include "EntityPanel.h"
 #include "Systems/Transform/sysTransform.h"
-
 
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
@@ -560,8 +558,103 @@ void ComponentsPanel::onAttach() {
 
   // ---- CompoundCollider ----
   registerCompUIFunc<PAIN::CompoundCollider>(
-      "CompoundCollider", [](ComponentsPanel &, PAIN::CompoundCollider &cc) {
-        DrawWithReflection(cc);
+      "CompoundCollider", [](ComponentsPanel &, PAIN::CompoundCollider &comp) {
+        bool changed = false;
+
+        // Toggle for using compound collider
+        changed |=
+            ImGui::Checkbox("Use Compound Collider", &comp.useCompoundCollider);
+
+        if (!comp.useCompoundCollider) {
+          ImGui::TextDisabled("Enable to define custom collision shapes");
+          return;
+        }
+
+        ImGui::Separator();
+        ImGui::Text("Shapes (%zu)", comp.shapes.size());
+
+        // Add shape buttons
+        if (ImGui::Button("+ Box")) {
+          comp.addBox(glm::vec3(0.5f));
+          changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("+ Sphere")) {
+          comp.addSphere(0.5f);
+          changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("+ Capsule")) {
+          comp.addCapsule(0.25f, 0.5f);
+          changed = true;
+        }
+
+        ImGui::Separator();
+
+        // Edit each shape
+        int toRemove = -1;
+        for (size_t i = 0; i < comp.shapes.size(); ++i) {
+          auto &shape = comp.shapes[i];
+          ImGui::PushID(static_cast<int>(i));
+
+          // Shape type label
+          const char *typeNames[] = {"Box", "Sphere", "Capsule"};
+          int typeIndex = static_cast<int>(shape.type);
+          std::string header =
+              std::string(typeNames[typeIndex]) + " #" + std::to_string(i);
+
+          if (ImGui::CollapsingHeader(header.c_str(),
+                                      ImGuiTreeNodeFlags_DefaultOpen)) {
+            // Shape type selector
+            if (ImGui::Combo("Type", &typeIndex, typeNames, 3)) {
+              shape.type = static_cast<ColliderShapeType>(typeIndex);
+              changed = true;
+            }
+
+            // Common properties
+            changed |= ImGui::DragFloat3("Offset", &shape.offset.x, 0.01f);
+
+            // Type-specific properties
+            switch (shape.type) {
+            case ColliderShapeType::Box:
+              changed |=
+                  ImGui::DragFloat3("Half Extents", &shape.boxHalfExtents.x,
+                                    0.01f, 0.01f, 100.0f);
+              break;
+            case ColliderShapeType::Sphere:
+              changed |= ImGui::DragFloat("Radius", &shape.sphereRadius, 0.01f,
+                                          0.01f, 100.0f);
+              break;
+            case ColliderShapeType::Capsule:
+              changed |= ImGui::DragFloat("Radius", &shape.capsuleRadius, 0.01f,
+                                          0.01f, 100.0f);
+              changed |=
+                  ImGui::DragFloat("Half Height", &shape.capsuleHalfHeight,
+                                   0.01f, 0.01f, 100.0f);
+              break;
+            }
+
+            // Remove button
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+            if (ImGui::Button("Remove Shape")) {
+              toRemove = static_cast<int>(i);
+            }
+            ImGui::PopStyleColor();
+          }
+
+          ImGui::PopID();
+        }
+
+        // Remove shape if requested
+        if (toRemove >= 0) {
+          comp.shapes.erase(comp.shapes.begin() + toRemove);
+          changed = true;
+        }
+
+        if (comp.shapes.empty()) {
+          ImGui::TextDisabled("No shapes defined. Add shapes above.");
+        }
       });
 
   // ---- Script ----
