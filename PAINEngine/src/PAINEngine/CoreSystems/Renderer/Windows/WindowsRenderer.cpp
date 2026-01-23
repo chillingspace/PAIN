@@ -28,8 +28,9 @@ WindowsRenderer::~WindowsRenderer() { Cleanup(); }
 
 void WindowsRenderer::initSceneVbo() {
 
-  if (!geometry_vbo)
-    throw std::runtime_error("Init not yet called!");
+
+
+  if (!geometry_vbo) return;
 
   // Initialize Buffers
   PN_CORE_INFO("Initializing New Buffers");
