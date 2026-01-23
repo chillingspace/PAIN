@@ -467,14 +467,10 @@
 				PN_CORE_WARN("================================");
 			}
 
-
 			void System::syncNewBodies(entt::registry& registry) {
-				// Use view to avoid group ownership conflict with onUpdate
 				auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 				for (auto&& [entity, rigidBody, transform] : view.each()) {
 
-					// Check if scale OR offset changed in editor
-					// If so, destroy the existing body so it can be recreated below with new settings
 					if (!rigidBody.bodyID.IsInvalid() &&
 						(rigidBody.collider_scale != rigidBody.last_applied_scale ||
 							rigidBody.collider_offset != rigidBody.last_applied_offset)) {
@@ -484,9 +480,7 @@
 						rigidBody.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
 					}
 
-					// Only create if not already created (or just destroyed above)
 					if (rigidBody.bodyID.IsInvalid()) {
-						// Get rotation
 						const glm::quat& q = glm::normalize(transform.rotation);
 
 						JPH::Quat rotationQuat(q.x,
@@ -494,18 +488,12 @@
 							q.z,
 							q.w); // Jolt uses x, y, z, w order
 
-						// Create Jolt body settings
-
-						// 1. Create the base BoxShape (Apply Scale)
-						// Note: Jolt BoxShape takes half-extents
 						JPH::Ref<JPH::Shape> finalShape = new JPH::BoxShape(
 							JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x,
 								.5f * transform.scale.y * rigidBody.collider_scale.y,
 								.5f * transform.scale.z * rigidBody.collider_scale.z),
 							.0f);
 
-						// 2. Apply Offset using RotatedTranslatedShape if needed
-						// We wrap the box shape in a transform shape to offset it from the entity center
 						if (rigidBody.collider_offset != glm::vec3(0.0f)) {
 							JPH::Vec3 offset(
 								rigidBody.collider_offset.x * transform.scale.x,
@@ -535,21 +523,27 @@
 							jolt_layer
 						);
 
-						settings.mAllowDynamicOrKinematic = true;  // Allow runtime motion type changes
+						settings.mAllowDynamicOrKinematic = true;
 
-						// tag body with owning entt::entity so contact listener can map back
 						settings.mUserData = static_cast<uint64_t>(static_cast<uint32_t>(entity));
 
 						settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
-						settings.mMassPropertiesOverride.mMass = 10.0f; // any positive number
-						settings.mMassPropertiesOverride.mInertia = JPH::Mat44::sScale(1.0f); // placeholder inertia tensor
-
+						settings.mMassPropertiesOverride.mMass = 10.f;
+						settings.mMassPropertiesOverride.mInertia = JPH::Mat44::sScale(1.f);
 						settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
+						settings.mFriction = .75f;
+						settings.mAngularDamping = 20.f;
+
+						settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX |
+												JPH::EAllowedDOFs::TranslationY |
+												JPH::EAllowedDOFs::TranslationZ;
+
+						JPH::Vec3 com_offset(0.0f, -0.3f * transform.scale.y, 0.0f);
+						settings.mMassPropertiesOverride.mInertia.SetTranslation(com_offset);
 
 						JPH::BodyID body_id = body_interface->CreateAndAddBody(settings, JPH::EActivation::Activate);
 						rigidBody.bodyID = body_id;
 
-						// Cache the values we just used so we can detect future changes
 						rigidBody.last_applied_scale = rigidBody.collider_scale;
 						rigidBody.last_applied_offset = rigidBody.collider_offset;
 
@@ -560,8 +554,8 @@
 						body_interface->SetAngularVelocity(body_id, JPH::Vec3::sZero());
 
 						PN_CORE_TRACE("Created Jolt body for entity {} with ID {}",
-							(uint32_t)entity,
-							rigidBody.bodyID.GetIndexAndSequenceNumber());
+									  (uint32_t)entity,
+									            rigidBody.bodyID.GetIndexAndSequenceNumber());
 					}
 				}
 			}
