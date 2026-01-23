@@ -7,7 +7,6 @@
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
-#include "CoreSystems/Renderer/sRenderer.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -24,9 +23,6 @@ namespace PAIN {
 			//Normalize path first
 			auto path_service = services->get<Path::Path>();
 			std::filesystem::path norm_path = path_service->normalizePath(relative_path.string());
-
-			//Use shared_lock for read-only operation (multiple readers allowed)
-			std::shared_lock<std::shared_mutex> lock(registry_mutex);
 			
 			//Find GUID
 			auto main_it = main_path_to_guid.find(norm_path);
@@ -221,7 +217,6 @@ namespace PAIN {
 		
 #ifdef PN_PLATFORM_WINDOWS
 		void Manager::registerAsset(std::filesystem::path const& relative_path) {
-
 			//Get path service
 			auto path_service = services->get<Path::Path>();
 
@@ -240,17 +235,12 @@ namespace PAIN {
 				//Check for valid guid
 				if (!i_asset.guid.IsValid()) return;
 
-				{
-					//Unique lock for writing
-					std::unique_lock<std::shared_mutex> lock(registry_mutex);
+				//Get asset registry data
+				asset_registry[i_asset.guid] = std::make_shared<IAsset>(i_asset);
 
-					//Get asset registry data
-					asset_registry[i_asset.guid] = std::make_shared<IAsset>(i_asset);
-
-					//Register paths to guid
-					shipped_path_to_guid[i_asset.shipped_relative_path] = i_asset.guid;
-					main_path_to_guid[i_asset.main_relative_path] = i_asset.guid;
-				}
+				//Register paths to guid
+				shipped_path_to_guid[i_asset.shipped_relative_path] = i_asset.guid;
+				main_path_to_guid[i_asset.main_relative_path] = i_asset.guid;
 			}
 		}
 #endif
@@ -259,9 +249,6 @@ namespace PAIN {
 
 			//Check to ensure that GUID is valid
 			if (!asset->guid.IsValid()) return;
-
-			//Unique lock for writing
-			std::unique_lock<std::shared_mutex> lock(registry_mutex);
 
 			//Get asset registry data
 			asset_registry[asset->guid] = asset;
@@ -305,46 +292,31 @@ namespace PAIN {
 		void Manager::unregisterAsset(GUID const& id) {
 
 			//Find cache it and uncache
-			{
-				std::unique_lock<std::shared_mutex> cache_lock(cache_mutex);
-				auto cache_it = asset_cache.find(id);
-				if (cache_it != asset_cache.end()) {
-					cache_it = asset_cache.erase(cache_it);
-				}
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				cache_it = asset_cache.erase(cache_it);
 			}
 
 			//Get asset registry data
-			{
-				std::unique_lock<std::shared_mutex> registry_lock(registry_mutex);
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
 
-				auto registry_it = asset_registry.find(id);
-				if (registry_it != asset_registry.end()) {
-
-					//Remove paths to guid
-					auto shipped_it = shipped_path_to_guid.find(registry_it->second->shipped_relative_path);
-					if (shipped_it != shipped_path_to_guid.end()) {
-						shipped_it = shipped_path_to_guid.erase(shipped_it);
-					}
-
-					auto main_it = main_path_to_guid.find(registry_it->second->main_relative_path);
-					if (main_it != main_path_to_guid.end()) {
-						main_it = main_path_to_guid.erase(main_it);
-					}
-
-					registry_it = asset_registry.erase(registry_it);
+				//Remove paths to guid
+				auto shipped_it = shipped_path_to_guid.find(registry_it->second->shipped_relative_path);
+				if (shipped_it != shipped_path_to_guid.end()) {
+					shipped_it = shipped_path_to_guid.erase(shipped_it);
 				}
+
+				auto main_it = main_path_to_guid.find(registry_it->second->main_relative_path);
+				if (main_it != main_path_to_guid.end()) {
+					main_it = main_path_to_guid.erase(main_it);
+				}
+
+				registry_it = asset_registry.erase(registry_it);
 			}
 		}
 
 		bool Manager::checkAssetRegistered(GUID const& id) const {
-			//Check if GUID is valid
-			if (!id.IsValid()) {
-				return false;
-			}
-
-			//Shared lock for reading
-			std::shared_lock<std::shared_mutex> lock(registry_mutex);
-
 			auto registry_it = asset_registry.find(id);
 			if (registry_it != asset_registry.end()) {
 				return true;
@@ -358,165 +330,74 @@ namespace PAIN {
 			//Find GUID
 			auto id = findGUID(relative_path);
 
-			return checkAssetRegistered(id);
+			auto registry_it = asset_registry.find(id);
+			if (registry_it != asset_registry.end()) {
+				return true;
+			}
+
+			return false;
 		}
 
-		void Manager::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
-			if (!tex->gl_texture) services->get<sRenderer>()->queueTexUpload(tex);
-		}
-
-		// Efficient double-checked locking for cacheAsset
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
-			// PHASE 1: Check if already cached (read lock) 
-			{
-				std::shared_lock<std::shared_mutex> cache_lock(cache_mutex);
-				auto cache_it = asset_cache.find(id);
-				if (cache_it != asset_cache.end()) {
-					return cache_it->second;
-				}
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
 			}
 
-			// PHASE 2: Check if currently loading (avoid duplicate work) 
-			{
-				std::unique_lock<std::mutex> loading_lock(loading_mutex);
-
-				// Double-check cache again (another thread may have loaded it)
-				{
-					std::shared_lock<std::shared_mutex> cache_lock(cache_mutex);
-					auto cache_it = asset_cache.find(id);
-					if (cache_it != asset_cache.end()) {
-						return cache_it->second;
-					}
-				}
-
-				// Check if another thread is already loading this asset
-				if (loading_assets.find(id) != loading_assets.end()) {
-					// Another thread is loading - wait for it
-					loading_lock.unlock();
-
-					// Spin-wait until loading completes (or use condition_variable)
-					while (true) {
-						std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-						std::shared_lock<std::shared_mutex> cache_lock(cache_mutex);
-						auto cache_it = asset_cache.find(id);
-						if (cache_it != asset_cache.end()) {
-							return cache_it->second;
-						}
-					}
-				}
-
-				// Mark as loading
-				loading_assets.insert(id);
+			//Check asset cache
+			auto cache_it = asset_cache.find(id);
+			if (cache_it != asset_cache.end()) {
+				return cache_it->second;
 			}
 
-			// PHASE 3: Load asset data (get registry info) 
-			std::shared_ptr<IAsset> asset_data;
-			{
-				std::shared_lock<std::shared_mutex> registry_lock(registry_mutex);
-				auto registry_it = asset_registry.find(id);
-				if (registry_it == asset_registry.end()) {
-					// Cleanup loading flag
-					std::unique_lock<std::mutex> loading_lock(loading_mutex);
-					loading_assets.erase(id);
-					throw std::runtime_error("Asset not in registry!");
-				}
-				asset_data = registry_it->second;
-			}
+			//Resolve asset path
+			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, registry_it->second->shipped_relative_path.string());
 
-			// PHASE 4: Load asset (NO LOCKS - can take seconds) 
-			auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(
-				Path::assets_alias,
-				asset_data->shipped_relative_path.string()
-			);
+			//Load assset through registered loaded
+			auto asset = asset_loader->GetLoader(registry_it->second->type)(virtual_path);
 
-			// CRITICAL: Load asset WITHOUT holding any locks
-			auto asset = asset_loader->GetLoader(asset_data->type)(virtual_path);
+			//Init asset registry var
+			asset->guid = registry_it->second->guid;
+			asset->main_relative_path = registry_it->second->main_relative_path;
+			asset->shipped_relative_path = registry_it->second->shipped_relative_path;
+			asset->name = registry_it->second->name;
+			asset->type = registry_it->second->type;
 
-			// Copy metadata
-			asset->guid = asset_data->guid;
-			asset->main_relative_path = asset_data->main_relative_path;
-			asset->shipped_relative_path = asset_data->shipped_relative_path;
-			asset->name = asset_data->name;
-			asset->type = asset_data->type;
-
-			//  PHASE 5: Insert into cache (write lock) 
-			{
-				std::unique_lock<std::shared_mutex> cache_lock(cache_mutex);
-				asset_cache.emplace(id, asset);
-			}
-
-			//  PHASE 6: Cleanup loading flag 
-			{
-				std::unique_lock<std::mutex> loading_lock(loading_mutex);
-				loading_assets.erase(id);
-			}
+			//Insert loaded asset into asset cache
+			asset_cache.emplace(id, asset);
 
 			return asset;
 		}
 
-		void Manager::batchCacheAssets(std::unordered_set<GUID> batch_ids) {
+		void Manager::batchCacheAssets(std::vector<GUID> batch_ids) {
 
 			//Get all batch ids
-			for (auto const& id : batch_ids) {
+			for (auto id : batch_ids) {
 
-				//Each cacheAsset call handles locking internally
-				try {
-					if (checkAssetRegistered(id) && !checkAssetCached(id)) {
+				//check registration
+				if (checkAssetRegistered(id)) {
+
+					//Check asset cache
+					if (!checkAssetCached(id)) {
+						
+						//Cache asset
 						cacheAsset(id);
 					}
 				}
-				catch (const std::exception& e) {
-					PN_CORE_ERROR("Failed to cache asset {}: {}", id.ToString(), e.what());
-				}
 			}
-		}
-
-		void Manager::batchUploadAllCachedTextures() {
-
-			std::unique_lock<std::shared_mutex> lock(cache_mutex);
-
-			//Find all assets with type
-			for (auto const& asset : asset_cache) {
-				if (asset.second->type == Assets::Type::Texture) {
-
-					//Cast and check gl texture
-					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset.second);
-					if (tex && !tex->gl_texture) uploadTexture(tex);
-				}
-			}
-
-			//Trigger batch uploading for next frame
-			services->get<sRenderer>()->batchUpload();
 		}
 
 		void Manager::uncacheAsset(GUID const& id) {
-
-			std::unique_lock<std::shared_mutex> lock(cache_mutex);
-
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
 			if (cache_it != asset_cache.end()) {
 				cache_it = asset_cache.erase(cache_it);
 			}
 		}
-
-		void Manager::clearAssetCache() {
-
-			std::unique_lock<std::shared_mutex> lock(cache_mutex);
-
-			//Clear asset cache except for shaders
-			for (auto it = asset_cache.begin(); it != asset_cache.end();) {
-
-				//Ensure that asset shader cache is not getting removed
-				if (it->second->type != Assets::Type::Shader) it = asset_cache.erase(it);
-				else ++it;
-			}
-		}
-
 #ifdef PN_PLATFORM_WINDOWS
 		std::shared_ptr<IAsset> Manager::recacheAsset(GUID const& id) {
-
 			//Uncache asset
 			uncacheAsset(id);
 
@@ -553,10 +434,6 @@ namespace PAIN {
 		}
 #endif
 		bool Manager::checkAssetCached(GUID const& id) const {
-
-			//Shared lock for reading
-			std::shared_lock<std::shared_mutex> lock(cache_mutex);
-
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
 			if (cache_it != asset_cache.end()) {
@@ -567,16 +444,6 @@ namespace PAIN {
 		}
 
 		std::shared_ptr<IAsset> Manager::getAssetData(GUID const& id) const {
-
-			//Check if GUID is valid
-			if (!id.IsValid()) {
-				//Asset doesnt exist in registry
-				throw std::runtime_error("Invalid GUID.");
-			}
-
-			//Thread safety
-			std::shared_lock<std::shared_mutex> lock(registry_mutex);
-
 			//Get asset registry data
 			auto registry_it = asset_registry.find(id);
 			if (registry_it == asset_registry.end()) {
@@ -590,16 +457,25 @@ namespace PAIN {
 			//Find GUID
 			auto id = findGUID(relative_path);
 
-			return getAssetData(id);
+			//Check if GUID is valid
+			if (!id.IsValid()) {
+				//Asset doesnt exist in registry
+				throw std::runtime_error("Invalid GUID.");
+			}
+
+			//Get asset registry data
+			auto registry_it = asset_registry.find(id);
+			if (registry_it == asset_registry.end()) {
+				throw std::runtime_error("Assset that does not exist in the registry! Unable to cache!");
+			}
+
+			return std::make_shared<IAsset>(*registry_it->second);
 		}
 
 		std::vector <std::shared_ptr<IAsset>> Manager::getAllAssetDataOfType(Type const& type) {
 
 			//Declare temp container
 			std::vector<std::shared_ptr<IAsset>> container;
-
-			//Thread safety
-			std::shared_lock<std::shared_mutex> lock(registry_mutex);
 
 			//Find all assets with type
 			for (auto const& asset : asset_registry) {

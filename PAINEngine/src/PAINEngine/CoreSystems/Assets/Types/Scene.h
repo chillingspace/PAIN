@@ -56,9 +56,6 @@ namespace PAIN {
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;
 
-            //Set of asset GUID to cache
-            std::unordered_set<Assets::GUID> assets_to_cache;
-
             //Entity data
             nlohmann::json entityData;
 

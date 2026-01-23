@@ -20,19 +20,11 @@ namespace PAIN {
         };
 
         class SurfaceCreated : public SurfaceEvent {
-        private:
-            int width, height;
         public:
-            SurfaceCreated(void* window, int w, int h) 
-                : SurfaceEvent(window), width(w), height(h) {}
-
-            int getWidth() const { return width; }
-            int getHeight() const { return height; }
+            SurfaceCreated(void* window) : SurfaceEvent(window) {}
 
             std::string toString() override {
-                std::stringstream ss;
-                ss << "Android Surface Created: " << width << "x" << height;
-                return ss.str();
+                return "Android Surface Created";
             }
 
             EVENT_CLASS_TYPE(SurfaceCreated);

@@ -67,8 +67,6 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetPosition(entt::entity entityId) = 0;
         virtual void SetPosition(entt::entity entityId, glm::vec3 p) = 0;
-        virtual glm::vec2 Get2DPosition(entt::entity entityId) = 0;
-        virtual void Set2DPosition(entt::entity entityId, glm::vec2 p) = 0;
         virtual glm::vec3 GetScale(entt::entity entityId) = 0;
         virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
         virtual glm::vec3 GetRotation(entt::entity entityId) = 0;

@@ -7,7 +7,7 @@
     "hash": 481450525595049104
   },
   "descriptor_version": 1,
-  "guid": "c7be8677-0815-3f42-9408-1f9f6408b829",
+  "guid": "9a15367b-5f69-fc47-8525-72999ec050ad",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_gamma.frag"

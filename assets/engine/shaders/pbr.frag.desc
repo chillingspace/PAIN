@@ -7,7 +7,7 @@
     "hash": 12461019305837069103
   },
   "descriptor_version": 1,
-  "guid": "ddcff416-657d-2e4c-aabc-65b43b54fdff",
+  "guid": "77d8f413-df11-3040-92f3-d470263ed446",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\pbr.frag"

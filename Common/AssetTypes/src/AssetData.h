@@ -59,22 +59,7 @@ namespace PAIN {
             bool operator!=(const GUID& other) const noexcept {
                 return !(*this == other);
             }
-
-            bool operator<(const GUID& other) const noexcept {
-                return std::lexicographical_compare(
-                    std::begin(bytes), std::end(bytes),
-                    std::begin(other.bytes), std::end(other.bytes)
-                );
-            }
         };
-
-        inline void to_json(nlohmann::json& j, const GUID& guid) {
-            j = guid.ToString(true);
-        }
-
-        inline void from_json(const nlohmann::json& j, GUID& guid) {
-            guid = GUID(j.get<std::string>());
-        }
 
         //Asset types
         enum class Type {
@@ -323,48 +308,36 @@ namespace PAIN {
         static std::filesystem::path findProjectRoot() {
             // Get the actual executable directory
             std::filesystem::path execDir = getExecutablePath();
-            std::cout << "[Info] Executable directory: " << execDir << std::endl;
+
+            std::cout << "Executable directory: " << execDir << std::endl;
 
             // Search upward from executable location
             std::filesystem::path currentPath = execDir;
-            std::filesystem::path fallbackPath;
-            bool foundFallback = false;
 
             for (int levels = 0; levels < 25; levels++) {
-                // Strong markers - these definitely indicate the source root
-                if (std::filesystem::exists(currentPath / "build.bat") || 
-                    std::filesystem::exists(currentPath / "CMakeLists.txt") ||
-                    std::filesystem::exists(currentPath / ".git")) {
-                    
-                    std::cout << "[Info] Found project root (Strong Marker): " << currentPath << std::endl;
+                std::filesystem::path readme = currentPath / "README.md";
+                std::filesystem::path buildbat = currentPath / "build.bat";
+
+
+                if (std::filesystem::exists(readme) || std::filesystem::exists(buildbat)) {
+                    std::cout << "Found project root: " << currentPath << std::endl;
                     return currentPath;
                 }
                 
-                // Weak marker - found an assets folder
-                // We store this but keep searching in case we are just in bin/Debug/
-                // which might have a copy of assets but isn't the true source root.
-                if (!foundFallback) {
-                    std::filesystem::path asset_dir = currentPath / "assets";
-                    if (std::filesystem::exists(asset_dir) && std::filesystem::is_directory(asset_dir)) {
-                         fallbackPath = currentPath;
-                         foundFallback = true;
-                    }
+                // Check for "assets" folder for portable/release builds
+                std::filesystem::path asset_dir = currentPath / "assets";
+                if (std::filesystem::exists(asset_dir) && std::filesystem::is_directory(asset_dir)) {
+                     std::cout << "Found project root (via assets): " << currentPath << std::endl;
+                     return currentPath;
                 }
 
-                if (currentPath.has_parent_path() && currentPath != currentPath.root_path()) {
-                    currentPath = currentPath.parent_path();
-                } else {
+                currentPath = currentPath.parent_path();
+                if (currentPath.empty() || currentPath == currentPath.root_path()) {
                     break;
                 }
             }
 
-            // If we didn't find a strong marker (e.g. portable build), use the fallback
-            if (foundFallback) {
-                std::cout << "[Info] Using accessible project root (Weak Marker): " << fallbackPath << std::endl;
-                return fallbackPath;
-            }
-
-            std::cerr << "[Error] Could not find project root containing Assets/ directory or build markers" << std::endl;
+            std::cerr << "Could not find project root containing Assets/ directory" << std::endl;
             throw std::runtime_error("Could not find project root containing Assets/ directory");
         }
 

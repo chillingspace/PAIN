@@ -29,10 +29,9 @@ namespace PAIN {
             // Get system name
             std::string getSysName() const override { return "UI Animation System"; }
 
-
+        private:
+            float easeInOut(float t);
         };
-
-
     }
 }
 

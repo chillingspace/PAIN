@@ -51,8 +51,8 @@ namespace PAIN {
 			void terminateDisplay();
 
 			//Private internal functions
-			void init();
-			void shutdown();
+			virtual void init();
+			virtual void shutdown();
 
 			//Static callbacks
 			static int32_t handle_input(android_app* app, AInputEvent* event);
@@ -64,8 +64,7 @@ namespace PAIN {
 			Android_Window(void* app, Package const& package);
 			~Android_Window() override;
 
-            //On detach as a service
-			void onDetach() override { shutdown(); }
+			virtual void onDetach() override { shutdown(); }
 
 			//Update
             void onFixedUpdate(AppTiming timing) override {}
@@ -86,7 +85,6 @@ namespace PAIN {
 			//Android swap buffers
 			void swapBuffers() override;
 
-            //Get android frame buffer size
 			glm::uvec2 getFrameBuffer() const override;
 
 			void safeShutdown() override;

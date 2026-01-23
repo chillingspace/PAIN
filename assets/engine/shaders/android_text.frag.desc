@@ -7,7 +7,7 @@
     "hash": 17895923432874285383
   },
   "descriptor_version": 1,
-  "guid": "d359fd9b-1c9f-8b4d-893e-de0ca940da68",
+  "guid": "436aa7ae-eb90-d04c-9e90-1b62eb28fd88",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_text.frag"

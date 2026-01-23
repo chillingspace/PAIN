@@ -21,8 +21,3 @@
 const std::string ENGINE_NAME = "Pain Engine";
 const unsigned int DEF_ENGINE_HEIGHT = 900;
 const unsigned int DEF_ENGINE_WIDTH = 1600;
-
-// Global application control flag
-namespace PAIN {
-    extern bool g_shouldQuitApplication;
-}

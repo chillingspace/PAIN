@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_bloom_blend.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15099341922813928511
+  },
+  "descriptor_version": 1,
+  "guid": "b9bb361b-c38b-1a4d-a32f-a06af71f248a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_bloom_blend.vert"
+  }
+}

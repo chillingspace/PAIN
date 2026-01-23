@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_tone.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 3629436311954064932
+  },
+  "descriptor_version": 1,
+  "guid": "3aef61f2-2d56-c646-8a14-1f9d81e57e79",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_tone.frag"
+  }
+}

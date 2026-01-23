@@ -20,156 +20,72 @@ namespace PAIN {
         }
 
         // SET UNIFORMS HELPERS
-        void Shader::SetUniform(const std::string& name, const glm::mat4& m)
+        void Shader::SetUniform(const std::string& name, const glm::mat4& m) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniformMatrix4fv(location, 1, GL_FALSE, &m[0][0]);
         }
 
-        void Shader::SetUniform(const std::string& name, const glm::vec4& val)
+        void Shader::SetUniform(const std::string& name, const glm::vec4& val) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform4f(location, val.x, val.y, val.z, val.w);
         }
 
-        void Shader::SetUniform(const std::string& name, const glm::vec3& val)
+        void Shader::SetUniform(const std::string& name, const glm::vec3& val) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform3f(location, val.x, val.y, val.z);
         }
 
-        void Shader::SetUniform(const std::string& name, const glm::vec2& val)
+        void Shader::SetUniform(const std::string& name, const glm::vec2& val) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform2f(location, val.x, val.y);
         }
 
-        void Shader::SetUniform(const std::string& name, float x, float y, float z)
+        void Shader::SetUniform(const std::string& name, float x, float y, float z) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform3f(location, x, y, z);
         }
 
-        void Shader::SetUniform(const std::string& name, float val)
+        void Shader::SetUniform(const std::string& name, float val) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform1f(location, val);
         }
 
-        void Shader::SetUniform(const std::string& name, int val)
+        void Shader::SetUniform(const std::string& name, int val) const
         {
-            //Location variable
-            GLint location = -1;
-
-            //Check loc map
-            if (loc_map.count(name)) {
-                location = loc_map[name];
-            }
-            else {
-                location = glGetUniformLocation(m_RendererID, name.c_str());
-                if (location == -1) {
-                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
-                    return;
-                }
-                else {
-                    loc_map[name] = location;
-                }
+            GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+            if (location == -1) {
+                //PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                return;
             }
             glUniform1i(location, val);
         }

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "tone.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4919463888033716715
+  },
+  "descriptor_version": 1,
+  "guid": "d35c7f8f-6ff9-2140-ab6b-319215aea71f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\tone.vert"
+  }
+}

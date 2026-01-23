@@ -8,10 +8,6 @@ local moveDown = false
 local jumpPressed = false
 local walkingSoundPlaying = false
 
--- Joystick input (set by UI drag callback)
-local joystickDirX = 0.0
-local joystickDirY = 0.0
-
 -- for UI button (on_click_callback_lua = "JumpButton_OnClick")
 _G_root.JumpButton_OnClick = function()
     printLog("[UI] Jump button pressed, setting jumpPressed")
@@ -26,17 +22,6 @@ _G_root.ActionButton_OnClick = function()
     if PlayerState and PlayerState.onActionButton then
         PlayerState.onActionButton()
     end
-end
-
--- Callback for joystick (on_click_callback_lua = "Joystick_OnDrag")
--- This function handles both drag (with x, y params) and click (no params)
-_G_root.Joystick_OnDrag = function(dirX, dirY)
-    -- If called with parameters, it's a drag event
-    if dirX ~= nil and dirY ~= nil then
-        joystickDirX = dirX
-        joystickDirY = dirY
-    end
-    -- If called without parameters, it's a click (can be ignored for joystick)
 end
 
 registerKeyDown("W", function() moveUp = true end)
@@ -71,48 +56,22 @@ registerUpdate(function(dt)
     local baseRx, baseRy, baseRz = getRotation(entityId)
     
     local id = entityId -- the entity script is attached to
-    
-    _G.PlayerEntity = id
-
-    -- log("[PlayerMovement] player:", tostring(_G.PlayerEntity))
 
     -- make sure see Input even if PlayerState loaded later
     if not I and _G.Input then
         I = _G.Input
     end
 
-    -- if not playerStateInited then
-    --     if PlayerState and PlayerState.init then
-    --         PlayerState.init(entityId)
-    --     end
-    --     playerStateInited = true
-    -- end
-
-    if PlayerState and PlayerState.init then
-        if not PlayerState.player or PlayerState.player ~= entityId then
+    if not playerStateInited then
+        if PlayerState and PlayerState.init then
             PlayerState.init(entityId)
         end
+        playerStateInited = true
     end
-
 
         if not S and _G.PlayerState then
         S = _G.PlayerState
     end
-
-    -- freeze player when game has ended (game over or win)
-    if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
-        -- stop walking audio
-        if walkingSoundPlaying and audioStop then
-            audioStop(id)
-            walkingSoundPlaying = false
-        end
-
-        -- stop movement
-        setVelocity(id, 0.0, 0.0, 0.0)
-        jumpPressed = false
-        return
-    end
-
 
     -- while hiding: stop movement + stop audio 
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
@@ -149,18 +108,12 @@ registerUpdate(function(dt)
     if moveLeft  then dx = dx + 1.0 end
     if moveRight then dx = dx - 1.0 end
 
-    -- 2. Android: left side of screen controls player movement (DISABLED - using virtual joystick instead)
-    --[[
+    -- 2. Android: left side of screen controls player movement
     if getMobileMoveAxes ~= nil then
         local mx, my = getMobileMoveAxes()  
         dx = dx + mx
         dz = dz - my
     end
-    --]]
-
-    -- 3. Virtual joystick input
-    dx = dx - joystickDirX
-    dz = dz + joystickDirY
 
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 

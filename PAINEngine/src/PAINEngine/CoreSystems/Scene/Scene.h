@@ -48,10 +48,8 @@ namespace PAIN {
             void setupCamera(SceneAsset const& scene_asset);
             void setupEnvironment(SceneAsset const& scene_asset);
             void setupLayers(SceneAsset const& scene_asset);
-            void cacheSceneAssets(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
             void recursiveCapture(entt::entity entity, nlohmann::json& jsonArray);
-            void captureCachedAssets(SceneAsset& scene_asset);
             void captureSceneVariables(SceneAsset& scene_asset);
             nlohmann::json convertSceneToJSON(SceneAsset& scn_asset);
 #ifdef PN_PLATFORM_WINDOWS
@@ -108,7 +106,6 @@ namespace PAIN {
             bool isPlaying() const { return is_playing; }
             void onPlay();
             void onStop();
-            void setPlaying(bool playing) { if (playing) is_playing = true; else is_playing = false; }
 
             //Accessor
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }

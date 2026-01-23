@@ -29,7 +29,7 @@ namespace PAIN {
 
 			//Register event
 			EVENT_CLASS_TYPE(WindowResize)
-			EVENT_CLASS_CATEGORY(Category::Application)
+				EVENT_CLASS_CATEGORY(Category::Application)
 		};
 
 		class WindowFocused : public Event {

@@ -41,12 +41,6 @@ _G.PlayerState = {
     sfxJump    = nil,
     sfxDrop    = nil,
 
-    -- end-game state
-    gameEnded   = false,
-    gameWon     = false,
-    uiEndScreen = nil,
-    spawnGraceTime = 0.0, --5.0
-
     _keysRegistered = false
 }
 
@@ -61,23 +55,12 @@ local S = _G.PlayerState
 local collectPressed = false
 local hidePressed = false
 
--- paths for end screens
-local GAMEOVER_TEX = "game/textures/gameover.png"
-local WIN_TEX = "game/textures/win screen.png"
-local CURRENT_SCENE_PATH = "proto2.scn"  
-local restartPressed = false
-
--- Heart UI textures
-local normalHeartTexture = "game/textures/heart normal.png"
-local greyHeartTexture   = "game/textures/heart grey.png"
-
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
     registerKeyDown("H", function() hidePressed = true end)
     registerKeyUp("H",   function() hidePressed = false end)
-    registerKeyDown("R", function() restartPressed = true end)
     
     -- mouse click and press (android) treated as a generic action
     if registerOnClick then
@@ -92,109 +75,8 @@ if not S._keysRegistered then
     S._keysRegistered = true
 end
 
--- Binds the heart entities
--- local function bindHearts()
---     S.heart1 = findEntity("heart_1")
---     S.heart2 = findEntity("heart_2")
---     S.heart3 = findEntity("heart_3")
--- end
-
--- -- Checks if heart entities are missing, then binds them if they are
--- local function heartBindingCheck()
---     if not S.heart1 or not S.heart2 or not S.heart3 then
---         bindHearts()
---     end
--- end
-
--- Tries to update hearts ui in case texture2d not set at init
--- local function tryUpdateHeartsUI()
---     if not (S.heart1 and S.heart2 and S.heart3) then return false end
-
---     local hearts = {S.heart1, S.heart2, S.heart3}
---     local ok = true
-
---     for i=1,3 do
---         local tex = (i <= S.lives) and normalHeartTexture or greyHeartTexture
---         ok = setUITexture(hearts[i], tex) and ok
---     end
---     return ok
--- end
-
-
-local function updateHeartsUI()
-    -- Store the player's lives
-    local hearts = {S.heart1, S.heart2, S.heart3}
-
-    -- Update each heart
-    for i = 1,3 do
-        local heart = hearts[i]
-        if heart then
-            -- Set to normal heart if true, grey if false
-            if i <= S.lives then
-                setUITexture(heart, normalHeartTexture)
-            else
-                setUITexture(heart, greyHeartTexture)
-            end
-        end
-    end
-end
-
-local function bindHeartsFromRegistry()
-    local hearts = _G.UI and _G.UI.hearts
-    if not hearts or #hearts < 3 then
-        return false
-    end
-
-    table.sort(hearts, function(a, b) return a.x < b.x end)
-
-    S.heart3 = (hearts[1] and hearts[1].id) or nil
-    S.heart2 = (hearts[2] and hearts[2].id) or nil
-    S.heart1 = (hearts[3] and hearts[3].id) or nil
-
-    return (S.heart1 and S.heart2 and S.heart3) ~= nil
-end
-
-
 -- called once when we first find the player
 function S.init(player)
-    -- Clear the stored UI entity ids
-    _G.UI = _G.UI or {}
-    _G.UI.hearts = {}
-
-    -- Check if current player is same as previous player (Respawn)
-    -- or non-existent (Fresh load)
-    local playerChanged = (S.player ~= player)
-
-    S.player = player
-
-    -- If we are coming into a freshly loaded scene after game over/win,
-    -- reset the core game state
-    if playerChanged or S.gameEnded or S.gameWon then
-        S.lives = 3
-        S.lettersDelivered = 0
-        S.carriedLetter = nil
-        S.hidden = false
-        S.hiddenIn = nil
-        S.respawnCooldown = 0.0
-        S.pendingRespawn = nil
-        S.gameEnded = false
-        S.gameWon = false
-        S.spawnGraceTime = 5.0
-
-         -- IMPORTANT: clear restart input so it doesn't instantly re-trigger
-        restartPressed = false
-        if I then
-            I.tapCount = 0
-            I.tapTimer = 0.0
-            I.doubleTapped = false
-        end
-
-        -- also clear any local action flags
-        collectPressed = false
-        hidePressed = false
-        
-    end
-
     if not S.player then
         S.player = player
         -- log("[PlayerState] S.player set to", tostring(player))
@@ -214,15 +96,9 @@ function S.init(player)
     end
 
     -- grab heart UI objects
-    -- bindHearts()
-    -- updateHeartsUI()
-
-    -- grab heart UI objects
-    S.pendingHeartBind = true
-    bindHeartsFromRegistry()
-    updateHeartsUI()
-
-    -- log("[Hearts bind] ", tostring(S.heart1), tostring(S.heart2), tostring(S.heart3))
+    S.heart1 = findEntity("heart_1")
+    S.heart2 = findEntity("heart_2")
+    S.heart3 = findEntity("heart_3")
 
     -- SFX entities
     if not S.sfxHideIn  then S.sfxHideIn  = findEntity("sfx_hide_in") end
@@ -232,16 +108,6 @@ function S.init(player)
     if not S.sfxJump    then S.sfxJump    = findEntity("sfx_jump") end
     if not S.sfxDrop    then S.sfxDrop    = findEntity("sfx_drop_collectible") end
 
-    -- end screen UI
-    if not S.uiEndScreen then
-        S.uiEndScreen = findEntity("end_screen")
-        -- ensure it starts blank
-        if S.uiEndScreen and setUITexture then
-            setUITexture(S.uiEndScreen, "")
-        end
-    end
-
-
 end
 
 local function playSfx(e)
@@ -249,31 +115,6 @@ local function playSfx(e)
         audioPlay(e)
     end
 end
-
-local function showEndScreen(texPath)
-    if S.uiEndScreen and setUITexture then
-        setUITexture(S.uiEndScreen, texPath)
-    end
-end
-
-local function triggerGameOver()
-    if S.gameEnded then return end  
-    S.gameEnded = true
-    S.gameWon   = false
-    showEndScreen(GAMEOVER_TEX)
-end
-
-local function triggerGameWin()
-    if S.gameEnded then return end
-    S.gameEnded = true
-    S.gameWon   = true
-    showEndScreen(WIN_TEX)
-end
-
-function S.isGameEnded()
-    return S.gameEnded
-end
-
 
 -- called by ui button, decides whether this press should hide/unhide or collect/deliver
 function S.onActionButton()
@@ -325,33 +166,11 @@ end
 
 
 function S.update(dt)
-    -- hearts ui
-    -- if S.heartsDirty then
-    --     if tryUpdateHeartsUI() then
-    --         S.heartsDirty = false
-    --     end
-    -- end
-    if S.pendingHeartBind then
-        if bindHeartsFromRegistry() then
-            S.pendingHeartBind = false
-            updateHeartsUI()
-            log("[Hearts bind] success", tostring(S.heart1), tostring(S.heart2), tostring(S.heart3))
-        end
-    end
-
-
     -- cooldown
     if S.respawnCooldown > 0 then
         S.respawnCooldown = S.respawnCooldown - dt
         if S.respawnCooldown < 0 then
             S.respawnCooldown = 0
-        end
-    end
-
-    if S.spawnGraceTime and S.spawnGraceTime > 0 then
-        S.spawnGraceTime = S.spawnGraceTime - dt
-        if S.spawnGraceTime < 0 then
-            S.spawnGraceTime = 0
         end
     end
 
@@ -367,27 +186,6 @@ function S.update(dt)
     if not S.player then
         return
     end
-
-    -- if the game has ended, wait for restart input only
-    if S.gameEnded then
-        -- simple restart triggers:
-        --   - R key on PC
-        --   - any tap/click on mobile (using the same tap system)
-        local wantRestart = restartPressed
-
-        if wantRestart and changeScene then
-            -- reset tap/input state so it doesn't re-trigger
-            restartPressed = false
-            I.tapCount = 0
-            I.tapTimer = 0.0
-            I.doubleTapped = false
-
-            changeScene(CURRENT_SCENE_PATH)
-        end
-
-        return -- don't run normal gameplay while on end screen
-    end
-
 
     ----------------------------------------------------------------
     -- tap / double-tap handling for generic input (click/touch)
@@ -614,7 +412,10 @@ function S.update(dt)
                 -- WIN CHECK
                 if S.lettersDelivered >= (S.lettersToWin or 3) then
                     log("[PlayerState] All letters delivered! YOU WIN")
-                    triggerGameWin()
+
+                    -- @TODO: hook win behaviour here
+                    -- changeScene("WinScene")
+
                 end
             end
         end
@@ -687,14 +488,6 @@ function S.canBeCaught()
         return false
     end
 
-    if S.gameEnded then
-        return false
-    end
-
-    if S.spawnGraceTime and S.spawnGraceTime > 0 then
-        return false
-    end
-
     return S.respawnCooldown <= 0
 end
 
@@ -718,6 +511,26 @@ function S.setCheckpoint(player, checkpointEntity)
     --log("[PlayerState] Checkpoint set at:", x, y, z)
 end
 
+-- local NORMAL_HEART_PATH = "game/textures/heart normal.png"
+-- local GREY_HEART_PATH   = "game/textures/heart grey.png"
+
+local function updateHeartsUI()
+    if S.heart1 then setUITexture(S.heart1, "game/textures/heart normal.png") end
+    if S.heart2 then setUITexture(S.heart2, "game/textures/heart normal.png") end
+    if S.heart3 then setUITexture(S.heart3, "game/textures/heart normal.png") end
+
+    -- hide hearts if > lives
+    if S.lives <= 2 and S.heart3 then
+        setUITexture(S.heart3, "game/textures/heart grey.png")
+    end
+    if S.lives <= 1 and S.heart2 then
+        setUITexture(S.heart2, "game/textures/heart grey.png")
+    end
+    if S.lives <= 0 and S.heart1 then
+        setUITexture(S.heart1, "game/textures/heart grey.png")
+    end
+end
+
 function S.onCaught(player)
     -- guard, dont recatch during cooldown
     if not S.canBeCaught() then
@@ -735,7 +548,6 @@ function S.onCaught(player)
     if S.lives < 0 then S.lives = 0 end
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
-    if S.lives <= 0 then triggerGameOver() return end
     playSfx(S.sfxRespawn)
 
     -- drop carried letter

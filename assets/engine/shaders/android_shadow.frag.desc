@@ -7,7 +7,7 @@
     "hash": 14646905730738188429
   },
   "descriptor_version": 1,
-  "guid": "899c066f-1327-554a-a2e9-967d98ae7396",
+  "guid": "09b7b014-c88d-cd41-adc0-4b5b60e59959",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_shadow.frag"

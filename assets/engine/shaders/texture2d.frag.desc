@@ -7,7 +7,7 @@
     "hash": 11338115205641800753
   },
   "descriptor_version": 1,
-  "guid": "619a6748-19da-114a-a62a-fa12a7bb1755",
+  "guid": "378c4193-ec03-ce4d-b3cf-e4452ab6e40e",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\texture2d.frag"

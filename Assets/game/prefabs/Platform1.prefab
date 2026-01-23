@@ -16,17 +16,17 @@
                             -100.0
                         ]
                     },
-                    "needsUpdate": true,
+                    "needsUpdate": false,
                     "worldAABB": {
                         "max": [
-                            0.22,
-                            0.11,
-                            0.13
+                            0.2459999918937683,
+                            0.1113993376493454,
+                            0.12300000339746475
                         ],
                         "min": [
-                            -0.22,
+                            -0.2460000365972519,
                             0.0,
-                            -0.13
+                            -0.12300000339746475
                         ]
                     }
                 },
@@ -52,9 +52,9 @@
                         1.0
                     ],
                     "scale": [
-                        0.10000000149011612,
-                        0.10000000149011612,
-                        0.10000000149011612
+                        0.001230000052601099,
+                        0.001230000052601099,
+                        0.001230000052601099
                     ]
                 },
                 "ModelRenderer": {
@@ -117,38 +117,6 @@
                         0.0,
                         0.0,
                         0.0
-                    ]
-                },
-                "CompoundCollider": {
-                    "useCompoundCollider": true,
-                    "shapes": [
-                        {
-                            "type": 0,
-                            "offset": [0.0, 0.08, 0.0],
-                            "rotation": [0.0, 0.0, 0.0, 1.0],
-                            "boxHalfExtents": [2.125, 0.08, 1.25],
-                            "sphereRadius": 0.5,
-                            "capsuleRadius": 0.25,
-                            "capsuleHalfHeight": 0.5
-                        },
-                        {
-                            "type": 0,
-                            "offset": [0.0, 0.544, -1.19],
-                            "rotation": [0.0, 0.0, 0.0, 1.0],
-                            "boxHalfExtents": [2.125, 0.454, 0.0625],
-                            "sphereRadius": 0.5,
-                            "capsuleRadius": 0.25,
-                            "capsuleHalfHeight": 0.5
-                        },
-                        {
-                            "type": 0,
-                            "offset": [0.0, 0.544, 1.19],
-                            "rotation": [0.0, 0.0, 0.0, 1.0],
-                            "boxHalfExtents": [2.125, 0.454, 0.0625],
-                            "sphereRadius": 0.5,
-                            "capsuleRadius": 0.25,
-                            "capsuleHalfHeight": 0.5
-                        }
                     ]
                 }
             },

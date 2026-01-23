@@ -89,7 +89,7 @@ namespace PAIN {
 			std::shared_ptr<Material> ImportMaterial(std::string const& virtual_path) const;
 
 			//Import scene
-			std::shared_ptr<Scene::SceneAsset> ImportScene(std::string const& virtual_path) const;\
+			std::shared_ptr<Scene::SceneAsset> ImportScene(std::string const& virtual_path) const;
 		};
 	}
 }

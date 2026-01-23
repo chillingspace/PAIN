@@ -448,7 +448,7 @@ namespace PAIN {
             auto rebuildEnd = std::chrono::high_resolution_clock::now();
 
             auto rebuildTime = std::chrono::duration_cast<std::chrono::microseconds>(rebuildEnd - rebuildStart).count();
-            PN_CORE_INFO("BVH rebuild complete: {} microseconds", rebuildTime);
+            PN_CORE_INFO("BVH rebuild complete: {} μs", rebuildTime);
 
             m_needsFullRebuild = false;
             m_lastEntityCount = m_bvhItems.size();

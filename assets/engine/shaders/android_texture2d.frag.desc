@@ -7,7 +7,7 @@
     "hash": 4920650670510174338
   },
   "descriptor_version": 1,
-  "guid": "30fb45b2-f459-bc4e-bf9e-8a2def0cc0f9",
+  "guid": "b22dae53-c16f-8045-ba99-9d395a5d7459",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_texture2d.frag"

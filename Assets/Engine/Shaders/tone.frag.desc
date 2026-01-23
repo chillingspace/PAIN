@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "tone.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 14730818865217628525
+  },
+  "descriptor_version": 1,
+  "guid": "5e8c4035-f927-6c48-82a1-12fddd04e83f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\tone.frag"
+  }
+}

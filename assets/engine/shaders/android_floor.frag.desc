@@ -7,7 +7,7 @@
     "hash": 4382668773091520512
   },
   "descriptor_version": 1,
-  "guid": "b7d569a8-33f6-7541-94b7-dc5d878d8cc8",
+  "guid": "fb7a3066-8736-0246-84b6-14b0b6e1d9ec",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_floor.frag"

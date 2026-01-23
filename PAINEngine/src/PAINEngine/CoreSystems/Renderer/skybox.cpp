@@ -17,7 +17,6 @@
 #endif
 
 #include "CoreSystems/Windows/Window.h"
-#include "CoreSystems/Renderer/sRenderer.h"
 
 namespace PAIN {
 	Skybox::Skybox() {
@@ -249,7 +248,6 @@ namespace PAIN {
 
 	void Skybox::setTexture(Assets::GUID const& id) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(id);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
 		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
 
 		// Clean up old resources
@@ -275,7 +273,6 @@ namespace PAIN {
 
 	void Skybox::setTexture(const std::filesystem::path& skybox_path) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
 		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
 
 		// Clean up old resources

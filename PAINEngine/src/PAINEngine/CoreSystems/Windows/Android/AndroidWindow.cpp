@@ -1,3 +1,4 @@
+#include <CoreSystems/Events/Android/OtherEvents.h>
 #include "pch.h"
 
 #ifdef PN_PLATFORM_ANDROID
@@ -15,9 +16,20 @@
 namespace PAIN {
 	namespace Window {
 
+        Window* Window::create(void* app, Package const& package) {
+            return new Android_Window(app, package);
+        }
+
+        Android_Window::Android_Window(void* app, Package const& package) {
+            m_App = static_cast<android_app*>(app);
+        }
+
+        Android_Window::~Android_Window() {
+            shutdown();
+        }
+
         bool Android_Window::initDisplay() {
             m_Display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
             if (m_Display == EGL_NO_DISPLAY) {
                 PN_CORE_ERROR("eglGetDisplay failed");
                 return false;
@@ -29,14 +41,14 @@ namespace PAIN {
                 return false;
             }
 
-            PN_CORE_INFO("EGL initialized: version %d.%d", major, minor);
             b_displayready = true;
+            PN_CORE_INFO("EGL initialized: %d.%d", major, minor);
             return true;
         }
 
         bool Android_Window::setConfig() {
+            // Initialize EGL
             const EGLint attribs[] = {
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
                 EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
                 EGL_BLUE_SIZE, 8,
                 EGL_GREEN_SIZE, 8,
@@ -44,85 +56,56 @@ namespace PAIN {
                 EGL_ALPHA_SIZE, 8,
                 EGL_DEPTH_SIZE, 24,
                 EGL_STENCIL_SIZE, 8,
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
                 EGL_NONE
             };
 
-            EGLint num_configs;
-            if (!eglChooseConfig(m_Display, attribs, &config, 1, &num_configs)) {
+            EGLint numConfigs;
+            if (!eglChooseConfig(m_Display, attribs, &config, 1, &numConfigs)) {
                 PN_CORE_ERROR("eglChooseConfig failed");
                 return false;
             }
 
-            if (num_configs == 0) {
-                PN_CORE_ERROR("No matching EGL configs found");
-                return false;
-            }
-
-            PN_CORE_INFO("EGL config set successfully");
+            b_initialized = true;
             return true;
         }
 
         bool Android_Window::createContext() {
-            const EGLint context_attribs[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 3,  // OpenGL ES 3.0
+            const EGLint ctxAttribs[] = {
+                EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL_NONE
             };
 
-            m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, context_attribs);
-
+            m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, ctxAttribs);
             if (m_Context == EGL_NO_CONTEXT) {
                 PN_CORE_ERROR("eglCreateContext failed");
                 return false;
             }
 
-            PN_CORE_INFO("EGL context created successfully");
             b_contextready = true;
             return true;
         }
 
         bool Android_Window::createSurface() {
-            if (!m_App->window) {
-                PN_CORE_ERROR("Native window is null, cannot create surface");
+            //Init app window
+            m_Window = m_App->window;
+
+            if (!m_Window) {
+                PN_CORE_ERROR("Cannot initialize Android_Window without native window!");
                 return false;
             }
 
-            m_Window = m_App->window;
-
-            // Set native window buffer format
-            EGLint format;
+            // Set native window format
+            EGLint format = 0;
             eglGetConfigAttrib(m_Display, config, EGL_NATIVE_VISUAL_ID, &format);
             ANativeWindow_setBuffersGeometry(m_Window, 0, 0, format);
 
-            // Create window surface
             m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
-
             if (m_Surface == EGL_NO_SURFACE) {
                 PN_CORE_ERROR("eglCreateWindowSurface failed");
                 return false;
             }
 
-            PN_CORE_INFO("EGL surface created successfully");
-            b_surfaceready = true;
-
-            // Query actual surface dimensions
-            if (!querySurfaceDimensions()) {
-                PN_CORE_ERROR("Failed to query surface dimensions");
-                return false;
-            }
-
-            // Make context current
-            if (!makeCurrent()) {
-                PN_CORE_ERROR("Failed to make context current");
-                return false;
-            }
-
-            // Set viewport
-            glViewport(0, 0, frame_buffer.x, frame_buffer.y);
-
-            // Mark window as active
-            b_active = true;
-
-            PN_CORE_INFO("Window surface ready and active");
             return true;
         }
 
@@ -132,125 +115,105 @@ namespace PAIN {
                 return false;
             }
 
-            PN_CORE_INFO("EGL context made current");
+            b_surfaceready = true;
             return true;
         }
 
         bool Android_Window::querySurfaceDimensions() {
+            // Query actual surface size
             EGLint width, height;
-
-            if (!eglQuerySurface(m_Display, m_Surface, EGL_WIDTH, &width)) {
-                PN_CORE_ERROR("Failed to query surface width");
-                return false;
-            }
-
-            if (!eglQuerySurface(m_Display, m_Surface, EGL_HEIGHT, &height)) {
-                PN_CORE_ERROR("Failed to query surface height");
-                return false;
-            }
-
+            eglQuerySurface(m_Display, m_Surface, EGL_WIDTH, &width);
+            eglQuerySurface(m_Display, m_Surface, EGL_HEIGHT, &height);
             frame_buffer.x = width;
             frame_buffer.y = height;
 
-            PN_CORE_INFO("Surface dimensions: %dx%d", width, height);
-            return true;
+            return (width > 0 && height > 0);
         }
 
         void Android_Window::destroySurface() {
             if (m_Surface != EGL_NO_SURFACE) {
-                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, m_Context);
                 eglDestroySurface(m_Display, m_Surface);
                 m_Surface = EGL_NO_SURFACE;
-                b_surfaceready = false;
-                b_active = false;
-                PN_CORE_INFO("EGL surface destroyed");
             }
+            m_Window = nullptr;
+            b_surfaceready = false;
+            b_active = false;
         }
 
         void Android_Window::destroyContext() {
             if (m_Context != EGL_NO_CONTEXT) {
+                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
                 eglDestroyContext(m_Display, m_Context);
                 m_Context = EGL_NO_CONTEXT;
-                b_contextready = false;
-                PN_CORE_INFO("EGL context destroyed");
             }
+            b_contextready = false;
+            b_active = false;
         }
 
         void Android_Window::terminateDisplay() {
             if (m_Display != EGL_NO_DISPLAY) {
+                eglMakeCurrent(m_Display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
                 eglTerminate(m_Display);
                 m_Display = EGL_NO_DISPLAY;
-                b_displayready = false;
-                PN_CORE_INFO("EGL display terminated");
             }
-        }
-
-        Window* Window::create(void* app, Package const& package) {
-            return new Android_Window(app, package);
-        }
-
-        Android_Window::Android_Window(void* app, Package const& package) {
-            m_App = static_cast<android_app*>(app);
-
-            if (!m_App) {
-                PN_CORE_ERROR("android_app* is null!");
-                throw std::runtime_error("Android app pointer is null");
-            }
-
-            // Store package info
-            frame_buffer.x = package.width;
-            frame_buffer.y = package.height;
-
-            // Initialize window
-            init();
-        }
-
-        Android_Window::~Android_Window() {
-            shutdown();
+            b_displayready = false;
+            b_initialized = false;
+            b_active = false;
         }
 
         void Android_Window::init() {
-            PN_CORE_INFO("Initializing Android Window");
 
-            // Initialize EGL display
-            if (!initDisplay()) {
-                PN_CORE_ERROR("Failed to initialize EGL display");
-                return;
+            //Setup windows
+            if (!b_displayready) {
+                if (!initDisplay()) PN_CORE_ERROR("DIPSLAY ERROR");
+            }
+            if (!b_initialized) { 
+                if (!setConfig()) PN_CORE_ERROR("CONFIG ERROR");
+            }
+            if (!b_contextready) {
+                if (!createContext()) PN_CORE_ERROR("CONTEXT ERROR");
             }
 
-            // Set EGL configuration
-            if (!setConfig()) {
-                PN_CORE_ERROR("Failed to set EGL config");
-                return;
+            //Setup surface
+            if (!b_surfaceready) {
+                if (!createSurface()) PN_CORE_ERROR("SURFACE ERROR");
+                if (!makeCurrent()) PN_CORE_ERROR("CONTEXT ERROR");
+                if (!querySurfaceDimensions()) PN_CORE_ERROR("QUERY ERROR");
+
+                frame_buffer.x = ANativeWindow_getWidth(m_Window);
+                frame_buffer.y = ANativeWindow_getHeight(m_Window);
+                glViewport(0, 0, frame_buffer.x, frame_buffer.y);
+
+                // Enable depth testing
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
             }
 
-            // Create EGL context
-            if (!createContext()) {
-                PN_CORE_ERROR("Failed to create EGL context");
-                return;
-            }
-
-            // Note: Surface creation happens in handle_cmd when APP_CMD_INIT_WINDOW arrives
-            // This is because m_App->window might not be ready yet
-
-            b_initialized = true;
-            PN_CORE_INFO("Android Window initialized successfully");
+            //Set window to active
+            b_active = true;
         }
 
         void Android_Window::shutdown() {
 
-            if (!b_initialized) return;
+            if (b_active) {
 
-            PN_CORE_INFO("Shutting down Android Window");
+                //Terminate all
+                if (b_surfaceready)destroySurface();
+                if (b_contextready)destroyContext();
+                if (b_initialized || b_displayready)terminateDisplay();
 
-            destroySurface();
-            destroyContext();
-            terminateDisplay();
+                //Ensure proper clearing
+                m_Window = nullptr;
+                m_App = nullptr;
+                m_Display = EGL_NO_DISPLAY;
+                config = nullptr;
+                m_Surface = EGL_NO_SURFACE;
+                m_Context = EGL_NO_CONTEXT;
+                PN_CORE_INFO("Android Window shut down");
 
-            b_initialized = false;
-            b_active = false;
-
-            PN_CORE_INFO("Android Window shutdown complete");
+                b_active = false;
+            }
         }
 
         int32_t Android_Window::handle_input(android_app* app, AInputEvent* event)
@@ -258,101 +221,144 @@ namespace PAIN {
             auto* package = static_cast<EventsPackage*>(app->userData);
             auto* e_app = static_cast<PAIN::Application*>(package->app);
 
-            if (!e_app || !event) {
-                return 0;
-            }
+            // Always enqueue a catch-all (useful for debugging/raw access)
+            e_app->pushEventQueue(std::make_shared<Event::AllEvent>(event));
 
-            int32_t event_type = AInputEvent_getType(event);
+            const int32_t type = AInputEvent_getType(event);
 
-            // Handle Motion Events (Touch)
-            if (event_type == AINPUT_EVENT_TYPE_MOTION) {
-                int32_t action = AMotionEvent_getAction(event);
-                int32_t action_code = action & AMOTION_EVENT_ACTION_MASK;
-                size_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+            if (type == AINPUT_EVENT_TYPE_MOTION)
+            {
+                // ========================================
+                // VALIDATE POINTER COUNT FIRST
+                // ========================================
+                const int32_t pointerCount = AMotionEvent_getPointerCount(event);
+
+                if (pointerCount == 0) {
+                    PN_CORE_WARN("MotionEvent has 0 pointers - ignoring");
+                    return 0;
+                }
+
+                const int32_t action = AMotionEvent_getAction(event);
+                if (action < 0) {
+                    PN_CORE_WARN("Rejecting motion event with invalid action: {}", action);
+                    return 1;
+                }
+                const int32_t actionMasked = action & AMOTION_EVENT_ACTION_MASK;
+                const int32_t actionIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
                     >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 
-                // Get pointer count
-                size_t pointer_count = AMotionEvent_getPointerCount(event);
-                if (pointer_count == 0) {
+                // ========================================
+                // VALIDATE ACTION INDEX
+                // ========================================
+                if (actionIndex < 0 || actionIndex >= pointerCount) {
+                    PN_CORE_ERROR("Invalid action index {} (pointer count: {})", actionIndex, pointerCount);
                     return 0;
                 }
 
-                // For multi-touch events (POINTER_DOWN/UP), use the specific pointer index
-                // For single touch events (DOWN/UP/MOVE), use index 0
-                if (action_code != AMOTION_EVENT_ACTION_POINTER_DOWN &&
-                    action_code != AMOTION_EVENT_ACTION_POINTER_UP) {
-                    pointer_index = 0;
-                }
-
-                // Ensure pointer_index is valid
-                if (pointer_index >= pointer_count) {
-                    pointer_index = 0;
-                }
-
-                // Extract touch data
-                float x = AMotionEvent_getX(event, pointer_index);
-                float y = AMotionEvent_getY(event, pointer_index);
-                int32_t pointer_id = AMotionEvent_getPointerId(event, pointer_index);
-
-                // Dispatch based on action
-                switch (action_code) {
+                switch (actionMasked) {
                 case AMOTION_EVENT_ACTION_DOWN:
-                case AMOTION_EVENT_ACTION_POINTER_DOWN:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchDown>(x, y, pointer_id));
-                    return 1; // Event consumed
+                case AMOTION_EVENT_ACTION_POINTER_DOWN: {
+                    // Use the specific pointer that went down
+                    const float x = AMotionEvent_getX(event, actionIndex);
+                    const float y = AMotionEvent_getY(event, actionIndex);
+                    const int32_t pointerId = AMotionEvent_getPointerId(event, actionIndex);
+
+                    // Validate coordinates
+                    if (std::isfinite(x) && std::isfinite(y)) {
+                        e_app->pushEventQueue(std::make_shared<Event::TouchDown>(x, y, pointerId));
+                        PN_CORE_TRACE("TouchDown: id={}, pos=({}, {})", pointerId, x, y);
+                    }
+                    else {
+                        PN_CORE_WARN("Invalid touch down coordinates: ({}, {})", x, y);
+                    }
+                    break;
+                }
 
                 case AMOTION_EVENT_ACTION_UP:
-                case AMOTION_EVENT_ACTION_POINTER_UP:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchUp>(x, y, pointer_id));
-                    return 1; // Event consumed
+                case AMOTION_EVENT_ACTION_POINTER_UP: {
+                    // Use the specific pointer that went up
+                    const float x = AMotionEvent_getX(event, actionIndex);
+                    const float y = AMotionEvent_getY(event, actionIndex);
+                    const int32_t pointerId = AMotionEvent_getPointerId(event, actionIndex);
 
-                case AMOTION_EVENT_ACTION_MOVE:
-                    // Move events contain data for all active pointers
-                    for (size_t i = 0; i < pointer_count; ++i) {
-                        float move_x = AMotionEvent_getX(event, i);
-                        float move_y = AMotionEvent_getY(event, i);
-                        int32_t move_id = AMotionEvent_getPointerId(event, i);
-                        e_app->pushEventQueue(std::make_shared<Event::TouchMove>(move_x, move_y, move_id));
+                    if (std::isfinite(x) && std::isfinite(y)) {
+                        e_app->pushEventQueue(std::make_shared<Event::TouchUp>(x, y, pointerId));
+                        PN_CORE_TRACE("TouchUp: id={}", pointerId);
                     }
-                    return 1; // Event consumed
+                    else {
+                        PN_CORE_WARN("Invalid touch up coordinates: ({}, {})", x, y);
+                    }
+                    break;
+                }
 
-                case AMOTION_EVENT_ACTION_CANCEL:
-                    e_app->pushEventQueue(std::make_shared<Event::TouchCancel>(x, y, pointer_id));
-                    return 1; // Event consumed
+                case AMOTION_EVENT_ACTION_MOVE: {
+                    // ========================================
+                    // MOVE EVENTS: PROCESS ALL ACTIVE POINTERS
+                    // ========================================
+                    for (int32_t i = 0; i < pointerCount; i++) {
+                        const float x = AMotionEvent_getX(event, i);
+                        const float y = AMotionEvent_getY(event, i);
+                        const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                        if (std::isfinite(x) && std::isfinite(y)) {
+                            e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                        }
+                        else {
+                            PN_CORE_WARN("Invalid touch move coordinates for pointer {}: ({}, {})",
+                                pointerId, x, y);
+                        }
+                    }
+
+                    // ========================================
+                    // OPTIONAL: PROCESS HISTORICAL DATA
+                    // (Provides smoother input for fast movements)
+                    // ========================================
+                    size_t historySize = AMotionEvent_getHistorySize(event);
+
+                    if (historySize > 0) {
+                        for (size_t h = 0; h < historySize; h++) {
+                            for (int32_t i = 0; i < pointerCount; i++) {
+                                const float x = AMotionEvent_getHistoricalX(event, i, h);
+                                const float y = AMotionEvent_getHistoricalY(event, i, h);
+                                const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                                if (std::isfinite(x) && std::isfinite(y)) {
+                                    e_app->pushEventQueue(std::make_shared<Event::TouchMove>(x, y, pointerId));
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                case AMOTION_EVENT_ACTION_CANCEL: {
+                    // ========================================
+                    // CANCEL: END ALL ACTIVE POINTERS
+                    // ========================================
+                    for (int32_t i = 0; i < pointerCount; i++) {
+                        const float x = AMotionEvent_getX(event, i);
+                        const float y = AMotionEvent_getY(event, i);
+                        const int32_t pointerId = AMotionEvent_getPointerId(event, i);
+
+                        if (std::isfinite(x) && std::isfinite(y)) {
+                            e_app->pushEventQueue(std::make_shared<Event::TouchCancel>(x, y, pointerId));
+                            PN_CORE_WARN("TouchCancel: id={}", pointerId);
+                        }
+                    }
+                    break;
+                }
 
                 default:
-                    // Unknown motion action
-                    return 0;
+                    PN_CORE_TRACE("Unhandled motion action: 0x{:X}", actionMasked);
+                    break;
                 }
             }
-
-            // Handle Key Events
-            else if (event_type == AINPUT_EVENT_TYPE_KEY) {
-                int32_t key_code = AKeyEvent_getKeyCode(event);
-                int32_t action = AKeyEvent_getAction(event);
-                int32_t meta_state = AKeyEvent_getMetaState(event);
-
-                // Special handling for back button
-                if (key_code == AKEYCODE_BACK) {
-                    // Only dispatch on key up to avoid duplicates
-                    if (action == AKEY_EVENT_ACTION_UP) {
-                        e_app->pushEventQueue(std::make_shared<Event::BackButton>());
-                    }
-                    return 1; // Consume back button to prevent default app termination
-                }
-
-                // Handle other key events
-                if (action == AKEY_EVENT_ACTION_DOWN) {
-                    e_app->pushEventQueue(std::make_shared<Event::AndroidKeyDown>(key_code, meta_state));
-                    return 1; // Event consumed
-                }
-                else if (action == AKEY_EVENT_ACTION_UP) {
-                    e_app->pushEventQueue(std::make_shared<Event::AndroidKeyUp>(key_code, meta_state));
-                    return 1; // Event consumed
-                }
+            else if (type == AINPUT_EVENT_TYPE_KEY)
+            {
+                // Key events - future implementation
             }
 
-            return 0; // Event not handled
+            return 0; // not consumed
         }
 
 
@@ -366,59 +372,29 @@ namespace PAIN {
 
             switch (cmd) {
             case APP_CMD_INIT_WINDOW:
-                PN_CORE_INFO("APP_CMD_INIT_WINDOW received");
-                if (e_window) {
-                    e_window->createSurface();
-
-                    // Dispatch window resize event
-                    if (e_app) {
-                        e_app->pushEventQueue(std::make_shared<Event::SurfaceCreated>(
-                            e_window->getNativeWindow(), 
-                            e_window->frame_buffer.x, 
-                            e_window->frame_buffer.y));
-                    }
-                }
+                e_window->init();
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceCreated>(e_window->getNativeWindow()));
                 break;
 
             case APP_CMD_TERM_WINDOW:
-                PN_CORE_INFO("APP_CMD_TERM_WINDOW received");
                 e_window->destroySurface();
-                if (e_app) {
-                    e_app->pushEventQueue(std::make_shared<Event::SurfaceDestroyed>(e_window->getNativeWindow()));
-                }
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceDestroyed>(e_window->getNativeWindow()));
                 break;
 
             case APP_CMD_WINDOW_RESIZED: {
-                PN_CORE_INFO("APP_CMD_WINDOW_RESIZED received");
-                if (e_window->b_surfaceready) {
-                    e_window->querySurfaceDimensions();
-
-                    // Dispatch window resize event
-                    if (e_app) {
-                        e_app->pushEventQueue(std::make_shared<Event::SurfaceChanged>(e_window->getNativeWindow(), e_window->frame_buffer.x, e_window->frame_buffer.y));
-                    }
-                }
+                // If you track framebuffer size in e_window, pass the latest values
+                const EGLint w = e_window->frame_buffer.x; // or query via eglQuerySurface
+                const EGLint h = e_window->frame_buffer.y;
+                e_app->pushEventQueue(std::make_shared<Event::SurfaceChanged>(e_window->getNativeWindow(), w, h));
                 break;
             }
 
             case APP_CMD_GAINED_FOCUS:
-                PN_CORE_INFO("APP_CMD_GAINED_FOCUS received");
-                e_window->b_active = true;
-
-                // Dispatch focus event
-                if (e_app) {
-                    e_app->pushEventQueue(std::make_shared<Event::FocusGained>());
-                }
+                e_app->pushEventQueue(std::make_shared<Event::FocusGained>());
                 break;
 
             case APP_CMD_LOST_FOCUS:
-                PN_CORE_INFO("APP_CMD_LOST_FOCUS received");
-                e_window->b_active = false;
-
-                // Dispatch focus event
-                if (e_app) {
-                    e_app->pushEventQueue(std::make_shared<Event::FocusLost>());
-                }
+                e_app->pushEventQueue(std::make_shared<Event::FocusLost>());
                 break;
 
             case APP_CMD_PAUSE:
@@ -460,18 +436,27 @@ namespace PAIN {
         void Android_Window::registerCallbacks(void* app) {
 
             //Create events package for android app handled
-            m_EventPackage = EventsPackage{ this, app };
+            m_EventPackage = EventsPackage{ this, m_App->userData };
             m_App->userData = &m_EventPackage;
 
             //Register callbacks
             m_App->onAppCmd = handle_cmd;
             m_App->onInputEvent = handle_input;
 
-            PN_CORE_INFO("Android callbacks registered");
+            //Wait for window to fully init
+            while (!b_active) {
+                int events;
+                android_poll_source* source;
 
-            //Poll events under windows is ready and opengl is ready
-            while (!b_surfaceready && !b_active) {
-                pollEvents();
+                //Process events waiting for game to init
+                while (ALooper_pollOnce(-1, nullptr, &events,
+                    (void**)&source) >= 0) {
+                    if (source) {
+                        source->process(m_App, source);
+                    }
+
+                    if (b_active) break;
+                }
             }
         }
 
@@ -480,22 +465,18 @@ namespace PAIN {
             int events;
             android_poll_source* source;
 
-            // Poll with timeout of 0 = non-blocking
-            // If window is not active, we could use -1 (blocking) to save battery
-            while (ALooper_pollOnce(b_active ? 0 : -1, nullptr, &events, (void**)&source) >= 0) {
+            // Process all pending events
+            while (ALooper_pollOnce(b_active ? 0 : -1, nullptr, &events,
+                (void**)&source) >= 0) {
                 if (source) {
                     source->process(m_App, source);
-                }
-
-                // Check if app is being destroyed
-                if (m_App->destroyRequested) {
-                    safeShutdown();
-                    break;
                 }
             }
         }
 
         void Android_Window::swapBuffers() {
+
+            //Swap buffers
             if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {
                 eglSwapBuffers(m_Display, m_Surface);
             }
@@ -511,19 +492,13 @@ namespace PAIN {
         glm::uvec2 Android_Window::getFrameBuffer() const {
             return frame_buffer;
         }
-
+        //
         void Android_Window::safeShutdown() {
-            auto* pain_app = static_cast<PAIN::Application*>(m_EventPackage.app);
-            if (pain_app) {
-                pain_app->terminate();
-            }
-            else {
-                shutdown();
-            }
+
         }
 
         bool Android_Window::isMinimized() const {
-            return !b_active || !b_surfaceready;
+            return false;
         }
 
         void Android_Window::setCursorMode(bool locked) {

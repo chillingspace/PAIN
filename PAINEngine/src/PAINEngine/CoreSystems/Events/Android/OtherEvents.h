@@ -83,7 +83,7 @@ namespace PAIN {
             }
 
             EVENT_CLASS_TYPE(BackButton);
-            EVENT_CLASS_CATEGORY(Category::Input | Category::Keyboard | Category::Application)
+            EVENT_CLASS_CATEGORY(Category::Input | Category::Application)
         };
 
         // Memory Events

@@ -7,7 +7,7 @@
     "hash": 18310604608081665680
   },
   "descriptor_version": 1,
-  "guid": "512d8386-60db-f045-8d5b-67bfa36fceee",
+  "guid": "37cc2290-763b-5b41-802b-adce3c1cbdca",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\skybox.vert"

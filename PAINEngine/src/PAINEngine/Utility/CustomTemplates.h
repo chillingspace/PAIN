@@ -47,7 +47,7 @@ namespace PAIN {
             template<class Iface>
             std::shared_ptr<Iface> get() const {
                 auto it = map_.find(std::type_index(typeid(Iface)));
-                if (it == map_.end()) return nullptr;
+                if (it == map_.end()) return {};
                 return std::static_pointer_cast<Iface>(it->second.ptr);
             }
 
