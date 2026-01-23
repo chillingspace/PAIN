@@ -19,6 +19,10 @@
 #include "Systems/Scripting/GameScriptingSystem.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
+#include "LoadingScreen.h"
+
+#include <thread>
+#include <atomic>
 
 namespace PAIN {
 	namespace Scene {
@@ -782,28 +786,111 @@ namespace PAIN {
 #endif
 
 		void SceneManager::configScene(SceneAsset const& scn_asset) {
-			PN_CORE_ERROR("[SceneManager] CONFIGING SCENE");
-
-			//Build new scene
+			PN_CORE_INFO("[SceneManager] Starting async scene configuration");
+			// ========================================
+			// PHASE 1: Main Thread Setup (Fast, No I/O)
+			// ========================================
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
-
-			//Clear existing cache and cache new assets
-			cacheSceneAssets(scn_asset);
-
-			//Failed to build entities
-			if (!buildEntitiesFromAsset(scn_asset)) {
-				PN_CORE_ERROR("[SceneManager] Failed to build entities from scene asset");
+			// Clear existing asset cache
+			auto assetManager = services->get<Assets::Manager>();
+			assetManager->clearAssetCache();
+			auto window = services->get<Window::Window>();
+			// ========================================
+			// PHASE 2: Initialize Loading Screen
+			// ========================================
+			LoadingScreen loadingScreen;
+			loadingScreen.init(window);
+			loadingScreen.setStatus("Initializing scene...");
+			loadingScreen.setProgress(0.0f);
+			loadingScreen.render();
+			// ========================================
+			// PHASE 3: Launch Worker Thread for Asset Loading
+			// ========================================
+			std::atomic<bool> loadingComplete{ false };
+			std::atomic<bool> loadingFailed{ false };
+			std::string errorMessage;
+			std::thread workerThread([&]() {
+				try {
+					PN_CORE_INFO("[AsyncLoader] Worker thread started");
+					// Step 1: Load all assets (CPU-only, thread-safe)
+					loadingScreen.setStatus("Loading scene assets...");
+					loadingScreen.setProgress(0.1f);
+					const auto& assetGuids = scn_asset.assets_to_cache;
+					size_t totalAssets = assetGuids.size();
+					size_t loadedAssets = 0;
+					PN_CORE_INFO("[AsyncLoader] Loading {} assets", totalAssets);
+					for (const auto& guid : assetGuids) {
+						assetManager->cacheAsset(guid);
+						loadedAssets++;
+						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
+						loadingScreen.setProgress(progress);
+						if (loadedAssets % 10 == 0) {
+							PN_CORE_INFO("[AsyncLoader] Loaded {}/{} assets", loadedAssets, totalAssets);
+						}
+					}
+					PN_CORE_INFO("[AsyncLoader] All assets loaded");
+					// Step 2: Build entities (CPU-only)
+					loadingScreen.setStatus("Building scene entities...");
+					loadingScreen.setProgress(0.7f);
+					if (!buildEntitiesFromAsset(scn_asset)) {
+						throw std::runtime_error("Failed to build entities from scene asset");
+					}
+					loadingScreen.setProgress(0.9f);
+					PN_CORE_INFO("[AsyncLoader] Worker thread complete");
+				}
+				catch (const std::exception& e) {
+					PN_CORE_ERROR("[AsyncLoader] Worker thread failed: {}", e.what());
+					errorMessage = e.what();
+					loadingFailed.store(true);
+				}
+				loadingComplete.store(true);
+				});
+			// ========================================
+			// PHASE 4: Render Loading Screen Loop
+			// ========================================
+			PN_CORE_INFO("[SceneManager] Entering loading screen render loop");
+			while (!loadingComplete.load()) {
+				loadingScreen.render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			}
+			workerThread.join();
+			PN_CORE_INFO("[SceneManager] Worker thread joined");
+			if (loadingFailed.load()) {
+				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
+				loadingScreen.cleanup();
 				return;
 			}
-
-			// set scene in renderer
+			// ========================================
+			// PHASE 5: Finalize on Main Thread (GPU)
+			// ========================================
+			loadingScreen.setStatus("Uploading textures to GPU...");
+			loadingScreen.setProgress(0.95f);
+			loadingScreen.render();
+			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
+			assetManager->batchUploadAllCachedTextures();
+			loadingScreen.setStatus("Initializing renderer...");
+			loadingScreen.setProgress(0.98f);
+			loadingScreen.render();
 			auto renderer = services->get<sRenderer>();
 			renderer->setScene(services->get<Scene::SceneManager>());
-
-			// init vbo for scene
 			renderer->initSceneVbo();
+#ifdef _DEBUG
+			{
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+				}
+			}
+#endif
+			loadingScreen.setProgress(1.0f);
+			loadingScreen.setStatus("Complete!");
+			loadingScreen.render();
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			loadingScreen.cleanup();
+			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
 		void SceneManager::onAttach() {

@@ -117,18 +117,18 @@ namespace PAIN {
 		// Renderer
 		addCoreSystem(std::make_shared<sRenderer>());
 
-		// Scenes
-		addCoreSystem(std::make_shared<Scene::SceneManager>());
-
-		// Camera System
-		addCoreSystem(std::make_shared<sCameraController>());
-
 		//Editor only added when debug mode
 #ifdef _DEBUG
 		// !NOTE: IMGUI eats events
 		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
 		addLayerSystem(editor);
 #endif
+
+		// Scenes management
+		addCoreSystem(std::make_shared<Scene::SceneManager>());
+
+		// Camera System
+		addCoreSystem(std::make_shared<sCameraController>());
 
 
 #ifdef _DEBUG
