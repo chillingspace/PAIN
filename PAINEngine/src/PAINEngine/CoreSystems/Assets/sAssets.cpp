@@ -497,7 +497,13 @@ namespace PAIN {
 
 			std::unique_lock<std::shared_mutex> lock(cache_mutex);
 
-			asset_cache.clear();
+			//Clear asset cache except for shaders
+			for (auto it = asset_cache.begin(); it != asset_cache.end();) {
+
+				//Ensure that asset shader cache is not getting removed
+				if (it->second->type != Assets::Type::Shader) it = asset_cache.erase(it);
+				else ++it;
+			}
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
