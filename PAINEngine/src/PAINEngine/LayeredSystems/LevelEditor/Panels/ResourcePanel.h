@@ -93,6 +93,9 @@ namespace PAIN {
                 void setScriptSaved(bool is_script_changed);
                 bool getScriptSaved();
 
+                //Public refresh
+                void refreshResources();
+
             private:
 
                 // ----------------------------

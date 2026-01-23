@@ -18,6 +18,8 @@
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
 
+#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
+
 namespace PAIN {
 	namespace Scene {
 
@@ -383,6 +385,17 @@ namespace PAIN {
 
 			//Batch upload all textures to GPU
 			assetMananger->batchUploadAllCachedTextures();
+
+			//Refresh editor resources only in debug mode
+#ifdef _DEBUG
+			{
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+				}
+			}
+#endif
 		}
 
 		nlohmann::json SceneManager::captureCurrentEntities() {

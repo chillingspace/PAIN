@@ -212,6 +212,16 @@ namespace PAIN {
 				}
 			}
 
+			void ResourcePanel::refreshResources() {
+				//Reset directory cache
+				directoryCache.clear();
+				populateDirectoryCache(current_path);
+
+				//Update directories & files
+				populateDirs(current_path);
+				populateFiles(current_path);
+			}
+
 			void ResourcePanel::populateDirectoryCache(std::filesystem::path const& path) {
 				if (directoryCache.count(path) > 0) return; // Already cached
 
@@ -508,7 +518,7 @@ namespace PAIN {
 				renderPopUpContext(virtual_path);
 
 				//Display all directories
-				for (const auto& dir : directories) {
+				for (auto& dir : directories) {
 
 					//Skip dir not matching searching filter
 					if (dir.file_name.find(search_filter) == dir.file_name.npos) {
@@ -524,7 +534,7 @@ namespace PAIN {
 					++shown_count;
 
 					//Folder icon
-					ImTextureID icon = dir.icon ? dir.icon : 0;
+					ImTextureID icon = dir.icon;
 
 					//Display directory icon
 					ImVec2 uv0(0.0f, 0.0f);
@@ -580,7 +590,7 @@ namespace PAIN {
 				}
 
 				//Display all files
-				for (const auto& file : files) {
+				for (auto& file : files) {
 
 					//Skip file not matching searching filter
 					if (file.file_name.find(search_filter) == file.file_name.npos) {
@@ -631,6 +641,8 @@ namespace PAIN {
 					//Begin file group
 					ImGui::BeginGroup();
 					++shown_count;
+
+					if (!file.icon) PN_CORE_INFO("Invalid!");
 
 					//Extension cases
 					ImTextureID icon = file.icon ? file.icon : 0;
@@ -2158,13 +2170,8 @@ namespace PAIN {
 								//Reset timer
 								auto_refresh_timer = 0.0f;
 
-								//Reset directory cache
-								directoryCache.clear();
-								populateDirectoryCache(current_path);
-
-								//Update directories & files
-								populateDirs(current_path);
-								populateFiles(current_path);
+								//Refresh resources
+								refreshResources();
 							}
 						}
 
