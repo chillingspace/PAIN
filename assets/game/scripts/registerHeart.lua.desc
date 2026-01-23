@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "registerHeart.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 10872018775462051206
+  },
+  "descriptor_version": 1,
+  "guid": "357751f9-ce90-1a4a-9151-75339efa9e50",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\registerHeart.lua"
+  }
+}
