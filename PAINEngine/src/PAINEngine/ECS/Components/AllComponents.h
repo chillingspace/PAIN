@@ -1,33 +1,12 @@
-﻿/*****************************************************************/ /**
-                                                                     * \file
-                                                                     * AllComponents.h
-                                                                     * \brief
-                                                                     * All
-                                                                     * physics
-                                                                     * data
-                                                                     * components
-                                                                     *
-                                                                     * \author
-                                                                     * Bryan
-                                                                     * Lim,
-                                                                     * 2301214,
-                                                                     * bryanlicheng.l@digipen.edu
-                                                                     * (100%)
-                                                                     * \co-author
-                                                                     * \date
-                                                                     * September
-                                                                     * 2025 All
-                                                                     * content
-                                                                     * 2024
-                                                                     * DigiPen
-                                                                     * Institute
-                                                                     * of
-                                                                     * Technology
-                                                                     * Singapore,
-                                                                     * all
-                                                                     * rights
-                                                                     * reserved.
-                                                                     *********************************************************************/
+﻿/*****************************************************************//**
+ * \file   AllComponents.h
+ * \brief  All physics data components
+ *
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
+ * \co-author
+ * \date   September 2025
+ * All content 2024 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
 
 #pragma once
 
