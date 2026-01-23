@@ -7,7 +7,7 @@
     "hash": 11076646984706826292
   },
   "descriptor_version": 1,
-  "guid": "78e8dbb8-cf88-b849-9215-5eac08f9707f",
+  "guid": "d70b221d-10b5-6b46-9342-622de53c098f",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_eqr_to_skybox.vert"

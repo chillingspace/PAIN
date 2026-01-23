@@ -26,10 +26,6 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
-
-
-
-
 namespace PAIN {
 
 	Application::Application() {
@@ -83,10 +79,6 @@ namespace PAIN {
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// Match viewport to window size
-		auto window = services->get<Window::Window>();
-
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
 		services->get<Path::Path>()->logVirtualPaths();
@@ -118,6 +110,7 @@ namespace PAIN {
 
 		// Register components here
 		services->get<ECS::Controller>()->registerAllComponents();
+
 		// Register all systems here
 		services->get<ECS::Controller>()->registerAllSystems();
 
@@ -144,133 +137,137 @@ namespace PAIN {
 		PN_CORE_INFO("Testing Lua on Release");
 #endif
 
-			//Mark engine as ready
-			b_app_running = true;
-		}
-	
+		//Mark engine as ready
+		b_app_running = true;
+	}
+
 	void Application::Run() {
 
-	//Set last time
-	last_time = std::chrono::steady_clock::now();
+		//Set last time
+		last_time = std::chrono::steady_clock::now();
 
-	//Application loop
-	while (b_app_running) {
+		//Application loop - MODIFIED: Added g_shouldQuitApplication check
+		while (b_app_running && !g_shouldQuitApplication) {
 
-		//Poll events
-		auto window = services->get<Window::Window>();
-		if (window) window->pollEvents();
-
-		if (window->isMinimized()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			continue; // Go back to start of while loop
-		}
-
-		//Drain all events in queue
-		drainEventQueue();
-
-		//Update delta time
-		auto now = std::chrono::steady_clock::now();
-		float real_dt = std::chrono::duration<float>(now - last_time).count();
-		last_time = now;
-
-		// Store Unscaled Time (Always ticking even when paused)
-		timing.unscaled_dt = real_dt;
-
-		auto fps = static_cast<int>(1.f / timing.unscaled_dt);
-#ifdef PN_PLATFORM_WINDOWS
-		static float avgFps = 0.f;
-		static float timeSinceLastUpdate = 0.0f;
-
-		avgFps = avgFps * 0.95f + fps * 0.05f;
-		timeSinceLastUpdate += timing.unscaled_dt;
-
-		if (timeSinceLastUpdate >= 0.5f) {
-			timeSinceLastUpdate = 0.0f;
+			//Poll events
 			auto window = services->get<Window::Window>();
-			std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
-			glfwSetWindowTitle(
-				reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
-				title.c_str()
-			);
-		}
+			if (window) window->pollEvents();
+
+			if (window->isMinimized()) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				continue; // Go back to start of while loop
+			}
+
+			//Drain all events in queue
+			drainEventQueue();
+
+			//Update delta time
+			auto now = std::chrono::steady_clock::now();
+			float real_dt = std::chrono::duration<float>(now - last_time).count();
+			last_time = now;
+
+			// Store Unscaled Time (Always ticking even when paused)
+			timing.unscaled_dt = real_dt;
+
+			auto fps = static_cast<int>(1.f / timing.unscaled_dt);
+#ifdef PN_PLATFORM_WINDOWS
+			static float avgFps = 0.f;
+			static float timeSinceLastUpdate = 0.0f;
+
+			avgFps = avgFps * 0.95f + fps * 0.05f;
+			timeSinceLastUpdate += timing.unscaled_dt;
+
+			if (timeSinceLastUpdate >= 0.5f) {
+				timeSinceLastUpdate = 0.0f;
+				auto window = services->get<Window::Window>();
+				std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
+				glfwSetWindowTitle(
+					reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
+					title.c_str()
+				);
+			}
 #endif
 #ifdef _DEBUG
-		if (services->get<Scene::SceneManager>()->isPlaying()) {
-			timing.dt = real_dt;
-			services->get<Audio::Audio>()->resumeAll();
-		}
-		else {
-			timing.dt = 0.0f;
-			services->get<Audio::Audio>()->pauseAll();
+			if (services->get<Scene::SceneManager>()->isPlaying()) {
+				timing.dt = real_dt;
+				services->get<Audio::Audio>()->resumeAll();
+			}
+			else {
+				timing.dt = 0.0f;
+				services->get<Audio::Audio>()->pauseAll();
 
-		}
+			}
 #else
-		timing.dt = real_dt;
+			timing.dt = real_dt;
 #endif
 
 
 
-		//Accumulate for fixed updates (use scaled time)
-		accumulator += timing.dt;  // Changed from timing.dt
+			//Accumulate for fixed updates (use scaled time)
+			accumulator += timing.dt;  // Changed from timing.dt
 
 
-		//Skip all other systems when window is not active
-		if (!services->get<Window::Window>()->getActive()) {
-			services->get<Window::Window>()->swapBuffers();
-			continue;
-		}
+			//Skip all other systems when window is not active
+			if (!services->get<Window::Window>()->getActive()) {
+				services->get<Window::Window>()->swapBuffers();
+				continue;
+			}
 
 
-		//Update fixed delta
-		int steps = 0;
-		while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+			//Update fixed delta
+			int steps = 0;
+			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+
+				//Update all core systems
+				for (auto& core : core_stack) {
+					//if (auto core_ptr = core.lock()) core_ptr->onFixedUpdate(timing);
+
+					auto core_ptr = core.lock();
+					if (core_ptr) core_ptr->onFixedUpdate(timing);
+				}
+
+				//Update all layered systems
+				for (auto& layer : layer_stack) {
+					//if (auto layer_ptr = core.lock()) layer_ptr->onFixedUpdate(timing);
+
+					auto layer_ptr = layer.lock();
+					if (layer_ptr) layer_ptr->onFixedUpdate(timing);
+
+				}
+
+				accumulator -= timing.fixed_dt;
+				++steps;
+			}
+
+			//Update timing variables
+			timing.steps_this_frame = steps;
+			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
+			// clear errors before next rendering loop
+
+			while (glGetError());
 
 			//Update all core systems
 			for (auto& core : core_stack) {
-				//if (auto core_ptr = core.lock()) core_ptr->onFixedUpdate(timing);
-
 				auto core_ptr = core.lock();
-				if (core_ptr) core_ptr->onFixedUpdate(timing);
+				if (core_ptr) core_ptr->onUpdate(timing);
 			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
-				//if (auto layer_ptr = core.lock()) layer_ptr->onFixedUpdate(timing);
-
 				auto layer_ptr = layer.lock();
-				if (layer_ptr) layer_ptr->onFixedUpdate(timing);
-
+				if (layer_ptr) layer_ptr->onUpdate(timing);
 			}
 
-			accumulator -= timing.fixed_dt;
-			++steps;
+			//Swap buffer
+			services->get<Window::Window>()->swapBuffers();
 		}
 
-		//Update timing variables
-		timing.steps_this_frame = steps;
-		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
-
-		// clear errors before next rendering loop
-
-		while (glGetError());
-
-		//Update all core systems
-		for (auto& core : core_stack) {
-			auto core_ptr = core.lock();
-            if (core_ptr) core_ptr->onUpdate(timing);
+		// ADDED: Log graceful shutdown if quit was requested from script
+		if (g_shouldQuitApplication) {
+			PN_CORE_INFO("Application quit requested from script, shutting down gracefully");
 		}
-
-		//Update all layered systems
-		for (auto& layer : layer_stack) {
-			auto layer_ptr = layer.lock();
-            if (layer_ptr) layer_ptr->onUpdate(timing);
-		}
-
-		//Swap buffer
-		services->get<Window::Window>()->swapBuffers();
 	}
-}
-
 
 	void Application::terminate() {
 		b_app_running = false;
@@ -284,7 +281,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			auto layer_ptr = it->lock();
-        	if (!layer_ptr) continue; // skip null weak_ptr
+			if (!layer_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -299,7 +296,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			auto core_ptr = it->lock();
-        	if (!core_ptr) continue; // skip null weak_ptr
+			if (!core_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -315,9 +312,9 @@ namespace PAIN {
 		//Dispatch to layer top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 			if (auto layer_ptr = it->lock()) {
-           		layer_ptr->onEvent(e);
-           		if (e.checkHandled()) return;
-       		}
+				layer_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 
 		//Check if handled
@@ -328,9 +325,9 @@ namespace PAIN {
 
 			//Dispatch event down layers
 			if (auto core_ptr = it->lock()) {
-            	core_ptr->onEvent(e);
-            	if (e.checkHandled()) return;
-	       	}
+				core_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 	}
 
@@ -350,7 +347,7 @@ namespace PAIN {
 
 	void Application::pushEventQueue(std::shared_ptr<Event::Event> e) {
 		event_queue.push(e);
-	}	
+	}
 
 	void Application::drainEventQueue() {
 

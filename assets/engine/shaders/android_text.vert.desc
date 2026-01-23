@@ -7,7 +7,7 @@
     "hash": 15878392368856220313
   },
   "descriptor_version": 1,
-  "guid": "1292d5ca-de45-a94b-a441-44719a08361e",
+  "guid": "ffd4ba71-2a2f-a048-ae3e-07ed476c2b1d",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_text.vert"

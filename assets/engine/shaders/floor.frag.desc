@@ -7,7 +7,7 @@
     "hash": 17121312488822456569
   },
   "descriptor_version": 1,
-  "guid": "5cd73fd6-5603-044f-a6d3-8df76c6aa5d9",
+  "guid": "37d7357f-3fae-8542-9e3a-c801acd46df5",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\floor.frag"

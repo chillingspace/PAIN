@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "blur.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4919463888033716715
+  },
+  "descriptor_version": 1,
+  "guid": "bba921b0-7f70-6247-9a0c-0ff354c5ad97",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\blur.vert"
+  }
+}

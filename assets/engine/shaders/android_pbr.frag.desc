@@ -7,7 +7,7 @@
     "hash": 14470324072280183097
   },
   "descriptor_version": 1,
-  "guid": "64501ccf-367f-304f-85fb-c1daa43b448f",
+  "guid": "5d46f1c0-143b-ac4a-a6cd-872ed6ea9dc2",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_pbr.frag"

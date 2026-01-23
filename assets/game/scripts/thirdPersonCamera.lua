@@ -11,7 +11,8 @@ local lastMouseX = nil
 local lastMouseY = nil
 
 -- shared so movement can be camera-relative
-_G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }
+-- _G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }
+_G.CameraState = { yaw = yaw, pitch = pitch }
 
 registerUpdate(function(dt)
     local playerId = entityId

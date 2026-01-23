@@ -70,6 +70,40 @@ namespace PAIN {
         // Cached asset pointer (DO NOT SERIALIZE)
         mutable std::shared_ptr<const Assets::Model> cachedModelAsset;
 
+        // ========================================
+        // PERFORMANCE OPTIMIZATION: Buffer Offset Tracking
+        // ========================================
+        // Tracks where this model's geometry is in the shared VBO/EBO
+        struct BufferOffset {
+            unsigned int vertexOffset = 0;  // Offset in shared VBO
+            unsigned int indexOffset = 0;   // Offset in shared EBO  
+            unsigned int indexCount = 0;    // Number of indices
+            bool isUploaded = false;
+        };
+        BufferOffset bufferOffset;
+
+        // ========================================
+        // PERFORMANCE OPTIMIZATION: Texture Cache
+        // ========================================
+        // Caches texture handles to avoid AssetManager lookups every frame
+        struct SubmeshTextureCache {
+            GLuint albedoTexture = 0;
+            GLuint normalTexture = 0;
+            GLuint metallicTexture = 0;
+            GLuint roughnessTexture = 0;
+            GLuint aoTexture = 0;
+            GLuint emissiveTexture = 0;
+            GLuint opacityTexture = 0;
+            
+            // Material properties (avoid lookups)
+            glm::vec3 baseColor = glm::vec3(1.0f);
+            float metallic = 0.0f;
+            float roughness = 0.5f;
+            
+            bool cacheValid = false;
+        };
+        std::vector<SubmeshTextureCache> submeshCaches;
+
         // Constructors
         ModelRenderer() = default;
         explicit ModelRenderer(const Assets::GUID& guid) : modelGUID(guid) {}

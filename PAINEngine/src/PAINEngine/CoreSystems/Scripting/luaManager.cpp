@@ -203,6 +203,14 @@ namespace PAIN {
 
     void LuaManager::onDetach() {
         // clear script environments, timers, and callback vectors
+        resetForSceneReload();
+
+        api_.reset();
+
+        lua_ = sol::state();
+    }
+
+    void LuaManager::resetForSceneReload() {
         updates_.clear();
         keyDown_.clear();
         keyUp_.clear();
@@ -217,12 +225,10 @@ namespace PAIN {
         collisionInterests_.clear();
         delayedOps_.clear();
         while (!timeoutHeap_.empty()) timeoutHeap_.pop();
+
         pendingSceneChange_.reset();
-
-        api_.reset();
-
-        lua_ = sol::state();
     }
+
 
     void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {
         instantiatePrefab_ = std::move(fn);
@@ -504,6 +510,17 @@ namespace PAIN {
             return std::make_tuple(p.x, p.y, p.z);
             });
         lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
+
+        lua_.set_function("get2DPosition", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                return std::make_tuple(0.f, 0.f);
+            }
+            auto p = api_->Get2DPosition(entityId);
+            return std::make_tuple(p.x, p.y);
+            });
+        lua_.set_function("set2DPosition", [this](entt::entity entityId, float x, float y) { if (api_) api_->Set2DPosition(entityId, { x,y }); });
+
         lua_.set_function("getScale", [this](entt::entity entityId) {
             if (!api_) return std::make_tuple(1.f, 1.f, 1.f);
             auto s = api_->GetScale(entityId);
@@ -644,7 +661,6 @@ namespace PAIN {
             auto [t, r] = api_->GetCameraOffsets(entityId);
             return std::make_tuple(t.x, t.y, t.z, r.x, r.y, r.z);
             });
-
 
         /* =========================================================================== */
         /*                                Particles                                    */
@@ -818,7 +834,8 @@ namespace PAIN {
         if (pendingSceneChange_ && !sceneChangeQueued_) {
             sceneChangeQueued_ = true;
             (*pendingSceneChange_)();
-            pendingSceneChange_.reset();
+            //pendingSceneChange_.reset();
+            resetForSceneReload();
             sceneChangeQueued_ = false;
         }
     }
@@ -918,6 +935,25 @@ namespace PAIN {
         sol::protected_function fn = obj.as<sol::protected_function>();
         sol::protected_function_result r = fn();
         if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
+    }
+
+    void LuaManager::callGlobalWithVec2(const std::string& name, float x, float y) {
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' is not a function", name);
+            return;
+        }
+        
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn(x, y);
+        if (!r.valid()) { 
+            sol::error e = r; 
+            logError("Global(" + name + ")", e); 
+        }
     }
 
 }

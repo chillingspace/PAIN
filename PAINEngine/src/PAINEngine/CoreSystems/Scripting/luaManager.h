@@ -51,6 +51,7 @@ namespace PAIN {
 
         // misc
         void callGlobal(const std::string& name);
+        void callGlobalWithVec2(const std::string& name, float x, float y);
         void queueOp(std::function<void(void)> op) { delayedOps_.push_back(std::move(op)); }
         void setPendingSceneChange(std::function<void(void)> op) { pendingSceneChange_ = std::move(op); }
 
@@ -65,6 +66,7 @@ namespace PAIN {
         void Input_OnEvent(PAIN::Event::Event& e);
         void Input_EndFrame();
         void onDetach();
+        void resetForSceneReload();
 
     public:
         sol::state& state() { return lua_; } // so AI can call into Lua directly

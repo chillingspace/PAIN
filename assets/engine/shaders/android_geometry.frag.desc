@@ -7,7 +7,7 @@
     "hash": 11256383063946602002
   },
   "descriptor_version": 1,
-  "guid": "18526b71-f639-e645-b798-b527f4fb507b",
+  "guid": "2d8015d1-009a-fb48-85fe-beacd87f5e0d",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\android_geometry.frag"
