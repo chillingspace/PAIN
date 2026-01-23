@@ -1090,22 +1090,6 @@ namespace PAIN {
 				return;
 			}
 
-			// init vbo for scene
-			//{
-			//	std::vector<ModelRenderer> models{};
-
-			//	auto ecs = services->get<ECS::Controller>();
-			//	auto& registry = ecs->getRegistry();
-			//	auto view = registry.view<ModelRenderer>();
-			//	for (auto e : view) {
-			//		auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			//		if (mdl.has_value()) models.push_back(mdl.value());
-			//	}
-
-			//	auto renderer = services->get<sRenderer>();
-			//	renderer->initSceneVbo(models);
-			//}
-
 			//Scene loaded successfully
 			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
 			curr_scene_id = sceneGUID;

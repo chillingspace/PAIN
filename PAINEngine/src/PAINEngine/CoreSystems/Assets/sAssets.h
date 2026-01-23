@@ -74,6 +74,9 @@ namespace PAIN {
 			bool checkAssetRegistered(std::filesystem::path const& relative_path);
 			bool checkAssetRegistered(GUID const& id) const;
 
+			//Upload texture to queue
+			void uploadTexture(std::shared_ptr<Assets::Texture> tex);
+
 			//Get asset
 			template <typename T>
 			std::optional<std::shared_ptr<T>> getAsset(std::filesystem::path const& relative_path) {
@@ -153,9 +156,7 @@ namespace PAIN {
 				//PHASE 3: Handle texture upload (if needed)
 				if (asset->type == Assets::Type::Texture) {
 					auto tex = std::dynamic_pointer_cast<Texture>(asset);
-					if (tex && !tex->gl_texture) {
-						asset_loader->uploadTexture(tex);
-					}
+					if (tex && !tex->gl_texture) uploadTexture(tex);
 				}
 
 				//PHASE 4: Cast and return

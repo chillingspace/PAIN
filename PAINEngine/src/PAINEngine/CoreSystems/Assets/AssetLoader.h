@@ -61,9 +61,6 @@ namespace PAIN {
 			}
 			~Loader() = default;
 
-			//Upload texture to GPU
-			void uploadTexture(std::shared_ptr<Assets::Texture> tex);
-
 			//Register loader
 			void RegisterLoader(Type const& type, LoaderFunc const& func);
 
