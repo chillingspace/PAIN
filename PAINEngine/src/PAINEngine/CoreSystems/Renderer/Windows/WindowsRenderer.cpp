@@ -64,6 +64,9 @@ void WindowsRenderer::initSceneVbo() {
     if (!mdl.has_value())
       continue;
 
+    //Invalidate Cached Buffer Offsets
+			mdl.value().get().bufferOffset.isUploaded = false;
+      
     // Retrieve model asset with validation
     auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
         mdl.value().get().modelGUID);
