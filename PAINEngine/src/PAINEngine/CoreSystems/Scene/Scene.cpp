@@ -388,6 +388,7 @@ namespace PAIN {
 
 			//Refresh editor resources only in debug mode
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 			{
 				auto editor = services->get<Editor::Editor>();
 				if (editor) {
@@ -395,6 +396,7 @@ namespace PAIN {
 					if (resource_panel) resource_panel->refreshResources();
 				}
 			}
+#endif
 #endif
 		}
 
@@ -1089,22 +1091,6 @@ namespace PAIN {
 				PN_CORE_INFO("[SceneManager] Failed to configure scene with GUID: {}", sceneGUID.ToString());
 				return;
 			}
-
-			// init vbo for scene
-			//{
-			//	std::vector<ModelRenderer> models{};
-
-			//	auto ecs = services->get<ECS::Controller>();
-			//	auto& registry = ecs->getRegistry();
-			//	auto view = registry.view<ModelRenderer>();
-			//	for (auto e : view) {
-			//		auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			//		if (mdl.has_value()) models.push_back(mdl.value());
-			//	}
-
-			//	auto renderer = services->get<sRenderer>();
-			//	renderer->initSceneVbo(models);
-			//}
 
 			//Scene loaded successfully
 			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());

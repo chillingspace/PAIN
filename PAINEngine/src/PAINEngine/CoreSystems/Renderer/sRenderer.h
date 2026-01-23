@@ -10,8 +10,16 @@
 #include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
-	
+
 	class sRenderer : public AppSystem {
+	private:
+
+		//Texture uploaders
+		mutable std::mutex tex_mutex;
+		std::vector<std::shared_ptr<Assets::Texture>> pending_textures;
+
+		//Batch upload trigger
+		bool batch_upload = false;
 	public:
 		sRenderer() = default;
 		~sRenderer() = default;
@@ -42,9 +50,18 @@ namespace PAIN {
 
 		void initSceneVbo() { w_renderer->initSceneVbo(); }
 
+		void uploadTexture(std::shared_ptr<Assets::Texture> tex) { w_renderer->uploadTexture(tex); }
+
 		void setScene(std::shared_ptr<Scene::SceneManager> scn) { m_Scene = scn; }
 
 		std::unique_ptr<WindowsRenderer> w_renderer;
 
+		void queueTexUpload(std::shared_ptr<Assets::Texture> tex);
+
+		size_t getPendingTexUploadCount() const;
+
+		void batchUpload() { batch_upload = true; }
+
+		void processUploads(int max_per_frame = 5);
 	};
 }
