@@ -27,7 +27,6 @@
 #include "Systems/UI/sysUIInput.h"
 #include "Systems/UI/sysUILayout.h"
 
-
 namespace PAIN {
 namespace ECS {
 
@@ -340,6 +339,14 @@ bool Controller::isRegistryAutoSimulate(RegistryID id) const {
 std::string Controller::getRegistryName(RegistryID id) const {
   auto *ctx = getRegistryContext(id);
   return ctx ? ctx->name : "Unknown";
+}
+std::vector<RegistryID> Controller::getAllRegistryIDs() const {
+  std::vector<RegistryID> ids;
+  ids.reserve(registries.size());
+  for (const auto &[id, ctx] : registries) {
+    ids.push_back(id);
+  }
+  return ids;
 }
 /*****************************************************************/ /**
                                                                      * GUID

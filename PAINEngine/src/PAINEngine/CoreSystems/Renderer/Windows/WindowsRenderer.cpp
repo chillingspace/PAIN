@@ -51,49 +51,54 @@ void WindowsRenderer::initSceneVbo() {
   std::vector<unsigned int> allIndices;
   std::unordered_set<std::string> uploaded;
 
-  // Get all models in the current ecs registry
+  // Get ECS controller to iterate ALL registries (including prefab edit
+  // registries)
   auto ecs = services->get<ECS::Controller>();
-  auto &registry = ecs->getRegistry();
-  auto view = registry.view<ModelRenderer>();
 
-  // Collect all unique models and build combined vertex/index buffers
-  for (auto e : view) {
+  // Iterate ALL registries to collect models (fixes prefab editor rendering)
+  for (auto registryId : ecs->getAllRegistryIDs()) {
+    auto &registry = ecs->getRegistry(registryId);
+    auto view = registry.view<ModelRenderer>();
 
-    // Get mdl asset
-    auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-    if (!mdl.has_value())
-      continue;
+    // Collect all unique models and build combined vertex/index buffers
+    for (auto e : view) {
 
-    //Invalidate Cached Buffer Offsets
-			mdl.value().get().bufferOffset.isUploaded = false;
-      
-    // Retrieve model asset with validation
-    auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
-        mdl.value().get().modelGUID);
-    if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model)
-      continue;
-    const auto &modelAsset = mdl_opt.value();
+      // Get mdl asset
+      auto mdl = ecs->getEntityComponent<ModelRenderer>(e, registryId);
+      if (!mdl.has_value())
+        continue;
 
-    // Skip if already uploaded (deduplicate by model path)
-    if (uploaded.find(modelAsset->vpath) != uploaded.end())
-      continue;
-    uploaded.insert(modelAsset->vpath);
+      // Invalidate Cached Buffer Offsets
+      mdl.value().get().bufferOffset.isUploaded = false;
 
-    // Store offset for this model in the map (used by both rendering paths)
-    instanced_offsets[modelAsset->vpath] = {
-        indexOffset, (unsigned int)modelAsset->indices.size()};
+      // Retrieve model asset with validation
+      auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
+          mdl.value().get().modelGUID);
+      if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model)
+        continue;
+      const auto &modelAsset = mdl_opt.value();
 
-    // Add vertices
-    allVertices.insert(allVertices.end(), modelAsset->vertices.begin(),
-                       modelAsset->vertices.end());
+      // Skip if already uploaded (deduplicate by model path)
+      if (uploaded.find(modelAsset->vpath) != uploaded.end())
+        continue;
+      uploaded.insert(modelAsset->vpath);
 
-    // Add indices with vertex offset applied
-    for (unsigned int idx : modelAsset->indices) {
-      allIndices.push_back(vertexOffset + idx);
+      // Store offset for this model in the map (used by both rendering paths)
+      instanced_offsets[modelAsset->vpath] = {
+          indexOffset, (unsigned int)modelAsset->indices.size()};
+
+      // Add vertices
+      allVertices.insert(allVertices.end(), modelAsset->vertices.begin(),
+                         modelAsset->vertices.end());
+
+      // Add indices with vertex offset applied
+      for (unsigned int idx : modelAsset->indices) {
+        allIndices.push_back(vertexOffset + idx);
+      }
+
+      vertexOffset += modelAsset->vertices.size();
+      indexOffset += modelAsset->indices.size();
     }
-
-    vertexOffset += modelAsset->vertices.size();
-    indexOffset += modelAsset->indices.size();
   }
 
   // Upload ALL geometry ONCE to main geometry buffers
@@ -829,7 +834,7 @@ void WindowsRenderer::BeginGeometryPass(
   //// draw skybox
   //{
   //	Skybox::get().render(scene->GetActiveCamera()->view(),
-  //scene->GetActiveCamera()->projection());
+  // scene->GetActiveCamera()->projection());
   //}
   // err = glGetError();
   // if (err != GL_NO_ERROR) {
@@ -1252,7 +1257,7 @@ void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene,
                                    const LightSources &lights) {
   //{
   //	/* this block is for debug tracing. print color texture(buffer) straight
-  //to screen */
+  // to screen */
 
   //	glBindFramebuffer(GL_FRAMEBUFFER, 0);
   //	passthrough_shader->Bind();

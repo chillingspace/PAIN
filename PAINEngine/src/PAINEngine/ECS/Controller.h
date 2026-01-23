@@ -147,6 +147,9 @@ namespace PAIN {
 			void setRegistryAutoSimulate(RegistryID id, bool autoSimulate);
 			bool isRegistryAutoSimulate(RegistryID id) const;
 			std::string getRegistryName(RegistryID id) const;
+		
+		//Get all registry IDs (for systems that need to iterate all registries)
+		std::vector<RegistryID> getAllRegistryIDs() const;
 
 			//Registry updates
 			void updateRegistry(RegistryID id, AppTiming timing);
