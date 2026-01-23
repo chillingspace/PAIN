@@ -1212,7 +1212,7 @@ namespace PAIN {
 				//	const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
 				//	geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
 				//}
-
+			}
             else {
                 //PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
 				geometry_shader->SetUniform("u_Animated", 0.0f);

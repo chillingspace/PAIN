@@ -23,7 +23,7 @@
         "c60c8f27-fe85-4546-8281-deaab9d87acc",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-        "81117530-de12-7b4c-a0e5-6ebc94459e26",
+        "1782f43f-dae5-9649-affe-5ec14503abb7",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "9aac41f9-737d-d540-a485-7155b0011394",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
@@ -2982,7 +2982,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "81117530-de12-7b4c-a0e5-6ebc94459e26",
+                            "modelGUID": "1782f43f-dae5-9649-affe-5ec14503abb7",
                             "receiveShadows": true,
                             "visible": true
                         },
