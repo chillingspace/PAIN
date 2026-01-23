@@ -1180,6 +1180,12 @@ namespace PAIN {
 						emissiveTexture = tex_opt.value()->gl_texture;
 					}
 
+					if (material->useOverrides) {
+						geometry_shader->SetUniform("u_UseEmissionOverride", 1.f);
+						geometry_shader->SetUniform("u_EmissionOverride", material->emissiveOverride);
+						// geometry_shader->SetUniform("u_EmissionOverride", {1,0,1});
+					}
+
 					// Height texture
 					/*
         tex_opt = material->useOverrides ?

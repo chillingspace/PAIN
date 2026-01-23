@@ -220,6 +220,13 @@ namespace PAIN {
 							changed = true;
 						}
 
+						//if (ImGui::CollapsingHeader("Overrides")) {
+						//	ImGui::Indent(10.f);
+						//	changed |= ImGui::Checkbox("Override Emissive Map", &renderer.materials[0].useEmissiveOverride);
+						//	changed |= ImGui::ColorEdit3("Emissive Color Override", &renderer.materials[0].emissiveOverride.x);
+						//	ImGui::Unindent(10.f);
+						//}
+
 						ImGui::PopStyleVar();
 					});
 
