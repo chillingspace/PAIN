@@ -1185,6 +1185,9 @@ namespace PAIN {
 						geometry_shader->SetUniform("u_EmissionOverride", material->emissiveOverride);
 						// geometry_shader->SetUniform("u_EmissionOverride", {1,0,1});
 					}
+					else {
+						geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
+					}
 
 					// Height texture
 					/*
