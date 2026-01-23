@@ -1,4 +1,78 @@
 {
+    "assets": [
+        "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+        "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+        "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+        "30cd3b32-bce1-564e-8046-1204bbfee443",
+        "a8977689-ded0-fa41-9efb-33354e83dec7",
+        "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
+        "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+        "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
+        "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
+        "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
+        "57242baf-a6af-5646-bbc2-858308aa22a9",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
+        "a67656ca-15a5-d441-b14d-dae036e5245e",
+        "14377587-a8fe-2b47-9f46-dad6bdad2753",
+        "c60c8f27-fe85-4546-8281-deaab9d87acc",
+        "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "81117530-de12-7b4c-a0e5-6ebc94459e26",
+        "3e8dc653-3d17-ab42-bb53-da040f01f965",
+        "9aac41f9-737d-d540-a485-7155b0011394",
+        "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+        "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
+        "61599017-a38c-ff4c-9a02-0b353f879dee",
+        "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+        "e65e4858-d371-c142-8857-4f39f5d654fb",
+        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+        "633f661d-20e5-3b45-b5a5-299f91b71e17",
+        "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+        "163da0e7-00d9-0541-a470-a859fd023b6b",
+        "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
+        "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
+        "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
+        "296fa841-931e-664c-b744-fe3b3558b5c5",
+        "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+        "3a5c03f0-d776-2a44-ba91-1b088c4a4bb5",
+        "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+        "510e3ede-f637-c448-99e8-7dc200d60c8f",
+        "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+        "df12f04f-34c5-644d-980a-c8251d57cd55",
+        "19c6aae9-108a-7d45-937d-bbd0c891a9cb",
+        "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+        "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+        "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+        "ad95c15c-a360-f548-8f9e-f7cab095c869",
+        "f79091e8-3999-8543-a6da-c631ad94a064",
+        "090f5424-a7e5-a44c-adf1-bf54ac246837",
+        "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
+        "19d818f3-a8fc-1b4a-bf95-b233da10f329",
+        "9da056a0-d46c-664b-a2bd-9ba986135c23",
+        "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+        "0973caab-44f6-834a-8b63-b2ab319c8eaa",
+        "c3240e7d-4066-2444-a024-c1d31c71a299",
+        "ba0c5258-4554-c14c-a4ee-8814e088cab2",
+        "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
+        "91e02ba2-c6b8-184f-bd48-b59674946972",
+        "ec65dc46-5bab-fc48-975b-768ca1f3ff3d",
+        "266caf71-f83f-9e4a-b789-333e707a570f",
+        "626410d0-f893-4d45-a4bd-b48df7ac6a33",
+        "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+        "c79c529b-71e5-164c-854d-f8cf076f5318",
+        "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+        "be682648-fcd7-2b47-b7bf-3faea372c733",
+        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+        "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+        "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+        "7555c2b8-dfee-174c-b955-e7c939d7b8f0"
+    ],
     "camera": {
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
@@ -12,9 +86,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            1.547614336013794,
-            1.6414904594421387,
-            3.5284290313720703
+            0.9511768817901611,
+            0.5624738931655884,
+            1.8284335136413574
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 1.5,
@@ -290,6 +364,14 @@
                             "b_is_enabled": true,
                             "b_is_interactable": true,
                             "layer": 0
+                        },
+                        "UIJoystick": {
+                            "center_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "is_dragging": false,
+                            "max_radius": 0.15000000596046448
                         },
                         "UIRectTransform": {
                             "anchor_max": [
@@ -3712,6 +3794,77 @@
                                 ]
                             }
                         },
+                        "CompoundCollider": {
+                            "shapes": [
+                                {
+                                    "boxHalfExtents": [
+                                        2.125,
+                                        0.08,
+                                        1.25
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        0.08,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                },
+                                {
+                                    "boxHalfExtents": [
+                                        2.125,
+                                        0.454,
+                                        0.0625
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        0.544,
+                                        -1.19
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                },
+                                {
+                                    "boxHalfExtents": [
+                                        2.125,
+                                        0.454,
+                                        0.0625
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.0,
+                                        0.544,
+                                        1.19
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                }
+                            ],
+                            "useCompoundCollider": true
+                        },
                         "GUID": {
                             "guid": "9f07ccba-f14e-434b-a15f-e36eeb02c6ef"
                         },
@@ -3805,6 +3958,77 @@
                                         ]
                                     }
                                 },
+                                "CompoundCollider": {
+                                    "shapes": [
+                                        {
+                                            "boxHalfExtents": [
+                                                2.125,
+                                                0.08,
+                                                1.25
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                0.08,
+                                                0.0
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        },
+                                        {
+                                            "boxHalfExtents": [
+                                                2.125,
+                                                0.454,
+                                                0.0625
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                0.544,
+                                                -1.19
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        },
+                                        {
+                                            "boxHalfExtents": [
+                                                2.125,
+                                                0.454,
+                                                0.0625
+                                            ],
+                                            "capsuleHalfHeight": 0.5,
+                                            "capsuleRadius": 0.25,
+                                            "offset": [
+                                                0.0,
+                                                0.544,
+                                                1.19
+                                            ],
+                                            "rotation": [
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                1.0
+                                            ],
+                                            "sphereRadius": 0.5,
+                                            "type": 0
+                                        }
+                                    ],
+                                    "useCompoundCollider": true
+                                },
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -3840,9 +4064,9 @@
                                         0.0
                                     ],
                                     "collider_scale": [
-                                        4.050000190734863,
-                                        0.009999999776482582,
-                                        2.0
+                                        1.0,
+                                        1.0,
+                                        1.0
                                     ],
                                     "mass": -107374176.0,
                                     "motion_type": 0,
@@ -3872,9 +4096,9 @@
                                 0.0
                             ],
                             "collider_scale": [
-                                4.050000190734863,
-                                0.009999999776482582,
-                                2.0
+                                1.0,
+                                1.0,
+                                1.0
                             ],
                             "mass": -107374176.0,
                             "motion_type": 0,

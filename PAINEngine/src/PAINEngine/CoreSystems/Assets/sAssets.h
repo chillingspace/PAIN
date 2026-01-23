@@ -33,6 +33,14 @@ namespace PAIN {
 			//Asset loader
 			std::unique_ptr<Loader> asset_loader;
 
+			//Use shared_mutex for read-write locking (better performance)
+			mutable std::shared_mutex registry_mutex;  // Protects asset_registry + path maps
+			mutable std::shared_mutex cache_mutex;      // Protects asset_cache
+
+			//Separate mutex for in-flight loading
+			mutable std::mutex loading_mutex;           // Protects loading_assets
+			std::unordered_set<GUID> loading_assets;    // Track which assets are currently 
+
 #ifdef PN_PLATFORM_WINDOWS
 			//Asset Organizer
 			std::unique_ptr<Organizer> asset_organizer;
@@ -66,6 +74,9 @@ namespace PAIN {
 			bool checkAssetRegistered(std::filesystem::path const& relative_path);
 			bool checkAssetRegistered(GUID const& id) const;
 
+			//Upload texture to queue
+			void uploadTexture(std::shared_ptr<Assets::Texture> tex);
+
 			//Get asset
 			template <typename T>
 			std::optional<std::shared_ptr<T>> getAsset(std::filesystem::path const& relative_path) {
@@ -86,42 +97,74 @@ namespace PAIN {
 			template <typename T>
 			std::optional<std::shared_ptr<T>> getAsset(GUID const& id) {
 
-				//Check GUID
-				if (!id.IsValid() || !checkAssetRegistered(id)) return std::nullopt;
+				// Validate GUID
+				if (!id.IsValid()) return std::nullopt;
 
-				//Asset template
+				//PHASE 1: Check registration (read lock)
+				bool is_cacheable;
+				{
+					std::shared_lock<std::shared_mutex> registry_lock(registry_mutex);
+					auto registry_it = asset_registry.find(id);
+					if (registry_it == asset_registry.end()) {
+						return std::nullopt;
+					}
+					is_cacheable = Assets::isAssetCacheable(registry_it->second->type);
+				}
+
 				std::shared_ptr<IAsset> asset;
 
-				//Check if asset is cachable
-				if (Assets::isAssetCacheable(asset_registry[id]->type)) {
-					//Search asset cache
-					auto it = asset_cache.find(id);
-					if (it == asset_cache.end()) {
-
-						//Cache asset
-						asset = cacheAsset(id);
+				//PHASE 2: Get or load asset
+				if (is_cacheable) {
+					// Check cache first
+					{
+						std::shared_lock<std::shared_mutex> cache_lock(cache_mutex);
+						auto cache_it = asset_cache.find(id);
+						if (cache_it != asset_cache.end()) {
+							asset = cache_it->second;
+						}
 					}
-					else {
-						asset = it->second;
+
+					// Not cached - load it
+					if (!asset) {
+						asset = cacheAsset(id);
 					}
 				}
 				else {
-					//Simply just call on loader without caching
-					auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(Path::assets_alias, asset_registry[id]->shipped_relative_path.string());
-					asset = asset_loader->GetLoader(asset_registry[id]->type)(virtual_path);
+					// Non-cacheable - load directly without caching
+					std::shared_ptr<IAsset> asset_data;
+					{
+						std::shared_lock<std::shared_mutex> registry_lock(registry_mutex);
+						asset_data = asset_registry[id];
+					}
 
-					//Init asset registry var
-					asset->guid = asset_registry[id]->guid;
-					asset->main_relative_path = asset_registry[id]->main_relative_path;
-					asset->shipped_relative_path = asset_registry[id]->shipped_relative_path;
-					asset->name = asset_registry[id]->name;
-					asset->type = asset_registry[id]->type;
+					auto virtual_path = services->get<Path::Path>()->aliasCombineRelative(
+						Path::assets_alias,
+						asset_data->shipped_relative_path.string()
+					);
+
+					//Load without locks
+					asset = asset_loader->GetLoader(asset_data->type)(virtual_path);
+
+					// Copy metadata
+					asset->guid = asset_data->guid;
+					asset->main_relative_path = asset_data->main_relative_path;
+					asset->shipped_relative_path = asset_data->shipped_relative_path;
+					asset->name = asset_data->name;
+					asset->type = asset_data->type;
 				}
 
+				//PHASE 3: Handle texture upload (if needed)
+				if (asset->type == Assets::Type::Texture) {
+					auto tex = std::dynamic_pointer_cast<Texture>(asset);
+					if (tex && !tex->gl_texture) uploadTexture(tex);
+				}
+
+				//PHASE 4: Cast and return
 				auto typed_asset = std::dynamic_pointer_cast<T>(asset);
 				if (!typed_asset) {
-					throw std::runtime_error("Asset type mismatch (wrong cast to requested type).");
+					throw std::runtime_error("Asset type mismatch");
 				}
+
 				return typed_asset;
 			}
 
@@ -133,6 +176,7 @@ namespace PAIN {
 				std::vector<std::shared_ptr<T>> container;
 
 				//Find all assets with type
+				std::shared_lock<std::shared_mutex> registry_lock(registry_mutex);
 				for (auto const& asset : asset_registry) {
 					if (asset.second->type == type) {
 						auto opt_asset = getAsset<T>(asset.first);
@@ -144,11 +188,12 @@ namespace PAIN {
 				return container;
 			}
 
-
 			//Caching of assets
 			std::shared_ptr<IAsset> cacheAsset(GUID const& id);
-			void batchCacheAssets(std::vector<GUID> batch_ids);
+			void batchCacheAssets(std::unordered_set<GUID> batch_ids);
+			void batchUploadAllCachedTextures();
 			void uncacheAsset(GUID const& id);
+			void clearAssetCache();
 #ifdef PN_PLATFORM_WINDOWS
 			std::shared_ptr<IAsset> recacheAsset(GUID const& id);
 			void reshipAsset(GUID const& id);

@@ -239,6 +239,28 @@ namespace PAIN {
         }
     }
 
+    glm::vec2 EngineAPIAdapter::Get2DPosition(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Texture2D>(entityId)) {
+            return opt->get().pos;
+        }
+        return { 0.f, 0.f};
+    }
+
+    void EngineAPIAdapter::Set2DPosition(entt::entity entityId, glm::vec2 p) {
+        /*auto& t = ensure<PAIN::Transform>(entityId);
+        t.position = { p.x, p.y, p.z };*/
+
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Texture2D>(entityId)) return;
+
+        auto& t = reg.get<PAIN::Texture2D>(entityId);
+        t.pos = p;
+
+        if (auto ts = ecs_.getSystem<PAIN::Transform::System>()) { //recompute worldtransform
+            ts->markDirty(entityId, reg);
+        }
+    }
+
     glm::vec3 EngineAPIAdapter::GetScale(entt::entity entityId) {
         if (auto opt = ecs_.getEntityComponent<PAIN::LocalTransform>(entityId)) {
             return opt->get().scale;
@@ -399,19 +421,15 @@ namespace PAIN {
         PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
             name, targetGuid.ToString());
 
-        // Preserve play state (Not sure if this function is called somewhere else)
-        bool wasPlaying = scene_->isPlaying();
-
-        // Load next scene
+        bool previousSceneState = scene_->isPlaying();
         scene_->loadScene(targetGuid);
-        // Set scene to play
-        if (wasPlaying) {
-            scene_->onPlay();
-            //scene_->setPlaying(true);
-        }
 
-        // Set Camera to game camera
-        scene_->SetGameCamera();
+        if (previousSceneState) {
+            scene_->onPlay();
+        }
+        else {
+            scene_->onStop();
+        }
 
         return true;
     }

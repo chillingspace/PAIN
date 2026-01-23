@@ -140,14 +140,14 @@ namespace PAIN {
 		//Mark engine as ready
 		b_app_running = true;
 	}
-	
+
 	void Application::Run() {
 
 		//Set last time
 		last_time = std::chrono::steady_clock::now();
 
-		//Application loop
-		while (b_app_running) {
+		//Application loop - MODIFIED: Added g_shouldQuitApplication check
+		while (b_app_running && !g_shouldQuitApplication) {
 
 			//Poll events
 			auto window = services->get<Window::Window>();
@@ -170,7 +170,7 @@ namespace PAIN {
 			timing.unscaled_dt = real_dt;
 
 			auto fps = static_cast<int>(1.f / timing.unscaled_dt);
-	#ifdef PN_PLATFORM_WINDOWS
+#ifdef PN_PLATFORM_WINDOWS
 			static float avgFps = 0.f;
 			static float timeSinceLastUpdate = 0.0f;
 
@@ -186,8 +186,8 @@ namespace PAIN {
 					title.c_str()
 				);
 			}
-	#endif
-	#ifdef _DEBUG
+#endif
+#ifdef _DEBUG
 			if (services->get<Scene::SceneManager>()->isPlaying()) {
 				timing.dt = real_dt;
 				services->get<Audio::Audio>()->resumeAll();
@@ -197,9 +197,9 @@ namespace PAIN {
 				services->get<Audio::Audio>()->pauseAll();
 
 			}
-	#else
+#else
 			timing.dt = real_dt;
-	#endif
+#endif
 
 
 
@@ -262,6 +262,11 @@ namespace PAIN {
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
 		}
+
+		// ADDED: Log graceful shutdown if quit was requested from script
+		if (g_shouldQuitApplication) {
+			PN_CORE_INFO("Application quit requested from script, shutting down gracefully");
+		}
 	}
 
 	void Application::terminate() {
@@ -276,7 +281,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			auto layer_ptr = it->lock();
-        	if (!layer_ptr) continue; // skip null weak_ptr
+			if (!layer_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -291,7 +296,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			auto core_ptr = it->lock();
-        	if (!core_ptr) continue; // skip null weak_ptr
+			if (!core_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -307,9 +312,9 @@ namespace PAIN {
 		//Dispatch to layer top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 			if (auto layer_ptr = it->lock()) {
-           		layer_ptr->onEvent(e);
-           		if (e.checkHandled()) return;
-       		}
+				layer_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 
 		//Check if handled
@@ -320,9 +325,9 @@ namespace PAIN {
 
 			//Dispatch event down layers
 			if (auto core_ptr = it->lock()) {
-            	core_ptr->onEvent(e);
-            	if (e.checkHandled()) return;
-	       	}
+				core_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 	}
 
@@ -342,7 +347,7 @@ namespace PAIN {
 
 	void Application::pushEventQueue(std::shared_ptr<Event::Event> e) {
 		event_queue.push(e);
-	}	
+	}
 
 	void Application::drainEventQueue() {
 
