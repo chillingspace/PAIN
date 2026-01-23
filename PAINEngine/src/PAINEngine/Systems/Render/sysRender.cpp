@@ -491,90 +491,151 @@ void System::debugPass(entt::registry &registry, int debug_mode) {
   if (!camera)
     return;
 
-  // Mode 1: Draw Physics Colliders with CompoundCollider support
+  // Mode 1: Draw Physics Colliders (Cyan for basic, different colors for
+  // compound shapes)
   if (debug_mode == 1) {
-    // Iterate entities with RigidBody3D and Transform
+    // Iterate entities with both RigidBody3D and Transform
     auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 
-    // Color palette for alternating compound collider shapes
-    glm::vec4 colors[] = {
-        glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), // Cyan
-        glm::vec4(1.0f, 0.5f, 0.0f, 1.0f), // Orange
-        glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), // Green
-        glm::vec4(1.0f, 0.0f, 1.0f, 1.0f), // Magenta
-        glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), // Yellow
-        glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)  // Light blue
-    };
-    int numColors = sizeof(colors) / sizeof(colors[0]);
-
     for (auto [entity, rb, trans] : view.each()) {
-      glm::quat rotation = glm::normalize(trans.rotation);
-
       // Check if entity has CompoundCollider
-      auto *compoundCollider = registry.try_get<PAIN::CompoundCollider>(entity);
+      auto *compCollider = registry.try_get<CompoundCollider>(entity);
 
-      if (compoundCollider && compoundCollider->useCompoundCollider &&
-          !compoundCollider->shapes.empty()) {
-        // Draw each sub-shape with alternating colors
-        int shapeIdx = 0;
-        for (const auto &shape : compoundCollider->shapes) {
-          glm::vec4 shapeColor = colors[shapeIdx % numColors];
-          glm::vec3 corners[8];
-
-          // Calculate world-space corners based on shape type
-          glm::vec3 halfExtents;
-          switch (shape.type) {
-          case ColliderShapeType::Box:
-            halfExtents = shape.boxHalfExtents * trans.scale;
-            break;
-          case ColliderShapeType::Sphere:
-            halfExtents = glm::vec3(shape.sphereRadius) * trans.scale;
-            break;
-          case ColliderShapeType::Capsule:
-            halfExtents =
-                glm::vec3(shape.capsuleRadius,
-                          shape.capsuleHalfHeight + shape.capsuleRadius,
-                          shape.capsuleRadius) *
-                trans.scale;
-            break;
+      if (compCollider && compCollider->useCompoundCollider &&
+          !compCollider->shapes.empty()) {
+        // Draw each compound sub-shape with alternating colors
+        int shapeIndex = 0;
+        for (const auto &shape : compCollider->shapes) {
+          // Pick color based on shape index
+          glm::vec4 color;
+          switch (shapeIndex % 3) {
+          case 0:
+            color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+            break; // Cyan
+          case 1:
+            color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+            break; // Magenta
+          case 2:
+            color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            break; // Yellow
           }
 
-          glm::vec3 scaledOffset = shape.offset * trans.scale;
-
-          // Calculate 8 corners with entity rotation + shape local rotation
-          glm::quat combinedRotation = rotation * shape.rotation;
-          for (int i = 0; i < 8; ++i) {
-            glm::vec3 corner;
-            corner.x = (i & 1) ? halfExtents.x : -halfExtents.x;
-            corner.y = (i & 2) ? halfExtents.y : -halfExtents.y;
-            corner.z = (i & 4) ? halfExtents.z : -halfExtents.z;
-
-            glm::vec3 localPoint = scaledOffset + (shape.rotation * corner);
-            corners[i] = trans.position + (rotation * localPoint);
+          // Get shape dimensions based on type
+          glm::vec3 half_extents;
+          if (shape.type == ColliderShapeType::Box) {
+            half_extents =
+                shape.boxHalfExtents * trans.scale * rb.collider_scale;
+          } else if (shape.type == ColliderShapeType::Sphere) {
+            float scaledRadius =
+                shape.sphereRadius *
+                glm::max(trans.scale.x, glm::max(trans.scale.y, trans.scale.z));
+            half_extents = glm::vec3(scaledRadius);
+          } else if (shape.type == ColliderShapeType::Capsule) {
+            float scaledRadius =
+                shape.capsuleRadius * glm::max(trans.scale.x, trans.scale.z);
+            float scaledHeight = shape.capsuleHalfHeight * trans.scale.y;
+            half_extents = glm::vec3(scaledRadius, scaledHeight + scaledRadius,
+                                     scaledRadius);
+          } else {
+            half_extents = glm::vec3(0.5f) * trans.scale;
           }
 
-          rendererService->w_renderer->DebugPassOBB(corners, shapeColor, scene);
-          shapeIdx++;
+          // Calculate scaled offset (note: offset does NOT scale by
+          // collider_scale per physics engine)
+          glm::vec3 scaled_offset = shape.offset * trans.scale;
+
+          // Entity rotation combined with shape local rotation
+          glm::quat entity_rot = glm::normalize(trans.rotation);
+          glm::quat shape_rot = glm::normalize(shape.rotation);
+          glm::quat combined_rot = entity_rot * shape_rot;
+
+          // Check if entity has any rotation (non-identity quaternion)
+          bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
+                             glm::abs(trans.rotation.x) > 0.0001f ||
+                             glm::abs(trans.rotation.y) > 0.0001f ||
+                             glm::abs(trans.rotation.z) > 0.0001f;
+
+          if (hasRotation) {
+            // Calculate 8 corners of OBB for oriented visualization
+            // Order must match edge list: back face (0,1,2,3), front face
+            // (4,5,6,7)
+            glm::vec3 he = half_extents;
+            glm::vec3 local_corners[8] = {
+                glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
+                glm::vec3(+he.x, -he.y, -he.z), // 1: back-bottom-right
+                glm::vec3(+he.x, +he.y, -he.z), // 2: back-top-right
+                glm::vec3(-he.x, +he.y, -he.z), // 3: back-top-left
+                glm::vec3(-he.x, -he.y, +he.z), // 4: front-bottom-left
+                glm::vec3(+he.x, -he.y, +he.z), // 5: front-bottom-right
+                glm::vec3(+he.x, +he.y, +he.z), // 6: front-top-right
+                glm::vec3(-he.x, +he.y, +he.z), // 7: front-top-left
+            };
+
+            glm::vec3 corners[8];
+            glm::vec3 rotated_offset = entity_rot * scaled_offset;
+            for (int i = 0; i < 8; ++i) {
+              glm::vec3 rotated_corner = combined_rot * local_corners[i];
+              corners[i] = trans.position + rotated_offset + rotated_corner;
+            }
+
+            // Use OBB rendering for rotated entities
+            rendererService->w_renderer->DebugPassOBB(corners, color, scene);
+          } else {
+            // No rotation - use faster AABB path
+            glm::vec3 center = trans.position + scaled_offset;
+            glm::vec3 min_aabb = center - half_extents;
+            glm::vec3 max_aabb = center + half_extents;
+            rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
+                                                   scene);
+          }
+          shapeIndex++;
         }
       } else {
-        // Fallback: Draw basic RigidBody3D collider (AABB visualization)
-        glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
+        // Fall back to basic RigidBody3D collider (original behavior)
+        glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan for Physics
+
         glm::vec3 offset_scaled = trans.scale * rb.collider_offset;
         glm::vec3 half_extents = 0.5f * trans.scale * rb.collider_scale;
+        glm::quat rotation = glm::normalize(trans.rotation);
 
-        // Calculate OBB corners
-        glm::vec3 corners[8];
-        for (int i = 0; i < 8; ++i) {
-          glm::vec3 corner;
-          corner.x = (i & 1) ? half_extents.x : -half_extents.x;
-          corner.y = (i & 2) ? half_extents.y : -half_extents.y;
-          corner.z = (i & 4) ? half_extents.z : -half_extents.z;
+        // Check if entity has any rotation (non-identity quaternion)
+        bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
+                           glm::abs(trans.rotation.x) > 0.0001f ||
+                           glm::abs(trans.rotation.y) > 0.0001f ||
+                           glm::abs(trans.rotation.z) > 0.0001f;
 
-          glm::vec3 body_space_point = offset_scaled + corner;
-          corners[i] = trans.position + (rotation * body_space_point);
+        if (hasRotation) {
+          // Calculate 8 corners of OBB for oriented visualization
+          // Order must match edge list: back face (0,1,2,3), front face
+          // (4,5,6,7)
+          glm::vec3 he = half_extents;
+          glm::vec3 local_corners[8] = {
+              glm::vec3(-he.x, -he.y, -he.z), // 0: back-bottom-left
+              glm::vec3(+he.x, -he.y, -he.z), // 1: back-bottom-right
+              glm::vec3(+he.x, +he.y, -he.z), // 2: back-top-right
+              glm::vec3(-he.x, +he.y, -he.z), // 3: back-top-left
+              glm::vec3(-he.x, -he.y, +he.z), // 4: front-bottom-left
+              glm::vec3(+he.x, -he.y, +he.z), // 5: front-bottom-right
+              glm::vec3(+he.x, +he.y, +he.z), // 6: front-top-right
+              glm::vec3(-he.x, +he.y, +he.z), // 7: front-top-left
+          };
+
+          glm::vec3 corners[8];
+          for (int i = 0; i < 8; ++i) {
+            glm::vec3 body_space_point = offset_scaled + local_corners[i];
+            corners[i] = trans.position + (rotation * body_space_point);
+          }
+
+          // Use OBB rendering for rotated entities
+          rendererService->w_renderer->DebugPassOBB(corners, color, scene);
+        } else {
+          // No rotation - use faster AABB path
+          glm::vec3 center = trans.position + offset_scaled;
+          glm::vec3 min_aabb = center - half_extents;
+          glm::vec3 max_aabb = center + half_extents;
+          rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
+                                                 scene);
         }
-
-        rendererService->w_renderer->DebugPassOBB(corners, color, scene);
       }
     }
   }
