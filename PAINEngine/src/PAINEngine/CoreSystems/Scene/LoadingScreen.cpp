@@ -5,6 +5,8 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "ECS/Components/cUIComps.h"
 
+#include "CoreSystems/Windows/Window.h"
+
 namespace PAIN {
     namespace Scene {
 
@@ -37,11 +39,11 @@ void main() {
 }
 )";
 
-        void LoadingScreen::init(std::shared_ptr<Window::Window> win) {
+        void LoadingScreen::init(std::shared_ptr<Services> serv) {
             PN_CORE_INFO("[LoadingScreen] Initializing...");
 
             // Set window ptr
-            win_ptr = win;
+            services = serv;
 
             // Compile shaders
             m_shader = compileShader();
@@ -114,21 +116,42 @@ void main() {
         }
 
         void LoadingScreen::render() {
+            // Calculate delta time for animations
+            auto currentTime = std::chrono::steady_clock::now();
+            std::chrono::duration<float> deltaTime = currentTime - m_lastFrameTime;
+            m_lastFrameTime = currentTime;
+            
+            // Update animation time
+            m_animationTime += deltaTime.count();
+            
             // Clear screen with dark background
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
-
-            // Render progress bar
+            
+            // Render in Z-order (back to front):
+            // Layer 1: Background texture (if set)
+            renderBackgroundTexture();
+            
+            // Layer 2: Animated gradient overlay
+            renderBackgroundOverlay();
+            
+            // Layer 3: Progress bar
             renderProgressBar();
-
-            // Render status text (simplified - just log for now)
+            
+            // Layer 4: Title text
+            renderTitle();
+            
+            // Layer 5: Status text
             renderStatusText();
+            
+            // Layer 6: Percentage text
+            renderPercentage();
 
             // Swap buffers and poll events
-            auto win = win_ptr.lock();
+            auto win = services.lock()->get<Window::Window>();
             if (win) {
                 win->swapBuffers();
                 win->pollEvents();
@@ -208,9 +231,40 @@ void main() {
         }
 
         void LoadingScreen::renderStatusText() {
-            // For now, just log the status text
-            // In a full implementation, you would render text using your text rendering system
-            // TODO: Integrate with existing text rendering system (CoreSystems/Renderer/text.h)
+            // Get window dimensions for positioning
+            auto win = services.lock()->get<Window::Window>();
+            if (!win) return;
+            
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+            
+            // Lock mutex to safely read status text
+            std::string currentStatus;
+            {
+                std::lock_guard<std::mutex> lock(m_statusMutex);
+                currentStatus = m_statusText;
+            }
+            
+            if (currentStatus.empty()) return;
+            
+            // Create UIText component for status
+            UIText statusTextComp;
+            statusTextComp.display_text = currentStatus;
+            statusTextComp.font_size = 20.0f;
+            statusTextComp.color = glm::vec3(0.85f, 0.85f, 0.85f);  // Light gray
+            statusTextComp.alignment = TextAlignment::Center;
+            
+            // Position below progress bar
+            // Progress bar Y is -0.3 in NDC, convert to screen space
+            float progressBarScreenY = screenHeight * (1.0f - m_progressBarY) / 2.0f;
+            statusTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY + 60.0f);
+            
+            // TODO: Set font GUID - for now TextRenderer will use default font
+            // statusTextComp.font_guid = defaultFontGUID;
+            
+            // Render using TextRenderer static instance
+            TextRenderer::get().renderText(statusTextComp);
         }
 
         void LoadingScreen::setProgress(float progress) {
@@ -273,27 +327,54 @@ void main() {
         }
 
         unsigned int LoadingScreen::compileProgressBarShader() {
-            // Load shader files via asset manager would be better, but for now use inline
-            // In production, you'd want to load from assets/engine/shaders/loading_progress.vert/frag
+            // NOTE: This requires services pointer, which LoadingScreen doesn't currently have
+            // For now, return 0 and we'll use the basic shader instead
+            // This will be properly implemented when LoadingScreen gets services access
             
-            // For now, return 0 and log - will be implemented with asset loading  
-            // This is a placeholder that doesn't break compilation
-            PN_CORE_WARN("[LoadingScreen] Progress bar shader compilation not yet implemented - using basic shader");
+            PN_CORE_WARN("[LoadingScreen] Custom progress bar shader not loaded - using basic shader");
             return 0;
             
-            // TODO: Implement proper shader loading from assets/engine/shaders/loading_progress.vert/frag
-            // Similar to how WindowsRenderer loads shaders via AssetManager
+            /* TODO: Uncomment when services pointer is added to LoadingScreen::init()
+            #ifdef PN_PLATFORM_WINDOWS
+                std::filesystem::path shader_path = "engine/shaders/loading_progress.vert";
+            #else
+                std::filesystem::path shader_path = "engine\\shaders\\android_loading_progress.vert";
+            #endif
+            
+            auto assets_loader = services->get<Assets::Manager>();
+            auto shader_opt = assets_loader->getAsset<Assets::Shader>(shader_path);
+            auto shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+            
+            if (!shader || shader->GetRendererID() == 0) {
+                PN_CORE_ERROR("[LoadingScreen] Failed to load progress bar shader");
+                return 0;
+            }
+            
+            return shader->GetRendererID();
+            */
         }
 
         unsigned int LoadingScreen::compileOverlayShader() {
-            // Load shader files via asset manager would be better, but for now use inline
-            // In production, you'd want to load from assets/engine/shaders/loading_overlay.vert/frag
-            
-            // For now, return 0 and log - will be implemented with asset loading
-            PN_CORE_WARN("[LoadingScreen] Overlay shader compilation not yet implemented");
+            // NOTE: Same as above - requires services pointer
+            PN_CORE_WARN("[LoadingScreen] Custom overlay shader not loaded - skipping overlay");
             return 0;
             
-            // TODO: Implement proper shader loading from assets/engine/shaders/loading_overlay.vert/frag
+            #ifdef PN_PLATFORM_WINDOWS
+                std::filesystem::path shader_path = "engine/shaders/loading_overlay.vert";
+            #else
+                std::filesystem::path shader_path = "engine\\shaders\\android_loading_overlay.vert";
+            #endif
+            
+            auto assets_loader = services.lock()->get<Assets::Manager>();
+            auto shader_opt = assets_loader->getAsset<Assets::Shader>(shader_path);
+            auto shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
+            
+            if (!shader || shader->GetRendererID() == 0) {
+                PN_CORE_WARN("[LoadingScreen] Failed to load overlay shader - skipping");
+                return 0;
+            }
+            
+            return shader->GetRendererID();
         }
 
         void LoadingScreen::setBackgroundTexture(const Assets::GUID& textureGUID) {
@@ -311,13 +392,61 @@ void main() {
         }
 
         void LoadingScreen::renderTitle() {
-            // TODO: Implement with TextRenderer::get().renderText()
-            // Display "PAIN Engine" title
+            // Get window dimensions
+            auto win = services.lock()->get<Window::Window>();
+            if (!win) return;
+            
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+            
+            // Create UIText component for title
+            UIText titleTextComp;
+            titleTextComp.display_text = "PAIN Engine";
+            titleTextComp.font_size = 48.0f;
+            titleTextComp.color = glm::vec3(1.0f, 1.0f, 1.0f);  // Pure white
+            titleTextComp.alignment = TextAlignment::Center;
+            
+            // Position at top of screen
+            titleTextComp.text_pos = glm::vec2(screenWidth / 2.0f, 80.0f);
+            
+            // Optional: Add subtle shadow for depth
+            titleTextComp.shadow_offset = glm::vec2(2.0f, 2.0f);
+            titleTextComp.shadow_color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
+            
+            // Render
+            TextRenderer::get().renderText(titleTextComp);
         }
 
         void LoadingScreen::renderPercentage() {
-            // TODO: Implement with TextRenderer::get().renderText()
-            // Display progress percentage
+            // Get window dimensions
+            auto win = services.lock()->get<Window::Window>();
+            if (!win) return;
+            
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+            
+            // Get current progress
+            float progress = m_progress.load();
+            int percentage = static_cast<int>(progress * 100.0f);
+            
+            // Create percentage text (e.g., "67%")
+            std::string percentageText = std::to_string(percentage) + "%";
+            
+            // Create UIText component
+            UIText percentTextComp;
+            percentTextComp.display_text = percentageText;
+            percentTextComp.font_size = 32.0f;
+            percentTextComp.color = glm::vec3(0.9f, 0.9f, 1.0f);  // Slightly blue-tinted white
+            percentTextComp.alignment = TextAlignment::Center;
+            
+            // Position above progress bar
+            float progressBarScreenY = screenHeight * (1.0f - m_progressBarY) / 2.0f;
+            percentTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY - 40.0f);
+            
+            // Render
+            TextRenderer::get().renderText(percentTextComp);
         }
 
     }

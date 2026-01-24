@@ -796,15 +796,12 @@ namespace PAIN {
 			// Clear existing asset cache
 			auto assetManager = services->get<Assets::Manager>();
 			assetManager->clearAssetCache();
-			auto window = services->get<Window::Window>();
 			// ========================================
 			// PHASE 2: Initialize Loading Screen
 			// ========================================
-			LoadingScreen loadingScreen;
-			loadingScreen.init(window);
-			loadingScreen.setStatus("Initializing scene...");
-			loadingScreen.setProgress(0.0f);
-			loadingScreen.render();
+			loadingScreen->setStatus("Initializing scene...");
+			loadingScreen->setProgress(0.0f);
+			loadingScreen->render();
 			// ========================================
 			// PHASE 3: Launch Worker Thread for Asset Loading
 			// ========================================
@@ -815,8 +812,8 @@ namespace PAIN {
 				try {
 					PN_CORE_INFO("[AsyncLoader] Worker thread started");
 					// Step 1: Load all assets (CPU-only, thread-safe)
-					loadingScreen.setStatus("Loading scene assets...");
-					loadingScreen.setProgress(0.1f);
+					loadingScreen->setStatus("Loading scene assets...");
+					loadingScreen->setProgress(0.1f);
 					const auto& assetGuids = scn_asset.assets_to_cache;
 					size_t totalAssets = assetGuids.size();
 					size_t loadedAssets = 0;
@@ -824,19 +821,19 @@ namespace PAIN {
 					for (const auto& guid : assetGuids) {
 						if(assetManager->cacheAsset(guid)) loadedAssets++;
 						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
-						loadingScreen.setProgress(progress);
+						loadingScreen->setProgress(progress);
 						if (loadedAssets % 10 == 0) {
 							PN_CORE_INFO("[AsyncLoader] Loaded {}/{} assets", loadedAssets, totalAssets);
 						}
 					}
 					PN_CORE_INFO("[AsyncLoader] All assets loaded");
 					// Step 2: Build entities (CPU-only)
-					loadingScreen.setStatus("Building scene entities...");
-					loadingScreen.setProgress(0.7f);
+					loadingScreen->setStatus("Building scene entities...");
+					loadingScreen->setProgress(0.7f);
 					if (!buildEntitiesFromAsset(scn_asset)) {
 						throw std::runtime_error("Failed to build entities from scene asset");
 					}
-					loadingScreen.setProgress(0.9f);
+					loadingScreen->setProgress(0.9f);
 					PN_CORE_INFO("[AsyncLoader] Worker thread complete");
 				}
 				catch (const std::exception& e) {
@@ -851,27 +848,26 @@ namespace PAIN {
 			// ========================================
 			PN_CORE_INFO("[SceneManager] Entering loading screen render loop");
 			while (!loadingComplete.load()) {
-				loadingScreen.render();
+				loadingScreen->render();
 				std::this_thread::sleep_for(std::chrono::milliseconds(16));
 			}
 			workerThread.join();
 			PN_CORE_INFO("[SceneManager] Worker thread joined");
 			if (loadingFailed.load()) {
 				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
-				loadingScreen.cleanup();
 				return;
 			}
 			// ========================================
 			// PHASE 5: Finalize on Main Thread (GPU)
 			// ========================================
-			loadingScreen.setStatus("Uploading textures to GPU...");
-			loadingScreen.setProgress(0.95f);
-			loadingScreen.render();
+			loadingScreen->setStatus("Uploading textures to GPU...");
+			loadingScreen->setProgress(0.95f);
+			loadingScreen->render();
 			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
 			assetManager->batchUploadAllCachedTextures();
-			loadingScreen.setStatus("Initializing renderer...");
-			loadingScreen.setProgress(0.98f);
-			loadingScreen.render();
+			loadingScreen->setStatus("Initializing renderer...");
+			loadingScreen->setProgress(0.98f);
+			loadingScreen->render();
 			services->get<sRenderer>()->initSceneVbo();
 #ifdef _DEBUG
 			{
@@ -882,11 +878,10 @@ namespace PAIN {
 				}
 			}
 #endif
-			loadingScreen.setProgress(1.0f);
-			loadingScreen.setStatus("Complete!");
-			loadingScreen.render();
+			loadingScreen->setProgress(1.0f);
+			loadingScreen->setStatus("Complete!");
+			loadingScreen->render();
 			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			loadingScreen.cleanup();
 			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
@@ -897,6 +892,10 @@ namespace PAIN {
 
 			//Set scecne manager for renderer
 			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
+
+			//Init loading screen
+			loadingScreen = std::make_unique<LoadingScreen>();
+			loadingScreen->init(services);
 
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);

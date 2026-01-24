@@ -8,10 +8,15 @@
 
 #include "CoreSystems/Assets/Types/Scene.h"
 
+#include "LoadingScreen.h"
+
 namespace PAIN {
 	namespace Scene {
         class SceneManager : public AppSystem {
         private:
+
+            //Loading screen
+            std::unique_ptr<LoadingScreen> loadingScreen;
 
             //Curr active camera
             Camera* active_camera = nullptr;

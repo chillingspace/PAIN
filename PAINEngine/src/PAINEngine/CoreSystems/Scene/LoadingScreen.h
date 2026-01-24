@@ -8,9 +8,6 @@
 #include <mutex>
 #include <chrono>
 
-#include "CoreSystems/Windows/Window.h"
-#include "CoreSystems/Renderer/sRenderer.h"
-
 namespace PAIN {
     namespace Scene {
 
@@ -24,19 +21,15 @@ namespace PAIN {
         class LoadingScreen {
         public:
             LoadingScreen() = default;
-            ~LoadingScreen() = default;
+            ~LoadingScreen() {
+                cleanup();
+            }
 
             /**
              * @brief Initialize OpenGL resources (VAO, VBO, shader)
              * Must be called on main thread with active OpenGL context
              */
-            void init(std::shared_ptr<Window::Window> win);
-
-            /**
-             * @brief Cleanup OpenGL resources
-             * Must be called on main thread with active OpenGL context
-             */
-            void cleanup();
+            void init(std::shared_ptr<Services> serv);
 
             /**
              * @brief Render the loading screen (progress bar + status text)
@@ -67,6 +60,7 @@ namespace PAIN {
             void setBackgroundTexture(const Assets::GUID& textureGUID);
 
         private:
+
             // Thread-safe progress tracking
             std::atomic<float> m_progress{ 0.0f };
 
@@ -80,10 +74,7 @@ namespace PAIN {
             unsigned int m_shader{ 0 };
 
             // Window dimensions for aspect ratio calculation
-            std::weak_ptr<Window::Window> win_ptr;
-
-            // Renderer access for 2D texture rendering
-            std::weak_ptr<sRenderer> renderer_ptr;
+            std::weak_ptr<Services> services;
 
             // Optional background texture
             Assets::GUID m_backgroundTextureGUID;
@@ -108,6 +99,12 @@ namespace PAIN {
             glm::vec3 m_overlayColor1{ 0.05f, 0.05f, 0.1f }; // Dark blue
             glm::vec3 m_overlayColor2{ 0.02f, 0.02f, 0.05f }; // Darker blue
             float m_overlayStrength{ 0.8f };
+
+            /**
+            * @brief Cleanup OpenGL resources
+            * Must be called on main thread with active OpenGL context
+            */
+            void cleanup();
 
             // Helper methods
             void renderBackgroundTexture();
