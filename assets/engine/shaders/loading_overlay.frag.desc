@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "loading_overlay.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 13479540793226040852
+  },
+  "descriptor_version": 1,
+  "guid": "122b4fdb-1397-b642-9435-c808feb408e3",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\loading_overlay.frag"
+  }
+}

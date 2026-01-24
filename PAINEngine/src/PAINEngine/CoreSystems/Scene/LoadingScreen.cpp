@@ -1,5 +1,9 @@
 #include "pch.h"
 #include "LoadingScreen.h"
+#include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/text.h"
+#include "CoreSystems/Assets/sAssets.h"
+#include "ECS/Components/cUIComps.h"
 
 namespace PAIN {
     namespace Scene {
@@ -39,8 +43,14 @@ void main() {
             // Set window ptr
             win_ptr = win;
 
-            // Compile shader
+            // Compile shaders
             m_shader = compileShader();
+            m_progressBarShader = compileProgressBarShader();
+            m_overlayShader = compileOverlayShader();
+
+            // Initialize animation timing
+            m_animationTime = 0.0f;
+            m_lastFrameTime = std::chrono::steady_clock::now();
 
             // Create fullscreen quad for background and progress bar
             float quadVertices[] = {
@@ -90,6 +100,16 @@ void main() {
             if (m_shader) {
                 glDeleteProgram(m_shader);
                 m_shader = 0;
+            }
+
+            if (m_progressBarShader) {
+                glDeleteProgram(m_progressBarShader);
+                m_progressBarShader = 0;
+            }
+
+            if (m_overlayShader) {
+                glDeleteProgram(m_overlayShader);
+                m_overlayShader = 0;
             }
         }
 
@@ -250,6 +270,54 @@ void main() {
             glDeleteShader(fragmentShader);
 
             return shaderProgram;
+        }
+
+        unsigned int LoadingScreen::compileProgressBarShader() {
+            // Load shader files via asset manager would be better, but for now use inline
+            // In production, you'd want to load from assets/engine/shaders/loading_progress.vert/frag
+            
+            // For now, return 0 and log - will be implemented with asset loading  
+            // This is a placeholder that doesn't break compilation
+            PN_CORE_WARN("[LoadingScreen] Progress bar shader compilation not yet implemented - using basic shader");
+            return 0;
+            
+            // TODO: Implement proper shader loading from assets/engine/shaders/loading_progress.vert/frag
+            // Similar to how WindowsRenderer loads shaders via AssetManager
+        }
+
+        unsigned int LoadingScreen::compileOverlayShader() {
+            // Load shader files via asset manager would be better, but for now use inline
+            // In production, you'd want to load from assets/engine/shaders/loading_overlay.vert/frag
+            
+            // For now, return 0 and log - will be implemented with asset loading
+            PN_CORE_WARN("[LoadingScreen] Overlay shader compilation not yet implemented");
+            return 0;
+            
+            // TODO: Implement proper shader loading from assets/engine/shaders/loading_overlay.vert/frag
+        }
+
+        void LoadingScreen::setBackgroundTexture(const Assets::GUID& textureGUID) {
+            m_backgroundTextureGUID = textureGUID;
+        }
+
+        void LoadingScreen::renderBackgroundTexture() {
+            // TODO: Implement after renderer_ptr is properly set in Scene.cpp
+            // Will use WindowsRenderer->Render2DTexture() for fullscreen background
+        }
+
+        void LoadingScreen::renderBackgroundOverlay() {
+            // TODO: Implement with overlay shader
+            // Renders animated gradient overlay
+        }
+
+        void LoadingScreen::renderTitle() {
+            // TODO: Implement with TextRenderer::get().renderText()
+            // Display "PAIN Engine" title
+        }
+
+        void LoadingScreen::renderPercentage() {
+            // TODO: Implement with TextRenderer::get().renderText()
+            // Display progress percentage
         }
 
     }
