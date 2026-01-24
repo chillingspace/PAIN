@@ -39,6 +39,13 @@ namespace PAIN {
             void render();
 
             /**
+             * @brief Finish the loading screen rendered into frame buffer
+             * Must be called on main thread
+             * This also swaps buffers and polls events
+             */
+            void finish();
+
+            /**
              * @brief Update progress value (thread-safe)
              * @param progress Progress value from 0.0 to 1.0
              * Can be called from worker thread
@@ -60,6 +67,9 @@ namespace PAIN {
             void setBackgroundTexture(const Assets::GUID& textureGUID);
 
         private:
+
+            //Internal blocking timing
+            AppTiming timing;
 
             // Thread-safe progress tracking
             std::atomic<float> m_progress{ 0.0f };

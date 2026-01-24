@@ -6,6 +6,7 @@
 #include "ECS/Components/cUIComps.h"
 
 #include "CoreSystems/Windows/Window.h"
+#include "LayeredSystems/LevelEditor/Editor.h"
 
 namespace PAIN {
     namespace Scene {
@@ -117,12 +118,19 @@ void main() {
 
         void LoadingScreen::render() {
             // Calculate delta time for animations
-            auto currentTime = std::chrono::steady_clock::now();
-            std::chrono::duration<float> deltaTime = currentTime - m_lastFrameTime;
-            m_lastFrameTime = currentTime;
+            auto last_time = std::chrono::steady_clock::now();
+
+            //Update delta time
+            auto now = std::chrono::steady_clock::now();
+            float real_dt = std::chrono::duration<float>(now - last_time).count();
+            last_time = now;
+
+            // Store Unscaled Time (Always ticking even when paused)
+            timing.unscaled_dt = real_dt;
+            timing.dt = real_dt;
             
             // Update animation time
-            m_animationTime += deltaTime.count();
+            m_animationTime += timing.dt;
             
             // Clear screen with dark background
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -149,6 +157,71 @@ void main() {
             
             // Layer 6: Percentage text
             renderPercentage();
+
+            // Swap buffers and poll events
+            auto win = services.lock()->get<Window::Window>();
+            if (win) {
+                win->swapBuffers();
+                win->pollEvents();
+            }
+        }
+
+        void LoadingScreen::finish() {
+#ifdef _DEBUG
+            auto editor = services.lock()->get<Editor::Editor>();
+            bool editor_visible = editor && editor->isVisible();
+            int editor_debug_mode = editor ? editor->getDebugMode() : 0;
+
+#else
+            bool editor_visible = false;
+            int editor_debug_mode = 0;
+#endif
+
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
+            }
+
+            if (editor_visible) {
+                glBindFramebuffer(GL_FRAMEBUFFER, services.lock()->get<sRenderer>()->getFinalFbo());
+                // glViewport(0, 0, fbWidth, fbHeight);
+            }
+            else {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                // Match viewport to window size
+                auto window = services.lock()->get<Window::Window>();
+                auto frame_buffer = window->getFrameBuffer();
+                glViewport(0, 0, frame_buffer.x, frame_buffer.y);
+            }
+
+            // Clear screen with dark background
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+
+            // Render in Z-order (back to front):
+            // Layer 1: Background texture (if set)
+            renderBackgroundTexture();
+
+            // Layer 2: Animated gradient overlay
+            renderBackgroundOverlay();
+
+            // Layer 3: Progress bar
+            renderProgressBar();
+
+            // Layer 4: Title text
+            renderTitle();
+
+            // Layer 5: Status text
+            renderStatusText();
+
+            // Layer 6: Percentage text
+            renderPercentage();
+
+            //Unbind frame buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 
             // Swap buffers and poll events
             auto win = services.lock()->get<Window::Window>();

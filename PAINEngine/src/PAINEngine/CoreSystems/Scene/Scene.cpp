@@ -881,7 +881,7 @@ namespace PAIN {
 			loadingScreen->setProgress(1.0f);
 			loadingScreen->setStatus("Complete!");
 			loadingScreen->render();
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			loadingScreen->finish();
 			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
