@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "hover button sfx.mp3",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 52877211637051148
+  },
+  "descriptor_version": 1,
+  "guid": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\ui\\hover\\hover button sfx.mp3"
+  }
+}

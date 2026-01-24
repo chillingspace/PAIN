@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "BGM_Level1a_BaseLayer 2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 3989224249952888800
+  },
+  "descriptor_version": 1,
+  "guid": "1d28dd5c-5baa-f54c-a266-bcb84246193a",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\BGM_Level1a_BaseLayer 2.wav"
+  }
+}
