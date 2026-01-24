@@ -705,6 +705,22 @@ namespace PAIN {
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
 
         /* =========================================================================== */
+        /*                              Cursor Control                                 */
+        /* =========================================================================== */
+        lua_.set_function("showCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] showCursor - not implemented yet");
+            });
+
+        lua_.set_function("hideCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] hideCursor - not implemented yet");
+            });
+
+
+
+
+        /* =========================================================================== */
         /*                                ModelRenderer                                 */
         /* =========================================================================== */
         lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {

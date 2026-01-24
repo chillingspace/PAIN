@@ -1,4 +1,3 @@
-
 -- offset of camera relative to player in *player space*
 local baseOffset = { x = 0.0, y = 0.25, z = -0.5 }
 
@@ -11,10 +10,14 @@ local lastMouseX = nil
 local lastMouseY = nil
 
 -- shared so movement can be camera-relative
--- _G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }
 _G.CameraState = { yaw = yaw, pitch = pitch }
 
 registerUpdate(function(dt)
+    -- EXIT EARLY IF PAUSED - stops camera movement
+    if _G_root.gamePaused then
+        return
+    end
+
     local playerId = entityId
 
     local px, py, pz = getPosition(playerId)
@@ -58,14 +61,11 @@ registerUpdate(function(dt)
     local oz = baseOffset.z
 
     -- STEP 1: Pitch first (Rotate around Local X axis)
-    -- We rotate the base offset vector by pitch. 
-    -- This ensures "Up" is always "Up" relative to the camera view.
     local pitchX = ox 
     local pitchY = oy * cosP - oz * sinP
     local pitchZ = oy * sinP + oz * cosP
 
     -- STEP 2: Yaw second (Rotate around Global Y axis)
-    -- Now we spin that pitched vector around the player.
     local rx = pitchX * cosY + pitchZ * sinY
     local rz = -pitchX * sinY + pitchZ * cosY
     local ry = pitchY
@@ -75,9 +75,9 @@ registerUpdate(function(dt)
     local cy = py + ry
     local cz = pz + rz
 
-    -- aim camera at player (Looking at head/center is usually better than feet)
+    -- aim camera at player
     local targetX = px
-    local targetY = py -- + 1.0 (Optional: Look at head instead of feet)
+    local targetY = py
     local targetZ = pz
 
     cameraSetTransform(

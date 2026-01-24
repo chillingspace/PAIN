@@ -72,6 +72,8 @@ namespace PAIN {
         sol::state& state() { return lua_; } // so AI can call into Lua directly
         const sol::state& state() const { return lua_; }
 
+        void setServices(Services* services) { services_ = services; }
+
     private:
         // bindings
         void openLibs(bool shipping);
@@ -82,6 +84,8 @@ namespace PAIN {
         bool runFileIntoEnv(const std::string& path, entt::entity entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
 
         static entt::entity toEntity(int id);
+
+        GLFWwindow* window_ = nullptr;
 
     private:
         struct TimeoutNode {
@@ -94,6 +98,7 @@ namespace PAIN {
 
         sol::state lua_;
         std::shared_ptr<IEngineAPI> api_;
+        Services* services_ = nullptr;
         bool shipping_{ false };
         bool gamePaused_{ false };
 
