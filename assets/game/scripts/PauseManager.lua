@@ -25,11 +25,15 @@ function TogglePause()
     
     log("[PauseManager] Toggling pause: " .. tostring(isPaused))
     
-    setLayerEnabled(1, not isPaused)  -- Game UI layer
-    setLayerEnabled(2, isPaused)       -- Pause menu layer
+    -- Broadcast to all scripts
+    _G_root.gamePaused = isPaused  -- ADD THIS LINE
+    
+    setLayerEnabled(1, not isPaused)
+    setLayerEnabled(2, isPaused)
     
     log("[PauseManager] Layers toggled successfully")
 end
+
 
 _G_root.ContinueButton_OnClick = function()
     log("[UI] Continue button pressed")
