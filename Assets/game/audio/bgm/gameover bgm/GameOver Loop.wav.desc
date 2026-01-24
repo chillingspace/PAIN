@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GameOver Loop.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 14657500459600793409
+  },
+  "descriptor_version": 1,
+  "guid": "e0527c63-e8c5-304b-b9bc-4510f5af3204",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\gameover bgm\\GameOver Loop.wav"
+  }
+}

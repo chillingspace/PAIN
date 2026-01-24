@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear Pick Up.wav",
+    "name": "click 2.wav",
     "type": "Audio"
   },
   "build_data": {
-    "hash": 9653473035345827376
+    "hash": 5790296328320901104
   },
   "descriptor_version": 1,
-  "guid": "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+  "guid": "74ab1a14-a9b0-c645-9ed2-5df86ca61ff2",
   "import_settings": {
     "compression": "OGG",
     "extension": ".ogg",
@@ -15,6 +15,6 @@
     "quality": 0.8
   },
   "meta_data": {
-    "source_file": "game\\audio\\Gear Pick Up.wav"
+    "source_file": "game\\audio\\sfx\\ui\\clicks\\click 2.wav"
   }
 }
