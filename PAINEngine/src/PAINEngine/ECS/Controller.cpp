@@ -160,9 +160,9 @@ namespace PAIN {
 		}
 
 		/*****************************************************************/ /**
-                                                                     * EntityGUIDRegistry
-                                                                     * Implementation
-                                                                     *********************************************************************/
+        * EntityGUIDRegistry
+        * Implementation
+        *********************************************************************/
 
 		Assets::GUID EntityGUIDRegistry::getOrCreateGUID(entt::entity e,
 														 entt::registry& registry) {
@@ -228,9 +228,9 @@ namespace PAIN {
 			entity_to_guid.clear();
 		}
 		/*****************************************************************/ /**
-                                                                     * Controller
-                                                                     * Implementation
-                                                                     *********************************************************************/
+        * Controller
+        * Implementation
+        *********************************************************************/
 		Controller::Controller(std::shared_ptr<Services> svc) {
 			services = svc;
 
@@ -244,9 +244,9 @@ namespace PAIN {
 						 MAIN_REGISTRY_ID);
 		}
 		/*****************************************************************/ /**
-                                                                     * Helper
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * Helper
+        * Methods
+        *********************************************************************/
 		RegistryContext* Controller::getRegistryContext(RegistryID id) {
 			auto it = registries.find(id);
 			if (it == registries.end()) {
@@ -280,10 +280,10 @@ namespace PAIN {
 			return ctx->registry;
 		}
 		/*****************************************************************/ /**
-                                                                     * Registry
-                                                                     * Management
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * Registry
+        * Management
+        * Methods
+        *********************************************************************/
 		RegistryID Controller::createRegistry(const std::string& name,
 											  bool autoSimulate) {
 			RegistryID newId = next_registry_id++;
@@ -349,10 +349,10 @@ namespace PAIN {
 			return ids;
 		}
 		/*****************************************************************/ /**
-                                                                     * GUID
-                                                                     * Registry
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * GUID
+        * Registry
+        * Methods
+        *********************************************************************/
 		EntityGUIDRegistry& Controller::getGUIDRegistry(RegistryID registryId) {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx) {
@@ -384,9 +384,9 @@ namespace PAIN {
 			return ctx ? static_cast<int>(ctx->entity_count) : 0;
 		}
 		/*****************************************************************/ /**
-                                                                     * Event
-                                                                     * Dispatching
-                                                                     *********************************************************************/
+        * Event
+        * Dispatching
+        *********************************************************************/
 		void Controller::dispatchToLayers(Event::Event& e) {
 			for (auto& sys : systems) {
 				if (sys && sys->enabled) {
@@ -408,10 +408,10 @@ namespace PAIN {
 			}
 		}
 		/*****************************************************************/ /**
-                                                                     * System
-                                                                     * Update
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * System
+        * Update
+        * Methods
+        *********************************************************************/
 		void Controller::updateSystemsForRegistry(RegistryID id, AppTiming timing,
 												  bool isFixed) {
 			auto* ctx = getRegistryContext(id);
@@ -463,11 +463,11 @@ namespace PAIN {
 			}
 		}
 		/*****************************************************************/ /**
-                                                                     * Component
-                                                                     * and
-                                                                     * System
-                                                                     * Registration
-                                                                     *********************************************************************/
+        * Component
+        * and
+        * System
+        * Registration
+        *********************************************************************/
 		void Controller::registerAllComponents() {
 			// Entity components
 			registerComponent<Entity::GUID>("GUID");
@@ -532,9 +532,9 @@ namespace PAIN {
 			dispatchToLayers(e);
 		}
 		/*****************************************************************/ /**
-                                                                     * Entity
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * Entity
+        * Methods
+        *********************************************************************/
 		entt::entity Controller::createEntity(RegistryID registryId) {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx)
@@ -635,9 +635,9 @@ namespace PAIN {
 			PN_CORE_INFO("Cleared all entities in registry {}", registryId);
 		}
 		/*****************************************************************/ /**
-                                                                     * Component
-                                                                     * Methods
-                                                                     *********************************************************************/
+        * Component
+        * Methods
+        *********************************************************************/
 		const std::unordered_map<std::string,
 								 std::function<void(entt::entity, RegistryID)>>&
 		Controller::getComponentFactories() const {

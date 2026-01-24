@@ -1293,10 +1293,6 @@ namespace PAIN {
 					}
 					geometry_shader->SetUniform("u_Animated", 1.0f);
 				}
-				else {
-					// Fallback if data missing
-					geometry_shader->SetUniform("u_Animated", 0.0f);
-				}
 
 				//static std::vector<glm::mat4> boneMatrices;
 				//static constexpr int MAX_BONES = 100;

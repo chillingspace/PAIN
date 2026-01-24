@@ -12,11 +12,14 @@ namespace PAIN {
         static constexpr bool ShouldSerialize = true;
 
         // Playback state
+        int defaultAnimationIndex = -1; // Current not being used anywhere
+        bool loopAnimation = true;
+        float playbackSpeed = 1.0f;
+
+        // Runtime states (DO NOT SERIALIZE)
         int currentAnimationIndex = -1;
         float animationTime = 0.0f;
         bool isPlaying = false;
-        bool loopAnimation = true;
-        float playbackSpeed = 1.0f;
 
         // Blending state
         int nextAnimationIndex = -1;
@@ -77,13 +80,15 @@ namespace PAIN {
 // REFLECTION (Editor Integration)
 // ============================================
 REFL_TYPE(PAIN::Animation)
-REFL_FIELD(currentAnimationIndex, PAIN::Editor::Attributes::DisplayName("Animation Index"))
+REFL_FIELD(defaultAnimationIndex, PAIN::Editor::Attributes::DisplayName("Default Anim"))
 REFL_FIELD(nextAnimationIndex, PAIN::Editor::Attributes::DisplayName("Next Anim (Debug)"))
 REFL_FIELD(transitionWeight, PAIN::Editor::Attributes::DisplayName("Blend Weight"))
-REFL_FIELD(animationTime, PAIN::Editor::Attributes::DisplayName("Current Time"))
 REFL_FIELD(isPlaying, PAIN::Editor::Attributes::DisplayName("Is Playing"))
 REFL_FIELD(loopAnimation, PAIN::Editor::Attributes::DisplayName("Loop"))
 REFL_FIELD(playbackSpeed, PAIN::Editor::Attributes::Range(0.1f, 5.0f), PAIN::Editor::Attributes::DisplayName("Speed"))
+
+REFL_FIELD(currentAnimationIndex, PAIN::Editor::Attributes::ReadOnly())
+REFL_FIELD(animationTime, PAIN::Editor::Attributes::ReadOnly())
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Animation>);

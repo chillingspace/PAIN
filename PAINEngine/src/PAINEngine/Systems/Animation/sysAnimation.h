@@ -25,11 +25,13 @@ namespace PAIN {
 			std::vector<glm::vec3> translations;
 			std::vector<glm::quat> rotations;
 			std::vector<glm::vec3> scales;
+			std::vector<float> morphWeights;
 
-			void Resize(size_t size) {
-				translations.resize(size, glm::vec3(0.0f));
-				rotations.resize(size, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-				scales.resize(size, glm::vec3(1.0f));
+			void Resize(size_t boneCount, size_t morphCount = 0) {
+				translations.resize(boneCount);
+				rotations.resize(boneCount);
+				scales.resize(boneCount);
+				if (morphCount > 0) morphWeights.resize(morphCount);
 			}
 		};
 

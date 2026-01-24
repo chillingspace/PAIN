@@ -800,20 +800,29 @@ namespace PAIN {
 
             // resolve bone parents
             for (size_t i = 0; i < asset.skeleton.size(); ++i) {
-                // get bone
+                // Find the node corresponding to this bone
                 aiNode* boneNode = scene->mRootNode->FindNode(asset.skeleton[i].name.c_str());
 
-                //
-                if (boneNode && boneNode->mParent) {
-                    std::string parentName = boneNode->mParent->mName.C_Str();
+                if (!boneNode) continue; // should not happen if logic is correct
 
-                    // check if parent is bone
-                    auto it = boneNameToIndex.find(parentName);
+                // go up the hierarchy to find the first parent that IS a bone
+                aiNode* parentNode = boneNode->mParent;
+                while (parentNode) {
+                    std::string parentNodeName = parentNode->mName.C_Str();
+
+                    // check if parent node is in the list
+                    auto it = boneNameToIndex.find(parentNodeName);
                     if (it != boneNameToIndex.end()) {
+                        // Found parent bone
                         asset.skeleton[i].parent = it->second;
+                        break;
                     }
+
+                    // keep going up the node
+                    parentNode = parentNode->mParent;
                 }
             }
+
 
             size_t vertexBase = 0;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
@@ -927,34 +936,32 @@ namespace PAIN {
                         const std::string boneName = chan->mNodeName.C_Str();
                         auto& track = clip.track_map[boneName];
 
-                        // Determine the maximum number of keys (or just rely on the fact they usually align if baked)
-                        unsigned int maxKeys = std::max({ chan->mNumPositionKeys, chan->mNumRotationKeys, chan->mNumScalingKeys });
+                        // Get all unique time points from all pos , rot and scaling keys
+                        std::set<double> timePoints;
+                        for (unsigned int i = 0; i < chan->mNumPositionKeys; ++i) timePoints.insert(chan->mPositionKeys[i].mTime);
+                        for (unsigned int i = 0; i < chan->mNumRotationKeys; ++i) timePoints.insert(chan->mRotationKeys[i].mTime);
+                        for (unsigned int i = 0; i < chan->mNumScalingKeys; ++i) timePoints.insert(chan->mScalingKeys[i].mTime);
 
-                        for (unsigned int k = 0; k < maxKeys; ++k) {
+                        // cache indices
+                        unsigned int lastPosIdx = 0;
+                        unsigned int lastRotIdx = 0;
+                        unsigned int lastSclIdx = 0;
+
+                        // Iterate through sorted time points and build unified keys
+                        for (double time : timePoints) {
                             AnimationKey key;
 
-                            // Use the LAST available key if we run out (Clamping)
-                            unsigned int posIndex = (k < chan->mNumPositionKeys) ? k : (chan->mNumPositionKeys - 1);
-                            unsigned int rotIndex = (k < chan->mNumRotationKeys) ? k : (chan->mNumRotationKeys - 1);
-                            unsigned int sclIndex = (k < chan->mNumScalingKeys) ? k : (chan->mNumScalingKeys - 1);
-
-                            // Use the time from the Rotation key if it has the most keys (common for limbs)
-                            if (k < chan->mNumRotationKeys) {
-                                key.time = (float)chan->mRotationKeys[rotIndex].mTime;
-                            }
-                            else if (k < chan->mNumPositionKeys) {
-                                key.time = (float)chan->mPositionKeys[posIndex].mTime;
-                            }
-                            else {
-                                key.time = (float)chan->mScalingKeys[sclIndex].mTime;
-                            }
-
                             // Normalize time
-                            key.time /= (float)(anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f);
+                            key.time = (float)(time / (anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0));
 
                             // Position
+                            key.translation = glm::vec3(0.0f); // Default
                             if (chan->mNumPositionKeys > 0) {
-                                auto val = chan->mPositionKeys[posIndex].mValue;
+                                // Advance index until we find the key just before or at 'time'
+                                while (lastPosIdx + 1 < chan->mNumPositionKeys && chan->mPositionKeys[lastPosIdx + 1].mTime <= time) {
+                                    lastPosIdx++;
+                                }
+                                auto val = chan->mPositionKeys[lastPosIdx].mValue;
                                 key.translation = glm::vec3(val.x, val.y, val.z);
                             }
                             else {
@@ -962,8 +969,12 @@ namespace PAIN {
                             }
 
                             // Rotation
+                            key.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Default
                             if (chan->mNumRotationKeys > 0) {
-                                auto val = chan->mRotationKeys[rotIndex].mValue;
+                                while (lastRotIdx + 1 < chan->mNumRotationKeys && chan->mRotationKeys[lastRotIdx + 1].mTime <= time) {
+                                    lastRotIdx++;
+                                }
+                                auto val = chan->mRotationKeys[lastRotIdx].mValue;
                                 key.rotation = glm::quat(val.w, val.x, val.y, val.z);
                             }
                             else {
@@ -971,8 +982,12 @@ namespace PAIN {
                             }
 
                             // Scale
+                            key.scale = glm::vec3(1.0f); // Default
                             if (chan->mNumScalingKeys > 0) {
-                                auto val = chan->mScalingKeys[sclIndex].mValue;
+                                while (lastSclIdx + 1 < chan->mNumScalingKeys && chan->mScalingKeys[lastSclIdx + 1].mTime <= time) {
+                                    lastSclIdx++;
+                                }
+                                auto val = chan->mScalingKeys[lastSclIdx].mValue;
                                 key.scale = glm::vec3(val.x, val.y, val.z);
                             }
                             else {
@@ -981,7 +996,7 @@ namespace PAIN {
 
                             track.push_back(key);
                         }
-                        //clip.tracks.push_back(track);
+                        
                     }
                     asset.animations.push_back(clip);
                 }
