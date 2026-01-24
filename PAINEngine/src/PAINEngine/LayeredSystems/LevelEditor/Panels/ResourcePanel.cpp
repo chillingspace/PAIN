@@ -12,6 +12,7 @@
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+#include "CoreSystems/Renderer/sRenderer.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
@@ -156,6 +157,7 @@ namespace PAIN {
 
 					//Get Folder icon
 					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					if (icon_opt.has_value() && !icon_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(icon_opt.value());
 					temp.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Instantiate name
@@ -289,6 +291,7 @@ namespace PAIN {
 
 					//Folder icon
 					auto icon_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(folder_path);
+					if (icon_opt.has_value() && !icon_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(icon_opt.value());
 					dir_copy.icon = icon_opt.has_value() ? static_cast<ImTextureID>(icon_opt.value()->gl_texture) : 0;
 
 					//Set drag payload with asset name
@@ -484,6 +487,9 @@ namespace PAIN {
 
 					//Folder icon
 					auto texture_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(icon_path);
+
+					//Ensure texture is loaded
+					if (texture_opt.has_value() && !texture_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(texture_opt.value());
 
 					//Check and ensure texture is not a cubemap
 					if (texture_opt.has_value() && !texture.value()->is_cube_map) {
@@ -948,6 +954,7 @@ namespace PAIN {
 				//Albedo Texture
 				std::optional<std::shared_ptr<Assets::Texture>> tex_opt = assetManager->getAsset<Assets::Texture>(material->albedoTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_AlbedoMap", 0);
@@ -960,6 +967,7 @@ namespace PAIN {
 				//Normal texture
 				tex_opt = assetManager->getAsset<Assets::Texture>(material->normalTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE1);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_NormalMap", 1);
@@ -972,6 +980,7 @@ namespace PAIN {
 				//Metallic texture
 				tex_opt = assetManager->getAsset<Assets::Texture>(material->metallicTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_MetallicMap", 2);
@@ -984,6 +993,7 @@ namespace PAIN {
 				//Roughness texture
 				tex_opt = assetManager->getAsset<Assets::Texture>(material->roughnessTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE3);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_RoughnessMap", 3);
@@ -996,6 +1006,7 @@ namespace PAIN {
 				//AO texture
 				tex_opt = assetManager->getAsset<Assets::Texture>(material->aoTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE4);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_AOMap", 4);
@@ -1008,6 +1019,7 @@ namespace PAIN {
 				//Emissive texture
 				tex_opt = assetManager->getAsset<Assets::Texture>(material->emissiveTexturePath);
 				if (tex_opt.has_value()) {
+					if (!tex_opt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(tex_opt.value());
 					glActiveTexture(GL_TEXTURE5);
 					glBindTexture(GL_TEXTURE_2D, tex_opt.value()->gl_texture);
 					shader->SetUniform("u_EmissiveMap", 5);

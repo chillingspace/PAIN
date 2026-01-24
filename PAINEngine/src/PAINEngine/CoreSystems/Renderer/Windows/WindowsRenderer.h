@@ -34,7 +34,7 @@ namespace PAIN {
 namespace PAIN {
 
 	class WindowsRenderer {
-	  private:
+	private:
 		// for instanced rendering
 
 		// scene vbo stuff
@@ -87,7 +87,7 @@ namespace PAIN {
 			}
 		};
 
-	  public:
+	public:
 		static constexpr float ao = 1.f; // ambient occlusion	(1 = no occlusion)
 
 		inline static int winWidth = 0;
@@ -97,6 +97,7 @@ namespace PAIN {
 		~WindowsRenderer();
 
 		void Init(std::shared_ptr<Services> app_services);
+		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
 		void initSceneVbo();
 		void clearBuffers();
 

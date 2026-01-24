@@ -5,34 +5,6 @@
 local player = nil
 
 registerUpdate(function(dt)
-    -- if not player then
-    --     local found = findEntity("Player")
-    --     if not found then 
-    --         return 
-    --     end
-
-    --     player = found
-
-    --     -- ensure PlayerState knows the start/checkpoint
-    --     if PlayerState and PlayerState.init then
-    --         PlayerState.init(player)
-    --     end
-    -- end
-
-    -- local found = findEntity("Player")
-    -- if not found then
-    --     return
-    -- end
-
-    -- -- If player changed (scene reload), rebind
-    -- if player ~= found then
-    --     player = found
-
-    --     if PlayerState and PlayerState.init then
-    --         PlayerState.init(player)
-    --     end
-    -- end
-
     local p = _G.PlayerEntity
     if not p then
         return
@@ -45,7 +17,12 @@ registerUpdate(function(dt)
     local px, py, pz = getPosition(player)
     local dx, dy, dz = px - ex, py - ey, pz - ez
     local dist2 = dx*dx + dy*dy + dz*dz
-    local radius = 0.35
+
+    local BASE_DETECTION_RADIUS = 1.0 -- 0.35
+
+    local sx, sy, sz = getScale(entityId)
+    local radius = BASE_DETECTION_RADIUS * math.max(sx, sz)
+
 
     if dist2 < radius*radius then
         -- 1) If the game is already ended, do nothing.

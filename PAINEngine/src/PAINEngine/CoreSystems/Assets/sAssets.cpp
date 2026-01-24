@@ -7,6 +7,7 @@
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
+#include "CoreSystems/Renderer/sRenderer.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -360,6 +361,10 @@ namespace PAIN {
 			return checkAssetRegistered(id);
 		}
 
+		void Manager::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
+			if (!tex->gl_texture) services->get<sRenderer>()->queueTexUpload(tex);
+		}
+
 		// Efficient double-checked locking for cacheAsset
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 			// PHASE 1: Check if already cached (read lock) 
@@ -477,9 +482,12 @@ namespace PAIN {
 
 					//Cast and check gl texture
 					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset.second);
-					if (!tex->gl_texture) asset_loader->uploadTexture(tex);
+					if (tex && !tex->gl_texture) uploadTexture(tex);
 				}
 			}
+
+			//Trigger batch uploading for next frame
+			services->get<sRenderer>()->batchUpload();
 		}
 
 		void Manager::uncacheAsset(GUID const& id) {

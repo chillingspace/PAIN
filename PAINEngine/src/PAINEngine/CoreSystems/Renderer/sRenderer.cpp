@@ -26,6 +26,7 @@
 #include "Systems/Collision/sBVHSystem.h"
 
 namespace PAIN {
+
 	void sRenderer::onDetach()
 	{
 		w_renderer = nullptr;
@@ -56,6 +57,42 @@ namespace PAIN {
 
 	void sRenderer::onUpdate(AppTiming timing) {
 
+		//Upload textures
+		if(getPendingTexUploadCount() > 0) processUploads();
+	}
+
+	void sRenderer::queueTexUpload(std::shared_ptr<Assets::Texture> tex) {
+		//Unique lock for writing
+		std::unique_lock<std::mutex> lock(tex_mutex);
+		pending_textures.push_back(tex);
+	}
+
+	size_t sRenderer::getPendingTexUploadCount() const {
+		//Unique lock for writing
+		std::unique_lock<std::mutex> lock(tex_mutex);
+		return pending_textures.size();
+	}
+
+	void sRenderer::processUploads(int max_per_frame) {
+		//Unique lock for writing
+		std::unique_lock<std::mutex> lock(tex_mutex);
+
+		int uploaded = 0;
+		auto it = pending_textures.begin();
+
+		while (it != pending_textures.end() && (batch_upload || uploaded < max_per_frame)) {
+			auto& tex = *it;
+
+			if (!tex->gl_texture) {
+				w_renderer->uploadTexture(tex);
+			}
+
+			it = pending_textures.erase(it);
+			uploaded++;
+		}
+
+		//Reset batch upload flag
+		if (batch_upload) batch_upload = false;
 	}
 
 	void sRenderer::onEvent(Event::Event& e) {
