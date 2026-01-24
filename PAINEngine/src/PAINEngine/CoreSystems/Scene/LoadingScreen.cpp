@@ -51,6 +51,14 @@ void main() {
             m_progressBarShader = compileProgressBarShader();
             m_overlayShader = compileOverlayShader();
 
+            //Get GUID for the background texture
+#ifdef PN_PLATFORM_WINDOWS
+            std::filesystem::path tex_path = "engine/textures/sunshine.png";
+#else
+            std::filesystem::path tex_path = "engine\\textures\\sunshine.png";
+#endif
+            m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
+
             // Initialize animation timing
             m_animationTime = 0.0f;
             m_lastFrameTime = std::chrono::steady_clock::now();
@@ -138,6 +146,8 @@ void main() {
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             
             // Render in Z-order (back to front):
             // Layer 1: Background texture (if set)
@@ -489,18 +499,14 @@ void main() {
             auto assetMgr = serv->get<Assets::Manager>();
             auto texOpt = assetMgr->getAsset<Assets::Texture>(m_backgroundTextureGUID);
             if (!texOpt.has_value()) return;
+            if (!texOpt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(texOpt.value());
             
             GLuint texID = texOpt.value()->gl_texture;
             
             // Render fullscreen background texture
             glm::vec2 pos(0.0f, 0.0f);
-            glm::vec2 scale(screenWidth, screenHeight);
+            glm::vec2 scale(1, 1);
             glm::vec4 uvTransform(1.0f, 1.0f, 0.0f, 0.0f);  // Full texture
-            
-            // Set GL state for background rendering
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             
             renderer->w_renderer->Render2DTexture(texID, pos, scale, uvTransform);
         }
