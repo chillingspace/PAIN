@@ -25,15 +25,16 @@
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
+        "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
         "3a5c03f0-d776-2a44-ba91-1b088c4a4bb5",
         "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
+        "38e8f9de-b2dc-0f47-ad64-f0209917e593",
         "6f80f4ba-d003-2c41-aa74-2535221b1df7",
         "9679f581-d33b-d44d-ae70-30f076c3dca3",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
         "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
-        "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "727c84f2-9736-9548-9f0f-45f80159ae7b",
         "5936ba72-6cad-7a4a-8039-d1614e5a9719",
@@ -61,21 +62,21 @@
         "cf15ebf1-3c0e-d341-b9c7-44121d571eb4"
     ],
     "camera": {
-        "active_game_cam": "",
+        "active_game_cam": "Player",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.08044943958520889,
-            -0.5833404660224915,
-            0.8082338571548462
+            -0.10928960889577866,
+            -0.7288002371788025,
+            0.6759482026100159
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            1.611769676208496,
-            4.0988569259643555,
-            -12.30096435546875
+            1.9034066200256348,
+            6.576014041900635,
+            -19.051633834838867
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 13.5,
@@ -1446,10 +1447,8 @@
                 "Entity": {
                     "Components": {
                         "Animation": {
-                            "animationTime": 0.0,
-                            "currentAnimationIndex": -1,
-                            "isPlaying": false,
-                            "loopAnimation": true,
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": false,
                             "playbackSpeed": 1.0
                         },
                         "BoundingVolume": {
@@ -1533,7 +1532,7 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "albedoTextureOverride": "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
                                     "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
@@ -1554,10 +1553,10 @@
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
                                     "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "useOverrides": false
+                                    "useOverrides": true
                                 }
                             ],
-                            "modelGUID": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+                            "modelGUID": "38e8f9de-b2dc-0f47-ad64-f0209917e593",
                             "receiveShadows": true,
                             "visible": true
                         },

@@ -263,6 +263,39 @@ namespace PAIN {
 					"Animation", [](ComponentsPanel&, PAIN::Animation& anim) {
 						// Basic fields; reflection will handle labels from cAnimation.h
 						DrawWithReflection(anim);
+
+						ImGui::Spacing();
+						ImGui::Separator();
+						ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Runtime Debug Info");
+
+						// Show Status
+						if (anim.isPlaying) {
+							ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Status: Playing");
+						}
+						else {
+							ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.2f, 1.0f), "Status: Paused");
+						}
+
+						// Read-only Runtime Values
+						ImGui::BeginDisabled(); // Grey out to show they aren't editable settings
+
+						int currIdx = anim.currentAnimationIndex;
+						ImGui::InputInt("Current Index", &currIdx);
+
+						float currTime = anim.animationTime;
+						ImGui::DragFloat("Time", &currTime);
+
+						int nextIdx = anim.nextAnimationIndex;
+						if (nextIdx != -1) {
+							ImGui::InputInt("Next Index", &nextIdx);
+						}
+
+						ImGui::EndDisabled();
+
+						// 3. Optional: Manual Controls for testing
+						if (ImGui::Button(anim.isPlaying ? "Pause##Comp" : "Resume##Comp")) {
+							anim.isPlaying = !anim.isPlaying;
+						}
 					});
 
 				// UItext comp ui

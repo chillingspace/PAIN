@@ -64,13 +64,25 @@ namespace PAIN {
 
 			for (auto [entity, anim, renderer] : group.each()) {
 
-				// Skip if not playing or model missing
-				if (!anim.isPlaying || !renderer.cachedModelAsset) continue;
+				// Skip if model missing or no animations
+				if (!renderer.cachedModelAsset || renderer.cachedModelAsset->animations.empty()) continue;
 
 				// Check for valid index
 				if (anim.currentAnimationIndex < 0 || anim.currentAnimationIndex >= renderer.cachedModelAsset->animations.size()) {
-					continue;
+					int targetIndex = 0;
+
+					// Use default if there is one
+					if (anim.defaultAnimationIndex >= 0 &&
+						anim.defaultAnimationIndex < renderer.cachedModelAsset->animations.size()) {
+						targetIndex = anim.defaultAnimationIndex;
+					}
+
+					// Play animations immediately
+					anim.PlayAnimation(targetIndex, anim.loopAnimation, anim.playbackSpeed);
 				}
+
+				// Skip if paused
+				if (!anim.isPlaying) continue;
 
 				float duration = renderer.cachedModelAsset->animations[anim.currentAnimationIndex].duration;
 				if (duration <= 0.001f) duration = 1.0f; // Prevent divide by zero
