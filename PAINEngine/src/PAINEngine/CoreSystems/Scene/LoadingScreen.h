@@ -120,9 +120,7 @@ namespace PAIN {
             void renderBackgroundTexture();
             void renderBackgroundOverlay();
             void renderProgressBar();
-            void renderTitle();
             void renderStatusText();
-            void renderPercentage();
             
             unsigned int compileShader();
             unsigned int compileProgressBarShader();

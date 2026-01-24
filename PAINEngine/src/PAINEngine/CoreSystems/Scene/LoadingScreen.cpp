@@ -11,7 +11,7 @@
 namespace PAIN {
     namespace Scene {
 
-        // Simple vertex shader for fullscreen quad
+        // Simple vertex shader for fullscreen quad !!FALLBACK
         static const char* vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
@@ -25,7 +25,7 @@ void main() {
 }
 )";
 
-        // Simple fragment shader for solid colors
+        // Simple fragment shader for solid colors !!FALLBACK
         static const char* fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
@@ -148,15 +148,12 @@ void main() {
             
             // Layer 3: Progress bar
             renderProgressBar();
-            
-            // Layer 4: Title text
-            renderTitle();
-            
-            // Layer 5: Status text
+
+            // Layer 4: Status text
             renderStatusText();
-            
-            // Layer 6: Percentage text
-            renderPercentage();
+
+            //Unbind frame buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             // Swap buffers and poll events
             auto win = services.lock()->get<Window::Window>();
@@ -194,111 +191,120 @@ void main() {
                 glViewport(0, 0, frame_buffer.x, frame_buffer.y);
             }
 
-            // Clear screen with dark background
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_CULL_FACE);
-
-            // Render in Z-order (back to front):
-            // Layer 1: Background texture (if set)
-            renderBackgroundTexture();
-
-            // Layer 2: Animated gradient overlay
-            renderBackgroundOverlay();
-
-            // Layer 3: Progress bar
-            renderProgressBar();
-
-            // Layer 4: Title text
-            renderTitle();
-
-            // Layer 5: Status text
-            renderStatusText();
-
-            // Layer 6: Percentage text
-            renderPercentage();
-
-            //Unbind frame buffer
-            glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
-
-            // Swap buffers and poll events
-            auto win = services.lock()->get<Window::Window>();
-            if (win) {
-                win->swapBuffers();
-                win->pollEvents();
-            }
+            //Render to buffer
+            render();
         }
 
         void LoadingScreen::renderProgressBar() {
-            if (!m_shader || !m_vao) return;
-
-            glUseProgram(m_shader);
+            if (!m_vao) return;
+            
+            // Use custom shader if available, otherwise fall back to basic shader
+            GLuint shaderToUse = m_progressBarShader ? m_progressBarShader : m_shader;
+            if (!shaderToUse) return;
+            
+            glUseProgram(shaderToUse);
             glBindVertexArray(m_vao);
-
+            
             float progress = m_progress.load();
-
-            // Draw background bar (dark gray)
-            {
-                // Bar dimensions in NDC (-1 to 1)
-                float barWidth = 0.6f;   // 60% of screen width
-                float barHeight = 0.05f; // 5% of screen height
-                float barX = 0.0f;       // Centered
-                float barY = -0.3f;      // Below center
-
-                // Create vertices for background bar
-                float bgVertices[] = {
-                    barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                    barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
-                    barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-
-                    barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                    barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                    barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
-                };
-
-                glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(bgVertices), bgVertices);
-
-                // Set color uniform (dark gray: 0.2, 0.2, 0.2)
-                GLint colorLoc = glGetUniformLocation(m_shader, "color");
-                GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
-                glUniform3f(colorLoc, 0.2f, 0.2f, 0.2f);
-                glUniform1f(alphaLoc, 1.0f);
-
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-            }
-
-            // Draw progress bar (bright color)
-            if (progress > 0.0f) {
-                float barWidth = 0.6f * progress; // Scale by progress
-                float barHeight = 0.05f;
-                float barX = -0.3f + (0.6f * progress) / 2; // Offset to start from left
-                float barY = -0.3f;
-
+            
+            // Set GL state
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_DEPTH_TEST);
+            
+            // If using custom shader, set all uniforms
+            if (m_progressBarShader) {
+                GLint progressLoc = glGetUniformLocation(m_progressBarShader, "progress");
+                GLint animTimeLoc = glGetUniformLocation(m_progressBarShader, "animationTime");
+                GLint fillColorLoc = glGetUniformLocation(m_progressBarShader, "fillColor");
+                GLint glowColorLoc = glGetUniformLocation(m_progressBarShader, "glowColor");
+                GLint glowIntensityLoc = glGetUniformLocation(m_progressBarShader, "glowIntensity");
+                
+                glUniform1f(progressLoc, progress);
+                glUniform1f(animTimeLoc, m_animationTime);
+                glUniform3fv(fillColorLoc, 1, &m_fillColor[0]);
+                glUniform3fv(glowColorLoc, 1, &m_glowColor[0]);
+                glUniform1f(glowIntensityLoc, m_glowIntensity);
+                
+                // Create progress bar quad in NDC (-1 to 1)
+                float barWidth = m_progressBarWidth;
+                float barHeight = m_progressBarHeight;
+                float barY = m_progressBarY;
+                
                 float progressVertices[] = {
-                    barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                    barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
-                    barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-
-                    barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                    barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                    barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
+                    -barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                    -barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
+                     barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                    
+                    -barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                     barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                     barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
                 };
-
+                
                 glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
                 glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
-
-                // Set color uniform (bright cyan: 0.2, 0.8, 0.9)
-                GLint colorLoc = glGetUniformLocation(m_shader, "color");
-                GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
-                glUniform3f(colorLoc, 0.2f, 0.8f, 0.9f);
-                glUniform1f(alphaLoc, 1.0f);
-
+                
+                // Draw single quad - shader handles empty vs filled portions
                 glDrawArrays(GL_TRIANGLES, 0, 6);
+            } else {
+                // Fallback: Use basic shader with old dual-pass approach
+                // Draw background bar (dark gray)
+                {
+                    float barWidth = 0.6f;
+                    float barHeight = 0.05f;
+                    float barX = 0.0f;
+                    float barY = -0.3f;
+                    
+                    float bgVertices[] = {
+                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                        barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
+                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                        
+                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                        barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
+                    };
+                    
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(bgVertices), bgVertices);
+                    
+                    GLint colorLoc = glGetUniformLocation(m_shader, "color");
+                    GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
+                    glUniform3f(colorLoc, 0.2f, 0.2f, 0.2f);
+                    glUniform1f(alphaLoc, 1.0f);
+                    
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+                
+                // Draw progress bar (bright color)
+                if (progress > 0.0f) {
+                    float barWidth = 0.6f * progress;
+                    float barHeight = 0.05f;
+                    float barX = -0.3f + (0.6f * progress) / 2;
+                    float barY = -0.3f;
+                    
+                    float progressVertices[] = {
+                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                        barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
+                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                        
+                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
+                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                        barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
+                    };
+                    
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
+                    
+                    GLint colorLoc = glGetUniformLocation(m_shader, "color");
+                    GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
+                    glUniform3f(colorLoc, 0.2f, 0.8f, 0.9f);
+                    glUniform1f(alphaLoc, 1.0f);
+                    
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
             }
-
+            
             glBindVertexArray(0);
             glUseProgram(0);
         }
@@ -313,10 +319,13 @@ void main() {
             float screenHeight = framebuffer.y;
             
             // Lock mutex to safely read status text
-            std::string currentStatus;
+            std::string currentStatus = "Progress ( ";
+            float progress = m_progress.load();
+            int percentage = static_cast<int>(progress * 100.0f);
+            currentStatus += std::to_string(percentage) + "% ): ";
             {
                 std::lock_guard<std::mutex> lock(m_statusMutex);
-                currentStatus = m_statusText;
+                currentStatus += m_statusText;
             }
             
             if (currentStatus.empty()) return;
@@ -324,17 +333,21 @@ void main() {
             // Create UIText component for status
             UIText statusTextComp;
             statusTextComp.display_text = currentStatus;
-            statusTextComp.font_size = 20.0f;
             statusTextComp.color = glm::vec3(0.85f, 0.85f, 0.85f);  // Light gray
             statusTextComp.alignment = TextAlignment::Center;
+            statusTextComp.scale_factor = 0.02f;
+            statusTextComp.word_wrap = false;
+#ifdef PN_PLATFORM_WINDOWS
+            std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
+#else
+            std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
+#endif
+            statusTextComp.font_guid = services.lock()->get<Assets::Manager>()->findGUID(font_path);
             
             // Position below progress bar
             // Progress bar Y is -0.3 in NDC, convert to screen space
             float progressBarScreenY = screenHeight * (1.0f - m_progressBarY) / 2.0f;
-            statusTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY + 60.0f);
-            
-            // TODO: Set font GUID - for now TextRenderer will use default font
-            // statusTextComp.font_guid = defaultFontGUID;
+            statusTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY - 30.0f);
             
             // Render using TextRenderer static instance
             TextRenderer::get().renderText(statusTextComp);
@@ -407,14 +420,13 @@ void main() {
             PN_CORE_WARN("[LoadingScreen] Custom progress bar shader not loaded - using basic shader");
             return 0;
             
-            /* TODO: Uncomment when services pointer is added to LoadingScreen::init()
             #ifdef PN_PLATFORM_WINDOWS
                 std::filesystem::path shader_path = "engine/shaders/loading_progress.vert";
             #else
                 std::filesystem::path shader_path = "engine\\shaders\\android_loading_progress.vert";
             #endif
             
-            auto assets_loader = services->get<Assets::Manager>();
+            auto assets_loader = services.lock()->get<Assets::Manager>();
             auto shader_opt = assets_loader->getAsset<Assets::Shader>(shader_path);
             auto shader = shader_opt.has_value() ? shader_opt.value() : nullptr;
             
@@ -424,7 +436,6 @@ void main() {
             }
             
             return shader->GetRendererID();
-            */
         }
 
         unsigned int LoadingScreen::compileOverlayShader() {
@@ -455,73 +466,74 @@ void main() {
         }
 
         void LoadingScreen::renderBackgroundTexture() {
-            // TODO: Implement after renderer_ptr is properly set in Scene.cpp
-            // Will use WindowsRenderer->Render2DTexture() for fullscreen background
+            // Check if background texture is set
+            if (!m_backgroundTextureGUID.IsValid()) return;
+            
+            // Get services
+            auto serv = services.lock();
+            if (!serv) return;
+            
+            // Get renderer
+            auto renderer = serv->get<sRenderer>();
+            if (!renderer || !renderer->w_renderer) return;
+            
+            // Get window for dimensions
+            auto win = serv->get<Window::Window>();
+            if (!win) return;
+            
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+            
+            // Get texture asset
+            auto assetMgr = serv->get<Assets::Manager>();
+            auto texOpt = assetMgr->getAsset<Assets::Texture>(m_backgroundTextureGUID);
+            if (!texOpt.has_value()) return;
+            
+            GLuint texID = texOpt.value()->gl_texture;
+            
+            // Render fullscreen background texture
+            glm::vec2 pos(0.0f, 0.0f);
+            glm::vec2 scale(screenWidth, screenHeight);
+            glm::vec4 uvTransform(1.0f, 1.0f, 0.0f, 0.0f);  // Full texture
+            
+            // Set GL state for background rendering
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            
+            renderer->w_renderer->Render2DTexture(texID, pos, scale, uvTransform);
         }
 
         void LoadingScreen::renderBackgroundOverlay() {
-            // TODO: Implement with overlay shader
-            // Renders animated gradient overlay
+            // Only render if overlay shader is loaded
+            if (!m_overlayShader || !m_vao) return;
+            
+            glUseProgram(m_overlayShader);
+            glBindVertexArray(m_vao);
+            
+            // Set GL state for overlay (with blending)
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_DEPTH_TEST);
+            
+            // Set shader uniforms
+            GLint animTimeLoc = glGetUniformLocation(m_overlayShader, "animationTime");
+            GLint color1Loc = glGetUniformLocation(m_overlayShader, "color1");
+            GLint color2Loc = glGetUniformLocation(m_overlayShader, "color2");
+            GLint strengthLoc = glGetUniformLocation(m_overlayShader, "overlayStrength");
+            
+            glUniform1f(animTimeLoc, m_animationTime);
+            glUniform3fv(color1Loc, 1, &m_overlayColor1[0]);
+            glUniform3fv(color2Loc, 1, &m_overlayColor2[0]);
+            glUniform1f(strengthLoc, m_overlayStrength);
+            
+            // Draw fullscreen quad
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+           glBindVertexArray(0);
+            glUseProgram(0);
         }
-
-        void LoadingScreen::renderTitle() {
-            // Get window dimensions
-            auto win = services.lock()->get<Window::Window>();
-            if (!win) return;
-            
-            auto framebuffer = win->getFrameBuffer();
-            float screenWidth = framebuffer.x;
-            float screenHeight = framebuffer.y;
-            
-            // Create UIText component for title
-            UIText titleTextComp;
-            titleTextComp.display_text = "PAIN Engine";
-            titleTextComp.font_size = 48.0f;
-            titleTextComp.color = glm::vec3(1.0f, 1.0f, 1.0f);  // Pure white
-            titleTextComp.alignment = TextAlignment::Center;
-            
-            // Position at top of screen
-            titleTextComp.text_pos = glm::vec2(screenWidth / 2.0f, 80.0f);
-            
-            // Optional: Add subtle shadow for depth
-            titleTextComp.shadow_offset = glm::vec2(2.0f, 2.0f);
-            titleTextComp.shadow_color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f);
-            
-            // Render
-            TextRenderer::get().renderText(titleTextComp);
-        }
-
-        void LoadingScreen::renderPercentage() {
-            // Get window dimensions
-            auto win = services.lock()->get<Window::Window>();
-            if (!win) return;
-            
-            auto framebuffer = win->getFrameBuffer();
-            float screenWidth = framebuffer.x;
-            float screenHeight = framebuffer.y;
-            
-            // Get current progress
-            float progress = m_progress.load();
-            int percentage = static_cast<int>(progress * 100.0f);
-            
-            // Create percentage text (e.g., "67%")
-            std::string percentageText = std::to_string(percentage) + "%";
-            
-            // Create UIText component
-            UIText percentTextComp;
-            percentTextComp.display_text = percentageText;
-            percentTextComp.font_size = 32.0f;
-            percentTextComp.color = glm::vec3(0.9f, 0.9f, 1.0f);  // Slightly blue-tinted white
-            percentTextComp.alignment = TextAlignment::Center;
-            
-            // Position above progress bar
-            float progressBarScreenY = screenHeight * (1.0f - m_progressBarY) / 2.0f;
-            percentTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY - 40.0f);
-            
-            // Render
-            TextRenderer::get().renderText(percentTextComp);
-        }
-
     }
 }
 
