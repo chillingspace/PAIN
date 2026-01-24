@@ -630,6 +630,33 @@ namespace PAIN {
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        lua_.set_function("setLayerEnabled", [this](int layerId, bool enabled) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] setLayerEnabled: API not initialized");
+                return;
+            }
+
+            bool success = api_->SetLayerEnabled(layerId, enabled);
+            if (success) {
+                PN_INFO("[Lua] Layer {} enabled: {}", layerId, enabled);
+            }
+            else {
+                PN_WARN("[Lua] Failed to set Layer {} - layer not found", layerId);
+            }
+            });
+
+        lua_.set_function("getLayerEnabled", [this](int layerId) -> bool {
+            if (!api_) {
+                PN_ERROR("[LuaManager] getLayerEnabled: API not initialized");
+                return false;
+            }
+            return api_->GetLayerEnabled(layerId);
+            });
+
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });

@@ -113,6 +113,12 @@ namespace PAIN {
         float GetDeltaMultiplier() const override;
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        bool SetLayerEnabled(int layerId, bool enabled) override;
+        bool GetLayerEnabled(int layerId) override;
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         void ShakeCamera(float duration, float amplitude) override;

@@ -888,7 +888,8 @@
                                 "37ca7d5d-72d5-b940-afb0-57a2bfb00b57",
                                 "5a10b62d-37de-2a4f-875c-07f930e081f5",
                                 "01ef6a12-57ac-1c4b-86fb-25b9724637c8",
-                                "b46e2a9c-59db-814e-89ed-8443a9596037"
+                                "b46e2a9c-59db-814e-89ed-8443a9596037",
+                                "b3e9b378-94a2-6647-9398-c9134578dc9b"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 1
@@ -916,7 +917,15 @@
                             ]
                         },
                         "Name": {
-                            "name": "pause_screen"
+                            "name": "PauseManager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                }
+                            ]
                         },
                         "UICanvas": {
                             "sort_order": 0
@@ -968,7 +977,7 @@
                             ]
                         }
                     },
-                    "Name": "pause_screen"
+                    "Name": "PauseManager"
                 }
             },
             {
@@ -1511,6 +1520,105 @@
                         }
                     },
                     "Name": "pause_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "b3e9b378-94a2-6647-9398-c9134578dc9b"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "3f14b949-e2af-044c-864a-4c91c714b35e",
+                            "siblingIndex": 5
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pause manager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                }
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                364.0,
+                                364.0
+                            ]
+                        }
+                    },
+                    "Name": "pause manager"
                 }
             },
             {
@@ -16662,7 +16770,7 @@
                 0.30000001192092896,
                 0.8999999761581421
             ],
-            "enabled": true,
+            "enabled": false,
             "id": 2,
             "mask": 4,
             "name": "Pause_screen"
