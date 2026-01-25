@@ -1,9 +1,5 @@
 {
     "assets": [
-        "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
-        "30cd3b32-bce1-564e-8046-1204bbfee443",
-        "a8977689-ded0-fa41-9efb-33354e83dec7",
         "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
@@ -12,6 +8,10 @@
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
         "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
         "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "30cd3b32-bce1-564e-8046-1204bbfee443",
+        "a8977689-ded0-fa41-9efb-33354e83dec7",
         "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
         "57242baf-a6af-5646-bbc2-858308aa22a9",
         "a77749e3-6c15-7446-a792-5609dd96b391",
@@ -78,16 +78,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.2701103091239929,
-            -0.6840178966522217,
-            0.6776134967803955
+            0.7011629343032837,
+            -0.5683956742286682,
+            0.4304613173007965
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.2223440706729889,
-            0.987946093082428,
-            0.11288478970527649
+            1.2346857786178589,
+            0.334293931722641,
+            0.7675216197967529
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 1.5,
@@ -2304,14 +2304,9 @@
                 "Entity": {
                     "Components": {
                         "Animation": {
-                            "animationTime": 0.8627764582633972,
-                            "currentAnimationIndex": 0,
                             "defaultAnimationIndex": -1,
-                            "isPlaying": true,
-                            "loopAnimation": true,
-                            "nextAnimationIndex": -1,
-                            "playbackSpeed": 1.0080000162124634,
-                            "transitionWeight": 0.0
+                            "loopAnimation": false,
+                            "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
                             "group_name": "sfx",
@@ -2371,8 +2366,8 @@
                             ],
                             "trans_offset": [
                                 0.0,
-                                3.0,
-                                -5.0
+                                0.25,
+                                -0.5
                             ],
                             "width_ratio": 16.0
                         },

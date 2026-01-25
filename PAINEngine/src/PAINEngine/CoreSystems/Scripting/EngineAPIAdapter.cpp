@@ -466,7 +466,7 @@ namespace PAIN {
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
     /* =========================================================================== */
-    /*                              Graphics / FX                                  */
+    /*                              Camera / FX                                    */
     /* =========================================================================== */
     void EngineAPIAdapter::ShakeCamera(float /*duration*/, float /*amplitude*/) {}
 
