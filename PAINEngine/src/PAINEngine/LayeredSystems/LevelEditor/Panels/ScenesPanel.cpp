@@ -1047,6 +1047,88 @@ namespace PAIN {
                 ImGui::Spacing();
                 
                 // ============================================================
+                // Style & Color Settings  
+                // ============================================================
+                if (ImGui::CollapsingHeader("Style & Colors")) {
+                    ImGui::Indent();
+                    
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Progress Bar Appearance");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Get current style
+                    auto [fillColor, glowColor, glowIntensity] = loadingScreen->getProgressBarStyle();
+                    float fillColorArray[3] = { fillColor.r, fillColor.g, fillColor.b };
+                    float glowColorArray[3] = { glowColor.r, glowColor.g, glowColor.b };
+                    float intensity = glowIntensity;
+                    
+                    // Fill Color
+                    ImGui::Text("Fill Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##FillColor", fillColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(fillColorArray[0], fillColorArray[1], fillColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the filled progress portion");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Glow Color
+                    ImGui::Text("Glow Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##GlowColor", glowColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(glowColorArray[0], glowColorArray[1], glowColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the animated glow effect");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Glow Intensity
+                    ImGui::Text("Glow Intensity:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::SliderFloat("##GlowIntensity", &intensity, 0.0f, 2.0f, "%.2f")) {
+                        loadingScreen->setProgressBarGlowIntensity(intensity);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Intensity of the glow effect (0 = off, 2 = maximum)");
+                    }
+                    
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Quick color presets
+                    ImGui::Text("Quick Presets:");
+                    
+                    if (ImGui::Button("Cyan/Blue (Default)")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.2f, 0.8f, 0.9f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(0.3f, 0.6f, 1.0f));
+                        loadingScreen->setProgressBarGlowIntensity(0.8f);
+                    }
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Green/Yellow")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.3f, 0.9f, 0.3f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(1.0f, 1.0f, 0.3f));
+                        loadingScreen->setProgressBarGlowIntensity(0.6f);
+                    }
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Purple/Pink")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.8f, 0.3f, 0.9f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(1.0f, 0.4f, 0.8f));
+                        loadingScreen->setProgressBarGlowIntensity(1.0f);
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                
+                // ============================================================
                 // Background Settings
                 // ============================================================
                 if (ImGui::CollapsingHeader("Background")) {

@@ -165,6 +165,34 @@ namespace PAIN {
              */
             void renderPreview(float progress, const std::string& status);
 
+            // ============================================================
+            // Style Customization - Progress Bar Colors
+            // ============================================================
+            
+            /**
+             * @brief Set progress bar fill color
+             * @param color RGB color for filled portion
+             */
+            void setProgressBarFillColor(const glm::vec3& color);
+            
+            /**
+             * @brief Set progress bar glow color
+             * @param color RGB color for glow effect
+             */
+            void setProgressBarGlowColor(const glm::vec3& color);
+            
+            /**
+             * @brief Set glow intensity
+             * @param intensity Glow intensity multiplier (0.0 - 2.0)
+             */
+            void setProgressBarGlowIntensity(float intensity);
+            
+            /**
+             * @brief Get progress bar colors and style
+             * @return Tuple of (fillColor, glowColor, glowIntensity)
+             */
+            std::tuple<glm::vec3, glm::vec3, float> getProgressBarStyle() const;
+
         private:
 
             // Simple vertex shader for fullscreen quad !!FALLBACK
@@ -264,6 +292,8 @@ void main() {
             unsigned int compileShader();
             unsigned int compileProgressBarShader();
             unsigned int compileOverlayShader();
+
+            void buildProgressBarVertices();
         };
 
     }

@@ -33,27 +33,6 @@ namespace PAIN {
             // Initialize animation timing
             m_animationTime = 0.0f;
             m_lastFrameTime = std::chrono::steady_clock::now();
-            
-            // Initialize default position and size for progress bar and status text
-            auto win = services.lock()->get<Window::Window>();
-            if (win) {
-                auto framebuffer = win->getFrameBuffer();
-                float screenWidth = framebuffer.x;
-                float screenHeight = framebuffer.y;
-                
-                // Set default progress bar position and size (if not already set by user)
-                if (m_progressBarPosition.x == 0.0f && m_progressBarPosition.y == 0.0f) {
-                    m_progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.7f);
-                }
-                if (m_progressBarSize.x == 600.0f && m_progressBarSize.y == 40.0f) {
-                    m_progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
-                }
-                
-                // Set default status text position (if not already set by user)
-                if (m_statusTextPosition.x == 0.0f && m_statusTextPosition.y == 0.0f) {
-                    m_statusTextPosition = glm::vec2(screenWidth / 2.0f, m_progressBarPosition.y + (m_progressBarSize.y / 2.0f) + 30.0f);
-                }
-            }
 
             // Create fullscreen quad for background and progress bar
             float quadVertices[] = {
@@ -83,6 +62,32 @@ namespace PAIN {
             glEnableVertexAttribArray(1);
 
             glBindVertexArray(0);
+
+            // Initialize default position and size for progress bar and status text
+            auto win = services.lock()->get<Window::Window>();
+            if (win) {
+                auto framebuffer = win->getFrameBuffer();
+                float screenWidth = framebuffer.x;
+                float screenHeight = framebuffer.y;
+
+                // Set default progress bar position and size (if not already set by user)
+                if (m_progressBarPosition.x == 0.0f && m_progressBarPosition.y == 0.0f) {
+                    // Default: centered horizontally, 85% down from top
+                    m_progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.85f);
+                }
+                if (m_progressBarSize.x == 600.0f && m_progressBarSize.y == 40.0f) {
+                    m_progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
+                }
+
+                // Set default status text position (if not already set by user)
+                if (m_statusTextPosition.x == 0.0f && m_statusTextPosition.y == 0.0f) {
+                    // Default: centered horizontally, 90% down from top (below progress bar)
+                    m_statusTextPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.90f);
+                }
+
+                // Build initial progress bar vertices
+                buildProgressBarVertices();
+            }
 
             PN_CORE_INFO("[LoadingScreen] Initialization complete");
         }
@@ -225,15 +230,6 @@ namespace PAIN {
             
             // If using custom shader, set all uniforms
             if (m_progressBarShader) {
-                // Get window dimensions for screen-space to NDC conversion
-                auto serv = services.lock();
-                if (!serv) return;
-                auto win = serv->get<Window::Window>();
-                if (!win) return;
-                
-                auto framebuffer = win->getFrameBuffer();
-                float screenWidth = framebuffer.x;
-                float screenHeight = framebuffer.y;
                 
                 GLint progressLoc = glGetUniformLocation(m_progressBarShader, "progress");
                 GLint animTimeLoc = glGetUniformLocation(m_progressBarShader, "animationTime");
@@ -247,106 +243,16 @@ namespace PAIN {
                 glUniform3fv(glowColorLoc, 1, &m_glowColor[0]);
                 glUniform1f(glowIntensityLoc, m_glowIntensity);
                 
-                // Calculate position and size in screen space
-                float barWidth = m_progressBarSize.x;
-                float barHeight = m_progressBarSize.y;
-                
-                float barX = m_progressBarPosition.x;
-                float barY = m_progressBarPosition.y;
-                
-                // Convert screen space to NDC
-                float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
-                float ndcY = 1.0f - (barY / screenHeight) * 2.0f;  // Flip Y (screen Y is top-down, NDC is bottom-up)
-                float ndcWidth = (barWidth / screenWidth) * 2.0f;
-                float ndcHeight = (barHeight / screenHeight) * 2.0f;
-                
-                // Create progress bar quad in NDC
-                float progressVertices[] = {
-                    ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
-                    ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
-                    ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
-                    
-                    ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
-                    ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
-                    ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
-                };
-                
-                glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
-                
-                // Draw single quad - shader handles empty vs filled portions
+                // Vertices are pre-built by buildProgressBarVertices()
+                //Just draw from the buffer
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             } else {
                 // Fallback: Use basic shader with old dual-pass approach
                 // Draw background bar (dark gray)
-                {
-                    // Get window dimensions for screen-space to NDC conversion
-                    auto serv = services.lock();
-                    if (!serv) return;
-                    auto win = serv->get<Window::Window>();
-                    if (!win) return;
-
-                    auto framebuffer = win->getFrameBuffer();
-                    float screenWidth = framebuffer.x;
-                    float screenHeight = framebuffer.y;
-
-                    // Calculate position and size in screen space
-                    float barWidth = m_progressBarSize.x;
-                    float barHeight = m_progressBarSize.y;
-
-                    float barX = m_progressBarPosition.x;
-                    float barY = m_progressBarPosition.y;
-
-                    // Convert screen space to NDC
-                    float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
-                    float ndcY = 1.0f - (barY / screenHeight) * 2.0f;  // Flip Y (screen Y is top-down, NDC is bottom-up)
-                    float ndcWidth = (barWidth / screenWidth) * 2.0f;
-                    float ndcHeight = (barHeight / screenHeight) * 2.0f;
-                    
-                    float progressVertices[] = {
-                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
-                        ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
-                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
-
-                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
-                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
-                        ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
-                    };
-                    
-                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
-                    
+                {                    
                     GLint colorLoc = glGetUniformLocation(m_shader, "color");
                     GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
                     glUniform3f(colorLoc, 0.2f, 0.2f, 0.2f);
-                    glUniform1f(alphaLoc, 1.0f);
-                    
-                    glDrawArrays(GL_TRIANGLES, 0, 6);
-                }
-                
-                // Draw progress bar (bright color)
-                if (progress > 0.0f) {
-                    float barWidth = 0.6f * progress;
-                    float barHeight = 0.05f;
-                    float barX = -0.3f + (0.6f * progress) / 2;
-                    float barY = -0.3f;
-                    
-                    float progressVertices[] = {
-                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                        barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
-                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                        
-                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                        barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
-                    };
-                    
-                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
-                    
-                    GLint colorLoc = glGetUniformLocation(m_shader, "color");
-                    GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
-                    glUniform3f(colorLoc, 0.2f, 0.8f, 0.9f);
                     glUniform1f(alphaLoc, 1.0f);
                     
                     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -613,10 +519,12 @@ namespace PAIN {
 
         void LoadingScreen::setProgressBarPosition(float x, float y) {
             m_progressBarPosition = glm::vec2(x, y);
+            buildProgressBarVertices();
         }
 
         void LoadingScreen::setProgressBarSize(float width, float height) {
             m_progressBarSize = glm::vec2(width, height);
+            buildProgressBarVertices();
         }
 
         glm::vec2 LoadingScreen::getProgressBarPosition() const {
@@ -661,6 +569,70 @@ namespace PAIN {
 
         std::tuple<int, int, float, bool> LoadingScreen::getSpritesheetSettings() const {
             return std::make_tuple(m_frameCount, m_framesPerRow, m_frameTime, m_animationEnabled);
+        }
+
+        // ============================================================
+        // Style Customization Implementations
+        // ============================================================
+
+        void LoadingScreen::setProgressBarFillColor(const glm::vec3& color) {
+            m_fillColor = color;
+        }
+
+        void LoadingScreen::setProgressBarGlowColor(const glm::vec3& color) {
+            m_glowColor = color;
+        }
+
+        void LoadingScreen::setProgressBarGlowIntensity(float intensity) {
+            m_glowIntensity = glm::clamp(intensity, 0.0f, 2.0f);
+        }
+
+        std::tuple<glm::vec3, glm::vec3, float> LoadingScreen::getProgressBarStyle() const {
+            return std::make_tuple(m_fillColor, m_glowColor, m_glowIntensity);
+        }
+
+        // ============================================================
+        // Helper Method - Build Progress Bar Vertices
+        // ============================================================
+
+        void LoadingScreen::buildProgressBarVertices() {
+            auto serv = services.lock();
+            if (!serv) return;
+            auto win = serv->get<Window::Window>();
+            if (!win) return;
+
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+
+            // Calculate position and size in screen space
+            float barWidth = m_progressBarSize.x;
+            float barHeight = m_progressBarSize.y;
+            float barX = m_progressBarPosition.x;
+            float barY = m_progressBarPosition.y;
+
+            // Convert screen space to NDC
+            // X: left edge (0) -> -1, right edge (screenWidth) -> +1
+            // Y: top edge (0) -> +1, bottom edge (screenHeight) -> -1
+            float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
+            float ndcY = (barY / screenHeight) * 2.0f - 1.0f;
+            float ndcWidth = (barWidth / screenWidth) * 2.0f;
+            float ndcHeight = (barHeight / screenHeight) * 2.0f;
+
+            // Create progress bar quad in NDC
+            float progressVertices[] = {
+                ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
+                ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+
+                ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+                ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
+            };
+
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 
         // ============================================================
