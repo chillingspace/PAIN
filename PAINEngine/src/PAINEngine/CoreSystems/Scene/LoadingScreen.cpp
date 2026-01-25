@@ -247,14 +247,84 @@ namespace PAIN {
                 //Just draw from the buffer
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             } else {
+                // Get window dimensions for screen-space to NDC conversion
+                auto serv = services.lock();
+                if (!serv) return;
+                auto win = serv->get<Window::Window>();
+                if (!win) return;
+
+                auto framebuffer = win->getFrameBuffer();
+                float screenWidth = framebuffer.x;
+                float screenHeight = framebuffer.y;
+
                 // Fallback: Use basic shader with old dual-pass approach
                 // Draw background bar (dark gray)
-                {                    
+                {                  
+                    // Calculate position and size in screen space
+                    float barWidth = m_progressBarSize.x;
+                    float barHeight = m_progressBarSize.y;
+
+                    float barX = m_progressBarPosition.x;
+                    float barY = m_progressBarPosition.y;
+
+                    // Convert screen space to NDC
+                    float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
+                    float ndcY = (barY / screenHeight) * 2.0f - 1.0f;
+                    float ndcWidth = (barWidth / screenWidth) * 2.0f;
+                    float ndcHeight = (barHeight / screenHeight) * 2.0f;
+
+                    float progressVertices[] = {
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
+                    };
+
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
+
                     GLint colorLoc = glGetUniformLocation(m_shader, "color");
                     GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
                     glUniform3f(colorLoc, 0.2f, 0.2f, 0.2f);
                     glUniform1f(alphaLoc, 1.0f);
                     
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+
+                // Draw progress bar (bright color)
+                if (progress > 0.0f) {
+                    float barWidth = m_progressBarSize.x * progress;
+                    float barHeight = m_progressBarSize.y;
+                    float barX = m_progressBarPosition.x;
+                    float barY = m_progressBarPosition.y;
+
+                    // Convert screen space to NDC
+                    float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
+                    float ndcY = (barY / screenHeight) * 2.0f - 1.0f;
+                    float ndcWidth = (barWidth / screenWidth) * 2.0f;
+                    float ndcHeight = (barHeight / screenHeight) * 2.0f;
+
+                    float progressVertices[] = {
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
+                    };
+
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
+
+                    GLint colorLoc = glGetUniformLocation(m_shader, "color");
+                    GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
+                    glUniform3f(colorLoc, 0.2f, 0.8f, 0.9f);
+                    glUniform1f(alphaLoc, 1.0f);
+
                     glDrawArrays(GL_TRIANGLES, 0, 6);
                 }
             }
