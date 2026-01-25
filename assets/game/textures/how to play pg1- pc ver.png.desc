@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "how to play pg1- pc ver.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10082004968051115156
+  },
+  "descriptor_version": 1,
+  "guid": "41fb6c3d-c2e9-2e48-9acd-e7e1ef17ebf6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\how to play pg1- pc ver.png"
+  }
+}
