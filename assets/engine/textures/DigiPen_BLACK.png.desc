@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "DigiPen_BLACK.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18263473380593651779
+  },
+  "descriptor_version": 1,
+  "guid": "407a7faf-4823-4847-81a4-4e37c94a3a3f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\DigiPen_BLACK.png"
+  }
+}
