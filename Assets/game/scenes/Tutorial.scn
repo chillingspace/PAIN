@@ -68,19 +68,19 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.49292197823524475,
-            -0.14584042131900787,
-            0.8577637672424316
+            -0.05540350824594498,
+            0.07174210995435715,
+            0.9958832859992981
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.9876209497451782,
-            0.5198035836219788,
-            -17.731056213378906
+            0.8786278963088989,
+            0.3555530607700348,
+            -15.640325546264648
         ],
         "sensitivity": 0.10000000149011612,
-        "speed": 13.5,
+        "speed": 8.0,
         "up": [
             0.0,
             1.0,
@@ -92,63 +92,26 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    0.800000011920929,
-                                    5.020569801330566,
-                                    -8.018499374389648
-                                ],
-                                "min": [
-                                    -0.800000011920929,
-                                    3.420569658279419,
-                                    -9.618499755859375
-                                ]
-                            }
-                        },
                         "GUID": {
-                            "guid": "e91543dd-0d34-974e-9638-1b4754081d8c"
+                            "guid": "08f7b37b-512b-8046-aa8f-df4df3c659da"
                         },
                         "Hierarchy": {
-                            "childrenGUIDs": [],
+                            "childrenGUIDs": [
+                                "18a8d426-4f81-b54e-a985-72ceafb36934",
+                                "7f20ef65-a9d5-4541-859b-ff911ea58a59"
+                            ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "Lighting": {
-                            "light_intensity": [
-                                0.5,
-                                0.5,
-                                0.5
-                            ],
-                            "light_type": 2,
-                            "offset": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "shadow_type": 0
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
                                 0.0,
-                                4.220569610595703,
-                                -8.818499565124512
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -157,60 +120,908 @@
                                 1.0
                             ],
                             "scale": [
-                                0.800000011920929,
-                                0.800000011920929,
-                                0.800000011920929
+                                1.0,
+                                1.0,
+                                1.0
                             ]
                         },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
                         "Name": {
-                            "name": "Enemy1"
+                            "name": "ui canvas"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
-                                }
+                        "UICanvas": {
+                            "sort_order": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
                             ]
                         }
                     },
-                    "Name": "Enemy1"
+                    "Name": "ui canvas"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "18a8d426-4f81-b54e-a985-72ceafb36934"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "234f63d2-9ce2-de4a-b2e9-b51df68fadf4",
+                                "63468803-8740-6446-9248-b63d7e49f36d",
+                                "09276c7c-b239-474f-950f-e175ea7b3e7e",
+                                "0dc7d509-a2c9-b640-ae82-df7adde1fa4b"
+                            ],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "buttons"
+                        }
+                    },
+                    "Name": "buttons"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pause button"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.800000011920929,
+                                0.699999988079071
+                            ],
+                            "texture_guid": "7ccefaa4-196c-9a44-8f03-bd9d4f7328d0",
+                            "texture_scale": [
+                                0.10000000149011612,
+                                0.10000000149011612
+                            ]
+                        },
+                        "UIButton": {
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "pause button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "0dc7d509-a2c9-b640-ae82-df7adde1fa4b"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "joystick"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.699999988079071,
+                                -0.5
+                            ],
+                            "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+                            "texture_scale": [
+                                0.15000000596046448,
+                                0.15000000596046448
+                            ]
+                        },
+                        "UIButton": {
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "Joystick_OnDrag",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIJoystick": {
+                            "center_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "is_dragging": false,
+                            "max_radius": 0.15000000596046448
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "joystick"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "63468803-8740-6446-9248-b63d7e49f36d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "collect/deliver button"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.4699999988079071,
+                                -0.550000011920929
+                            ],
+                            "texture_guid": "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "collect/deliver button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "09276c7c-b239-474f-950f-e175ea7b3e7e"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "jump button"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.75,
+                                -0.550000011920929
+                            ],
+                            "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "on_click_callback_lua": "JumpButton_OnClick",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "jump button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "7f20ef65-a9d5-4541-859b-ff911ea58a59"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "c9bc93bb-fca8-4341-952c-6f550e3190ac",
+                                "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
+                                "919b7422-5e7c-c140-b2c0-91ef65fa8262"
+                            ],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "hearts"
+                        }
+                    },
+                    "Name": "hearts"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c9bc93bb-fca8-4341-952c-6f550e3190ac"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_1"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.8500000238418579,
+                                0.800000011920929
+                            ],
+                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "83b6ccea-04e0-a54a-93c0-c94fbdccd8de"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_2"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.7200000286102295,
+                                0.800000011920929
+                            ],
+                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "919b7422-5e7c-c140-b2c0-91ef65fa8262"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_3"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.5899999737739563,
+                                0.800000011920929
+                            ],
+                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_3"
                 }
             },
             {
@@ -315,7 +1126,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -376,6 +1187,130 @@
             {
                 "Entity": {
                     "Components": {
+                        "BoundingVolume": {
+                            "localAABB": {
+                                "max": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "min": [
+                                    -1.0,
+                                    -1.0,
+                                    -1.0
+                                ]
+                            },
+                            "worldAABB": {
+                                "max": [
+                                    0.800000011920929,
+                                    5.020569801330566,
+                                    -8.018499374389648
+                                ],
+                                "min": [
+                                    -0.800000011920929,
+                                    3.420569658279419,
+                                    -9.618499755859375
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "e91543dd-0d34-974e-9638-1b4754081d8c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "Lighting": {
+                            "light_intensity": [
+                                0.5,
+                                0.5,
+                                0.5
+                            ],
+                            "light_type": 2,
+                            "offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "shadow_type": 0
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                4.220569610595703,
+                                -8.818499565124512
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.800000011920929,
+                                0.800000011920929,
+                                0.800000011920929
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
+                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Enemy1"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
+                                },
+                                {
+                                    "enabled": true,
+                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "Enemy1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "GUID": {
                             "guid": "75d1f30b-c786-784b-baba-f6f13f5e7436"
                         },
@@ -385,7 +1320,7 @@
                                 "9362e2a0-fefd-6545-847b-3640ce0677f5"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -615,14 +1550,14 @@
                             },
                             "worldAABB": {
                                 "max": [
-                                    -0.5857828259468079,
+                                    0.24514007568359375,
                                     0.3207780420780182,
-                                    -10.69809627532959
+                                    0.24514009058475494
                                 ],
                                 "min": [
-                                    -1.1865520477294922,
+                                    -0.3556291162967682,
                                     0.006818561349064112,
-                                    -11.188376426696777
+                                    -0.24514009058475494
                                 ]
                             }
                         },
@@ -640,9 +1575,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -0.8309229016304016,
                                 0.0,
-                                -10.943236351013184
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -708,14 +1643,14 @@
                                     },
                                     "worldAABB": {
                                         "max": [
-                                            -0.5857828259468079,
+                                            0.24514007568359375,
                                             0.3207780420780182,
-                                            -10.69809627532959
+                                            0.24514009058475494
                                         ],
                                         "min": [
-                                            -1.1865520477294922,
+                                            -0.3556291162967682,
                                             0.006818561349064112,
-                                            -11.188376426696777
+                                            -0.24514009058475494
                                         ]
                                     }
                                 },
@@ -726,9 +1661,9 @@
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        -0.8309229016304016,
                                         0.0,
-                                        -10.943236351013184
+                                        0.0,
+                                        0.0
                                     ],
                                     "rotation": [
                                         0.0,
@@ -796,7 +1731,7 @@
                                 "e51ddd7e-baf8-044d-af3b-d26f2ba7e5e5"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1405,7 +2340,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1521,7 +2456,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1637,7 +2572,7 @@
                                 "b5692014-216a-9146-a903-c3f8d6826a7a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2074,7 +3009,7 @@
                                 "f11911f5-c66c-9d4f-9bfd-6e908773690f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2846,7 +3781,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2971,7 +3906,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3068,7 +4003,27 @@
             "id": 0,
             "mask": 1,
             "name": "Layer 0"
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": true,
+            "id": 1,
+            "mask": 2,
+            "name": "UI"
         }
     ],
-    "mask_matrix": []
+    "mask_matrix": [
+        [
+            false,
+            false
+        ],
+        [
+            false,
+            false
+        ]
+    ]
 }
