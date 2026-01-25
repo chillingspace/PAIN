@@ -111,13 +111,12 @@ namespace PAIN {
             // Update animation time
            m_animationTime += timing.dt;
             
-            // Update animated background frames if enabled
-            if (m_animationEnabled && !m_backgroundFrames.empty()) {
+            // Update spritesheet animation frame if enabled
+            if (m_animationEnabled && m_frameCount > 1) {
                 m_currentFrameTime += timing.dt;
                 if (m_currentFrameTime >= m_frameTime) {
                     m_currentFrameTime = 0.0f;
-                    m_currentFrame = (m_currentFrame + 1) % m_backgroundFrames.size();
-                    m_backgroundTextureGUID = m_backgroundFrames[m_currentFrame];
+                    m_currentFrameIndex = (m_currentFrameIndex + 1) % m_frameCount;
                 }
             }
             
@@ -363,20 +362,33 @@ namespace PAIN {
             // Calculate position based on custom settings or defaults
             float textX, textY;
             if (m_useCustomStatusTextPos) {
+                // Use custom position set by user
                 textX = m_statusTextPosition.x;
                 textY = m_statusTextPosition.y;
             } else {
                 // Default: centered horizontally, below progress bar
                 textX = screenWidth / 2.0f;
                 
-                // Calculate default progress bar Y position
-                float defaultBarY = screenHeight * 0.7f;
+                // Get progress bar Y position (either custom or default)
+                float progressBarY;
                 if (m_useCustomProgressBarPos) {
-                    defaultBarY = m_progressBarPosition.y;
+                    progressBarY = m_progressBarPosition.y;
+                } else {
+                    // Default progress bar position is 70% down from top
+                    progressBarY = screenHeight * 0.7f;
                 }
                 
-                // Position text below progress bar (add 60 pixels)
-                textY = defaultBarY + 60.0f;
+                // Get progress bar height (either custom or default)
+                float progressBarHeight;
+                if (m_useCustomProgressBarSize) {
+                    progressBarHeight = m_progressBarSize.y;
+                } else {
+                    // Default height is 40 pixels
+                    progressBarHeight = 40.0f;
+                }
+                
+                // Position text below progress bar (progress bar center Y + half height + 30px spacing)
+                textY = progressBarY + (progressBarHeight / 2.0f) + 30.0f;
             }
             
             statusTextComp.text_pos = glm::vec2(textX, textY);
@@ -539,10 +551,35 @@ namespace PAIN {
             
             GLuint texID = texOpt.value()->gl_texture;
             
-            // Render fullscreen background texture
+            // Calculate UV coordinates for spritesheet animation
+            glm::vec4 uvTransform;
+            
+            if (m_animationEnabled && m_frameCount > 1) {
+                // Calculate UV coordinates for current frame in spritesheet
+                float frameWidth = 1.0f / static_cast<float>(m_framesPerRow);
+                int framesPerColumn = (m_frameCount + m_framesPerRow - 1) / m_framesPerRow;  // Ceil division
+                float frameHeight = 1.0f / static_cast<float>(framesPerColumn);
+                
+                // Calculate current frame's row and column
+                int frameRow = m_currentFrameIndex / m_framesPerRow;
+                int frameCol = m_currentFrameIndex % m_framesPerRow;
+                
+                // UV transform: (scaleU, scaleV, offsetU, offsetV)
+                uvTransform = glm::vec4(
+                    frameWidth,                              // Scale U
+                    frameHeight,                             // Scale V
+                    frameCol * frameWidth,                   // Offset U
+                    frameRow * frameHeight                   // Offset V
+                );
+            } else {
+                // No animation: use full texture
+                uvTransform = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
+            }
+            
+            // Render fullscreen background texture with UV transform
+            // Use normalized scale (1,1) for fullscreen, renderer handles actual screen dimensions
             glm::vec2 pos(0.0f, 0.0f);
-            glm::vec2 scale(1, 1);
-            glm::vec4 uvTransform(1.0f, 1.0f, 0.0f, 0.0f);  // Full texture
+            glm::vec2 scale(1.0f, 1.0f);
             
             renderer->w_renderer->Render2DTexture(texID, pos, scale, uvTransform);
         }
@@ -616,21 +653,76 @@ namespace PAIN {
             return m_statusTextScale;
         }
 
-        void LoadingScreen::setAnimatedBackground(const std::vector<Assets::GUID>& textureGUIDs, float frameTime) {
-            m_backgroundFrames = textureGUIDs;
-            m_frameTime = frameTime;
-            m_currentFrame = 0;
+        // ============================================================
+        // Spritesheet Animation Implementation
+        // ============================================================
+
+        void LoadingScreen::setSpritesheetAnimation(int frameCount, int framesPerRow, float frameTime) {
+            m_frameCount = std::max(1, frameCount);
+            m_framesPerRow = std::max(1, framesPerRow);
+            m_frameTime = std::max(0.01f, frameTime);
+            m_currentFrameIndex = 0;
             m_currentFrameTime = 0.0f;
-            
-            // Set first frame as background if available
-            if (!m_backgroundFrames.empty()) {
-                m_backgroundTextureGUID = m_backgroundFrames[0];
-                m_animationEnabled = true;
-            }
         }
 
-        void LoadingScreen::setBackgroundAnimationEnabled(bool enabled) {
-            m_animationEnabled = enabled && !m_backgroundFrames.empty();
+        void LoadingScreen::setAnimationEnabled(bool enabled) {
+            m_animationEnabled = enabled && (m_frameCount > 1);
+        }
+
+        std::tuple<int, int, float, bool> LoadingScreen::getSpritesheetSettings() const {
+            return std::make_tuple(m_frameCount, m_framesPerRow, m_frameTime, m_animationEnabled);
+        }
+
+        // ============================================================
+        // Preview Mode Implementation
+        // ============================================================
+
+        void LoadingScreen::renderPreview(float progress, const std::string& status) {
+            // Temporarily override progress and status
+            float oldProgress = m_progress.load();
+            std::string oldStatus;
+            {
+                std::lock_guard<std::mutex> lock(m_statusMutex);
+                oldStatus = m_statusText;
+                m_statusText = status;
+            }
+            m_progress.store(progress);
+            
+            // Render the loading screen to the editor framebuffer
+#ifdef _DEBUG
+            auto editor = services.lock()->get<Editor::Editor>();
+            bool editor_visible = editor && editor->isVisible();
+            
+            if (editor_visible) {
+                glBindFramebuffer(GL_FRAMEBUFFER, services.lock()->get<sRenderer>()->getFinalFbo());
+            } else {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+#else
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
+            
+            // Clear screen
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            
+            // Render all layers
+            renderBackgroundTexture();
+            renderBackgroundOverlay();
+            renderProgressBar();
+            renderStatusText();
+            
+            // Restore original values
+            m_progress.store(oldProgress);
+            {
+                std::lock_guard<std::mutex> lock(m_statusMutex);
+                m_statusText = oldStatus;
+            }
         }
 
     }

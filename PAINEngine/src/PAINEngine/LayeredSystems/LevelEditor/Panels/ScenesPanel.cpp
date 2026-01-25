@@ -1052,11 +1052,11 @@ namespace PAIN {
                 if (ImGui::CollapsingHeader("Background")) {
                     ImGui::Indent();
                     
-                    ImGui::TextWrapped("Set a static background texture or configure animated backgrounds.");
+                    ImGui::TextWrapped("Set a background texture and optionally configure spritesheet animation.");
                     ImGui::Spacing();
                     
-                    // Static background texture selector
-                    Assets::GUID currentBg = scn_service->loadingScreen->getBackgroundTexture();  // TODO: We need a getter for background texture GUID
+                    // Background texture selector
+                    Assets::GUID currentBg = scn_service->loadingScreen->getBackgroundTexture();
                     if (DrawAssetSelectorField("Background Texture",
                         currentBg,
                         PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
@@ -1071,9 +1071,56 @@ namespace PAIN {
                     ImGui::Separator();
                     ImGui::Spacing();
                     
-                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Animated Background");
-                    ImGui::TextWrapped("Note: Animated backgrounds require manual setup via code using setAnimatedBackground().");
-                    ImGui::TextDisabled("Feature available through scripting API");
+                    // Spritesheet Animation
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Animation");
+                    ImGui::TextWrapped("Configure spritesheet-based animation for the background texture.");
+                    ImGui::Spacing();
+                    
+                    // Get current settings
+                    auto [frameCount, framesPerRow, frameTime, enabled] = loadingScreen->getSpritesheetSettings();
+                    
+                    // Frame count
+                    int tempFrameCount = frameCount;
+                    ImGui::Text("Frame Count:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::InputInt("##FrameCount", &tempFrameCount, 1, 10)) {
+                        if (tempFrameCount >= 1 && tempFrameCount <= 1000) {
+                            loadingScreen->setSpritesheetAnimation(tempFrameCount, framesPerRow, frameTime);
+                        }
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Total number of frames in the spritesheet");
+                    }
+                    
+                    // Frames per row
+                    int tempFramesPerRow = framesPerRow;
+                    ImGui::Text("Frames Per Row:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::InputInt("##FramesPerRow", &tempFramesPerRow, 1, 10)) {
+                        if (tempFramesPerRow >= 1 && tempFramesPerRow <= 100) {
+                            loadingScreen->setSpritesheetAnimation(frameCount, tempFramesPerRow, frameTime);
+                        }
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Number of frames per row in the spritesheet layout");
+                    }
+                    
+                    // Frame time
+                    float tempFrameTime = frameTime;
+                    ImGui::Text("Frame Duration:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::SliderFloat("##FrameTime", &tempFrameTime, 0.01f, 1.0f, "%.2f sec")) {
+                        loadingScreen->setSpritesheetAnimation(frameCount, framesPerRow, tempFrameTime);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Time to display each frame");
+                    }
+                    
+                    // Enable/disable toggle
+                    bool tempEnabled = enabled;
+                    if (ImGui::Checkbox("Enable Animation", &tempEnabled)) {
+                        loadingScreen->setAnimationEnabled(tempEnabled);
+                    }
                     
                     ImGui::Unindent();
                 }
@@ -1081,25 +1128,67 @@ namespace PAIN {
                 ImGui::Spacing();
                 
                 // ============================================================
-                // Test/Preview Section
+                // Live Preview Section
                 // ============================================================
-                if (ImGui::CollapsingHeader("Testing & Preview")) {
+                if (ImGui::CollapsingHeader("Live Preview")) {
                     ImGui::Indent();
                     
-                    ImGui::TextColored(ImVec4(0.8f, 1.0f, 0.8f, 1.0f), "Test Loading Screen");
-                    ImGui::TextWrapped("Use the scene loading system to preview the loading screen with current settings.");
+                    ImGui::TextColored(ImVec4(0.8f, 1.0f, 0.8f, 1.0f), "Loading Screen Preview");
+                    ImGui::TextWrapped("Preview the loading screen in real-time without reloading the scene.");
                     
                     ImGui::Spacing();
                     
-                    if (ImGui::Button("Reload Current Scene", ImVec2(200, 30))) {
-                        // This will trigger the loading screen
+                    // Preview controls
+                    static float previewProgress = 0.5f;
+                    static char previewStatus[256] = "Loading assets...";
+                    static bool autoAnimate = false;
+                    
+                    ImGui::Text("Progress:");
+                    ImGui::SetNextItemWidth(200);
+                    ImGui::SliderFloat("##PreviewProgress", &previewProgress, 0.0f, 1.0f, "%.2f");
+                    
+                    ImGui::Spacing();
+                    
+                    ImGui::Text("Status Text:");
+                    ImGui::SetNextItemWidth(300);
+                    ImGui::InputText("##PreviewStatus", previewStatus, IM_ARRAYSIZE(previewStatus));
+                    
+                    ImGui::Spacing();
+                    
+                    ImGui::Checkbox("Auto-animate progress", &autoAnimate);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Automatically cycle progress from 0% to 100%");
+                    }
+                    
+                    // Auto-animate logic
+                    if (autoAnimate) {
+                        previewProgress += 0.01f * ImGui::GetIO().DeltaTime;
+                        if (previewProgress > 1.0f) previewProgress = 0.0f;
+                    }
+                    
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Render preview button
+                    if (ImGui::Button("Render Preview", ImVec2(200, 40))) {
+                        loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Render loading screen to the viewport");
+                    }
+                    
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Quick Test", ImVec2(120, 40))) {
+                        // This will trigger the loading screen via actual scene load
                         auto currSceneID = scn_service->getCurrScnID();
                         if (currSceneID.IsValid()) {
                             scn_service->loadScene(currSceneID);
                         }
                     }
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Reload the current scene to see loading screen in action");
+                        ImGui::SetTooltip("Reload scene to test loading screen (3-4 seconds)");
                     }
                     
                     ImGui::Unindent();

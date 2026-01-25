@@ -131,21 +131,39 @@ namespace PAIN {
             float getStatusTextScale() const;
 
             // ============================================================
-            // Animated Texture Support
+            // Spritesheet Animation Support
             // ============================================================
             
             /**
-             * @brief Set animated texture frames for background
-             * @param textureGUIDs Vector of texture GUIDs for animation frames
+             * @brief Configure spritesheet animation for background texture
+             * @param frameCount Number of frames in the spritesheet
+             * @param framesPerRow Number of frames per row in the spritesheet
              * @param frameTime Time per frame in seconds
              */
-            void setAnimatedBackground(const std::vector<Assets::GUID>& textureGUIDs, float frameTime);
+            void setSpritesheetAnimation(int frameCount, int framesPerRow, float frameTime);
             
             /**
-             * @brief Enable/disable background animation
+             * @brief Enable/disable spritesheet animation
              * @param enabled True to enable animation, false to disable
              */
-            void setBackgroundAnimationEnabled(bool enabled);
+            void setAnimationEnabled(bool enabled);
+            
+            /**
+             * @brief Get spritesheet animation settings
+             * @return Tuple of (frameCount, framesPerRow, frameTime, enabled)
+             */
+            std::tuple<int, int, float, bool> getSpritesheetSettings() const;
+
+            // ============================================================
+            // Preview Mode
+            // ============================================================
+            
+            /**
+             * @brief Render loading screen for preview (editor mode)
+             * @param progress Progress value to display (0.0 - 1.0)
+             * @param status Status text to display
+             */
+            void renderPreview(float progress, const std::string& status);
 
         private:
 
@@ -218,11 +236,12 @@ void main() {
             float m_statusTextScale{ 0.02f };                  // Scale factor for font size
             bool m_useCustomStatusTextPos{ false };           // True if custom position set
 
-            // Animated Background Support
-            std::vector<Assets::GUID> m_backgroundFrames;     // Animation frames
+            // Spritesheet Animation Support
+            int m_frameCount{ 1 };                            // Number of frames in spritesheet
+            int m_framesPerRow{ 1 };                          // Frames per row in spritesheet
             float m_frameTime{ 0.1f };                        // Time per frame in seconds
             float m_currentFrameTime{ 0.0f };                 // Accumulated time for current frame
-            size_t m_currentFrame{ 0 };                       // Current frame index
+            int m_currentFrameIndex{ 0 };                     // Current frame index
             bool m_animationEnabled{ false };                 // Animation enabled flag
 
             // Color scheme
