@@ -193,6 +193,61 @@ namespace PAIN {
              */
             std::tuple<glm::vec3, glm::vec3, float> getProgressBarStyle() const;
 
+            /**
+             * @brief Set progress bar and status text to default
+             */
+            void defaultSetup();
+
+            /**
+             * @brief Get boolean show Background
+             */
+            bool getShowBG() const;
+
+            /**
+             * @brief Set boolean show Background
+             */
+            void setShowBG(bool show);
+
+            /**
+             * @brief Get boolean show Overlay
+             */
+            bool getShowOverlay() const;
+
+            /**
+             * @brief Set boolean show Overlay
+             */
+            void setShowOverlay(bool show);
+
+            /**
+             * @brief Get boolean show Progress Bar
+             */
+            bool getShowProgressBar() const;
+
+            /**
+             * @brief Set boolean show Progress Bar
+             */
+            void setShowProgressBar(bool show);
+
+            /**
+             * @brief Get boolean show Status Text
+             */
+            bool getShowStatusText() const;
+
+            /**
+             * @brief Set boolean show Status Text
+             */
+            void setShowStatusText(bool show);
+
+            /**
+            * @brief Get background texture scale
+            */
+            float getBGScale() const;
+
+            /**
+             * @brief Set background texture scale
+             */
+            void setBGScale(float scale);
+
         private:
 
             // Simple vertex shader for fullscreen quad !!FALLBACK
@@ -244,6 +299,7 @@ void main() {
 
             // Optional background texture
             Assets::GUID m_backgroundTextureGUID;
+            float bgScale = 1.0f;
 
             // Custom shader programs for loading screen effects
             unsigned int m_progressBarShader{ 0 };
@@ -259,7 +315,7 @@ void main() {
 
             // Status Text - Screen Space Configuration
             glm::vec2 m_statusTextPosition{ 0.0f, 0.0f };    // Position (x, y) in screen space
-            float m_statusTextScale{ 0.02f };                  // Scale factor for font size
+            float m_statusTextScale{ 0.03f };                  // Scale factor for font size
 
             // Spritesheet Animation Support
             int m_frameCount{ 1 };                            // Number of frames in spritesheet
@@ -276,6 +332,12 @@ void main() {
             glm::vec3 m_overlayColor1{ 0.05f, 0.05f, 0.1f }; // Dark blue
             glm::vec3 m_overlayColor2{ 0.02f, 0.02f, 0.05f }; // Darker blue
             float m_overlayStrength{ 0.8f };
+
+            //Internal boolean to render BG / Progress / Status
+            bool showBg = true;
+            bool showOverlay = false;
+            bool showProgress = false;
+            bool showStatus = false;
 
             /**
             * @brief Cleanup OpenGL resources

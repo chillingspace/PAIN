@@ -868,7 +868,7 @@ namespace PAIN {
 
 		float aspect_ratio =
 			static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
-		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y / aspect_ratio);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
 
 		texture2d_shader->Bind();
 
