@@ -873,8 +873,10 @@ namespace PAIN {
 			{
 				auto editor = services->get<Editor::Editor>();
 				if (editor) {
+#ifdef PN_PLATFORM_WINDOWS
 					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
 					if (resource_panel) resource_panel->refreshResources();
+#endif
 				}
 			}
 #endif
