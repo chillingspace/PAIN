@@ -922,22 +922,22 @@ namespace PAIN {
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path tc_path = "game/models/toycar/ToyCar.mesh";
+				std::filesystem::path fox_path = "game/models/Fox.mesh";
 #else	
-				std::filesystem::path tc_path = "game\\models\\toycar\\ToyCar.mesh";
+				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
 #endif
 				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", tc_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(tc_path);
+				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "toycar", { 2.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.005f });
+					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
 				}
 
 
@@ -964,9 +964,9 @@ namespace PAIN {
 #endif
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
 #else	
-				std::filesystem::path fh_path = "game\\models\\Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
 #endif
 				//Get model
 				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());

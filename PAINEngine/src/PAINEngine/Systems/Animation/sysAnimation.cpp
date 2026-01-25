@@ -60,130 +60,274 @@ namespace PAIN {
 		}
 
 		void System::updateAllAnimations(float deltaTime, entt::registry& reg) {
-			// Get all entities with BOTH Animation AND ModelRenderer components
-			// Optimized using group
 			auto group = reg.group<Animation>(entt::get<ModelRenderer>);
 
-			// Count entities
-			size_t entityCount = 0;
-			for (auto e : group) { entityCount++; }
-
-
-			// Iterate and update each animated entity
 			for (auto [entity, anim, renderer] : group.each()) {
-				
-				// Skip if not playing or no model
-				if (!anim.isPlaying) {
-					continue;
+
+				// Skip if model missing or no animations
+				if (!renderer.cachedModelAsset || renderer.cachedModelAsset->animations.empty()) continue;
+
+				// Check for valid index
+				if (anim.currentAnimationIndex < 0 || anim.currentAnimationIndex >= renderer.cachedModelAsset->animations.size()) {
+					int targetIndex = 0;
+
+					// Use default if there is one
+					if (anim.defaultAnimationIndex >= 0 &&
+						anim.defaultAnimationIndex < renderer.cachedModelAsset->animations.size()) {
+						targetIndex = anim.defaultAnimationIndex;
+					}
+
+					// Play animations immediately
+					anim.PlayAnimation(targetIndex, anim.loopAnimation, anim.playbackSpeed);
 				}
 
-				if (!renderer.cachedModelAsset) {
-					continue;
-				}
+				// Skip if paused
+				if (!anim.isPlaying) continue;
 
-				// Check animation index is valid
-				if (anim.currentAnimationIndex < 0 ||
-					anim.currentAnimationIndex >= static_cast<int>(renderer.cachedModelAsset->animations.size())) {
+				float duration = renderer.cachedModelAsset->animations[anim.currentAnimationIndex].duration;
+				if (duration <= 0.001f) duration = 1.0f; // Prevent divide by zero
 
-					continue;
-				}
-
-				// Get current animation data
-				const auto& animData = renderer.cachedModelAsset->animations[anim.currentAnimationIndex];
-
-				// Advance time
+				// Progress the animation time
 				anim.animationTime += deltaTime * anim.playbackSpeed;
 
-				// Handle end of animation
-				if (anim.animationTime >= animData.duration) {
+				// Handle looping / stopping of animation
+				if (anim.animationTime >= duration) {
 					if (anim.loopAnimation) {
-						anim.animationTime = fmod(anim.animationTime, animData.duration);
+						//looping
+						anim.animationTime = fmod(anim.animationTime, duration);
 					}
 					else {
-						anim.animationTime = animData.duration;
-						anim.isPlaying = false;
+						//stop
+						anim.animationTime = duration;
 					}
 				}
 
-				computeBoneTransforms(entity, anim, renderer, animData);
+				// Sample Current Animation
+				LocalPose finalPose = SampleAnimation(renderer.cachedModelAsset.get(), anim.currentAnimationIndex, anim.animationTime);
 
-				renderer.currentAnimationIndex = anim.currentAnimationIndex;
-				renderer.animationTime = anim.animationTime;
-				renderer.isPlaying = anim.isPlaying;
-				renderer.loopAnimation = anim.loopAnimation;
-				renderer.playbackSpeed = anim.playbackSpeed;
+				// Handle Blending of different animation states
+				if (anim.nextAnimationIndex != -1) {
 
-				if (!anim.boneTransforms.empty()) {
-					renderer.boneTransforms = anim.boneTransforms;
+					// Check if next index is valid
+					if (anim.nextAnimationIndex >= 0 && anim.nextAnimationIndex < renderer.cachedModelAsset->animations.size())
+					{
+						// Update Weight
+						anim.transitionWeight += deltaTime / anim.transitionDuration;
+
+						float nextDuration = renderer.cachedModelAsset->animations[anim.nextAnimationIndex].duration;
+						float nextTime = anim.animationTime;
+						if (nextDuration > 0.001f) {
+							nextTime = fmod(nextTime, nextDuration);
+						}
+
+						// Sample Next Animation (Using same time for sync - simplistic but works for now)
+						LocalPose nextPose = SampleAnimation(renderer.cachedModelAsset.get(), anim.nextAnimationIndex, anim.animationTime);
+
+						// Mix them
+						float w = glm::clamp(anim.transitionWeight, 0.0f, 1.0f);
+						finalPose = BlendPoses(finalPose, nextPose, w);
+
+						// Check if done
+						if (anim.transitionWeight >= 1.0f) {
+							anim.currentAnimationIndex = anim.nextAnimationIndex;
+							anim.nextAnimationIndex = -1;
+							anim.transitionWeight = 0.0f;
+						}
+					}
+					else {
+						anim.nextAnimationIndex = -1;
+						anim.transitionWeight = 0.0f;
+					}
 				}
-				if (!anim.morphWeights.empty()) {
-					renderer.morphWeights = anim.morphWeights;
-				}
 
+				// convert all to matrices
+				anim.boneTransforms = ConvertPoseToMatrices(finalPose, renderer.cachedModelAsset->skeleton);
+
+				// set bones in renderer
+				renderer.boneTransforms = anim.boneTransforms;
 			}
 		}
 
-		void System::computeBoneTransforms(entt::entity entity, Animation& anim, ModelRenderer& renderer, const Assets::AnimationClip& animData) {
-			// Get skeleton from model
-			if (!renderer.cachedModelAsset || renderer.cachedModelAsset->skeleton.empty()) {
-				return;
-			}
+		//void System::computeBoneTransforms(entt::entity entity, Animation& anim, ModelRenderer& renderer, const Assets::AnimationClip& animData) {
+		//	// Get skeleton from model
+		//	if (!renderer.cachedModelAsset || renderer.cachedModelAsset->skeleton.empty()) {
+		//		return;
+		//	}
 
-			const auto& skeleton = renderer.cachedModelAsset->skeleton;
+		//	const auto& skeleton = renderer.cachedModelAsset->skeleton;
 
 
-			// Resize bone transform array if needed
-			if (anim.boneTransforms.size() != skeleton.size()) {
-				anim.boneTransforms.resize(skeleton.size(), glm::mat4(1.0f));
-			}
+		//	// Resize bone transform array if needed
+		//	if (anim.boneTransforms.size() != skeleton.size()) {
+		//		anim.boneTransforms.resize(skeleton.size(), glm::mat4(1.0f));
+		//	}
 
-			// Sample animation at current time
-			float time = anim.animationTime;
+		//	// Sample animation at current time
+		//	float time = anim.animationTime;
 
-			// For each bone in skeleton
+		//	// For each bone in skeleton
+		//	for (size_t i = 0; i < skeleton.size(); ++i) {
+		//		const auto& bone = skeleton[i];
+
+		//		// Find this bone's animation track
+		//		auto trackIt = animData.track_map.find(bone.name);
+
+		//		if (trackIt != animData.track_map.end()) {
+		//			const auto& track = trackIt->second;
+
+		//			// Sample the track at current time (simple linear interpolation)
+		//			glm::vec3 translation = glm::vec3(0.0f);
+		//			glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		//			glm::vec3 scale = glm::vec3(1.0f);
+
+		//			if (!track.empty()) {
+		//				// Find keyframes around current time
+		//				size_t keyIndex = 0;
+		//				for (size_t k = 0; k < track.size() - 1; ++k) {
+		//					if (track[k].time <= time && time < track[k + 1].time) {
+		//						keyIndex = k;
+		//						break;
+		//					}
+		//				}
+
+		//				// Simple: just use the nearest keyframe (no interpolation for now)
+		//				translation = track[keyIndex].translation;
+		//				rotation = track[keyIndex].rotation;
+		//				scale = track[keyIndex].scale;
+		//			}
+
+		//			// Build bone transform matrix
+		//			glm::mat4 T = glm::translate(glm::mat4(1.0f), translation);
+		//			glm::mat4 R = glm::mat4_cast(rotation);
+		//			glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
+
+		//			anim.boneTransforms[i] = T * R * S;
+		//		}
+		//		else {
+		//			// No animation track for this bone, use identity
+		//			anim.boneTransforms[i] = glm::mat4(1.0f);
+		//		}
+		//	}
+
+		//}
+
+		// Returns pose for a specific time of the animation
+		LocalPose System::SampleAnimation(const Assets::Model* model, int animIndex, float time)
+		{
+			LocalPose pose;
+			if (!model || animIndex < 0 || animIndex >= model->animations.size()) return pose;
+
+			const auto& animClip = model->animations[animIndex];
+			const auto& skeleton = model->skeleton;
+
+			pose.Resize(skeleton.size());
+
 			for (size_t i = 0; i < skeleton.size(); ++i) {
 				const auto& bone = skeleton[i];
 
-				// Find this bone's animation track
-				auto trackIt = animData.track_map.find(bone.name);
+				// Defaults (Identity)
+				glm::vec3 translation(0.0f);
+				glm::quat rotation(1.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec3 scale(1.0f);
 
-				if (trackIt != animData.track_map.end()) {
-					const auto& track = trackIt->second;
-
-					// Sample the track at current time (simple linear interpolation)
-					glm::vec3 translation = glm::vec3(0.0f);
-					glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-					glm::vec3 scale = glm::vec3(1.0f);
+				auto it = animClip.track_map.find(bone.name);
+				if (it != animClip.track_map.end()) {
+					const auto& track = it->second;
 
 					if (!track.empty()) {
-						// Find keyframes around current time
-						size_t keyIndex = 0;
-						for (size_t k = 0; k < track.size() - 1; ++k) {
-							if (track[k].time <= time && time < track[k + 1].time) {
-								keyIndex = k;
-								break;
-							}
+						// if only one track
+						if (track.size() == 1) {
+							translation = track[0].translation;
+							rotation = track[0].rotation;
+							scale = track[0].scale;
 						}
+						// if time is past the end
+						else if (time >= track.back().time) {
+							const auto& last = track.back();
+							translation = last.translation;
+							rotation = last.rotation;
+							scale = last.scale;
+						}
+						// handle as per normal
+						else {
+							// Find the frame index 'k' such that: track[k].time <= time < track[k+1].time
+							size_t k = 0;
+							for (; k < track.size() - 2; ++k) {
+								if (time < track[k + 1].time) break;
+							}
 
-						// Simple: just use the nearest keyframe (no interpolation for now)
-						translation = track[keyIndex].translation;
-						rotation = track[keyIndex].rotation;
-						scale = track[keyIndex].scale;
+							const auto& k1 = track[k];
+							const auto& k2 = track[k + 1];
+
+							// Interpolate
+							float duration = k2.time - k1.time;
+							float t = (duration > 1e-5f) ? (time - k1.time) / duration : 0.0f;
+
+							translation = glm::mix(k1.translation, k2.translation, t);
+							rotation = glm::slerp(k1.rotation, k2.rotation, t);
+							scale = glm::mix(k1.scale, k2.scale, t);
+						}
 					}
+				}
 
-					// Build bone transform matrix
-					glm::mat4 T = glm::translate(glm::mat4(1.0f), translation);
-					glm::mat4 R = glm::mat4_cast(rotation);
-					glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
+				pose.translations[i] = translation;
+				pose.rotations[i] = rotation;
+				pose.scales[i] = scale;
+			}
+			return pose;
+		}
 
-					anim.boneTransforms[i] = T * R * S;
+		// Blends two different states to make it seemless
+		LocalPose System::BlendPoses(const LocalPose& poseA, const LocalPose& poseB, float weight)
+		{
+			LocalPose result;
+			size_t count = poseA.translations.size();
+			if (poseB.translations.size() != count) return result; // Error mismatch
+
+
+
+			result.Resize(count);
+
+			for (size_t i = 0; i < count; ++i) {
+				// Linear Interpolate Position
+				result.translations[i] = glm::mix(poseA.translations[i], poseB.translations[i], weight);
+
+				// Spherical Interpolate Rotation (Vital!)
+				result.rotations[i] = glm::slerp(poseA.rotations[i], poseB.rotations[i], weight);
+
+				// Linear Interpolate Scale
+				result.scales[i] = glm::mix(poseA.scales[i], poseB.scales[i], weight);
+			}
+			return result;
+		}
+
+		std::vector<glm::mat4> System::ConvertPoseToMatrices(const LocalPose& pose, const std::vector<Assets::Bone>& skeleton)
+		{
+
+			std::vector<glm::mat4> matrices(skeleton.size());
+			std::vector<glm::mat4> globalTransforms(skeleton.size());
+
+			for (size_t i = 0; i < skeleton.size(); ++i) {
+
+				// 1. Calc Local Matrix
+				glm::mat4 T = glm::translate(glm::mat4(1.0f), pose.translations[i]);
+				glm::mat4 R = glm::mat4_cast(pose.rotations[i]);
+				glm::mat4 S = glm::scale(glm::mat4(1.0f), pose.scales[i]);
+				glm::mat4 localMat = T * R * S;
+
+				// 2. Calc Global Matrix (Parent * Local)
+				int parentIndex = skeleton[i].parent;
+				if (parentIndex != -1) {
+					globalTransforms[i] = globalTransforms[parentIndex] * localMat;
 				}
 				else {
-					// No animation track for this bone, use identity
-					anim.boneTransforms[i] = glm::mat4(1.0f);
+					globalTransforms[i] = localMat;
 				}
-			}
 
+				// 3. Multiply by Inverse Bind Pose (For Skinning)
+				matrices[i] = globalTransforms[i] * skeleton[i].bindPose;
+			}
+			return matrices;
 		}
 
 

@@ -26,7 +26,9 @@ namespace PAIN {
         glm::vec3 baseColorOverride{ 1.0f, 1.0f, 1.0f };
         float metallicOverride = 0.0f;
         float roughnessOverride = 0.5f;
-        glm::vec3 emissiveOverride{ 0.0f, 0.0f, 0.0f };
+        glm::vec3 emissiveOverride{ 1.0f, 0.0f, 1.0f };
+
+		//bool useEmissiveOverride = false;
 
         bool useOverrides = false;
     };
@@ -52,11 +54,6 @@ namespace PAIN {
         std::vector<MaterialInstance> materials;
 
         // Animation state
-        int currentAnimationIndex = -1;
-        float animationTime = 0.0f;
-        bool isPlaying = false;
-        bool loopAnimation = true;
-        float playbackSpeed = 1.0f;
         std::vector<glm::mat4> boneTransforms;
         std::vector<float> morphWeights;
 

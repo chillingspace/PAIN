@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "BGM_Level1b_CombatLayer 2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 8716348184443244737
+  },
+  "descriptor_version": 1,
+  "guid": "3775932c-0c3a-c84a-a8b9-0b846323bff2",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\BGM_Level1b_CombatLayer 2.wav"
+  }
+}

@@ -562,6 +562,8 @@ namespace PAIN {
             return tex;
         }
 
+
+
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
             PN_CORE_INFO("ImportModel {}", virtual_path);
 
@@ -585,6 +587,8 @@ namespace PAIN {
 
             Model asset;
             size_t offset = 0;
+
+            // Lamda helper functions
             auto require = [&](size_t n) {
                 if (offset + n > data.size()) { 
                     PN_CORE_ERROR("Unexpected end of model file");
@@ -595,6 +599,21 @@ namespace PAIN {
                 if (n == 0) return;
                 require(n); std::memcpy(dst, data.data() + offset, n); offset += n;
                 };
+            auto readStr = [&](std::string& str) {
+                uint32_t len = 0;
+                readMem(&len, sizeof(len));
+                if (len > 2048) { // Safety Cap
+                    PN_CORE_ERROR("String too long: {} at offset {}", len, offset);
+                    throw std::runtime_error("Corrupt file: String too long");
+                }
+                str.resize(len);
+                if (len > 0) {
+                    readMem(str.data(), len);
+                    
+                    if (str.back() == '\0') str.pop_back();
+                }
+                };
+
 
             PN_CORE_INFO("File size: {} bytes", data.size());
 
@@ -669,13 +688,13 @@ namespace PAIN {
             uint32_t boneCount = 0;
             readMem(&boneCount, sizeof(boneCount));
             asset.skeleton.resize(boneCount);
-            for (Bone& b : asset.skeleton) {
-                uint32_t nameLen = 0;
-                readMem(&nameLen, sizeof(nameLen));
-                b.name.resize(nameLen);
-                readMem(b.name.data(), nameLen);
+            for (size_t i = 0; i < boneCount; ++i) {
+                Bone& b = asset.skeleton[i];
+                readStr(b.name);
                 readMem(&b.parent, sizeof(b.parent));
                 readMem(&b.bindPose, sizeof(glm::mat4));
+
+                PN_CORE_INFO("  Bone [{}] '{}' -> Parent Index: {}", i, b.name, b.parent);
             }
 
             // check if bones are well or poorly ordered
@@ -697,30 +716,36 @@ namespace PAIN {
             // Animations
             uint32_t animCount = 0;
             readMem(&animCount, sizeof(animCount));
+            PN_CORE_INFO("--- Reading {} Animations ---", animCount);
             asset.animations.resize(animCount);
             for (AnimationClip& anim : asset.animations) {
-                uint32_t nameLen = 0;
-                readMem(&nameLen, sizeof(nameLen));
-                anim.name.resize(nameLen);
-                readMem(anim.name.data(), nameLen);
+                readStr(anim.name);
                 readMem(&anim.duration, sizeof(anim.duration));
                 readMem(&anim.isAdditive, sizeof(anim.isAdditive));
 
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
                 //anim.tracks.resize(trackCount);
+                PN_CORE_TRACE("  Anim '{}' ({}s) has {} tracks", anim.name, anim.duration, trackCount);
 
                 int no_bone_tracks{};
                 for (size_t i{}; i < trackCount; ++i) {
-                    uint32_t boneLen = 0, keyCount = 0;
-                    readMem(&boneLen, sizeof(boneLen));
+                    //uint32_t boneLen = 0, keyCount = 0;
+                    //readMem(&boneLen, sizeof(boneLen));
                     //track.boneName.resize(boneLen);
                     //readMem(track.boneName.data(), boneLen);
 
-                    static std::string boneName;
-                    boneName.resize(boneLen);
-                    readMem(boneName.data(), boneLen);
+                    std::string boneName;
+                    readStr(boneName); 
                     
+                    bool foundBone = false;
+                    for (const auto& b : asset.skeleton) {
+                        if (b.name == boneName) { foundBone = true; break; }
+                    }
+                    if (!foundBone) {
+                        PN_CORE_WARN("  [WARNING] Track for '{}' NOT FOUND in skeleton!", boneName);
+                    }
+
                     // unnamed bones suck tf, but i guess this could cause more problems
                     // if bone doesn't exist, store as root xform or scene xform
                     //auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
@@ -734,13 +759,16 @@ namespace PAIN {
 
                     auto& track = anim.track_map[boneName];
 
+                    uint32_t keyCount = 0;
                     readMem(&keyCount, sizeof(keyCount));
                     track.resize(keyCount);
+
                     for (AnimationKey& key : track) {
                         readMem(&key.time, sizeof(key.time));
                         readMem(&key.translation, sizeof(key.translation));
                         readMem(&key.rotation, sizeof(key.rotation));
                         readMem(&key.scale, sizeof(key.scale));
+
                         // Morph weights
                         uint32_t morphWeightsCount = 0;
                         readMem(&morphWeightsCount, sizeof(morphWeightsCount));
@@ -757,13 +785,6 @@ namespace PAIN {
             readMem(&matCount, sizeof(matCount));
             asset.materials.resize(matCount);
             for (auto& mat : asset.materials) {
-                auto readStr = [&](std::string& str) {
-                    uint32_t len = 0;
-                    readMem(&len, sizeof(len));
-                    str.resize(len);
-                    readMem(str.data(), len);
-                    };
-
                 std::string temp_str;
                 readStr(temp_str);
                 mat = std::filesystem::path(temp_str);

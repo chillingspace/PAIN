@@ -1,12 +1,30 @@
 
 -- player movement script
-
 local moveLeft = false
 local moveRight = false
 local moveUp = false
 local moveDown = false
 local jumpPressed = false
 local walkingSoundPlaying = false
+
+-- Animation
+local ANIM_IDLE = "Frog_RigAction" 
+local ANIM_WALK = "Frog_Jump"
+local ANIM_JUMP = "Frog_Jump"
+local currentAnimState = "" 
+
+-- Helper to switch animation smoothly
+local function PlayAnim(id, animName, fadeTime, loop)
+    if currentAnimState == animName then return end
+    
+    -- Check if the C++ binding exists before calling to prevent crash
+    if Animation and Animation.CrossFade then
+        Animation.CrossFade(id, animName, fadeTime)
+        Animation.SetLoop(id, loop)
+    end
+    
+    currentAnimState = animName
+end
 
 -- Joystick input (set by UI drag callback)
 local joystickDirX = 0.0
@@ -155,6 +173,9 @@ registerUpdate(function(dt)
     end
     --]]
 
+    -- ---------------------------------------------------------
+    -- MOVEMENT LOGIC
+    -- ---------------------------------------------------------
     -- 3. Virtual joystick input
     dx = dx - joystickDirX
     dz = dz + joystickDirY
@@ -162,15 +183,27 @@ registerUpdate(function(dt)
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 
     if isMoving then
+        -- Walking AUDIO
         if not walkingSoundPlaying and audioPlay then
             if audioSetLooping then audioSetLooping(id, true) end 
             audioPlay(id)
             walkingSoundPlaying = true
         end
+
+        -- PLAY walk Animation
+        if isGrounded then
+             PlayAnim(id, ANIM_WALK, 0.15, true)
+        end
     else
+         -- STOPPED audio
         if walkingSoundPlaying and audioStop then
             audioStop(id)
             walkingSoundPlaying = false
+        end
+
+         -- PLAY idle Animation
+        if isGrounded then
+            PlayAnim(id, ANIM_IDLE, 0.2, true)
         end
     end
 
@@ -188,8 +221,9 @@ registerUpdate(function(dt)
         end
 
 
-    -- Make movement relative to camera yaw, if available.
-    -- This means "push up" always moves in front of the camera.
+    -- ---------------------------------------------------------
+    -- CAMERA LOGIC
+    -- ---------------------------------------------------------
     if _G.CameraState ~= nil and _G.CameraState.yaw ~= nil then
         local cy = _G.CameraState.yaw
         local sinY = math.sin(cy)
@@ -233,14 +267,17 @@ registerUpdate(function(dt)
         currentYaw = newYaw
     end
 
+    -- ---------------------------------------------------------
+    -- JUMP LOGIC
+    -- ---------------------------------------------------------
     -- ground check based on physics
     local groundedEpsPos = 0.05
     local groundedEpsVel = 0.1
     isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
 
     -- jump, modify vertical vel -> physics handle gravity
-    --local doubleTapJump = (I and I.doubleTapped) or false
-    --if (jumpPressed or doubleTapJump) and isGrounded then
+    -- local doubleTapJump = (I and I.doubleTapped) or false
+    -- if (jumpPressed or doubleTapJump) and isGrounded then
     if jumpPressed and isGrounded then
         curr_vy = jumpSpeed  
         isGrounded = false
@@ -250,6 +287,8 @@ registerUpdate(function(dt)
             audioPlay(S.sfxJump)
         end
 
+        PlayAnim(id, ANIM_JUMP, 0.1, false)
+        
         -- consume jump
         jumpPressed = false
         -- if I then

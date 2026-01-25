@@ -724,8 +724,7 @@ namespace PAIN {
 			glEnableVertexAttribArray(2);
 
 			// bone indices
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, boneIndices_f));
+			glVertexAttribIPointer(3, 4, GL_INT, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
 			glEnableVertexAttribArray(3);
 
 			// bone weights
@@ -1180,6 +1179,15 @@ namespace PAIN {
 						emissiveTexture = tex_opt.value()->gl_texture;
 					}
 
+					if (material->useOverrides) {
+						geometry_shader->SetUniform("u_UseEmissionOverride", 1.f);
+						geometry_shader->SetUniform("u_EmissionOverride", material->emissiveOverride);
+						// geometry_shader->SetUniform("u_EmissionOverride", {1,0,1});
+					}
+					else {
+						geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
+					}
+
 					// Height texture
 					/*
         tex_opt = material->useOverrides ?
@@ -1271,121 +1279,108 @@ namespace PAIN {
 			}
 
 			// animation
-			geometry_shader->SetUniform("u_Animated", component.isPlaying ? 1.f : 0.f);
+
 			int bones_skipped{};
-			if (component.isPlaying) {
-				// PN_CORE_TRACE("Animation playing: {}s", component.animationTime);
+			if (!component.boneTransforms.empty()) {
 
-				static std::vector<glm::mat4> boneMatrices;
-				static constexpr int MAX_BONES = 100;
-				boneMatrices.resize(MAX_BONES, glm::mat4(1.f));
+				// Animation calculation now handled in animation system
+				const auto& matrices = component.boneTransforms; // OR renderer.boneTransforms, depending on where you stored it
 
-				// find local bone xforms relative to parent
-				// these mtx move this particular bone the specific amount RELATIVE to
-				// it's parent eg. how much a finger moves relative to the hand bone (not
-				// absolute positioning)
-				std::vector<glm::mat4> relative_poses(modelAsset->skeleton.size(),
-													  glm::mat4(1.f));
-
-				// each track controls a single bone's animation
-				for (const auto& [bone_name, track] :
-					 modelAsset->animations[component.currentAnimationIndex].track_map) {
-					// find the animation keyframe corresponding to current animation time
-					const auto key_it = std::lower_bound(
-						track.begin(), track.end(), component.animationTime,
-						[](const auto& key, const float t) { return key.time < t; });
-					if (key_it == track.end())
-						PN_CORE_ERROR("Invalid iterator key_it in animation block in "
-									  "DrawGeometry in WindowsRenderer.cpp");
-
-					// find the bone idx affected by current track
-					std::string bone_name_copy = bone_name; // Create copy for lambda
-					const auto bone_it = std::find_if(
-						modelAsset->skeleton.begin(), modelAsset->skeleton.end(),
-						[&bone_name_copy](const Assets::Bone& b) {
-							return b.name == bone_name_copy;
-						});
-					if (bone_it == modelAsset->skeleton.end()) {
-						// PN_CORE_WARN("Bone does not exist for animation track {} for model
-						// {}. Skipped: {}", component.currentAnimationIndex,
-						// modelAsset->vpath, ++bones_skipped); PN_CORE_ERROR("Invalid
-						// iterator bone_it in animation block in DrawGeometry in
-						// WindowsRenderer.cpp");
-						continue;
+				if (!matrices.empty()) {
+					for (size_t i = 0; i < matrices.size() && i < 100; ++i) { // 100 = MAX_BONES
+						std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
+						geometry_shader->SetUniform(uniform_name, matrices[i]);
 					}
-					const int bone_idx =
-						std::distance(modelAsset->skeleton.begin(), bone_it);
-
-					// get the xform matrix that applies to current vertex from current
-					// animation key
-					const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
-					const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
-					const glm::mat4 translate =
-						glm::translate(glm::mat4(1.f), key_it->translation);
-					glm::mat4 animated_pose = translate * rotate * scale;
-
-					if (GraphicsSettings::get().interpolate_animation) {
-						auto next_key_it = std::next(key_it);
-						if (next_key_it != track.end()) {
-							// interpolate between current keyframe pose and next keyframe pose
-							const float t = (component.animationTime - key_it->time) /
-											(next_key_it->time - key_it->time);
-							const glm::vec3 i_scale =
-								glm::mix(key_it->scale, next_key_it->scale, t);
-							const glm::quat i_rotate =
-								glm::slerp(key_it->rotation, next_key_it->rotation, t);
-							const glm::vec3 i_translate =
-								glm::mix(key_it->translation, next_key_it->translation, t);
-
-							const glm::mat4 i_scale_mtx = glm::scale(glm::mat4(1.f), i_scale);
-							const glm::mat4 i_rotate_mtx = glm::mat4_cast(i_rotate);
-							const glm::mat4 i_translate_mtx =
-								glm::translate(glm::mat4(1.f), i_translate);
-
-							// update interpolated matrix
-							animated_pose = i_translate_mtx * i_rotate_mtx * i_scale_mtx;
-						}
-					}
-
-					relative_poses[bone_idx] = animated_pose;
-
-					// multiply with bind pose mtx(the T shape thingy) for final xform
-					// matrix
-					// boneMatrices[bone_idx] = animated_pose *
-					// glm::inverse(bone_it->bindPose);
+					geometry_shader->SetUniform("u_Animated", 1.0f);
 				}
 
-				// account for parent bone transformation
-				std::vector<glm::mat4> poses(modelAsset->skeleton.size());
-				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
-					// if is parent, no need
-					if (modelAsset->skeleton[i].parent == -1) {
-						poses[i] = relative_poses[i];
-						continue;
-					}
+				//static std::vector<glm::mat4> boneMatrices;
+				//static constexpr int MAX_BONES = 100;
+				//boneMatrices.resize(MAX_BONES, glm::mat4(1.f));
 
-					// account for parent's xform
-					poses[i] = poses[modelAsset->skeleton[i].parent] * relative_poses[i];
-					// poses[i] = relative_poses[i] * poses[modelAsset->skeleton[i].parent];
-				}
+				//// find local bone xforms relative to parent
+				//// these mtx move this particular bone the specific amount RELATIVE to it's parent
+				//// eg. how much a finger moves relative to the hand bone (not absolute positioning)
+				//std::vector<glm::mat4> relative_poses(modelAsset->skeleton.size(), glm::mat4(1.f));
 
-				// apply to bind pose (T pose)
-				for (int i{}; i < modelAsset->skeleton.size(); ++i) {
-					boneMatrices[i] = poses[i] * modelAsset->skeleton[i].bindPose;
-					// boneMatrices[i] = glm::inverse(modelAsset->skeleton[i].bindPose) *
-					// poses[i];
-				}
+				//// each track controls a single bone's animation
+				//for (const auto& [bone_name, track] : modelAsset->animations[component.currentAnimationIndex].track_map) {
+				//	// find the animation keyframe corresponding to current animation time
+				//	const auto key_it = std::lower_bound(track.begin(), track.end(), component.animationTime, [](const auto& key, const float t) {return key.time < t; });
+				//	if (key_it == track.end())	PN_CORE_ERROR("Invalid iterator key_it in animation block in DrawGeometry in WindowsRenderer.cpp");
 
-				// populate animated bone xforms in shader
-				for (size_t i{}; i < boneMatrices.size(); ++i) {
-					const std::string uniform_name =
-						"u_BoneMatrices[" + std::to_string(i) + "]";
-					geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
-				}
+				//	// find the bone idx affected by current track
+				//	std::string bone_name_copy = bone_name;  // Create copy for lambda
+				//	const auto bone_it = std::find_if(modelAsset->skeleton.begin(), modelAsset->skeleton.end(),
+				//		[&bone_name_copy](const Assets::Bone& b) {return b.name == bone_name_copy; });
+				//	if (bone_it == modelAsset->skeleton.end()) {
+				//		//PN_CORE_WARN("Bone does not exist for animation track {} for model {}. Skipped: {}", component.currentAnimationIndex, modelAsset->vpath, ++bones_skipped);
+				//		//PN_CORE_ERROR("Invalid iterator bone_it in animation block in DrawGeometry in WindowsRenderer.cpp");
+				//		continue;
 
-			} else {
-				// PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
+				//	}
+				//	const int bone_idx = std::distance(modelAsset->skeleton.begin(), bone_it);
+
+				//	// get the xform matrix that applies to current vertex from current animation key
+				//	const glm::mat4 scale = glm::scale(glm::mat4(1.f), key_it->scale);
+				//	const glm::mat4 rotate = glm::mat4_cast(key_it->rotation);
+				//	const glm::mat4 translate = glm::translate(glm::mat4(1.f), key_it->translation);
+				//	glm::mat4 animated_pose = translate * rotate * scale;
+
+				//	if (GraphicsSettings::get().interpolate_animation) {
+				//		auto next_key_it = std::next(key_it);
+				//		if (next_key_it != track.end()) {
+				//			// interpolate between current keyframe pose and next keyframe pose
+				//			const float t = (component.animationTime - key_it->time) / (next_key_it->time - key_it->time);
+				//			const glm::vec3 i_scale = glm::mix(key_it->scale, next_key_it->scale, t);
+				//			const glm::quat i_rotate = glm::slerp(key_it->rotation, next_key_it->rotation, t);
+				//			const glm::vec3 i_translate = glm::mix(key_it->translation, next_key_it->translation, t);
+
+				//			const glm::mat4 i_scale_mtx = glm::scale(glm::mat4(1.f), i_scale);
+				//			const glm::mat4 i_rotate_mtx = glm::mat4_cast(i_rotate);
+				//			const glm::mat4 i_translate_mtx = glm::translate(glm::mat4(1.f), i_translate);
+
+				//			// update interpolated matrix
+				//			animated_pose = i_translate_mtx * i_rotate_mtx * i_scale_mtx;
+				//		}
+				//	}
+
+				//	relative_poses[bone_idx] = animated_pose;
+
+				//	// multiply with bind pose mtx(the T shape thingy) for final xform matrix
+				//	//boneMatrices[bone_idx] = animated_pose * glm::inverse(bone_it->bindPose);
+				//}
+
+				//// account for parent bone transformation
+				//std::vector<glm::mat4> poses(modelAsset->skeleton.size());
+				//for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+				//	// if is parent, no need
+				//	if (modelAsset->skeleton[i].parent == -1) {
+				//		poses[i] = relative_poses[i];
+				//		continue;
+				//	}
+
+				//	// account for parent's xform
+				//	poses[i] = poses[modelAsset->skeleton[i].parent] * relative_poses[i];
+				//	//poses[i] = relative_poses[i] * poses[modelAsset->skeleton[i].parent];
+				//}
+
+				//// apply to bind pose (T pose)
+				//for (int i{}; i < modelAsset->skeleton.size(); ++i) {
+				//	boneMatrices[i] = poses[i] * modelAsset->skeleton[i].bindPose;
+				//	//boneMatrices[i] = glm::inverse(modelAsset->skeleton[i].bindPose) * poses[i];
+				//}
+
+				//// populate animated bone xforms in shader
+				//for (size_t i{}; i < boneMatrices.size(); ++i) {
+				//	const std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
+				//	geometry_shader->SetUniform(uniform_name, boneMatrices[i]);
+				//}
 			}
+            else {
+                //PN_CORE_TRACE("{} is not playing animation", modelAsset->vpath);
+				geometry_shader->SetUniform("u_Animated", 0.0f);
+            }
 
 			// debug
 			geometry_shader->SetUniform(

@@ -163,6 +163,15 @@ namespace PAIN {
         void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
 
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        void Animation_Play(entt::entity entityId, std::string animName) override;
+        void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) override;
+        void Animation_SetSpeed(entt::entity entityId, float speed) override;
+        void Animation_SetLoop(entt::entity entityId, bool loop) override;
+        bool Animation_IsPlaying(entt::entity entityId, std::string animName) override;
+
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());
         inline static EntityType asEntity(int id) { return static_cast<EntityType>(id); }

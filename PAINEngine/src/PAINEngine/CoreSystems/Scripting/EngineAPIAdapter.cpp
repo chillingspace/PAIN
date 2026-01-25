@@ -154,6 +154,24 @@ namespace PAIN {
         return std::nullopt;
     }
 
+    static int FindAnimIndex(PAIN::ECS::Controller& ecs, entt::entity entity, const std::string& animName) {
+        auto& reg = ecs.getRegistry();
+
+        // We need ModelRenderer to access the asset's animation list
+        if (!reg.all_of<PAIN::ModelRenderer>(entity)) return -1;
+
+        const auto& renderer = reg.get<PAIN::ModelRenderer>(entity);
+        if (!renderer.cachedModelAsset) return -1;
+
+        const auto& animations = renderer.cachedModelAsset->animations;
+        for (int i = 0; i < animations.size(); ++i) {
+            if (animations[i].name == animName) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     std::string EngineAPIAdapter::GetAssetGUID(std::string_view name, PAIN::Assets::Type want) {
         if (!assets_) return {};
         auto guid = assets_->findByName(std::string{ name });
@@ -719,5 +737,85 @@ namespace PAIN {
             return;
         }
         l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);*/
+    }
+
+    /* =========================================================================== */
+    /*                                  Animation                                  */
+    /* =========================================================================== */
+
+    void EngineAPIAdapter::Animation_Play(entt::entity entityId, std::string animName)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Animation>(entityId)) return;
+
+        int idx = FindAnimIndex(ecs_, entityId, animName);
+        if (idx != -1) {
+            auto& anim = reg.get<PAIN::Animation>(entityId);
+
+            // If already playing this animation, do nothing (or reset if you prefer)
+            if (anim.currentAnimationIndex == idx && anim.isPlaying) return;
+
+            anim.currentAnimationIndex = idx;
+            anim.animationTime = 0.0f;
+            anim.isPlaying = true;
+
+            // Clear any transition
+            anim.nextAnimationIndex = -1;
+            anim.transitionWeight = 0.0f;
+        }
+        else {
+            PN_CORE_WARN("[EngineAPI] Animation_Play: Animation '{}' not found on entity {}", animName, (uint32_t)entityId);
+        }
+    }
+
+    void EngineAPIAdapter::Animation_CrossFade(entt::entity entityId, std::string animName, float duration)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Animation>(entityId)) return;
+
+        int idx = FindAnimIndex(ecs_, entityId, animName);
+        if (idx != -1) {
+            auto& anim = reg.get<PAIN::Animation>(entityId);
+
+            // Only crossfade if different
+            if (anim.currentAnimationIndex != idx) {
+                anim.nextAnimationIndex = idx;
+                anim.transitionDuration = duration > 0.0f ? duration : 0.1f;
+                anim.transitionWeight = 0.0f; // Start transition from 0
+                anim.isPlaying = true;
+            }
+        }
+        else {
+            PN_CORE_WARN("[EngineAPI] Animation_CrossFade: Animation '{}' not found on entity {}", animName, (uint32_t)entityId);
+        }
+    }
+
+    void EngineAPIAdapter::Animation_SetSpeed(entt::entity entityId, float speed)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            reg.get<PAIN::Animation>(entityId).playbackSpeed = speed;
+        }
+    }
+
+    void EngineAPIAdapter::Animation_SetLoop(entt::entity entityId, bool loop)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            reg.get<PAIN::Animation>(entityId).loopAnimation = loop;
+        }
+    }
+
+    bool EngineAPIAdapter::Animation_IsPlaying(entt::entity entityId, std::string animName)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Animation>(entityId)) return false;
+
+        const auto& anim = reg.get<PAIN::Animation>(entityId);
+        int idx = FindAnimIndex(ecs_, entityId, animName);
+
+        // Check if current is the anim AND it's playing
+        // OR check if we are transitioning TO it
+        return (anim.currentAnimationIndex == idx && anim.isPlaying) || (anim.nextAnimationIndex == idx);
     }
 }

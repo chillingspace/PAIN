@@ -586,13 +586,22 @@ namespace PAIN {
 								0.0f);
 						}
 					} else {
+						// ensure positive dimensions in order to prevent assert errors
+						float extentX = std::abs(.5f * transform.scale.x * rigidBody.collider_scale.x);
+						float extentY = std::abs(.5f * transform.scale.y * rigidBody.collider_scale.y);
+						float extentZ = std::abs(.5f * transform.scale.z * rigidBody.collider_scale.z);
+
+						// ensure dimensions are not exactly zero to be safe
+						extentX = std::max(extentX, 0.001f);
+						extentY = std::max(extentY, 0.001f);
+						extentZ = std::max(extentZ, 0.001f);
+
 						// Default: Create simple BoxShape (original behavior)
 						// Note: Jolt BoxShape takes half-extents
 						finalShape = new JPH::BoxShape(
-							JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x,
-									  .5f * transform.scale.y * rigidBody.collider_scale.y,
-									  .5f * transform.scale.z * rigidBody.collider_scale.z),
-							0.0f);
+							JPH::Vec3(extentX, extentY, extentZ),
+							0.0f
+						);
 
 						// Apply Offset using RotatedTranslatedShape if needed
 						// We wrap the box shape in a transform shape to offset it from the
