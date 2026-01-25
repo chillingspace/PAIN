@@ -228,13 +228,10 @@ void main() {
             // Progress Bar - Screen Space Configuration (in pixels)
             glm::vec2 m_progressBarPosition{ 0.0f, 0.0f };  // Position (x, y) in screen space
             glm::vec2 m_progressBarSize{ 600.0f, 40.0f };    // Size (width, height) in pixels
-            bool m_useCustomProgressBarPos{ false };          // True if custom position set
-            bool m_useCustomProgressBarSize{ false };         // True if custom size set
 
             // Status Text - Screen Space Configuration
             glm::vec2 m_statusTextPosition{ 0.0f, 0.0f };    // Position (x, y) in screen space
             float m_statusTextScale{ 0.02f };                  // Scale factor for font size
-            bool m_useCustomStatusTextPos{ false };           // True if custom position set
 
             // Spritesheet Animation Support
             int m_frameCount{ 1 };                            // Number of frames in spritesheet

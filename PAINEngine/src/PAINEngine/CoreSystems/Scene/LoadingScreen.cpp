@@ -227,25 +227,11 @@ namespace PAIN {
                 glUniform1f(glowIntensityLoc, m_glowIntensity);
                 
                 // Calculate position and size in screen space
-                float barWidth, barHeight, barX, barY;
+                float barWidth = m_progressBarSize.x;
+                float barHeight = m_progressBarSize.y;
                 
-                if (m_useCustomProgressBarSize) {
-                    barWidth = m_progressBarSize.x;
-                    barHeight = m_progressBarSize.y;
-                } else {
-                    // Default: 60% of screen width, 40 pixels height
-                    barWidth = screenWidth * 0.6f;
-                    barHeight = 40.0f;
-                }
-                
-                if (m_useCustomProgressBarPos) {
-                    barX = m_progressBarPosition.x;
-                    barY = m_progressBarPosition.y;
-                } else {
-                    // Default: centered horizontally, 70% down from top
-                    barX = screenWidth / 2.0f;
-                    barY = screenHeight * 0.7f;
-                }
+                float barX = m_progressBarPosition.x;
+                float barY = m_progressBarPosition.y;
                 
                 // Convert screen space to NDC
                 float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
@@ -360,36 +346,9 @@ namespace PAIN {
             statusTextComp.alignment = TextAlignment::Center;
             
             // Calculate position based on custom settings or defaults
-            float textX, textY;
-            if (m_useCustomStatusTextPos) {
-                // Use custom position set by user
-                textX = m_statusTextPosition.x;
-                textY = m_statusTextPosition.y;
-            } else {
-                // Default: centered horizontally, below progress bar
-                textX = screenWidth / 2.0f;
-                
-                // Get progress bar Y position (either custom or default)
-                float progressBarY;
-                if (m_useCustomProgressBarPos) {
-                    progressBarY = m_progressBarPosition.y;
-                } else {
-                    // Default progress bar position is 70% down from top
-                    progressBarY = screenHeight * 0.7f;
-                }
-                
-                // Get progress bar height (either custom or default)
-                float progressBarHeight;
-                if (m_useCustomProgressBarSize) {
-                    progressBarHeight = m_progressBarSize.y;
-                } else {
-                    // Default height is 40 pixels
-                    progressBarHeight = 40.0f;
-                }
-                
-                // Position text below progress bar (progress bar center Y + half height + 30px spacing)
-                textY = progressBarY + (progressBarHeight / 2.0f) + 30.0f;
-            }
+            float textX = m_statusTextPosition.x;
+            float textY = m_statusTextPosition.y;
+
             
             statusTextComp.text_pos = glm::vec2(textX, textY);
             statusTextComp.scale_factor = m_statusTextScale;
@@ -620,12 +579,10 @@ namespace PAIN {
 
         void LoadingScreen::setProgressBarPosition(float x, float y) {
             m_progressBarPosition = glm::vec2(x, y);
-            m_useCustomProgressBarPos = true;
         }
 
         void LoadingScreen::setProgressBarSize(float width, float height) {
             m_progressBarSize = glm::vec2(width, height);
-            m_useCustomProgressBarSize = true;
         }
 
         glm::vec2 LoadingScreen::getProgressBarPosition() const {
@@ -638,7 +595,6 @@ namespace PAIN {
 
         void LoadingScreen::setStatusTextPosition(float x, float y) {
             m_statusTextPosition = glm::vec2(x, y);
-            m_useCustomStatusTextPos = true;
         }
 
         void LoadingScreen::setStatusTextScale(float scale) {
@@ -689,33 +645,7 @@ namespace PAIN {
             m_progress.store(progress);
             
             // Render the loading screen to the editor framebuffer
-#ifdef _DEBUG
-            auto editor = services.lock()->get<Editor::Editor>();
-            bool editor_visible = editor && editor->isVisible();
-            
-            if (editor_visible) {
-                glBindFramebuffer(GL_FRAMEBUFFER, services.lock()->get<sRenderer>()->getFinalFbo());
-            } else {
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            }
-#else
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
-            
-            // Clear screen
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            
-            // Render all layers
-            renderBackgroundTexture();
-            renderBackgroundOverlay();
-            renderProgressBar();
-            renderStatusText();
+            finish();
             
             // Restore original values
             m_progress.store(oldProgress);

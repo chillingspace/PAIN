@@ -1165,32 +1165,9 @@ namespace PAIN {
                         previewProgress += 0.01f * ImGui::GetIO().DeltaTime;
                         if (previewProgress > 1.0f) previewProgress = 0.0f;
                     }
-                    
-                    ImGui::Spacing();
-                    ImGui::Separator();
-                    ImGui::Spacing();
-                    
-                    // Render preview button
-                    if (ImGui::Button("Render Preview", ImVec2(200, 40))) {
-                        loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
-                    }
-                    if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Render loading screen to the viewport");
-                    }
-                    
-                    ImGui::SameLine();
-                    
-                    if (ImGui::Button("Quick Test", ImVec2(120, 40))) {
-                        // This will trigger the loading screen via actual scene load
-                        auto currSceneID = scn_service->getCurrScnID();
-                        if (currSceneID.IsValid()) {
-                            scn_service->loadScene(currSceneID);
-                        }
-                    }
-                    if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Reload scene to test loading screen (3-4 seconds)");
-                    }
-                    
+
+                    //Render the preview
+                    loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
                     ImGui::Unindent();
                 }
                 
