@@ -23,6 +23,11 @@ struct Light {
     mat4 P;         // perspective mtx
     float shadowMapIdx;
     float type;         // light type. 0 -> point, 1 -> dir, 2 -> spotlight(cone)
+
+    // spotlight
+    vec3 direction;     // Direction the spotlight is facing
+    float innerCutoff;  // Cosine of inner angle
+    float outerCutoff;  // Cosine of outer angle
 };
 
 #define MAX_LIGHTS 16
@@ -99,7 +104,30 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
         l = normalize((u_V * vec4(light.position, 0.0)).xyz);
         // attenuation not required
     }
+    else if (int(light.type) == 2) {
+        // spotlight lighting
 
+        vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
+        l = lightPositionInView - position;
+        float dist = length(l);
+        l = normalize(l); // Vector FROM Surface TO Light
+        
+         // distance attenuation
+        intensity *= 100.0 / (dist * dist);
+
+        // cone attenuation
+        // have to convert world space to view space
+        vec3 spotDirView = normalize(mat3(u_V) * light.direction); 
+
+        // calculate angle
+        float theta = dot(-l, spotDirView); 
+        
+        // clamping to kill the light
+        float epsilon = light.innerCutoff - light.outerCutoff;
+        float spotIntensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
+        
+        intensity *= spotIntensity;
+    }
 
     vec3 diffuseBrdf = material.color;
 

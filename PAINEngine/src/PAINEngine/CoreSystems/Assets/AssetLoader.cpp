@@ -694,7 +694,7 @@ namespace PAIN {
                 readMem(&b.parent, sizeof(b.parent));
                 readMem(&b.bindPose, sizeof(glm::mat4));
 
-                PN_CORE_INFO("  Bone [{}] '{}' -> Parent Index: {}", i, b.name, b.parent);
+                //PN_CORE_INFO("  Bone [{}] '{}' -> Parent Index: {}", i, b.name, b.parent);
             }
 
             // check if bones are well or poorly ordered
@@ -716,7 +716,7 @@ namespace PAIN {
             // Animations
             uint32_t animCount = 0;
             readMem(&animCount, sizeof(animCount));
-            PN_CORE_INFO("--- Reading {} Animations ---", animCount);
+            //PN_CORE_INFO("--- Reading {} Animations ---", animCount);
             asset.animations.resize(animCount);
             for (AnimationClip& anim : asset.animations) {
                 readStr(anim.name);
@@ -726,7 +726,7 @@ namespace PAIN {
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
                 //anim.tracks.resize(trackCount);
-                PN_CORE_TRACE("  Anim '{}' ({}s) has {} tracks", anim.name, anim.duration, trackCount);
+                //PN_CORE_TRACE("  Anim '{}' ({}s) has {} tracks", anim.name, anim.duration, trackCount);
 
                 int no_bone_tracks{};
                 for (size_t i{}; i < trackCount; ++i) {
@@ -778,7 +778,7 @@ namespace PAIN {
                 }
             }
 
-            PN_CORE_TRACE("ImportModel: Before reading materials");
+            //PN_CORE_TRACE("ImportModel: Before reading materials");
 
             // Materials
             uint32_t matCount = 0;
