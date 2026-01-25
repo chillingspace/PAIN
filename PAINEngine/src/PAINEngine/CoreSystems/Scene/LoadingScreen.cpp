@@ -33,6 +33,27 @@ namespace PAIN {
             // Initialize animation timing
             m_animationTime = 0.0f;
             m_lastFrameTime = std::chrono::steady_clock::now();
+            
+            // Initialize default position and size for progress bar and status text
+            auto win = services.lock()->get<Window::Window>();
+            if (win) {
+                auto framebuffer = win->getFrameBuffer();
+                float screenWidth = framebuffer.x;
+                float screenHeight = framebuffer.y;
+                
+                // Set default progress bar position and size (if not already set by user)
+                if (m_progressBarPosition.x == 0.0f && m_progressBarPosition.y == 0.0f) {
+                    m_progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.7f);
+                }
+                if (m_progressBarSize.x == 600.0f && m_progressBarSize.y == 40.0f) {
+                    m_progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
+                }
+                
+                // Set default status text position (if not already set by user)
+                if (m_statusTextPosition.x == 0.0f && m_statusTextPosition.y == 0.0f) {
+                    m_statusTextPosition = glm::vec2(screenWidth / 2.0f, m_progressBarPosition.y + (m_progressBarSize.y / 2.0f) + 30.0f);
+                }
+            }
 
             // Create fullscreen quad for background and progress bar
             float quadVertices[] = {
@@ -259,23 +280,41 @@ namespace PAIN {
                 // Fallback: Use basic shader with old dual-pass approach
                 // Draw background bar (dark gray)
                 {
-                    float barWidth = 0.6f;
-                    float barHeight = 0.05f;
-                    float barX = 0.0f;
-                    float barY = -0.3f;
+                    // Get window dimensions for screen-space to NDC conversion
+                    auto serv = services.lock();
+                    if (!serv) return;
+                    auto win = serv->get<Window::Window>();
+                    if (!win) return;
+
+                    auto framebuffer = win->getFrameBuffer();
+                    float screenWidth = framebuffer.x;
+                    float screenHeight = framebuffer.y;
+
+                    // Calculate position and size in screen space
+                    float barWidth = m_progressBarSize.x;
+                    float barHeight = m_progressBarSize.y;
+
+                    float barX = m_progressBarPosition.x;
+                    float barY = m_progressBarPosition.y;
+
+                    // Convert screen space to NDC
+                    float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
+                    float ndcY = 1.0f - (barY / screenHeight) * 2.0f;  // Flip Y (screen Y is top-down, NDC is bottom-up)
+                    float ndcWidth = (barWidth / screenWidth) * 2.0f;
+                    float ndcHeight = (barHeight / screenHeight) * 2.0f;
                     
-                    float bgVertices[] = {
-                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                        barX - barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
-                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                        
-                        barX - barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                        barX + barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                        barX + barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
+                    float progressVertices[] = {
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+
+                        ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                        ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+                        ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
                     };
                     
                     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(bgVertices), bgVertices);
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(progressVertices), progressVertices);
                     
                     GLint colorLoc = glGetUniformLocation(m_shader, "color");
                     GLint alphaLoc = glGetUniformLocation(m_shader, "alpha");
@@ -430,9 +469,6 @@ namespace PAIN {
             // For now, return 0 and we'll use the basic shader instead
             // This will be properly implemented when LoadingScreen gets services access
             
-            PN_CORE_WARN("[LoadingScreen] Custom progress bar shader not loaded - using basic shader");
-            return 0;
-            
             #ifdef PN_PLATFORM_WINDOWS
                 std::filesystem::path shader_path = "engine/shaders/loading_progress.vert";
             #else
@@ -453,8 +489,6 @@ namespace PAIN {
 
         unsigned int LoadingScreen::compileOverlayShader() {
             // NOTE: Same as above - requires services pointer
-            PN_CORE_WARN("[LoadingScreen] Custom overlay shader not loaded - skipping overlay");
-            return 0;
             
             #ifdef PN_PLATFORM_WINDOWS
                 std::filesystem::path shader_path = "engine/shaders/loading_overlay.vert";
@@ -644,8 +678,58 @@ namespace PAIN {
             }
             m_progress.store(progress);
             
-            // Render the loading screen to the editor framebuffer
-            finish();
+#ifdef _DEBUG
+            auto editor = services.lock()->get<Editor::Editor>();
+            bool editor_visible = editor && editor->isVisible();
+            int editor_debug_mode = editor ? editor->getDebugMode() : 0;
+
+#else
+            bool editor_visible = false;
+            int editor_debug_mode = 0;
+#endif
+
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
+            }
+
+            if (editor_visible) {
+                glBindFramebuffer(GL_FRAMEBUFFER, services.lock()->get<sRenderer>()->getFinalFbo());
+                // glViewport(0, 0, fbWidth, fbHeight);
+            }
+            else {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                // Match viewport to window size
+                auto window = services.lock()->get<Window::Window>();
+                auto frame_buffer = window->getFrameBuffer();
+                glViewport(0, 0, frame_buffer.x, frame_buffer.y);
+            }
+
+            //Render to buffer
+            // Clear screen with dark background
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            // Render in Z-order (back to front):
+            // Layer 1: Background texture (if set)
+            renderBackgroundTexture();
+
+            // Layer 2: Animated gradient overlay
+            renderBackgroundOverlay();
+
+            // Layer 3: Progress bar
+            renderProgressBar();
+
+            // Layer 4: Status text
+            renderStatusText();
+
+            ////Unbind frame buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             
             // Restore original values
             m_progress.store(oldProgress);
@@ -654,7 +738,6 @@ namespace PAIN {
                 m_statusText = oldStatus;
             }
         }
-
     }
 }
 

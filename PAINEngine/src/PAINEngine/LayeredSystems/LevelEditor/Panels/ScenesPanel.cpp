@@ -1160,14 +1160,26 @@ namespace PAIN {
                         ImGui::SetTooltip("Automatically cycle progress from 0% to 100%");
                     }
                     
+                    ImGui::Spacing();
+                    
+                    // Preview enable/disable toggle
+                    static bool enablePreview = false;
+                    ImGui::Checkbox("Enable Live Preview", &enablePreview);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Toggle real-time preview rendering (may impact performance)");
+                    }
+                    
                     // Auto-animate logic
                     if (autoAnimate) {
                         previewProgress += 0.01f * ImGui::GetIO().DeltaTime;
                         if (previewProgress > 1.0f) previewProgress = 0.0f;
                     }
 
-                    //Render the preview
-                    loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
+                    // Only render preview if enabled
+                    if (enablePreview) {
+                        loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
+                    }
+                    
                     ImGui::Unindent();
                 }
                 
