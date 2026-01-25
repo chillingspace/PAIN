@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "enemyDetection_radiusTimer.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 13227585465361510374
+  },
+  "descriptor_version": 1,
+  "guid": "73fd142e-44fa-7642-bb2c-514b94f1de5b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\enemyDetection_radiusTimer.lua"
+  }
+}

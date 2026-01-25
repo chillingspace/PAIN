@@ -1,5 +1,7 @@
 {
     "assets": [
+        "5cccecaa-acca-ae47-a45d-0210732e76aa",
+        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
@@ -78,19 +80,19 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.2701103091239929,
-            -0.6840178966522217,
-            0.6776134967803955
+            -0.34869664907455444,
+            -0.8535653948783875,
+            -0.3870874345302582
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.2223440706729889,
-            0.987946093082428,
-            0.11288478970527649
+            1.734927773475647,
+            0.6316738128662109,
+            2.00994610786438
         ],
         "sensitivity": 0.11999999731779099,
-        "speed": 1.5,
+        "speed": 1.0,
         "up": [
             0.0,
             1.0,
@@ -99,6 +101,112 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "localAABB": {
+                                "max": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "min": [
+                                    -1.0,
+                                    -1.0,
+                                    -1.0
+                                ]
+                            },
+                            "worldAABB": {
+                                "max": [
+                                    1.3707389831542969,
+                                    0.02197938598692417,
+                                    1.7226836681365967
+                                ],
+                                "min": [
+                                    1.170738935470581,
+                                    0.0019793864339590073,
+                                    1.5226836204528809
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "9f766a6a-ba81-0146-b181-b87f39b829a5"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                1.270738959312439,
+                                0.01197938621044159,
+                                1.6226836442947388
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.10000000149011612,
+                                0.009999999776482582,
+                                0.10000000149011612
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "5cccecaa-acca-ae47-a45d-0210732e76aa",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "enemyTest"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "73fd142e-44fa-7642-bb2c-514b94f1de5b"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "enemyTest"
+                }
+            },
             {
                 "Entity": {
                     "Components": {

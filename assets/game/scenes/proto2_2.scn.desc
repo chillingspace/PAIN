@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "proto2_2.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 13797767816820923260
+  },
+  "descriptor_version": 1,
+  "guid": "9f15a68f-892f-1c47-8869-d04a215edf26",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\proto2_2.scn"
+  }
+}
