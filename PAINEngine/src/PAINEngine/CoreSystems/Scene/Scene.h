@@ -15,9 +15,6 @@ namespace PAIN {
         class SceneManager : public AppSystem {
         private:
 
-            //Loading screen
-            std::unique_ptr<LoadingScreen> loadingScreen;
-
             //Curr active camera
             Camera* active_camera = nullptr;
 
@@ -130,6 +127,9 @@ namespace PAIN {
                 auto light = LightSources::get().get(world_light_name);
                 return light.has_value() ? &light->get() : nullptr;
             }
+
+            //Loading screen
+            std::unique_ptr<LoadingScreen> loadingScreen;
 
             // Cameras
             Camera* GetActiveCamera();

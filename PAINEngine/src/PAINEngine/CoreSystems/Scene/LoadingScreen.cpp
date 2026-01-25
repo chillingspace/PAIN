@@ -109,7 +109,17 @@ namespace PAIN {
             timing.dt = real_dt;
             
             // Update animation time
-            m_animationTime += timing.dt;
+           m_animationTime += timing.dt;
+            
+            // Update animated background frames if enabled
+            if (m_animationEnabled && !m_backgroundFrames.empty()) {
+                m_currentFrameTime += timing.dt;
+                if (m_currentFrameTime >= m_frameTime) {
+                    m_currentFrameTime = 0.0f;
+                    m_currentFrame = (m_currentFrame + 1) % m_backgroundFrames.size();
+                    m_backgroundTextureGUID = m_backgroundFrames[m_currentFrame];
+                }
+            }
             
             // Clear screen with dark background
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -195,6 +205,16 @@ namespace PAIN {
             
             // If using custom shader, set all uniforms
             if (m_progressBarShader) {
+                // Get window dimensions for screen-space to NDC conversion
+                auto serv = services.lock();
+                if (!serv) return;
+                auto win = serv->get<Window::Window>();
+                if (!win) return;
+                
+                auto framebuffer = win->getFrameBuffer();
+                float screenWidth = framebuffer.x;
+                float screenHeight = framebuffer.y;
+                
                 GLint progressLoc = glGetUniformLocation(m_progressBarShader, "progress");
                 GLint animTimeLoc = glGetUniformLocation(m_progressBarShader, "animationTime");
                 GLint fillColorLoc = glGetUniformLocation(m_progressBarShader, "fillColor");
@@ -207,19 +227,42 @@ namespace PAIN {
                 glUniform3fv(glowColorLoc, 1, &m_glowColor[0]);
                 glUniform1f(glowIntensityLoc, m_glowIntensity);
                 
-                // Create progress bar quad in NDC (-1 to 1)
-                float barWidth = m_progressBarWidth;
-                float barHeight = m_progressBarHeight;
-                float barY = m_progressBarY;
+                // Calculate position and size in screen space
+                float barWidth, barHeight, barX, barY;
                 
+                if (m_useCustomProgressBarSize) {
+                    barWidth = m_progressBarSize.x;
+                    barHeight = m_progressBarSize.y;
+                } else {
+                    // Default: 60% of screen width, 40 pixels height
+                    barWidth = screenWidth * 0.6f;
+                    barHeight = 40.0f;
+                }
+                
+                if (m_useCustomProgressBarPos) {
+                    barX = m_progressBarPosition.x;
+                    barY = m_progressBarPosition.y;
+                } else {
+                    // Default: centered horizontally, 70% down from top
+                    barX = screenWidth / 2.0f;
+                    barY = screenHeight * 0.7f;
+                }
+                
+                // Convert screen space to NDC
+                float ndcX = (barX / screenWidth) * 2.0f - 1.0f;
+                float ndcY = 1.0f - (barY / screenHeight) * 2.0f;  // Flip Y (screen Y is top-down, NDC is bottom-up)
+                float ndcWidth = (barWidth / screenWidth) * 2.0f;
+                float ndcHeight = (barHeight / screenHeight) * 2.0f;
+                
+                // Create progress bar quad in NDC
                 float progressVertices[] = {
-                    -barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                    -barWidth / 2, barY - barHeight / 2,  0.0f, 0.0f,
-                     barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
+                    ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                    ndcX - ndcWidth / 2, ndcY - ndcHeight / 2,  0.0f, 0.0f,
+                    ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
                     
-                    -barWidth / 2, barY + barHeight / 2,  0.0f, 1.0f,
-                     barWidth / 2, barY - barHeight / 2,  1.0f, 0.0f,
-                     barWidth / 2, barY + barHeight / 2,  1.0f, 1.0f
+                    ndcX - ndcWidth / 2, ndcY + ndcHeight / 2,  0.0f, 1.0f,
+                    ndcX + ndcWidth / 2, ndcY - ndcHeight / 2,  1.0f, 0.0f,
+                    ndcX + ndcWidth / 2, ndcY + ndcHeight / 2,  1.0f, 1.0f
                 };
                 
                 glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -314,9 +357,32 @@ namespace PAIN {
             // Create UIText component for status
             UIText statusTextComp;
             statusTextComp.display_text = currentStatus;
-            statusTextComp.color = glm::vec3(0.85f, 0.85f, 0.85f);  // Light gray
+            statusTextComp.color = glm::vec3(0.85f, 0.85f, 0.85f);
             statusTextComp.alignment = TextAlignment::Center;
-            statusTextComp.scale_factor = 0.02f;
+            
+            // Calculate position based on custom settings or defaults
+            float textX, textY;
+            if (m_useCustomStatusTextPos) {
+                textX = m_statusTextPosition.x;
+                textY = m_statusTextPosition.y;
+            } else {
+                // Default: centered horizontally, below progress bar
+                textX = screenWidth / 2.0f;
+                
+                // Calculate default progress bar Y position
+                float defaultBarY = screenHeight * 0.7f;
+                if (m_useCustomProgressBarPos) {
+                    defaultBarY = m_progressBarPosition.y;
+                }
+                
+                // Position text below progress bar (add 60 pixels)
+                textY = defaultBarY + 60.0f;
+            }
+            
+            statusTextComp.text_pos = glm::vec2(textX, textY);
+            statusTextComp.scale_factor = m_statusTextScale;
+            
+            // Set word wrap and font
             statusTextComp.word_wrap = false;
 #ifdef PN_PLATFORM_WINDOWS
             std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
@@ -324,11 +390,6 @@ namespace PAIN {
             std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
 #endif
             statusTextComp.font_guid = services.lock()->get<Assets::Manager>()->findGUID(font_path);
-            
-            // Position below progress bar
-            // Progress bar Y is -0.3 in NDC, convert to screen space
-            float progressBarScreenY = screenHeight * (1.0f - m_progressBarY) / 2.0f;
-            statusTextComp.text_pos = glm::vec2(screenWidth / 2.0f, progressBarScreenY - 30.0f);
             
             // Render using TextRenderer static instance
             TextRenderer::get().renderText(statusTextComp);
@@ -446,6 +507,10 @@ namespace PAIN {
             m_backgroundTextureGUID = textureGUID;
         }
 
+        Assets::GUID LoadingScreen::getBackgroundTexture() {
+            return m_backgroundTextureGUID;
+        }
+
         void LoadingScreen::renderBackgroundTexture() {
             // Check if background texture is set
             if (!m_backgroundTextureGUID.IsValid()) return;
@@ -511,6 +576,63 @@ namespace PAIN {
            glBindVertexArray(0);
             glUseProgram(0);
         }
+
+        // ============================================================
+        // Runtime Configuration Implementations
+        // ============================================================
+
+        void LoadingScreen::setProgressBarPosition(float x, float y) {
+            m_progressBarPosition = glm::vec2(x, y);
+            m_useCustomProgressBarPos = true;
+        }
+
+        void LoadingScreen::setProgressBarSize(float width, float height) {
+            m_progressBarSize = glm::vec2(width, height);
+            m_useCustomProgressBarSize = true;
+        }
+
+        glm::vec2 LoadingScreen::getProgressBarPosition() const {
+            return m_progressBarPosition;
+        }
+
+        glm::vec2 LoadingScreen::getProgressBarSize() const {
+            return m_progressBarSize;
+        }
+
+        void LoadingScreen::setStatusTextPosition(float x, float y) {
+            m_statusTextPosition = glm::vec2(x, y);
+            m_useCustomStatusTextPos = true;
+        }
+
+        void LoadingScreen::setStatusTextScale(float scale) {
+            m_statusTextScale = scale;
+        }
+
+        glm::vec2 LoadingScreen::getStatusTextPosition() const {
+            return m_statusTextPosition;
+        }
+
+        float LoadingScreen::getStatusTextScale() const {
+            return m_statusTextScale;
+        }
+
+        void LoadingScreen::setAnimatedBackground(const std::vector<Assets::GUID>& textureGUIDs, float frameTime) {
+            m_backgroundFrames = textureGUIDs;
+            m_frameTime = frameTime;
+            m_currentFrame = 0;
+            m_currentFrameTime = 0.0f;
+            
+            // Set first frame as background if available
+            if (!m_backgroundFrames.empty()) {
+                m_backgroundTextureGUID = m_backgroundFrames[0];
+                m_animationEnabled = true;
+            }
+        }
+
+        void LoadingScreen::setBackgroundAnimationEnabled(bool enabled) {
+            m_animationEnabled = enabled && !m_backgroundFrames.empty();
+        }
+
     }
 }
 

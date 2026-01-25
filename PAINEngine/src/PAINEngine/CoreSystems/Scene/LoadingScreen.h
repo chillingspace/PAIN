@@ -66,6 +66,87 @@ namespace PAIN {
              */
             void setBackgroundTexture(const Assets::GUID& textureGUID);
 
+            /**
+             * @brief Get background texture to display (optional)
+             */
+            Assets::GUID getBackgroundTexture();
+
+            // ============================================================
+            // Runtime Configuration - Progress Bar
+            // ============================================================
+            
+            /**
+             * @brief Set progress bar position in screen space (world coordinates)
+             * @param x X position in pixels from left edge of screen
+             * @param y Y position in pixels from top edge of screen
+             */
+            void setProgressBarPosition(float x, float y);
+            
+            /**
+             * @brief Set progress bar size in screen space
+             * @param width Width in pixels
+             * @param height Height in pixels
+             */
+            void setProgressBarSize(float width, float height);
+            
+            /**
+             * @brief Get progress bar position in screen space
+             * @return glm::vec2 Position (x, y) in pixels
+             */
+            glm::vec2 getProgressBarPosition() const;
+            
+            /**
+             * @brief Get progress bar size in screen space
+             * @return glm::vec2 Size (width, height) in pixels
+             */
+            glm::vec2 getProgressBarSize() const;
+
+            // ============================================================
+            // Runtime Configuration - Status Text
+            // ============================================================
+            
+            /**
+             * @brief Set status text position in screen space (world coordinates)
+             * @param x X position in pixels from left edge of screen
+             * @param y Y position in pixels from top edge of screen
+             */
+            void setStatusTextPosition(float x, float y);
+            
+            /**
+             * @brief Set status text scale factor
+             * @param scale Scale multiplier for font size (default 1.0)
+             */
+            void setStatusTextScale(float scale);
+            
+            /**
+             * @brief Get status text position in screen space
+             * @return glm::vec2 Position (x, y) in pixels
+             */
+            glm::vec2 getStatusTextPosition() const;
+            
+            /**
+             * @brief Get status text scale factor
+             * @return float Scale multiplier
+             */
+            float getStatusTextScale() const;
+
+            // ============================================================
+            // Animated Texture Support
+            // ============================================================
+            
+            /**
+             * @brief Set animated texture frames for background
+             * @param textureGUIDs Vector of texture GUIDs for animation frames
+             * @param frameTime Time per frame in seconds
+             */
+            void setAnimatedBackground(const std::vector<Assets::GUID>& textureGUIDs, float frameTime);
+            
+            /**
+             * @brief Enable/disable background animation
+             * @param enabled True to enable animation, false to disable
+             */
+            void setBackgroundAnimationEnabled(bool enabled);
+
         private:
 
             // Simple vertex shader for fullscreen quad !!FALLBACK
@@ -126,10 +207,23 @@ void main() {
             float m_animationTime{ 0.0f };
             std::chrono::steady_clock::time_point m_lastFrameTime;
 
-            // Layout configuration (in screen space -1 to 1)
-            float m_progressBarWidth{ 0.6f };   // 60% of screen width
-            float m_progressBarHeight{ 0.05f }; // 5% of screen height
-            float m_progressBarY{ -0.3f };      // Y position (below center)
+            // Progress Bar - Screen Space Configuration (in pixels)
+            glm::vec2 m_progressBarPosition{ 0.0f, 0.0f };  // Position (x, y) in screen space
+            glm::vec2 m_progressBarSize{ 600.0f, 40.0f };    // Size (width, height) in pixels
+            bool m_useCustomProgressBarPos{ false };          // True if custom position set
+            bool m_useCustomProgressBarSize{ false };         // True if custom size set
+
+            // Status Text - Screen Space Configuration
+            glm::vec2 m_statusTextPosition{ 0.0f, 0.0f };    // Position (x, y) in screen space
+            float m_statusTextScale{ 0.02f };                  // Scale factor for font size
+            bool m_useCustomStatusTextPos{ false };           // True if custom position set
+
+            // Animated Background Support
+            std::vector<Assets::GUID> m_backgroundFrames;     // Animation frames
+            float m_frameTime{ 0.1f };                        // Time per frame in seconds
+            float m_currentFrameTime{ 0.0f };                 // Accumulated time for current frame
+            size_t m_currentFrame{ 0 };                       // Current frame index
+            bool m_animationEnabled{ false };                 // Animation enabled flag
 
             // Color scheme
             glm::vec3 m_fillColor{ 0.2f, 0.8f, 0.9f };      // Cyan
