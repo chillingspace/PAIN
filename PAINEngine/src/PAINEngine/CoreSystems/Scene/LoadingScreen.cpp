@@ -11,35 +11,6 @@
 namespace PAIN {
     namespace Scene {
 
-        // Simple vertex shader for fullscreen quad !!FALLBACK
-        static const char* vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-
-out vec2 TexCoord;
-
-void main() {
-    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
-    TexCoord = aTexCoord;
-}
-)";
-
-        // Simple fragment shader for solid colors !!FALLBACK
-        static const char* fragmentShaderSource = R"(
-#version 330 core
-out vec4 FragColor;
-
-in vec2 TexCoord;
-
-uniform vec3 color;
-uniform float alpha;
-
-void main() {
-    FragColor = vec4(color, alpha);
-}
-)";
-
         void LoadingScreen::init(std::shared_ptr<Services> serv) {
             PN_CORE_INFO("[LoadingScreen] Initializing...");
 
@@ -51,11 +22,11 @@ void main() {
             m_progressBarShader = compileProgressBarShader();
             m_overlayShader = compileOverlayShader();
 
-            //Get GUID for the background texture
+            //Set default digipen screen for texture rendering
 #ifdef PN_PLATFORM_WINDOWS
-            std::filesystem::path tex_path = "engine/textures/sunshine.png";
+            std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
 #else
-            std::filesystem::path tex_path = "engine\\textures\\sunshine.png";
+            std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
 #endif
             m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
 
