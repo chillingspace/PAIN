@@ -1,32 +1,43 @@
 
 -- radius/proximity-based (enemy detection) script WITH TIMER
  
-
+-- Player Entity
 local player = nil
+
+-- Time that the player has been seen
 local timeSeen = 0.0
-local timeRequired = 3.0
-local caught = false
+
+-- Time required to be seen before caught
+local timeRequired = 0.5
+
+-- Whether player has been caught
+local playerCaught = false
+
+-- If the player is being detected (For detection UI)
+local playerDetected = false
 
 registerUpdate(function(dt)
     local p = _G.PlayerEntity
     if not p then
         timeSeen = 0.0
-        caught = false
+        playerCaught = false
         return
     end
     player = p
 
     -- 1) If the game is already ended, do nothing.
     if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
+        playerDetected = false
         timeSeen = 0.0
-        caught = false
+        playerCaught = false
         return
     end
 
     -- so player not detected when hiding and cooldown
     if PlayerState and PlayerState.canBeCaught and not PlayerState.canBeCaught() then
+        playerDetected = false
         timeSeen = 0.0
-        caught = false
+        playerCaught = false
         return
     end
 
@@ -49,14 +60,19 @@ registerUpdate(function(dt)
         -- Increase time seen
         timeSeen = timeSeen + dt
 
+        -- Mark player as being detected
+        playerDetected = true
+
         -- player in detection range
         -- log("[enemyDetection_radius] I see the player!")    
 
         if (not caught) and timeSeen >= timeRequired then
-            caught = true
-            log("[EnemyDetection] Player detected long enough - caught!")
+            playerCaught = true
+            log("[EnemyDetection] Player playerDetected long enough - caught!")
 
+            -- If player has been caught
             if PlayerState and PlayerState.onCaught then
+
                 -- Reset time seen
                 timeSeen = 0.0
 
@@ -69,8 +85,11 @@ registerUpdate(function(dt)
         -- Leaving range resets the timer
         -- timeSeen = 0.0
 
+        playerDetected = false
+
         -- Leaving range makes timer decay
         timeSeen = math.max(0.0, timeSeen - dt * 2.0)
-        caught = false
+
+        playerCaught = false
     end
 end)
