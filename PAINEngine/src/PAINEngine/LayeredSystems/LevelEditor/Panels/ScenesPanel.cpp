@@ -907,6 +907,8 @@ namespace PAIN {
                 auto& loadingScreen = scn_service->loadingScreen;
                 
                 ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Loading Screen Configuration");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Default Configuration##LoadingScreen")) loadingScreen->defaultSetup();
                 ImGui::Separator();
                 ImGui::Spacing();
                 
@@ -943,36 +945,14 @@ namespace PAIN {
                     if (ImGui::IsItemHovered()) {
                         ImGui::SetTooltip("Progress bar dimensions (Width, Height) in pixels");
                     }
-                    
+
                     ImGui::Spacing();
-                    ImGui::Separator();
-                    ImGui::Spacing();
-                    
-                    // Quick presets
-                    ImGui::Text("Quick Presets:");
-                    
-                    auto win = services->get<Window::Window>();
-                    if (win) {
-                        auto framebuffer = win->getFrameBuffer();
-                        float screenWidth = framebuffer.x;
-                        float screenHeight = framebuffer.y;
-                        
-                        if (ImGui::Button("Center (60% width)")) {
-                            loadingScreen->setProgressBarPosition(screenWidth / 2.0f, screenHeight * 0.7f);
-                            loadingScreen->setProgressBarSize(screenWidth * 0.6f, 40.0f);
-                        }
-                        ImGui::SameLine();
-                        
-                        if (ImGui::Button("Top (80% width)")) {
-                            loadingScreen->setProgressBarPosition(screenWidth / 2.0f, screenHeight * 0.2f);
-                            loadingScreen->setProgressBarSize(screenWidth * 0.8f, 30.0f);
-                        }
-                        ImGui::SameLine();
-                        
-                        if (ImGui::Button("Bottom (50% width)")) {
-                            loadingScreen->setProgressBarPosition(screenWidth / 2.0f, screenHeight * 0.9f);
-                            loadingScreen->setProgressBarSize(screenWidth * 0.5f, 35.0f);
-                        }
+
+                    // Progress Bar enable/disable toggle
+                    bool showProgress = loadingScreen->getShowProgressBar();
+                    if (ImGui::Checkbox("Progress Bar Shown", &showProgress)) loadingScreen->setShowProgressBar(showProgress);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show progress bar on loading screen");
                     }
                     
                     ImGui::Unindent();
@@ -1005,11 +985,20 @@ namespace PAIN {
                     float textScale = loadingScreen->getStatusTextScale();
                     ImGui::Text("Font Scale");
                     ImGui::SetNextItemWidth(200);
-                    if (ImGui::SliderFloat("##TextScale", &textScale, 0.01f, 3.0f, "%.2f")) {
+                    if (ImGui::SliderFloat("##TextScale", &textScale, 0.01f, 0.1f, "%.2f")) {
                         loadingScreen->setStatusTextScale(textScale);
                     }
                     if (ImGui::IsItemHovered()) {
                         ImGui::SetTooltip("Multiplier for text size (1.0 = default)");
+                    }
+
+                    ImGui::Spacing();
+
+                    // Status text enable/disable toggle
+                    bool showStatus = loadingScreen->getShowStatusText();
+                    if (ImGui::Checkbox("Status Text Shown", &showStatus)) loadingScreen->setShowStatusText(showStatus);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Status Text on loading screen");
                     }
                     
                     ImGui::Spacing();
@@ -1027,17 +1016,12 @@ namespace PAIN {
                         glm::vec2 barPos = loadingScreen->getProgressBarPosition();
                         
                         if (ImGui::Button("Below Progress Bar")) {
-                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y + 60.0f);
+                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y - 70.0f);
                         }
                         ImGui::SameLine();
                         
                         if (ImGui::Button("Above Progress Bar")) {
-                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y - 40.0f);
-                        }
-                        ImGui::SameLine();
-                        
-                        if (ImGui::Button("Top Center")) {
-                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, 100.0f);
+                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y + 70.0f);
                         }
                     }
                     
@@ -1148,6 +1132,16 @@ namespace PAIN {
                             loadingScreen->setBackgroundTexture(currentBg);
                         }
                     }
+
+                    ImGui::Spacing();
+
+                    // Scale
+                    float bgScale = loadingScreen->getBGScale();
+                    ImGui::Text("Background Texture Scale");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::SliderFloat("##BGScale", &bgScale, 0.1f, 10.0f, "%.2f")) {
+                        loadingScreen->setBGScale(bgScale);
+                    }
                     
                     ImGui::Spacing();
                     ImGui::Separator();
@@ -1202,6 +1196,24 @@ namespace PAIN {
                     bool tempEnabled = enabled;
                     if (ImGui::Checkbox("Enable Animation", &tempEnabled)) {
                         loadingScreen->setAnimationEnabled(tempEnabled);
+                    }
+
+                    ImGui::Spacing();
+
+                    // Background enable/disable toggle
+                    bool showBG = loadingScreen->getShowBG();
+                    if (ImGui::Checkbox("Texture Background Shown", &showBG)) loadingScreen->setShowBG(showBG);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Texture As Background on loading screen");
+                    }
+
+                    ImGui::Spacing();
+
+                    // Overlay enable/disable toggle
+                    bool showOverlay = loadingScreen->getShowOverlay();
+                    if (ImGui::Checkbox("Overlay Shown", &showOverlay)) loadingScreen->setShowOverlay(showOverlay);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Overlay on loading screen");
                     }
                     
                     ImGui::Unindent();
