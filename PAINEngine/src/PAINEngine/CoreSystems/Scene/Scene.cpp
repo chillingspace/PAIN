@@ -1396,7 +1396,6 @@ namespace PAIN {
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
-				PN_CORE_ERROR("{}",it->first.c_str() );
 			}
 			else {
 				PN_CORE_ERROR("Game camera not found");

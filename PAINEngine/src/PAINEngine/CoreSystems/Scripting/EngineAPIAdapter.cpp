@@ -781,20 +781,29 @@ namespace PAIN {
         if (!reg.all_of<PAIN::Animation>(entityId)) return;
 
         int idx = FindAnimIndex(ecs_, entityId, animName);
-        if (idx != -1) {
-            auto& anim = reg.get<PAIN::Animation>(entityId);
 
-            // Only crossfade if different
-            if (anim.currentAnimationIndex != idx) {
-                anim.nextAnimationIndex = idx;
-                anim.transitionDuration = duration > 0.0f ? duration : 0.1f;
-                anim.transitionWeight = 0.0f; // Start transition from 0
-                anim.isPlaying = true;
-            }
-        }
-        else {
+        if (idx == -1) {
             PN_CORE_WARN("[EngineAPI] Animation_CrossFade: Animation '{}' not found on entity {}", animName, (uint32_t)entityId);
+            return;
         }
+
+        auto& anim = reg.get<PAIN::Animation>(entityId);
+
+        // Only crossfade if different
+        if (anim.currentAnimationIndex == idx && anim.nextAnimationIndex == -1) {
+            return;
+        }
+
+        // If ALREADY transitioning to this animation, let it finish.
+        if (anim.nextAnimationIndex == idx) {
+            return; 
+        }
+
+        anim.nextAnimationIndex = idx;
+        anim.transitionDuration = duration > 0.0f ? duration : 0.1f; 
+        anim.transitionWeight = 0.0f;
+        anim.isPlaying = true;
+
     }
 
     void EngineAPIAdapter::Animation_SetSpeed(entt::entity entityId, float speed)
@@ -824,5 +833,12 @@ namespace PAIN {
         // Check if current is the anim AND it's playing
         // OR check if we are transitioning TO it
         return (anim.currentAnimationIndex == idx && anim.isPlaying) || (anim.nextAnimationIndex == idx);
+    }
+    float EngineAPIAdapter::GetAnimationDuration(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            return reg.get<PAIN::Animation>(entityId).animationTime;
+        }
     }
 }

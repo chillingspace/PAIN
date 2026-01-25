@@ -153,18 +153,23 @@ namespace PAIN {
 			auto window = services->get<Window::Window>();
 			if (window) window->pollEvents();
 
+			//Drain all events in queue
+			drainEventQueue();
+
 			if (window->isMinimized()) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue; // Go back to start of while loop
 			}
 
-			//Drain all events in queue
-			drainEventQueue();
-
 			//Update delta time
 			auto now = std::chrono::steady_clock::now();
 			float real_dt = std::chrono::duration<float>(now - last_time).count();
 			last_time = now;
+
+			// Cap 
+			if (real_dt > 0.1f) {
+				real_dt = 0.1f;
+			}
 
 			// Store Unscaled Time (Always ticking even when paused)
 			timing.unscaled_dt = real_dt;
