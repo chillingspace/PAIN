@@ -1,11 +1,13 @@
 -- PauseManager.lua
 log("[PauseManager] Script LOADED at startup!")
 
+
 local isPaused = false
 local escWasPressed = false
 local KEY_ESCAPE = 256
 local sceneChange = false
 local nextScene = nil
+
 
 registerUpdate(function(dt)
     -- Handle ESC key for pause
@@ -30,6 +32,8 @@ registerUpdate(function(dt)
     end
 end)
 
+
+-- Make TogglePause globally accessible
 function TogglePause()
     isPaused = not isPaused
     
@@ -58,6 +62,10 @@ function TogglePause()
     log("[PauseManager] Layers toggled successfully")
 end
 
+-- Export to global scope so other scripts can call it
+_G_root.TogglePause = TogglePause
+
+
 -- Continue button - unpause the game
 _G_root.continue_button = function()
     log("[UI] Continue button pressed")
@@ -66,12 +74,14 @@ _G_root.continue_button = function()
     end
 end
 
+
 -- Restart button - reload current scene
 _G_root.restart_button = function()
     log("[UI] Restart button pressed")
     sceneChange = true
     nextScene = "Tutorial.scn"  -- Reloads the game scene
 end
+
 
 -- Quit to Main Menu button
 _G_root.quit_button = function()
