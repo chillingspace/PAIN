@@ -881,5 +881,7 @@ namespace PAIN {
         if (reg.all_of<PAIN::Animation>(entityId)) {
             return reg.get<PAIN::Animation>(entityId).animationTime;
         }
+
+        return 0.0f;
     }
 }

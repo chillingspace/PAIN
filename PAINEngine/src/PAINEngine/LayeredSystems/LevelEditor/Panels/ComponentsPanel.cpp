@@ -800,6 +800,11 @@ namespace PAIN {
 						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
 					});
 
+				registerCompUIFunc<PAIN::CustomHitbox2D>(
+					"CustomHitbox2D", [this](ComponentsPanel&, PAIN::CustomHitbox2D& ui) {
+						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
+					});
+
 				registerCompUIFunc<PAIN::UIFollowsWorldEntity>(
 					"UIFollowsWorldEntity",
 					[this](ComponentsPanel& panel, PAIN::UIFollowsWorldEntity& follow) {

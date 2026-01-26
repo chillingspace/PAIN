@@ -304,9 +304,11 @@ registerUpdate(function(dt)
         curr_vy = jumpSpeed  
         isGrounded = false
 
+        Animation.SetLoop(id, true)
+        PlayAnim(id, ANIM_JUMP, 0.05, true)
+
+        -- jump sfx
         if S and S.sfxJump then
-            Animation.SetLoop(id, true)
-            PlayAnim(id, ANIM_JUMP, 0.05, true)
             audioPlay(S.sfxJump)
         end
         

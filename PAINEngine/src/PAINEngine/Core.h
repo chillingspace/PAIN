@@ -17,6 +17,7 @@
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cPrefab.h"
 #include "ECS/Components/cUIComps.h"
+#include "ECS/Components/cCompoundCollider.h"
 
 const std::string ENGINE_NAME = "Pain Engine";
 const unsigned int DEF_ENGINE_HEIGHT = 900;

@@ -543,33 +543,53 @@ namespace PAIN {
 			for (auto [entity, tex, element, rect] : view.each()) {
 				if (!element.b_is_enabled || !element.b_is_interactable) continue;
 
-				// Calculate actual frame size (accounting for spritesheets)
-				glm::vec2 frame_size = rect.size_delta;
+				glm::vec2 rect_min, rect_max;
 
-				if (registry.all_of<UIAnimation>(entity)) {
-					const auto& anim = registry.get<UIAnimation>(entity);
-					if (anim.spritesheet_columns > 0 || anim.spritesheet_rows > 0) {
-						// Get texture dimensions from asset manager
-						auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(tex.texture_guid);
-						if (texture_opt.has_value()) {
-							float width = static_cast<float>(texture_opt.value().get()->width);
-							float height = static_cast<float>(texture_opt.value().get()->height);
+				// Check for custom hitbox first
+				if (registry.all_of<CustomHitbox2D>(entity)) {
+					const auto& hitbox = registry.get<CustomHitbox2D>(entity);
+					
+					// Hitbox position = texture position + offset
+					glm::vec2 hitbox_center = tex.pos + normalizeSize(hitbox.position_offset, services);
+					
+					// Convert hitbox bounds to normalized space
+					glm::vec2 normalized_min = normalizeSize(hitbox.min_point, services);
+					glm::vec2 normalized_max = normalizeSize(hitbox.max_point, services);
+					
+					// Calculate absolute bounds
+					rect_min = hitbox_center + normalized_min;
+					rect_max = hitbox_center + normalized_max;
+				}
+				else {
+					// Default behavior: use texture bounds
+					// Calculate actual frame size (accounting for spritesheets)
+					glm::vec2 frame_size = rect.size_delta;
 
-							// Divide by spritesheet dimensions to get frame size
-							if (anim.spritesheet_columns > 0) width /= anim.spritesheet_columns;
-							if (anim.spritesheet_rows > 0) height /= anim.spritesheet_rows;
-							frame_size = glm::vec2(width, height);
+					if (registry.all_of<UIAnimation>(entity)) {
+						const auto& anim = registry.get<UIAnimation>(entity);
+						if (anim.spritesheet_columns > 0 || anim.spritesheet_rows > 0) {
+							// Get texture dimensions from asset manager
+							auto texture_opt = services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(tex.texture_guid);
+							if (texture_opt.has_value()) {
+								float width = static_cast<float>(texture_opt.value().get()->width);
+								float height = static_cast<float>(texture_opt.value().get()->height);
+
+								// Divide by spritesheet dimensions to get frame size
+								if (anim.spritesheet_columns > 0) width /= anim.spritesheet_columns;
+								if (anim.spritesheet_rows > 0) height /= anim.spritesheet_rows;
+								frame_size = glm::vec2(width, height);
+							}
 						}
 					}
+
+					// Actual rendered size = base size * scale multiplier
+					glm::vec2 actual_pixel_size = frame_size * tex.texture_scale;
+
+					// Convert size to normalized space
+					glm::vec2 normalized_size = normalizeSize(actual_pixel_size, services);
+					rect_min = tex.pos - normalized_size;
+					rect_max = tex.pos + normalized_size;
 				}
-
-				// Actual rendered size = base size * scale multiplier
-				glm::vec2 actual_pixel_size = frame_size * tex.texture_scale;
-
-				// Convert size to normalized space
-				glm::vec2 normalized_size = normalizeSize(actual_pixel_size);
-				glm::vec2 rect_min = tex.pos - normalized_size;
-				glm::vec2 rect_max = tex.pos + normalized_size;
 
 				if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 
@@ -749,7 +769,7 @@ namespace PAIN {
 			return normalized;
 		}
 
-		glm::vec2 InputSystem::normalizeSize(const glm::vec2& pixel_size)
+		glm::vec2 normalizeSize(const glm::vec2& pixel_size, std::weak_ptr<Services> services)
 		{
 			auto svc = services.lock();
 			auto window = svc->get<Window::Window>();
