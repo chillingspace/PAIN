@@ -57,7 +57,6 @@ namespace PAIN {
 
             // Initialize default position and size for progress bar and status text
             defaultSetup();
-            buildProgressBarVertices();
 
             PN_CORE_INFO("[LoadingScreen] Initialization complete");
         }
@@ -462,6 +461,14 @@ namespace PAIN {
             return m_backgroundTextureGUID;
         }
 
+        void LoadingScreen::setBackgroundColor(glm::vec3 const& bg_color) {
+            m_backGroundColor = bg_color;
+        }
+
+        glm::vec3 LoadingScreen::getBackgroundColor() {
+            return m_backGroundColor;
+        }
+
         void LoadingScreen::renderBackgroundTexture() {
             // Check if background texture is set
             if (!m_backgroundTextureGUID.IsValid()) return;
@@ -600,6 +607,7 @@ namespace PAIN {
             std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
 #endif
             m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
+            m_backGroundColor = { 0.1f, 0.1f, 0.1f };
 
             //Default BG Scale
             bgScale = 1.0f;
@@ -633,6 +641,8 @@ namespace PAIN {
                 m_statusTextPosition = glm::vec2(screenWidth / 2.0f, m_progressBarPosition.y - 70.0f);
                 m_statusTextScale = 0.03f;
             }
+
+            buildProgressBarVertices();
         }
 
         bool LoadingScreen::getShowBG() const {
@@ -803,7 +813,7 @@ namespace PAIN {
 
             //Render to buffer
             // Clear screen with dark background
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(m_backGroundColor.r, m_backGroundColor.g, m_backGroundColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDisable(GL_DEPTH_TEST);

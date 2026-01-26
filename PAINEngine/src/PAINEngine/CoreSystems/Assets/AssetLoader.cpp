@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "AssetLoader.h"
 
+#include "CoreSystems/Windows/Window.h"
+
 #ifdef PN_PLATFORM_ANDROID
 #include <ktx.h>
 
@@ -561,8 +563,6 @@ namespace PAIN {
             PN_CORE_TRACE("Texture {} loaded, not uploaded to GPU yet.", virtual_path);
             return tex;
         }
-
-
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
             PN_CORE_INFO("ImportModel {}", virtual_path);
@@ -1188,6 +1188,156 @@ namespace PAIN {
                 }
                 if (env.contains("pbr_map")) {
                     sceneAsset->environment.pbr_map = static_cast<GraphicsSettings::DEBUG_PBR_MAP_TYPES>(env["pbr_map"].get<int>());
+                }
+            }
+
+            // Parse loading screen settings
+            if (sceneJson.contains("loadingScreen")) {
+                auto& ls = sceneJson["loadingScreen"];
+
+                if (ls.contains("backgroundTextureGUID")) {
+                    sceneAsset->loadingScreen.backgroundTextureGUID = Assets::GUID(ls["backgroundTextureGUID"].get<std::string>());
+                }
+                else {
+                    //Set default digipen screen for texture rendering
+#ifdef PN_PLATFORM_WINDOWS
+                    std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
+#else
+                    std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
+#endif
+                    sceneAsset->loadingScreen.backgroundTextureGUID = services->get<Assets::Manager>()->findGUID(tex_path);
+                }
+                if (ls.contains("backgroundColor") && ls["backgroundColor"].is_array() && ls["backgroundColor"].size() >= 3) {
+                    sceneAsset->loadingScreen.backgroundColor = glm::vec3(
+                        ls["backgroundColor"][0].get<float>(),
+                        ls["backgroundColor"][1].get<float>(),
+                        ls["backgroundColor"][2].get<float>()
+                    );
+                }
+                if (ls.contains("bgScale")) {
+                    sceneAsset->loadingScreen.bgScale = ls["bgScale"].get<float>();
+                }
+                if (ls.contains("showBackground")) {
+                    sceneAsset->loadingScreen.showBackground = ls["showBackground"].get<bool>();
+                }
+                if (ls.contains("showOverlay")) {
+                    sceneAsset->loadingScreen.showOverlay = ls["showOverlay"].get<bool>();
+                }
+
+                if (ls.contains("progressBarPosition") && ls["progressBarPosition"].is_array() && ls["progressBarPosition"].size() >= 2) {
+                    sceneAsset->loadingScreen.progressBarPosition = glm::vec2(
+                        ls["progressBarPosition"][0].get<float>(),
+                        ls["progressBarPosition"][1].get<float>()
+                    );
+                }
+                else {
+                    auto win = services->get<Window::Window>();
+                    if (win) {
+                        auto framebuffer = win->getFrameBuffer();
+                        float screenWidth = framebuffer.x;
+                        float screenHeight = framebuffer.y;
+
+                        // Set default progress bar position
+                        sceneAsset->loadingScreen.progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.15f);
+                    }
+                }
+                if (ls.contains("progressBarSize") && ls["progressBarSize"].is_array() && ls["progressBarSize"].size() >= 2) {
+                    sceneAsset->loadingScreen.progressBarSize = glm::vec2(
+                        ls["progressBarSize"][0].get<float>(),
+                        ls["progressBarSize"][1].get<float>()
+                    );
+                }
+                else {
+                    auto win = services->get<Window::Window>();
+                    if (win) {
+                        auto framebuffer = win->getFrameBuffer();
+                        float screenWidth = framebuffer.x;
+                        float screenHeight = framebuffer.y;
+
+                        // Set default progress bar size
+                        sceneAsset->loadingScreen.progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
+                    }
+                }
+                if (ls.contains("fillColor") && ls["fillColor"].is_array() && ls["fillColor"].size() >= 3) {
+                    sceneAsset->loadingScreen.fillColor = glm::vec3(
+                        ls["fillColor"][0].get<float>(),
+                        ls["fillColor"][1].get<float>(),
+                        ls["fillColor"][2].get<float>()
+                    );
+                }
+                if (ls.contains("glowColor") && ls["glowColor"].is_array() && ls["glowColor"].size() >= 3) {
+                    sceneAsset->loadingScreen.glowColor = glm::vec3(
+                        ls["glowColor"][0].get<float>(),
+                        ls["glowColor"][1].get<float>(),
+                        ls["glowColor"][2].get<float>()
+                    );
+                }
+                if (ls.contains("glowIntensity")) {
+                    sceneAsset->loadingScreen.glowIntensity = ls["glowIntensity"].get<float>();
+                }
+                if (ls.contains("showProgressBar")) {
+                    sceneAsset->loadingScreen.showProgressBar = ls["showProgressBar"].get<bool>();
+                }
+
+                if (ls.contains("statusTextPosition") && ls["statusTextPosition"].is_array() && ls["statusTextPosition"].size() >= 2) {
+                    sceneAsset->loadingScreen.statusTextPosition = glm::vec2(
+                        ls["statusTextPosition"][0].get<float>(),
+                        ls["statusTextPosition"][1].get<float>()
+                    );
+                }
+                else {
+                    auto win = services->get<Window::Window>();
+                    if (win) {
+                        auto framebuffer = win->getFrameBuffer();
+                        float screenWidth = framebuffer.x;
+                        float screenHeight = framebuffer.y;
+
+                        // Set default status text position (if not already set by user)
+                        sceneAsset->loadingScreen.statusTextPosition = glm::vec2(screenWidth / 2.0f, sceneAsset->loadingScreen.progressBarPosition.y - 70.0f);
+                    }
+                }
+                if (ls.contains("statusTextScale")) {
+                    sceneAsset->loadingScreen.statusTextScale = ls["statusTextScale"].get<float>();
+                }
+                if (ls.contains("showStatusText")) {
+                    sceneAsset->loadingScreen.showStatusText = ls["showStatusText"].get<bool>();
+                }
+
+                if (ls.contains("frameCount")) {
+                    sceneAsset->loadingScreen.frameCount = ls["frameCount"].get<int>();
+                }
+                if (ls.contains("framesPerRow")) {
+                    sceneAsset->loadingScreen.framesPerRow = ls["framesPerRow"].get<int>();
+                }
+                if (ls.contains("frameTime")) {
+                    sceneAsset->loadingScreen.frameTime = ls["frameTime"].get<float>();
+                }
+                if (ls.contains("animationEnabled")) {
+                    sceneAsset->loadingScreen.animationEnabled = ls["animationEnabled"].get<bool>();
+                }
+            }
+            else {
+                //Set default digipen screen for texture rendering
+#ifdef PN_PLATFORM_WINDOWS
+                std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
+#else
+                std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
+#endif
+                sceneAsset->loadingScreen.backgroundTextureGUID = services->get<Assets::Manager>()->findGUID(tex_path);
+
+                //Setup other variables
+                auto win = services->get<Window::Window>();
+                if (win) {
+                    auto framebuffer = win->getFrameBuffer();
+                    float screenWidth = framebuffer.x;
+                    float screenHeight = framebuffer.y;
+
+                    // Set default progress bar position and size (if not already set by user)
+                    sceneAsset->loadingScreen.progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.15f);
+                    sceneAsset->loadingScreen.progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
+
+                    // Set default status text position (if not already set by user)
+                    sceneAsset->loadingScreen.statusTextPosition = glm::vec2(screenWidth / 2.0f, sceneAsset->loadingScreen.progressBarPosition.y - 70.0f);
                 }
             }
 
