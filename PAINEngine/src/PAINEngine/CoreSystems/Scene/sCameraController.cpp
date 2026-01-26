@@ -593,6 +593,10 @@ namespace PAIN {
                 gs.ibl = !gs.ibl;
                 PN_CORE_INFO("Toggled IBL: {}", gs.ibl);
                 break;
+            case PAIN_KEY_F11:
+                gs.DEBUG_DRAW_UI_HITBOXES = !gs.DEBUG_DRAW_UI_HITBOXES;
+                PN_CORE_INFO("Toggled DEBUG_DRAW_UI_HITBOXES: {}", gs.DEBUG_DRAW_UI_HITBOXES);
+                break;
 
 
             //case PAIN_KEY_G:
