@@ -883,15 +883,18 @@ namespace PAIN {
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
+
 			// Clear existing asset cache
 			auto assetManager = services->get<Assets::Manager>();
 			assetManager->clearAssetCache();
+
 			// ========================================
 			// PHASE 2: Initialize Loading Screen
 			// ========================================
 			loadingScreen->setStatus("Initializing scene...");
 			loadingScreen->setProgress(0.0f);
 			loadingScreen->render();
+
 			// ========================================
 			// PHASE 3: Launch Worker Thread for Asset Loading
 			// ========================================
@@ -901,6 +904,7 @@ namespace PAIN {
 			std::thread workerThread([&]() {
 				try {
 					PN_CORE_INFO("[AsyncLoader] Worker thread started");
+
 					// Step 1: Load all assets (CPU-only, thread-safe)
 					loadingScreen->setStatus("Loading scene assets...");
 					loadingScreen->setProgress(0.1f);
@@ -917,6 +921,7 @@ namespace PAIN {
 						}
 					}
 					PN_CORE_INFO("[AsyncLoader] All assets loaded");
+
 					// Step 2: Build entities (CPU-only)
 					loadingScreen->setStatus("Building scene entities...");
 					loadingScreen->setProgress(0.7f);
@@ -933,6 +938,7 @@ namespace PAIN {
 				}
 				loadingComplete.store(true);
 				});
+
 			// ========================================
 			// PHASE 4: Render Loading Screen Loop
 			// ========================================
@@ -947,6 +953,7 @@ namespace PAIN {
 				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
 				return;
 			}
+
 			// ========================================
 			// PHASE 5: Finalize on Main Thread (GPU)
 			// ========================================
@@ -955,10 +962,11 @@ namespace PAIN {
 			loadingScreen->render();
 			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
 			assetManager->batchUploadAllCachedTextures();
-			loadingScreen->setStatus("Initializing renderer...");
+			loadingScreen->setStatus("Building Model's VBO...");
 			loadingScreen->setProgress(0.98f);
 			loadingScreen->render();
 			services->get<sRenderer>()->initSceneVbo();
+
 #ifdef _DEBUG
 #ifdef PN_PLATFORM_WINDOWS
 			{
@@ -970,8 +978,10 @@ namespace PAIN {
 			}
 #endif
 #endif
+
+			//Scene config completed
 			loadingScreen->setProgress(1.0f);
-			loadingScreen->setStatus("Complete!");
+			loadingScreen->setStatus("Scene loading Complete!");
 			loadingScreen->render();
 			loadingScreen->finish();
 			PN_CORE_INFO("[SceneManager] Scene configuration complete");
