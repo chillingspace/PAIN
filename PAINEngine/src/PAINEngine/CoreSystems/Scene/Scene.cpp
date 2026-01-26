@@ -870,6 +870,7 @@ namespace PAIN {
 			loadingScreen->render();
 			services->get<sRenderer>()->initSceneVbo();
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 			{
 				auto editor = services->get<Editor::Editor>();
 				if (editor) {
@@ -877,6 +878,7 @@ namespace PAIN {
 					if (resource_panel) resource_panel->refreshResources();
 				}
 			}
+#endif
 #endif
 			loadingScreen->setProgress(1.0f);
 			loadingScreen->setStatus("Complete!");
