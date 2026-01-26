@@ -1,9 +1,5 @@
 {
     "assets": [
-        "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
-        "30cd3b32-bce1-564e-8046-1204bbfee443",
-        "a8977689-ded0-fa41-9efb-33354e83dec7",
         "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
@@ -12,17 +8,19 @@
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
         "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
         "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "30cd3b32-bce1-564e-8046-1204bbfee443",
+        "a8977689-ded0-fa41-9efb-33354e83dec7",
         "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
         "57242baf-a6af-5646-bbc2-858308aa22a9",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-        "81117530-de12-7b4c-a0e5-6ebc94459e26",
+        "38e8f9de-b2dc-0f47-ad64-f0209917e593",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
-        "9aac41f9-737d-d540-a485-7155b0011394",
         "e67d7fe6-960e-b144-a9ee-0f21262ddd71",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
         "e65e4858-d371-c142-8857-4f39f5d654fb",
@@ -55,6 +53,7 @@
         "9da056a0-d46c-664b-a2bd-9ba986135c23",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "0973caab-44f6-834a-8b63-b2ab319c8eaa",
         "19c6aae9-108a-7d45-937d-bbd0c891a9cb",
@@ -79,16 +78,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.2840179204940796,
-            -0.513817310333252,
-            -0.8095217943191528
+            0.7011629343032837,
+            -0.5683956742286682,
+            0.4304613173007965
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.9199349284172058,
-            0.5059539675712585,
-            1.7393860816955566
+            1.2346857786178589,
+            0.334293931722641,
+            0.7675216197967529
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -100,6 +99,253 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "BoundingVolume": {
+                            "localAABB": {
+                                "max": [
+                                    953.6362915039063,
+                                    0.009999999776482582,
+                                    946.9449462890625
+                                ],
+                                "min": [
+                                    -953.6362915039063,
+                                    -0.009999999776482582,
+                                    -946.9449462890625
+                                ]
+                            },
+                            "worldAABB": {
+                                "max": [
+                                    47.68181610107422,
+                                    0.0005000000237487257,
+                                    47.34724807739258
+                                ],
+                                "min": [
+                                    -47.68181610107422,
+                                    -0.0005000000237487257,
+                                    -47.34724807739258
+                                ]
+                            }
+                        },
+                        "GUID": {
+                            "guid": "ce700d51-a84c-e24e-970b-f0cc7c63c275"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.05000000074505806,
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+                                    "aoTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                    "normalTextureOverride": "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "BigGround"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "BoundingVolume": {
+                                    "localAABB": {
+                                        "max": [
+                                            953.6362915039063,
+                                            0.009999999776482582,
+                                            946.9449462890625
+                                        ],
+                                        "min": [
+                                            -953.6362915039063,
+                                            -0.009999999776482582,
+                                            -946.9449462890625
+                                        ]
+                                    },
+                                    "worldAABB": {
+                                        "max": [
+                                            47.68181610107422,
+                                            0.0005000000237487257,
+                                            47.34724807739258
+                                        ],
+                                        "min": [
+                                            -47.68181610107422,
+                                            -0.0005000000237487257,
+                                            -47.34724807739258
+                                        ]
+                                    }
+                                },
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        0.05000000074505806,
+                                        0.05000000074505806,
+                                        0.05000000074505806
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+                                            "aoTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                            "normalTextureOverride": "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "BigGround"
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "mass": -107374176.0,
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "133bec09-7c3e-c046-a77a-03ee3bc00133",
+                            "instanceRootGUID": "ce700d51-a84c-e24e-970b-f0cc7c63c275",
+                            "sourcePrefabGUID": "0287c7b2-8f1d-0e46-b3cd-99dfed3cc09d"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "mass": -107374176.0,
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 1
+                            },
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "BigGround"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -115,7 +361,7 @@
                                 "2cc6f41e-1a12-5945-8930-ed862a4f53cb"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -3832,10 +4078,8 @@
                 "Entity": {
                     "Components": {
                         "Animation": {
-                            "animationTime": 0.8627764582633972,
-                            "currentAnimationIndex": 0,
-                            "isPlaying": true,
-                            "loopAnimation": true,
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": false,
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
@@ -3896,8 +4140,8 @@
                             ],
                             "trans_offset": [
                                 0.0,
-                                3.0,
-                                -5.0
+                                0.25,
+                                -0.5
                             ],
                             "width_ratio": 16.0
                         },
@@ -3957,33 +4201,9 @@
                                     "roughnessOverride": 1.0,
                                     "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "useOverrides": true
-                                },
-                                {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "9aac41f9-737d-d540-a485-7155b0011394",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "81117530-de12-7b4c-a0e5-6ebc94459e26",
+                            "modelGUID": "38e8f9de-b2dc-0f47-ad64-f0209917e593",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -5220,6 +5440,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.1320531666278839,
@@ -5462,6 +5686,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 23
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -5714,6 +5942,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.36556339263916,
@@ -5961,6 +6193,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.417604684829712,
@@ -6203,6 +6439,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 26
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -6465,6 +6705,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.6027384996414185,
@@ -6722,6 +6966,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.884707510471344,
@@ -6964,6 +7212,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 29
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -7216,6 +7468,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         -0.6082712411880493,
@@ -7458,6 +7714,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 31
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -7710,6 +7970,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.902109384536743,
@@ -7952,6 +8216,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 33
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -8204,6 +8472,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.3495383262634277,
@@ -8446,6 +8718,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 35
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -8698,6 +8974,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.706792950630188,
@@ -8940,6 +9220,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 37
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -9192,6 +9476,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         1.9428642988204956,
@@ -9434,6 +9722,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 39
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -9686,6 +9978,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.8516828417778015,
@@ -9928,6 +10224,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 41
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -10180,6 +10480,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         1.9354841709136963,
@@ -10422,6 +10726,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 43
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -10674,6 +10982,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         1.80599045753479,
@@ -10916,6 +11228,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 45
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -11168,6 +11484,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         -0.26365604996681213,
@@ -11410,6 +11730,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 47
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -11662,6 +11986,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.23310136795043945,
@@ -11904,6 +12232,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 49
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -12156,6 +12488,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         1.8862744569778442,
@@ -12398,6 +12734,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 51
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -12650,6 +12990,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         -0.023421956226229668,
@@ -12892,6 +13236,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 53
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -13144,6 +13492,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.7812485098838806,
@@ -13386,6 +13738,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 55
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -13638,6 +13994,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         1.8150362968444824,
@@ -13880,6 +14240,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 57
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -14132,6 +14496,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         -0.61728835105896,
@@ -14374,6 +14742,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 59
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -14626,6 +14998,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.915003776550293,
@@ -14868,6 +15244,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 61
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -15120,6 +15500,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         2.492414951324463,
@@ -15362,6 +15746,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 63
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -15614,6 +16002,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.9784673452377319,
@@ -15856,6 +16248,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 65
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -16108,6 +16504,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.20947012305259705,
@@ -16355,6 +16755,10 @@
                                     "layer_id": 0,
                                     "layer_mask": 1
                                 },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         0.9329898357391357,
@@ -16597,6 +17001,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 68
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "Layer": {
                                     "layer_id": 0,

@@ -750,6 +750,35 @@ namespace PAIN {
         lua_.set_function("setLightDirection", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightDirection(entityId, x, y, z); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
+        /* =========================================================================== */
+        /*                                 Animations                                  */
+        /* =========================================================================== */
+        auto animTable = lua_["Animation"].get_or_create<sol::table>();
+
+        animTable.set_function("Play", [this](entt::entity entityId, const std::string& name) {
+            if (api_) api_->Animation_Play(entityId, name);
+        });
+
+        animTable.set_function("CrossFade", [this](entt::entity entityId, const std::string& name, float duration) {
+            if (api_) api_->Animation_CrossFade(entityId, name, duration);
+        });
+
+        animTable.set_function("SetSpeed", [this](entt::entity entityId, float speed) {
+            if (api_) api_->Animation_SetSpeed(entityId, speed);
+        });
+
+        animTable.set_function("SetLoop", [this](entt::entity entityId, bool loop) {
+            if (api_) api_->Animation_SetLoop(entityId, loop);
+        });
+
+        animTable.set_function("IsPlaying", [this](entt::entity entityId, const std::string& name) {
+            if (api_) return api_->Animation_IsPlaying(entityId, name);
+                return false;
+        });
+        animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationDuration(entityId);
+            return 0.0f;
+            });
     }
 
 

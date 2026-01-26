@@ -156,6 +156,16 @@ namespace PAIN {
         virtual void SetLightDirection(entt::entity entityId, float x, float y, float z) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
 
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        virtual void Animation_Play(entt::entity entityId, std::string animName) = 0;
+        virtual void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) = 0;
+        virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
+        virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
+        virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationDuration(entt::entity entityId) = 0;
+
     };
 
 }

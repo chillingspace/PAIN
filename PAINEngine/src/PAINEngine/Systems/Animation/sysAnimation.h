@@ -21,6 +21,20 @@ namespace PAIN {
 
 	namespace AnimationSystem {
 
+		struct LocalPose {
+			std::vector<glm::vec3> translations;
+			std::vector<glm::quat> rotations;
+			std::vector<glm::vec3> scales;
+			std::vector<float> morphWeights;
+
+			void Resize(size_t boneCount, size_t morphCount = 0) {
+				translations.resize(boneCount);
+				rotations.resize(boneCount);
+				scales.resize(boneCount);
+				if (morphCount > 0) morphWeights.resize(morphCount);
+			}
+		};
+
 		class System : public ECS::System::ISystem
 		{
 		public:
@@ -58,7 +72,9 @@ namespace PAIN {
 			// Core animation update logic
 			void updateAllAnimations(float deltaTime, entt::registry& reg);
 			void computeBoneTransforms(entt::entity entity, Animation& anim, ModelRenderer& renderer, const Assets::AnimationClip& animData);
-
+			LocalPose SampleAnimation(const Assets::Model* model, int animIndex, float time);
+			LocalPose BlendPoses(const LocalPose& poseA, const LocalPose& poseB, float weight);
+			std::vector<glm::mat4> ConvertPoseToMatrices(const LocalPose& pose, const std::vector<Assets::Bone>& skeleton);
 		};
 	}
 

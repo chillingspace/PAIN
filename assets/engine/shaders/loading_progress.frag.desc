@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "loading_progress.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 3327825851642523437
+  },
+  "descriptor_version": 1,
+  "guid": "6287e6e8-2bdb-5a41-9f65-f94356ed2c16",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\loading_progress.frag"
+  }
+}

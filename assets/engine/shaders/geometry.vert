@@ -9,7 +9,7 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoords;
 
 // int because opengl has beef with ints istg
-layout(location=3) in vec4 aBoneIndices;       // the indices of the bones that affect this particular vertex
+layout(location=3) in ivec4 aBoneIndices;       // the indices of the bones that affect this particular vertex
 layout(location=4) in vec4 aBoneWeights;        // how much effect does this bone have on this vertex.
 // in this case, there are a max of 4 bones that can affect a vertex. all 4 bones must add up to 1
 
