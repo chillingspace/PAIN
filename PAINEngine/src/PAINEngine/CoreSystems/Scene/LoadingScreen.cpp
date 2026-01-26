@@ -116,7 +116,7 @@ namespace PAIN {
             }
             
             // Clear screen with dark background
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(m_backGroundColor.r, m_backGroundColor.g, m_backGroundColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDisable(GL_DEPTH_TEST);

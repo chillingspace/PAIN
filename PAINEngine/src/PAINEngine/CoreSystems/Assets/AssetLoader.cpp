@@ -1302,7 +1302,6 @@ namespace PAIN {
                 if (ls.contains("showStatusText")) {
                     sceneAsset->loadingScreen.showStatusText = ls["showStatusText"].get<bool>();
                 }
-
                 if (ls.contains("frameCount")) {
                     sceneAsset->loadingScreen.frameCount = ls["frameCount"].get<int>();
                 }
