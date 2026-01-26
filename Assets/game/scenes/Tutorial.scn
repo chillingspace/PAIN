@@ -297,7 +297,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "StartButton_OnClick",
+                                    "on_click_callback_lua": "continue_button",
                                     "pressed_color": -5592406,
                                     "state": 0
                                 },
@@ -365,14 +365,6 @@
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                             "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
@@ -397,7 +389,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "StartButton_OnClick",
+                            "on_click_callback_lua": "continue_button",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -592,7 +584,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "StartButton_OnClick",
+                                    "on_click_callback_lua": "restart_button",
                                     "pressed_color": -5592406,
                                     "state": 0
                                 },
@@ -660,14 +652,6 @@
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                             "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
@@ -692,7 +676,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "StartButton_OnClick",
+                            "on_click_callback_lua": "restart_button",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -887,7 +871,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "StartButton_OnClick",
+                                    "on_click_callback_lua": "quit_button",
                                     "pressed_color": -5592406,
                                     "state": 0
                                 },
@@ -955,14 +939,6 @@
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                             "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
@@ -987,7 +963,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "StartButton_OnClick",
+                            "on_click_callback_lua": "quit_button",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -1182,7 +1158,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "StartButton_OnClick",
+                                    "on_click_callback_lua": "quit_button",
                                     "pressed_color": -5592406,
                                     "state": 0
                                 },
@@ -1239,9 +1215,9 @@
                                 },
                                 "UVCoordinates": {
                                     "uv": [
-                                        0.0015625000232830644,
+                                        0.0011627906933426857,
                                         0.011363636702299118,
-                                        0.4984374940395355,
+                                        0.4988372027873993,
                                         0.9886363744735718
                                     ]
                                 }
@@ -1249,14 +1225,6 @@
                             "correspondingPrefabEntityGUID": "7beaa535-462c-7f45-9d6d-4090ca227034",
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                             "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
-                                }
-                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -1282,7 +1250,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "StartButton_OnClick",
+                            "on_click_callback_lua": "quit_button",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -1339,9 +1307,9 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0015625000232830644,
+                                0.0011627906933426857,
                                 0.011363636702299118,
-                                0.4984374940395355,
+                                0.4988372027873993,
                                 0.9886363744735718
                             ]
                         }

@@ -6,7 +6,7 @@ local nextScene = nil
 -- for UI button (on_click_callback_lua = "StartButton_OnClick")
 _G_root.StartButton_OnClick = function()
     sceneChange = true
-    nextScene = "prototype.scn"
+    nextScene = "Tutorial.scn"
 end
 
 -- for UI button (on_click_callback_lua = "HowToPlayButton_OnClick")

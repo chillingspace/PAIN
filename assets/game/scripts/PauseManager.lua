@@ -70,11 +70,11 @@ end
 _G_root.restart_button = function()
     log("[UI] Restart button pressed")
     sceneChange = true
-    nextScene = "prototype.scn"  -- Reloads the game scene
+    nextScene = "Tutorial.scn"  -- Reloads the game scene
 end
 
 -- Quit to Main Menu button
-_G_root.quit_to_menu_button = function()
+_G_root.quit_button = function()
     log("[UI] Quit to menu button pressed")
     sceneChange = true
     nextScene = "mainmenu.scn"
