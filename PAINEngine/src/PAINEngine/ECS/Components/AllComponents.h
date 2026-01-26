@@ -12,7 +12,6 @@
 
 // To include all components excluding metadata
 #include "Core.h"
-#include "cCompoundCollider.h"
 
 namespace PAIN {
 	// All gameplay components (NOT metadata components)
@@ -43,7 +42,7 @@ namespace PAIN {
 
 		// UI comps
 		UIRectTransform, UIButton, UIElement, UICanvas, UIAnimation, UIText,
-		UIFollowsWorldEntity, UIJoystick, UVCoordinates,
+		UIFollowsWorldEntity, UIJoystick, UVCoordinates, CustomHitbox2D,
 		// AI
 		// AI::Blackboard,
 		AI::Controller, AI::Sensors, AI::NavAgent, AI::Steering
@@ -121,6 +120,8 @@ namespace PAIN {
 			return "UIJoystick";
 		else if constexpr (std::is_same_v<T, UVCoordinates>)
 			return "UVCoordinates";
+		else if constexpr (std::is_same_v<T, CustomHitbox2D>)
+			return "CustomHitbox2D";
 		// AI components
 		// else if constexpr (std::is_same_v<T, AI::Blackboard>) return
 		// "AIBlackboard";

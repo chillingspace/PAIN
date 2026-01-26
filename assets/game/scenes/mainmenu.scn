@@ -2,9 +2,9 @@
     "assets": [
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "ec5cda66-10a9-2249-bc83-deb5a6493b10",
-        "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
         "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+        "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -13,12 +13,12 @@
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+        "81117530-de12-7b4c-a0e5-6ebc94459e26",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "9aac41f9-737d-d540-a485-7155b0011394",
-        "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-        "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
@@ -26,8 +26,8 @@
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "be682648-fcd7-2b47-b7bf-3faea372c733",
-        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-        "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+        "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9"
     ],
@@ -275,21 +275,19 @@
             {
                 "Entity": {
                     "Components": {
-                        "AudioSource": {
-                            "group_name": "sfx",
-                            "is3D": true,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                117.30000305175781,
+                                40.400001525878906
                             ],
-                            "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
-                            "volumeDb": 0.0
+                            "min_point": [
+                                -122.30000305175781,
+                                -48.79999923706055
+                            ],
+                            "position_offset": [
+                                60.0,
+                                0.0
+                            ]
                         },
                         "GUID": {
                             "guid": "7beaa535-462c-7f45-9d6d-4090ca227034"
@@ -426,6 +424,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                190.0,
+                                35.900001525878906
+                            ],
+                            "min_point": [
+                                -114.69999694824219,
+                                -49.400001525878906
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "07e8316a-68b8-b542-880e-f6c9adbd653e"
                         },
@@ -561,6 +573,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                180.0,
+                                35.79999923706055
+                            ],
+                            "min_point": [
+                                -95.19999694824219,
+                                -49.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "fd8dc10d-5137-1246-9a92-1a22fe38ae62"
                         },
@@ -696,6 +722,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                175.0,
+                                35.5
+                            ],
+                            "min_point": [
+                                -85.19999694824219,
+                                -45.400001525878906
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "afe62cce-006c-b340-835c-b6fe6075f530"
                         },
@@ -831,6 +871,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                174.39999389648438,
+                                38.900001525878906
+                            ],
+                            "min_point": [
+                                -43.29999923706055,
+                                -42.599998474121094
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "fa655f6b-e097-5643-9794-1d3c86087914"
                         },

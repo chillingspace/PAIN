@@ -120,6 +120,8 @@ namespace PAIN {
 					   std::shared_ptr<Scene::SceneManager> scene);
 		void DebugPassOBB(const glm::vec3 corners[8], const glm::vec4& color,
 						  std::shared_ptr<Scene::SceneManager> scene);
+		void DebugPass2D(const glm::vec2& min_p, const glm::vec2& max_p,
+						 const glm::vec4& color);
 		void PostProcessPass();
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,

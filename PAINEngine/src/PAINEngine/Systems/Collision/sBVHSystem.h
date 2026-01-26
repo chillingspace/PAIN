@@ -9,10 +9,6 @@
 #include "CoreSystems/Events/Event.h" // Defines Event::Event
 #include "CoreSystems/Collision/BVH.h" // Defines BVH and includes BVHNode, AABB
 #include "CoreSystems/Scene/Scene.h"
-#include <vector>
-#include <utility>
-#include <memory>
-#include <string>
 
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {

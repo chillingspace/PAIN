@@ -376,6 +376,42 @@ namespace PAIN {
 			}
 		}
 
+		void SceneManager::setupLoadingScreen(SceneAsset const& scene_asset) {
+			if (!loadingScreen) {
+				PN_CORE_WARN("[SceneManager] Loading screen not initialized");
+				return;
+			}
+
+			// Get loading screen from scene asset
+			const auto& ls = scene_asset.loadingScreen;
+
+			// Background settings
+			loadingScreen->setBackgroundTexture(ls.backgroundTextureGUID);
+			loadingScreen->setBackgroundColor(ls.backgroundColor);
+			loadingScreen->setBGScale(ls.bgScale);
+			loadingScreen->setShowBG(ls.showBackground);
+			loadingScreen->setShowOverlay(ls.showOverlay);
+
+			// Progress bar settings
+			loadingScreen->setProgressBarPosition(ls.progressBarPosition.x, ls.progressBarPosition.y);
+			loadingScreen->setProgressBarSize(ls.progressBarSize.x, ls.progressBarSize.y);
+			loadingScreen->setProgressBarFillColor(ls.fillColor);
+			loadingScreen->setProgressBarGlowColor(ls.glowColor);
+			loadingScreen->setProgressBarGlowIntensity(ls.glowIntensity);
+			loadingScreen->setShowProgressBar(ls.showProgressBar);
+
+			// Status text settings
+			loadingScreen->setStatusTextPosition(ls.statusTextPosition.x, ls.statusTextPosition.y);
+			loadingScreen->setStatusTextScale(ls.statusTextScale);
+			loadingScreen->setShowStatusText(ls.showStatusText);
+
+			// Spritesheet animation settings
+			loadingScreen->setSpritesheetAnimation(ls.frameCount, ls.framesPerRow, ls.frameTime);
+			loadingScreen->setAnimationEnabled(ls.animationEnabled);
+
+			PN_CORE_INFO("[SceneManager] Loading screen setup complete");
+		}
+
 		void SceneManager::cacheSceneAssets(SceneAsset const& scene_asset) {
 
 			//Get asset manager
@@ -698,6 +734,34 @@ namespace PAIN {
 			//Capture all layer variables
 			scene_asset.layers = layers;
 			scene_asset.mask_matrix = mask_matrix;
+
+			//Capture loading screen settings
+			if (loadingScreen) {
+				scene_asset.loadingScreen.backgroundTextureGUID = loadingScreen->getBackgroundTexture();
+				scene_asset.loadingScreen.backgroundColor = loadingScreen->getBackgroundColor();
+				scene_asset.loadingScreen.bgScale = loadingScreen->getBGScale();
+				scene_asset.loadingScreen.showBackground = loadingScreen->getShowBG();
+				scene_asset.loadingScreen.showOverlay = loadingScreen->getShowOverlay();
+			
+				scene_asset.loadingScreen.progressBarPosition = loadingScreen->getProgressBarPosition();
+				scene_asset.loadingScreen.progressBarSize = loadingScreen->getProgressBarSize();
+			
+				auto [fillColor, glowColor, glowIntensity] = loadingScreen->getProgressBarStyle();
+				scene_asset.loadingScreen.fillColor = fillColor;
+				scene_asset.loadingScreen.glowColor = glowColor;
+				scene_asset.loadingScreen.glowIntensity = glowIntensity;
+				scene_asset.loadingScreen.showProgressBar = loadingScreen->getShowProgressBar();
+			
+				scene_asset.loadingScreen.statusTextPosition = loadingScreen->getStatusTextPosition();
+				scene_asset.loadingScreen.statusTextScale = loadingScreen->getStatusTextScale();
+				scene_asset.loadingScreen.showStatusText = loadingScreen->getShowStatusText();
+			
+				auto [frameCount, framesPerRow, frameTime, animEnabled] = loadingScreen->getSpritesheetSettings();
+				scene_asset.loadingScreen.frameCount = frameCount;
+				scene_asset.loadingScreen.framesPerRow = framesPerRow;
+				scene_asset.loadingScreen.frameTime = frameTime;
+				scene_asset.loadingScreen.animationEnabled = animEnabled;
+			}
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
@@ -732,6 +796,31 @@ namespace PAIN {
 				{"useRoughnessMetallicMap", scn_asset.environment.useRoughnessMetallicMap},
 				{"useEmissionMap", scn_asset.environment.useEmissionMap},
 				{"pbr_map", static_cast<int>(scn_asset.environment.pbr_map)}
+			};
+
+			//Loading screen settings  
+			sceneJson["loadingScreen"] = {
+				{"backgroundTextureGUID", scn_asset.loadingScreen.backgroundTextureGUID.ToString()},
+				{"backgroundColor", {scn_asset.loadingScreen.backgroundColor.r, scn_asset.loadingScreen.backgroundColor.g, scn_asset.loadingScreen.backgroundColor.b}},
+				{"bgScale", scn_asset.loadingScreen.bgScale},
+				{"showBackground", scn_asset.loadingScreen.showBackground},
+				{"showOverlay", scn_asset.loadingScreen.showOverlay},
+
+				{"progressBarPosition", {scn_asset.loadingScreen.progressBarPosition.x, scn_asset.loadingScreen.progressBarPosition.y}},
+				{"progressBarSize", {scn_asset.loadingScreen.progressBarSize.x, scn_asset.loadingScreen.progressBarSize.y}},
+				{"fillColor", {scn_asset.loadingScreen.fillColor.r, scn_asset.loadingScreen.fillColor.g, scn_asset.loadingScreen.fillColor.b}},
+				{"glowColor", {scn_asset.loadingScreen.glowColor.r, scn_asset.loadingScreen.glowColor.g, scn_asset.loadingScreen.glowColor.b}},
+				{"glowIntensity", scn_asset.loadingScreen.glowIntensity},
+				{"showProgressBar", scn_asset.loadingScreen.showProgressBar},
+
+				{"statusTextPosition", {scn_asset.loadingScreen.statusTextPosition.x, scn_asset.loadingScreen.statusTextPosition.y}},
+				{"statusTextScale", scn_asset.loadingScreen.statusTextScale},
+				{"showStatusText", scn_asset.loadingScreen.showStatusText},
+
+				{"frameCount", scn_asset.loadingScreen.frameCount},
+				{"framesPerRow", scn_asset.loadingScreen.framesPerRow},
+				{"frameTime", scn_asset.loadingScreen.frameTime},
+				{"animationEnabled", scn_asset.loadingScreen.animationEnabled}
 			};
 
 			// Layers
@@ -790,18 +879,22 @@ namespace PAIN {
 			// ========================================
 			// PHASE 1: Main Thread Setup (Fast, No I/O)
 			// ========================================
+			setupLoadingScreen(scn_asset);
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
+
 			// Clear existing asset cache
 			auto assetManager = services->get<Assets::Manager>();
 			assetManager->clearAssetCache();
+
 			// ========================================
 			// PHASE 2: Initialize Loading Screen
 			// ========================================
 			loadingScreen->setStatus("Initializing scene...");
 			loadingScreen->setProgress(0.0f);
 			loadingScreen->render();
+
 			// ========================================
 			// PHASE 3: Launch Worker Thread for Asset Loading
 			// ========================================
@@ -811,6 +904,7 @@ namespace PAIN {
 			std::thread workerThread([&]() {
 				try {
 					PN_CORE_INFO("[AsyncLoader] Worker thread started");
+
 					// Step 1: Load all assets (CPU-only, thread-safe)
 					loadingScreen->setStatus("Loading scene assets...");
 					loadingScreen->setProgress(0.1f);
@@ -827,6 +921,7 @@ namespace PAIN {
 						}
 					}
 					PN_CORE_INFO("[AsyncLoader] All assets loaded");
+
 					// Step 2: Build entities (CPU-only)
 					loadingScreen->setStatus("Building scene entities...");
 					loadingScreen->setProgress(0.7f);
@@ -843,6 +938,7 @@ namespace PAIN {
 				}
 				loadingComplete.store(true);
 				});
+
 			// ========================================
 			// PHASE 4: Render Loading Screen Loop
 			// ========================================
@@ -857,6 +953,7 @@ namespace PAIN {
 				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
 				return;
 			}
+
 			// ========================================
 			// PHASE 5: Finalize on Main Thread (GPU)
 			// ========================================
@@ -865,11 +962,13 @@ namespace PAIN {
 			loadingScreen->render();
 			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
 			assetManager->batchUploadAllCachedTextures();
-			loadingScreen->setStatus("Initializing renderer...");
+			loadingScreen->setStatus("Building Model's VBO...");
 			loadingScreen->setProgress(0.98f);
 			loadingScreen->render();
 			services->get<sRenderer>()->initSceneVbo();
+
 #ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 			{
 				auto editor = services->get<Editor::Editor>();
 				if (editor) {
@@ -880,8 +979,11 @@ namespace PAIN {
 				}
 			}
 #endif
+#endif
+
+			//Scene config completed
 			loadingScreen->setProgress(1.0f);
-			loadingScreen->setStatus("Complete!");
+			loadingScreen->setStatus("Scene loading Complete!");
 			loadingScreen->render();
 			loadingScreen->finish();
 			PN_CORE_INFO("[SceneManager] Scene configuration complete");
@@ -1398,7 +1500,6 @@ namespace PAIN {
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
-				PN_CORE_ERROR("{}",it->first.c_str() );
 			}
 			else {
 				PN_CORE_ERROR("Game camera not found");

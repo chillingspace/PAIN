@@ -309,13 +309,13 @@ namespace PAIN {
 
 			for (size_t i = 0; i < skeleton.size(); ++i) {
 
-				// 1. Calc Local Matrix
+				// Calc Local Matrix
 				glm::mat4 T = glm::translate(glm::mat4(1.0f), pose.translations[i]);
 				glm::mat4 R = glm::mat4_cast(pose.rotations[i]);
 				glm::mat4 S = glm::scale(glm::mat4(1.0f), pose.scales[i]);
 				glm::mat4 localMat = T * R * S;
 
-				// 2. Calc Global Matrix (Parent * Local)
+				// Calc Global Matrix (Parent * Local)
 				int parentIndex = skeleton[i].parent;
 				if (parentIndex != -1) {
 					globalTransforms[i] = globalTransforms[parentIndex] * localMat;
@@ -324,7 +324,7 @@ namespace PAIN {
 					globalTransforms[i] = localMat;
 				}
 
-				// 3. Multiply by Inverse Bind Pose (For Skinning)
+				// Multiply by Inverse Bind Pose (For Skinning)
 				matrices[i] = globalTransforms[i] * skeleton[i].bindPose;
 			}
 			return matrices;

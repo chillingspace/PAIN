@@ -26,6 +26,9 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
+//Loading screen
+#include "CoreSystems/Scene/LoadingScreen.h"
+
 namespace PAIN {
 
 	Application::Application() {
@@ -86,56 +89,113 @@ namespace PAIN {
 		//Create asset service
 		addCoreSystem(std::make_shared<Assets::Manager>());
 
-		//Create and add the AudioManager to the core systems
-		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
-		addCoreSystem(app_audio);
-
-		//Get sound asset
-		//auto sound = services->get<Assets::Manager>()->getAsset<Audio::Sound>("game/audio/music/Boss_Music.wav");
-		//app_audio->play(sound);
+		// Renderer
+		addCoreSystem(std::make_shared<sRenderer>());
 
 		// dependency injection
 		TextRenderer::init(services);
 
-		//Push other core systems into the stack
-		addCoreSystem(std::make_shared<ECS::Controller>(services));
-		addCoreSystem(std::make_shared<MetaData::Service>());
+		//!DO NOT SHIFT SERVICES ABOVE ( loading screen needs them )
+		{
+			//Create loading screen
+			Scene::LoadingScreen ls;
+			ls.init(services);
+			//ls.setShowProgressBar(true);
+			//ls.setShowStatusText(true);
 
-		//Create entity template and prefab service
-		services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
-		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
+			//Begin loading screen
+			ls.setProgress(0.0f);
+			ls.setStatus("Service Initialization Begin...");
+			ls.render();
 
-		// Add Serialization
-		addCoreSystem(std::make_shared<Serialization::Service>());
+			std::atomic<bool> loadingComplete{ false };
+			std::atomic<bool> loadingFailed{ false };
+			std::string errorMessage;
+			std::thread workerThread([&]() {
+				try {
+					PN_CORE_INFO("[AsyncServiceSetup] Worker thread started");
+					//Create and add the AudioManager to the core systems
+					ls.setProgress(0.0f);
+					ls.setStatus("Initializing FMOD Audio Service...");
+					auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
+					addCoreSystem(app_audio);
 
-		// Register components here
-		services->get<ECS::Controller>()->registerAllComponents();
+					//Push other core systems into the stack
+					ls.setProgress(0.2f);
+					ls.setStatus("Initializing ECS Controller...");
+					addCoreSystem(std::make_shared<ECS::Controller>(services));
 
-		// Register all systems here
-		services->get<ECS::Controller>()->registerAllSystems();
+					// Register components adn systems here
+					ls.setProgress(0.3f);
+					ls.setStatus("Registering ECS Components And Systems...");
+					services->get<ECS::Controller>()->registerAllComponents();
+					services->get<ECS::Controller>()->registerAllSystems();
 
-		// Renderer
-		addCoreSystem(std::make_shared<sRenderer>());
+					addCoreSystem(std::make_shared<MetaData::Service>());
 
-		//Editor only added when debug mode
+					//Create entity template and prefab service
+					ls.setProgress(0.5f);
+					ls.setStatus("Initializing Prefab and Templates Service...");
+					services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
+					services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
+
+					// Add Serialization
+					ls.setProgress(0.6f);
+					ls.setStatus("Initializing Serialization Service...");
+					addCoreSystem(std::make_shared<Serialization::Service>());
+				}
+				catch (const std::exception& e) {
+					PN_CORE_ERROR("[AsyncServiceSetup] Worker thread failed: {}", e.what());
+					errorMessage = e.what();
+					loadingFailed.store(true);
+				}
+				loadingComplete.store(true);
+				});
+
+			// ========================================
+			// Render Loading Screen Loop
+			// ========================================
+			PN_CORE_INFO("[Application] Entering loading screen render loop");
+			while (!loadingComplete.load()) {
+				ls.render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			}
+			workerThread.join();
+			PN_CORE_INFO("[Application] Worker thread joined");
+			if (loadingFailed.load()) {
+				PN_CORE_ERROR("[Application] Service Initialization Failed: {}", errorMessage);
+				return;
+			}
+
+			//Editor only added when debug mode
 #ifdef _DEBUG
-		// !NOTE: IMGUI eats events
-		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
-		addLayerSystem(editor);
+			// !NOTE: IMGUI eats events
+			ls.setProgress(0.7f);
+			ls.setStatus("Initializing ImGui...");
+			ls.render();
+			auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
+			addLayerSystem(editor);
 #endif
 
-		// Scenes management
-		addCoreSystem(std::make_shared<Scene::SceneManager>());
+			// Scenes management
+			ls.setProgress(0.8f);
+			ls.setStatus("Initializing Scene Manager...");
+			ls.render();
+			addCoreSystem(std::make_shared<Scene::SceneManager>());
 
-		// Camera System
-		addCoreSystem(std::make_shared<sCameraController>());
+			// Camera System
+			ls.setProgress(0.9f);
+			ls.setStatus("Initializing Camera Controller...");
+			ls.render();
+			addCoreSystem(std::make_shared<sCameraController>());
 
-
-#ifdef _DEBUG
-		PN_CORE_INFO("Testing Lua on Debug");
-#else
-		PN_CORE_INFO("Testing Lua on Release");
-#endif
+			//Scene config completed
+			ls.setProgress(1.0f);
+			ls.setStatus("Service initialization completed!");
+			ls.render();
+			ls.finish();
+			PN_CORE_INFO("[Application] Thread Safe Service Initialization Completed.");
+		}
 
 		//Mark engine as ready
 		b_app_running = true;
@@ -153,18 +213,23 @@ namespace PAIN {
 			auto window = services->get<Window::Window>();
 			if (window) window->pollEvents();
 
+			//Drain all events in queue
+			drainEventQueue();
+
 			if (window->isMinimized()) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue; // Go back to start of while loop
 			}
 
-			//Drain all events in queue
-			drainEventQueue();
-
 			//Update delta time
 			auto now = std::chrono::steady_clock::now();
 			float real_dt = std::chrono::duration<float>(now - last_time).count();
 			last_time = now;
+
+			// Cap 
+			if (real_dt > 0.1f) {
+				real_dt = 0.1f;
+			}
 
 			// Store Unscaled Time (Always ticking even when paused)
 			timing.unscaled_dt = real_dt;

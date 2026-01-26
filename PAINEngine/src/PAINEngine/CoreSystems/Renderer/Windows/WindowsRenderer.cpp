@@ -868,7 +868,7 @@ namespace PAIN {
 
 		float aspect_ratio =
 			static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
-		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y / aspect_ratio);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
 
 		texture2d_shader->Bind();
 
@@ -1739,6 +1739,53 @@ namespace PAIN {
 		glDrawArrays(GL_LINES, 0, 24);
 
 		glDepthMask(GL_TRUE);
+		glBindVertexArray(0);
+	}
+
+	// DebugPass2D - Draw 2D rectangle outline for UI debugging
+	void WindowsRenderer::DebugPass2D(const glm::vec2& min_p, const glm::vec2& max_p,
+									  const glm::vec4& color) {
+		if (!debug_VAO || !debug_shader)
+			return;
+
+		std::vector<float> verts;
+		verts.reserve(8 * 7); // 4 lines * 2 points * 7 floats
+
+		// Define the 4 corners of the rectangle
+		glm::vec2 corners[4] = {
+			{min_p.x, min_p.y}, // bottom-left
+			{max_p.x, min_p.y}, // bottom-right
+			{max_p.x, max_p.y}, // top-right
+			{min_p.x, max_p.y}  // top-left
+		};
+
+		// Edge index list for rectangle (connect corners in order)
+		int e[8] = {0, 1, 1, 2, 2, 3, 3, 0};
+
+		// xyz and rgba (z=0 for 2D)
+		auto push = [&](const glm::vec2& p, const glm::vec4& c) {
+			verts.insert(verts.end(), {p.x, p.y, 0.0f, c.r, c.g, c.b, c.a});
+		};
+
+		// Push the 4 edges
+		for (int i = 0; i < 8; i += 2) {
+			push(corners[e[i]], color);
+			push(corners[e[i + 1]], color);
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
+					 GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		// For 2D UI, use orthographic projection
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f)); // identity view
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_LINES, 0, 8);
+
 		glBindVertexArray(0);
 	}
 

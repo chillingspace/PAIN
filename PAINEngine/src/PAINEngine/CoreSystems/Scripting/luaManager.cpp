@@ -630,7 +630,7 @@ namespace PAIN {
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
         /* =========================================================================== */
-        /*                              Graphics / FX                                  */
+        /*                              Camera / FX                                    */
         /* =========================================================================== */
         lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
 
@@ -732,6 +732,10 @@ namespace PAIN {
             if (api_) return api_->Animation_IsPlaying(entityId, name);
                 return false;
         });
+        animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationDuration(entityId);
+            return 0.0f;
+            });
     }
 
 

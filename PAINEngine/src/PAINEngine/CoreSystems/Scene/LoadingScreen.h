@@ -71,6 +71,16 @@ namespace PAIN {
              */
             Assets::GUID getBackgroundTexture();
 
+            /**
+             * @brief Set background color
+             */
+            void setBackgroundColor(glm::vec3 const& bg_color);
+
+            /**
+             * @brief Get background color
+             */
+            glm::vec3 getBackgroundColor();
+
             // ============================================================
             // Runtime Configuration - Progress Bar
             // ============================================================
@@ -193,6 +203,61 @@ namespace PAIN {
              */
             std::tuple<glm::vec3, glm::vec3, float> getProgressBarStyle() const;
 
+            /**
+             * @brief Set progress bar and status text to default
+             */
+            void defaultSetup();
+
+            /**
+             * @brief Get boolean show Background
+             */
+            bool getShowBG() const;
+
+            /**
+             * @brief Set boolean show Background
+             */
+            void setShowBG(bool show);
+
+            /**
+             * @brief Get boolean show Overlay
+             */
+            bool getShowOverlay() const;
+
+            /**
+             * @brief Set boolean show Overlay
+             */
+            void setShowOverlay(bool show);
+
+            /**
+             * @brief Get boolean show Progress Bar
+             */
+            bool getShowProgressBar() const;
+
+            /**
+             * @brief Set boolean show Progress Bar
+             */
+            void setShowProgressBar(bool show);
+
+            /**
+             * @brief Get boolean show Status Text
+             */
+            bool getShowStatusText() const;
+
+            /**
+             * @brief Set boolean show Status Text
+             */
+            void setShowStatusText(bool show);
+
+            /**
+            * @brief Get background texture scale
+            */
+            float getBGScale() const;
+
+            /**
+             * @brief Set background texture scale
+             */
+            void setBGScale(float scale);
+
         private:
 
             // Simple vertex shader for fullscreen quad !!FALLBACK
@@ -242,9 +307,6 @@ void main() {
             // Window dimensions for aspect ratio calculation
             std::weak_ptr<Services> services;
 
-            // Optional background texture
-            Assets::GUID m_backgroundTextureGUID;
-
             // Custom shader programs for loading screen effects
             unsigned int m_progressBarShader{ 0 };
             unsigned int m_overlayShader{ 0 };
@@ -253,13 +315,18 @@ void main() {
             float m_animationTime{ 0.0f };
             std::chrono::steady_clock::time_point m_lastFrameTime;
 
+            // Optional background texture
+            Assets::GUID m_backgroundTextureGUID;
+            glm::vec3 m_backGroundColor{ 0.1f, 0.1f, 0.1f };
+            float bgScale = 1.0f;
+
             // Progress Bar - Screen Space Configuration (in pixels)
             glm::vec2 m_progressBarPosition{ 0.0f, 0.0f };  // Position (x, y) in screen space
             glm::vec2 m_progressBarSize{ 600.0f, 40.0f };    // Size (width, height) in pixels
 
             // Status Text - Screen Space Configuration
             glm::vec2 m_statusTextPosition{ 0.0f, 0.0f };    // Position (x, y) in screen space
-            float m_statusTextScale{ 0.02f };                  // Scale factor for font size
+            float m_statusTextScale{ 0.03f };                  // Scale factor for font size
 
             // Spritesheet Animation Support
             int m_frameCount{ 1 };                            // Number of frames in spritesheet
@@ -276,6 +343,12 @@ void main() {
             glm::vec3 m_overlayColor1{ 0.05f, 0.05f, 0.1f }; // Dark blue
             glm::vec3 m_overlayColor2{ 0.02f, 0.02f, 0.05f }; // Darker blue
             float m_overlayStrength{ 0.8f };
+
+            //Internal boolean to render BG / Progress / Status
+            bool showBg = true;
+            bool showOverlay = false;
+            bool showProgress = false;
+            bool showStatus = false;
 
             /**
             * @brief Cleanup OpenGL resources

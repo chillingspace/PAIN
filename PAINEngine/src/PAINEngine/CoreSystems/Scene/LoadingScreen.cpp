@@ -22,14 +22,6 @@ namespace PAIN {
             m_progressBarShader = compileProgressBarShader();
             m_overlayShader = compileOverlayShader();
 
-            //Set default digipen screen for texture rendering
-#ifdef PN_PLATFORM_WINDOWS
-            std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
-#else
-            std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
-#endif
-            m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
-
             // Initialize animation timing
             m_animationTime = 0.0f;
             m_lastFrameTime = std::chrono::steady_clock::now();
@@ -64,30 +56,7 @@ namespace PAIN {
             glBindVertexArray(0);
 
             // Initialize default position and size for progress bar and status text
-            auto win = services.lock()->get<Window::Window>();
-            if (win) {
-                auto framebuffer = win->getFrameBuffer();
-                float screenWidth = framebuffer.x;
-                float screenHeight = framebuffer.y;
-
-                // Set default progress bar position and size (if not already set by user)
-                if (m_progressBarPosition.x == 0.0f && m_progressBarPosition.y == 0.0f) {
-                    // Default: centered horizontally, 85% down from top
-                    m_progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.85f);
-                }
-                if (m_progressBarSize.x == 600.0f && m_progressBarSize.y == 40.0f) {
-                    m_progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
-                }
-
-                // Set default status text position (if not already set by user)
-                if (m_statusTextPosition.x == 0.0f && m_statusTextPosition.y == 0.0f) {
-                    // Default: centered horizontally, 90% down from top (below progress bar)
-                    m_statusTextPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.90f);
-                }
-
-                // Build initial progress bar vertices
-                buildProgressBarVertices();
-            }
+            defaultSetup();
 
             PN_CORE_INFO("[LoadingScreen] Initialization complete");
         }
@@ -147,7 +116,7 @@ namespace PAIN {
             }
             
             // Clear screen with dark background
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(m_backGroundColor.r, m_backGroundColor.g, m_backGroundColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDisable(GL_DEPTH_TEST);
@@ -157,16 +126,16 @@ namespace PAIN {
             
             // Render in Z-order (back to front):
             // Layer 1: Background texture (if set)
-            renderBackgroundTexture();
-            
+            if (showBg) renderBackgroundTexture();
+
             // Layer 2: Animated gradient overlay
-            renderBackgroundOverlay();
-            
+            if (showOverlay) renderBackgroundOverlay();
+
             // Layer 3: Progress bar
-            renderProgressBar();
+            if (showProgress) renderProgressBar();
 
             // Layer 4: Status text
-            renderStatusText();
+            if (showStatus) renderStatusText();
 
             //Unbind frame buffer
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -492,6 +461,14 @@ namespace PAIN {
             return m_backgroundTextureGUID;
         }
 
+        void LoadingScreen::setBackgroundColor(glm::vec3 const& bg_color) {
+            m_backGroundColor = bg_color;
+        }
+
+        glm::vec3 LoadingScreen::getBackgroundColor() {
+            return m_backGroundColor;
+        }
+
         void LoadingScreen::renderBackgroundTexture() {
             // Check if background texture is set
             if (!m_backgroundTextureGUID.IsValid()) return;
@@ -548,9 +525,10 @@ namespace PAIN {
             // Render fullscreen background texture with UV transform
             // Use normalized scale (1,1) for fullscreen, renderer handles actual screen dimensions
             glm::vec2 pos(0.0f, 0.0f);
-            glm::vec2 scale(1.0f, 1.0f);
+            glm::vec2 scale(texOpt.value()->width, texOpt.value()->height);
+            glm::vec2 normscale = glm::normalize(scale) * bgScale;
             
-            renderer->w_renderer->Render2DTexture(texID, pos, scale, uvTransform);
+            renderer->w_renderer->Render2DTexture(texID, pos, normscale, uvTransform);
         }
 
         void LoadingScreen::renderBackgroundOverlay() {
@@ -579,7 +557,7 @@ namespace PAIN {
             // Draw fullscreen quad
             glDrawArrays(GL_TRIANGLES, 0, 6);
             
-           glBindVertexArray(0);
+            glBindVertexArray(0);
             glUseProgram(0);
         }
 
@@ -619,6 +597,92 @@ namespace PAIN {
 
         float LoadingScreen::getStatusTextScale() const {
             return m_statusTextScale;
+        }
+
+        void LoadingScreen::defaultSetup() {
+            //Set default digipen screen for texture rendering
+#ifdef PN_PLATFORM_WINDOWS
+            std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
+#else
+            std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
+#endif
+            m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
+            m_backGroundColor = { 0.1f, 0.1f, 0.1f };
+
+            //Default BG Scale
+            bgScale = 1.0f;
+
+            //Default booleans
+            showBg = true;
+            showOverlay = false;
+            showProgress = false;
+            showStatus = false;
+
+            //Setup other variables
+            auto win = services.lock()->get<Window::Window>();
+            if (win) {
+                auto framebuffer = win->getFrameBuffer();
+                float screenWidth = framebuffer.x;
+                float screenHeight = framebuffer.y;
+
+                // Set default progress bar position and size (if not already set by user)
+                m_progressBarPosition = glm::vec2(screenWidth / 2.0f, screenHeight * 0.15f);
+                m_progressBarSize = glm::vec2(screenWidth * 0.6f, 40.0f);
+
+                // Set default progress bar color and overlay color
+                m_fillColor = { 0.2f, 0.8f, 0.9f };
+                m_glowColor = { 0.4f, 0.9f, 1.0f };
+                m_glowIntensity = 0.5f;
+                m_overlayColor1 = {0.05f, 0.05f, 0.1f };
+                m_overlayColor2 = { 0.02f, 0.02f, 0.05f };
+                m_overlayStrength = 0.8f;
+
+                // Set default status text position (if not already set by user)
+                m_statusTextPosition = glm::vec2(screenWidth / 2.0f, m_progressBarPosition.y - 70.0f);
+                m_statusTextScale = 0.03f;
+            }
+
+            buildProgressBarVertices();
+        }
+
+        bool LoadingScreen::getShowBG() const {
+            return showBg;
+        }
+
+        void LoadingScreen::setShowBG(bool show) {
+            showBg = show;
+        }
+
+        bool LoadingScreen::getShowOverlay() const {
+            return showOverlay;
+        }
+
+        void LoadingScreen::setShowOverlay(bool show) {
+            showOverlay = show;
+        }
+
+        bool LoadingScreen::getShowProgressBar() const {
+            return showProgress;
+        }
+
+        void LoadingScreen::setShowProgressBar(bool show) {
+            showProgress = show;
+        }
+
+        bool LoadingScreen::getShowStatusText() const {
+            return showStatus;
+        }
+
+        void LoadingScreen::setShowStatusText(bool show) {
+            showStatus = show;
+        }
+
+        float LoadingScreen::getBGScale() const {
+            return bgScale;
+        }
+
+        void LoadingScreen::setBGScale(float scale) {
+            bgScale = scale;
         }
 
         // ============================================================
@@ -749,7 +813,7 @@ namespace PAIN {
 
             //Render to buffer
             // Clear screen with dark background
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(m_backGroundColor.r, m_backGroundColor.g, m_backGroundColor.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDisable(GL_DEPTH_TEST);
@@ -759,16 +823,16 @@ namespace PAIN {
 
             // Render in Z-order (back to front):
             // Layer 1: Background texture (if set)
-            renderBackgroundTexture();
+            if (showBg) renderBackgroundTexture();
 
             // Layer 2: Animated gradient overlay
-            renderBackgroundOverlay();
+            if (showOverlay) renderBackgroundOverlay();
 
             // Layer 3: Progress bar
-            renderProgressBar();
+            if (showProgress) renderProgressBar();
 
             // Layer 4: Status text
-            renderStatusText();
+            if (showStatus) renderStatusText();
 
             ////Unbind frame buffer
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
