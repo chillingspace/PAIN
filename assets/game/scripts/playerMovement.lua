@@ -1,12 +1,31 @@
 
 -- player movement script
-
 local moveLeft = false
 local moveRight = false
 local moveUp = false
 local moveDown = false
 local jumpPressed = false
-local walkingSoundPlaying = false
+local wasMoving = false
+
+-- Animation
+local ANIM_IDLE = "Frog_RigAction" 
+local ANIM_WALK = "Frog_Jump"
+local ANIM_JUMP = "Frog_Jump"
+local currentAnimState = "" 
+local lastAnimTime =  0.0
+
+-- Helper to switch animation smoothly
+local function PlayAnim(id, animName, fadeTime, loop)
+    if currentAnimState == animName then return end
+    
+    -- Check if the C++ binding exists before calling to prevent crash
+    if Animation and Animation.CrossFade then
+        Animation.CrossFade(id, animName, fadeTime)
+        Animation.SetLoop(id, loop)
+    end
+    
+    currentAnimState = animName
+end
 
 -- Joystick input (set by UI drag callback)
 local joystickDirX = 0.0
@@ -99,9 +118,8 @@ registerUpdate(function(dt)
     -- freeze player when game has ended (game over or win)
     if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
         -- stop walking audio
-        if walkingSoundPlaying and audioStop then
+        if audioStop then
             audioStop(id)
-            walkingSoundPlaying = false
         end
 
         -- stop movement
@@ -121,9 +139,8 @@ registerUpdate(function(dt)
         -- end
         jumpPressed = false
 
-        if walkingSoundPlaying and audioStop then
+        if audioStop then
             audioStop(id)
-            walkingSoundPlaying = false
         end
         return
     end
@@ -155,41 +172,73 @@ registerUpdate(function(dt)
     end
     --]]
 
+    -- ---------------------------------------------------------
+    -- MOVEMENT LOGIC
+    -- ---------------------------------------------------------
     -- 3. Virtual joystick input
     dx = dx - joystickDirX
     dz = dz + joystickDirY
 
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 
+
     if isMoving then
-        if not walkingSoundPlaying and audioPlay then
-            if audioSetLooping then audioSetLooping(id, true) end 
-            audioPlay(id)
-            walkingSoundPlaying = true
+        -- PLAY walk Animation
+        if isGrounded then
+            PlayAnim(id, ANIM_WALK, 0.1, true) -- on the ground
+            Animation.SetLoop(id, true)
         end
+
+        if not wasMoving then
+            if audioPlay then 
+                 audioSetLooping(id, false)
+                 audioPlay(id) 
+            end
+            -- Reset lastAnimTime to 0.0 so we don't trigger again immediately
+            lastAnimTime = 0.0 
+        
+        -- LOOP
+        elseif Animation and Animation.GetTime then
+            local t = Animation.GetTime(id)
+            
+            -- Play audio at the start of the walk cycle
+            if t < lastAnimTime and t < 0.2 then
+                 if audioPlay then audioPlay(id) end
+            end
+            
+            lastAnimTime = t
+        end
+        
+        wasMoving = true
+
     else
-        if walkingSoundPlaying and audioStop then
-            audioStop(id)
-            walkingSoundPlaying = false
-        end
+        -- STOPPED
+        wasMoving = false
+        lastAnimTime = 1000.0
+        
+        -- Make sure animation is not looping
+        if isGrounded then Animation.SetLoop(id, false) end
     end
 
-        -- idle sfx: when not moving, in intervals
-        if not isMoving then
-            idleTimer = idleTimer + dt
-            if idleTimer >= idleInterval then
-                idleTimer = 0.0
-                if S and S.sfxIdle then
-                    audioPlay(S.sfxIdle)
-                end
-            end
-        else
+    -- idle sfx: when not moving, in intervals
+    if not isMoving then
+        idleTimer = idleTimer + dt
+        if idleTimer >= idleInterval then
             idleTimer = 0.0
+            if S and S.sfxIdle then
+                audioPlay(S.sfxIdle)
+                Animation.SetLoop(id, true) -- overwrite is grounded animation
+                PlayAnim(id, ANIM_IDLE, 0.2, true)
+            end
         end
+    else
+        idleTimer = 0.0
+    end
 
 
-    -- Make movement relative to camera yaw, if available.
-    -- This means "push up" always moves in front of the camera.
+    -- ---------------------------------------------------------
+    -- CAMERA LOGIC
+    -- ---------------------------------------------------------
     if _G.CameraState ~= nil and _G.CameraState.yaw ~= nil then
         local cy = _G.CameraState.yaw
         local sinY = math.sin(cy)
@@ -233,23 +282,28 @@ registerUpdate(function(dt)
         currentYaw = newYaw
     end
 
+    -- ---------------------------------------------------------
+    -- JUMP LOGIC
+    -- ---------------------------------------------------------
     -- ground check based on physics
     local groundedEpsPos = 0.05
     local groundedEpsVel = 0.1
     isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
 
     -- jump, modify vertical vel -> physics handle gravity
-    --local doubleTapJump = (I and I.doubleTapped) or false
-    --if (jumpPressed or doubleTapJump) and isGrounded then
+    -- local doubleTapJump = (I and I.doubleTapped) or false
+    -- if (jumpPressed or doubleTapJump) and isGrounded then
     if jumpPressed and isGrounded then
         curr_vy = jumpSpeed  
         isGrounded = false
 
         -- jump sfx
         if S and S.sfxJump then
+            Animation.SetLoop(id, true)
+            PlayAnim(id, ANIM_JUMP, 0.05, true)
             audioPlay(S.sfxJump)
         end
-
+        
         -- consume jump
         jumpPressed = false
         -- if I then

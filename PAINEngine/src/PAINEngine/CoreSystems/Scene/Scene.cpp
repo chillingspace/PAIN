@@ -18,6 +18,12 @@
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
 
+#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
+#include "LoadingScreen.h"
+
+#include <thread>
+#include <atomic>
+
 namespace PAIN {
 	namespace Scene {
 
@@ -383,6 +389,19 @@ namespace PAIN {
 
 			//Batch upload all textures to GPU
 			assetMananger->batchUploadAllCachedTextures();
+
+			//Refresh editor resources only in debug mode
+#ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
+			{
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+				}
+			}
+#endif
+#endif
 		}
 
 		nlohmann::json SceneManager::captureCurrentEntities() {
@@ -767,34 +786,116 @@ namespace PAIN {
 #endif
 
 		void SceneManager::configScene(SceneAsset const& scn_asset) {
-			PN_CORE_ERROR("[SceneManager] CONFIGING SCENE");
-
-			//Build new scene
+			PN_CORE_INFO("[SceneManager] Starting async scene configuration");
+			// ========================================
+			// PHASE 1: Main Thread Setup (Fast, No I/O)
+			// ========================================
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
-
-			//Clear existing cache and cache new assets
-			cacheSceneAssets(scn_asset);
-
-			//Failed to build entities
-			if (!buildEntitiesFromAsset(scn_asset)) {
-				PN_CORE_ERROR("[SceneManager] Failed to build entities from scene asset");
+			// Clear existing asset cache
+			auto assetManager = services->get<Assets::Manager>();
+			assetManager->clearAssetCache();
+			// ========================================
+			// PHASE 2: Initialize Loading Screen
+			// ========================================
+			loadingScreen->setStatus("Initializing scene...");
+			loadingScreen->setProgress(0.0f);
+			loadingScreen->render();
+			// ========================================
+			// PHASE 3: Launch Worker Thread for Asset Loading
+			// ========================================
+			std::atomic<bool> loadingComplete{ false };
+			std::atomic<bool> loadingFailed{ false };
+			std::string errorMessage;
+			std::thread workerThread([&]() {
+				try {
+					PN_CORE_INFO("[AsyncLoader] Worker thread started");
+					// Step 1: Load all assets (CPU-only, thread-safe)
+					loadingScreen->setStatus("Loading scene assets...");
+					loadingScreen->setProgress(0.1f);
+					const auto& assetGuids = scn_asset.assets_to_cache;
+					size_t totalAssets = assetGuids.size();
+					size_t loadedAssets = 0;
+					PN_CORE_INFO("[AsyncLoader] Loading {} assets", totalAssets);
+					for (const auto& guid : assetGuids) {
+						if(assetManager->cacheAsset(guid)) loadedAssets++;
+						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
+						loadingScreen->setProgress(progress);
+						if (loadedAssets % 10 == 0) {
+							PN_CORE_INFO("[AsyncLoader] Loaded {}/{} assets", loadedAssets, totalAssets);
+						}
+					}
+					PN_CORE_INFO("[AsyncLoader] All assets loaded");
+					// Step 2: Build entities (CPU-only)
+					loadingScreen->setStatus("Building scene entities...");
+					loadingScreen->setProgress(0.7f);
+					if (!buildEntitiesFromAsset(scn_asset)) {
+						throw std::runtime_error("Failed to build entities from scene asset");
+					}
+					loadingScreen->setProgress(0.9f);
+					PN_CORE_INFO("[AsyncLoader] Worker thread complete");
+				}
+				catch (const std::exception& e) {
+					PN_CORE_ERROR("[AsyncLoader] Worker thread failed: {}", e.what());
+					errorMessage = e.what();
+					loadingFailed.store(true);
+				}
+				loadingComplete.store(true);
+				});
+			// ========================================
+			// PHASE 4: Render Loading Screen Loop
+			// ========================================
+			PN_CORE_INFO("[SceneManager] Entering loading screen render loop");
+			while (!loadingComplete.load()) {
+				loadingScreen->render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			}
+			workerThread.join();
+			PN_CORE_INFO("[SceneManager] Worker thread joined");
+			if (loadingFailed.load()) {
+				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
 				return;
 			}
-
-			// set scene in renderer
-			auto renderer = services->get<sRenderer>();
-			renderer->setScene(services->get<Scene::SceneManager>());
-
-			// init vbo for scene
-			renderer->initSceneVbo();
+			// ========================================
+			// PHASE 5: Finalize on Main Thread (GPU)
+			// ========================================
+			loadingScreen->setStatus("Uploading textures to GPU...");
+			loadingScreen->setProgress(0.95f);
+			loadingScreen->render();
+			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
+			assetManager->batchUploadAllCachedTextures();
+			loadingScreen->setStatus("Initializing renderer...");
+			loadingScreen->setProgress(0.98f);
+			loadingScreen->render();
+			services->get<sRenderer>()->initSceneVbo();
+#ifdef _DEBUG
+			{
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+				}
+			}
+#endif
+			loadingScreen->setProgress(1.0f);
+			loadingScreen->setStatus("Complete!");
+			loadingScreen->render();
+			loadingScreen->finish();
+			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
 		void SceneManager::onAttach() {
 
 			//Get ECS Controller
 			auto ecs = services->get<ECS::Controller>();
+
+			//Set scecne manager for renderer
+			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
+
+			//Init loading screen
+			loadingScreen = std::make_unique<LoadingScreen>();
+			loadingScreen->init(services);
 
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);
@@ -821,22 +922,22 @@ namespace PAIN {
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path tc_path = "game/models/toycar/ToyCar.mesh";
+				std::filesystem::path fox_path = "game/models/Fox.mesh";
 #else	
-				std::filesystem::path tc_path = "game\\models\\toycar\\ToyCar.mesh";
+				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
 #endif
 				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", tc_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(tc_path);
+				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "toycar", { 2.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.005f });
+					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
 				}
 
 
@@ -863,9 +964,9 @@ namespace PAIN {
 #endif
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
 #else	
-				std::filesystem::path fh_path = "game\\models\\Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
 #endif
 				//Get model
 				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
@@ -1076,22 +1177,6 @@ namespace PAIN {
 				PN_CORE_INFO("[SceneManager] Failed to configure scene with GUID: {}", sceneGUID.ToString());
 				return;
 			}
-
-			// init vbo for scene
-			//{
-			//	std::vector<ModelRenderer> models{};
-
-			//	auto ecs = services->get<ECS::Controller>();
-			//	auto& registry = ecs->getRegistry();
-			//	auto view = registry.view<ModelRenderer>();
-			//	for (auto e : view) {
-			//		auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			//		if (mdl.has_value()) models.push_back(mdl.value());
-			//	}
-
-			//	auto renderer = services->get<sRenderer>();
-			//	renderer->initSceneVbo(models);
-			//}
 
 			//Scene loaded successfully
 			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
@@ -1311,7 +1396,6 @@ namespace PAIN {
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
-				PN_CORE_ERROR("{}",it->first.c_str() );
 			}
 			else {
 				PN_CORE_ERROR("Game camera not found");

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Enemy_Alert_Hit_v1.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 10413118489824686865
+  },
+  "descriptor_version": 1,
+  "guid": "dadd8247-bfe7-7e42-8874-2bccc9ed2210",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\enemy\\Enemy_Alert_Hit_v1.wav"
+  }
+}

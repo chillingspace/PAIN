@@ -8,6 +8,8 @@
 
 #include "CoreSystems/Assets/Types/Scene.h"
 
+#include "LoadingScreen.h"
+
 namespace PAIN {
 	namespace Scene {
         class SceneManager : public AppSystem {
@@ -125,6 +127,9 @@ namespace PAIN {
                 auto light = LightSources::get().get(world_light_name);
                 return light.has_value() ? &light->get() : nullptr;
             }
+
+            //Loading screen
+            std::unique_ptr<LoadingScreen> loadingScreen;
 
             // Cameras
             Camera* GetActiveCamera();

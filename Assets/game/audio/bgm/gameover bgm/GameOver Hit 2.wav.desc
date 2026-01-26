@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GameOver Hit 2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 8505607611008384019
+  },
+  "descriptor_version": 1,
+  "guid": "5268a1b8-0408-424c-83d9-42983671d7e2",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\gameover bgm\\GameOver Hit 2.wav"
+  }
+}

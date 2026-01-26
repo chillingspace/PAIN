@@ -45,7 +45,7 @@ _G.PlayerState = {
     gameEnded   = false,
     gameWon     = false,
     uiEndScreen = nil,
-    spawnGraceTime = 0.0,
+    spawnGraceTime = 0.0, --5.0
 
     _keysRegistered = false
 }
@@ -64,8 +64,12 @@ local hidePressed = false
 -- paths for end screens
 local GAMEOVER_TEX = "game/textures/gameover.png"
 local WIN_TEX = "game/textures/win screen.png"
-local CURRENT_SCENE_PATH = "prototype.scn"  
+local CURRENT_SCENE_PATH = "proto2.scn"  
 local restartPressed = false
+
+-- Heart UI textures
+local normalHeartTexture = "game/textures/heart normal.png"
+local greyHeartTexture   = "game/textures/heart grey.png"
 
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
@@ -88,8 +92,75 @@ if not S._keysRegistered then
     S._keysRegistered = true
 end
 
+-- Binds the heart entities
+-- local function bindHearts()
+--     S.heart1 = findEntity("heart_1")
+--     S.heart2 = findEntity("heart_2")
+--     S.heart3 = findEntity("heart_3")
+-- end
+
+-- -- Checks if heart entities are missing, then binds them if they are
+-- local function heartBindingCheck()
+--     if not S.heart1 or not S.heart2 or not S.heart3 then
+--         bindHearts()
+--     end
+-- end
+
+-- Tries to update hearts ui in case texture2d not set at init
+-- local function tryUpdateHeartsUI()
+--     if not (S.heart1 and S.heart2 and S.heart3) then return false end
+
+--     local hearts = {S.heart1, S.heart2, S.heart3}
+--     local ok = true
+
+--     for i=1,3 do
+--         local tex = (i <= S.lives) and normalHeartTexture or greyHeartTexture
+--         ok = setUITexture(hearts[i], tex) and ok
+--     end
+--     return ok
+-- end
+
+
+local function updateHeartsUI()
+    -- Store the player's lives
+    local hearts = {S.heart1, S.heart2, S.heart3}
+
+    -- Update each heart
+    for i = 1,3 do
+        local heart = hearts[i]
+        if heart then
+            -- Set to normal heart if true, grey if false
+            if i <= S.lives then
+                setUITexture(heart, normalHeartTexture)
+            else
+                setUITexture(heart, greyHeartTexture)
+            end
+        end
+    end
+end
+
+local function bindHeartsFromRegistry()
+    local hearts = _G.UI and _G.UI.hearts
+    if not hearts or #hearts < 3 then
+        return false
+    end
+
+    table.sort(hearts, function(a, b) return a.x < b.x end)
+
+    S.heart3 = (hearts[1] and hearts[1].id) or nil
+    S.heart2 = (hearts[2] and hearts[2].id) or nil
+    S.heart1 = (hearts[3] and hearts[3].id) or nil
+
+    return (S.heart1 and S.heart2 and S.heart3) ~= nil
+end
+
+
 -- called once when we first find the player
 function S.init(player)
+    -- Clear the stored UI entity ids
+    _G.UI = _G.UI or {}
+    _G.UI.hearts = {}
+
     -- Check if current player is same as previous player (Respawn)
     -- or non-existent (Fresh load)
     local playerChanged = (S.player ~= player)
@@ -143,9 +214,15 @@ function S.init(player)
     end
 
     -- grab heart UI objects
-    S.heart1 = findEntity("heart_1")
-    S.heart2 = findEntity("heart_2")
-    S.heart3 = findEntity("heart_3")
+    -- bindHearts()
+    -- updateHeartsUI()
+
+    -- grab heart UI objects
+    S.pendingHeartBind = true
+    bindHeartsFromRegistry()
+    updateHeartsUI()
+
+    -- log("[Hearts bind] ", tostring(S.heart1), tostring(S.heart2), tostring(S.heart3))
 
     -- SFX entities
     if not S.sfxHideIn  then S.sfxHideIn  = findEntity("sfx_hide_in") end
@@ -248,6 +325,21 @@ end
 
 
 function S.update(dt)
+    -- hearts ui
+    -- if S.heartsDirty then
+    --     if tryUpdateHeartsUI() then
+    --         S.heartsDirty = false
+    --     end
+    -- end
+    if S.pendingHeartBind then
+        if bindHeartsFromRegistry() then
+            S.pendingHeartBind = false
+            updateHeartsUI()
+            log("[Hearts bind] success", tostring(S.heart1), tostring(S.heart2), tostring(S.heart3))
+        end
+    end
+
+
     -- cooldown
     if S.respawnCooldown > 0 then
         S.respawnCooldown = S.respawnCooldown - dt
@@ -624,27 +716,6 @@ function S.setCheckpoint(player, checkpointEntity)
     end
 
     --log("[PlayerState] Checkpoint set at:", x, y, z)
-end
-
-local normalHeartTexture = "game/textures/heart normal.png"
-local greyHeartTexture   = "game/textures/heart grey.png"
-
-local function updateHeartsUI()
-    -- Store the player's lives
-    local hearts = {S.heart1, S.heart2, S.heart3}
-
-    -- Update each heart
-    for i = 1,3 do
-        local heart = hearts[i]
-        if heart then
-            -- Set to normal heart if true, grey if false
-            if i <= S.lives then
-                setUITexture(heart, normalHeartTexture)
-            else
-                setUITexture(heart, greyHeartTexture)
-            end
-        end
-    end
 end
 
 function S.onCaught(player)

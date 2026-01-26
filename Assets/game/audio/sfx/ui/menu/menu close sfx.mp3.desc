@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu close sfx.mp3",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 11993265485944767580
+  },
+  "descriptor_version": 1,
+  "guid": "e94c8379-d025-7c42-9b07-600b1431c3f1",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\ui\\menu\\menu close sfx.mp3"
+  }
+}

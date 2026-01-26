@@ -37,6 +37,8 @@ struct Material {
 
 uniform Material material;
 
+uniform vec3 u_EmissionOverride;
+uniform float u_UseEmissionOverride;
 // debug
 uniform float DEBUG_TYPE;
 
@@ -80,13 +82,15 @@ void main() {
         gMaterial = vec3(material.rough, material.metal, dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
     }
 
-    if (material.use_emission > 0.5) {
+    if (u_UseEmissionOverride > 0.5) {
+        gEmission = u_EmissionOverride;
+    }
+    else if (material.use_emission > 0.5) {
         gEmission = texture(material.emission_map, vTexCoords).rgb;
     }
     else {
         gEmission = vec3(0.0, 0.0, 0.0);
     }
-
     if (material.useTex == 0.0) {
         gCol = material.color;
         return;

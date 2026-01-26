@@ -547,166 +547,6 @@ namespace PAIN {
         }
 #endif
 
-        void Loader::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
-
-            // ========================================
-            // SAVE ACTIVE TEXTURE UNIT
-            // ========================================
-            GLint activeTextureUnit;
-            glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
-
-            PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
-
-            // ========================================
-            // RESET TO TEXTURE UNIT 0 FOR LOADING
-            // ========================================
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            // Clear any errors
-            while (glGetError() != GL_NO_ERROR);
-
-            // VALIDATE EXTRACTED DATA
-            if (tex->mipOffsets.size() != tex->mipSizes.size()) {
-                throw std::runtime_error("Mip offset/size mismatch!");
-            }
-
-            size_t expectedMips = tex->is_cube_map ? (tex->mips * 6) : tex->mips;
-            if (tex->mipOffsets.size() != expectedMips) {
-                PN_CORE_WARN("Expected {} mip entries, got {}", expectedMips, tex->mipOffsets.size());
-            }
-
-            //Generate textures
-            glGenTextures(1, &tex->gl_texture);
-
-            if (tex->is_cube_map) {
-                glBindTexture(GL_TEXTURE_CUBE_MAP, tex->gl_texture);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                GLfloat maxAniso = 1.0f;
-                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-                glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-
-                size_t dataIndex = 0;
-                for (int face = 0; face < 6; ++face) {
-                    for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                        if (dataIndex >= tex->mipOffsets.size()) {
-                            throw std::runtime_error("Ran out of mip data for cubemap!");
-                        }
-
-                        // USE STORED SIZES FROM EXTRACTION
-                        size_t offset = tex->mipOffsets[dataIndex];
-                        size_t mipSize = tex->mipSizes[dataIndex];
-
-                        int mipW = std::max(1, tex->width >> mip);
-                        int mipH = std::max(1, tex->height >> mip);
-
-                        if (offset + mipSize > tex->data.size()) {
-                            throw std::runtime_error("Mip data overflow at face " +
-                                std::to_string(face) + " mip " + std::to_string(mip));
-                        }
-
-                        glCompressedTexImage2D(
-                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-                            mip,
-                            tex->glTexFormat,
-                            mipW,
-                            mipH,
-                            0,
-                            static_cast<GLsizei>(mipSize),
-                            tex->data.data() + offset
-                        );
-
-                        GLenum err = glGetError();
-                        if (err != GL_NO_ERROR) {
-                            throw std::runtime_error("OpenGL error uploading mip " +
-                                std::to_string(mip) + ": 0x" +
-                                std::to_string(err));
-                        }
-
-                        dataIndex++;
-                    }
-                }
-
-                glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-            }
-            else {
-                glBindTexture(GL_TEXTURE_2D, tex->gl_texture);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tex->mips - 1);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                GLfloat maxAniso = 1.0f;
-                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
-
-                for (uint32_t mip = 0; mip < tex->mips; ++mip) {
-                    if (mip >= tex->mipOffsets.size()) {
-                        throw std::runtime_error("Missing mip data for level " + std::to_string(mip));
-                    }
-
-                    // USE STORED SIZES FROM EXTRACTION
-                    size_t offset = tex->mipOffsets[mip];
-                    size_t mipSize = tex->mipSizes[mip];
-
-                    int mipW = std::max(1, tex->width >> mip);
-                    int mipH = std::max(1, tex->height >> mip);
-
-                    PN_CORE_TRACE("Uploading mip {}: {}x{}, {} bytes at offset {}",
-                        mip, mipW, mipH, mipSize, offset);
-
-                    if (offset + mipSize > tex->data.size()) {
-                        throw std::runtime_error("Mip data overflow at mip " + std::to_string(mip));
-                    }
-
-                    glCompressedTexImage2D(
-                        GL_TEXTURE_2D,
-                        mip,
-                        tex->glTexFormat,
-                        mipW,
-                        mipH,
-                        0,
-                        static_cast<GLsizei>(mipSize),
-                        tex->data.data() + offset
-                    );
-
-                    GLenum err = glGetError();
-                    if (err != GL_NO_ERROR) {
-                        PN_CORE_ERROR("OpenGL error uploading mip {}: 0x{:X}", mip, err);
-                        PN_CORE_ERROR("  Dimensions: {}x{}", mipW, mipH);
-                        PN_CORE_ERROR("  Size: {} bytes", mipSize);
-                        PN_CORE_ERROR("  Offset: {}", offset);
-                        PN_CORE_ERROR("  Format: 0x{:X}", tex->glTexFormat);
-                        throw std::runtime_error("OpenGL error uploading mip " + std::to_string(mip) +
-                            ": 0x" + std::to_string(err));
-                    }
-                }
-
-                glBindTexture(GL_TEXTURE_2D, 0);
-            }
-
-            // Free CPU-side texture data after GPU upload
-            PN_CORE_INFO("Texture uploaded to GPU (ID: {}), freeing CPU data ({} bytes)",
-                tex->gl_texture, tex->data.size());
-            std::vector<uint8_t>().swap(tex->data);
-            std::vector<size_t>().swap(tex->mipOffsets);
-            std::vector<size_t>().swap(tex->mipSizes);
-
-            // ========================================
-            // RESTORE ACTIVE TEXTURE UNIT
-            // ========================================
-            glActiveTexture(activeTextureUnit);
-        }
-
         std::shared_ptr<Texture> Loader::ImportTexture(std::string const& virtual_path) const {
 
             auto tex = std::make_shared<Texture>();
@@ -721,6 +561,8 @@ namespace PAIN {
             PN_CORE_TRACE("Texture {} loaded, not uploaded to GPU yet.", virtual_path);
             return tex;
         }
+
+
 
 		std::shared_ptr<Model> Loader::ImportModel(std::string const& virtual_path) const {
             PN_CORE_INFO("ImportModel {}", virtual_path);
@@ -745,6 +587,8 @@ namespace PAIN {
 
             Model asset;
             size_t offset = 0;
+
+            // Lamda helper functions
             auto require = [&](size_t n) {
                 if (offset + n > data.size()) { 
                     PN_CORE_ERROR("Unexpected end of model file");
@@ -755,6 +599,21 @@ namespace PAIN {
                 if (n == 0) return;
                 require(n); std::memcpy(dst, data.data() + offset, n); offset += n;
                 };
+            auto readStr = [&](std::string& str) {
+                uint32_t len = 0;
+                readMem(&len, sizeof(len));
+                if (len > 2048) { // Safety Cap
+                    PN_CORE_ERROR("String too long: {} at offset {}", len, offset);
+                    throw std::runtime_error("Corrupt file: String too long");
+                }
+                str.resize(len);
+                if (len > 0) {
+                    readMem(str.data(), len);
+                    
+                    if (str.back() == '\0') str.pop_back();
+                }
+                };
+
 
             PN_CORE_INFO("File size: {} bytes", data.size());
 
@@ -829,13 +688,13 @@ namespace PAIN {
             uint32_t boneCount = 0;
             readMem(&boneCount, sizeof(boneCount));
             asset.skeleton.resize(boneCount);
-            for (Bone& b : asset.skeleton) {
-                uint32_t nameLen = 0;
-                readMem(&nameLen, sizeof(nameLen));
-                b.name.resize(nameLen);
-                readMem(b.name.data(), nameLen);
+            for (size_t i = 0; i < boneCount; ++i) {
+                Bone& b = asset.skeleton[i];
+                readStr(b.name);
                 readMem(&b.parent, sizeof(b.parent));
                 readMem(&b.bindPose, sizeof(glm::mat4));
+
+                //PN_CORE_INFO("  Bone [{}] '{}' -> Parent Index: {}", i, b.name, b.parent);
             }
 
             // check if bones are well or poorly ordered
@@ -857,30 +716,36 @@ namespace PAIN {
             // Animations
             uint32_t animCount = 0;
             readMem(&animCount, sizeof(animCount));
+            //PN_CORE_INFO("--- Reading {} Animations ---", animCount);
             asset.animations.resize(animCount);
             for (AnimationClip& anim : asset.animations) {
-                uint32_t nameLen = 0;
-                readMem(&nameLen, sizeof(nameLen));
-                anim.name.resize(nameLen);
-                readMem(anim.name.data(), nameLen);
+                readStr(anim.name);
                 readMem(&anim.duration, sizeof(anim.duration));
                 readMem(&anim.isAdditive, sizeof(anim.isAdditive));
 
                 uint32_t trackCount = 0;
                 readMem(&trackCount, sizeof(trackCount));
                 //anim.tracks.resize(trackCount);
+                //PN_CORE_TRACE("  Anim '{}' ({}s) has {} tracks", anim.name, anim.duration, trackCount);
 
                 int no_bone_tracks{};
                 for (size_t i{}; i < trackCount; ++i) {
-                    uint32_t boneLen = 0, keyCount = 0;
-                    readMem(&boneLen, sizeof(boneLen));
+                    //uint32_t boneLen = 0, keyCount = 0;
+                    //readMem(&boneLen, sizeof(boneLen));
                     //track.boneName.resize(boneLen);
                     //readMem(track.boneName.data(), boneLen);
 
-                    static std::string boneName;
-                    boneName.resize(boneLen);
-                    readMem(boneName.data(), boneLen);
+                    std::string boneName;
+                    readStr(boneName); 
                     
+                    bool foundBone = false;
+                    for (const auto& b : asset.skeleton) {
+                        if (b.name == boneName) { foundBone = true; break; }
+                    }
+                    if (!foundBone) {
+                        PN_CORE_WARN("  [WARNING] Track for '{}' NOT FOUND in skeleton!", boneName);
+                    }
+
                     // unnamed bones suck tf, but i guess this could cause more problems
                     // if bone doesn't exist, store as root xform or scene xform
                     //auto it = std::find_if(asset.skeleton.begin(), asset.skeleton.end(), [](const Assets::Bone& b) { return b.name == boneName; });
@@ -894,13 +759,16 @@ namespace PAIN {
 
                     auto& track = anim.track_map[boneName];
 
+                    uint32_t keyCount = 0;
                     readMem(&keyCount, sizeof(keyCount));
                     track.resize(keyCount);
+
                     for (AnimationKey& key : track) {
                         readMem(&key.time, sizeof(key.time));
                         readMem(&key.translation, sizeof(key.translation));
                         readMem(&key.rotation, sizeof(key.rotation));
                         readMem(&key.scale, sizeof(key.scale));
+
                         // Morph weights
                         uint32_t morphWeightsCount = 0;
                         readMem(&morphWeightsCount, sizeof(morphWeightsCount));
@@ -910,20 +778,13 @@ namespace PAIN {
                 }
             }
 
-            PN_CORE_TRACE("ImportModel: Before reading materials");
+            //PN_CORE_TRACE("ImportModel: Before reading materials");
 
             // Materials
             uint32_t matCount = 0;
             readMem(&matCount, sizeof(matCount));
             asset.materials.resize(matCount);
             for (auto& mat : asset.materials) {
-                auto readStr = [&](std::string& str) {
-                    uint32_t len = 0;
-                    readMem(&len, sizeof(len));
-                    str.resize(len);
-                    readMem(str.data(), len);
-                    };
-
                 std::string temp_str;
                 readStr(temp_str);
                 mat = std::filesystem::path(temp_str);

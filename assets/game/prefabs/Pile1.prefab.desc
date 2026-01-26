@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 316663886387648756
+    "hash": 7315643094892810990
   },
   "descriptor_version": 1,
-  "guid": "65593ba1-3e64-5e49-8273-2e6ace4e597a",
+  "guid": "06414c40-ae12-174c-96ea-52ea187c80c4",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\Pile1.prefab"

@@ -7,6 +7,7 @@
 #include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
+#include "CoreSystems/Renderer/sRenderer.h"
 
 namespace PAIN {
 	namespace Assets {
@@ -360,6 +361,10 @@ namespace PAIN {
 			return checkAssetRegistered(id);
 		}
 
+		void Manager::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
+			if (!tex->gl_texture) services->get<sRenderer>()->queueTexUpload(tex);
+		}
+
 		// Efficient double-checked locking for cacheAsset
 		std::shared_ptr<IAsset> Manager::cacheAsset(GUID const& id) {
 			// PHASE 1: Check if already cached (read lock) 
@@ -414,7 +419,8 @@ namespace PAIN {
 					// Cleanup loading flag
 					std::unique_lock<std::mutex> loading_lock(loading_mutex);
 					loading_assets.erase(id);
-					throw std::runtime_error("Asset not in registry!");
+					PN_CORE_WARN("Asset Not In Registry. Did not cache it!");
+					return nullptr;
 				}
 				asset_data = registry_it->second;
 			}
@@ -477,9 +483,12 @@ namespace PAIN {
 
 					//Cast and check gl texture
 					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset.second);
-					if (!tex->gl_texture) asset_loader->uploadTexture(tex);
+					if (tex && !tex->gl_texture) services->get<sRenderer>()->uploadTexture(tex);
 				}
 			}
+
+			//Trigger batch uploading for next frame
+			services->get<sRenderer>()->batchUpload();
 		}
 
 		void Manager::uncacheAsset(GUID const& id) {
@@ -497,7 +506,13 @@ namespace PAIN {
 
 			std::unique_lock<std::shared_mutex> lock(cache_mutex);
 
-			asset_cache.clear();
+			//Clear asset cache except for shaders
+			for (auto it = asset_cache.begin(); it != asset_cache.end();) {
+
+				//Ensure that asset shader cache is not getting removed
+				if (it->second->type != Assets::Type::Shader) it = asset_cache.erase(it);
+				else ++it;
+			}
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
