@@ -1676,6 +1676,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                73.30000305175781,
+                                73.0999984741211
+                            ],
+                            "min_point": [
+                                -67.69999694824219,
+                                -74.80000305175781
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "0dc7d509-a2c9-b640-ae82-df7adde1fa4b"
                         },
@@ -1794,6 +1808,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                94.5999984741211,
+                                87.5999984741211
+                            ],
+                            "min_point": [
+                                -96.80000305175781,
+                                -105.19999694824219
+                            ],
+                            "position_offset": [
+                                2.0,
+                                7.5
+                            ]
+                        },
                         "GUID": {
                             "guid": "63468803-8740-6446-9248-b63d7e49f36d"
                         },
@@ -1904,6 +1932,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                88.0999984741211,
+                                93.30000305175781
+                            ],
+                            "min_point": [
+                                -81.5,
+                                -93.5999984741211
+                            ],
+                            "position_offset": [
+                                -1.2000000476837158,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "09276c7c-b239-474f-950f-e175ea7b3e7e"
                         },
@@ -2104,7 +2146,7 @@
                         },
                         "UIElement": {
                             "b_is_enabled": true,
-                            "b_is_interactable": true,
+                            "b_is_interactable": false,
                             "layer": 0
                         },
                         "UIRectTransform": {
@@ -2206,7 +2248,7 @@
                         },
                         "UIElement": {
                             "b_is_enabled": true,
-                            "b_is_interactable": true,
+                            "b_is_interactable": false,
                             "layer": 0
                         },
                         "UIRectTransform": {
@@ -2308,7 +2350,7 @@
                         },
                         "UIElement": {
                             "b_is_enabled": true,
-                            "b_is_interactable": true,
+                            "b_is_interactable": false,
                             "layer": 0
                         },
                         "UIRectTransform": {
@@ -5389,7 +5431,7 @@
         "glowIntensity": 0.5,
         "progressBarPosition": [
             800.0,
-            135.0
+            133.35000610351563
         ],
         "progressBarSize": [
             960.0000610351563,
@@ -5401,7 +5443,7 @@
         "showStatusText": false,
         "statusTextPosition": [
             800.0,
-            65.0
+            63.350006103515625
         ],
         "statusTextScale": 0.029999999329447746
     },

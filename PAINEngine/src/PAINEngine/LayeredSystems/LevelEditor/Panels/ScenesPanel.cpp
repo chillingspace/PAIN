@@ -1268,7 +1268,7 @@ namespace PAIN {
                     
                     ImGui::Checkbox("Auto-animate progress", &autoAnimate);
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Automatically cycle progress from 0% to 100%");
+                        ImGui::SetTooltip("Automatically cycle progress from 0%% to 100%%");
                     }
                     
                     ImGui::Spacing();
