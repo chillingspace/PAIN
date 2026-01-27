@@ -7,7 +7,7 @@
     "hash": 16282428333231840076
   },
   "descriptor_version": 1,
-  "guid": "5d185917-7c35-a842-a955-561ba4ab6e50",
+  "guid": "ed87d956-cf59-3c4f-ab23-639f04e53783",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\scripts\\Game_PlayerState.lua"
