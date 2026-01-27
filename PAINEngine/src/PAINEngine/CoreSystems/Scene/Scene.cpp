@@ -991,8 +991,10 @@ namespace PAIN {
 
 		void SceneManager::onAttach() {
 
-			//Get ECS Controller
+			//Services
 			auto ecs = services->get<ECS::Controller>();
+			auto pathService = services->get<Path::Path>();
+			auto asset_manager = services->get<Assets::Manager>();
 
 			//Set scecne manager for renderer
 			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
@@ -1003,13 +1005,12 @@ namespace PAIN {
 
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);
+			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
+			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
 			PN_CORE_INFO("[SceneManager] Initialized skybox");
 
+#ifdef _DEBUG
 			// Demo Object and Audio Setup
-
-			auto pathService = services->get<Path::Path>();
-			auto asset_manager = services->get<Assets::Manager>();
-
 			{
 				// for .mesh(converted from .obj only)
 				std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
@@ -1046,7 +1047,6 @@ namespace PAIN {
 
 
 #ifdef PN_PLATFORM_WINDOWS
-#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
 				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
@@ -1065,7 +1065,6 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
-#endif
 
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
@@ -1085,17 +1084,16 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
+
+				//Create default scene asset
+				SceneAsset default_scene_config;
+
+				//Configure scene with default settings
+				configScene(default_scene_config);
 			}
-
-			//Create default scene asset
-			SceneAsset default_scene_config;
-
-			//Configure scene with default settings
-			configScene(default_scene_config);
-
-#ifndef _DEBUG
+#else
 			// Prep for subs
-			std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+			std::filesystem::path init_scn_path = "game/scenes/mainmenu.scn";
 
 			auto scn_opt = asset_manager->getAssetData(init_scn_path);
 
@@ -1105,12 +1103,6 @@ namespace PAIN {
 				//SetGameCamera();
 			}
 #endif
-
-			//Craft skybox path and get GUID
-			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
-
-			//Set skybox
-			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");

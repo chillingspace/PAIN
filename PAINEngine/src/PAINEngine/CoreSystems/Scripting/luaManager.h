@@ -85,7 +85,7 @@ namespace PAIN {
 
         static entt::entity toEntity(int id);
 
-        GLFWwindow* window_ = nullptr;
+        //GLFWwindow* window_ = nullptr;
 
     private:
         struct TimeoutNode {
