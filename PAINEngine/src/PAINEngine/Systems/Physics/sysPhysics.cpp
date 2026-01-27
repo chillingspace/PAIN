@@ -648,7 +648,7 @@ namespace PAIN {
 					settings.mMassPropertiesOverride.mMass = 10.0f; // any positive number
 					settings.mMassPropertiesOverride.mInertia =
 						JPH::Mat44::sScale(1.0f); // placeholder inertia tensor
-
+					
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(
 						settings, JPH::EActivation::Activate);
 					rigidBody.bodyID = body_id;

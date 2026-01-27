@@ -38,6 +38,8 @@ namespace PAIN {
 				entt::registry& registry);
 
 			void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
+			void activateButton(entt::entity entity, entt::registry& registry);
+			void dispatchUIAction(entt::entity entity, entt::registry& registry, UIAction action);
 
 			glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
 			glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos);

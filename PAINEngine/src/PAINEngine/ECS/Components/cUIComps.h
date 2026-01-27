@@ -94,6 +94,29 @@ namespace PAIN {
         Disabled      // Not interactable
     };
 
+    enum class UIAction {
+        None = 0,
+        game_Jump,
+        game_Hide,
+        game_Collect,
+
+        // pause screen
+        pause_Resume,
+        pause_Restart,
+        pause_Settings,
+        pause_ReturnToMainMenu,
+
+        // main menu screen
+        menu_StartGame,
+        menu_OpenSettings,
+        menu_HowToPlay,
+        menu_Credits,
+        menu_QuitGame,
+
+        menu_OpenTutorial,
+        menu_BackToMain
+    };
+
     struct UIButton {
         UIButtonState state = UIButtonState::Normal;
 
@@ -105,6 +128,9 @@ namespace PAIN {
 
         // Lua callback - function name to call on click (e.g., "OnButtonClick")
         std::string on_click_callback_lua;
+
+        UIAction action = UIAction::None;
+        std::string payload;
     };
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -244,6 +270,26 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIButtonState, {
     {PAIN::TextAlignment::Center, "Center"},
     {PAIN::TextAlignment::Right, "Right"} })
 
+NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
+    {PAIN::UIAction::None, "None" },
+    {PAIN::UIAction::game_Jump, "game_Jump"},
+    {PAIN::UIAction::game_Hide, "game_Hide"},
+    {PAIN::UIAction::game_Collect, "game_Collect"},
+
+    {PAIN::UIAction::pause_Resume, "pause_Resume"},
+    {PAIN::UIAction::pause_Restart, "pause_Restart"},
+    {PAIN::UIAction::pause_Settings, "pause_Settings"},
+    {PAIN::UIAction::pause_ReturnToMainMenu, "pause_ReturnToMainMenu"},
+
+    {PAIN::UIAction::menu_StartGame, "menu_StartGame"},
+    {PAIN::UIAction::menu_OpenSettings, "menu_OpenSettings"},
+    {PAIN::UIAction::menu_HowToPlay, "menu_HowToPlay"},
+    {PAIN::UIAction::menu_Credits, "menu_Credits"},
+    {PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
+
+    {PAIN::UIAction::menu_OpenTutorial, "menu_OpenTutorial"},
+    {PAIN::UIAction::menu_BackToMain, "menu_BackToMain"} })
+
     REFL_TYPE(PAIN::UIRectTransform)
     REFL_FIELD(local_position)
     REFL_FIELD(rotation)
@@ -274,6 +320,8 @@ REFL_FIELD(highlighted_color)
 REFL_FIELD(pressed_color)
 REFL_FIELD(disabled_color)
 REFL_FIELD(on_click_callback_lua)
+REFL_FIELD(action)
+REFL_FIELD(payload)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIButton>);

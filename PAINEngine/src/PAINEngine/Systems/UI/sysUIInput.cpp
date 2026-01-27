@@ -23,6 +23,33 @@
 #endif
 
 namespace PAIN {
+
+	static const char* ToActionName(UIAction action) {
+		switch (action) {
+		case UIAction::game_Jump:              return "game_Jump";
+		case UIAction::game_Hide:              return "game_Hide";
+		case UIAction::game_Collect:           return "game_Collect";
+
+		case UIAction::pause_Resume:           return "pause_Resume";
+		case UIAction::pause_Restart:          return "pause_Restart";
+		case UIAction::pause_Settings:         return "pause_Settings";
+		case UIAction::pause_ReturnToMainMenu: return "pause_ReturnToMainMenu";
+			// quit to start ??
+
+		case UIAction::menu_StartGame:         return "menu_StartGame";
+		case UIAction::menu_OpenSettings:      return "menu_OpenSettings";
+		case UIAction::menu_HowToPlay:         return "menu_HowToPlay";
+		case UIAction::menu_Credits:           return "menu_Credits";
+		case UIAction::menu_QuitGame:          return "menu_QuitGame";
+
+		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
+		case UIAction::menu_BackToMain:        return "menu_BackToMain";
+
+		case UIAction::None:
+		default:                               return "None";
+		}
+	}
+
 	namespace UI {
 
 		InputSystem::InputSystem(std::shared_ptr<Services> svc) : ISystem(svc) {}
@@ -194,26 +221,41 @@ namespace PAIN {
 							}
 						}
 
-						// If NOT a joystick drag, treat as normal button click
-						if (!was_joystick_drag && m_pressed_entity == m_hovered_entity &&
-							registry.all_of<UIButton>(m_pressed_entity)) {
+						//// If NOT a joystick drag, treat as normal button click
+						//if (!was_joystick_drag && m_pressed_entity == m_hovered_entity &&
+						//	registry.all_of<UIButton>(m_pressed_entity)) {
+						//	auto& button = registry.get<UIButton>(m_pressed_entity);
+						//	PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
+						//		static_cast<uint32_t>(m_pressed_entity),
+						//		static_cast<uint32_t>(m_hovered_entity),
+						//		button.on_click_callback_lua);
+
+						//	if (!button.on_click_callback_lua.empty()) {
+						//		auto& ctx = registry.ctx();
+						//		if (ctx.contains<LuaManager*>()) {
+						//			auto& luaMgr = ctx.get<LuaManager*>();
+						//			if (luaMgr) {
+						//				PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
+						//					button.on_click_callback_lua);
+						//				luaMgr->callGlobal(button.on_click_callback_lua);
+						//			}
+						//		}
+						//	}
+						//}
+
+						if (!was_joystick_drag &&
+							m_pressed_entity == m_hovered_entity &&
+							registry.all_of<UIButton>(m_pressed_entity))
+						{
 							auto& button = registry.get<UIButton>(m_pressed_entity);
-							PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
+
+							PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} action={}",
 								static_cast<uint32_t>(m_pressed_entity),
 								static_cast<uint32_t>(m_hovered_entity),
-								button.on_click_callback_lua);
+								ToActionName(button.action));
 
-							if (!button.on_click_callback_lua.empty()) {
-								auto& ctx = registry.ctx();
-								if (ctx.contains<LuaManager*>()) {
-									auto& luaMgr = ctx.get<LuaManager*>();
-									if (luaMgr) {
-										PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
-											button.on_click_callback_lua);
-										luaMgr->callGlobal(button.on_click_callback_lua);
-									}
-								}
-							}
+							// always go through activateButton, handles UIAction + old callback 
+							activateButton(m_pressed_entity, registry);
 						}
 
 						updateButtonState(m_pressed_entity, registry,
@@ -406,6 +448,7 @@ namespace PAIN {
 						// Only trigger click if finger is still on the button
 						if (hit_entity.has_value() && hit_entity.value() == touch_entity) {
 							PN_CORE_INFO("[UIInput] Button click detected");
+							activateButton(touch_entity, registry);
 							auto& button = registry.get<UIButton>(touch_entity);
 							if (!button.on_click_callback_lua.empty()) {
 								auto& ctx = registry.ctx();
@@ -658,6 +701,55 @@ namespace PAIN {
 					}
 				}
 			}
+		}
+
+		void InputSystem::activateButton(entt::entity entity, entt::registry& registry)
+		{
+			if (!registry.all_of<UIButton>(entity))
+				return;
+
+			auto& button = registry.get<UIButton>(entity);
+			PN_CORE_INFO("[UI] On click, UIButton.action = {}", ToActionName(button.action));
+			if (button.action != UIAction::None) {
+				dispatchUIAction(entity, registry, button.action);
+				return;
+			}
+
+			// fallback, old lua callback
+			if (!button.on_click_callback_lua.empty()) {
+				auto& ctx = registry.ctx();
+				if (ctx.contains<LuaManager*>()) {
+					auto& luaMgr = ctx.get<LuaManager*>();
+					if (luaMgr) {
+						luaMgr->callGlobal(button.on_click_callback_lua);
+					}
+				}
+			}
+		}
+
+		void InputSystem::dispatchUIAction(entt::entity entity, entt::registry& registry, UIAction action)
+		{
+			auto& ctx = registry.ctx();
+			if (!ctx.contains<LuaManager*>()) {
+				PN_CORE_WARN("[UIInput] dispatchUIAction: LuaManager* not found in registry context");
+				return;
+			}
+
+			auto& luaMgr = ctx.get<LuaManager*>();
+			if (!luaMgr) {
+				PN_CORE_WARN("[UIInput] dispatchUIAction: LuaManager is null");
+				return;
+			}
+
+			auto& button = registry.get<UIButton>(entity);
+
+			const char* actionName = ToActionName(action);
+
+			// Call a single Lua router: UI_OnAction(actionName, entityId, payload)
+			luaMgr->callGlobal("UI_OnAction",
+				actionName,
+				entity,
+				button.payload);
 		}
 
 		glm::vec2 InputSystem::convertToCenterOrigin(const glm::vec2& screen_pos)

@@ -252,7 +252,7 @@ namespace PAIN {
 							ImGui::DragFloat2("Texture Scale", &texture_comp.texture_scale.x,
 											  0.02f, 0.2f, 4.0f, "%.2f");
 						changed |= ImGui::DragFloat2("Texture Position", &texture_comp.pos.x);
-
+						
 						ImGui::PopStyleVar();
 
 						return changed;
@@ -389,35 +389,85 @@ namespace PAIN {
 
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
-						// ── Script Callback ──
-						ImGui::SeparatorText("Callback");
+						//// ── Script Callback ──
+						//ImGui::SeparatorText("Callback");
 
-						// Function name input
-						char funcName[128];
-						strncpy(funcName, button.on_click_callback_lua.c_str(),
-								sizeof(funcName) - 1);
-						funcName[sizeof(funcName) - 1] = '\0';
+						//// Function name input
+						//char funcName[128];
+						//strncpy(funcName, button.on_click_callback_lua.c_str(),
+						//		sizeof(funcName) - 1);
+						//funcName[sizeof(funcName) - 1] = '\0';
 
-						if (ImGui::InputText("Function Name", funcName, sizeof(funcName))) {
-							button.on_click_callback_lua = funcName;
+						//if (ImGui::InputText("Function Name", funcName, sizeof(funcName))) {
+						//	button.on_click_callback_lua = funcName;
+						//	changed = true;
+						//}
+						//ImGui::TextDisabled("(e.g., OnPlayButtonClick)");
+						//ImGui::TextDisabled("Function must be defined in a loaded script");
+
+						//// ── Button State (Read-only display) ──
+						//ImGui::SeparatorText("State");
+
+						//const char* state_names[] = {"Normal", "Highlighted", "Pressed",
+						//							 "Disabled"};
+						//int current_state = static_cast<int>(button.state);
+
+						//ImGui::BeginDisabled(); // Make it read-only (runtime state)
+						//ImGui::Combo("Current State", &current_state, state_names,
+						//			 IM_ARRAYSIZE(state_names));
+						//ImGui::EndDisabled();
+
+						//ImGui::TextDisabled("(Runtime state - updates automatically)");
+
+						// -- Action --
+						ImGui::SeparatorText("Action");
+
+						// must match UIAction order
+						static const char* action_names[] = {
+							"None",
+							"game_Jump",
+							"game_Hide",
+							"game_Collect",
+
+							"pause_Resume",
+							"pause_Restart",
+							"pause_ReturnToMainMenu",
+							"pause_Settings",
+
+							"menu_StartGame",
+							"menu_OpenSettings",
+							"menu_HowToPlay",
+							"menu_Credits",
+							"menu_OpenTutorial",
+							"menu_QuitGame",
+						};
+
+						int action_idx = static_cast<int>(button.action);
+
+						if (ImGui::Combo("UI Action", &action_idx, action_names, IM_ARRAYSIZE(action_names))) {
+							button.action = static_cast<PAIN::UIAction>(action_idx);
+							changed = true;
+
+							// if user picked a real action, clear legacy callback to avoid confusion
+							if (button.action != PAIN::UIAction::None) {
+								button.on_click_callback_lua.clear();
+							}
+						}
+
+						ImGui::TextDisabled("Pick an action.");
+
+						// -- Payload --
+						ImGui::SeparatorText("Payload (Optional)");
+						ImGui::TextDisabled("Used by actions like StartGame/Restart/ReturnToMainMenu (e.g. scene path).");
+
+						char payloadBuf[256];
+						strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
+						payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+
+						if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
+							button.payload = payloadBuf;
 							changed = true;
 						}
-						ImGui::TextDisabled("(e.g., OnPlayButtonClick)");
-						ImGui::TextDisabled("Function must be defined in a loaded script");
-
-						// ── Button State (Read-only display) ──
-						ImGui::SeparatorText("State");
-
-						const char* state_names[] = {"Normal", "Highlighted", "Pressed",
-													 "Disabled"};
-						int current_state = static_cast<int>(button.state);
-
-						ImGui::BeginDisabled(); // Make it read-only (runtime state)
-						ImGui::Combo("Current State", &current_state, state_names,
-									 IM_ARRAYSIZE(state_names));
-						ImGui::EndDisabled();
-
-						ImGui::TextDisabled("(Runtime state - updates automatically)");
 
 						// ── State Colors ──
 						ImGui::SeparatorText("State Colors");

@@ -51,6 +51,7 @@ namespace PAIN {
 
         // misc
         void callGlobal(const std::string& name);
+        void callGlobal(const std::string& name, const std::string& arg1, entt::entity arg2, const std::string& arg3);
         void callGlobalWithVec2(const std::string& name, float x, float y);
         void queueOp(std::function<void(void)> op) { delayedOps_.push_back(std::move(op)); }
         void setPendingSceneChange(std::function<void(void)> op) { pendingSceneChange_ = std::move(op); }
