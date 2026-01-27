@@ -88,8 +88,8 @@ registerKeyUp("S", function() moveDown = false end)
 registerKeyUp("A", function() moveLeft = false end)
 registerKeyUp("D", function() moveRight = false end)
 
-local speed = 0.8
-local jumpSpeed = 2
+local speed = 3
+local jumpSpeed = 5
 local isGrounded = true
 local groundY = nil
 
