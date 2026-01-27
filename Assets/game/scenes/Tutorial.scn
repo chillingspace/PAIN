@@ -68,16 +68,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.38676217198371887,
-            -0.6505899429321289,
-            0.6535654067993164
+            -0.0714573934674263,
+            -0.09386671334505081,
+            -0.9930171370506287
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -1.445117712020874,
-            1.669310212135315,
-            0.21933850646018982
+            -0.38676217198371887,
+            0.6505899429321289,
+            -0.6535654067993164
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 0.10000000149011612,
@@ -89,6 +89,389 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "be280bbb-809d-d94c-93eb-9f5f67449310",
+                                "cd76b47e-2d44-374c-9eba-8098650a069f",
+                                "7bb3e694-7e31-bd4d-aa86-b4fe6908be4f",
+                                "a54fc513-6dad-3145-ae17-39d785cec2fc",
+                                "f5c7f21f-2bb8-2545-8f7f-dba9f69a1624",
+                                "a42e4252-e74a-a44f-be6d-ded4fcf3ac7c"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "Audio"
+                        }
+                    },
+                    "Name": "Audio"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "feb46661-0d8d-d947-ac9f-881f436feda7",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "be280bbb-809d-d94c-93eb-9f5f67449310"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_drop_collectible"
+                        }
+                    },
+                    "Name": "sfx_drop_collectible"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "b5f33fbe-eadf-bf46-9329-26bbad7a5e72",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "cd76b47e-2d44-374c-9eba-8098650a069f"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_hide_in"
+                        }
+                    },
+                    "Name": "sfx_hide_in"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "11f20ced-0a55-f344-a74e-7a57022bd83e",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "7bb3e694-7e31-bd4d-aa86-b4fe6908be4f"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_hide_out"
+                        }
+                    },
+                    "Name": "sfx_hide_out"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "06cab9b7-c91a-6948-bb59-426b8032ea12",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "a54fc513-6dad-3145-ae17-39d785cec2fc"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_jump"
+                        }
+                    },
+                    "Name": "sfx_jump"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "d581ecc8-3155-e543-9438-5e38ba0956d3",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "f5c7f21f-2bb8-2545-8f7f-dba9f69a1624"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 4
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_respawn"
+                        }
+                    },
+                    "Name": "sfx_respawn"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "a42e4252-e74a-a44f-be6d-ded4fcf3ac7c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
+                            "siblingIndex": 5
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "sfx_idle"
+                        }
+                    },
+                    "Name": "sfx_idle"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -129,7 +512,7 @@
                                 "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -1325,7 +1708,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -1431,7 +1814,7 @@
                                 "c8989800-69e0-aa48-a789-d62df22f9123"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -3084,7 +3467,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3177,7 +3560,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3278,7 +3661,7 @@
                                 "9362e2a0-fefd-6545-847b-3640ce0677f5"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3453,6 +3836,11 @@
                                         1.0,
                                         1.0
                                     ]
+                                },
+                                "Tag": {
+                                    "tags": [
+                                        "letter_collectible"
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "d72d233b-43b7-814c-a9a6-9df6a281c8c5",
@@ -3484,6 +3872,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "letter_collectible"
                             ]
                         }
                     },
@@ -3689,7 +4082,7 @@
                                 "e51ddd7e-baf8-044d-af3b-d26f2ba7e5e5"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4298,7 +4691,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4414,7 +4807,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4530,7 +4923,7 @@
                                 "b5692014-216a-9146-a903-c3f8d6826a7a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4967,7 +5360,7 @@
                                 "f11911f5-c66c-9d4f-9bfd-6e908773690f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5739,7 +6132,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5864,7 +6257,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5922,6 +6315,11 @@
                         },
                         "Name": {
                             "name": "robot5"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "letter_collection"
+                            ]
                         }
                     },
                     "Name": "robot5"
