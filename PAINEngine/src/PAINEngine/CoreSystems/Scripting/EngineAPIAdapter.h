@@ -114,6 +114,12 @@ namespace PAIN {
         float GetDeltaMultiplier() const override;
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        bool SetLayerEnabled(int layerId, bool enabled) override;
+        bool GetLayerEnabled(int layerId) override;
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         void ShakeCamera(float duration, float amplitude) override;
@@ -163,6 +169,16 @@ namespace PAIN {
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
         void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
+
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        void Animation_Play(entt::entity entityId, std::string animName) override;
+        void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) override;
+        void Animation_SetSpeed(entt::entity entityId, float speed) override;
+        void Animation_SetLoop(entt::entity entityId, bool loop) override;
+        bool Animation_IsPlaying(entt::entity entityId, std::string animName) override;
+        float GetAnimationDuration(entt::entity entityId) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());

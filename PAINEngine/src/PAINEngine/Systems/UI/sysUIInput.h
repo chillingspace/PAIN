@@ -2,7 +2,7 @@
  * \file   sysUILayout.h
  * \brief  Declaration of UI layout system
  *
- * \author Bryan Lim, 2301214, [bryanlicheng.l@digipen.edu](mailto:bryanlicheng.l@digipen.edu) (100%)
+ * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
  * \co-author
  * \date   September 2025
  * All content 2025 DigiPen Institute of Technology Singapore, all rights reserved.
@@ -14,42 +14,49 @@
 
 #include "ECS/System/ISystem.h"
 #include "ECS/Components/cUIComps.h"
+#include <unordered_map>
 
 namespace PAIN {
+	namespace UI {
 
-    namespace UI {
-        class InputSystem : public ECS::System::ISystem {
-        public:
-            explicit InputSystem(std::shared_ptr<Services> svc);
+		glm::vec2 normalizeSize(const glm::vec2& pixel_size, std::weak_ptr<Services> services);
 
-            ~InputSystem();
+		class InputSystem : public ECS::System::ISystem {
+		public:
+			explicit InputSystem(std::shared_ptr<Services> svc);
+			~InputSystem();
 
-            // Get system name
-            std::string getSysName() const override { return "UI Input System"; }
+			// Get system name
+			std::string getSysName() const override { return "UI Input System"; }
 
-            void onUpdate(AppTiming timing, entt::registry& registry) override;
-            void onEvent(Event::Event& e) override;
+			void onUpdate(AppTiming timing, entt::registry& registry) override;
+			void onEvent(Event::Event& e) override;
 
-        private:
-            bool isPointInRect(const glm::vec2& point, const glm::vec2& rect_min,
-                const glm::vec2& rect_max);
-            std::optional<entt::entity> raycastUI(const glm::vec2& mouse_pos,
-                entt::registry& registry);
-            void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
-            glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
-            glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos);
-            glm::vec2 normalizeSize(const glm::vec2& pixel_size);
+		private:
+			bool isPointInRect(const glm::vec2& point, const glm::vec2& rect_min,
+				const glm::vec2& rect_max);
 
+			std::optional<entt::entity> raycastUI(const glm::vec2& mouse_pos,
+				entt::registry& registry);
 
-            entt::entity m_hovered_entity = entt::null;
-            entt::entity m_pressed_entity = entt::null;
-            glm::vec2 m_mouse_position{ -1.f, -1.f };
+			void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
 
-            // Android multi-touch: track which pointer is controlling the joystick
-            int m_joystick_pointer_id = -1;
-        };
+			glm::vec2 convertToCenterOrigin(const glm::vec2& screen_pos);
+			glm::vec2 normalizeScreenPosition(const glm::vec2& center_origin_pos);
 
-    }
-}
+			// Windows mouse tracking
+			entt::entity m_hovered_entity = entt::null;
+			entt::entity m_pressed_entity = entt::null;
+			glm::vec2 m_mouse_position{ -1.f, -1.f };
+
+			// Android multi-touch: map pointer IDs to entities
+			std::unordered_map<int, entt::entity> m_active_touches;
+
+			// Track which pointer is controlling the joystick
+			int m_joystick_pointer_id = -1;
+		};
+
+	} // namespace UI
+} // namespace PAIN
 
 #endif

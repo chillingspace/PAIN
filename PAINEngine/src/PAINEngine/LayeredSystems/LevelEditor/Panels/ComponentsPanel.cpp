@@ -1,5 +1,5 @@
-﻿#include "ComponentsPanel.h"
-#include "pch.h"
+﻿#include "pch.h"
+#include "ComponentsPanel.h"
 
 #ifdef _DEBUG
 
@@ -220,6 +220,13 @@ namespace PAIN {
 							changed = true;
 						}
 
+						//if (ImGui::CollapsingHeader("Overrides")) {
+						//	ImGui::Indent(10.f);
+						//	changed |= ImGui::Checkbox("Override Emissive Map", &renderer.materials[0].useEmissiveOverride);
+						//	changed |= ImGui::ColorEdit3("Emissive Color Override", &renderer.materials[0].emissiveOverride.x);
+						//	ImGui::Unindent(10.f);
+						//}
+
 						ImGui::PopStyleVar();
 					});
 
@@ -256,6 +263,39 @@ namespace PAIN {
 					"Animation", [](ComponentsPanel&, PAIN::Animation& anim) {
 						// Basic fields; reflection will handle labels from cAnimation.h
 						DrawWithReflection(anim);
+
+						ImGui::Spacing();
+						ImGui::Separator();
+						ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Runtime Debug Info");
+
+						// Show Status
+						if (anim.isPlaying) {
+							ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Status: Playing");
+						}
+						else {
+							ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.2f, 1.0f), "Status: Paused");
+						}
+
+						// Read-only Runtime Values
+						ImGui::BeginDisabled(); // Grey out to show they aren't editable settings
+
+						int currIdx = anim.currentAnimationIndex;
+						ImGui::InputInt("Current Index", &currIdx);
+
+						float currTime = anim.animationTime;
+						ImGui::DragFloat("Time", &currTime);
+
+						int nextIdx = anim.nextAnimationIndex;
+						if (nextIdx != -1) {
+							ImGui::InputInt("Next Index", &nextIdx);
+						}
+
+						ImGui::EndDisabled();
+
+						// 3. Optional: Manual Controls for testing
+						if (ImGui::Button(anim.isPlaying ? "Pause##Comp" : "Resume##Comp")) {
+							anim.isPlaying = !anim.isPlaying;
+						}
 					});
 
 				// UItext comp ui
@@ -757,6 +797,11 @@ namespace PAIN {
 
 				registerCompUIFunc<PAIN::UIAnimation>(
 					"UIAnimation", [this](ComponentsPanel&, PAIN::UIAnimation& ui) {
+						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
+					});
+
+				registerCompUIFunc<PAIN::CustomHitbox2D>(
+					"CustomHitbox2D", [this](ComponentsPanel&, PAIN::CustomHitbox2D& ui) {
 						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
 					});
 
@@ -1341,6 +1386,38 @@ namespace PAIN {
 							ImGui::PopStyleVar();
 						} else {
 							ImGui::TextDisabled("No UI registered for this component");
+						}
+
+						ImGui::Spacing();
+
+						// Remove Component Button
+						ImGui::Separator();
+						ImGui::Spacing();
+
+						std::string componentName = comp_name;
+
+						// Center the button
+						float buttonWidth = 150.0f;
+						float availWidth = ImGui::GetContentRegionAvail().x;
+						float offset = (availWidth - buttonWidth) * 0.5f;
+						if (offset > 0) {
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+						}
+
+						// Red remove button
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+
+						if (ImGui::Button("Remove Component", ImVec2(buttonWidth, 0))) {
+							comp_string_ref = componentName;
+							should_open_remove_popup = true;
+						}
+
+						ImGui::PopStyleColor(3);
+
+						if (ImGui::IsItemHovered()) {
+							ImGui::SetTooltip("Remove this component from the entity");
 						}
 
 						ImGui::Spacing();

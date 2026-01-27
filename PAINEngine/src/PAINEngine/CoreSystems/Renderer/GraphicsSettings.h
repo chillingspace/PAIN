@@ -85,6 +85,7 @@ namespace PAIN {
 		bool DEBUG_USE_NORMAL_MAP{ true };
 		bool DEBUG_USE_ROUGHNESSMETALLIC_MAP{ true };
 		bool DEBUG_USE_EMISSION_MAP{ true };
+		bool DEBUG_DRAW_UI_HITBOXES{ false };
 
 		enum DEBUG_PBR_MAP_TYPES {
 			NONE = 0,

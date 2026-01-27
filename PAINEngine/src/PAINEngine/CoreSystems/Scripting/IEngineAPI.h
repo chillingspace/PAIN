@@ -102,6 +102,12 @@ namespace PAIN {
         virtual float GetDeltaMultiplier() const = 0;
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        virtual bool SetLayerEnabled(int layerId, bool enabled) = 0;
+        virtual bool GetLayerEnabled(int layerId) = 0;
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         virtual void ShakeCamera(float duration, float amplitude) = 0;
@@ -150,6 +156,16 @@ namespace PAIN {
         virtual void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
         virtual void SetLightDirection(entt::entity entityId, float x, float y, float z) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
+
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        virtual void Animation_Play(entt::entity entityId, std::string animName) = 0;
+        virtual void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) = 0;
+        virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
+        virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
+        virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationDuration(entt::entity entityId) = 0;
 
     };
 

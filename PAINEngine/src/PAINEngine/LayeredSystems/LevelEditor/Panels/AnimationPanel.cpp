@@ -329,6 +329,34 @@ namespace PAIN {
                 ImGui::Text("Playback Speed");
                 ImGui::SliderFloat("##Speed", &anim.playbackSpeed, 0.1f, 5.0f, "%.2fx");
 
+                ImGui::Separator();
+                ImGui::Text("Transition Test");
+
+                static int targetBlendAnim = 0;
+                // Dropdown to pick target animation
+                if (ImGui::BeginCombo("Target Anim", mdl.cachedModelAsset->animations[targetBlendAnim].name.c_str())) {
+                    for (int i = 0; i < mdl.cachedModelAsset->animations.size(); ++i) {
+                        bool isSelected = (targetBlendAnim == i);
+                        if (ImGui::Selectable(mdl.cachedModelAsset->animations[i].name.c_str(), isSelected)) {
+                            targetBlendAnim = i;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                static float blendDuration = 0.5f;
+                ImGui::SliderFloat("Blend Time", &blendDuration, 0.1f, 2.0f);
+
+                if (ImGui::Button("CrossFade To Target")) {
+                    anim.CrossFade(targetBlendAnim, blendDuration);
+                }
+
+                // Visualizer for Blend Weight
+                if (anim.nextAnimationIndex != -1) {
+                    ImGui::ProgressBar(anim.transitionWeight, ImVec2(-1, 0), "Blending...");
+                }
+
+
                 ImGui::Spacing();
                 ImGui::Text("Timeline Scrubber");
                 float timeNormalized = (currentAnim.duration > 0.0f)

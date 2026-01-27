@@ -634,6 +634,33 @@ namespace PAIN {
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        lua_.set_function("setLayerEnabled", [this](int layerId, bool enabled) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] setLayerEnabled: API not initialized");
+                return;
+            }
+
+            bool success = api_->SetLayerEnabled(layerId, enabled);
+            if (success) {
+                PN_INFO("[Lua] Layer {} enabled: {}", layerId, enabled);
+            }
+            else {
+                PN_WARN("[Lua] Failed to set Layer {} - layer not found", layerId);
+            }
+            });
+
+        lua_.set_function("getLayerEnabled", [this](int layerId) -> bool {
+            if (!api_) {
+                PN_ERROR("[LuaManager] getLayerEnabled: API not initialized");
+                return false;
+            }
+            return api_->GetLayerEnabled(layerId);
+            });
+
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
@@ -682,6 +709,22 @@ namespace PAIN {
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
 
         /* =========================================================================== */
+        /*                              Cursor Control                                 */
+        /* =========================================================================== */
+        lua_.set_function("showCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] showCursor - not implemented yet");
+            });
+
+        lua_.set_function("hideCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] hideCursor - not implemented yet");
+            });
+
+
+
+
+        /* =========================================================================== */
         /*                                ModelRenderer                                 */
         /* =========================================================================== */
         lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {
@@ -711,6 +754,35 @@ namespace PAIN {
         lua_.set_function("setLightDirection", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightDirection(entityId, x, y, z); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
+        /* =========================================================================== */
+        /*                                 Animations                                  */
+        /* =========================================================================== */
+        auto animTable = lua_["Animation"].get_or_create<sol::table>();
+
+        animTable.set_function("Play", [this](entt::entity entityId, const std::string& name) {
+            if (api_) api_->Animation_Play(entityId, name);
+        });
+
+        animTable.set_function("CrossFade", [this](entt::entity entityId, const std::string& name, float duration) {
+            if (api_) api_->Animation_CrossFade(entityId, name, duration);
+        });
+
+        animTable.set_function("SetSpeed", [this](entt::entity entityId, float speed) {
+            if (api_) api_->Animation_SetSpeed(entityId, speed);
+        });
+
+        animTable.set_function("SetLoop", [this](entt::entity entityId, bool loop) {
+            if (api_) api_->Animation_SetLoop(entityId, loop);
+        });
+
+        animTable.set_function("IsPlaying", [this](entt::entity entityId, const std::string& name) {
+            if (api_) return api_->Animation_IsPlaying(entityId, name);
+                return false;
+        });
+        animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationDuration(entityId);
+            return 0.0f;
+            });
     }
 
 

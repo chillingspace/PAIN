@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "detect prog.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1766241380220997177
+  },
+  "descriptor_version": 1,
+  "guid": "6801c30d-0050-3944-b4c9-c2acb85439bb",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\detect prog.png"
+  }
+}

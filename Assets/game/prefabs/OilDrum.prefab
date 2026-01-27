@@ -1,0 +1,126 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "localAABB": {
+                        "max": [
+                            0.3581809103488922,
+                            0.9757580161094666,
+                            0.3581809997558594
+                        ],
+                        "min": [
+                            -0.3581809401512146,
+                            0.0,
+                            -0.3581809103488922
+                        ]
+                    },
+                    "worldAABB": {
+                        "max": [
+                            -1.1769345998764038,
+                            0.9757580161094666,
+                            -10.310294151306152
+                        ],
+                        "min": [
+                            -1.893296480178833,
+                            0.0,
+                            -11.026656150817871
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -1.5351154804229736,
+                        0.0,
+                        -10.668474197387695
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
+                            "aoTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                            "normalTextureOverride": "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "3688e05d-7434-b849-8904-1d7884ad053f",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "OilDrumBlue"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.5,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        0.699999988079071,
+                        1.0,
+                        0.699999988079071
+                    ],
+                    "mass": -107374176.0,
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "c7a783bf-cfe1-0e45-9d2d-57c83956c9f3"
+        }
+    ],
+    "prefabName": "OilDrum",
+    "rootEntityGUID": "c7a783bf-cfe1-0e45-9d2d-57c83956c9f3"
+}

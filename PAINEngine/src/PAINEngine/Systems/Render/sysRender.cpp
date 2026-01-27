@@ -15,6 +15,7 @@
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
 #endif
+#include <Systems/UI/sysUIInput.h>
 
 namespace PAIN {
 	namespace Render {
@@ -836,6 +837,28 @@ namespace PAIN {
 					PN_CORE_ERROR(
 						"[Render System] GL error after rendering font '{}': 0x{:X}",
 						font_opt.value()->name, err);
+				}
+			}
+
+			// ========================================
+			// DEBUG UI HITBOXES
+			// ========================================
+			auto& gs = GraphicsSettings::get();
+			if (gs.DEBUG_DRAW_UI_HITBOXES) {
+				// Draw hitboxes for entities with CustomHitbox2D
+				auto hitbox_view = registry.view<CustomHitbox2D, Texture2D, UIElement, UIRectTransform>();
+				for (auto [entity, hitbox, tex, element, rect] : hitbox_view.each()) {
+					if (!element.b_is_enabled) continue;
+
+					// Calculate hitbox bounds (same logic as in raycastUI)
+					glm::vec2 hitbox_center = tex.pos + UI::normalizeSize(hitbox.position_offset, services);
+					glm::vec2 normalized_min = UI::normalizeSize(hitbox.min_point, services);
+					glm::vec2 normalized_max = UI::normalizeSize(hitbox.max_point, services);
+					glm::vec2 rect_min = hitbox_center + normalized_min;
+					glm::vec2 rect_max = hitbox_center + normalized_max;
+
+					// Draw debug rectangle
+					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
 				}
 			}
 

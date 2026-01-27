@@ -4,10 +4,10 @@
     "type": "Prefabs"
   },
   "build_data": {
-    "hash": 17469546936172727031
+    "hash": 12311100693030826564
   },
   "descriptor_version": 1,
-  "guid": "1e65fd4a-218e-9c4b-9839-a5e5bd4e471b",
+  "guid": "ebc36048-73cc-7f4d-8ddf-b8433bbe6e21",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\prefabs\\OilDrumRed.prefab"

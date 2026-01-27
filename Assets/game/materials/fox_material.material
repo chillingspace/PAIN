@@ -1,0 +1,23 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "metallic": 0.0,
+        "roughness": 0.5799999833106995
+    },
+    "textures": {
+        "albedo": "game\\textures\\Texture.png"
+    }
+}

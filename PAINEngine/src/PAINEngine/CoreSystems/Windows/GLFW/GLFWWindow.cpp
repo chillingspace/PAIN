@@ -114,17 +114,33 @@ namespace PAIN {
 
 		void GLFW_Window::setCursorMode(bool locked)
 		{
-			if (locked) {
-				// Hides cursor and locks it to center
-				glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			}
-			else {
-				// Shows cursor and allows free movement
-				glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			int currentMode = glfwGetInputMode(ptr_window, GLFW_CURSOR);
+			bool isCurrentlyLocked = (currentMode == GLFW_CURSOR_DISABLED);
+
+			if (locked != isCurrentlyLocked)
+			{
+				if (locked) {
+					// Hides cursor and locks it to center (set it only once)
+					int width, height;
+					glfwGetWindowSize(ptr_window, &width, &height);
+
+					// Reset to center
+					glfwSetCursorPos(ptr_window, width / 2.0, height / 2.0);
+
+					glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				}
+				else {
+					// Shows cursor and allows free movement
+					glfwSetInputMode(ptr_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
 			}
 		}
 
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
+			// Ignore 0x0 resize events
+			if (width == 0 || height == 0) {
+				return;
+			}
 
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));

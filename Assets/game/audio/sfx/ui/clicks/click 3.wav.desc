@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "click 3.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6111212394115102608
+  },
+  "descriptor_version": 1,
+  "guid": "de17b76f-a5bc-0042-8529-6ca6fd75384f",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\ui\\clicks\\click 3.wav"
+  }
+}

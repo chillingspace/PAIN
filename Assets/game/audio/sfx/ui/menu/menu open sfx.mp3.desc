@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu open sfx.mp3",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 2101452001970234381
+  },
+  "descriptor_version": 1,
+  "guid": "c776a330-f80b-8943-8130-7d40c744314b",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\ui\\menu\\menu open sfx.mp3"
+  }
+}
