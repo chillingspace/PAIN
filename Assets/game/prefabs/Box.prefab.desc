@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Box.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 17711596337635936858
+  },
+  "descriptor_version": 1,
+  "guid": "e33b70df-e226-b644-9172-f96238288759",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Box.prefab"
+  }
+}
