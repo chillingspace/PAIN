@@ -1,0 +1,197 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "localAABB": {
+                        "max": [
+                            199.99998474121094,
+                            90.56856536865234,
+                            100.0
+                        ],
+                        "min": [
+                            -200.00001525878906,
+                            0.0,
+                            -100.0
+                        ]
+                    },
+                    "worldAABB": {
+                        "max": [
+                            199.99998474121094,
+                            90.56856536865234,
+                            100.0
+                        ],
+                        "min": [
+                            -200.00001525878906,
+                            0.0,
+                            -100.0
+                        ]
+                    }
+                },
+                "CompoundCollider": {
+                    "shapes": [
+                        {
+                            "boxHalfExtents": [
+                                2.125,
+                                0.07999999821186066,
+                                1.25
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                0.07999999821186066,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                2.125,
+                                0.45399999618530273,
+                                0.0625
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                0.5440000295639038,
+                                -1.190000057220459
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                2.125,
+                                0.45399999618530273,
+                                0.0625
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                0.5440000295639038,
+                                1.190000057220459
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        }
+                    ],
+                    "useCompoundCollider": true
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+                            "aoTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "normalTextureOverride": "6fc0ccbc-ae9d-a948-9557-6140470621c4",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "510e3ede-f637-c448-99e8-7dc200d60c8f",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Platform1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
+        }
+    ],
+    "prefabName": "Platform1",
+    "rootEntityGUID": "18182cd9-212a-5741-94eb-3d9f9df02518"
+}

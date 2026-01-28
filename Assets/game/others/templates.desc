@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "templates",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "8e2b44d8-718b-094c-b590-69823607d860",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\templates"
+  }
+}

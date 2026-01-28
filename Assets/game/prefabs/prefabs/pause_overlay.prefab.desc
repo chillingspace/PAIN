@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "pause_overlay.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 1962473238802764323
+  },
+  "descriptor_version": 1,
+  "guid": "bd0b40cf-eda7-a441-9ae8-ed9fb811bca4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\prefabs\\pause_overlay.prefab"
+  }
+}
