@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "frog icon.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8782360573609642012
+  },
+  "descriptor_version": 1,
+  "guid": "b53c34cc-53db-ca42-89c5-6e67f341e76e",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\frog icon.png"
+  }
+}

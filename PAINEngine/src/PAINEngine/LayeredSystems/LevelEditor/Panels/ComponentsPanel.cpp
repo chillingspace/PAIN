@@ -850,6 +850,11 @@ namespace PAIN {
 						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
 					});
 
+				registerCompUIFunc<PAIN::CustomHitbox2D>(
+					"CustomHitbox2D", [this](ComponentsPanel&, PAIN::CustomHitbox2D& ui) {
+						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
+					});
+
 				registerCompUIFunc<PAIN::UIFollowsWorldEntity>(
 					"UIFollowsWorldEntity",
 					[this](ComponentsPanel& panel, PAIN::UIFollowsWorldEntity& follow) {
@@ -1431,6 +1436,38 @@ namespace PAIN {
 							ImGui::PopStyleVar();
 						} else {
 							ImGui::TextDisabled("No UI registered for this component");
+						}
+
+						ImGui::Spacing();
+
+						// Remove Component Button
+						ImGui::Separator();
+						ImGui::Spacing();
+
+						std::string componentName = comp_name;
+
+						// Center the button
+						float buttonWidth = 150.0f;
+						float availWidth = ImGui::GetContentRegionAvail().x;
+						float offset = (availWidth - buttonWidth) * 0.5f;
+						if (offset > 0) {
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+						}
+
+						// Red remove button
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+
+						if (ImGui::Button("Remove Component", ImVec2(buttonWidth, 0))) {
+							comp_string_ref = componentName;
+							should_open_remove_popup = true;
+						}
+
+						ImGui::PopStyleColor(3);
+
+						if (ImGui::IsItemHovered()) {
+							ImGui::SetTooltip("Remove this component from the entity");
 						}
 
 						ImGui::Spacing();

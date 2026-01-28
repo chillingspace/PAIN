@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "loading_progress.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 7263484876416717206
+  },
+  "descriptor_version": 1,
+  "guid": "59428da7-d867-cb41-9d6e-7dbbda24ac64",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\loading_progress.vert"
+  }
+}

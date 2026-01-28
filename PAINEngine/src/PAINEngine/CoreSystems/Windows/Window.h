@@ -28,7 +28,7 @@ namespace PAIN {
 			// Rendering context (OpenGL for now)
 			std::unique_ptr<GraphicsContext> m_Context;
 
-			//Anrdoid state
+			//Android state
 			bool b_active = false;
 		public:
 			virtual ~Window() = default;

@@ -219,6 +219,22 @@ namespace PAIN {
     };
 
     // ═══════════════════════════════════════════════════════════════════════
+    // CustomHitbox2D - Custom rectangular hitbox for UI raycasting
+    // ═══════════════════════════════════════════════════════════════════════
+    // USAGE:
+    //   1. Add CustomHitbox2D to UI entities that need custom click areas
+    //   2. Set min_point and max_point to define the hitbox rectangle
+    //   3. Set position_offset to offset from the entity's transform position
+    //   4. Hitbox is relative to entity's position + offset
+    //   5. Used for spritesheets with inconsistent padding
+    // ═══════════════════════════════════════════════════════════════════════
+    struct CustomHitbox2D {
+        glm::vec2 min_point{ -50.0f, -50.0f };  // Bottom-left corner of hitbox (relative to position + offset)
+        glm::vec2 max_point{ 50.0f, 50.0f };    // Top-right corner of hitbox (relative to position + offset)
+        glm::vec2 position_offset{ 0.0f, 0.0f }; // Offset from entity's transform position
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════
     // UVCoordinates - Custom UV mapping for textures (used by spritesheet animations)
     // ═══════════════════════════════════════════════════════════════════════
     // USAGE:
@@ -383,3 +399,11 @@ REFL_FIELD(world_offset)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIFollowsWorldEntity>);
+
+REFL_TYPE(PAIN::CustomHitbox2D)
+REFL_FIELD(min_point)
+REFL_FIELD(max_point)
+REFL_FIELD(position_offset)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::CustomHitbox2D>);

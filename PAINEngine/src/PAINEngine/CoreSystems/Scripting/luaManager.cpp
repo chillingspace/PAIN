@@ -630,6 +630,33 @@ namespace PAIN {
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        lua_.set_function("setLayerEnabled", [this](int layerId, bool enabled) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] setLayerEnabled: API not initialized");
+                return;
+            }
+
+            bool success = api_->SetLayerEnabled(layerId, enabled);
+            if (success) {
+                PN_INFO("[Lua] Layer {} enabled: {}", layerId, enabled);
+            }
+            else {
+                PN_WARN("[Lua] Failed to set Layer {} - layer not found", layerId);
+            }
+            });
+
+        lua_.set_function("getLayerEnabled", [this](int layerId) -> bool {
+            if (!api_) {
+                PN_ERROR("[LuaManager] getLayerEnabled: API not initialized");
+                return false;
+            }
+            return api_->GetLayerEnabled(layerId);
+            });
+
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
@@ -676,6 +703,22 @@ namespace PAIN {
         lua_.set_function("mousePos", [this] { return api_ ? api_->Input_GetMousePos() : glm::vec2{ 0 }; });
         lua_.set_function("mouseScroll", [this] { return api_ ? api_->Input_GetScrollDelta() : glm::vec2{ 0 }; });
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
+
+        /* =========================================================================== */
+        /*                              Cursor Control                                 */
+        /* =========================================================================== */
+        lua_.set_function("showCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] showCursor - not implemented yet");
+            });
+
+        lua_.set_function("hideCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] hideCursor - not implemented yet");
+            });
+
+
+
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */
@@ -739,6 +782,10 @@ namespace PAIN {
             if (api_) return api_->Animation_IsPlaying(entityId, name);
                 return false;
         });
+        animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationDuration(entityId);
+            return 0.0f;
+            });
     }
 
 

@@ -439,15 +439,22 @@ namespace PAIN {
         PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
             name, targetGuid.ToString());
 
+        // Preserve play state
         bool previousSceneState = scene_->isPlaying();
-        scene_->loadScene(targetGuid);
 
+        // Load next scene
+        scene_->loadScene(targetGuid);
+        
+        // Set scene to play
         if (previousSceneState) {
             scene_->onPlay();
         }
         else {
             scene_->onStop();
         }
+
+        // Set Camera to game camera
+        scene_->SetGameCamera();
 
         return true;
     }
@@ -457,6 +464,47 @@ namespace PAIN {
     float EngineAPIAdapter::GetFps() const { return 0.0f; }
     void EngineAPIAdapter::SetDeltaMultiplier(float) {}
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
+
+    /* =========================================================================== */
+/*                              Layer Control                                  */
+/* =========================================================================== */
+
+    bool EngineAPIAdapter::SetLayerEnabled(int layerId, bool enabled) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] SetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (auto& layer : layers) {
+            if (layer.id == layerId) {
+                layer.enabled = enabled;
+                PN_CORE_INFO("[EngineAPIAdapter] Set Layer {} enabled: {}", layerId, enabled);
+                return true;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
+    bool EngineAPIAdapter::GetLayerEnabled(int layerId) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] GetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (const auto& layer : layers) {
+            if (layer.id == layerId) {
+                return layer.enabled;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
 
     /* =========================================================================== */
     /*                              Graphics / FX                                  */
@@ -788,20 +836,29 @@ namespace PAIN {
         if (!reg.all_of<PAIN::Animation>(entityId)) return;
 
         int idx = FindAnimIndex(ecs_, entityId, animName);
-        if (idx != -1) {
-            auto& anim = reg.get<PAIN::Animation>(entityId);
 
-            // Only crossfade if different
-            if (anim.currentAnimationIndex != idx) {
-                anim.nextAnimationIndex = idx;
-                anim.transitionDuration = duration > 0.0f ? duration : 0.1f;
-                anim.transitionWeight = 0.0f; // Start transition from 0
-                anim.isPlaying = true;
-            }
-        }
-        else {
+        if (idx == -1) {
             PN_CORE_WARN("[EngineAPI] Animation_CrossFade: Animation '{}' not found on entity {}", animName, (uint32_t)entityId);
+            return;
         }
+
+        auto& anim = reg.get<PAIN::Animation>(entityId);
+
+        // Only crossfade if different
+        if (anim.currentAnimationIndex == idx && anim.nextAnimationIndex == -1) {
+            return;
+        }
+
+        // If ALREADY transitioning to this animation, let it finish.
+        if (anim.nextAnimationIndex == idx) {
+            return; 
+        }
+
+        anim.nextAnimationIndex = idx;
+        anim.transitionDuration = duration > 0.0f ? duration : 0.1f; 
+        anim.transitionWeight = 0.0f;
+        anim.isPlaying = true;
+
     }
 
     void EngineAPIAdapter::Animation_SetSpeed(entt::entity entityId, float speed)
@@ -831,5 +888,14 @@ namespace PAIN {
         // Check if current is the anim AND it's playing
         // OR check if we are transitioning TO it
         return (anim.currentAnimationIndex == idx && anim.isPlaying) || (anim.nextAnimationIndex == idx);
+    }
+    float EngineAPIAdapter::GetAnimationDuration(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            return reg.get<PAIN::Animation>(entityId).animationTime;
+        }
+
+        return 0.0f;
     }
 }

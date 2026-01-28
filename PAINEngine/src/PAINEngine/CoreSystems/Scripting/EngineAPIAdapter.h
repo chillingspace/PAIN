@@ -113,6 +113,12 @@ namespace PAIN {
         float GetDeltaMultiplier() const override;
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        bool SetLayerEnabled(int layerId, bool enabled) override;
+        bool GetLayerEnabled(int layerId) override;
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         void ShakeCamera(float duration, float amplitude) override;
@@ -173,6 +179,7 @@ namespace PAIN {
         void Animation_SetSpeed(entt::entity entityId, float speed) override;
         void Animation_SetLoop(entt::entity entityId, bool loop) override;
         bool Animation_IsPlaying(entt::entity entityId, std::string animName) override;
+        float GetAnimationDuration(entt::entity entityId) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());

@@ -69,6 +69,9 @@ namespace PAIN {
                 // Cam Panel
                 void drawActiveCamPanel();
 
+                // Loading Screen Panel
+                void drawLoadingScreenPanel();
+
                 // Layer management state
                 unsigned selectedLayerIdx_ = 0;
 

@@ -101,6 +101,12 @@ namespace PAIN {
         virtual float GetDeltaMultiplier() const = 0;
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        virtual bool SetLayerEnabled(int layerId, bool enabled) = 0;
+        virtual bool GetLayerEnabled(int layerId) = 0;
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         virtual void ShakeCamera(float duration, float amplitude) = 0;
@@ -160,6 +166,7 @@ namespace PAIN {
         virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
         virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
         virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationDuration(entt::entity entityId) = 0;
 
     };
 
