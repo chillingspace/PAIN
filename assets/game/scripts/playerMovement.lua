@@ -102,6 +102,8 @@ local idleTimer = 0.0
 local idleInterval = 5.0
 local S = nil
 
+local maxGroundCheckDist = 0.25
+
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
     if _G_root.gamePaused then
