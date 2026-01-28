@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "prefabs",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "7ce07807-9f5f-2844-8428-64f88ef0eb6e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\prefabs"
+  }
+}

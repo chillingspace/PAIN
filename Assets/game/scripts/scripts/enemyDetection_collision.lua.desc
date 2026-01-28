@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "enemyDetection_collision.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 3653522494933740544
+  },
+  "descriptor_version": 1,
+  "guid": "22345232-e154-f042-9c56-3391fb5e3164",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\scripts\\enemyDetection_collision.lua"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "enemyDetection_radius.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 9012428952439156931
+  },
+  "descriptor_version": 1,
+  "guid": "0ab12b46-3b63-2143-8863-042d7302bdb8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\scripts\\enemyDetection_radius.lua"
+  }
+}

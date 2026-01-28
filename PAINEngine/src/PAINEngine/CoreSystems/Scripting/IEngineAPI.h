@@ -79,6 +79,7 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
+		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
 
         /* =========================================================================== */
         /*                                   Audio                                     */

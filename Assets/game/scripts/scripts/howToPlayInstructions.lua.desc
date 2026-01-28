@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "howToPlayInstructions.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 10382589409109487009
+  },
+  "descriptor_version": 1,
+  "guid": "8ec5603e-4501-4a4f-adc9-41cc449d880d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\scripts\\howToPlayInstructions.lua"
+  }
+}

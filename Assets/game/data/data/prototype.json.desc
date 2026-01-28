@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "prototype.json",
+    "type": "Data"
+  },
+  "build_data": {
+    "hash": 2771338975587214711
+  },
+  "descriptor_version": 1,
+  "guid": "e4cb1a7a-8a8c-1044-93d8-5aa0dd43040c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\data\\data\\prototype.json"
+  }
+}
