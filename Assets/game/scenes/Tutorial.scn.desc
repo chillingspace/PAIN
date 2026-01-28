@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tutorial.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 14477219204311092720
+  },
+  "descriptor_version": 1,
+  "guid": "95b7210f-817a-d64e-a371-7fcbf2fbb7d0",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\Tutorial.scn"
+  }
+}

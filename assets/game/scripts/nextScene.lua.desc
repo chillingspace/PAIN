@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "nextScene.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 4572191854739547819
+  },
+  "descriptor_version": 1,
+  "guid": "614b9671-17c7-4f4b-a759-f45410de3e15",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\nextScene.lua"
+  }
+}
