@@ -87,12 +87,6 @@ namespace PAIN {
                 void handleMaterialDrop(File* materialFile,
                     ImVec2 localMousePos,
                     ImVec2 viewportSize);
-
-                bool rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-                    const glm::vec3& sphereCenter, float sphereRadius,
-                    float& distance);
-                bool rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-                    const LocalTransform& transform, float& distance);
             };
 
         } // namespace Panel

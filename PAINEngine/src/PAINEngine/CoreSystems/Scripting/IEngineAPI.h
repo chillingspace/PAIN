@@ -79,6 +79,7 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
+		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
 
         /* =========================================================================== */
         /*                                   Audio                                     */
@@ -99,6 +100,12 @@ namespace PAIN {
         virtual float GetFps() const = 0;
         virtual void  SetDeltaMultiplier(float m) = 0;
         virtual float GetDeltaMultiplier() const = 0;
+
+        /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        virtual bool SetLayerEnabled(int layerId, bool enabled) = 0;
+        virtual bool GetLayerEnabled(int layerId) = 0;
 
         /* =========================================================================== */
         /*                              Graphics / FX                                  */

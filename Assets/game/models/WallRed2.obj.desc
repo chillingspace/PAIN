@@ -4,10 +4,10 @@
     "type": "Model"
   },
   "build_data": {
-    "hash": 14998281311630200844
+    "hash": 6895246638064293036
   },
   "descriptor_version": 1,
-  "guid": "55916641-2735-1446-96bf-8fbf12ae9fc4",
+  "guid": "c4f49888-b844-fb45-be89-dbc964b48c18",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,

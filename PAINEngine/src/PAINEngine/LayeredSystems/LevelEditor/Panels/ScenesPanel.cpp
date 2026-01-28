@@ -907,8 +907,6 @@ namespace PAIN {
                 auto& loadingScreen = scn_service->loadingScreen;
                 
                 ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Loading Screen Configuration");
-                ImGui::SameLine();
-                if (ImGui::SmallButton("Default Configuration##LoadingScreen")) loadingScreen->defaultSetup();
                 ImGui::Separator();
                 ImGui::Spacing();
                 
@@ -1035,6 +1033,25 @@ namespace PAIN {
                 // ============================================================
                 if (ImGui::CollapsingHeader("Style & Colors")) {
                     ImGui::Indent();
+
+                    auto bgColor = loadingScreen->getBackgroundColor();
+                    float bgfillColorArray[3] = { bgColor.r, bgColor.g, bgColor.b };
+
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Background Appearance");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    // Fill Color
+                    ImGui::Text("Background Fill Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##BGFillColor", bgfillColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setBackgroundColor(glm::vec3(bgfillColorArray[0], bgfillColorArray[1], bgfillColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the background");
+                    }
+
+                    ImGui::Spacing();
                     
                     ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Progress Bar Appearance");
                     ImGui::Separator();
@@ -1251,7 +1268,7 @@ namespace PAIN {
                     
                     ImGui::Checkbox("Auto-animate progress", &autoAnimate);
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Automatically cycle progress from 0% to 100%");
+                        ImGui::SetTooltip("Automatically cycle progress from 0%% to 100%%");
                     }
                     
                     ImGui::Spacing();
@@ -1279,6 +1296,10 @@ namespace PAIN {
                 
                 ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
+
+                if (ImGui::Button("Default Configuration##LoadingScreen")) loadingScreen->defaultSetup();
+
                 ImGui::Spacing();
                 
                 // Info footer

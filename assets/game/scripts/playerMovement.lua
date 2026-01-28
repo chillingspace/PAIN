@@ -1,4 +1,3 @@
-
 -- player movement script
 local moveLeft = false
 local moveRight = false
@@ -33,6 +32,9 @@ local joystickDirY = 0.0
 
 -- for UI button (on_click_callback_lua = "JumpButton_OnClick")
 _G_root.JumpButton_OnClick = function()
+    -- Don't allow jump when paused
+    if _G_root.gamePaused then return end
+    
     printLog("[UI] Jump button pressed, setting jumpPressed")
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
         return
@@ -41,6 +43,9 @@ _G_root.JumpButton_OnClick = function()
 end
 
 _G_root.ActionButton_OnClick = function()
+    -- Don't allow action when paused
+    if _G_root.gamePaused then return end
+    
     printLog("[UI] Action button pressed (hide / collect)")
     if PlayerState and PlayerState.onActionButton then
         PlayerState.onActionButton()
@@ -48,61 +53,79 @@ _G_root.ActionButton_OnClick = function()
 end
 
 -- Callback for joystick (on_click_callback_lua = "Joystick_OnDrag")
--- This function handles both drag (with x, y params) and click (no params)
 _G_root.Joystick_OnDrag = function(dirX, dirY)
-    -- If called with parameters, it's a drag event
+    -- Don't process joystick when paused
+    if _G_root.gamePaused then 
+        joystickDirX = 0.0
+        joystickDirY = 0.0
+        return 
+    end
+    
     if dirX ~= nil and dirY ~= nil then
         joystickDirX = dirX
         joystickDirY = dirY
     end
-    -- If called without parameters, it's a click (can be ignored for joystick)
 end
 
-registerKeyDown("W", function() moveUp = true end)
-registerKeyDown("S", function() moveDown = true end)
-registerKeyDown("A", function() moveLeft = true end)
-registerKeyDown("D", function() moveRight = true end)
-registerKeyDown("SPACE", function() jumpPressed = true end)
+registerKeyDown("W", function() 
+    if not _G_root.gamePaused then moveUp = true end 
+end)
+registerKeyDown("S", function() 
+    if not _G_root.gamePaused then moveDown = true end 
+end)
+registerKeyDown("A", function() 
+    if not _G_root.gamePaused then moveLeft = true end 
+end)
+registerKeyDown("D", function() 
+    if not _G_root.gamePaused then moveRight = true end 
+end)
+registerKeyDown("SPACE", function() 
+    if not _G_root.gamePaused then jumpPressed = true end 
+end)
+
 registerKeyUp("W", function() moveUp = false end)
 registerKeyUp("S", function() moveDown = false end)
 registerKeyUp("A", function() moveLeft = false end)
 registerKeyUp("D", function() moveRight = false end)
 
-local speed = 0.8
-local jumpSpeed = 2
+local speed = 3
+local jumpSpeed = 5
 local isGrounded = true
-local groundY = nil -- will be set from initial position
+local groundY = nil
 
-local I = nil -- will be hooked to _G.Input once PlayerState has created it
-
--- grab initial rotation 
+local I = nil
 local baseRx, baseRy, baseRz = getRotation(entityId)
 local currentYaw = baseRy or 0.0
 local playerStateInited = false
 
-local idleTimer     = 0.0
-local idleInterval  = 5.0   -- seconds between idle sounds when not moving
-local S = nil -- will grab _G.PlayerState
-
+local idleTimer = 0.0
+local idleInterval = 5.0
+local S = nil
 
 registerUpdate(function(dt)
-    local id = entityId -- the entity script is attached to
+    -- EARLY EXIT: If game is paused, freeze player completely
+    if _G_root.gamePaused then
+        -- Stop walking audio
+        if walkingSoundPlaying and audioStop then
+            audioStop(entityId)
+            walkingSoundPlaying = false
+        end
+        
+        -- Clear all movement inputs
+        joystickDirX = 0.0
+        joystickDirY = 0.0
+        
+        -- Stop all movement
+        setVelocity(entityId, 0.0, 0.0, 0.0)
+        return
+    end
     
+    local id = entityId
     _G.PlayerEntity = id
 
-    -- log("[PlayerMovement] player:", tostring(_G.PlayerEntity))
-
-    -- make sure see Input even if PlayerState loaded later
     if not I and _G.Input then
         I = _G.Input
     end
-
-    -- if not playerStateInited then
-    --     if PlayerState and PlayerState.init then
-    --         PlayerState.init(entityId)
-    --     end
-    --     playerStateInited = true
-    -- end
 
     if PlayerState and PlayerState.init then
         if not PlayerState.player or PlayerState.player ~= entityId then
@@ -110,33 +133,23 @@ registerUpdate(function(dt)
         end
     end
 
-
-        if not S and _G.PlayerState then
+    if not S and _G.PlayerState then
         S = _G.PlayerState
     end
 
-    -- freeze player when game has ended (game over or win)
+    -- freeze player when game has ended
     if PlayerState and PlayerState.isGameEnded and PlayerState.isGameEnded() then
         -- stop walking audio
         if audioStop then
             audioStop(id)
         end
-
-        -- stop movement
         setVelocity(id, 0.0, 0.0, 0.0)
         jumpPressed = false
         return
     end
 
-
     -- while hiding: stop movement + stop audio 
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
-        -- clear any pending jump inputs so they dont fire after unhide
-        -- if I then
-        --     I.doubleTapped = false
-        --     I.tapCount = 0     
-        --     I.tapTimer = 0.0
-        -- end
         jumpPressed = false
 
         if audioStop then
@@ -149,7 +162,7 @@ registerUpdate(function(dt)
     local x, y, z = getPosition(id) 
     if groundY == nil then
         groundY = y
-    elseif isGrounded and math.abs(y - groundY) > 0.01 then -- if player gets teleported to a new floor/checkpoint
+    elseif isGrounded and math.abs(y - groundY) > 0.01 then
         groundY = y 
     end
     local curr_vx, curr_vy, curr_vz = getVelocity(id)
@@ -157,7 +170,7 @@ registerUpdate(function(dt)
     -- input -> movement
     local dx, dz = 0.0, 0.0
 
-    -- 1. PC: Arrow keys (KEY_U/D/L/R)
+    -- 1. PC: WASD keys
     if moveUp    then dz = dz + 1.0 end
     if moveDown  then dz = dz - 1.0 end
     if moveLeft  then dx = dx + 1.0 end
@@ -166,7 +179,7 @@ registerUpdate(function(dt)
     -- 2. Android: left side of screen controls player movement (DISABLED - using virtual joystick instead)
     --[[
     if getMobileMoveAxes ~= nil then
-        local mx, my = getMobileMoveAxes()
+        local mx, my = getMobileMoveAxes()  
         dx = dx + mx
         dz = dz - my
     end
@@ -244,10 +257,6 @@ registerUpdate(function(dt)
         local sinY = math.sin(cy)
         local cosY = math.cos(cy)
 
-        -- dx, dz are in camera-local space.
-        -- Convert to world space using camera's right and forward:
-        -- right  = ( cosY, 0, -sinY )
-        -- forward= ( sinY, 0,  cosY )
         local wx =  cosY * dx + sinY * dz
         local wz = -sinY * dx + cosY * dz
 
@@ -265,13 +274,11 @@ registerUpdate(function(dt)
         vx = dx * speed
         vz = dz * speed
 
-        -- move in that direction
         x = x + dx * speed * dt
         z = z + dz * speed * dt
 
         local newYaw = math.atan(dx, dz)   
 
-        -- unwrap to avoid jumps across +pi / -pi
         local diff = newYaw - currentYaw
         if diff > math.pi then
             newYaw = newYaw - 2*math.pi
@@ -288,7 +295,7 @@ registerUpdate(function(dt)
     -- ground check based on physics
     local groundedEpsPos = 0.05
     local groundedEpsVel = 0.1
-    isGrounded = (y <= groundY + groundedEpsPos) and (curr_vy <= groundedEpsVel)
+    isGrounded = isGrounded_(id, maxGroundCheckDist)
 
     -- jump, modify vertical vel -> physics handle gravity
     -- local doubleTapJump = (I and I.doubleTapped) or false
@@ -297,21 +304,18 @@ registerUpdate(function(dt)
         curr_vy = jumpSpeed  
         isGrounded = false
 
+        Animation.SetLoop(id, true)
+        PlayAnim(id, ANIM_JUMP, 0.05, true)
+
         -- jump sfx
         if S and S.sfxJump then
-            Animation.SetLoop(id, true)
-            PlayAnim(id, ANIM_JUMP, 0.05, true)
             audioPlay(S.sfxJump)
         end
         
         -- consume jump
         jumpPressed = false
-        -- if I then
-        --     I.doubleTapped = false
-        -- end
     end
 
-    -- apply rotation and phy velocity
     setRotation(id, baseRx, currentYaw, baseRz)
     setVelocity(id, vx, curr_vy, vz)
 

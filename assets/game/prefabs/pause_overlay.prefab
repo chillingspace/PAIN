@@ -1,0 +1,103 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "3f14b949-e2af-044c-864a-4c91c714b35e",
+                    "siblingIndex": 4
+                },
+                "Layer": {
+                    "layer_id": 2,
+                    "layer_mask": 4
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "pause_overlay"
+                },
+                "Texture2D": {
+                    "pos": [
+                        0.0,
+                        0.0
+                    ],
+                    "texture_guid": "e3ef88a4-bc32-2d49-b6dc-b4cdd0c69531",
+                    "texture_scale": [
+                        2.0,
+                        1.0
+                    ]
+                },
+                "UIElement": {
+                    "b_is_enabled": true,
+                    "b_is_interactable": true,
+                    "layer": 0
+                },
+                "UIRectTransform": {
+                    "anchor_max": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchor_min": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchored_position": [
+                        0.0,
+                        0.0
+                    ],
+                    "local_position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "offset_max": [
+                        0.0,
+                        0.0
+                    ],
+                    "offset_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "size_delta": [
+                        364.0,
+                        364.0
+                    ]
+                }
+            },
+            "entityGUID": "01ef6a12-57ac-1c4b-86fb-25b9724637c8"
+        }
+    ],
+    "prefabName": "pause_overlay",
+    "rootEntityGUID": "01ef6a12-57ac-1c4b-86fb-25b9724637c8"
+}

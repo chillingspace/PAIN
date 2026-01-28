@@ -355,6 +355,19 @@ namespace PAIN {
 
     }
 
+    bool EngineAPIAdapter::IsGrounded(entt::entity entityId, float maxDistance) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return false;
+
+		auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);       
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+			return phys->isGrounded(rb.bodyID, maxDistance);
+        }
+
+        return false;
+    }
+
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */
@@ -466,7 +479,48 @@ namespace PAIN {
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
     /* =========================================================================== */
-    /*                              Camera / FX                                    */
+/*                              Layer Control                                  */
+/* =========================================================================== */
+
+    bool EngineAPIAdapter::SetLayerEnabled(int layerId, bool enabled) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] SetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (auto& layer : layers) {
+            if (layer.id == layerId) {
+                layer.enabled = enabled;
+                PN_CORE_INFO("[EngineAPIAdapter] Set Layer {} enabled: {}", layerId, enabled);
+                return true;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
+    bool EngineAPIAdapter::GetLayerEnabled(int layerId) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] GetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (const auto& layer : layers) {
+            if (layer.id == layerId) {
+                return layer.enabled;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
+
+    /* =========================================================================== */
+    /*                              Graphics / FX                                  */
     /* =========================================================================== */
     void EngineAPIAdapter::ShakeCamera(float /*duration*/, float /*amplitude*/) {}
 
@@ -840,5 +894,7 @@ namespace PAIN {
         if (reg.all_of<PAIN::Animation>(entityId)) {
             return reg.get<PAIN::Animation>(entityId).animationTime;
         }
+
+        return 0.0f;
     }
 }

@@ -19,10 +19,14 @@ local lastMouseY = nil
 local isInit = false
 
 -- shared so movement can be camera-relative
--- _G.CameraState = _G.CameraState or { yaw = yaw, pitch = pitch }
 _G.CameraState = { yaw = yaw, pitch = pitch }
 
 registerUpdate(function(dt)
+    -- EXIT EARLY IF PAUSED - stops camera movement
+    if _G_root.gamePaused then
+        return
+    end
+
     local playerId = entityId
 
     if getCameraOffsets then

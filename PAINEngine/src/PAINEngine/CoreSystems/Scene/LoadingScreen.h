@@ -71,6 +71,16 @@ namespace PAIN {
              */
             Assets::GUID getBackgroundTexture();
 
+            /**
+             * @brief Set background color
+             */
+            void setBackgroundColor(glm::vec3 const& bg_color);
+
+            /**
+             * @brief Get background color
+             */
+            glm::vec3 getBackgroundColor();
+
             // ============================================================
             // Runtime Configuration - Progress Bar
             // ============================================================
@@ -297,10 +307,6 @@ void main() {
             // Window dimensions for aspect ratio calculation
             std::weak_ptr<Services> services;
 
-            // Optional background texture
-            Assets::GUID m_backgroundTextureGUID;
-            float bgScale = 1.0f;
-
             // Custom shader programs for loading screen effects
             unsigned int m_progressBarShader{ 0 };
             unsigned int m_overlayShader{ 0 };
@@ -308,6 +314,11 @@ void main() {
             // Animation timing
             float m_animationTime{ 0.0f };
             std::chrono::steady_clock::time_point m_lastFrameTime;
+
+            // Optional background texture
+            Assets::GUID m_backgroundTextureGUID;
+            glm::vec3 m_backGroundColor{ 0.1f, 0.1f, 0.1f };
+            float bgScale = 1.0f;
 
             // Progress Bar - Screen Space Configuration (in pixels)
             glm::vec2 m_progressBarPosition{ 0.0f, 0.0f };  // Position (x, y) in screen space
