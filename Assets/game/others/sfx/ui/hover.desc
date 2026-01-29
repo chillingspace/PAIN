@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "hover",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 0
+  },
+  "descriptor_version": 1,
+  "guid": "c2868410-bc02-9b4c-ae86-5e8f638594ca",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\sfx\\ui\\hover"
+  }
+}
