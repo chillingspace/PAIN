@@ -22,6 +22,9 @@
 #include "PAINEngine/CoreSystems/Events/GLFW/KeyEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/MouseEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/WindowEvents.h"
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
 #endif
 
 namespace PAIN {
@@ -117,6 +120,11 @@ namespace PAIN {
             luaManager_.Input_OnEvent(e); // foward all events to luamanger
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+            // Skip keyboard input if user is typing in ImGui editor
+            ImGuiIO& io = ImGui::GetIO();
+            if (!io.WantCaptureKeyboard) {
+#endif
             d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
                 //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
                 if (auto name = getKeyName(ev.getKeyCode())) {
@@ -132,6 +140,9 @@ namespace PAIN {
                 }
                 return false;
                 });
+#ifdef _DEBUG
+            }
+#endif
             d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed&) {
                 luaManager_.onClick();
                 return false;

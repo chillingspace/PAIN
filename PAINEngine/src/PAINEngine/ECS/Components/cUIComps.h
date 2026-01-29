@@ -68,6 +68,7 @@ namespace PAIN {
         // ─── Calculated values (DO NOT SET - computed by layout system) ───
         glm::vec2 calculated_world_position{ 0, 0 };
         glm::vec2 calculated_world_size{ 100, 100 };
+        bool layout_dirty = true;  // Set true when layout needs recalculation
     };
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -375,7 +376,6 @@ REFL_END
 static_assert(refl::trait::is_reflectable_v<PAIN::UVCoordinates>);
 
 REFL_TYPE(PAIN::UIText)
-REFL_FIELD(text_pos)
 REFL_FIELD(display_text)
 REFL_FIELD(color)
 REFL_FIELD(font_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Font))

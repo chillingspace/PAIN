@@ -99,6 +99,7 @@ namespace PAIN {
             // Store calculated values
             rect.calculated_world_position = calculated_pos;
             rect.calculated_world_size = calculated_size;
+            rect.layout_dirty = true;
 
             // ── Recurse children ──
             if (registry.all_of<Entity::Hierarchy>(entity)) {
