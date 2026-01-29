@@ -751,7 +751,7 @@ namespace PAIN {
 									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
 
 									// Hotkeys (skip if typing in text field)
-								if (!ImGui::GetIO().WantCaptureKeyboard) {
+								if (!ImGui::GetIO().WantTextInput) {
 									if (ImGui::IsKeyPressed(ImGuiKey_T))
 										m_GizmoOperation = ImGuizmo::TRANSLATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_R))
