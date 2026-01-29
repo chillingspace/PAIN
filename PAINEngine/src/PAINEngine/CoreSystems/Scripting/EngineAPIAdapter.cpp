@@ -23,6 +23,9 @@
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -567,6 +570,11 @@ namespace PAIN {
         Dispatcher d{ e };
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+        // Skip keyboard input if user is typing in ImGui text field
+        ImGuiIO& io = ImGui::GetIO();
+        if (!io.WantTextInput) {
+#endif
         d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
             keysDown_.insert(ev.getKeyCode());
             keysPressed_.insert(ev.getKeyCode());
@@ -580,6 +588,9 @@ namespace PAIN {
         d.Dispatch<KeyRepeated>([&](KeyRepeated&) {
             return false;
             });
+#ifdef _DEBUG
+        }
+#endif
 
         d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed& ev) {
             mouseDown_.insert(ev.getBtnCode());

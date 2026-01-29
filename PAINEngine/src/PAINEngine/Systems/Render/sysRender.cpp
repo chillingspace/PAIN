@@ -826,8 +826,12 @@ namespace PAIN {
 				// PN_CORE_INFO("[Render System] Rendering Font: {}",
 				// font_opt.value()->name);
 
-				text_comp.text_pos = rect_comp.calculated_world_position;
-				text_comp.scale_factor = rect_comp.scale.x;
+				// Only recalculate text_pos when layout changes
+				if (rect_comp.layout_dirty) {
+					text_comp.text_pos = rect_comp.calculated_world_position;
+					text_comp.scale_factor = rect_comp.scale.x;
+					rect_comp.layout_dirty = false;
+				}
 
 				TextRenderer::get().renderText(text_comp);
 

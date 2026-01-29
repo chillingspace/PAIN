@@ -1415,7 +1415,7 @@ namespace PAIN {
 					ImGui::Spacing();
 
 					//Save file
-					if (ImGui::Button("Save##Save file") || (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))) {
+				if (ImGui::Button("Save##Save file") || (!ImGui::GetIO().WantTextInput && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_S))) {
 						//std::ofstream file(PN_ASSETS_SERVICE->getAssetPath(it->first));
 						//if (file.is_open()) {
 						//	file << it->second;
