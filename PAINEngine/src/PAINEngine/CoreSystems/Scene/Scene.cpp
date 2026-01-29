@@ -1275,8 +1275,9 @@ namespace PAIN {
 			}
 
 			//Scene loaded successfully
-			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
+			PN_CORE_INFO("[SceneManager] Loaded scene {} from GUID: {}", currentSceneAsset->name, sceneGUID.ToString());
 			curr_scene_id = sceneGUID;
+			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
@@ -1417,10 +1418,9 @@ namespace PAIN {
 
 			//Reset with default
 			curr_scene_id = Assets::GUID();
+			services->get<Serialization::Service>()->clearModifiedFlag();
+			services->get<Serialization::Service>()->setCurrSceneFileName("");
 
-			// Clear lights
-			//LightSources::get().clear();
-			//PN_CORE_INFO("[SceneManager] Cleared all lights");
 
 			// Reset camera (but don't destroy it - we'll reuse it)
 			active_game_cam = "";

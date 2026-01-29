@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Command.h"
 
+
 namespace PAIN {
 	namespace Editor {
 
@@ -25,7 +26,11 @@ namespace PAIN {
 
 			action.undo_action();
 
-			if (onModifySceneHook) onModifySceneHook();
+			if (services) {
+				if (auto ser = services->get<Serialization::Service>()) {
+					ser->modifyScene();
+				}
+			}
 
 			redo_stack.push(std::move(action));
 			undo_stack.pop();
@@ -54,7 +59,11 @@ namespace PAIN {
 
 			action.do_action();
 
-			if (onModifySceneHook) onModifySceneHook();
+			if (services) {
+				if (auto ser = services->get<Serialization::Service>()) {
+					ser->modifyScene();
+				}
+			}
 
 			undo_stack.push(std::move(action));
 			redo_stack.pop();
@@ -73,8 +82,11 @@ namespace PAIN {
 			// Execute action immediately
 			action.do_action();
 
-			if (onModifySceneHook) onModifySceneHook();
-
+			if (services) {
+				if (auto ser = services->get<Serialization::Service>()) {
+					ser->modifyScene();
+				}
+			}
 			// Push executed action onto the undo action stack
 			undo_stack.push(std::move(action));
 
