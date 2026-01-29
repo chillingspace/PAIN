@@ -148,18 +148,47 @@ namespace PAIN {
                  // Return an AABB that reflects this invalid state if needed, or a default one
                  return AABB(); // Default constructor gives max/lowest bounds
             }
-            glm::vec3 corners[8] = {
-                glm::vec3(min.x, min.y, min.z), glm::vec3(max.x, min.y, min.z),
-                glm::vec3(min.x, max.y, min.z), glm::vec3(min.x, min.y, max.z),
-                glm::vec3(max.x, max.y, min.z), glm::vec3(min.x, max.y, max.z),
-                glm::vec3(max.x, min.y, max.z), glm::vec3(max.x, max.y, max.z)
-            };
-            AABB transformed_aabb; // Initializes to max/lowest
-            for (int i = 0; i < 8; ++i) {
-                glm::vec4 transformed_corner = matrix * glm::vec4(corners[i], 1.0f);
-                transformed_aabb.expand(glm::vec3(transformed_corner)); // Expand using vec3 part
+
+            // Naive method
+            //glm::vec3 corners[8] = {
+            //    glm::vec3(min.x, min.y, min.z), glm::vec3(max.x, min.y, min.z),
+            //    glm::vec3(min.x, max.y, min.z), glm::vec3(min.x, min.y, max.z),
+            //    glm::vec3(max.x, max.y, min.z), glm::vec3(min.x, max.y, max.z),
+            //    glm::vec3(max.x, min.y, max.z), glm::vec3(max.x, max.y, max.z)
+            //};
+            //AABB transformed_aabb; // Initializes to max/lowest
+            //for (int i = 0; i < 8; ++i) {
+            //    glm::vec4 transformed_corner = matrix * glm::vec4(corners[i], 1.0f);
+            //    transformed_aabb.expand(glm::vec3(transformed_corner)); // Expand using vec3 part
+            //}
+            //return transformed_aabb;
+
+            // Arvo's Algorithm (Center-Extent) 
+            glm::vec3 newMin = glm::vec3(matrix[3]);
+            glm::vec3 newMax = newMin;
+
+            glm::vec3 currentMin = min;
+            glm::vec3 currentMax = max;
+
+            // For each column of the 3x3 rotation/scale part
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    float e = matrix[i][j]; 
+                    float a = e * currentMin[i];
+                    float b = e * currentMax[i];
+
+                    if (a < b) {
+                        newMin[j] += a;
+                        newMax[j] += b;
+                    }
+                    else {
+                        newMin[j] += b;
+                        newMax[j] += a;
+                    }
+                }
             }
-            return transformed_aabb;
+
+            return AABB(newMin, newMax);
         }
 
         // Merge two AABBs

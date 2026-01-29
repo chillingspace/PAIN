@@ -652,8 +652,8 @@ namespace PAIN {
             #ifdef PN_PLATFORM_WINDOWS
              PN_CORE_WARN("BVH::computeAABB: Invalid child index for node {}. Child1: {}, Child2: {}", nodeIndex, child1Idx, child2Idx);
             #endif
-             // Assign a default state to prevent further issues
-             node.aabb = AABB();
+             // Return a zero-sized box because default state is an invalid box
+             node.aabb = AABB(glm::vec3(0), glm::vec3(0));
              node.height = 0; // Treat as leaf in error case?
              return;
         }

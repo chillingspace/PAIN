@@ -53,6 +53,8 @@ public:
         int layer = 0;
     };
 
+    std::vector<RaycastHit> raycastAll(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, entt::registry& registry, int layerMask);
+
     std::optional<RaycastHit> raycast(
         const glm::vec3& origin,
         const glm::vec3& direction,
@@ -80,6 +82,7 @@ private:
         entt::entity entityA,
         entt::entity entityB
     );
+
 
     bool rayAABBIntersect(
         const glm::vec3& origin,
