@@ -571,9 +571,9 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
-        // Skip keyboard input if user is typing in ImGui editor
+        // Skip keyboard input if user is typing in ImGui text field
         ImGuiIO& io = ImGui::GetIO();
-        if (!io.WantCaptureKeyboard) {
+        if (!io.WantTextInput) {
 #endif
         d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
             keysDown_.insert(ev.getKeyCode());

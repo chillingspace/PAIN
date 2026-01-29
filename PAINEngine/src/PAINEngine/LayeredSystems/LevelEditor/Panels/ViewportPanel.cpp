@@ -561,8 +561,8 @@ namespace PAIN {
 							}
 						}
 
-						// Focus on entity 
-						if (ImGui::IsKeyPressed(ImGuiKey_F)) {
+						// Focus on entity (skip if typing in text field)
+						if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_F)) {
 
 							entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
 
@@ -750,13 +750,15 @@ namespace PAIN {
 									ImGuizmo::SetDrawlist();
 									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
 
-									// Hotkeys
+									// Hotkeys (skip if typing in text field)
+								if (!ImGui::GetIO().WantCaptureKeyboard) {
 									if (ImGui::IsKeyPressed(ImGuiKey_T))
 										m_GizmoOperation = ImGuizmo::TRANSLATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_R))
 										m_GizmoOperation = ImGuizmo::ROTATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_Y))
 										m_GizmoOperation = ImGuizmo::SCALE;
+								}
 
 									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 

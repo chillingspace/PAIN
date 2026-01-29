@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "sCameraController.h"
 
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
+
 
 namespace PAIN {
     MobileMoveAxes g_MobileMoveAxes;
@@ -475,8 +479,12 @@ namespace PAIN {
                 });
         }
 
-        // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+#ifdef _DEBUG
+            if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantTextInput) {
+                return false;
+            }
+#endif
             auto& gs = GraphicsSettings::get();
             auto window = services->get<Window::Window>();
 

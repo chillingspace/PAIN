@@ -130,6 +130,9 @@ namespace PAIN {
             //Get IO
             ImGuiIO& io = ImGui::GetIO();
 
+            // Skip hotkeys if user is typing in a text field
+            if (io.WantTextInput) return;
+
             //Undo
             static bool z_triggered = false;
             if (io.KeyCtrl && ImGui::IsKeyDown(ImGuiKey_Z)) {
