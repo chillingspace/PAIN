@@ -274,6 +274,15 @@ function S.isGameEnded()
     return S.gameEnded
 end
 
+-- called by "hide" ui button
+function S.onHideButton()
+    hidePressed = true
+end
+
+-- called by "collect" ui button
+function S.onCollectButton()
+    collectPressed = true
+end
 
 -- called by ui button, decides whether this press should hide/unhide or collect/deliver
 function S.onActionButton()

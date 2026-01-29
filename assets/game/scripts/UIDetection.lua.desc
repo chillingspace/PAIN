@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "UIDetection.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 15291395318687682710
+  },
+  "descriptor_version": 1,
+  "guid": "512f3df5-9882-3248-85d0-c853b7336574",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\UIDetection.lua"
+  }
+}

@@ -144,6 +144,8 @@ namespace PAIN {
         virtual void SetMeshId(entt::entity entityId, uint32_t meshId) = 0;
 
         virtual void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) = 0;
+        virtual void SetUITextureScale(entt::entity e, glm::vec2 s) = 0;
+        virtual glm::vec2 GetUITextureScale(entt::entity e) = 0;
 
         /* =========================================================================== */
         /*                                  Lighting                                   */

@@ -731,6 +731,20 @@ namespace PAIN {
         tex.texture_guid = guid;
     }
 
+    void EngineAPIAdapter::SetUITextureScale(entt::entity e, glm::vec2 s)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Texture2D>(e)) return;
+        reg.get<Texture2D>(e).texture_scale = s;
+    }
+
+    glm::vec2 EngineAPIAdapter::GetUITextureScale(entt::entity e)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Texture2D>(e)) return { 1.f, 1.f };
+        return reg.get<Texture2D>(e).texture_scale;
+    }
+
     /* =========================================================================== */
     /*                                  Lighting                                   */
     /* =========================================================================== */

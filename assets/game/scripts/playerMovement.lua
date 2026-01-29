@@ -30,26 +30,36 @@ end
 local joystickDirX = 0.0
 local joystickDirY = 0.0
 
--- for UI button (on_click_callback_lua = "JumpButton_OnClick")
-_G_root.JumpButton_OnClick = function()
-    -- Don't allow jump when paused
+-- -- for UI button (on_click_callback_lua = "JumpButton_OnClick")
+-- _G_root.JumpButton_OnClick = function()
+--     printLog("[UI] Jump button pressed, setting jumpPressed")
+--     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
+--         return
+--     end
+--     jumpPressed = true
+-- end
+
+-- _G_root.ActionButton_OnClick = function()
+--     printLog("[UI] Action button pressed (hide / collect)")
+--     if PlayerState and PlayerState.onActionButton then
+--         PlayerState.onActionButton()
+--     end
+-- end
+
+-- shared input API for other UIActions.lua
+_G.PlayerInput = _G.PlayerInput or {}
+local PlayerInput = _G.PlayerInput
+
+function PlayerInput.requestJump()
     if _G_root.gamePaused then return end
-    
-    printLog("[UI] Jump button pressed, setting jumpPressed")
+    printLog("[Input] requestJump from UI")
+
+    -- Same guard as before: cannot jump while hidden
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
         return
     end
-    jumpPressed = true
-end
 
-_G_root.ActionButton_OnClick = function()
-    -- Don't allow action when paused
-    if _G_root.gamePaused then return end
-    
-    printLog("[UI] Action button pressed (hide / collect)")
-    if PlayerState and PlayerState.onActionButton then
-        PlayerState.onActionButton()
-    end
+    jumpPressed = true
 end
 
 -- Callback for joystick (on_click_callback_lua = "Joystick_OnDrag")
@@ -101,6 +111,8 @@ local playerStateInited = false
 local idleTimer = 0.0
 local idleInterval = 5.0
 local S = nil
+
+local maxGroundCheckDist = 0.25
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "UIActions.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 8930875646671240707
+  },
+  "descriptor_version": 1,
+  "guid": "a03605c3-e8d3-a149-9f63-b06f941776a2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\UIActions.lua"
+  }
+}

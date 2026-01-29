@@ -740,7 +740,14 @@ namespace PAIN {
             api_->SetUITexture(entityId, textureName);
             }
         );
+        lua_.set_function("getUITextureScale", [this](entt::entity e) {
+            auto s = api_->GetUITextureScale(e);
+            return std::make_tuple(s.x, s.y);
+            });
 
+        lua_.set_function("setUITextureScale", [this](entt::entity e, float x, float y) {
+            api_->SetUITextureScale(e, { x, y });
+            });
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
@@ -1007,6 +1014,27 @@ namespace PAIN {
         sol::protected_function fn = obj.as<sol::protected_function>();
         sol::protected_function_result r = fn();
         if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
+    }
+
+    void LuaManager::callGlobal(const std::string& name, const std::string& arg1, entt::entity arg2, const std::string& arg3)
+    {
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' is not a function", name);
+            return;
+        }
+
+        PN_CORE_INFO("[LuaManager] callGlobal: calling '{}' with 3 args", name);
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn(arg1, arg2, arg3);
+        if (!r.valid()) {
+            sol::error e = r;
+            logError("Global(" + name + ")", e);
+        }
     }
 
     void LuaManager::callGlobalWithVec2(const std::string& name, float x, float y) {
