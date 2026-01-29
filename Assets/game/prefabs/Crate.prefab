@@ -1,0 +1,126 @@
+{
+    "entities": [
+        {
+            "components": {
+                "BoundingVolume": {
+                    "localAABB": {
+                        "max": [
+                            0.308515727519989,
+                            0.5970314145088196,
+                            0.308515727519989
+                        ],
+                        "min": [
+                            -0.308515727519989,
+                            -3.814697180359872e-08,
+                            -0.308515727519989
+                        ]
+                    },
+                    "worldAABB": {
+                        "max": [
+                            4.345423698425293,
+                            0.5970314145088196,
+                            -3.6489624977111816
+                        ],
+                        "min": [
+                            3.7283923625946045,
+                            -3.814697180359872e-08,
+                            -4.265994071960449
+                        ]
+                    }
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        4.036908149719238,
+                        0.0,
+                        -3.9574782848358154
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Crate"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e"
+        }
+    ],
+    "prefabName": "Crate",
+    "rootEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e"
+}
