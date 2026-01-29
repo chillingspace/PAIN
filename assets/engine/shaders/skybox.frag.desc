@@ -7,7 +7,7 @@
     "hash": 18118815337253657572
   },
   "descriptor_version": 1,
-  "guid": "0885891e-ae2a-044d-8ab1-44f86fb18b86",
+  "guid": "01315922-f937-6845-bcc6-bc041dd4af59",
   "import_settings": null,
   "meta_data": {
     "source_file": "engine\\shaders\\skybox.frag"

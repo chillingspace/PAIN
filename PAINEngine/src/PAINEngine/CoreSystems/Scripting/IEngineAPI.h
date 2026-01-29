@@ -67,6 +67,8 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetPosition(entt::entity entityId) = 0;
         virtual void SetPosition(entt::entity entityId, glm::vec3 p) = 0;
+        virtual glm::vec2 Get2DPosition(entt::entity entityId) = 0;
+        virtual void Set2DPosition(entt::entity entityId, glm::vec2 p) = 0;
         virtual glm::vec3 GetScale(entt::entity entityId) = 0;
         virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
         virtual glm::vec3 GetRotation(entt::entity entityId) = 0;
@@ -77,6 +79,7 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
+		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
 
         /* =========================================================================== */
         /*                                   Audio                                     */
@@ -97,6 +100,12 @@ namespace PAIN {
         virtual float GetFps() const = 0;
         virtual void  SetDeltaMultiplier(float m) = 0;
         virtual float GetDeltaMultiplier() const = 0;
+
+        /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        virtual bool SetLayerEnabled(int layerId, bool enabled) = 0;
+        virtual bool GetLayerEnabled(int layerId) = 0;
 
         /* =========================================================================== */
         /*                              Graphics / FX                                  */
@@ -135,6 +144,8 @@ namespace PAIN {
         virtual void SetMeshId(entt::entity entityId, uint32_t meshId) = 0;
 
         virtual void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) = 0;
+        virtual void SetUITextureScale(entt::entity e, glm::vec2 s) = 0;
+        virtual glm::vec2 GetUITextureScale(entt::entity e) = 0;
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
@@ -147,6 +158,16 @@ namespace PAIN {
         virtual void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) = 0;
         virtual void SetLightDirection(entt::entity entityId, float x, float y, float z) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
+
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        virtual void Animation_Play(entt::entity entityId, std::string animName) = 0;
+        virtual void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) = 0;
+        virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
+        virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
+        virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationDuration(entt::entity entityId) = 0;
 
     };
 

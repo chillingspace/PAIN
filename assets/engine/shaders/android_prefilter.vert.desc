@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_prefilter.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 6985732510541918937
+  },
+  "descriptor_version": 1,
+  "guid": "51571cd1-01b8-064d-9cf2-3d2805acab3b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_prefilter.vert"
+  }
+}

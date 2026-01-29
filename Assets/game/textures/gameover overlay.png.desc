@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "gameover overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2429978721010902227
+  },
+  "descriptor_version": 1,
+  "guid": "b7128467-93ed-f44f-b83b-c497ae4cc715",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\gameover overlay.png"
+  }
+}

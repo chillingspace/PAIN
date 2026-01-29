@@ -18,6 +18,12 @@
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
 
+#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
+#include "LoadingScreen.h"
+
+#include <thread>
+#include <atomic>
+
 namespace PAIN {
 	namespace Scene {
 
@@ -53,7 +59,6 @@ namespace PAIN {
 
 			return entity;
 		}
-
 
 		bool SceneManager::buildEntitiesFromAsset(SceneAsset const& scene_asset) {
 			if (scene_asset.entityData.empty()) {
@@ -171,8 +176,8 @@ namespace PAIN {
 					// ========================================
 					// PREFAB INSTANCE: Load from prefab + apply overrides
 					// ========================================
-					PN_CORE_TRACE("[SceneManager] Loading prefab instance entity {}",
-						static_cast<uint32_t>(info.entity));
+					//PN_CORE_TRACE("[SceneManager] Loading prefab instance entity {}", static_cast<uint32_t>(info.entity));
+
 					// Get prefab asset
 					auto assetManager = services->get<Assets::Manager>();
 					auto prefabAssetOpt = assetManager->getAsset<Prefab::PrefabAsset>(info.sourcePrefabGUID);
@@ -208,8 +213,7 @@ namespace PAIN {
 					// Load components from prefab
 					if (prefabEntityData->contains("components") && (*prefabEntityData)["components"].is_object()) {
 						controller->loadAllComponentsFromJson(info.entity, (*prefabEntityData)["components"]);
-						PN_CORE_TRACE("[SceneManager] Loaded {} components from prefab",
-							(*prefabEntityData)["components"].size());
+						//PN_CORE_TRACE("[SceneManager] Loaded {} components from prefab", (*prefabEntityData)["components"].size());
 					}
 					// Apply overrides
 					if (!info.componentOverrides.empty()) {
@@ -221,7 +225,7 @@ namespace PAIN {
 							componentJson[componentName] = overrideData;
 							controller->loadAllComponentsFromJson(info.entity, componentJson);
 						}
-						PN_CORE_TRACE("[SceneManager] Applied {} overrides", info.componentOverrides.size());
+						//PN_CORE_TRACE("[SceneManager] Applied {} overrides", info.componentOverrides.size());
 					}
 					// Re-add PrefabInstance component (reload from scene)
 					if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
@@ -372,6 +376,70 @@ namespace PAIN {
 			}
 		}
 
+		void SceneManager::setupLoadingScreen(SceneAsset const& scene_asset) {
+			if (!loadingScreen) {
+				PN_CORE_WARN("[SceneManager] Loading screen not initialized");
+				return;
+			}
+
+			// Get loading screen from scene asset
+			const auto& ls = scene_asset.loadingScreen;
+
+			// Background settings
+			loadingScreen->setBackgroundTexture(ls.backgroundTextureGUID);
+			loadingScreen->setBackgroundColor(ls.backgroundColor);
+			loadingScreen->setBGScale(ls.bgScale);
+			loadingScreen->setShowBG(ls.showBackground);
+			loadingScreen->setShowOverlay(ls.showOverlay);
+
+			// Progress bar settings
+			loadingScreen->setProgressBarPosition(ls.progressBarPosition.x, ls.progressBarPosition.y);
+			loadingScreen->setProgressBarSize(ls.progressBarSize.x, ls.progressBarSize.y);
+			loadingScreen->setProgressBarFillColor(ls.fillColor);
+			loadingScreen->setProgressBarGlowColor(ls.glowColor);
+			loadingScreen->setProgressBarGlowIntensity(ls.glowIntensity);
+			loadingScreen->setShowProgressBar(ls.showProgressBar);
+
+			// Status text settings
+			loadingScreen->setStatusTextPosition(ls.statusTextPosition.x, ls.statusTextPosition.y);
+			loadingScreen->setStatusTextScale(ls.statusTextScale);
+			loadingScreen->setShowStatusText(ls.showStatusText);
+
+			// Spritesheet animation settings
+			loadingScreen->setSpritesheetAnimation(ls.frameCount, ls.framesPerRow, ls.frameTime);
+			loadingScreen->setAnimationEnabled(ls.animationEnabled);
+
+			PN_CORE_INFO("[SceneManager] Loading screen setup complete");
+		}
+
+		void SceneManager::cacheSceneAssets(SceneAsset const& scene_asset) {
+
+			//Get asset manager
+			auto assetMananger = services->get<Assets::Manager>();
+
+			//Unload the cache
+			assetMananger->clearAssetCache();
+
+			//Batch cache all assets from scene
+			assetMananger->batchCacheAssets(scene_asset.assets_to_cache);
+
+			//Batch upload all textures to GPU
+			assetMananger->batchUploadAllCachedTextures();
+
+			//Refresh editor resources only in debug mode
+#ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
+			{
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+				}
+			}
+#endif
+#endif
+		}
+
 		nlohmann::json SceneManager::captureCurrentEntities() {
 			nlohmann::json ecs = nlohmann::json::object();
 			nlohmann::json ents = nlohmann::json::array();
@@ -385,34 +453,247 @@ namespace PAIN {
 			}
 
 			auto& registry = controller->getRegistry();
-			auto view = registry.view<Entity::Name>();
 
-			for (auto e : view) {
-				nlohmann::json E = nlohmann::json::object();
+			// Identify Root Entities (No Parent)
+			std::vector<entt::entity> roots;
+			auto view = registry.view<Entity::Hierarchy>();
 
-				// Get entity name
-				if (auto nameOpt = controller->getEntityComponent<Entity::Name>(e)) {
-					E["Name"] = nameOpt->get().name;
+			for (auto [entity, hierarchy] : view.each()) {
+				if (!hierarchy.parentGUID.IsValid()) {
+					roots.push_back(entity);
 				}
+			}
 
-				// Detect and save overrides for prefab instances
-				if (prefabService && registry.any_of<Prefab::PrefabInstance>(e)) {
-					prefabService->updateAllOverrides(e, ECS::MAIN_REGISTRY_ID);
-				}
+			// Sort roots by sibling index
+			std::stable_sort(roots.begin(), roots.end(), [&](entt::entity a, entt::entity b) {
+				auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
+				auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
+				int idxA = hA ? hA->get().siblingIndex : 0;
+				int idxB = hB ? hB->get().siblingIndex : 0;
+				return idxA < idxB;
+			});
 
-				// Serialize all components
-				E["Components"] = controller->getAllComponentsAsJson(e);
-
-
-				// Wrap in Entity object
-				ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+			for (auto root : roots) {
+				recursiveCapture( root, ents);
 			}
 
 			ecs["Entities"] = std::move(ents);
 
-			PN_CORE_INFO("[SceneManager] Captured {} entities", ents.size());
+			PN_CORE_INFO("[SceneManager] Captured {} entities ", ents.size());
 
 			return ecs;
+
+			//auto view = registry.view<Entity::Name>();
+
+			//for (auto e : view) {
+			//	nlohmann::json E = nlohmann::json::object();
+
+			//	// Get entity name
+			//	if (auto nameOpt = controller->getEntityComponent<Entity::Name>(e)) {
+			//		E["Name"] = nameOpt->get().name;
+			//	}
+
+			//	// Detect and save overrides for prefab instances
+			//	if (prefabService && registry.any_of<Prefab::PrefabInstance>(e)) {
+			//		prefabService->updateAllOverrides(e, ECS::MAIN_REGISTRY_ID);
+			//	}
+
+			//	// Serialize all components
+			//	E["Components"] = controller->getAllComponentsAsJson(e);
+
+
+			//	// Wrap in Entity object
+			//	ents.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+			//}
+
+			//ecs["Entities"] = std::move(ents);
+
+			//PN_CORE_INFO("[SceneManager] Captured {} entities", ents.size());
+
+			//return ecs;
+		}
+
+		void SceneManager::recursiveCapture(entt::entity entity, nlohmann::json& jsonArray)
+		{
+
+			auto controller = services->get<ECS::Controller>();
+			auto prefabService = services->get<Prefab::Service>();
+
+			// 1. Serialize THIS entity
+			nlohmann::json E = nlohmann::json::object();
+
+			// Name
+			if (auto nameOpt = controller->getEntityComponent<Entity::Name>(entity)) {
+				E["Name"] = nameOpt->get().name;
+			}
+
+			// Prefab Overrides
+			if (prefabService && controller->getRegistry().any_of<Prefab::PrefabInstance>(entity)) {
+				prefabService->updateAllOverrides(entity, ECS::MAIN_REGISTRY_ID);
+			}
+
+			// Components (This includes siblingIndex automatically via reflection)
+			E["Components"] = controller->getAllComponentsAsJson(entity);
+
+			// Add to main JSON Array
+			jsonArray.push_back(nlohmann::json{ {"Entity", std::move(E)} });
+
+			// 2. Find and Sort Children
+			if (auto h = controller->getEntityComponent<Entity::Hierarchy>(entity)) {
+				std::vector<entt::entity> children;
+				for (const auto& childGUID : h.value().get().childrenGUIDs) {
+					entt::entity child = controller->resolveGUID(childGUID);
+					if (controller->checkEntity(child)) {
+						children.push_back(child);
+					}
+				}
+
+				// [CRITICAL] Sort Children by Sibling Index before saving
+				std::stable_sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
+					auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
+					auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
+					int idxA = hA ? hA->get().siblingIndex : 0;
+					int idxB = hB ? hB->get().siblingIndex : 0;
+					return idxA < idxB;
+					});
+
+				// 3. Recurse
+				for (auto child : children) {
+					recursiveCapture(child, jsonArray);
+				}
+			}
+		}
+
+		void SceneManager::captureCachedAssets(SceneAsset& scene_asset) {
+
+			//Clear scene asset GUIDS
+			scene_asset.assets_to_cache.clear();
+
+			//Get all models in the current ecs registry
+			auto ecs = services->get<ECS::Controller>();
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<ModelRenderer>();
+			auto assetManager = services->get<Assets::Manager>();
+
+			//Lambda to cache function
+			auto cacheAsset = [&](Assets::GUID const& id) {
+				//Insert material GUID into asset to cache
+				if (id.IsValid() && !scene_asset.assets_to_cache.count(id)) scene_asset.assets_to_cache.insert(id);
+				};
+
+			// Collect all unique models and build combined vertex/index buffers
+			for (auto e : view) {
+
+				//Get mdl asset
+				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
+				if (mdl.has_value()) {
+
+					//Retrieve model GUID and insert
+					Assets::GUID mdl_id = mdl.value().get().modelGUID;
+					cacheAsset(mdl_id);
+
+					//Retrieve material
+					auto const& mat_vec = mdl.value().get().materials;
+					for (auto const& mat_inst : mat_vec) {
+
+						//optional material asset
+						auto materialAssetOpt = assetManager->getAsset<Assets::Material>(mat_inst.materialGUID);
+
+						// Load material asset
+						auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+						//Check material asset
+						if (materialAsset) {
+
+							//Insert material GUID into asset to cache
+							cacheAsset(mat_inst.materialGUID);
+
+							//Insert textures within materials to cache
+							{
+								//Albedo Texture
+								std::optional<std::shared_ptr<Assets::Texture>> tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.albedoTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->albedoTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Normal texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.normalTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->normalTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Metallic texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.metallicTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->metallicTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Roughness texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.roughnessTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->roughnessTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//AO texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.aoTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->aoTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Emissive texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.emissiveTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->emissiveTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Height texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.heightTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+
+								//Opacity texture
+								tex_opt = mat_inst.useOverrides ?
+									assetManager->getAsset<Assets::Texture>(mat_inst.opacityTextureOverride)
+									: assetManager->getAsset<Assets::Texture>(materialAsset->opacityTexturePath);
+
+								if (tex_opt.has_value()) {
+									cacheAsset(tex_opt.value().get()->guid);
+								}
+							}
+						}
+					}
+				}
+
+				//Get audio asset
+				auto audio = ecs->getEntityComponent<Audio::AudioSource>(e);
+				if (audio.has_value()) {
+
+					//Cache the audio source
+					cacheAsset(audio.value().get().selected_audio);
+				}
+			}
 		}
 
 		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
@@ -453,6 +734,34 @@ namespace PAIN {
 			//Capture all layer variables
 			scene_asset.layers = layers;
 			scene_asset.mask_matrix = mask_matrix;
+
+			//Capture loading screen settings
+			if (loadingScreen) {
+				scene_asset.loadingScreen.backgroundTextureGUID = loadingScreen->getBackgroundTexture();
+				scene_asset.loadingScreen.backgroundColor = loadingScreen->getBackgroundColor();
+				scene_asset.loadingScreen.bgScale = loadingScreen->getBGScale();
+				scene_asset.loadingScreen.showBackground = loadingScreen->getShowBG();
+				scene_asset.loadingScreen.showOverlay = loadingScreen->getShowOverlay();
+			
+				scene_asset.loadingScreen.progressBarPosition = loadingScreen->getProgressBarPosition();
+				scene_asset.loadingScreen.progressBarSize = loadingScreen->getProgressBarSize();
+			
+				auto [fillColor, glowColor, glowIntensity] = loadingScreen->getProgressBarStyle();
+				scene_asset.loadingScreen.fillColor = fillColor;
+				scene_asset.loadingScreen.glowColor = glowColor;
+				scene_asset.loadingScreen.glowIntensity = glowIntensity;
+				scene_asset.loadingScreen.showProgressBar = loadingScreen->getShowProgressBar();
+			
+				scene_asset.loadingScreen.statusTextPosition = loadingScreen->getStatusTextPosition();
+				scene_asset.loadingScreen.statusTextScale = loadingScreen->getStatusTextScale();
+				scene_asset.loadingScreen.showStatusText = loadingScreen->getShowStatusText();
+			
+				auto [frameCount, framesPerRow, frameTime, animEnabled] = loadingScreen->getSpritesheetSettings();
+				scene_asset.loadingScreen.frameCount = frameCount;
+				scene_asset.loadingScreen.framesPerRow = framesPerRow;
+				scene_asset.loadingScreen.frameTime = frameTime;
+				scene_asset.loadingScreen.animationEnabled = animEnabled;
+			}
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
@@ -489,6 +798,31 @@ namespace PAIN {
 				{"pbr_map", static_cast<int>(scn_asset.environment.pbr_map)}
 			};
 
+			//Loading screen settings  
+			sceneJson["loadingScreen"] = {
+				{"backgroundTextureGUID", scn_asset.loadingScreen.backgroundTextureGUID.ToString()},
+				{"backgroundColor", {scn_asset.loadingScreen.backgroundColor.r, scn_asset.loadingScreen.backgroundColor.g, scn_asset.loadingScreen.backgroundColor.b}},
+				{"bgScale", scn_asset.loadingScreen.bgScale},
+				{"showBackground", scn_asset.loadingScreen.showBackground},
+				{"showOverlay", scn_asset.loadingScreen.showOverlay},
+
+				{"progressBarPosition", {scn_asset.loadingScreen.progressBarPosition.x, scn_asset.loadingScreen.progressBarPosition.y}},
+				{"progressBarSize", {scn_asset.loadingScreen.progressBarSize.x, scn_asset.loadingScreen.progressBarSize.y}},
+				{"fillColor", {scn_asset.loadingScreen.fillColor.r, scn_asset.loadingScreen.fillColor.g, scn_asset.loadingScreen.fillColor.b}},
+				{"glowColor", {scn_asset.loadingScreen.glowColor.r, scn_asset.loadingScreen.glowColor.g, scn_asset.loadingScreen.glowColor.b}},
+				{"glowIntensity", scn_asset.loadingScreen.glowIntensity},
+				{"showProgressBar", scn_asset.loadingScreen.showProgressBar},
+
+				{"statusTextPosition", {scn_asset.loadingScreen.statusTextPosition.x, scn_asset.loadingScreen.statusTextPosition.y}},
+				{"statusTextScale", scn_asset.loadingScreen.statusTextScale},
+				{"showStatusText", scn_asset.loadingScreen.showStatusText},
+
+				{"frameCount", scn_asset.loadingScreen.frameCount},
+				{"framesPerRow", scn_asset.loadingScreen.framesPerRow},
+				{"frameTime", scn_asset.loadingScreen.frameTime},
+				{"animationEnabled", scn_asset.loadingScreen.animationEnabled}
+			};
+
 			// Layers
 			nlohmann::json layersJson = nlohmann::json::array();
 			for (const auto& layer : scn_asset.layers) {
@@ -502,6 +836,9 @@ namespace PAIN {
 			}
 			sceneJson["layers"] = layersJson;
 			sceneJson["mask_matrix"] = scn_asset.mask_matrix;
+
+			//Assets cache
+			sceneJson["assets"] = scn_asset.assets_to_cache;
 
 			// Entity data
 			sceneJson["ecs"] = scn_asset.entityData;
@@ -538,54 +875,142 @@ namespace PAIN {
 #endif
 
 		void SceneManager::configScene(SceneAsset const& scn_asset) {
-			PN_CORE_ERROR("[SceneManager] CONFIGING SCENE");
-
-			//Build new scene
+			PN_CORE_INFO("[SceneManager] Starting async scene configuration");
+			// ========================================
+			// PHASE 1: Main Thread Setup (Fast, No I/O)
+			// ========================================
+			setupLoadingScreen(scn_asset);
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
 			setupLayers(scn_asset);
 
-			//Failed to build entities
-			if (!buildEntitiesFromAsset(scn_asset)) {
-				PN_CORE_ERROR("[SceneManager] Failed to build entities from scene asset");
+			// Clear existing asset cache
+			auto assetManager = services->get<Assets::Manager>();
+			assetManager->clearAssetCache();
+
+			// ========================================
+			// PHASE 2: Initialize Loading Screen
+			// ========================================
+			loadingScreen->setStatus("Initializing scene...");
+			loadingScreen->setProgress(0.0f);
+			loadingScreen->render();
+
+			// ========================================
+			// PHASE 3: Launch Worker Thread for Asset Loading
+			// ========================================
+			std::atomic<bool> loadingComplete{ false };
+			std::atomic<bool> loadingFailed{ false };
+			std::string errorMessage;
+			std::thread workerThread([&]() {
+				try {
+					PN_CORE_INFO("[AsyncLoader] Worker thread started");
+
+					// Step 1: Load all assets (CPU-only, thread-safe)
+					loadingScreen->setStatus("Loading scene assets...");
+					loadingScreen->setProgress(0.1f);
+					const auto& assetGuids = scn_asset.assets_to_cache;
+					size_t totalAssets = assetGuids.size();
+					size_t loadedAssets = 0;
+					PN_CORE_INFO("[AsyncLoader] Loading {} assets", totalAssets);
+					for (const auto& guid : assetGuids) {
+						if(assetManager->cacheAsset(guid)) loadedAssets++;
+						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
+						loadingScreen->setProgress(progress);
+						if (loadedAssets % 10 == 0) {
+							PN_CORE_INFO("[AsyncLoader] Loaded {}/{} assets", loadedAssets, totalAssets);
+						}
+					}
+					PN_CORE_INFO("[AsyncLoader] All assets loaded");
+
+					// Step 2: Build entities (CPU-only)
+					loadingScreen->setStatus("Building scene entities...");
+					loadingScreen->setProgress(0.7f);
+					if (!buildEntitiesFromAsset(scn_asset)) {
+						throw std::runtime_error("Failed to build entities from scene asset");
+					}
+					loadingScreen->setProgress(0.9f);
+					PN_CORE_INFO("[AsyncLoader] Worker thread complete");
+				}
+				catch (const std::exception& e) {
+					PN_CORE_ERROR("[AsyncLoader] Worker thread failed: {}", e.what());
+					errorMessage = e.what();
+					loadingFailed.store(true);
+				}
+				loadingComplete.store(true);
+				});
+
+			// ========================================
+			// PHASE 4: Render Loading Screen Loop
+			// ========================================
+			PN_CORE_INFO("[SceneManager] Entering loading screen render loop");
+			while (!loadingComplete.load()) {
+				loadingScreen->render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			}
+			workerThread.join();
+			PN_CORE_INFO("[SceneManager] Worker thread joined");
+			if (loadingFailed.load()) {
+				PN_CORE_ERROR("[SceneManager] Scene loading failed: {}", errorMessage);
 				return;
 			}
 
-			// set scene in renderer
-			auto renderer = services->get<sRenderer>();
-			renderer->setScene(services->get<Scene::SceneManager>());
+			// ========================================
+			// PHASE 5: Finalize on Main Thread (GPU)
+			// ========================================
+			loadingScreen->setStatus("Uploading textures to GPU...");
+			loadingScreen->setProgress(0.95f);
+			loadingScreen->render();
+			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
+			assetManager->batchUploadAllCachedTextures();
+			loadingScreen->setStatus("Building Model's VBO...");
+			loadingScreen->setProgress(0.98f);
+			loadingScreen->render();
+			services->get<sRenderer>()->initSceneVbo();
 
-
-			// init vbo for scene
+#ifdef _DEBUG
+#ifdef PN_PLATFORM_WINDOWS
 			{
-				std::vector<ModelRenderer> models{};
-
-				auto ecs = services->get<ECS::Controller>();
-				auto& registry = ecs->getRegistry();
-				auto view = registry.view<ModelRenderer>();
-				for (auto e : view) {
-					auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-					if (mdl.has_value()) models.push_back(mdl.value());
+				auto editor = services->get<Editor::Editor>();
+				if (editor) {
+#ifdef PN_PLATFORM_WINDOWS
+					auto resource_panel = editor->getPanel<Editor::Panel::ResourcePanel>();
+					if (resource_panel) resource_panel->refreshResources();
+#endif
 				}
-
-				renderer->initSceneVbo(models);
 			}
+#endif
+#endif
+
+			//Scene config completed
+			loadingScreen->setProgress(1.0f);
+			loadingScreen->setStatus("Scene loading Complete!");
+			loadingScreen->render();
+			loadingScreen->finish();
+			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
 		void SceneManager::onAttach() {
 
-			//Get ECS Controller
+			//Services
 			auto ecs = services->get<ECS::Controller>();
-
-			//Init skybox here, set texture for skybox in config scene
-			Skybox::get().init(services);
-			PN_CORE_INFO("[SceneManager] Initialized skybox");
-
-			// Demo Object and Audio Setup
-
 			auto pathService = services->get<Path::Path>();
 			auto asset_manager = services->get<Assets::Manager>();
 
+			//Set scecne manager for renderer
+			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
+
+			//Init loading screen
+			loadingScreen = std::make_unique<LoadingScreen>();
+			loadingScreen->init(services);
+
+			//Init skybox here, set texture for skybox in config scene
+			Skybox::get().init(services);
+			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
+			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
+			PN_CORE_INFO("[SceneManager] Initialized skybox");
+
+#ifdef _DEBUG
+			// Demo Object and Audio Setup
 			{
 				// for .mesh(converted from .obj only)
 				std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
@@ -602,26 +1027,25 @@ namespace PAIN {
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path tc_path = "game/models/toycar/ToyCar.mesh";
+				std::filesystem::path fox_path = "game/models/Fox.mesh";
 #else	
-				std::filesystem::path tc_path = "game\\models\\toycar\\ToyCar.mesh";
+				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
 #endif
 				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", tc_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(tc_path);
+				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "toycar", { 2.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.005f });
+					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
 				}
 
 
-#ifdef PN_PLATFORM_WINDOWS
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
 #else	
@@ -641,12 +1065,11 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
-#endif
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
 #else	
-				std::filesystem::path fh_path = "game\\models\\Frog_Hopping.mesh";
+				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
 #endif
 				//Get model
 				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
@@ -661,17 +1084,16 @@ namespace PAIN {
 				else {
 					throw std::runtime_error("animation obj err");
 				}
+
+				//Create default scene asset
+				SceneAsset default_scene_config;
+
+				//Configure scene with default settings
+				configScene(default_scene_config);
 			}
-
-			//Create default scene asset
-			SceneAsset default_scene_config;
-
-			//Configure scene with default settings
-			configScene(default_scene_config);
-
-#ifndef _DEBUG
+#else
 			// Prep for subs
-			std::filesystem::path init_scn_path = "game/scenes/prototype.scn";
+			std::filesystem::path init_scn_path = "game/scenes/mainmenu.scn";
 
 			auto scn_opt = asset_manager->getAssetData(init_scn_path);
 
@@ -681,12 +1103,6 @@ namespace PAIN {
 				//SetGameCamera();
 			}
 #endif
-
-			//Craft skybox path and get GUID
-			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
-
-			//Set skybox
-			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
 
 			//Log scene manager init
 			PN_CORE_INFO("[SceneManager] Initialized");
@@ -858,25 +1274,12 @@ namespace PAIN {
 				return;
 			}
 
-			// init vbo for scene
-			//{
-			//	std::vector<ModelRenderer> models{};
-
-			//	auto ecs = services->get<ECS::Controller>();
-			//	auto& registry = ecs->getRegistry();
-			//	auto view = registry.view<ModelRenderer>();
-			//	for (auto e : view) {
-			//		auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
-			//		if (mdl.has_value()) models.push_back(mdl.value());
-			//	}
-
-			//	auto renderer = services->get<sRenderer>();
-			//	renderer->initSceneVbo(models);
-			//}
-
 			//Scene loaded successfully
 			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
 			curr_scene_id = sceneGUID;
+
+			services->get<Serialization::Service>()->markSceneChanged();
+
 		}
 
 		void SceneManager::loadScene(std::filesystem::path const& relative_path) {
@@ -920,7 +1323,6 @@ namespace PAIN {
 			unloadScene();
 		}
 
-
 		void SceneManager::deleteScene(Assets::GUID const& id) {
 
 			//Get asset manager
@@ -941,6 +1343,11 @@ namespace PAIN {
 			auto assetManager = services->get<Assets::Manager>();
 			if (!assetManager) {
 				PN_CORE_ERROR("[SceneManager] Asset Manager not available");
+				return;
+			}
+
+			if (is_playing) {
+				PN_CORE_WARN("[SceneManager] Cannot save scene while Game is Playing! Please Stop first.");
 				return;
 			}
 
@@ -968,6 +1375,9 @@ namespace PAIN {
 			//Capture current ECS state
 			currentSceneAsset->entityData = captureCurrentEntities();
 
+			//Capture assets to cache
+			captureCachedAssets(*currentSceneAsset);
+
 			//Capture the scene variables
 			captureSceneVariables(*currentSceneAsset);
 
@@ -993,6 +1403,10 @@ namespace PAIN {
 
 		void SceneManager::unloadScene() {
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
+
+			if (is_playing) {
+				is_playing = false;
+			}
 
 			// Destroy all ECS entities
 			auto controller = services->get<ECS::Controller>();
@@ -1078,7 +1492,6 @@ namespace PAIN {
 			auto it = game_cameras.find(active_game_cam);
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
-				PN_CORE_ERROR("{}",it->first.c_str() );
 			}
 			else {
 				PN_CORE_ERROR("Game camera not found");

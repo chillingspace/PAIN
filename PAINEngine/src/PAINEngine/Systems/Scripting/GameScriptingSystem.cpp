@@ -22,6 +22,9 @@
 #include "PAINEngine/CoreSystems/Events/GLFW/KeyEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/MouseEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/WindowEvents.h"
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
 #endif
 
 namespace PAIN {
@@ -114,24 +117,36 @@ namespace PAIN {
             using namespace Event;
             Dispatcher d{ e };
 
-            luaManager_.Input_OnEvent(e); // foward all events to luamanger
-
 #ifdef PN_PLATFORM_WINDOWS
-            d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
-                //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
-                if (auto name = getKeyName(ev.getKeyCode())) {
-                    //PN_CORE_INFO("[GSS] KeyDown -> {}", *name);
-                    luaManager_.onKeyDown(*name);
-                }
-                return false;
-                });
-            d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
-                //PN_CORE_INFO("[GSS] KeyReleased code={}", ev.getKeyCode());
-                if (auto name = getKeyName(ev.getKeyCode())) {
-                    luaManager_.onKeyUp(*name);
-                }
-                return false;
-                });
+#ifdef _DEBUG
+            // Skip keyboard input if user is typing in ImGui text field (WantTextInput)
+            ImGuiIO& io = ImGui::GetIO();
+            bool skipKeyboard = io.WantTextInput;
+#else
+            bool skipKeyboard = false;
+#endif
+
+            if (!skipKeyboard) {
+                luaManager_.Input_OnEvent(e); // forward keyboard events to luamanager only when not captured by editor
+            }
+
+            if (!skipKeyboard) {
+                d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
+                    //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
+                    if (auto name = getKeyName(ev.getKeyCode())) {
+                        //PN_CORE_INFO("[GSS] KeyDown -> {}", *name);
+                        luaManager_.onKeyDown(*name);
+                    }
+                    return false;
+                    });
+                d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
+                    //PN_CORE_INFO("[GSS] KeyReleased code={}", ev.getKeyCode());
+                    if (auto name = getKeyName(ev.getKeyCode())) {
+                        luaManager_.onKeyUp(*name);
+                    }
+                    return false;
+                    });
+            } // end if (!skipKeyboard)
             d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed&) {
                 luaManager_.onClick();
                 return false;
@@ -142,6 +157,7 @@ namespace PAIN {
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
+            luaManager_.Input_OnEvent(e); // forward all events to luamanager on Android
             d.Dispatch<TouchDown>([&](TouchDown&) {
                 luaManager_.onClick();
                 return false;
@@ -210,6 +226,7 @@ namespace PAIN {
             case GLFW_KEY_C: return "C";
             case GLFW_KEY_E: return "E";
             case GLFW_KEY_H: return "H";
+            case GLFW_KEY_R: return "R";
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -229,6 +246,7 @@ namespace PAIN {
 
             case 67: return "C";
             case 72: return "H";
+            //case 83: return "R";
 
 #endif
 

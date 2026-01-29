@@ -5,11 +5,11 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ribbitexpress_launcher"
         android:label="${appName}"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ribbitexpress_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:hasCode="true">
         <activity
             android:name="android.app.NativeActivity"

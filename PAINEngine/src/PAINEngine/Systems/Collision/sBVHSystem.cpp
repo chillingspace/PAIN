@@ -214,16 +214,40 @@ namespace PAIN {
 
                 // Get entity's AABB
                 auto* bv = registry.try_get<BoundingVolume>(node.entity);
-                if (!bv) return;
 
-                // Precise ray-AABB intersection
-                float t;
-                if (rayAABBIntersect(origin, rayDir, bv->worldAABB, tMin, tMax)) {
-                    if (tMin >= 0 && tMin < closestHit.distance) {
+                auto* worldTransform = registry.try_get<WorldTransform>(node.entity);
+                if (!bv || !worldTransform) return;
+
+                // Transform Ray into Entity's Local Space
+                glm::mat4 invMatrix = glm::inverse(worldTransform->matrix);
+
+                // Transform Origin: Point transformation (w=1)
+                glm::vec3 localOrigin = glm::vec3(invMatrix * glm::vec4(origin, 1.0f));
+
+                // Transform Direction: Vector transformation (w=0), then normalize
+                glm::vec3 localDir = glm::normalize(glm::vec3(invMatrix * glm::vec4(direction, 0.0f)));
+
+                // Perform Intersection against LOCAL AABB
+                float tLocalMin, tLocalMax;
+                if (rayAABBIntersect(localOrigin, localDir, bv->localAABB, tLocalMin, tLocalMax)) {
+
+                    // Convert local distance 't' back to world distance
+                    glm::vec3 worldDirUnnormalized = glm::mat3(worldTransform->matrix) * localDir;
+                    float scaleFactor = glm::length(worldDirUnnormalized);
+
+                    // Actual world distance
+                    float worldDistance = tLocalMin * scaleFactor;
+
+                    // Check if closest
+                    if (worldDistance >= 0 && worldDistance < closestHit.distance) {
                         closestHit.entity = node.entity;
-                        closestHit.distance = tMin;
-                        closestHit.point = origin + rayDir * tMin;
-                        closestHit.normal = calculateAABBNormal(bv->worldAABB, closestHit.point);
+                        closestHit.distance = worldDistance;
+                        closestHit.point = origin + direction * worldDistance; // World hit point
+
+                        // Calculate normal in local space, then transform to world
+                        glm::vec3 localNormal = calculateAABBNormal(bv->localAABB, localOrigin + localDir * tLocalMin);
+                        closestHit.normal = glm::normalize(glm::mat3(worldTransform->matrix) * localNormal);
+
                         closestHit.layer = entityLayer ? entityLayer->layer_id : 0;
                     }
                 }
@@ -448,7 +472,7 @@ namespace PAIN {
             auto rebuildEnd = std::chrono::high_resolution_clock::now();
 
             auto rebuildTime = std::chrono::duration_cast<std::chrono::microseconds>(rebuildEnd - rebuildStart).count();
-            PN_CORE_INFO("BVH rebuild complete: {} μs", rebuildTime);
+            PN_CORE_INFO("BVH rebuild complete: {} microseconds", rebuildTime);
 
             m_needsFullRebuild = false;
             m_lastEntityCount = m_bvhItems.size();

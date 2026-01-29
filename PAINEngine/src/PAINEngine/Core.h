@@ -17,7 +17,13 @@
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cPrefab.h"
 #include "ECS/Components/cUIComps.h"
+#include "ECS/Components/cCompoundCollider.h"
 
 const std::string ENGINE_NAME = "Pain Engine";
 const unsigned int DEF_ENGINE_HEIGHT = 900;
 const unsigned int DEF_ENGINE_WIDTH = 1600;
+
+// Global application control flag
+namespace PAIN {
+    extern bool g_shouldQuitApplication;
+}

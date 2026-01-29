@@ -26,9 +26,8 @@
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Path/Path.h"
 
-
-
-
+//Loading screen
+#include "CoreSystems/Scene/LoadingScreen.h"
 
 namespace PAIN {
 
@@ -83,10 +82,6 @@ namespace PAIN {
 		app_window->registerCallbacks(this);
 		addCoreSystem(app_window);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// Match viewport to window size
-		auto window = services->get<Window::Window>();
-
 		//Create path service
 		services->set<Path::Path>(std::shared_ptr<Path::Path>(Path::Path::create(app)));
 		services->get<Path::Path>()->logVirtualPaths();
@@ -94,183 +89,250 @@ namespace PAIN {
 		//Create asset service
 		addCoreSystem(std::make_shared<Assets::Manager>());
 
-		//Create and add the AudioManager to the core systems
-		auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
-		addCoreSystem(app_audio);
-
-		//Get sound asset
-		//auto sound = services->get<Assets::Manager>()->getAsset<Audio::Sound>("game/audio/music/Boss_Music.wav");
-		//app_audio->play(sound);
+		// Renderer
+		addCoreSystem(std::make_shared<sRenderer>());
 
 		// dependency injection
 		TextRenderer::init(services);
 
-		//Push other core systems into the stack
-		addCoreSystem(std::make_shared<ECS::Controller>(services));
-		addCoreSystem(std::make_shared<MetaData::Service>());
+		//!DO NOT SHIFT SERVICES ABOVE ( loading screen needs them )
+		{
+			//Create loading screen
+			Scene::LoadingScreen ls;
+			ls.init(services);
+			//ls.setShowProgressBar(true);
+			//ls.setShowStatusText(true);
 
-		//Create entity template and prefab service
-		services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
-		services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
+			//Begin loading screen
+			ls.setProgress(0.0f);
+			ls.setStatus("Service Initialization Begin...");
+			ls.render();
 
-		// Add Serialization
-		addCoreSystem(std::make_shared<Serialization::Service>());
+			std::atomic<bool> loadingComplete{ false };
+			std::atomic<bool> loadingFailed{ false };
+			std::string errorMessage;
+			std::thread workerThread([&]() {
+				try {
+					PN_CORE_INFO("[AsyncServiceSetup] Worker thread started");
+					//Create and add the AudioManager to the core systems
+					ls.setProgress(0.0f);
+					ls.setStatus("Initializing FMOD Audio Service...");
+					auto app_audio = std::shared_ptr<Audio::Audio>(Audio::Audio::create(app));
+					addCoreSystem(app_audio);
 
-		// Register components here
-		services->get<ECS::Controller>()->registerAllComponents();
-		// Register all systems here
-		services->get<ECS::Controller>()->registerAllSystems();
+					//Push other core systems into the stack
+					ls.setProgress(0.2f);
+					ls.setStatus("Initializing ECS Controller...");
+					addCoreSystem(std::make_shared<ECS::Controller>(services));
 
-		// Renderer
-		addCoreSystem(std::make_shared<sRenderer>());
+					// Register components adn systems here
+					ls.setProgress(0.3f);
+					ls.setStatus("Registering ECS Components And Systems...");
+					services->get<ECS::Controller>()->registerAllComponents();
+					services->get<ECS::Controller>()->registerAllSystems();
 
-		// Scenes
-		addCoreSystem(std::make_shared<Scene::SceneManager>());
+					addCoreSystem(std::make_shared<MetaData::Service>());
 
-		// Camera System
-		addCoreSystem(std::make_shared<sCameraController>());
+					//Create entity template and prefab service
+					ls.setProgress(0.5f);
+					ls.setStatus("Initializing Prefab and Templates Service...");
+					services->set<EntityTemplate::Service>(std::make_shared<EntityTemplate::Service>(services));
+					services->set<Prefab::Service>(std::shared_ptr<Prefab::Service>(Prefab::Service::create(services)));
 
-		//Editor only added when debug mode
+					// Add Serialization
+					ls.setProgress(0.6f);
+					ls.setStatus("Initializing Serialization Service...");
+					addCoreSystem(std::make_shared<Serialization::Service>());
+				}
+				catch (const std::exception& e) {
+					PN_CORE_ERROR("[AsyncServiceSetup] Worker thread failed: {}", e.what());
+					errorMessage = e.what();
+					loadingFailed.store(true);
+				}
+				loadingComplete.store(true);
+				});
+
+			// ========================================
+			// Render Loading Screen Loop
+			// ========================================
+			PN_CORE_INFO("[Application] Entering loading screen render loop");
+			while (!loadingComplete.load()) {
+				ls.render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			}
+			workerThread.join();
+			PN_CORE_INFO("[Application] Worker thread joined");
+			if (loadingFailed.load()) {
+				PN_CORE_ERROR("[Application] Service Initialization Failed: {}", errorMessage);
+				return;
+			}
+
+			//Editor only added when debug mode
 #ifdef _DEBUG
-		// !NOTE: IMGUI eats events
-		auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
-		addLayerSystem(editor);
+			// !NOTE: IMGUI eats events
+			ls.setProgress(0.7f);
+			ls.setStatus("Initializing ImGui...");
+			ls.render();
+			auto editor = std::make_shared<Editor::Editor>(app_window->getNativeWindow());
+			addLayerSystem(editor);
 #endif
 
+			// Scenes management
+			ls.setProgress(0.8f);
+			ls.setStatus("Initializing Scene Manager...");
+			ls.render();
+			addCoreSystem(std::make_shared<Scene::SceneManager>());
 
-#ifdef _DEBUG
-		PN_CORE_INFO("Testing Lua on Debug");
-#else
-		PN_CORE_INFO("Testing Lua on Release");
-#endif
+			// Camera System
+			ls.setProgress(0.9f);
+			ls.setStatus("Initializing Camera Controller...");
+			ls.render();
+			addCoreSystem(std::make_shared<sCameraController>());
 
-			//Mark engine as ready
-			b_app_running = true;
+			//Scene config completed
+			ls.setProgress(1.0f);
+			ls.setStatus("Service initialization completed!");
+			ls.render();
+			ls.finish();
+			PN_CORE_INFO("[Application] Thread Safe Service Initialization Completed.");
 		}
-	
+
+		//Mark engine as ready
+		b_app_running = true;
+	}
+
 	void Application::Run() {
 
-	//Set last time
-	last_time = std::chrono::steady_clock::now();
+		//Set last time
+		last_time = std::chrono::steady_clock::now();
 
-	//Application loop
-	while (b_app_running) {
+		//Application loop - MODIFIED: Added g_shouldQuitApplication check
+		while (b_app_running && !g_shouldQuitApplication) {
 
-		//Poll events
-		auto window = services->get<Window::Window>();
-		if (window) window->pollEvents();
-
-		if (window->isMinimized()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			continue; // Go back to start of while loop
-		}
-
-		//Drain all events in queue
-		drainEventQueue();
-
-		//Update delta time
-		auto now = std::chrono::steady_clock::now();
-		float real_dt = std::chrono::duration<float>(now - last_time).count();
-		last_time = now;
-
-		// Store Unscaled Time (Always ticking even when paused)
-		timing.unscaled_dt = real_dt;
-
-		auto fps = static_cast<int>(1.f / timing.unscaled_dt);
-#ifdef PN_PLATFORM_WINDOWS
-		static float avgFps = 0.f;
-		static float timeSinceLastUpdate = 0.0f;
-
-		avgFps = avgFps * 0.95f + fps * 0.05f;
-		timeSinceLastUpdate += timing.unscaled_dt;
-
-		if (timeSinceLastUpdate >= 0.5f) {
-			timeSinceLastUpdate = 0.0f;
+			//Poll events
 			auto window = services->get<Window::Window>();
-			std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
-			glfwSetWindowTitle(
-				reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
-				title.c_str()
-			);
-		}
+			if (window) window->pollEvents();
+
+			//Drain all events in queue
+			drainEventQueue();
+
+			if (window->isMinimized()) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				continue; // Go back to start of while loop
+			}
+
+			//Update delta time
+			auto now = std::chrono::steady_clock::now();
+			float real_dt = std::chrono::duration<float>(now - last_time).count();
+			last_time = now;
+
+			// Cap 
+			if (real_dt > 0.1f) {
+				real_dt = 0.1f;
+			}
+
+			// Store Unscaled Time (Always ticking even when paused)
+			timing.unscaled_dt = real_dt;
+
+			auto fps = static_cast<int>(1.f / timing.unscaled_dt);
+#ifdef PN_PLATFORM_WINDOWS
+			static float avgFps = 0.f;
+			static float timeSinceLastUpdate = 0.0f;
+
+			avgFps = avgFps * 0.95f + fps * 0.05f;
+			timeSinceLastUpdate += timing.unscaled_dt;
+
+			if (timeSinceLastUpdate >= 0.5f) {
+				timeSinceLastUpdate = 0.0f;
+				auto window = services->get<Window::Window>();
+				std::string title = "Pain Engine - FPS: " + std::to_string(static_cast<int>(avgFps));
+				glfwSetWindowTitle(
+					reinterpret_cast<GLFWwindow*>(window->getNativeWindow()),
+					title.c_str()
+				);
+			}
 #endif
 #ifdef _DEBUG
-		if (services->get<Scene::SceneManager>()->isPlaying()) {
-			timing.dt = real_dt;
-			services->get<Audio::Audio>()->resumeAll();
-		}
-		else {
-			timing.dt = 0.0f;
-			services->get<Audio::Audio>()->pauseAll();
+			if (services->get<Scene::SceneManager>()->isPlaying()) {
+				timing.dt = real_dt;
+				services->get<Audio::Audio>()->resumeAll();
+			}
+			else {
+				timing.dt = 0.0f;
+				services->get<Audio::Audio>()->pauseAll();
 
-		}
+			}
 #else
-		timing.dt = real_dt;
+			timing.dt = real_dt;
 #endif
 
 
 
-		//Accumulate for fixed updates (use scaled time)
-		accumulator += timing.dt;  // Changed from timing.dt
+			//Accumulate for fixed updates (use scaled time)
+			accumulator += timing.dt;  // Changed from timing.dt
 
 
-		//Skip all other systems when window is not active
-		if (!services->get<Window::Window>()->getActive()) {
-			services->get<Window::Window>()->swapBuffers();
-			continue;
-		}
+			//Skip all other systems when window is not active
+			if (!services->get<Window::Window>()->getActive()) {
+				services->get<Window::Window>()->swapBuffers();
+				continue;
+			}
 
 
-		//Update fixed delta
-		int steps = 0;
-		while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+			//Update fixed delta
+			int steps = 0;
+			while (accumulator >= timing.fixed_dt && steps < MAX_STEPS) {
+
+				//Update all core systems
+				for (auto& core : core_stack) {
+					//if (auto core_ptr = core.lock()) core_ptr->onFixedUpdate(timing);
+
+					auto core_ptr = core.lock();
+					if (core_ptr) core_ptr->onFixedUpdate(timing);
+				}
+
+				//Update all layered systems
+				for (auto& layer : layer_stack) {
+					//if (auto layer_ptr = core.lock()) layer_ptr->onFixedUpdate(timing);
+
+					auto layer_ptr = layer.lock();
+					if (layer_ptr) layer_ptr->onFixedUpdate(timing);
+
+				}
+
+				accumulator -= timing.fixed_dt;
+				++steps;
+			}
+
+			//Update timing variables
+			timing.steps_this_frame = steps;
+			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
+
+			// clear errors before next rendering loop
+
+			while (glGetError());
 
 			//Update all core systems
 			for (auto& core : core_stack) {
-				//if (auto core_ptr = core.lock()) core_ptr->onFixedUpdate(timing);
-
 				auto core_ptr = core.lock();
-				if (core_ptr) core_ptr->onFixedUpdate(timing);
+				if (core_ptr) core_ptr->onUpdate(timing);
 			}
 
 			//Update all layered systems
 			for (auto& layer : layer_stack) {
-				//if (auto layer_ptr = core.lock()) layer_ptr->onFixedUpdate(timing);
-
 				auto layer_ptr = layer.lock();
-				if (layer_ptr) layer_ptr->onFixedUpdate(timing);
-
+				if (layer_ptr) layer_ptr->onUpdate(timing);
 			}
 
-			accumulator -= timing.fixed_dt;
-			++steps;
+			//Swap buffer
+			services->get<Window::Window>()->swapBuffers();
 		}
 
-		//Update timing variables
-		timing.steps_this_frame = steps;
-		timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
-
-		// clear errors before next rendering loop
-
-		while (glGetError());
-
-		//Update all core systems
-		for (auto& core : core_stack) {
-			auto core_ptr = core.lock();
-            if (core_ptr) core_ptr->onUpdate(timing);
+		// ADDED: Log graceful shutdown if quit was requested from script
+		if (g_shouldQuitApplication) {
+			PN_CORE_INFO("Application quit requested from script, shutting down gracefully");
 		}
-
-		//Update all layered systems
-		for (auto& layer : layer_stack) {
-			auto layer_ptr = layer.lock();
-            if (layer_ptr) layer_ptr->onUpdate(timing);
-		}
-
-		//Swap buffer
-		services->get<Window::Window>()->swapBuffers();
 	}
-}
-
 
 	void Application::terminate() {
 		b_app_running = false;
@@ -284,7 +346,7 @@ namespace PAIN {
 		for (auto it = core_stack.begin(); it != core_stack.end(); ++it) {
 
 			auto layer_ptr = it->lock();
-        	if (!layer_ptr) continue; // skip null weak_ptr
+			if (!layer_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -299,7 +361,7 @@ namespace PAIN {
 		for (auto it = layer_stack.begin(); it != layer_stack.end(); ++it) {
 
 			auto core_ptr = it->lock();
-        	if (!core_ptr) continue; // skip null weak_ptr
+			if (!core_ptr) continue; // skip null weak_ptr
 
 			//Dispatch event down layers
 			(*it).lock()->onEvent(e);
@@ -315,9 +377,9 @@ namespace PAIN {
 		//Dispatch to layer top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 			if (auto layer_ptr = it->lock()) {
-           		layer_ptr->onEvent(e);
-           		if (e.checkHandled()) return;
-       		}
+				layer_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 
 		//Check if handled
@@ -328,9 +390,9 @@ namespace PAIN {
 
 			//Dispatch event down layers
 			if (auto core_ptr = it->lock()) {
-            	core_ptr->onEvent(e);
-            	if (e.checkHandled()) return;
-	       	}
+				core_ptr->onEvent(e);
+				if (e.checkHandled()) return;
+			}
 		}
 	}
 
@@ -350,7 +412,7 @@ namespace PAIN {
 
 	void Application::pushEventQueue(std::shared_ptr<Event::Event> e) {
 		event_queue.push(e);
-	}	
+	}
 
 	void Application::drainEventQueue() {
 

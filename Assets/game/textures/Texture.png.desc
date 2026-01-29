@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Texture.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6068312838112064572
+  },
+  "descriptor_version": 1,
+  "guid": "bbaf4c1b-58bb-7645-a85b-be2c7114b2c1",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Texture.png"
+  }
+}

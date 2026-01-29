@@ -60,7 +60,13 @@ namespace PAIN {
                                 ecs->addEntityComponent(entity, Entity::Name{ final_name }, currentRegistryID);
                                 ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
                                 ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
-                                ecs->addEntityComponent(entity, Entity::Hierarchy{}, currentRegistryID);
+
+                                std::vector<entt::entity> currentRoots = getRootEntities(); // Or get siblings if parenting
+                                int newIndex = static_cast<int>(currentRoots.size());
+
+                                if (auto h = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
+                                    h->get().siblingIndex = newIndex;
+                                }
 
                                 // Optional: Add default model
                                 if (scene) {
@@ -184,6 +190,22 @@ namespace PAIN {
                                 if (ecs->checkEntity(clone_source, currentRegistryID)) {
                                     entt::entity new_entity = ecs->cloneEntity(clone_source, currentRegistryID, currentRegistryID);
 
+                                    // Assign sibling index
+                                    auto hNew = ecs->getEntityComponent<Entity::Hierarchy>(new_entity, currentRegistryID);
+                                    if (hNew) {
+                                        hNew->get().childrenGUIDs.clear();
+                                        Assets::GUID parentGUID = hNew->get().parentGUID;
+                                        if (parentGUID.IsValid()) {
+                                            // If its a parent clone
+                                            entt::entity parent = ecs->resolveGUID(parentGUID, currentRegistryID);                                         
+                                            setEntityParent(new_entity, parent);
+                                        }
+                                        else {
+                                            // If its a root clone
+                                            hNew->get().parentGUID = Assets::GUID();
+                                        }
+                                    }
+
                                     // Set name
                                     if (auto name_comp = ecs->getEntityComponent<Entity::Name>(new_entity, currentRegistryID)) {
                                         name_comp.value().get().name = final_name;
@@ -192,11 +214,46 @@ namespace PAIN {
                                     // Clone children recursively
                                     cloneEntityWithChildren(clone_source, new_entity);
 
+                                    // Set a sibling index
+                                    std::vector<entt::entity> siblings = getSiblings(clone_source);
+
+                                    // Remove the new clone from wherever it is in the list
+                                    siblings.erase(std::remove(siblings.begin(), siblings.end(), new_entity), siblings.end());
+
+                                    // Sort the remaining list to restore the "Pre-Clone" order
+                                    std::stable_sort(siblings.begin(), siblings.end(), [&](entt::entity a, entt::entity b) {
+                                        auto hA = ecs->getEntityComponent<Entity::Hierarchy>(a, currentRegistryID);
+                                        auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b, currentRegistryID);
+                                        int idxA = hA ? hA->get().siblingIndex : 0;
+                                        int idxB = hB ? hB->get().siblingIndex : 0;
+                                        if (idxA != idxB) return idxA < idxB;
+                                        return a < b;
+                                        });
+
+                                    // Find Original and Insert Clone After it
+                                    auto it = std::find(siblings.begin(), siblings.end(), clone_source);
+                                    if (it != siblings.end()) {
+                                        siblings.insert(it + 1, new_entity);
+                                    }
+                                    else {
+                                        siblings.push_back(new_entity);
+                                    }
+
+                                    // Manually Stamp Indices (0, 1, 2, 3...) based on this exact vector order
+                                    for (int i = 0; i < siblings.size(); i++) {
+                                        if (auto h = ecs->getEntityComponent<Entity::Hierarchy>(siblings[i], currentRegistryID)) {
+                                            h->get().siblingIndex = i;
+                                        }
+                                    }
+
+
                                     // Mark dirty
                                     auto transformSystem = ecs->getSystem<Transform::System>();
                                     if (transformSystem) {
                                         transformSystem->markDirty(new_entity, ecs->getRegistry(currentRegistryID));
                                     }
+
+
                                 }
                             },
                             [this, final_name]() {
@@ -324,6 +381,39 @@ namespace PAIN {
                 if (ImGui::Checkbox("Sort A-Z", &sort_alphabetically)) {
                     force_refresh = true;
                 }
+                if (ImGui::Button("Normalize Sibling Indices")) {
+                    std::function<void(entt::entity)> recursiveNormalize = [&](entt::entity parent) {
+                        // 1. Get children of this parent
+                        std::vector<entt::entity> children = getEntityChildren(parent);
+
+                        // 2. Use your helper function to sort & fix indices
+                        normalizeSiblings(children);
+
+                        // 3. Recurse down
+                        for (auto child : children) {
+                            recursiveNormalize(child);
+                        }
+                    };
+
+                    std::vector<entt::entity> roots = getRootEntities();
+                    normalizeSiblings(roots);
+
+                    for (auto root : roots) {
+                        recursiveNormalize(root);
+                    }
+
+                    PN_CORE_INFO("Sibling indices normalized!");
+                    force_refresh = true;
+                }
+                ImGui::Spacing();
+                
+                // Search bar
+                ImGui::Text("Search:");
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(-1);
+                if (ImGui::InputText("##EntitySearch", search_buffer, sizeof(search_buffer))) {
+                    // Search changed - will filter on next frame
+                }
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
@@ -337,10 +427,31 @@ namespace PAIN {
                         return getEntityName(a) < getEntityName(b);
                         });
                 }
+                else {
+                    std::sort(root_entities.begin(), root_entities.end(), [&](entt::entity a, entt::entity b) {
+                        auto hA = ecs->getEntityComponent<Entity::Hierarchy>(a);
+                        auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b);
+                        int idxA = hA ? hA->get().siblingIndex : 0;
+                        int idxB = hB ? hB->get().siblingIndex : 0;
 
-                // Render hierarchy
+                        return idxA < idxB;
+                        });
+                }
+
+                // Get search filter (convert to lowercase for case-insensitive search)
+                std::string search_filter = search_buffer;
+                std::transform(search_filter.begin(), search_filter.end(), search_filter.begin(), ::tolower);
+
+                // Render hierarchy (filter if search is active)
                 for (auto entity : root_entities) {
-                    drawEntityHierarchy(entity, 0);
+                    if (search_filter.empty()) {
+                        drawEntityHierarchy(entity, 0, search_filter);
+                    } else {
+                        // Check if this entity or any of its children match the search
+                        if (entityMatchesSearch(entity, search_filter)) {
+                            drawEntityHierarchy(entity, 0, search_filter);
+                        }
+                    }
                 }
 
                 ImGui::Spacing();
@@ -372,7 +483,7 @@ namespace PAIN {
                 }
             }
 
-            void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth) {
+            void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth, const std::string& search_filter) {
                 auto ecs = PN_ECS_SERVICE;
 
                 if (!ecs->checkEntity(entity, currentRegistryID)) return;
@@ -382,24 +493,75 @@ namespace PAIN {
                 std::vector<entt::entity> children = getEntityChildren(entity);
                 bool has_children = !children.empty();
 
-                // Create indentation
-                std::string indent(depth * 2, ' ');
-                std::string prefix = depth > 0 ? "-> " : "";
-                if (has_children) prefix += "[G] ";
-
-                std::string display_label = indent + prefix + entity_name;
-                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
+                if (!sort_alphabetically) {
+                    std::sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
+                        auto hA = ecs->getEntityComponent<Entity::Hierarchy>(a, currentRegistryID);
+                        auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b, currentRegistryID);
+                        int idxA = hA ? hA->get().siblingIndex : 0;
+                        int idxB = hB ? hB->get().siblingIndex : 0;
+                        return idxA < idxB;
+                        });
+                }
+                // Check if this entity matches the search filter
+                std::string entity_name_lower = entity_name;
+                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
+                bool matches_search = search_filter.empty() || entity_name_lower.rfind(search_filter, 0) == 0;
 
                 // Check if entity is a prefab instance
                 bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry(currentRegistryID).any_of<Prefab::PrefabInstance>(entity);
+                
+                // Check if this group is collapsed
+                bool is_collapsed = collapsed_groups.find(entity) != collapsed_groups.end();
 
-                // Add icon or indicator for prefab instances
-                if (is_prefab_instance) {
-                    unique_label = "[P] " + unique_label;
+                // Create indentation
+                float indent_width = depth * 20.0f;
+                ImGui::Dummy(ImVec2(indent_width, 0));
+                ImGui::SameLine(0, 0);
+
+                // Draw collapse toggle for entities with children
+                if (has_children) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.5f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.5f));
+                    
+                    std::string arrow_label = std::string(is_collapsed ? ">" : "v") + "##toggle" + std::to_string(static_cast<uint32_t>(entity));
+                    if (ImGui::SmallButton(arrow_label.c_str())) {
+                        if (is_collapsed) {
+                            collapsed_groups.erase(entity);
+                        } else {
+                            collapsed_groups.insert(entity);
+                        }
+                    }
+                    ImGui::PopStyleColor(3);
+                    ImGui::SameLine();
+                } else if (depth > 0) {
+                    // Add spacing to align with siblings that have toggle buttons
+                    ImGui::Dummy(ImVec2(20.0f, 0));
+                    ImGui::SameLine(0, 0);
+                }
+
+                // Build display label
+                std::string prefix = "";
+                if (has_children) prefix += "[G] ";
+                if (is_prefab_instance) prefix = "[P] " + prefix;
+
+                std::string display_label = prefix + entity_name;
+                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
+
+                // Apply color styling (search match takes priority for highlighting)
+                bool color_pushed = false;
+                if (!search_filter.empty() && matches_search) {
+                    // Highlight matching entities in yellow/gold color
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.9f, 0.3f, 1.0f));
+                    color_pushed = true;
+                }
+                else if (is_prefab_instance) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                    color_pushed = true;
                 }
                 else if (depth > 0) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
+                    color_pushed = true;
                 }
 
                 // Render selectable
@@ -409,7 +571,7 @@ namespace PAIN {
                     b_entity_changed = true;
                 }
 
-                if (depth > 0 || is_prefab_instance) {
+                if (color_pushed) {
                     ImGui::PopStyleColor();
                 }
 
@@ -437,6 +599,47 @@ namespace PAIN {
                 if (ImGui::BeginPopupContextItem()) {
                     selected_entity = entity;
                     b_entity_changed = true;
+
+                    if (ImGui::MenuItem("Move Up")) {
+                        std::vector<entt::entity> siblings = getSiblings(entity);
+
+                        normalizeSiblings(siblings);
+
+                        // find current entity index in the SORTED list
+                        auto it = std::find(siblings.begin(), siblings.end(), entity);
+                        if (it != siblings.end() && it != siblings.begin()) {
+
+                            // Swap values in the ECS components
+                            entt::entity other = *std::prev(it);
+                            auto hCurrent = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                            auto hOther = ecs->getEntityComponent<Entity::Hierarchy>(other, currentRegistryID);
+
+                            // Simple swap
+                            std::swap(hCurrent->get().siblingIndex, hOther->get().siblingIndex);
+
+                            force_refresh = true;
+                        }
+                    }
+                    if (ImGui::MenuItem("Move Down")) {
+                        std::vector<entt::entity> siblings = getSiblings(entity);
+
+                        normalizeSiblings(siblings);
+
+                        // find current entity index in the SORTED list
+                        auto it = std::find(siblings.begin(), siblings.end(), entity);
+                        if (it != siblings.end() && std::next(it) != siblings.end()) {
+                            // Swap with the one after it
+                            entt::entity other = *std::next(it);
+
+                            auto hCurrent = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                            auto hOther = ecs->getEntityComponent<Entity::Hierarchy>(other, currentRegistryID);
+
+                            // SWAP INDICES
+                            std::swap(hCurrent->get().siblingIndex, hOther->get().siblingIndex);
+
+                            force_refresh = true;
+                        }
+                    }
 
                     if (ImGui::MenuItem("Clone")) {
                         openPopUp("Clone Entity");
@@ -509,12 +712,44 @@ namespace PAIN {
                     ImGui::EndPopup();
                 }
 
-                // Recursively draw children
-                if (has_children) {
+                // Recursively draw children (filter if search is active)
+                if (has_children && (!is_collapsed || !search_filter.empty())) {
                     for (auto child : children) {
-                        drawEntityHierarchy(child, depth + 1);
+                        if (search_filter.empty()) {
+                            drawEntityHierarchy(child, depth + 1, search_filter);
+                        } else {
+                            // Only draw children that match the search or have matching descendants
+                            if (entityMatchesSearch(child, search_filter)) {
+                                drawEntityHierarchy(child, depth + 1, search_filter);
+                            }
+                        }
                     }
                 }
+            }
+
+            bool EntityPanel::entityMatchesSearch(entt::entity entity, const std::string& search_filter) {
+                auto ecs = PN_ECS_SERVICE;
+                
+                if (!ecs->checkEntity(entity, currentRegistryID)) return false;
+                
+                // Check if this entity's name matches
+                std::string entity_name = getEntityName(entity);
+                std::string entity_name_lower = entity_name;
+                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
+                
+                if (entity_name_lower.rfind(search_filter, 0) == 0) {
+                    return true;
+                }
+                
+                // Check if any children match
+                std::vector<entt::entity> children = getEntityChildren(entity);
+                for (auto child : children) {
+                    if (entityMatchesSearch(child, search_filter)) {
+                        return true;
+                    }
+                }
+                
+                return false;
             }
 
             std::vector<entt::entity> EntityPanel::getRootEntities() {
@@ -558,9 +793,20 @@ namespace PAIN {
                 auto ecs = PN_ECS_SERVICE;
                 auto transformSystem = ecs->getSystem<Transform::System>();
 
+                std::vector<entt::entity> oldSiblings = getSiblings(child);
+
+                // Remove old child
+                oldSiblings.erase(std::remove(oldSiblings.begin(), oldSiblings.end(), child), oldSiblings.end());
+                normalizeSiblings(oldSiblings);
+
                 if (transformSystem) {
                     transformSystem->setParent(child, parent, ecs->getRegistry(currentRegistryID));
                     transformSystem->markDirty(child, ecs->getRegistry(currentRegistryID));
+
+                    // Assign new sibling index
+                    std::vector<entt::entity> newSiblings = getEntityChildren(parent);
+                    normalizeSiblings(newSiblings);
+
                 }
             }
 
@@ -636,6 +882,24 @@ namespace PAIN {
                     }
                 }
 
+                // Adjust sibling order
+                std::vector<entt::entity> siblings;
+
+                // FIND entity's siblings
+                auto h = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                if (h && h->get().parentGUID.IsValid()) {
+                    // Case A: Has Parent -> Siblings are Parent's children
+                    entt::entity parent = ecs->resolveGUID(h->get().parentGUID, currentRegistryID);
+                    siblings = getEntityChildren(parent);
+                }
+                else {
+                    // Case B: No Parent -> Siblings are Root entities
+                    siblings = getRootEntities();
+                }
+
+                siblings.erase(std::remove(siblings.begin(), siblings.end(), entity), siblings.end());
+                normalizeSiblings(siblings);
+
                 ecs->destroyEntity(entity, currentRegistryID);
             }
 
@@ -645,6 +909,13 @@ namespace PAIN {
 
                 for (auto child : children) {
                     entt::entity cloned_child = ecs->cloneEntity(child, currentRegistryID, currentRegistryID);
+                   
+                    // Wipe the Hierarchy of the new child before adding it
+                    if (auto h = ecs->getEntityComponent<Entity::Hierarchy>(cloned_child, currentRegistryID)) {
+                        h->get().childrenGUIDs.clear();
+                        h->get().parentGUID = Assets::GUID(); // Reset parent until setEntityParent sets it
+                    }
+
                     setEntityParent(cloned_child, cloned_parent);
                     cloneEntityWithChildren(child, cloned_child);
                 }
@@ -672,6 +943,51 @@ namespace PAIN {
                 }
 
                 force_refresh = true;
+            }
+
+            void EntityPanel::normalizeSiblings(std::vector<entt::entity>& siblings)
+            {
+                auto ecs = PN_ECS_SERVICE;
+
+                // SORT based on current siblingIndex, stable_sort to keep relative order if indices are equal (e.g. both are 0)
+                std::stable_sort(siblings.begin(), siblings.end(), [&](entt::entity a, entt::entity b) {
+                    auto hA = ecs->getEntityComponent<Entity::Hierarchy>(a, currentRegistryID);
+                    auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b, currentRegistryID);
+
+                    int idxA = hA ? hA->get().siblingIndex : 0;
+                    int idxB = hB ? hB->get().siblingIndex : 0;
+
+                    // Primary sort: The Index
+                    if (idxA != idxB) {
+                        return idxA < idxB;
+                    }
+
+                    // Tie-breaker: Entity ID (keeps order consistent if indices are identical)
+                    return a < b;
+                    });
+
+                // RE-ASSIGN clean 0, 1, 2, 3...
+                for (int i = 0; i < siblings.size(); i++) {
+                    if (auto h = ecs->getEntityComponent<Entity::Hierarchy>(siblings[i], currentRegistryID)) {
+                        // Only update if changed (to avoid unnecessary dirty flags)
+                        if (h->get().siblingIndex != i) {
+                            h->get().siblingIndex = i;
+                            
+                        }
+                    }
+                }
+            }
+
+            std::vector<entt::entity> EntityPanel::getSiblings(entt::entity e)
+            {
+                auto ecs = PN_ECS_SERVICE;
+                auto h = PN_ECS_SERVICE->getEntityComponent<Entity::Hierarchy>(e, currentRegistryID);
+                if (h && h->get().parentGUID.IsValid()) {
+                    // It's a child, get parent's children
+                    entt::entity parent = ecs->resolveGUID(h->get().parentGUID, currentRegistryID);
+                    return getEntityChildren(parent);
+                }
+                return getRootEntities(); // It's a root
             }
 
             std::string EntityPanel::getEntityName(entt::entity entity) {

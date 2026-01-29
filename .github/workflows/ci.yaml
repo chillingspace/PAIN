@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - UI-impl
   pull_request:
     branches: 
       - main
@@ -15,7 +14,7 @@ jobs:
   cppcheck:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Download Cppcheck MSI installer
       run: |
         Invoke-WebRequest -Uri "https://github.com/danmar/cppcheck/releases/download/2.18.0/cppcheck-2.18.0-x64-Setup.msi" -OutFile "cppcheck-setup.msi"
@@ -33,7 +32,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 #      - name: Cache _deps directory
 #        uses: actions/cache@v3
 #        with:
@@ -57,9 +56,9 @@ jobs:
         run: |
           cd bin/Debug
           # Start the exe, wait 10s, kill if still running
-          Start-Process .\Game.exe
+          Start-Process .\Ribbit_Express.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Game -ErrorAction SilentlyContinue
+          Stop-Process -Name Ribbit_Express -ErrorAction SilentlyContinue
         shell: pwsh
 
       - name: Build Release solution
@@ -69,14 +68,14 @@ jobs:
       - name: Run Release executable and test for crashes
         run: |
           cd bin/Release
-          Start-Process .\Game.exe
+          Start-Process .\Ribbit_Express.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Game -ErrorAction SilentlyContinue
+          Stop-Process -Name Ribbit_Express -ErrorAction SilentlyContinue
         shell: pwsh
   build-android:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 #      - name: Cache _deps directory
 #        uses: actions/cache@v3
 #        with:

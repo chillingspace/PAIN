@@ -203,6 +203,14 @@ namespace PAIN {
 
     void LuaManager::onDetach() {
         // clear script environments, timers, and callback vectors
+        resetForSceneReload();
+
+        api_.reset();
+
+        lua_ = sol::state();
+    }
+
+    void LuaManager::resetForSceneReload() {
         updates_.clear();
         keyDown_.clear();
         keyUp_.clear();
@@ -217,12 +225,10 @@ namespace PAIN {
         collisionInterests_.clear();
         delayedOps_.clear();
         while (!timeoutHeap_.empty()) timeoutHeap_.pop();
+
         pendingSceneChange_.reset();
-
-        api_.reset();
-
-        lua_ = sol::state();
     }
+
 
     void LuaManager::setPrefabInstantiator(std::function<entt::entity(const std::string& prefab, const std::string& layer, const std::string& name)> fn) {
         instantiatePrefab_ = std::move(fn);
@@ -504,6 +510,17 @@ namespace PAIN {
             return std::make_tuple(p.x, p.y, p.z);
             });
         lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
+
+        lua_.set_function("get2DPosition", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                return std::make_tuple(0.f, 0.f);
+            }
+            auto p = api_->Get2DPosition(entityId);
+            return std::make_tuple(p.x, p.y);
+            });
+        lua_.set_function("set2DPosition", [this](entt::entity entityId, float x, float y) { if (api_) api_->Set2DPosition(entityId, { x,y }); });
+
         lua_.set_function("getScale", [this](entt::entity entityId) {
             if (!api_) return std::make_tuple(1.f, 1.f, 1.f);
             auto s = api_->GetScale(entityId);
@@ -553,6 +570,10 @@ namespace PAIN {
             return std::make_tuple(v.x, v.y, v.z);
             });
         lua_.set_function("setVelocity", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetVelocity(entityId, { x,y,z }); });
+
+        lua_.set_function("isGrounded_", [this](entt::entity entityId, float maxDistance) {
+            return api_ ? api_->IsGrounded(entityId, maxDistance) : false;
+			});
 
         /* =========================================================================== */
         /*                                   Audio                                     */
@@ -613,6 +634,33 @@ namespace PAIN {
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
         /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        lua_.set_function("setLayerEnabled", [this](int layerId, bool enabled) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] setLayerEnabled: API not initialized");
+                return;
+            }
+
+            bool success = api_->SetLayerEnabled(layerId, enabled);
+            if (success) {
+                PN_INFO("[Lua] Layer {} enabled: {}", layerId, enabled);
+            }
+            else {
+                PN_WARN("[Lua] Failed to set Layer {} - layer not found", layerId);
+            }
+            });
+
+        lua_.set_function("getLayerEnabled", [this](int layerId) -> bool {
+            if (!api_) {
+                PN_ERROR("[LuaManager] getLayerEnabled: API not initialized");
+                return false;
+            }
+            return api_->GetLayerEnabled(layerId);
+            });
+
+
+        /* =========================================================================== */
         /*                              Graphics / FX                                  */
         /* =========================================================================== */
         lua_.set_function("shakeCamera", [this](float dur, float amp) { if (api_) api_->ShakeCamera(dur, amp); });
@@ -641,7 +689,6 @@ namespace PAIN {
             return std::make_tuple(t.x, t.y, t.z, r.x, r.y, r.z);
             });
 
-
         /* =========================================================================== */
         /*                                Particles                                    */
         /* =========================================================================== */
@@ -662,6 +709,22 @@ namespace PAIN {
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
 
         /* =========================================================================== */
+        /*                              Cursor Control                                 */
+        /* =========================================================================== */
+        lua_.set_function("showCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] showCursor - not implemented yet");
+            });
+
+        lua_.set_function("hideCursor", []() {
+            // Don't access 'this' or member variables
+            PN_INFO("[Lua] hideCursor - not implemented yet");
+            });
+
+
+
+
+        /* =========================================================================== */
         /*                                ModelRenderer                                 */
         /* =========================================================================== */
         lua_.set_function("getModelId", [this](entt::entity entityId) -> sol::object {
@@ -677,7 +740,14 @@ namespace PAIN {
             api_->SetUITexture(entityId, textureName);
             }
         );
+        lua_.set_function("getUITextureScale", [this](entt::entity e) {
+            auto s = api_->GetUITextureScale(e);
+            return std::make_tuple(s.x, s.y);
+            });
 
+        lua_.set_function("setUITextureScale", [this](entt::entity e, float x, float y) {
+            api_->SetUITextureScale(e, { x, y });
+            });
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
@@ -691,6 +761,35 @@ namespace PAIN {
         lua_.set_function("setLightDirection", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightDirection(entityId, x, y, z); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
+        /* =========================================================================== */
+        /*                                 Animations                                  */
+        /* =========================================================================== */
+        auto animTable = lua_["Animation"].get_or_create<sol::table>();
+
+        animTable.set_function("Play", [this](entt::entity entityId, const std::string& name) {
+            if (api_) api_->Animation_Play(entityId, name);
+        });
+
+        animTable.set_function("CrossFade", [this](entt::entity entityId, const std::string& name, float duration) {
+            if (api_) api_->Animation_CrossFade(entityId, name, duration);
+        });
+
+        animTable.set_function("SetSpeed", [this](entt::entity entityId, float speed) {
+            if (api_) api_->Animation_SetSpeed(entityId, speed);
+        });
+
+        animTable.set_function("SetLoop", [this](entt::entity entityId, bool loop) {
+            if (api_) api_->Animation_SetLoop(entityId, loop);
+        });
+
+        animTable.set_function("IsPlaying", [this](entt::entity entityId, const std::string& name) {
+            if (api_) return api_->Animation_IsPlaying(entityId, name);
+                return false;
+        });
+        animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationDuration(entityId);
+            return 0.0f;
+            });
     }
 
 
@@ -814,7 +913,8 @@ namespace PAIN {
         if (pendingSceneChange_ && !sceneChangeQueued_) {
             sceneChangeQueued_ = true;
             (*pendingSceneChange_)();
-            pendingSceneChange_.reset();
+            //pendingSceneChange_.reset();
+            resetForSceneReload();
             sceneChangeQueued_ = false;
         }
     }
@@ -914,6 +1014,46 @@ namespace PAIN {
         sol::protected_function fn = obj.as<sol::protected_function>();
         sol::protected_function_result r = fn();
         if (!r.valid()) { sol::error e = r; logError("Global(" + name + ")", e); }
+    }
+
+    void LuaManager::callGlobal(const std::string& name, const std::string& arg1, entt::entity arg2, const std::string& arg3)
+    {
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobal: '{}' is not a function", name);
+            return;
+        }
+
+        PN_CORE_INFO("[LuaManager] callGlobal: calling '{}' with 3 args", name);
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn(arg1, arg2, arg3);
+        if (!r.valid()) {
+            sol::error e = r;
+            logError("Global(" + name + ")", e);
+        }
+    }
+
+    void LuaManager::callGlobalWithVec2(const std::string& name, float x, float y) {
+        sol::object obj = lua_[name];
+        if (!obj.valid()) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' not found in globals", name);
+            return;
+        }
+        if (obj.get_type() != sol::type::function) {
+            PN_CORE_WARN("[LuaManager] callGlobalWithVec2: '{}' is not a function", name);
+            return;
+        }
+        
+        sol::protected_function fn = obj.as<sol::protected_function>();
+        sol::protected_function_result r = fn(x, y);
+        if (!r.valid()) { 
+            sol::error e = r; 
+            logError("Global(" + name + ")", e); 
+        }
     }
 
 }

@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "sCameraController.h"
 
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
+
 
 namespace PAIN {
     MobileMoveAxes g_MobileMoveAxes;
@@ -227,7 +231,7 @@ namespace PAIN {
         auto window = services->get<Window::Window>();
 
         if (gameMode) {
-            window->setCursorMode(true);
+            window->setCursorMode(b_hide_mouse);
 
         }
         else {
@@ -363,6 +367,13 @@ namespace PAIN {
         // ===== CAMERA CONTROLS: Active in Release OR when Editor is hidden in Debug =====
         if (!editorIsVisible) {
             dispatcher.Dispatch<Event::KeyPressed>([&](Event::KeyPressed& e) -> bool {
+
+                if (e.getKeyCode() == PAIN_KEY_Q && LCTRL_KEYDOWN) {
+                    //PN_CORE_INFO("Ctrl+Q pressed - Quitting application");
+                    g_shouldQuitApplication = true; // If you have this global flag
+                    return true; // Event handled
+                }
+
                 switch (e.getKeyCode()) {
                 case PAIN_KEY_W:
                     W_KEYDOWN = true;
@@ -381,6 +392,9 @@ namespace PAIN {
                     break;
                 case PAIN_KEY_Q:
                     Q_KEYDOWN = true;
+                    break;
+                case PAIN_KEY_ESCAPE:
+                    ESC_KEYDOWN = true;
                     break;
                 case PAIN_KEY_LEFT_SHIFT:
                     LSHIFT_KEYDOWN = true;
@@ -419,6 +433,9 @@ namespace PAIN {
                     break;
                 case PAIN_KEY_LEFT_CONTROL:
                     LCTRL_KEYDOWN = false;
+                    break;
+                case PAIN_KEY_ESCAPE:
+                    ESC_KEYDOWN = false;
                     break;
                 default:
                     break;
@@ -462,9 +479,14 @@ namespace PAIN {
                 });
         }
 
-        // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+#ifdef _DEBUG
+            if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantTextInput) {
+                return false;
+            }
+#endif
             auto& gs = GraphicsSettings::get();
+            auto window = services->get<Window::Window>();
 
             switch (e.getKeyCode()) {
 
@@ -483,6 +505,18 @@ namespace PAIN {
                 }
                 break;
             }
+            case PAIN_KEY_ESCAPE:
+            {
+
+                //auto window = services->get<Window::Window>();
+                //if (window) {
+                //    b_hide_mouse = !b_hide_mouse;
+                //    window->setCursorMode(true);
+                //    PN_CORE_INFO("Cursor Mode: {}", b_hide_mouse ? "Hidden" : "Visible");
+                //}
+                //break;
+            }
+
             case PAIN_KEY_EQUAL: // '+' key in many layouts (with shift)
             case PAIN_KEY_KP_ADD: // Numpad +
                 if (camera) {
@@ -542,6 +576,10 @@ namespace PAIN {
             case PAIN_KEY_F10:
                 gs.ibl = !gs.ibl;
                 PN_CORE_INFO("Toggled IBL: {}", gs.ibl);
+                break;
+            case PAIN_KEY_F11:
+                gs.DEBUG_DRAW_UI_HITBOXES = !gs.DEBUG_DRAW_UI_HITBOXES;
+                PN_CORE_INFO("Toggled DEBUG_DRAW_UI_HITBOXES: {}", gs.DEBUG_DRAW_UI_HITBOXES);
                 break;
 
 

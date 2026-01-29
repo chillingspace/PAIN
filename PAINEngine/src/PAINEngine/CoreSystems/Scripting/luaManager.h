@@ -51,6 +51,8 @@ namespace PAIN {
 
         // misc
         void callGlobal(const std::string& name);
+        void callGlobal(const std::string& name, const std::string& arg1, entt::entity arg2, const std::string& arg3);
+        void callGlobalWithVec2(const std::string& name, float x, float y);
         void queueOp(std::function<void(void)> op) { delayedOps_.push_back(std::move(op)); }
         void setPendingSceneChange(std::function<void(void)> op) { pendingSceneChange_ = std::move(op); }
 
@@ -65,10 +67,13 @@ namespace PAIN {
         void Input_OnEvent(PAIN::Event::Event& e);
         void Input_EndFrame();
         void onDetach();
+        void resetForSceneReload();
 
     public:
         sol::state& state() { return lua_; } // so AI can call into Lua directly
         const sol::state& state() const { return lua_; }
+
+        void setServices(Services* services) { services_ = services; }
 
     private:
         // bindings
@@ -81,6 +86,8 @@ namespace PAIN {
 
         static entt::entity toEntity(int id);
 
+        //GLFWwindow* window_ = nullptr;
+
     private:
         struct TimeoutNode {
             double wake;
@@ -92,6 +99,7 @@ namespace PAIN {
 
         sol::state lua_;
         std::shared_ptr<IEngineAPI> api_;
+        Services* services_ = nullptr;
         bool shipping_{ false };
         bool gamePaused_{ false };
 

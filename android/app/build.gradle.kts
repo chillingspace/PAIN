@@ -92,7 +92,7 @@ android {
             versionNameSuffix = "-DEBUG"    // Version shows as "1.0-DEBUG"
             
             // Different app name in launcher to distinguish them
-            manifestPlaceholders["appName"] = "PAIN (Debug)"
+            manifestPlaceholders["appName"] = "Ribbit Express (Debug)"
             
             // For debug/emulator: Only ARM to avoid KTX x86 compilation error
             // Modern emulators can use ARM via translation
@@ -111,7 +111,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
             
             // Production app name
-            manifestPlaceholders["appName"] = "PAIN"
+            manifestPlaceholders["appName"] = "Ribbit Express"
             
             // Optimize native builds
             externalNativeBuild {

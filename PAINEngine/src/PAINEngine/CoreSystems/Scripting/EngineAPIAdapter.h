@@ -79,6 +79,9 @@ namespace PAIN {
         /* =========================================================================== */
         glm::vec3 GetPosition(entt::entity entityId) override;
         void SetPosition(entt::entity entityId, glm::vec3 p) override;
+        glm::vec2 Get2DPosition(entt::entity entityId) override;
+        void Set2DPosition(entt::entity entityId, glm::vec2 p) override;
+
         glm::vec3 GetScale(entt::entity entityId) override;
         void SetScale(entt::entity entityId, glm::vec3 s) override;
         glm::vec3 GetRotation(entt::entity entityId) override;
@@ -89,6 +92,7 @@ namespace PAIN {
         /* =========================================================================== */
         glm::vec3 GetVelocity(entt::entity entityId) override;
         void SetVelocity(entt::entity entityId, glm::vec3 v) override;
+		bool IsGrounded(entt::entity entityId, float maxDistance = .25f) override;
 
         /* =========================================================================== */
         /*                                   Audio                                     */
@@ -108,6 +112,12 @@ namespace PAIN {
         float GetFps() const override;
         void  SetDeltaMultiplier(float m) override;
         float GetDeltaMultiplier() const override;
+
+        /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        bool SetLayerEnabled(int layerId, bool enabled) override;
+        bool GetLayerEnabled(int layerId) override;
 
         /* =========================================================================== */
         /*                              Graphics / FX                                  */
@@ -147,6 +157,8 @@ namespace PAIN {
         void SetMeshId(entt::entity entityId, uint32_t meshId) override;
 
         void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) override;
+        void SetUITextureScale(entt::entity e, glm::vec2 s) override;
+        glm::vec2 GetUITextureScale(entt::entity e) override;
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
@@ -159,6 +171,16 @@ namespace PAIN {
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
         void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
+
+        /* =========================================================================== */
+        /*                                  Animation                                  */
+        /* =========================================================================== */
+        void Animation_Play(entt::entity entityId, std::string animName) override;
+        void Animation_CrossFade(entt::entity entityId, std::string animName, float duration) override;
+        void Animation_SetSpeed(entt::entity entityId, float speed) override;
+        void Animation_SetLoop(entt::entity entityId, bool loop) override;
+        bool Animation_IsPlaying(entt::entity entityId, std::string animName) override;
+        float GetAnimationDuration(entt::entity entityId) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());

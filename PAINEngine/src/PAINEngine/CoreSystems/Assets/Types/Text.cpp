@@ -46,6 +46,8 @@ namespace PAIN {
 
                     // store in member var so that it stays in memory
                     font_buffer = std::move(fontData);
+                    fontData.clear();
+                    fontData.shrink_to_fit();
                 }
 
                 // Load font from memory buffer

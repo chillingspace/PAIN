@@ -52,9 +52,41 @@ namespace PAIN {
                 GraphicsSettings::DEBUG_PBR_MAP_TYPES pbr_map = GraphicsSettings::DEBUG_PBR_MAP_TYPES::NONE;
             } environment;
 
+            //Loading screen settings
+            struct LoadingScreenSettings {
+                // Background
+                Assets::GUID backgroundTextureGUID;
+                glm::vec3 backgroundColor{ 0.1f, 0.1f, 0.1f };
+                float bgScale = 1.0f;
+                bool showBackground = true;
+                bool showOverlay = false;
+                
+                // Progress Bar
+                glm::vec2 progressBarPosition{ 0.0f, 0.0f };
+                glm::vec2 progressBarSize{ 600.0f, 40.0f };
+                glm::vec3 fillColor{ 0.2f, 0.8f, 0.9f };
+                glm::vec3 glowColor{ 0.4f, 0.9f, 1.0f };
+                float glowIntensity = 0.5f;
+                bool showProgressBar = false;
+                
+                // Status Text
+                glm::vec2 statusTextPosition{ 0.0f, 0.0f };
+                float statusTextScale = 0.03f;
+                bool showStatusText = false;
+                
+                // Spritesheet Animation
+                int frameCount = 1;
+                int framesPerRow = 1;
+                float frameTime = 0.1f;
+                bool animationEnabled = false;
+            } loadingScreen;
+
             //Layers
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;
+
+            //Set of asset GUID to cache
+            std::unordered_set<Assets::GUID> assets_to_cache;
 
             //Entity data
             nlohmann::json entityData;

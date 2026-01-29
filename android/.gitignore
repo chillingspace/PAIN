@@ -17,3 +17,4 @@ local.properties
 # Android signing keystore - DO NOT COMMIT 
 keystore/ 
 key.properties 
+key.properties.backup

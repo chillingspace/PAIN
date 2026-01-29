@@ -23,7 +23,7 @@ namespace PAIN {
             float getY() const { return y; }
             int getPointerId() const { return pointer_id; }
 
-            EVENT_CLASS_CATEGORY(Category::Input | Category::Mouse)
+            EVENT_CLASS_CATEGORY(Category::Input | Category::Touch)
         };
 
         class TouchDown : public TouchEvent {

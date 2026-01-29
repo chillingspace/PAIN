@@ -1,4 +1,4 @@
-/*****************************************************************//**
+/*****************************************************************/ /**
  * \file   ReflectionUI.h
  * \brief  Declaration of reflection UI for imgui
  *
@@ -14,1123 +14,1329 @@
 #ifndef REFELCTION_UI_HPP
 #define REFELCTION_UI_HPP
 
-#include <refl.hpp>
-#include <imgui.h>
+#include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/constants.hpp>
-#include <entt/entt.hpp>
+#include <imgui.h>
+#include <refl.hpp>
 
-//Components include
+// Components include
 #include "ECS/Components/AllComponents.h"
+#include "ECS/Components/cCompoundCollider.h"
 
-//Asset data
+// Asset data
 #include "AssetData.h"
 
-//Panels
-#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
-#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+// Panels
 #include "LayeredSystems/LevelEditor/EditorAttributes.h"
+#include "LayeredSystems/LevelEditor/Panels/ComponentsPanel.h"
+#include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
 
-//Core services
-#include "CoreSystems/Path/Path.h"
+// Core services
 #include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Path/Path.h"
 
- // Helper: Fuzzy match score
+// Helper: Fuzzy match score
 inline int fuzzyMatchScore(const std::string& pattern, const std::string& str) {
-    int score = 0;
-    size_t pattern_idx = 0;
+	int score = 0;
+	size_t pattern_idx = 0;
 
-    for (size_t str_idx = 0; str_idx < str.length() && pattern_idx < pattern.length(); ++str_idx) {
-        char p = std::tolower(pattern[pattern_idx]);
-        char s = std::tolower(str[str_idx]);
+	for (size_t str_idx = 0;
+		 str_idx < str.length() && pattern_idx < pattern.length(); ++str_idx) {
+		char p = std::tolower(pattern[pattern_idx]);
+		char s = std::tolower(str[str_idx]);
 
-        if (p == s) {
-            score += (str_idx == pattern_idx) ? 2 : 1;  // Bonus for consecutive matches
-            pattern_idx++;
-        }
-    }
+		if (p == s) {
+			score +=
+				(str_idx == pattern_idx) ? 2 : 1; // Bonus for consecutive matches
+			pattern_idx++;
+		}
+	}
 
-    // Return score only if all pattern chars matched
-    return (pattern_idx == pattern.length()) ? score : 0;
+	// Return score only if all pattern chars matched
+	return (pattern_idx == pattern.length()) ? score : 0;
 }
 
 // ---------- Asset Selector with Fuzzy Search ----------
-inline bool DrawAssetSelectorField(
-    const char* label,
-    PAIN::Assets::GUID& guid,
-    const PAIN::Editor::Attributes::AssetSelector& attr,
-    std::shared_ptr<PAIN::Services> services,
-    bool readonly = false, std::set<std::string> ext_filter = {}
-) {
-    bool changed = false;
-    auto asset_service = services->get<PAIN::Assets::Manager>();
-    auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+inline bool
+DrawAssetSelectorField(const char* label, PAIN::Assets::GUID& guid,
+					   const PAIN::Editor::Attributes::AssetSelector& attr,
+					   std::shared_ptr<PAIN::Services> services,
+					   bool readonly = false,
+					   std::set<std::string> ext_filter = {}) {
+	bool changed = false;
+	auto asset_service = services->get<PAIN::Assets::Manager>();
+	auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
 
-    if (ext_filter.empty()) ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
+	if (ext_filter.empty())
+		ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
 
-    // Find current selection
-    std::string current_name = "None";
-    for (auto const& asset : assets) {
-        if (guid.IsValid() && asset->guid == guid) {
-            current_name = asset->main_relative_path.filename().string();
-            break;
-        }
-    }
+	// Find current selection
+	std::string current_name = "None";
+	for (auto const& asset : assets) {
+		if (guid.IsValid() && asset->guid == guid) {
+			current_name = asset->main_relative_path.filename().string();
+			break;
+		}
+	}
 
-    ImGui::Text("%s", label);
+	ImGui::Text("%s", label);
 
-    if (readonly) ImGui::BeginDisabled();
+	if (readonly)
+		ImGui::BeginDisabled();
 
-    // Selector button
-    std::string button_id = current_name + "###" + std::string(label) + "_selector";
-    if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
-        ImGui::OpenPopup(label);
-    }
+	// Selector button
+	std::string button_id =
+		current_name + "###" + std::string(label) + "_selector";
+	if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
+		ImGui::OpenPopup(label);
+	}
 
-    //Create file drag drop for any asset
-    auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
-    if (ImGui::BeginDragDropTarget()) {
-        // Accept material files from Resource Panel
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
-            PAIN::Editor::Panel::File* droppedFile = static_cast<PAIN::Editor::Panel::File*>(payload->Data);
+	// Create file drag drop for any asset
+	auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
+	if (ImGui::BeginDragDropTarget()) {
+		// Accept material files from Resource Panel
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+				std::string(filetype_string + "_FILE").c_str())) {
+			PAIN::Editor::Panel::File* droppedFile =
+				static_cast<PAIN::Editor::Panel::File*>(payload->Data);
 
-            if (droppedFile) {
+			if (droppedFile) {
 
-                //Update with new GUID
-                guid = droppedFile->id;
+				// Update with new GUID
+				guid = droppedFile->id;
 
-                //Set change flag to true
-                changed = true;
-            }
-        }
-        ImGui::EndDragDropTarget();
-    }
+				// Set change flag to true
+				changed = true;
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
 
-    // Searchable popup
-    if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
-        static char search_buffer[256] = "";
+	// Searchable popup
+	if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
+		static char search_buffer[256] = "";
 
-        // Search input
-        ImGui::SetNextItemWidth(400);
-        if (ImGui::InputTextWithHint("##search", "Type to search...",
-            search_buffer, 256, ImGuiInputTextFlags_AutoSelectAll)) {
-            // Search text changed
-        }
+		// Search input
+		ImGui::SetNextItemWidth(400);
+		if (ImGui::InputTextWithHint("##search", "Type to search...", search_buffer,
+									 256, ImGuiInputTextFlags_AutoSelectAll)) {
+			// Search text changed
+		}
 
-        ImGui::Separator();
+		ImGui::Separator();
 
-        // Build filtered and sorted list
-        struct ScoredAsset {
-            std::shared_ptr<const PAIN::Assets::IAsset> asset;
-            int score;
-            std::string display_name;
-        };
+		// Build filtered and sorted list
+		struct ScoredAsset {
+			std::shared_ptr<const PAIN::Assets::IAsset> asset;
+			int score;
+			std::string display_name;
+		};
 
-        std::vector<ScoredAsset> scored_assets;
+		std::vector<ScoredAsset> scored_assets;
 
-        for (auto const& asset : assets) {
-            std::string asset_path = asset->main_relative_path.string();
-            std::string asset_name = asset->name.empty() ? asset->main_relative_path.filename().string() : asset->name;
+		for (auto const& asset : assets) {
+			std::string asset_path = asset->main_relative_path.string();
+			std::string asset_name =
+				asset->name.empty() ? asset->main_relative_path.filename().string()
+									: asset->name;
 
-            int score = 100;  // Default score
+			int score = 100; // Default score
 
-            if (strlen(search_buffer) > 0) {
-                score = fuzzyMatchScore(search_buffer, asset_name);
-                if (score == 0) {
-                    score = fuzzyMatchScore(search_buffer, asset_path);
-                }
-                if (score == 0) continue;  // No match
-            }
+			if (strlen(search_buffer) > 0) {
+				score = fuzzyMatchScore(search_buffer, asset_name);
+				if (score == 0) {
+					score = fuzzyMatchScore(search_buffer, asset_path);
+				}
+				if (score == 0)
+					continue; // No match
+			}
 
-            scored_assets.push_back({ asset, score, asset_path });
-        }
+			scored_assets.push_back({asset, score, asset_path});
+		}
 
-        // Sort by score (descending)
-        std::sort(scored_assets.begin(), scored_assets.end(),
-            [](const ScoredAsset& a, const ScoredAsset& b) {
-                return a.score > b.score;
-            });
+		// Sort by score (descending)
+		std::sort(scored_assets.begin(), scored_assets.end(),
+				  [](const ScoredAsset& a, const ScoredAsset& b) {
+					  return a.score > b.score;
+				  });
 
-        // Display results
-        ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
+		// Display results
+		ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
 
-        for (auto const& scored : scored_assets) {
-            if (ext_filter.find(std::filesystem::path(scored.display_name).extension().string()) == ext_filter.end()) continue;
-            bool is_selected = (guid.IsValid() && scored.asset->guid == guid);
+		for (auto const& scored : scored_assets) {
+			if (ext_filter.find(std::filesystem::path(scored.display_name)
+									.extension()
+									.string()) == ext_filter.end())
+				continue;
+			bool is_selected = (guid.IsValid() && scored.asset->guid == guid);
 
-            // Highlight matched characters
-            if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
-                guid = scored.asset->guid;
-                changed = true;
-                search_buffer[0] = '\0';  // Clear search
-                ImGui::CloseCurrentPopup();
-            }
+			// Highlight matched characters
+			if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
+				guid = scored.asset->guid;
+				changed = true;
+				search_buffer[0] = '\0'; // Clear search
+				ImGui::CloseCurrentPopup();
+			}
 
-            // Tooltip with full path
-            if (ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::Text("Path: %s", scored.asset->shipped_relative_path.string().c_str());
-                ImGui::Text("Type: %s", PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
-                if (strlen(search_buffer) > 0) {
-                    ImGui::Text("Match Score: %d", scored.score);
-                }
-                ImGui::EndTooltip();
-            }
+			// Tooltip with full path
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text("Path: %s",
+							scored.asset->shipped_relative_path.string().c_str());
+				ImGui::Text(
+					"Type: %s",
+					PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
+				if (strlen(search_buffer) > 0) {
+					ImGui::Text("Match Score: %d", scored.score);
+				}
+				ImGui::EndTooltip();
+			}
 
-            if (is_selected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
+			if (is_selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
 
-        if (scored_assets.empty()) {
-            ImGui::TextDisabled("No matching assets");
-        }
+		if (scored_assets.empty()) {
+			ImGui::TextDisabled("No matching assets");
+		}
 
-        ImGui::EndChild();
+		ImGui::EndChild();
 
-        // Footer stats
-        ImGui::Separator();
-        ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(), assets.size());
+		// Footer stats
+		ImGui::Separator();
+		ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(),
+					assets.size());
 
-        ImGui::EndPopup();
-    }
+		ImGui::EndPopup();
+	}
 
-    if (readonly) ImGui::EndDisabled();
-    return changed;
+	if (readonly)
+		ImGui::EndDisabled();
+	return changed;
 }
 
-inline bool DrawAssetSelectorField(
-    const char* label,
-    std::filesystem::path& path,
-    const PAIN::Editor::Attributes::AssetSelector& attr,
-    std::shared_ptr<PAIN::Services> services,
-    bool readonly = false, std::set<std::string> ext_filter = {}
-) {
-    bool changed = false;
-    auto asset_service = services->get<PAIN::Assets::Manager>();
-    auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
+inline bool
+DrawAssetSelectorField(const char* label, std::filesystem::path& path,
+					   const PAIN::Editor::Attributes::AssetSelector& attr,
+					   std::shared_ptr<PAIN::Services> services,
+					   bool readonly = false,
+					   std::set<std::string> ext_filter = {}) {
+	bool changed = false;
+	auto asset_service = services->get<PAIN::Assets::Manager>();
+	auto assets = asset_service->getAllAssetDataOfType(attr.asset_type);
 
-    if (ext_filter.empty()) ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
+	if (ext_filter.empty())
+		ext_filter = PAIN::Assets::getAllExtensions()[attr.asset_type];
 
-    // Find current selection
-    std::string current_name = "None";
-    for (auto const& asset : assets) {
-        if (!path.empty() && asset->main_relative_path == path) {
-            current_name = asset->main_relative_path.filename().string();
-            break;
-        }
-    }
+	// Find current selection
+	std::string current_name = "None";
+	for (auto const& asset : assets) {
+		if (!path.empty() && asset->main_relative_path == path) {
+			current_name = asset->main_relative_path.filename().string();
+			break;
+		}
+	}
 
-    ImGui::Text("%s", label);
+	ImGui::Text("%s", label);
 
-    if (readonly) ImGui::BeginDisabled();
+	if (readonly)
+		ImGui::BeginDisabled();
 
-    // Selector button
-    std::string button_id = current_name + "###" + std::string(label) + "_selector";
-    if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
-        ImGui::OpenPopup(label);
-    }
+	// Selector button
+	std::string button_id =
+		current_name + "###" + std::string(label) + "_selector";
+	if (ImGui::Button(button_id.c_str(), ImVec2(-1, 0))) {
+		ImGui::OpenPopup(label);
+	}
 
-    //Create file drag drop for any asset (Only in windows)
+	// Create file drag drop for any asset (Only in windows)
 #ifdef PN_PLATFORM_WINDOWS
-    auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
-    if (ImGui::BeginDragDropTarget()) {
-        // Accept material files from Resource Panel
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::string(filetype_string + "_FILE").c_str())) {
-            PAIN::Editor::Panel::File* droppedFile = static_cast<PAIN::Editor::Panel::File*>(payload->Data);
+	auto filetype_string = PAIN::Assets::assetTypeToString(attr.asset_type);
+	if (ImGui::BeginDragDropTarget()) {
+		// Accept material files from Resource Panel
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+				std::string(filetype_string + "_FILE").c_str())) {
+			PAIN::Editor::Panel::File* droppedFile =
+				static_cast<PAIN::Editor::Panel::File*>(payload->Data);
 
-            if (droppedFile) {
+			if (droppedFile) {
 
-                //Update with new GUID
-                path = std::filesystem::relative(services->get<PAIN::Path::Path>()->resolvePath(PAIN::Path::main_assets_alias, ""), droppedFile->path);
+				// Update with new GUID
+				path = std::filesystem::relative(
+					services->get<PAIN::Path::Path>()->resolvePath(
+						PAIN::Path::main_assets_alias, ""),
+					droppedFile->path);
 
-                //Set change flag to true
-                changed = true;
-            }
-        }
-        ImGui::EndDragDropTarget();
-    }
+				// Set change flag to true
+				changed = true;
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
 #endif
 
-    // Searchable popup
-    if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
-        static char search_buffer[256] = "";
+	// Searchable popup
+	if (ImGui::BeginPopup(label, ImGuiWindowFlags_AlwaysAutoResize)) {
+		static char search_buffer[256] = "";
 
-        // Search input
-        ImGui::SetNextItemWidth(400);
-        if (ImGui::InputTextWithHint("##search", "Type to search...",
-            search_buffer, 256, ImGuiInputTextFlags_AutoSelectAll)) {
-            // Search text changed
-        }
+		// Search input
+		ImGui::SetNextItemWidth(400);
+		if (ImGui::InputTextWithHint("##search", "Type to search...", search_buffer,
+									 256, ImGuiInputTextFlags_AutoSelectAll)) {
+			// Search text changed
+		}
 
-        ImGui::Separator();
+		ImGui::Separator();
 
-        // Build filtered and sorted list
-        struct ScoredAsset {
-            std::shared_ptr<const PAIN::Assets::IAsset> asset;
-            int score;
-            std::string display_name;
-        };
+		// Build filtered and sorted list
+		struct ScoredAsset {
+			std::shared_ptr<const PAIN::Assets::IAsset> asset;
+			int score;
+			std::string display_name;
+		};
 
-        std::vector<ScoredAsset> scored_assets;
+		std::vector<ScoredAsset> scored_assets;
 
-        for (auto const& asset : assets) {
-            std::string asset_path = asset->main_relative_path.string();
-            std::string asset_name = asset->name.empty() ? asset->main_relative_path.filename().string() : asset->name;
+		for (auto const& asset : assets) {
+			std::string asset_path = asset->main_relative_path.string();
+			std::string asset_name =
+				asset->name.empty() ? asset->main_relative_path.filename().string()
+									: asset->name;
 
-            int score = 100;  // Default score
+			int score = 100; // Default score
 
-            if (strlen(search_buffer) > 0) {
-                score = fuzzyMatchScore(search_buffer, asset_name);
-                if (score == 0) {
-                    score = fuzzyMatchScore(search_buffer, asset_path);
-                }
-                if (score == 0) continue;  // No match
-            }
+			if (strlen(search_buffer) > 0) {
+				score = fuzzyMatchScore(search_buffer, asset_name);
+				if (score == 0) {
+					score = fuzzyMatchScore(search_buffer, asset_path);
+				}
+				if (score == 0)
+					continue; // No match
+			}
 
-            scored_assets.push_back({ asset, score, asset_path });
-        }
+			scored_assets.push_back({asset, score, asset_path});
+		}
 
-        // Sort by score (descending)
-        std::sort(scored_assets.begin(), scored_assets.end(),
-            [](const ScoredAsset& a, const ScoredAsset& b) {
-                return a.score > b.score;
-            });
+		// Sort by score (descending)
+		std::sort(scored_assets.begin(), scored_assets.end(),
+				  [](const ScoredAsset& a, const ScoredAsset& b) {
+					  return a.score > b.score;
+				  });
 
-        // Display results
-        ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
+		// Display results
+		ImGui::BeginChild("AssetList", ImVec2(400, 300), true);
 
-        for (auto const& scored : scored_assets) {
-            if (ext_filter.find(std::filesystem::path(scored.display_name).extension().string()) == ext_filter.end()) continue;
-            bool is_selected = (!path.empty() && scored.asset->main_relative_path == path);
+		for (auto const& scored : scored_assets) {
+			if (ext_filter.find(std::filesystem::path(scored.display_name)
+									.extension()
+									.string()) == ext_filter.end())
+				continue;
+			bool is_selected =
+				(!path.empty() && scored.asset->main_relative_path == path);
 
-            // Highlight matched characters
-            if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
-                path = scored.asset->main_relative_path;
-                changed = true;
-                search_buffer[0] = '\0';  // Clear search
-                ImGui::CloseCurrentPopup();
-            }
+			// Highlight matched characters
+			if (ImGui::Selectable(scored.display_name.c_str(), is_selected)) {
+				path = scored.asset->main_relative_path;
+				changed = true;
+				search_buffer[0] = '\0'; // Clear search
+				ImGui::CloseCurrentPopup();
+			}
 
-            // Tooltip with full path
-            if (ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                ImGui::Text("Path: %s", scored.asset->shipped_relative_path.string().c_str());
-                ImGui::Text("Type: %s", PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
-                if (strlen(search_buffer) > 0) {
-                    ImGui::Text("Match Score: %d", scored.score);
-                }
-                ImGui::EndTooltip();
-            }
+			// Tooltip with full path
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text("Path: %s",
+							scored.asset->shipped_relative_path.string().c_str());
+				ImGui::Text(
+					"Type: %s",
+					PAIN::Assets::assetTypeToString(scored.asset->type).c_str());
+				if (strlen(search_buffer) > 0) {
+					ImGui::Text("Match Score: %d", scored.score);
+				}
+				ImGui::EndTooltip();
+			}
 
-            if (is_selected) {
-                ImGui::SetItemDefaultFocus();
-            }
-        }
+			if (is_selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
 
-        if (scored_assets.empty()) {
-            ImGui::TextDisabled("No matching assets");
-        }
+		if (scored_assets.empty()) {
+			ImGui::TextDisabled("No matching assets");
+		}
 
-        ImGui::EndChild();
+		ImGui::EndChild();
 
-        // Footer stats
-        ImGui::Separator();
-        ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(), assets.size());
+		// Footer stats
+		ImGui::Separator();
+		ImGui::Text("Showing: %zu / %zu assets", scored_assets.size(),
+					assets.size());
 
-        ImGui::EndPopup();
-    }
+		ImGui::EndPopup();
+	}
 
-    if (readonly) ImGui::EndDisabled();
-    return changed;
+	if (readonly)
+		ImGui::EndDisabled();
+	return changed;
 }
-
 
 // Mark fields as read-only in the reflected UI
 struct ReadOnlyTag : refl::attr::usage::field {};
 
 // ---------- Asset GUID ----------
-inline bool DrawField(const char* label, PAIN::Assets::GUID& v) { ImGui::Text("%s", v.ToString().c_str()); return true; }
+inline bool DrawField(const char* label, PAIN::Assets::GUID& v) {
+	ImGui::Text("%s", v.ToString().c_str());
+	return true;
+}
 
 // ---------- Primitive + std types ----------
-inline bool DrawField(const char* label, bool& v) { return ImGui::Checkbox(label, &v); }
-inline bool DrawField(const char* label, int& v) { return ImGui::DragInt(label, &v, 1); }
-inline bool DrawField(const char* label, float& v) { return ImGui::DragFloat(label, &v, 0.1f); }
-inline bool DrawField(const char* label, double& v) { float f = (float)v; bool c = ImGui::DragFloat(label, &f, 0.1f); if (c)v = (double)f; return c; }
+inline bool DrawField(const char* label, bool& v) {
+	return ImGui::Checkbox(label, &v);
+}
+inline bool DrawField(const char* label, int& v) {
+	return ImGui::DragInt(label, &v, 1);
+}
+inline bool DrawField(const char* label, float& v) {
+	return ImGui::DragFloat(label, &v, 0.1f);
+}
+inline bool DrawField(const char* label, double& v) {
+	float f = (float)v;
+	bool c = ImGui::DragFloat(label, &f, 0.1f);
+	if (c)
+		v = (double)f;
+	return c;
+}
 inline bool DrawField(const char* label, std::string& s) {
-    char buf[512]; std::snprintf(buf, sizeof(buf), "%s", s.c_str());
-    if (ImGui::InputText(label, buf, sizeof(buf))) { s = buf; return true; }
-    return false;
+	char buf[512];
+	std::snprintf(buf, sizeof(buf), "%s", s.c_str());
+	if (ImGui::InputText(label, buf, sizeof(buf))) {
+		s = buf;
+		return true;
+	}
+	return false;
 }
 
 // ---------- GLM drawers (no reflection of GLM) ----------
-inline bool DrawField(const char* label, glm::vec2& v) { return ImGui::DragFloat2(label, glm::value_ptr(v), 0.1f); }
-inline bool DrawField(const char* label, glm::vec3& v) { return ImGui::DragFloat3(label, glm::value_ptr(v), 0.1f); }
-inline bool DrawField(const char* label, glm::vec4& v) { return ImGui::DragFloat4(label, glm::value_ptr(v), 0.1f); }
+inline bool DrawField(const char* label, glm::vec2& v) {
+	return ImGui::DragFloat2(label, glm::value_ptr(v), 0.1f);
+}
+inline bool DrawField(const char* label, glm::vec3& v) {
+	return ImGui::DragFloat3(label, glm::value_ptr(v), 0.1f);
+}
+inline bool DrawField(const char* label, glm::vec4& v) {
+	return ImGui::DragFloat4(label, glm::value_ptr(v), 0.1f);
+}
 
 // Show quat as Euler degrees for editing
 inline bool DrawField(const char* label, glm::quat& q) {
-    glm::vec3 eulerDeg = glm::degrees(glm::eulerAngles(q));
-    if (ImGui::DragFloat3(label, glm::value_ptr(eulerDeg), 1.0f)) {
-        q = glm::quat(glm::radians(eulerDeg));
-        return true;
-    }
-    return false;
+	glm::vec3 eulerDeg = glm::degrees(glm::eulerAngles(q));
+	if (ImGui::DragFloat3(label, glm::value_ptr(eulerDeg), 1.0f)) {
+		q = glm::quat(glm::radians(eulerDeg));
+		return true;
+	}
+	return false;
 }
 
 // ----------- Unsigned ints -----------
-inline bool DrawField(const char* label, uint8_t& v) { unsigned int uv = v; bool ch = ImGui::InputScalar(label, ImGuiDataType_U8, &uv); if (ch) v = (uint8_t)uv; return ch; }
-inline bool DrawField(const char* label, uint16_t& v) { unsigned int uv = v; bool ch = ImGui::InputScalar(label, ImGuiDataType_U16, &uv); if (ch) v = (uint16_t)uv; return ch; }
+inline bool DrawField(const char* label, uint8_t& v) {
+	unsigned int uv = v;
+	bool ch = ImGui::InputScalar(label, ImGuiDataType_U8, &uv);
+	if (ch)
+		v = (uint8_t)uv;
+	return ch;
+}
+inline bool DrawField(const char* label, uint16_t& v) {
+	unsigned int uv = v;
+	bool ch = ImGui::InputScalar(label, ImGuiDataType_U16, &uv);
+	if (ch)
+		v = (uint16_t)uv;
+	return ch;
+}
 
 // Exact type with matching step & format (decimal)
 inline bool DrawField(const char* label, uint32_t& v) {
-    uint32_t step = 1;
-    return ImGui::InputScalar(label, ImGuiDataType_U32, &v, &step, nullptr, "%u",
-        ImGuiInputTextFlags_CharsDecimal);
+	uint32_t step = 1;
+	return ImGui::InputScalar(label, ImGuiDataType_U32, &v, &step, nullptr, "%u",
+							  ImGuiInputTextFlags_CharsDecimal);
 }
 
 inline bool DrawField(const char* label, uint64_t& v) {
-    uint64_t step = 1;
-    return ImGui::InputScalar(label, ImGuiDataType_U64, &v, &step, nullptr, "%llu",
-        ImGuiInputTextFlags_CharsDecimal);
+	uint64_t step = 1;
+	return ImGui::InputScalar(label, ImGuiDataType_U64, &v, &step, nullptr,
+							  "%llu", ImGuiInputTextFlags_CharsDecimal);
 }
 
 // ----- Lighting Enums -----
 inline bool DrawField(const char* label, PAIN::TYPES& v) {
-    const char* names[] = { "Point", "Directional", "Spotlight" };
-    int idx = static_cast<int>(v);
-    const int count = 3; // keep in sync
-    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
-    bool changed = false;
+	const char* names[] = {"Point", "Directional", "Spotlight"};
+	int idx = static_cast<int>(v);
+	const int count = 3; // keep in sync
+	const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+	bool changed = false;
 
-    if (ImGui::BeginCombo(label, preview)) {
-        for (int i = 0; i < count; ++i) {
-            bool selected = (i == idx);
-            if (ImGui::Selectable(names[i], selected)) {
-                idx = i;
-                v = static_cast<PAIN::TYPES>(i);
-                changed = true;
-            }
-            if (selected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
+	if (ImGui::BeginCombo(label, preview)) {
+		for (int i = 0; i < count; ++i) {
+			bool selected = (i == idx);
+			if (ImGui::Selectable(names[i], selected)) {
+				idx = i;
+				v = static_cast<PAIN::TYPES>(i);
+				changed = true;
+			}
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
 }
 
 inline bool DrawField(const char* label, PAIN::SHADOW_TYPES& v) {
-    const char* names[] = { "None", "Mapped", "Screen Space" };
-    int idx = static_cast<int>(v);
-    const int count = 3; // keep in sync
-    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
-    bool changed = false;
+	const char* names[] = {"None", "Mapped", "Screen Space"};
+	int idx = static_cast<int>(v);
+	const int count = 3; // keep in sync
+	const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+	bool changed = false;
 
-    if (ImGui::BeginCombo(label, preview)) {
-        for (int i = 0; i < count; ++i) {
-            bool selected = (i == idx);
-            if (ImGui::Selectable(names[i], selected)) {
-                idx = i;
-                v = static_cast<PAIN::SHADOW_TYPES>(i);
-                changed = true;
-            }
-            if (selected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
+	if (ImGui::BeginCombo(label, preview)) {
+		for (int i = 0; i < count; ++i) {
+			bool selected = (i == idx);
+			if (ImGui::Selectable(names[i], selected)) {
+				idx = i;
+				v = static_cast<PAIN::SHADOW_TYPES>(i);
+				changed = true;
+			}
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
 }
 
 // ----- UI Comps Enums -----
 inline bool DrawField(const char* label, PAIN::UIButtonState& v) {
-    const char* names[] = { "Normal", "Highlighted", "Pressed", "Disabled"};
-    int idx = static_cast<int>(v);
-    const int count = 4; // keep in sync
-    const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
-    bool changed = false;
+	const char* names[] = {"Normal", "Highlighted", "Pressed", "Disabled"};
+	int idx = static_cast<int>(v);
+	const int count = 4; // keep in sync
+	const char* preview = (idx >= 0 && idx < count) ? names[idx] : "Unknown";
+	bool changed = false;
 
-    if (ImGui::BeginCombo(label, preview)) {
-        for (int i = 0; i < count; ++i) {
-            bool selected = (i == idx);
-            if (ImGui::Selectable(names[i], selected)) {
-                idx = i;
-                v = static_cast<PAIN::UIButtonState>(i);
-                changed = true;
-            }
-            if (selected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
+	if (ImGui::BeginCombo(label, preview)) {
+		for (int i = 0; i < count; ++i) {
+			bool selected = (i == idx);
+			if (ImGui::Selectable(names[i], selected)) {
+				idx = i;
+				v = static_cast<PAIN::UIButtonState>(i);
+				changed = true;
+			}
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
 }
 
 // ----- PAIN::AABB drawer (read-only UI) -----
- namespace PAIN { struct AABB; } // For Bounding Volume
+namespace PAIN {
+	struct AABB;
+} // namespace PAIN
 
- inline bool DrawField(const char* label, PAIN::AABB& aabb) {
-     bool changed = false;
-     ImGui::SeparatorText(label);
+inline bool DrawField(const char* label, PAIN::AABB& aabb) {
+	bool changed = false;
+	ImGui::SeparatorText(label);
 
-     ImGui::BeginDisabled(true);
-     ImGui::InputFloat3("Min", glm::value_ptr(aabb.min), "%.3f");
-     ImGui::InputFloat3("Max", glm::value_ptr(aabb.max), "%.3f");
-     ImGui::EndDisabled();
+	ImGui::BeginDisabled(true);
+	ImGui::InputFloat3("Min", glm::value_ptr(aabb.min), "%.3f");
+	ImGui::InputFloat3("Max", glm::value_ptr(aabb.max), "%.3f");
+	ImGui::EndDisabled();
 
-     // Small helpers (don't flip changed flags; they don't edit the struct)
-     ImGui::SameLine();
-     if (ImGui::Button("Copy##AABB")) {
-         char buf[256];
-         std::snprintf(buf, sizeof(buf),
-             "Min(%.3f, %.3f, %.3f) Max(%.3f, %.3f, %.3f)",
-             aabb.min.x, aabb.min.y, aabb.min.z,
-             aabb.max.x, aabb.max.y, aabb.max.z);
-         ImGui::SetClipboardText(buf);
-     }
-     return changed; // drawer is read-only
- }
+	// Small helpers (don't flip changed flags; they don't edit the struct)
+	ImGui::SameLine();
+	if (ImGui::Button("Copy##AABB")) {
+		char buf[256];
+		std::snprintf(buf, sizeof(buf),
+					  "Min(%.3f, %.3f, %.3f) Max(%.3f, %.3f, %.3f)", aabb.min.x,
+					  aabb.min.y, aabb.min.z, aabb.max.x, aabb.max.y, aabb.max.z);
+		ImGui::SetClipboardText(buf);
+	}
+	return changed; // drawer is read-only
+}
 
- // ---------- entt::entity drawer ----------
- inline bool DrawField(const char* label, entt::entity& e) {
-     using id_t = entt::id_type;
-     bool changed = false;
+// ---------- entt::entity drawer ----------
+inline bool DrawField(const char* label, entt::entity& e) {
+	using id_t = entt::id_type;
+	bool changed = false;
 
-     id_t id = (e == entt::null) ? 0u : static_cast<id_t>(e);
-     ImGui::SetNextItemWidth(-1);
-     if (ImGui::InputScalar(label, ImGuiDataType_U32, &id, nullptr, nullptr, "%u",
-         ImGuiInputTextFlags_CharsDecimal)) {
-         e = (id == 0u) ? entt::null : static_cast<entt::entity>(id);
-         changed = true;
-     }
-     ImGui::SameLine();
-     if (ImGui::SmallButton("Clear")) { e = entt::null; changed = true; }
-     return changed;
- }
+	id_t id = (e == entt::null) ? 0u : static_cast<id_t>(e);
+	ImGui::SetNextItemWidth(-1);
+	if (ImGui::InputScalar(label, ImGuiDataType_U32, &id, nullptr, nullptr, "%u",
+						   ImGuiInputTextFlags_CharsDecimal)) {
+		e = (id == 0u) ? entt::null : static_cast<entt::entity>(id);
+		changed = true;
+	}
+	ImGui::SameLine();
+	if (ImGui::SmallButton("Clear")) {
+		e = entt::null;
+		changed = true;
+	}
+	return changed;
+}
 
- // ---------- generic vector drawer (uses element drawers) ----------
- template <typename T>
- inline bool DrawField(const char* label, std::vector<T>& v) {
-     bool changed = false;
-     if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
-         for (size_t i = 0; i < v.size(); ++i) {
-             ImGui::PushID(static_cast<int>(i));
-             std::string item = "[" + std::to_string(i) + "]";
-             changed |= DrawField(item.c_str(), v[i]);
-             ImGui::PopID();
-         }
-         ImGui::TreePop();
-     }
-     return changed;
- }
+// ---- ColliderShapeType enum drawer (cCompoundCollider) ----
+// NOTE: Must be BEFORE generic vector template for C++ overload resolution
+inline bool DrawField(const char* label, PAIN::ColliderShapeType& v) {
+	const char* names[] = {"Box", "Sphere", "Capsule"};
+	int idx = static_cast<int>(v);
+	bool changed = false;
 
+	if (ImGui::BeginCombo(label, names[idx])) {
+		for (int i = 0; i < 3; ++i) {
+			bool sel = (i == idx);
+			if (ImGui::Selectable(names[i], sel)) {
+				idx = i;
+				v = static_cast<PAIN::ColliderShapeType>(i);
+				changed = true;
+			}
+			if (sel)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
+}
+
+// ---- ColliderShape drawer (cCompoundCollider) ----
+// NOTE: Must be BEFORE generic vector template for C++ overload resolution
+inline bool DrawField(const char* label, PAIN::ColliderShape& shape) {
+	bool changed = false;
+
+	if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+		// Shape type
+		changed |= DrawField("Type", shape.type);
+
+		// Offset and rotation
+		changed |= DrawField("Offset", shape.offset);
+		changed |= DrawField("Rotation", shape.rotation);
+
+		// Shape-specific parameters
+		switch (shape.type) {
+		case PAIN::ColliderShapeType::Box:
+			changed |= DrawField("Half Extents", shape.boxHalfExtents);
+			break;
+		case PAIN::ColliderShapeType::Sphere:
+			changed |= DrawField("Radius", shape.sphereRadius);
+			break;
+		case PAIN::ColliderShapeType::Capsule:
+			changed |= DrawField("Capsule Radius", shape.capsuleRadius);
+			changed |= DrawField("Capsule Half Height", shape.capsuleHalfHeight);
+			break;
+		}
+
+		ImGui::TreePop();
+	}
+
+	return changed;
+}
+
+// ---------- generic vector drawer (uses element drawers) ----------
+template <typename T>
+inline bool DrawField(const char* label, std::vector<T>& v) {
+	bool changed = false;
+	if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+		for (size_t i = 0; i < v.size(); ++i) {
+			ImGui::PushID(static_cast<int>(i));
+			std::string item = "[" + std::to_string(i) + "]";
+			changed |= DrawField(item.c_str(), v[i]);
+			ImGui::PopID();
+		}
+		ImGui::TreePop();
+	}
+	return changed;
+}
 
 // ----- AudioState Enum -----
 inline bool DrawField(const char* label, PAIN::Audio::AudioState& v) {
-    const char* names[] = { "Stopped", "Playing", "Paused" };
-    int idx = static_cast<int>(v);
-    if (idx < 0 || idx > 2) idx = 0; // Safety clamp
-    const char* preview = names[idx];
-    bool changed = false;
+	const char* names[] = {"Stopped", "Playing", "Paused"};
+	int idx = static_cast<int>(v);
+	if (idx < 0 || idx > 2)
+		idx = 0; // Safety clamp
+	const char* preview = names[idx];
+	bool changed = false;
 
-    // Make the state read-only in the editor
-    ImGui::Text("%s:", label);
-    ImGui::SameLine();
-    ImGui::TextDisabled("%s", preview);
+	// Make the state read-only in the editor
+	ImGui::Text("%s:", label);
+	ImGui::SameLine();
+	ImGui::TextDisabled("%s", preview);
 
-    return changed; // changed will always be false
+	return changed; // changed will always be false
 }
 
 // ---- SHAPE enum drawer (cPhysics) ----
 inline bool DrawField(const char* label, PAIN::SHAPE& v) {
-    const char* names[] = { "Box", "Sphere", "Capsule", "Mesh" };
-    int idx = static_cast<int>(v);
-    bool changed = false;
+	const char* names[] = {"Box", "Sphere", "Capsule", "Mesh"};
+	int idx = static_cast<int>(v);
+	bool changed = false;
 
-    if (ImGui::BeginCombo(label, names[idx])) {
-        for (int i = 0; i < 4; ++i) {
-            bool sel = (i == idx);
-            if (ImGui::Selectable(names[i], sel)) { idx = i; v = static_cast<PAIN::SHAPE>(i); changed = true; }
-            if (sel) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
+	if (ImGui::BeginCombo(label, names[idx])) {
+		for (int i = 0; i < 4; ++i) {
+			bool sel = (i == idx);
+			if (ImGui::Selectable(names[i], sel)) {
+				idx = i;
+				v = static_cast<PAIN::SHAPE>(i);
+				changed = true;
+			}
+			if (sel)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
 }
 
 // ---- JOINT enum drawer (cPhysics) ----
 inline bool DrawField(const char* label, PAIN::JOINT_TYPE& v) {
-    const char* names[] = { "Fixed", "Hinge" };
-    int idx = static_cast<int>(v);
-    if (idx < 0 || idx > 1) idx = 0;
+	const char* names[] = {"Fixed", "Hinge"};
+	int idx = static_cast<int>(v);
+	if (idx < 0 || idx > 1)
+		idx = 0;
 
-    bool changed = false;
-    const char* preview = names[idx];
+	bool changed = false;
+	const char* preview = names[idx];
 
-    if (ImGui::BeginCombo(label, preview)) {
-        for (int i = 0; i < 2; ++i) {
-            bool sel = (i == idx);
-            if (ImGui::Selectable(names[i], sel)) {
-                v = static_cast<PAIN::JOINT_TYPE>(i);
-                changed = true;
-            }
-            if (sel) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
-    return changed;
+	if (ImGui::BeginCombo(label, preview)) {
+		for (int i = 0; i < 2; ++i) {
+			bool sel = (i == idx);
+			if (ImGui::Selectable(names[i], sel)) {
+				v = static_cast<PAIN::JOINT_TYPE>(i);
+				changed = true;
+			}
+			if (sel)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
 }
 
 // ---- RigidBody3D (cPhysics) ----
 inline bool DrawField(const char* label, JPH::BodyID& id) {
-    const uint32_t val = id.GetIndexAndSequenceNumber();
+	const uint32_t val = id.GetIndexAndSequenceNumber();
 
-    ImGui::BeginDisabled(true);
-    ImGui::Text("%s: %u", label, static_cast<unsigned>(val));
-    ImGui::EndDisabled();
-    return false; // read-only
+	ImGui::BeginDisabled(true);
+	ImGui::Text("%s: %u", label, static_cast<unsigned>(val));
+	ImGui::EndDisabled();
+	return false; // read-only
 }
-
 
 // ---- JPH::ObjectLayer enum drawer (Physics Layers) ----
 inline bool DrawField(const char* label, PAIN::Physics::PhysicsLayer& layer) {
-    const char* names[] = { "NON-MOVING", "MOVING", "DEBRIS", "SENSOR" };
-    const uint16_t values[] = {
-        PAIN::Layer::NON_MOVING,
-        PAIN::Layer::MOVING,
-        PAIN::Layer::DEBRIS,
-        PAIN::Layer::SENSOR
-    };
+	const char* names[] = {"NON-MOVING", "MOVING", "DEBRIS", "SENSOR"};
+	const uint16_t values[] = {PAIN::Layer::NON_MOVING, PAIN::Layer::MOVING,
+							   PAIN::Layer::DEBRIS, PAIN::Layer::SENSOR};
 
-    int idx = 1;
-    for (int i = 0; i < 4; ++i) {
-        if (layer.value == values[i]) {
-            idx = i;
-            break;
-        }
-    }
+	int idx = 1;
+	for (int i = 0; i < 4; ++i) {
+		if (layer.value == values[i]) {
+			idx = i;
+			break;
+		}
+	}
 
-    bool changed = false;  // Track change
+	bool changed = false; // Track change
 
-    if (ImGui::Combo(label, &idx, names, 4)) {
-        layer.value = values[idx];
-        changed = true;  // Mark as changed
-    }
+	if (ImGui::Combo(label, &idx, names, 4)) {
+		layer.value = values[idx];
+		changed = true; // Mark as changed
+	}
 
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        switch (idx) {
-        case 0: ImGui::Text("Static objects (walls, floor)"); break;
-        case 1: ImGui::Text("Dynamic objects (player, movable items)"); break;
-        case 2: ImGui::Text("Small debris (collides with static only)"); break;
-        case 3: ImGui::Text("Trigger volumes (detects moving objects)"); break;
-        }
-        ImGui::EndTooltip();
-    }
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		switch (idx) {
+		case 0:
+			ImGui::Text("Static objects (walls, floor)");
+			break;
+		case 1:
+			ImGui::Text("Dynamic objects (player, movable items)");
+			break;
+		case 2:
+			ImGui::Text("Small debris (collides with static only)");
+			break;
+		case 3:
+			ImGui::Text("Trigger volumes (detects moving objects)");
+			break;
+		}
+		ImGui::EndTooltip();
+	}
 
-    return changed;  // Return the change state
+	return changed; // Return the change state
 }
 
-inline bool DrawField(const char* label, PAIN::Physics::PhysicsBehavior& behavior) {
-    const char* names[] = { "Static", "Dynamic", "Debris", "Sensor" };
-    int idx = static_cast<int>(behavior);
-    bool changed = ImGui::Combo(label, &idx, names, 4);
+inline bool DrawField(const char* label,
+					  PAIN::Physics::PhysicsBehavior& behavior) {
+	const char* names[] = {"Static", "Dynamic", "Debris", "Sensor"};
+	int idx = static_cast<int>(behavior);
+	bool changed = ImGui::Combo(label, &idx, names, 4);
 
-    if (changed) {
-        behavior = static_cast<PAIN::Physics::PhysicsBehavior>(idx);
-    }
+	if (changed) {
+		behavior = static_cast<PAIN::Physics::PhysicsBehavior>(idx);
+	}
 
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        switch (idx) {
-        case 0: ImGui::Text("Static: Does not move (walls, floor)"); break;
-        case 1: ImGui::Text("Dynamic: Moves and collides (player, objects)"); break;
-        case 2: ImGui::Text("Debris: Collides only with static"); break;
-        case 3: ImGui::Text("Sensor: Trigger volume (collides with dynamic)"); break;
-        }
-        ImGui::EndTooltip();
-    }
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		switch (idx) {
+		case 0:
+			ImGui::Text("Static: Does not move (walls, floor)");
+			break;
+		case 1:
+			ImGui::Text("Dynamic: Moves and collides (player, objects)");
+			break;
+		case 2:
+			ImGui::Text("Debris: Collides only with static");
+			break;
+		case 3:
+			ImGui::Text("Sensor: Trigger volume (collides with dynamic)");
+			break;
+		}
+		ImGui::EndTooltip();
+	}
 
-    return changed;
+	return changed;
 }
 
 inline bool DrawField(const char* label, PAIN::Physics::LayerMapping& mapping) {
-    return DrawField(label, mapping.behavior);
+	return DrawField(label, mapping.behavior);
 }
 // ---- AI::SensorsConfig (cfg) ----
 inline bool DrawField(const char* label, PAIN::AI::SensorsConfig& cfg) {
-    bool changed = false;
+	bool changed = false;
 
-    changed |= DrawField("Sight Range", cfg.sight_range);
-    changed |= DrawField("Sight FOV (deg)", cfg.sight_fov_deg);
-    changed |= DrawField("Hear Range", cfg.hear_range);
-    changed |= DrawField("Require LOS", cfg.require_los);
-    changed |= DrawField("LOS Mask", cfg.los_collision_mask); // uint32
+	changed |= DrawField("Sight Range", cfg.sight_range);
+	changed |= DrawField("Sight FOV (deg)", cfg.sight_fov_deg);
+	changed |= DrawField("Hear Range", cfg.hear_range);
+	changed |= DrawField("Require LOS", cfg.require_los);
+	changed |= DrawField("LOS Mask", cfg.los_collision_mask); // uint32
 
-    return changed;
+	return changed;
 }
 
-
 // ---- MotionType enum drawer with automatic physics integration ----
-inline bool DrawField(const char* label, PAIN::Physics::MotionType& motion_type) {
-    const char* names[] = { "Static", "Dynamic", "Kinematic" };
-    int idx = static_cast<int>(motion_type);
-    bool changed = ImGui::Combo(label, &idx, names, 3);
+inline bool DrawField(const char* label,
+					  PAIN::Physics::MotionType& motion_type) {
+	const char* names[] = {"Static", "Dynamic", "Kinematic"};
+	int idx = static_cast<int>(motion_type);
+	bool changed = ImGui::Combo(label, &idx, names, 3);
 
-    if (changed) {
-        motion_type = static_cast<PAIN::Physics::MotionType>(idx);
-        // Motion type changed - will be applied in next physics sync or via global update
-    }
+	if (changed) {
+		motion_type = static_cast<PAIN::Physics::MotionType>(idx);
+		// Motion type changed - will be applied in next physics sync or via
+		// global update
+	}
 
-    return changed;
+	return changed;
 }
 
 // ---- Collider drawer (Manual : Unions don't work in reflection) ----
 inline bool DrawField(const char* label, PAIN::Collision::Collider& c) {
-    bool changed = false;
+	bool changed = false;
 
-    //ImGui::SeparatorText(label);
+	// ImGui::SeparatorText(label);
 
-    // Shape (switching sets defaults for the active union member)
-    if (DrawField("Shape", c.shape)) {
-        changed = true;
-        switch (c.shape) {
-        case PAIN::SHAPE::Box:     c.box_size = glm::vec3(1.0f);     break;
-        case PAIN::SHAPE::Sphere:  c.sphere_radius = 0.5f;           break;
-        case PAIN::SHAPE::Capsule: c.capsule = { 0.25f, 1.0f };      break;
-        case PAIN::SHAPE::Mesh:    /* no size fields */              break;
-        }
-    }
+	// Shape (switching sets defaults for the active union member)
+	if (DrawField("Shape", c.shape)) {
+		changed = true;
+		switch (c.shape) {
+		case PAIN::SHAPE::Box:
+			c.box_size = glm::vec3(1.0f);
+			break;
+		case PAIN::SHAPE::Sphere:
+			c.sphere_radius = 0.5f;
+			break;
+		case PAIN::SHAPE::Capsule:
+			c.capsule = {0.25f, 1.0f};
+			break;
+		case PAIN::SHAPE::Mesh: /* no size fields */
+			break;
+		}
+	}
 
-    // Active shape params
-    switch (c.shape) {
-    case PAIN::SHAPE::Box: {
-        glm::vec3 s = c.box_size;
-        if (ImGui::DragFloat3("Box Size", glm::value_ptr(s), 0.01f, 0.0f)) {
-            c.box_size = glm::max(s, glm::vec3(0.0f));
-            changed = true;
-        }
-    } break;
+	// Active shape params
+	switch (c.shape) {
+	case PAIN::SHAPE::Box: {
+		glm::vec3 s = c.box_size;
+		if (ImGui::DragFloat3("Box Size", glm::value_ptr(s), 0.01f, 0.0f)) {
+			c.box_size = glm::max(s, glm::vec3(0.0f));
+			changed = true;
+		}
+	} break;
 
-    case PAIN::SHAPE::Sphere: {
-        float r = c.sphere_radius;
-        if (ImGui::DragFloat("Radius", &r, 0.01f, 0.0f)) {
-            c.sphere_radius = glm::max(r, 0.0f);
-            changed = true;
-        }
-    } break;
+	case PAIN::SHAPE::Sphere: {
+		float r = c.sphere_radius;
+		if (ImGui::DragFloat("Radius", &r, 0.01f, 0.0f)) {
+			c.sphere_radius = glm::max(r, 0.0f);
+			changed = true;
+		}
+	} break;
 
-    case PAIN::SHAPE::Capsule: {
-        float r = c.capsule.radius;
-        float h = c.capsule.height;
-        if (ImGui::DragFloat("Capsule Radius", &r, 0.01f, 0.0f)) { c.capsule.radius = glm::max(r, 0.0f); changed = true; }
-        if (ImGui::DragFloat("Capsule Height", &h, 0.01f, 0.0f)) { c.capsule.height = glm::max(h, 0.0f); changed = true; }
-    } break;
+	case PAIN::SHAPE::Capsule: {
+		float r = c.capsule.radius;
+		float h = c.capsule.height;
+		if (ImGui::DragFloat("Capsule Radius", &r, 0.01f, 0.0f)) {
+			c.capsule.radius = glm::max(r, 0.0f);
+			changed = true;
+		}
+		if (ImGui::DragFloat("Capsule Height", &h, 0.01f, 0.0f)) {
+			c.capsule.height = glm::max(h, 0.0f);
+			changed = true;
+		}
+	} break;
 
-    case PAIN::SHAPE::Mesh: {
-        ImGui::TextDisabled("Mesh collider uses the mesh's triangles (no size input).");
-    } break;
-    }
+	case PAIN::SHAPE::Mesh: {
+		ImGui::TextDisabled(
+			"Mesh collider uses the mesh's triangles (no size input).");
+	} break;
+	}
 
-    // Common properties
-    {
-        float f = c.friction;
-        float b = c.restitution;
-        if (ImGui::DragFloat("Friction", &f, 0.01f, 0.0f, 1.0f)) { c.friction = std::clamp(f, 0.0f, 1.0f); changed = true; }
-        if (ImGui::DragFloat("Restitution", &b, 0.01f, 0.0f, 1.0f)) { c.restitution = std::clamp(b, 0.0f, 1.0f); changed = true; }
+	// Common properties
+	{
+		float f = c.friction;
+		float b = c.restitution;
+		if (ImGui::DragFloat("Friction", &f, 0.01f, 0.0f, 1.0f)) {
+			c.friction = std::clamp(f, 0.0f, 1.0f);
+			changed = true;
+		}
+		if (ImGui::DragFloat("Restitution", &b, 0.01f, 0.0f, 1.0f)) {
+			c.restitution = std::clamp(b, 0.0f, 1.0f);
+			changed = true;
+		}
 
-        // Existing uint16_t & bool drawers
-        changed |= DrawField("Collision Layer", c.collision_layer);
-        changed |= DrawField("Is Trigger", c.is_trigger);
-    }
+		// Existing uint16_t & bool drawers
+		changed |= DrawField("Collision Layer", c.collision_layer);
+		changed |= DrawField("Is Trigger", c.is_trigger);
+	}
 
-    return changed;
+	return changed;
 }
 
 // ---------- Fallback for unknown types ----------
 template <typename T>
 inline bool DrawField(const char* label, T&) {
-    ImGui::TextDisabled("No drawer for \"%s\"", label);
-    return false;
+	ImGui::TextDisabled("No drawer for \"%s\"", label);
+	return false;
 }
 
 // ========== MaterialInstance Custom Drawer ==========
 // Place this with the other custom drawers in ReflectionUI.h
 
-namespace PAIN { struct MaterialInstance; }
+namespace PAIN {
+	struct MaterialInstance;
+}
 
-inline bool DrawField(const char* label, PAIN::MaterialInstance& mat, PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
-    bool changed = false;
+inline bool DrawField(const char* label, PAIN::MaterialInstance& mat,
+					  PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
+	bool changed = false;
 
-    ImGui::PushID(&mat); // Use pointer as unique ID
+	ImGui::PushID(&mat); // Use pointer as unique ID
 
-    // Material Asset Selector
-    if (panel) {
-        changed |= DrawAssetSelectorField("Select A Material",
-            mat.materialGUID,
-            PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
-            panel->services);
-    }
-    else {
-        ImGui::Text("Material GUID: %s", mat.materialGUID.ToString().c_str());
-    }
+	// Material Asset Selector
+	if (panel) {
+		changed |= DrawAssetSelectorField(
+			"Select A Material", mat.materialGUID,
+			PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Material),
+			panel->services);
+	} else {
+		ImGui::Text("Material GUID: %s", mat.materialGUID.ToString().c_str());
+	}
 
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
 
-    // Override Toggle
-    if (ImGui::Checkbox("Use Property Overrides", &mat.useOverrides)) {
-        changed = true;
-    }
+	// Override Toggle
+	if (ImGui::Checkbox("Use Property Overrides", &mat.useOverrides)) {
+		changed = true;
+	}
 
-    if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("Enable to override base material properties for this instance");
-    }
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip(
+			"Enable to override base material properties for this instance");
+	}
 
-    // Only show override controls when enabled
-    if (mat.useOverrides) {
-        ImGui::Spacing();
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.3f, 0.4f, 0.8f));
+	// Only show override controls when enabled
+	if (mat.useOverrides) {
+		ImGui::Spacing();
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.3f, 0.4f, 0.8f));
 
-        if (ImGui::CollapsingHeader("Material Overrides", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Indent(10.0f);
+		if (ImGui::CollapsingHeader("Material Overrides",
+									ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Indent(10.0f);
 
-            //Textures override dropdown
-            if(ImGui::CollapsingHeader("Texture Overrides")) {
-                DrawAssetSelectorField("Albedo Texture Override",
-                    mat.albedoTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+			// Textures override dropdown
+			if (ImGui::CollapsingHeader("Texture Overrides")) {
+				DrawAssetSelectorField("Albedo Texture Override",
+									   mat.albedoTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Normal Texture Override",
-                    mat.normalTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("Normal Texture Override",
+									   mat.normalTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Metallic Texture Override",
-                    mat.metallicTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("Metallic Texture Override",
+									   mat.metallicTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Roughness Texture Override",
-                    mat.roughnessTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("Roughness Texture Override",
+									   mat.roughnessTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("AO Texture Override",
-                    mat.aoTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("AO Texture Override", mat.aoTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Emissive Texture Override",
-                    mat.emissiveTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("Emissive Texture Override",
+									   mat.emissiveTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Height Texture Override",
-                    mat.heightTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
+				DrawAssetSelectorField("Height Texture Override",
+									   mat.heightTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
 
-                DrawAssetSelectorField("Opacity Texture Override",
-                    mat.opacityTextureOverride,
-                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
-                    panel->services);
-            }
+				DrawAssetSelectorField("Opacity Texture Override",
+									   mat.opacityTextureOverride,
+									   PAIN::Editor::Attributes::AssetSelector(
+										   PAIN::Assets::Type::Texture),
+									   panel->services);
+			}
 
-            // Base Color Override
-            if (ImGui::ColorEdit3("Base Color", glm::value_ptr(mat.baseColorOverride))) {
-                changed = true;
-            }
+			// Base Color Override
+			if (ImGui::ColorEdit3("Base Color",
+								  glm::value_ptr(mat.baseColorOverride))) {
+				changed = true;
+			}
 
-            // Metallic Override
-            if (ImGui::SliderFloat("Metallic", &mat.metallicOverride, 0.0f, 1.0f, "%.2f")) {
-                changed = true;
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("0 = Dielectric (non-metal), 1 = Metallic");
-            }
+			// Metallic Override
+			if (ImGui::SliderFloat("Metallic", &mat.metallicOverride, 0.0f, 1.0f,
+								   "%.2f")) {
+				changed = true;
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("0 = Dielectric (non-metal), 1 = Metallic");
+			}
 
-            // Roughness Override
-            if (ImGui::SliderFloat("Roughness", &mat.roughnessOverride, 0.0f, 1.0f, "%.2f")) {
-                changed = true;
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("0 = Smooth/Shiny, 1 = Rough/Matte");
-            }
+			// Roughness Override
+			if (ImGui::SliderFloat("Roughness", &mat.roughnessOverride, 0.0f, 1.0f,
+								   "%.2f")) {
+				changed = true;
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("0 = Smooth/Shiny, 1 = Rough/Matte");
+			}
 
-            // Emissive Override
-            if (ImGui::ColorEdit3("Emissive Color", glm::value_ptr(mat.emissiveOverride))) {
-                changed = true;
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Self-illumination color (HDR values supported)");
-            }
+			// Emissive Override
+			if (ImGui::ColorEdit3("Emissive Color",
+								  glm::value_ptr(mat.emissiveOverride))) {
+				changed = true;
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("Self-illumination color (HDR values supported)");
+			}
 
-            ImGui::Unindent(10.0f);
-        }
+			ImGui::Unindent(10.0f);
+		}
 
-        ImGui::PopStyleColor();
-    }
+		ImGui::PopStyleColor();
+	}
 
-    ImGui::PopID();
+	ImGui::PopID();
 
-    return changed;
+	return changed;
 }
 
 // ========== std::vector<MaterialInstance> Drawer ==========
 // This handles the entire vector with proper indexing
 
-inline bool DrawField(const char* label, std::vector<PAIN::MaterialInstance>& materials, PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
-    bool changed = false;
+inline bool DrawField(const char* label,
+					  std::vector<PAIN::MaterialInstance>& materials,
+					  PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
+	bool changed = false;
 
-    ImGui::PushID(label);
+	ImGui::PushID(label);
 
-    // Header with material count
-    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.6f, 0.9f));
+	// Header with material count
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.6f, 0.9f));
 
-    std::string header = std::string(label) + " (" + std::to_string(materials.size()) + ")";
-    bool open = ImGui::CollapsingHeader(header.c_str());
+	std::string header =
+		std::string(label) + " (" + std::to_string(materials.size()) + ")";
+	bool open = ImGui::CollapsingHeader(header.c_str());
 
-    ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
 
-    if (open) {
-        ImGui::Indent(5.0f);
+	if (open) {
+		ImGui::Indent(5.0f);
 
-        if (materials.empty()) {
-            ImGui::Spacing();
-            ImGui::TextDisabled("No materials (model may not be loaded yet)");
-            ImGui::Spacing();
-        }
-        else {
-            for (size_t i = 0; i < materials.size(); ++i) {
-                ImGui::PushID(static_cast<int>(i));
+		if (materials.empty()) {
+			ImGui::Spacing();
+			ImGui::TextDisabled("No materials (model may not be loaded yet)");
+			ImGui::Spacing();
+		} else {
+			for (size_t i = 0; i < materials.size(); ++i) {
+				ImGui::PushID(static_cast<int>(i));
 
-                // Material slot header
-                ImGui::Spacing();
-                ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.15f, 0.25f, 0.35f, 0.8f));
-                ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.2f, 0.3f, 0.4f, 0.9f));
-                ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.25f, 0.35f, 0.45f, 1.0f));
+				// Material slot header
+				ImGui::Spacing();
+				ImGui::PushStyleColor(ImGuiCol_Header,
+									  ImVec4(0.15f, 0.25f, 0.35f, 0.8f));
+				ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
+									  ImVec4(0.2f, 0.3f, 0.4f, 0.9f));
+				ImGui::PushStyleColor(ImGuiCol_HeaderActive,
+									  ImVec4(0.25f, 0.35f, 0.45f, 1.0f));
 
-                std::string slot_label = "(Submesh " + std::to_string(i) + ")";
-                bool slot_open = ImGui::CollapsingHeader(slot_label.c_str());
+				std::string slot_label = "(Submesh " + std::to_string(i) + ")";
+				bool slot_open = ImGui::CollapsingHeader(slot_label.c_str());
 
-                ImGui::PopStyleColor(3);
+				ImGui::PopStyleColor(3);
 
-                if (slot_open) {
-                    ImGui::Indent(10.0f);
+				if (slot_open) {
+					ImGui::Indent(10.0f);
 
-                    // Draw the material instance
-                    if (DrawField("##MaterialInstance", materials[i], panel)) {
-                        changed = true;
-                    }
+					// Draw the material instance
+					if (DrawField("##MaterialInstance", materials[i], panel)) {
+						changed = true;
+					}
 
-                    ImGui::Unindent(10.0f);
-                }
+					ImGui::Unindent(10.0f);
+				}
 
-                ImGui::PopID();
-                ImGui::Spacing();
-            }
-        }
+				ImGui::PopID();
+				ImGui::Spacing();
+			}
+		}
 
-        ImGui::Unindent(5.0f);
-    }
+		ImGui::Unindent(5.0f);
+	}
 
-    ImGui::PopID();
+	ImGui::PopID();
 
-    return changed;
+	return changed;
 }
 
 // ---------- Reflection driver ----------
- template <typename T>
-bool DrawWithReflection(T& obj, PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
-    bool changed = false;
+template <typename T>
+bool DrawWithReflection(T& obj,
+						PAIN::Editor::Panel::ComponentsPanel* panel = nullptr) {
+	bool changed = false;
 
-    constexpr auto type = refl::reflect<T>();
-    refl::util::for_each(type.members, [&](auto m) {
-        if constexpr (refl::descriptor::is_field(m)) {
-            auto& field = m(obj);
-            ImGui::PushID(m.name.c_str());
+	constexpr auto type = refl::reflect<T>();
+	refl::util::for_each(type.members, [&](auto m) {
+		if constexpr (refl::descriptor::is_field(m)) {
+			auto& field = m(obj);
+			ImGui::PushID(m.name.c_str());
 
-            // ------- Check for DisplayName -------
-            const char* display_name = m.name.c_str();
-            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::DisplayName>(m)) {
-                display_name = refl::descriptor::get_attribute<PAIN::Editor::Attributes::DisplayName>(m).name;
-            }
+			// ------- Check for DisplayName -------
+			const char* display_name = m.name.c_str();
+			if constexpr (refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::DisplayName>(m)) {
+				display_name = refl::descriptor::get_attribute<
+								   PAIN::Editor::Attributes::DisplayName>(m)
+								   .name;
+			}
 
-            // ------- Tooltip -------
-            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Tooltip>(m)) {
-                if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("%s", refl::descriptor::get_attribute<PAIN::Editor::Attributes::Tooltip>(m).text);
-                }
-            }
+			// ------- Tooltip -------
+			if constexpr (refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::Tooltip>(m)) {
+				if (ImGui::IsItemHovered()) {
+					ImGui::SetTooltip("%s", refl::descriptor::get_attribute<
+												PAIN::Editor::Attributes::Tooltip>(m)
+												.text);
+				}
+			}
 
-            // ------- ReadOnly -------
-            bool readonly = false;
-            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)
-                || refl::descriptor::has_attribute<PAIN::Editor::Attributes::ReadOnly>(m)) {
-                readonly = true;
-            }
+			// ------- ReadOnly -------
+			bool readonly = false;
+			if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m) ||
+						  refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::ReadOnly>(m)) {
+				readonly = true;
+			}
 
-            // ------- AssetSelector / Custom Draw -------
-            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::AssetSelector>(m)) {
-                // The field must be Asset GUID, or something compatible
-                if (panel) {
-                    auto attr = refl::descriptor::get_attribute<PAIN::Editor::Attributes::AssetSelector>(m);
-                    // Replace with your asset dropdown renderer
-                    changed |= DrawAssetSelectorField(display_name, field, attr, panel->services, readonly);
-                }
-            }
-            // ------- Range, Dropdown, etc. -------
-            else if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Range>(m)) {
-                auto attr = refl::descriptor::get_attribute<PAIN::Editor::Attributes::Range>(m);
-                if (!readonly) {
-                    changed |= ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
-                }
-                else {
-                    ImGui::BeginDisabled();
-                    ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
-                    ImGui::EndDisabled();
-                }
-            }
-            // ------- Default Drawing Logic -------
-            else {
-                if (!readonly) {
-                    changed |= DrawField(display_name, field);
-                }
-                else {
-                    ImGui::BeginDisabled();
-                    changed |= DrawField(display_name, field);
-                    ImGui::EndDisabled();
-                }
-            }
+			// ------- AssetSelector / Custom Draw -------
+			if constexpr (refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::AssetSelector>(m)) {
+				// The field must be Asset GUID, or something compatible
+				if (panel) {
+					auto attr = refl::descriptor::get_attribute<
+						PAIN::Editor::Attributes::AssetSelector>(m);
+					// Replace with your asset dropdown renderer
+					changed |= DrawAssetSelectorField(display_name, field, attr,
+													  panel->services, readonly);
+				}
+			}
+			// ------- Range, Dropdown, etc. -------
+			else if constexpr (refl::descriptor::has_attribute<
+								   PAIN::Editor::Attributes::Range>(m)) {
+				auto attr =
+					refl::descriptor::get_attribute<PAIN::Editor::Attributes::Range>(m);
+				if (!readonly) {
+					changed |=
+						ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
+				} else {
+					ImGui::BeginDisabled();
+					ImGui::SliderFloat(display_name, &field, attr.min, attr.max);
+					ImGui::EndDisabled();
+				}
+			}
+			// ------- Default Drawing Logic -------
+			else {
+				if (!readonly) {
+					changed |= DrawField(display_name, field);
+				} else {
+					ImGui::BeginDisabled();
+					changed |= DrawField(display_name, field);
+					ImGui::EndDisabled();
+				}
+			}
 
-            ImGui::PopID();
-        }
-        });
-    return changed;
+			ImGui::PopID();
+		}
+	});
+	return changed;
 }
 
- //Overload for AI::Controller to draw dropdown for behavior_asset
-template<>
+// Overload for AI::Controller to draw dropdown for behavior_asset
+template <>
 inline bool DrawWithReflection<PAIN::AI::Controller>(
-    PAIN::AI::Controller& ai,
-    PAIN::Editor::Panel::ComponentsPanel* panel)
-{
-    bool changed = false;
+	PAIN::AI::Controller& ai, PAIN::Editor::Panel::ComponentsPanel* panel) {
+	bool changed = false;
 
-    constexpr auto type = refl::reflect<PAIN::AI::Controller>();
+	constexpr auto type = refl::reflect<PAIN::AI::Controller>();
 
-    // ----------- Custom dropdown for behavior_asset -----------
-    if (panel) {
-        auto asset_service = panel->services->get<PAIN::Assets::Manager>();
-        auto scripts = asset_service->getAllAssetDataOfType(PAIN::Assets::Type::Script);
+	// ----------- Custom dropdown for behavior_asset -----------
+	if (panel) {
+		auto asset_service = panel->services->get<PAIN::Assets::Manager>();
+		auto scripts =
+			asset_service->getAllAssetDataOfType(PAIN::Assets::Type::Script);
 
-        std::vector<const char*> names;
-        names.reserve(scripts.size());
+		std::vector<const char*> names;
+		names.reserve(scripts.size());
 
-        int current_index = -1;
+		int current_index = -1;
 
-        for (int i = 0; i < (int)scripts.size(); ++i) {
-            auto& script = scripts[i];
-            names.push_back(script->name.c_str());
+		for (int i = 0; i < (int)scripts.size(); ++i) {
+			auto& script = scripts[i];
+			names.push_back(script->name.c_str());
 
-            if (ai.behavior_asset == script->name) {
-                current_index = i;
-            }
-        }
+			if (ai.behavior_asset == script->name) {
+				current_index = i;
+			}
+		}
 
-        if (!names.empty()) {
-            if (ImGui::Combo("Behavior Script", &current_index,
-                names.data(), (int)names.size())) {
-                if (current_index >= 0 && current_index < (int)scripts.size()) {
-                    ai.behavior_asset = scripts[current_index]->name;
-                    changed = true;
-                }
-            }
-        }
-        else {
-            ImGui::TextDisabled("No Script assets found");
-        }
-    }
+		if (!names.empty()) {
+			if (ImGui::Combo("Behavior Script", &current_index, names.data(),
+							 (int)names.size())) {
+				if (current_index >= 0 && current_index < (int)scripts.size()) {
+					ai.behavior_asset = scripts[current_index]->name;
+					changed = true;
+				}
+			}
+		} else {
+			ImGui::TextDisabled("No Script assets found");
+		}
+	}
 
-    refl::util::for_each(type.members, [&](auto m) {
-        if constexpr (refl::descriptor::is_field(m)) {
-            // ---- Disable Default Text Box ----
-            // String must be the same name as the reflected member (behavior_asset)
-            if (m.name == "behavior_asset") {
-                // don't draw the default textbox
-                return; 
-            }
+	refl::util::for_each(type.members, [&](auto m) {
+		if constexpr (refl::descriptor::is_field(m)) {
+			// ---- Disable Default Text Box ----
+			// String must be the same name as the reflected member (behavior_asset)
+			if (m.name == "behavior_asset") {
+				// don't draw the default textbox
+				return;
+			}
 
-            auto& field = m(ai);
-            ImGui::PushID(m.name.c_str());
+			auto& field = m(ai);
+			ImGui::PushID(m.name.c_str());
 
-            // ------- DisplayName -------
-            const char* display_name = m.name.c_str();
-            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::DisplayName>(m)) {
-                display_name =
-                    refl::descriptor::get_attribute<PAIN::Editor::Attributes::DisplayName>(m).name;
-            }
+			// ------- DisplayName -------
+			const char* display_name = m.name.c_str();
+			if constexpr (refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::DisplayName>(m)) {
+				display_name = refl::descriptor::get_attribute<
+								   PAIN::Editor::Attributes::DisplayName>(m)
+								   .name;
+			}
 
-            // ------- Tooltip -------
-            if constexpr (refl::descriptor::has_attribute<PAIN::Editor::Attributes::Tooltip>(m)) {
-                if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip(
-                        "%s",
-                        refl::descriptor::get_attribute<PAIN::Editor::Attributes::Tooltip>(m).text
-                    );
-                }
-            }
+			// ------- Tooltip -------
+			if constexpr (refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::Tooltip>(m)) {
+				if (ImGui::IsItemHovered()) {
+					ImGui::SetTooltip("%s", refl::descriptor::get_attribute<
+												PAIN::Editor::Attributes::Tooltip>(m)
+												.text);
+				}
+			}
 
-            // ------- ReadOnly -------
-            bool readonly = false;
-            if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m)
-                || refl::descriptor::has_attribute<PAIN::Editor::Attributes::ReadOnly>(m)) {
-                readonly = true;
-            }
+			// ------- ReadOnly -------
+			bool readonly = false;
+			if constexpr (refl::descriptor::has_attribute<ReadOnlyTag>(m) ||
+						  refl::descriptor::has_attribute<
+							  PAIN::Editor::Attributes::ReadOnly>(m)) {
+				readonly = true;
+			}
 
-            // ------- Default drawing logic -------
-            if (!readonly) {
-                changed |= DrawField(display_name, field);
-            }
-            else {
-                ImGui::BeginDisabled();
-                changed |= DrawField(display_name, field);
-                ImGui::EndDisabled();
-            }
+			// ------- Default drawing logic -------
+			if (!readonly) {
+				changed |= DrawField(display_name, field);
+			} else {
+				ImGui::BeginDisabled();
+				changed |= DrawField(display_name, field);
+				ImGui::EndDisabled();
+			}
 
-            ImGui::PopID();
-        }
-        });
+			ImGui::PopID();
+		}
+	});
 
-    return changed;
+	return changed;
 }
-
 
 namespace PAIN {
-    namespace Editor {
-        namespace Panel {
-            template <typename T>
-            inline void RegisterReflected(ComponentsPanel& panel, const char* title) {
-                panel.registerCompUIFunc<T>([title](ComponentsPanel&, T& comp) {
-                    //ImGui::TextUnformatted(title ? title : "Component");
-                    //ImGui::Separator();
-                    DrawWithReflection(comp);
-                    });
-            }
+	namespace Editor {
+		namespace Panel {
+			template <typename T>
+			inline void RegisterReflected(ComponentsPanel& panel, const char* title) {
+				panel.registerCompUIFunc<T>([title](ComponentsPanel&, T& comp) {
+					// ImGui::TextUnformatted(title ? title : "Component");
+					// ImGui::Separator();
+					DrawWithReflection(comp);
+				});
+			}
 
-            // Manual UI for collider comp
-            inline void RegisterColliderUI(PAIN::Editor::Panel::ComponentsPanel& panel) {
-                panel.registerCompUIFunc<Collision::Collider>("Collider",
-                    [](PAIN::Editor::Panel::ComponentsPanel&, Collision::Collider& c) {
-                        DrawField("Collider", c);  
-                    });
-            }
+			// Manual UI for collider comp
+			inline void RegisterColliderUI(PAIN::Editor::Panel::ComponentsPanel& panel) {
+				panel.registerCompUIFunc<Collision::Collider>(
+					"Collider", [](PAIN::Editor::Panel::ComponentsPanel&,
+								   Collision::Collider& c) { DrawField("Collider", c); });
+			}
 
-        }
-    }
-}
+		} // namespace Panel
+	} // namespace Editor
+} // namespace PAIN
 #endif
 #endif

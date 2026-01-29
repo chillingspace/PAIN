@@ -23,6 +23,13 @@ else()
     message(FATAL_ERROR "Git not found in PATH!")
 endif()
 
+# Use /MD in Release and /MDd in Debug for all MSVC targets
+if (MSVC)
+  add_compile_options(/MP)
+  add_compile_options(/bigobj)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # Include our dependency helper module
 include(ImportDependencies)
 importDependencies() # Placeholder
@@ -45,12 +52,7 @@ add_compile_definitions(
   endif()
 endif()
 
-# Use /MD in Release and /MDd in Debug for all MSVC targets
-if (MSVC)
-  add_compile_options(/MP)
-  add_compile_options(/bigobj)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-endif()
+
 
 # ======================= Vendors  =========================
 
@@ -107,7 +109,7 @@ endif()
 
 # Set the startup project for the Visual Studio solution
 if (MSVC)
-  set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Game)
+  set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Ribbit_Express)
   add_compile_options(/MP)
   add_compile_options(/bigobj)
 endif()

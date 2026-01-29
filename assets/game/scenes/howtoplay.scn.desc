@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "howtoplay.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 6201456046659464306
+  },
+  "descriptor_version": 1,
+  "guid": "b6f63cd4-4ccb-c74d-afaa-d169214a18c3",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\howtoplay.scn"
+  }
+}

@@ -9,22 +9,23 @@
  *
  */
 
-
 #pragma once
 
 #ifndef __WINDOWS_RENDERER_H__
 #define __WINDOWS_RENDERER_H__
 
-#include "pch.h"
 #include "../Mesh.h"
+#include "pch.h"
+
 
 #include "../Light.h"
 #include "../Material.h"
 
-#include "CoreSystems/Scene/Scene.h"
-#include "CoreSystems/Scene/Camera.h"
-#include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Path/Path.h"
+#include "CoreSystems/Scene/Camera.h"
+#include "CoreSystems/Scene/Scene.h"
+
 
 namespace PAIN {
 	extern Material material;
@@ -71,14 +72,14 @@ namespace PAIN {
 			unsigned int opacityTexture = 0;
 
 			bool operator==(const MaterialKey& mk) {
-				return mk.albedoTexture == albedoTexture
-					&& mk.normalTexture == normalTexture
-					&& mk.metallicTexture == metallicTexture
-					&& mk.roughnessTexture == roughnessTexture
-					&& mk.aoTexture == aoTexture
-					&& mk.emissiveTexture == emissiveTexture
-					&& mk.heightTexture == heightTexture
-					&& mk.opacityTexture == opacityTexture;
+				return mk.albedoTexture == albedoTexture &&
+					   mk.normalTexture == normalTexture &&
+					   mk.metallicTexture == metallicTexture &&
+					   mk.roughnessTexture == roughnessTexture &&
+					   mk.aoTexture == aoTexture &&
+					   mk.emissiveTexture == emissiveTexture &&
+					   mk.heightTexture == heightTexture &&
+					   mk.opacityTexture == opacityTexture;
 			}
 
 			bool operator!=(const MaterialKey& mk) {
@@ -86,9 +87,8 @@ namespace PAIN {
 			}
 		};
 
-
 	public:
-		static constexpr float ao = 1.f;		// ambient occlusion	(1 = no occlusion)
+		static constexpr float ao = 1.f; // ambient occlusion	(1 = no occlusion)
 
 		inline static int winWidth = 0;
 		inline static int winHeight = 0;
@@ -97,24 +97,37 @@ namespace PAIN {
 		~WindowsRenderer();
 
 		void Init(std::shared_ptr<Services> app_services);
-		void initSceneVbo(const std::vector<PAIN::ModelRenderer>& models);
+		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
+		void initSceneVbo();
+		void clearBuffers();
 
 		// PASSES
 		void BeginShadowPass(const Light& l);
-		void DrawShadows(const ModelRenderer& component, const glm::mat4& M, const Light& l);
+		void DrawShadows(const ModelRenderer& component, const glm::mat4& M,
+						 const Light& l);
 		void EndShadowPass();
 
 		void BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene);
-		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene, ModelRenderer& component, const glm::mat4& M);
+		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
+						  ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
 
-
 		void ReflectionPass(const ModelRenderer& component);
-		void LightingPass(std::shared_ptr<Scene::SceneManager> scene, const LightSources& lights);
-		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p, const glm::vec4& color, std::shared_ptr<Scene::SceneManager> scene);
+		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,
+						  const LightSources& lights);
+		void DebugPass(const glm::vec3& min_p, const glm::vec3& max_p,
+					   const glm::vec4& color,
+					   std::shared_ptr<Scene::SceneManager> scene);
+		void DebugPassOBB(const glm::vec3 corners[8], const glm::vec4& color,
+						  std::shared_ptr<Scene::SceneManager> scene);
+		void DebugPass2D(const glm::vec2& min_p, const glm::vec2& max_p,
+						 const glm::vec4& color);
 		void PostProcessPass();
 
-		void Render2DTexture(GLuint texture_id, const glm::vec2& pos, glm::vec2& scale);
+		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
+							 glm::vec2& scale,
+							 const glm::vec4& uv_transform = glm::vec4(1.0f, 1.0f,
+																	   0.0f, 0.0f));
 
 		void Cleanup();
 
@@ -129,29 +142,32 @@ namespace PAIN {
 		static constexpr int MAX_VERTICES = 1000000;
 		static constexpr int MAX_INDICES = MAX_VERTICES;
 
-	private:
+	  private:
 		/*
-				unsigned int empty_vao = 0;
+                  unsigned int empty_vao = 0;
 
-				unsigned int passthrough_vao = 0;
-				unsigned int passthrough_vbo = 0;
-		*/
-		unsigned int ds_fbo = 0;			// deferred shading framebuffer
-		unsigned int ds_rbo = 0;				// depth buffer
-		//unsigned int shadow_fbo = 0;
+                  unsigned int passthrough_vao = 0;
+                  unsigned int passthrough_vbo = 0;
+  */
+		unsigned int ds_fbo = 0; // deferred shading framebuffer
+		unsigned int ds_rbo = 0; // depth buffer
+		// unsigned int shadow_fbo = 0;
 		unsigned int final_fbo = 0;
 		unsigned int final_rbo = 0;
 
-		unsigned int pp_fbo = 0;			// post-processing framebuffer (for ping-pong)
-		unsigned int pp2_fbo = 0;			// post-processing framebuffer 2 (for ping-pong)	needed for stuff like bloom
-		unsigned int out_fbo = 0;			// output framebuffer (for imgui/display)
+		unsigned int pp_fbo = 0;  // post-processing framebuffer (for ping-pong)
+		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
+								  // needed for stuff like bloom
+		unsigned int out_fbo = 0; // output framebuffer (for imgui/display)
 
 		// === Textures ===
 		unsigned int pos_texture = 0;
 		unsigned int col_texture = 0;
 		unsigned int norm_texture = 0;
-		//unsigned int shadow_texture = 0;					// shadow map
-		unsigned int material_properties_texture = 0;		// 2D to store roughness, metallic properties
+		// unsigned int shadow_texture = 0;					//
+		// shadow map
+		unsigned int material_properties_texture =
+			0; // 2D to store roughness, metallic properties
 		unsigned int emission_texture = 0;
 
 		// !TODO: jspoh cleanup memory
@@ -167,7 +183,7 @@ namespace PAIN {
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
 
-		unsigned int final_texture = 0;		// for imgui/post-processing/display
+		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
 
@@ -192,12 +208,12 @@ namespace PAIN {
 		// for easy access to clear memory
 		std::array<unsigned int*, 4> fbos{
 			&ds_fbo,
-			//&shadow_fbo, 
+			//&shadow_fbo,
 			&final_fbo,
 			&pp_fbo,
 			&pp2_fbo,
 		};
-		std::array<unsigned int*, 2> rbos{ &ds_rbo, &final_rbo };
+		std::array<unsigned int*, 2> rbos{&ds_rbo, &final_rbo};
 		std::array<unsigned int*, 8> texs{
 			&pos_texture,
 			&col_texture,
@@ -214,16 +230,17 @@ namespace PAIN {
 		void initShaders();
 
 		/**
-		 * .
-		 *
-		 * \param tex
-		 * \param num_i channels
-		 * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n` HERE.
-		 */
-		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels, int gl_color_attachment);
+   * .
+   *
+   * \param tex
+   * \param num_i channels
+   * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n`
+   * HERE.
+   */
+		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels,
+										  int gl_color_attachment);
 		void _initDeferredShadingBuffers();
 	};
-}
-
+} // namespace PAIN
 
 #endif // PN_PLATFORM_WINDFOWS

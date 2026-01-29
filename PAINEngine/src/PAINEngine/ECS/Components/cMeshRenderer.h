@@ -26,7 +26,9 @@ namespace PAIN {
         glm::vec3 baseColorOverride{ 1.0f, 1.0f, 1.0f };
         float metallicOverride = 0.0f;
         float roughnessOverride = 0.5f;
-        glm::vec3 emissiveOverride{ 0.0f, 0.0f, 0.0f };
+        glm::vec3 emissiveOverride{ 1.0f, 0.0f, 1.0f };
+
+		//bool useEmissiveOverride = false;
 
         bool useOverrides = false;
     };
@@ -52,11 +54,6 @@ namespace PAIN {
         std::vector<MaterialInstance> materials;
 
         // Animation state
-        int currentAnimationIndex = -1;
-        float animationTime = 0.0f;
-        bool isPlaying = false;
-        bool loopAnimation = true;
-        float playbackSpeed = 1.0f;
         std::vector<glm::mat4> boneTransforms;
         std::vector<float> morphWeights;
 
@@ -69,6 +66,40 @@ namespace PAIN {
 
         // Cached asset pointer (DO NOT SERIALIZE)
         mutable std::shared_ptr<const Assets::Model> cachedModelAsset;
+
+        // ========================================
+        // PERFORMANCE OPTIMIZATION: Buffer Offset Tracking
+        // ========================================
+        // Tracks where this model's geometry is in the shared VBO/EBO
+        struct BufferOffset {
+            unsigned int vertexOffset = 0;  // Offset in shared VBO
+            unsigned int indexOffset = 0;   // Offset in shared EBO  
+            unsigned int indexCount = 0;    // Number of indices
+            bool isUploaded = false;
+        };
+        BufferOffset bufferOffset;
+
+        // ========================================
+        // PERFORMANCE OPTIMIZATION: Texture Cache
+        // ========================================
+        // Caches texture handles to avoid AssetManager lookups every frame
+        struct SubmeshTextureCache {
+            GLuint albedoTexture = 0;
+            GLuint normalTexture = 0;
+            GLuint metallicTexture = 0;
+            GLuint roughnessTexture = 0;
+            GLuint aoTexture = 0;
+            GLuint emissiveTexture = 0;
+            GLuint opacityTexture = 0;
+            
+            // Material properties (avoid lookups)
+            glm::vec3 baseColor = glm::vec3(1.0f);
+            float metallic = 0.0f;
+            float roughness = 0.5f;
+            
+            bool cacheValid = false;
+        };
+        std::vector<SubmeshTextureCache> submeshCaches;
 
         // Constructors
         ModelRenderer() = default;
