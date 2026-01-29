@@ -39,9 +39,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.2659432291984558,
-            0.47308972477912903,
-            0.8423681259155273
+            0.2423219084739685,
+            0.5000977516174316,
+            0.8904576301574707
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -346,10 +346,12 @@
                             "total_frames": 2
                         },
                         "UIButton": {
+                            "action": 0,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "on_click_callback_lua": "RightArrowButton_OnClick",
+                            "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -489,10 +491,12 @@
                             "total_frames": 2
                         },
                         "UIButton": {
+                            "action": 0,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "on_click_callback_lua": "LeftArrowButton_OnClick",
+                            "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -618,8 +622,8 @@
                             ],
                             "texture_guid": "ab814749-53c2-5f40-bc94-2ebed788c9b7",
                             "texture_scale": [
-                                0.25,
-                                0.12999999523162842
+                                0.30000001192092896,
+                                0.10000000149011612
                             ]
                         },
                         "UIAnimation": {
@@ -632,10 +636,12 @@
                             "total_frames": 2
                         },
                         "UIButton": {
+                            "action": 0,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "on_click_callback_lua": "BackButton_OnClick",
+                            "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -692,9 +698,9 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0015625000232830644,
+                                0.0018248175038024783,
                                 0.011363636702299118,
-                                0.4984374940395355,
+                                0.49817517399787903,
                                 0.9886363744735718
                             ]
                         }
@@ -719,7 +725,7 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.6797102689743042,
+                                0.0,
                                 0.0,
                                 0.0
                             ],
@@ -753,8 +759,8 @@
                             ],
                             "texture_guid": "e69f059a-e2a6-ab4f-af1e-61d02a47a17c",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.7999999523162842
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIAnimation": {
@@ -1892,11 +1898,11 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -1924,11 +1930,11 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2049,11 +2055,11 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2264,11 +2270,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -2296,11 +2302,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2511,11 +2517,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -2543,11 +2549,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2758,11 +2764,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -2790,11 +2796,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3005,11 +3011,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3037,11 +3043,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3252,11 +3258,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3284,11 +3290,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3499,11 +3505,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3531,11 +3537,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3746,11 +3752,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3778,11 +3784,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3993,11 +3999,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4025,11 +4031,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4240,11 +4246,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4272,11 +4278,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4487,11 +4493,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4519,11 +4525,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4734,11 +4740,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4766,11 +4772,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4981,11 +4987,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5013,11 +5019,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5228,11 +5234,11 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5260,11 +5266,11 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5475,11 +5481,11 @@
                                         0.06499999761581421,
                                         0.1899999976158142
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5507,11 +5513,11 @@
                                 0.06499999761581421,
                                 0.1899999976158142
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5569,6 +5575,47 @@
             "name": "UI"
         }
     ],
+    "loadingScreen": {
+        "animationEnabled": false,
+        "backgroundColor": [
+            0.10000000149011612,
+            0.10000000149011612,
+            0.10000000149011612
+        ],
+        "backgroundTextureGUID": "407a7faf-4823-4847-81a4-4e37c94a3a3f",
+        "bgScale": 1.0,
+        "fillColor": [
+            0.20000000298023224,
+            0.800000011920929,
+            0.8999999761581421
+        ],
+        "frameCount": 1,
+        "frameTime": 0.10000000149011612,
+        "framesPerRow": 1,
+        "glowColor": [
+            0.4000000059604645,
+            0.8999999761581421,
+            1.0
+        ],
+        "glowIntensity": 0.5,
+        "progressBarPosition": [
+            960.0,
+            148.65000915527344
+        ],
+        "progressBarSize": [
+            1152.0,
+            40.0
+        ],
+        "showBackground": true,
+        "showOverlay": false,
+        "showProgressBar": false,
+        "showStatusText": false,
+        "statusTextPosition": [
+            960.0,
+            78.65000915527344
+        ],
+        "statusTextScale": 0.029999999329447746
+    },
     "mask_matrix": [
         [
             false,
