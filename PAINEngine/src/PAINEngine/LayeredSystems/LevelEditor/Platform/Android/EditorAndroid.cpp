@@ -214,7 +214,7 @@ namespace PAIN {
 				io.AddKeyEvent(key, true);
 				io.SetKeyEventNativeData(key, e.getKeyCode(), 0);
 			}
-			return io.WantCaptureKeyboard;
+			return io.WantTextInput;
 			});
 
 		dispatcher.Dispatch<Event::AndroidKeyUp>([&](Event::AndroidKeyUp& e) -> bool {
