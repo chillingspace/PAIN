@@ -814,13 +814,19 @@ namespace PAIN {
 			if (!jolt_physics || body_id.IsInvalid())
 				return false;
 
-			// Lock body for reading to get its position
 			JPH::RVec3 bodyPosition;
+			float shapeHeight = 0.0f;
+
 			{
 				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), body_id);
 				if (lock.Succeeded()) {
 					const JPH::Body& body = lock.GetBody();
 					bodyPosition = body.GetPosition();
+
+					// Get the shape's bounding box to find bottom
+					const JPH::Shape* shape = body.GetShape();
+					JPH::AABox bounds = shape->GetLocalBounds();
+					shapeHeight = bounds.mMax.GetY() - bounds.mMin.GetY();
 				}
 				else {
 					PN_CORE_ERROR("Failed to lock body for reading in isGrounded");
@@ -830,14 +836,12 @@ namespace PAIN {
 
 			JPH::RayCastResult result;
 			JPH::RRayCast ray;
-			ray.mOrigin = bodyPosition + JPH::RVec3(0.0f, 0.05f, 0.0f);      // small offset above feet
+			// Cast from bottom of character
+			ray.mOrigin = bodyPosition + JPH::RVec3(0.0f, -(shapeHeight * 0.5f) + 0.05f, 0.0f);
 			ray.mDirection = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
-			bool hit = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
 
-			// Optionally filter by layer here using result.mBodyID if you want
+			bool hit = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
 			return hit;
-			PN_CORE_ERROR("Failed to get hit");
-			return false;
 		}
 
 		glm::vec3 System::getNormal(entt::entity e) const {
