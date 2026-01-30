@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        -0.8559707999229431,
-                        0.0,
-                        -10.822216987609863
+                        -23.4415340423584,
+                        -0.0154457688331604,
+                        7.30846643447876
                     ],
                     "rotation": [
                         0.0,
@@ -24,17 +24,17 @@
                         1.0
                     ],
                     "scale": [
-                        1.4700000286102295,
-                        1.4700000286102295,
-                        1.4700000286102295
+                        1.6999999284744263,
+                        1.6999999284744263,
+                        1.6999999284744263
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
-                            "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                            "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                            "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,22 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                            "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-                            "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
+                            "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                            "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                            "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "0d290cee-b55d-2e45-907d-ae2c745f492f",
+                    "modelGUID": "4abba89c-2728-1a4b-bf13-c88751021af2",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Box"
+                    "name": "MetalPillar1"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -72,13 +72,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.20000000298023224,
+                        0.800000011920929,
                         0.0
                     ],
                     "collider_scale": [
-                        0.5,
-                        0.5,
-                        0.5
+                        0.800000011920929,
+                        2.5,
+                        0.800000011920929
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -90,16 +90,11 @@
                         0.0,
                         0.0
                     ]
-                },
-                "Tag": {
-                    "tags": [
-                        "hiding_spot"
-                    ]
                 }
             },
-            "entityGUID": "8fe6f5e3-2031-ac4f-a455-515f33518b4e"
+            "entityGUID": "d75edf81-0818-9744-af9c-1468f7c72dd3"
         }
     ],
-    "prefabName": "Box",
-    "rootEntityGUID": "8fe6f5e3-2031-ac4f-a455-515f33518b4e"
+    "prefabName": "MetalPillar1",
+    "rootEntityGUID": "d75edf81-0818-9744-af9c-1468f7c72dd3"
 }

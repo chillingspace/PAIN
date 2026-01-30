@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        -0.8559707999229431,
+                        -21.12828254699707,
                         0.0,
-                        -10.822216987609863
+                        9.021308898925781
                     ],
                     "rotation": [
                         0.0,
@@ -24,17 +24,17 @@
                         1.0
                     ],
                     "scale": [
-                        1.4700000286102295,
-                        1.4700000286102295,
-                        1.4700000286102295
+                        1.0,
+                        1.0,
+                        1.0
                     ]
                 },
                 "ModelRenderer": {
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
-                            "aoTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                            "albedoTextureOverride": "60d237d0-60e1-c146-86e6-e76c967840d4",
+                            "aoTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,22 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "633f661d-20e5-3b45-b5a5-299f91b71e17",
+                            "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-                            "normalTextureOverride": "163da0e7-00d9-0541-a470-a859fd023b6b",
+                            "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+                            "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+                            "roughnessTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "0d290cee-b55d-2e45-907d-ae2c745f492f",
+                    "modelGUID": "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Box"
+                    "name": "Pipe1"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -72,13 +72,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.20000000298023224,
+                        0.0,
                         0.0
                     ],
                     "collider_scale": [
-                        0.5,
-                        0.5,
-                        0.5
+                        5.300000190734863,
+                        1.399999976158142,
+                        1.0
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -90,16 +90,11 @@
                         0.0,
                         0.0
                     ]
-                },
-                "Tag": {
-                    "tags": [
-                        "hiding_spot"
-                    ]
                 }
             },
-            "entityGUID": "8fe6f5e3-2031-ac4f-a455-515f33518b4e"
+            "entityGUID": "9e4114ae-3255-8b48-ac80-a1ac23cb388f"
         }
     ],
-    "prefabName": "Box",
-    "rootEntityGUID": "8fe6f5e3-2031-ac4f-a455-515f33518b4e"
+    "prefabName": "Pipe1",
+    "rootEntityGUID": "9e4114ae-3255-8b48-ac80-a1ac23cb388f"
 }
