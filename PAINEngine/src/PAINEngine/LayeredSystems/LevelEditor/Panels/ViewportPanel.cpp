@@ -290,18 +290,18 @@ namespace PAIN {
 				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
 				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
 
-				 PN_CORE_TRACE("Pick Ray - Origin: ({},{},{}) Dir: ({},{},{})", 
-				    rayOrigin.x, rayOrigin.y, rayOrigin.z,
-				    rayDirection.x, rayDirection.y, rayDirection.z);
+				 //PN_CORE_TRACE("Pick Ray - Origin: ({},{},{}) Dir: ({},{},{})", 
+				 //   rayOrigin.x, rayOrigin.y, rayOrigin.z,
+				 //   rayDirection.x, rayDirection.y, rayDirection.z);
 
 				// Perform Raycast via BVH
 				float maxDist = 1000.0f;
 				auto& registry = ecs->getRegistry(currentRegistryID);
-
-				auto hitResult = bvhSystem->raycast(rayOrigin, rayDirection, maxDist, registry, -1);
+				int mask = scene->getPickingMask(); 
+				auto hitResult = bvhSystem->raycast(rayOrigin, rayDirection, maxDist, registry, mask);
 
 				if (hitResult.has_value()) {
-					PN_CORE_INFO("Raycast Hit Entity: {}", (uint32_t)hitResult->entity);
+					//PN_CORE_INFO("Raycast Hit Entity: {}", (uint32_t)hitResult->entity);
 					return hitResult->entity;
 				}
 

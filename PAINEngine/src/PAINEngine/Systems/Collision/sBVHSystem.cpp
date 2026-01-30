@@ -303,6 +303,7 @@ namespace PAIN {
                     if ((layerMask & entityLayer->layer_mask) == 0) {
                         return;  // Layer not in mask - skip
                     }
+
                 }
 
                 // Get entity's AABB
