@@ -4833,7 +4833,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "continue_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -4927,7 +4926,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "continue_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -5124,7 +5122,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "restart_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5218,7 +5215,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "restart_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -5415,7 +5411,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "quit_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5509,7 +5504,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "quit_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -5706,7 +5700,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "quit_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5800,7 +5793,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "quit_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6153,6 +6145,11 @@
                                 }
                             ]
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.800000011920929,
@@ -6169,7 +6166,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "pause_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6279,6 +6275,11 @@
                         "Name": {
                             "name": "joystick"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.800000011920929,
@@ -6291,11 +6292,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 4,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Joystick_OnDrag",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6413,6 +6413,11 @@
                         "Name": {
                             "name": "collect/deliver button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.4099999964237213,
@@ -6425,11 +6430,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 3,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6539,6 +6543,11 @@
                         "Name": {
                             "name": "hide button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.6000000238418579,
@@ -6551,11 +6560,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 2,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6665,6 +6673,11 @@
                         "Name": {
                             "name": "jump button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.800000011920929,
@@ -6677,11 +6690,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 1,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "JumpButton_OnClick",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0

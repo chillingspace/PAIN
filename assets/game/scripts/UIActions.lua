@@ -43,6 +43,44 @@ local handlers = {
         printLog("[UI] game_Jump pressed, but PlayerInput.requestJump is missing")
     end,
 
+    game_Move = function(buttonEntity, payload)
+        -- Joystick movement callback
+        -- Payload should be a table or string containing dirX and dirY
+        -- This is called by the UI system when joystick is dragged
+        
+        if _G_root.gamePaused then
+            -- When paused, send zero movement
+            if _G_root.Joystick_OnDrag then
+                _G_root.Joystick_OnDrag(0.0, 0.0)
+            end
+            return
+        end
+        
+        -- Parse payload if it's a string (format: "dirX,dirY")
+        local dirX, dirY = 0.0, 0.0
+        
+        if type(payload) == "string" then
+            -- Parse "x,y" format
+            local values = {}
+            for val in string.gmatch(payload, "[^,]+") do
+                table.insert(values, tonumber(val) or 0.0)
+            end
+            dirX = values[1] or 0.0
+            dirY = values[2] or 0.0
+        elseif type(payload) == "table" then
+            -- If payload is a table with x,y or dirX,dirY
+            dirX = payload.dirX or payload.x or 0.0
+            dirY = payload.dirY or payload.y or 0.0
+        end
+        
+        -- Call the existing joystick callback from playerMovement.lua
+        if _G_root.Joystick_OnDrag then
+            _G_root.Joystick_OnDrag(dirX, dirY)
+        else
+            printLog("[UI] game_Move pressed, but Joystick_OnDrag is missing")
+        end
+    end,
+
 
     game_Hide = function(buttonEntity, payload)
         -- hide/unhide button
@@ -77,7 +115,7 @@ local handlers = {
     pause_Restart = function(buttonEntity, payload)
         -- reload current level
         -- priority: button payload > global CurrentLevelName > hardcoded default
-        local levelName = resolveSceneName(payload, G.CurrentLevelName,"prototype.scn")
+        local levelName = resolveSceneName(payload, G.CurrentLevelName,"Tutorial.scn")
 
         if changeScene then
             printLog("[UI] pause_Restart -> changeScene("..levelName..")")
@@ -114,7 +152,7 @@ local handlers = {
     ----------------------------------------------------------------------
     menu_StartGame = function(buttonEntity, payload)
         -- Start first level
-        local levelName = resolveSceneName(payload, G.FirstLevelScene, "prototype.scn")
+        local levelName = resolveSceneName(payload, G.FirstLevelScene, "Tutorial.scn")
 
         if changeScene then
             printLog("[UI] menu_StartGame -> changeScene("..levelName..")")

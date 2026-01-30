@@ -35,7 +35,7 @@ OutputBaseFilename=Ribbit-Express_Setup
 LicenseFile=INSTALLERFILES\DigiPen_EULA.txt
 
 ; Path to the icon for the installer (TCR check requires custom icon)
-SetupIconFile=.\INSTALLERFILES\Icon_256x256.ico
+SetupIconFile=.\INSTALLERFILES\frog_icon.ico
 
 ; Compression scheme for the installer. Check Inno Setup help files for more options.
 Compression=lzma
