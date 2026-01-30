@@ -13,7 +13,6 @@
         "15808cf2-db36-c04b-8954-48d10ebaf528",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
         "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
@@ -25,7 +24,6 @@
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
@@ -34,8 +32,6 @@
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "a77749e3-6c15-7446-a792-5609dd96b391",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
         "633f661d-20e5-3b45-b5a5-299f91b71e17",
@@ -47,7 +43,7 @@
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
@@ -228,6 +224,15 @@
                                         ]
                                     }
                                 },
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
                                 "LocalTransform": {
                                     "position": [
                                         4.355327606201172,
@@ -244,6 +249,68 @@
                                         1.899999976158142,
                                         1.899999976158142,
                                         1.899999976158142
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Crate"
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
                                     ]
                                 }
                             },
@@ -5208,7 +5275,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "continue_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5302,7 +5368,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "continue_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -5499,7 +5564,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "restart_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5593,7 +5657,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "restart_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -5790,7 +5853,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "quit_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -5884,7 +5946,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "quit_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6081,7 +6142,6 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "on_click_callback_lua": "quit_button",
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": 0
@@ -6175,7 +6235,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "quit_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6528,6 +6587,11 @@
                                 }
                             ]
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.800000011920929,
@@ -6544,7 +6608,6 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "pause_button",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6654,6 +6717,11 @@
                         "Name": {
                             "name": "joystick"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.800000011920929,
@@ -6666,11 +6734,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 4,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Joystick_OnDrag",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6788,6 +6855,11 @@
                         "Name": {
                             "name": "collect/deliver button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.4099999964237213,
@@ -6800,11 +6872,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 3,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -6914,6 +6985,11 @@
                         "Name": {
                             "name": "hide button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.6000000238418579,
@@ -6926,11 +7002,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 2,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
@@ -7040,6 +7115,11 @@
                         "Name": {
                             "name": "jump button"
                         },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.800000011920929,
@@ -7052,11 +7132,10 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 1,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "JumpButton_OnClick",
                             "payload": "",
                             "pressed_color": -5592406,
                             "state": 0

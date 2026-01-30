@@ -428,6 +428,7 @@ namespace PAIN {
 							"game_Jump",
 							"game_Hide",
 							"game_Collect",
+							"game_Move",
 
 							"pause_Resume",
 							"pause_Restart",

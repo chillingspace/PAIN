@@ -4,13 +4,11 @@
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Renderer/text.h"
-#include "CoreSystems/Scene/Scene.h"
-#include "ECS/Components/AllComponents.h"
-#include "ECS/Components/cAnimation.h"
-#include "ECS/Components/cCompoundCollider.h" // For CompoundCollider visualization
-#include "ECS/Components/cPhysics.h"		  // For rendering RigidBody3D
+#include "CoreSystems/Scene/Scene.h"	  
 #include "ECS/Controller.h"
 #include "Systems/Collision/sBVHSystem.h"
+#include "ECS/sMetaData.h"
+#include "Core.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -725,6 +723,10 @@ namespace PAIN {
 			if (!rendererService || !rendererService->w_renderer)
 				return;
 
+			auto metadata_service = services.lock()->get<MetaData::Service>();
+			if (!metadata_service) return;
+
+
 			// Texture and text groups
 			auto texture_group =
 				registry.group<Texture2D>(entt::get<UIElement, UIRectTransform>);
@@ -753,12 +755,18 @@ namespace PAIN {
 				PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
 			}
 
+
 			for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
 				// Layer check
 				auto layerComp = registry.try_get<Entity::Layer>(entity);
 				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
 					continue;
 				}
+
+#ifdef PN_PLATFORM_WINDOWS
+				// Skip android UI
+				if (metadata_service->hasTag(entity, "android_ui")) { continue; }
+#endif
 
 				if (!ui_elem.b_is_enabled)
 					continue;

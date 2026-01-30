@@ -29,6 +29,7 @@ namespace PAIN {
 		case UIAction::game_Jump:              return "game_Jump";
 		case UIAction::game_Hide:              return "game_Hide";
 		case UIAction::game_Collect:           return "game_Collect";
+        case UIAction::game_Move:              return "game_Move";
 
 		case UIAction::pause_Resume:           return "pause_Resume";
 		case UIAction::pause_Restart:          return "pause_Restart";
@@ -128,15 +129,10 @@ namespace PAIN {
 
                                 // Call Lua callback with direction
                                 auto& button = registry.get<UIButton>(m_pressed_entity);
-                                if (!button.on_click_callback_lua.empty()) {
-                                    auto& ctx = registry.ctx();
-                                    if (ctx.contains<LuaManager*>()) {
-                                        auto& luaMgr = ctx.get<LuaManager*>();
-                                        if (luaMgr) {
-                                            luaMgr->callGlobalWithVec2(button.on_click_callback_lua,
-                                                direction.x, direction.y);
-                                        }
-                                    }
+                                if (button.action == UIAction::game_Move) {
+                                    // Payload format: "dirX,dirY"
+                                    button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
+                                    dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
                                 }
                             }
                         }
@@ -208,7 +204,7 @@ namespace PAIN {
 
                                 // Notify Lua that movement stopped
                                 auto& button = registry.get<UIButton>(m_pressed_entity);
-                                if (!button.on_click_callback_lua.empty()) {
+                                if (button.action == UIAction::game_Move) {
                                     // CHECK IF BUTTON'S LAYER IS ENABLED
                                     bool should_process = true;
                                     if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
@@ -223,13 +219,8 @@ namespace PAIN {
 
                                     // should process - added
                                     if (should_process) {
-                                        auto& ctx = registry.ctx();
-                                        if (ctx.contains<LuaManager*>()) {
-                                            auto& luaMgr = ctx.get<LuaManager*>();
-                                            if (luaMgr) {
-                                                luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
-                                            }
-                                        }
+                                        button.payload = "0.0,0.0";
+                                        dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
                                     }
                                 }
                                 joystick.is_dragging = false;
@@ -260,97 +251,6 @@ namespace PAIN {
                                 activateButton(m_pressed_entity, registry);
                             }
                         }
-
-// current change -------------------------------------------------------------------------------------------------
-						//// If NOT a joystick drag, treat as normal button click
-						//if (!was_joystick_drag && m_pressed_entity == m_hovered_entity &&
-						//	registry.all_of<UIButton>(m_pressed_entity)) {
-						//	auto& button = registry.get<UIButton>(m_pressed_entity);
-						//	PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
-						//		static_cast<uint32_t>(m_pressed_entity),
-						//		static_cast<uint32_t>(m_hovered_entity),
-						//		button.on_click_callback_lua);
-
-						//	if (!button.on_click_callback_lua.empty()) {
-						//		auto& ctx = registry.ctx();
-						//		if (ctx.contains<LuaManager*>()) {
-						//			auto& luaMgr = ctx.get<LuaManager*>();
-						//			if (luaMgr) {
-						//				PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
-						//					button.on_click_callback_lua);
-						//				luaMgr->callGlobal(button.on_click_callback_lua);
-						//			}
-						//		}
-						//	}
-						//}
-
-						// if (!was_joystick_drag &&
-						// 	m_pressed_entity == m_hovered_entity &&
-						// 	registry.all_of<UIButton>(m_pressed_entity))
-						// {
-						// 	auto& button = registry.get<UIButton>(m_pressed_entity);
-
-						// 	PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} action={}",
-						// 		static_cast<uint32_t>(m_pressed_entity),
-						// 		static_cast<uint32_t>(m_hovered_entity),
-						// 		ToActionName(button.action));
-
-						// 	// always go through activateButton, handles UIAction + old callback 
-						// 	activateButton(m_pressed_entity, registry);
-						// }
-// current change END -------------------------------------------------------------------------------------------------
-// incoming change -------------------------------------------------------------------------------------------------
-                        //             if (should_process) {
-                        //                 auto& ctx = registry.ctx();
-                        //                 if (ctx.contains<LuaManager*>()) {
-                        //                     auto& luaMgr = ctx.get<LuaManager*>();
-                        //                     if (luaMgr) {
-                        //                         luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
-                        //                     }
-                        //                 }
-                        //             }
-                        //         }
-                        //         joystick.is_dragging = false;
-                        //     }
-                        // }
-
-                        // // If NOT a joystick drag, treat as normal button click
-                        // if (!was_joystick_drag && m_pressed_entity == m_hovered_entity &&
-                        //     registry.all_of<UIButton>(m_pressed_entity)) {
-                        //     auto& button = registry.get<UIButton>(m_pressed_entity);
-                        //     PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} callback='{}'",
-                        //         static_cast<uint32_t>(m_pressed_entity),
-                        //         static_cast<uint32_t>(m_hovered_entity),
-                        //         button.on_click_callback_lua);
-// incoming change END -------------------------------------------------------------------------------------------------
-
-                        //     if (!button.on_click_callback_lua.empty()) {
-                        //         // CHECK IF BUTTON'S LAYER IS ENABLED
-                        //         bool should_process = true;
-                        //         if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
-                        //             auto& layer_comp = registry.get<Entity::Layer>(m_pressed_entity);
-                        //             auto scene = services.lock()->get<Scene::SceneManager>();
-                        //             if (scene && !scene->isLayerEnabled(layer_comp.layer_id
-                        //             )) {
-                        //                 /*PN_CORE_INFO("[UIInput] Button on disabled layer {}, ignoring click",
-                        //                     layer_comp.layer);*/
-                        //                 should_process = false;
-                        //             }
-                        //         }
-
-                        //         if (should_process) {
-                        //             auto& ctx = registry.ctx();
-                        //             if (ctx.contains<LuaManager*>()) {
-                        //                 auto& luaMgr = ctx.get<LuaManager*>();
-                        //                 if (luaMgr) {
-                        //                     PN_CORE_INFO("[UIInput] Button clicked: {}, calling Lua",
-                        //                         button.on_click_callback_lua);
-                        //                     luaMgr->callGlobal(button.on_click_callback_lua);
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // }
 
                         updateButtonState(m_pressed_entity, 
                                           registry,
@@ -429,15 +329,10 @@ namespace PAIN {
 
                             // Call Lua callback
                             auto& button = registry.get<UIButton>(touch_entity);
-                            if (!button.on_click_callback_lua.empty()) {
-                                auto& ctx = registry.ctx();
-                                if (ctx.contains<LuaManager*>()) {
-                                    auto& luaMgr = ctx.get<LuaManager*>();
-                                    if (luaMgr) {
-                                        luaMgr->callGlobalWithVec2(button.on_click_callback_lua,
-                                            direction.x, direction.y);
-                                    }
-                                }
+                            if (button.action == UIAction::game_Move) {
+                                // Payload format: "dirX,dirY"
+                                button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
+                                dispatchUIAction(touch_entity, registry, UIAction::game_Move);
                             }
                             return true;
                         }
@@ -517,7 +412,7 @@ namespace PAIN {
 
                         // Stop movement - call Lua with zero vector
                         auto& button = registry.get<UIButton>(touch_entity);
-                        if (!button.on_click_callback_lua.empty()) {
+                        if (button.action == UIAction::game_Move) {
                             // CHECK IF BUTTON'S LAYER IS ENABLED (Android)
                             bool should_process = true;
                             if (registry.all_of<Entity::Layer>(touch_entity)) {
@@ -531,13 +426,8 @@ namespace PAIN {
                             }
 
                             if (should_process) {
-                                auto& ctx = registry.ctx();
-                                if (ctx.contains<LuaManager*>()) {
-                                    auto& luaMgr = ctx.get<LuaManager*>();
-                                    if (luaMgr) {
-                                        luaMgr->callGlobalWithVec2(button.on_click_callback_lua, 0.f, 0.f);
-                                    }
-                                }
+                                button.payload = "0.0,0.0";
+                                dispatchUIAction(touch_entity, registry, UIAction::game_Move);
                             }
                         }
 
@@ -590,72 +480,6 @@ namespace PAIN {
                     return true;
                 });
             }
-
-// current change -------------------------------------------------------------------------------------------------
-						// // Only trigger click if finger is still on the button
-						// if (hit_entity.has_value() && hit_entity.value() == touch_entity) {
-						// 	PN_CORE_INFO("[UIInput] Button click detected");
-						// 	activateButton(touch_entity, registry);
-						// 	auto& button = registry.get<UIButton>(touch_entity);
-						// 	if (!button.on_click_callback_lua.empty()) {
-						// 		auto& ctx = registry.ctx();
-						// 		if (ctx.contains<LuaManager*>()) {
-						// 			auto& luaMgr = ctx.get<LuaManager*>();
-						// 			if (luaMgr) {
-						// 				luaMgr->callGlobal(button.on_click_callback_lua);
-						// 			}
-						// 		}
-						// 	}
-						// }
-// current change END -------------------------------------------------------------------------------------------------
-// incoming change -------------------------------------------------------------------------------------------------
-                    //     updateButtonState(touch_entity, registry, UIButtonState::Normal);
-                    // }
-                    // // Handle regular button click
-                    // else if (registry.all_of<UIButton>(touch_entity)) {
-                    //     m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
-                    //     auto hit_entity = raycastUI(m_mouse_position, registry);
-// incoming change END -------------------------------------------------------------------------------------------------
-
-            //             // Only trigger click if finger is still on the button
-            //             if (hit_entity.has_value() && hit_entity.value() == touch_entity) {
-            //                 PN_CORE_INFO("[UIInput] Button click detected");
-            //                 auto& button = registry.get<UIButton>(touch_entity);
-            //                 if (!button.on_click_callback_lua.empty()) {
-            //                     // CHECK IF BUTTON'S LAYER IS ENABLED (Android)
-            //                     bool should_process = true;
-            //                     if (registry.all_of<Entity::Layer>(touch_entity)) {
-            //                         auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
-            //                         auto scene = services.lock()->get<Scene::SceneManager>();
-            //                         if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
-            //                             PN_CORE_INFO("[UIInput] Button on disabled layer {}, ignoring click",
-            //                                          layer_comp.layer_id);
-            //                             should_process = false;
-            //                         }
-            //                     }
-
-            //                     if (should_process) {
-            //                         auto& ctx = registry.ctx();
-            //                         if (ctx.contains<LuaManager*>()) {
-            //                             auto& luaMgr = ctx.get<LuaManager*>();
-            //                             if (luaMgr) {
-            //                                 luaMgr->callGlobal(button.on_click_callback_lua);
-            //                             }
-            //                         }
-            //                     }
-            //                 }
-            //             }
-
-            //             updateButtonState(touch_entity, registry,
-            //                 hit_entity.has_value() && hit_entity.value() == touch_entity ?
-            //                 UIButtonState::Highlighted : UIButtonState::Normal);
-            //         }
-
-            //         // Remove this touch from the map
-            //         m_active_touches.erase(it);
-            //         return true;
-            //         });
-            // }
 
             // ── TouchCancel ──
             if (event.getType() == Event::Type::TouchCancel) {
