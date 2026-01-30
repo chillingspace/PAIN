@@ -112,7 +112,7 @@ local idleTimer = 0.0
 local idleInterval = 5.0
 local S = nil
 
-local maxGroundCheckDist = 0.25
+local maxGroundCheckDist = 0.1
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
@@ -305,8 +305,6 @@ registerUpdate(function(dt)
     -- JUMP LOGIC
     -- ---------------------------------------------------------
     -- ground check based on physics
-    local groundedEpsPos = 0.05
-    local groundedEpsVel = 0.1
     isGrounded = isGrounded_(id, maxGroundCheckDist)
 
     -- jump, modify vertical vel -> physics handle gravity
