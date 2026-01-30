@@ -46,6 +46,9 @@ namespace PAIN {
 		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
 		case UIAction::menu_BackToMain:        return "menu_BackToMain";
 
+        case UIAction::howtoplay_ArrowLeft:    return "howtoplay_ArrowLeft";
+        case UIAction::howtoplay_ArrowRight:   return "howtoplay_ArrowRight";
+
 		case UIAction::None:
 		default:                               return "None";
 		}

@@ -9,6 +9,7 @@ G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"   -- tutorial sce
 
 G.MainMenuSceneName   = G.MainMenuSceneName  or "mainmenu.scn"    -- main menu scene
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "howtoplay.scn"   -- how to play scene
+G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "howtoplay2.scn"   -- how to play scene 2
 G.SettingsSceneName   = G.SettingsSceneName  or "settings.scn"   -- how to play scene
 G.CreditsSceneName    = G.CreditsSceneName   or "credits.scn"   -- how to play scene
 
@@ -226,6 +227,33 @@ local handlers = {
         end
     end,
 
+
+    ----------------------------------------------------------------------
+    -- HOW TO PLAY
+    ----------------------------------------------------------------------
+    howtoplay_ArrowLeft = function(buttonEntity, payload)
+        -- Back to How To Play Page 1
+        local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
+
+        if howtoplayScene and changeScene then
+            printLog("[UI] backtohowToPlay1 -> changeScene("..howtoplayScene..")")
+            changeScene(howtoplayScene)
+        else
+            printLog("[UI] backtohowToPlay1 pressed (no scene specified / not implemented)")
+        end
+    end,
+
+    howtoplay_ArrowRight = function(buttonEntity, payload)
+        -- Back to How To Play Page 2
+        local howtoplayScene2 = resolveSceneName(payload or G.HowToPlaySceneName2, "howtoplay2.scn")
+
+        if howtoplayScene2 and changeScene then
+            printLog("[UI] backtohowToPlay2 -> changeScene("..howtoplayScene2..")")
+            changeScene(howtoplayScene2)
+        else
+            printLog("[UI] backtohowToPlay2 pressed (no scene specified / not implemented)")
+        end
+    end,
 }
 
 function G.UI_OnAction(actionName, buttonEntity, payload)

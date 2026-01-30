@@ -441,6 +441,10 @@ namespace PAIN {
 							"menu_Credits",
 							"menu_OpenTutorial",
 							"menu_QuitGame",
+							"menu_BackToMain",
+
+							"howtoplay_ArrowLeft",
+							"howtoplay_ArrowRight",
 						};
 
 						int action_idx = static_cast<int>(button.action);

@@ -19,9 +19,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.11548863351345062,
-            0.6400731205940247,
-            1.1484932899475098
+            0.13208907842636108,
+            0.6261352896690369,
+            1.114875316619873
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -189,14 +189,14 @@
                             ]
                         },
                         "Name": {
-                            "name": "right_arrow_button"
+                            "name": "left_arrow_button"
                         },
                         "Texture2D": {
                             "pos": [
-                                0.8799999952316284,
+                                -0.8799999952316284,
                                 0.0
                             ],
-                            "texture_guid": "c04c73aa-9efe-db49-952c-1ed3ab3bcc64",
+                            "texture_guid": "dcdd6c9a-00c1-9b42-b14f-ff000e284d99",
                             "texture_scale": [
                                 0.10000000149011612,
                                 0.10000000149011612
@@ -212,7 +212,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 17,
+                            "action": 16,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -273,14 +273,14 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.010416666977107525,
-                                0.010869565419852734,
-                                0.4895833432674408,
-                                0.989130437374115
+                                0.0,
+                                0.0,
+                                1.0,
+                                1.0
                             ]
                         }
                     },
-                    "Name": "right_arrow_button"
+                    "Name": "left_arrow_button"
                 }
             },
             {
@@ -477,20 +477,12 @@
                         "Name": {
                             "name": "instructions1"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "8ec5603e-4501-4a4f-adc9-41cc449d880d"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "41fb6c3d-c2e9-2e48-9acd-e7e1ef17ebf6",
+                            "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
                             "texture_scale": [
                                 1.7999999523162842,
                                 1.0

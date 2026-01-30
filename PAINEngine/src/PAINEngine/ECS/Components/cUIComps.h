@@ -116,7 +116,10 @@ namespace PAIN {
 		menu_QuitGame,
 
 		menu_OpenTutorial,
-		menu_BackToMain
+		menu_BackToMain,
+
+		howtoplay_ArrowLeft,
+		howtoplay_ArrowRight
 	};
 
 	struct UIButton {
@@ -307,7 +310,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 	{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
 
 	{PAIN::UIAction::menu_OpenTutorial, "menu_OpenTutorial"},
-	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"} })
+	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"},
+
+	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
+	{ PAIN::UIAction::howtoplay_ArrowRight, "howtoplay_ArrowRight" } })
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)
