@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Truck2.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 3322261704939261432
+  },
+  "descriptor_version": 1,
+  "guid": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Truck2.material"
+  }
+}

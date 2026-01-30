@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Trucks.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 6809678468064781157
+  },
+  "descriptor_version": 1,
+  "guid": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Trucks.material"
+  }
+}

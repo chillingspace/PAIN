@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Outerwall1_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12020981236307608504
+  },
+  "descriptor_version": 1,
+  "guid": "d06b5061-9f4d-1143-8011-9925e1c8c6d1",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Outerwall1_normal.png"
+  }
+}

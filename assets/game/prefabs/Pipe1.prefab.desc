@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pipe1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 15518605751633506369
+  },
+  "descriptor_version": 1,
+  "guid": "da7db4d2-bd41-4040-814b-c1c3cdee6e4b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Pipe1.prefab"
+  }
+}

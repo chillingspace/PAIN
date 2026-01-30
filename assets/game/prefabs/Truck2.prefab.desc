@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Truck2.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 5311318783797938632
+  },
+  "descriptor_version": 1,
+  "guid": "57f3164d-0007-1142-91a1-66a776935cc3",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Truck2.prefab"
+  }
+}

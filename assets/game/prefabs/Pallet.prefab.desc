@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pallet.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 14256310425783235826
+  },
+  "descriptor_version": 1,
+  "guid": "782ee522-e947-5943-b2d3-9ec68399956d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Pallet.prefab"
+  }
+}

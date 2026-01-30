@@ -1,20 +1,20 @@
 {
   "asset_info": {
-    "name": "Frog_Idle.gltf",
+    "name": "Outerwall1.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 8389084285543026265
+    "hash": 10164162751040676538
   },
   "descriptor_version": 1,
-  "guid": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+  "guid": "2a0fe588-89ed-1644-b121-c5a9c9ee1af9",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": true,
-    "import_skeleton": true,
+    "import_animations": false,
+    "import_skeleton": false,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Idle.gltf"
+    "source_file": "game\\models\\Outerwall1.gltf"
   }
 }

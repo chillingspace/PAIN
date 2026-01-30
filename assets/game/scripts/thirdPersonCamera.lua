@@ -1,4 +1,3 @@
-
 -- Default Configs
 local config = {
     offX = 0.0,
@@ -7,38 +6,95 @@ local config = {
     
     mouseSensitivity = 0.002,
     touchSensitivity = 0.002,
-    pitchLimit = 1.4 -- ~80 degrees
+    pitchLimit = 1.4
 }
 
--- local baseOffset = { x = 0.0, y = 0.25, z = -0.5 }
+local DEFAULT_YAW = 0.0
+local DEFAULT_PITCH = 0.2
 
-local yaw   = 0.0   -- horizontal angle (radians)
-local pitch = 0.2   -- slight downward tilt
+local yaw   = DEFAULT_YAW
+local pitch = DEFAULT_PITCH
 local lastMouseX = nil
 local lastMouseY = nil
 local isInit = false
+local firstFrame = true  -- Force reset on first frame
 
--- shared so movement can be camera-relative
 _G.CameraState = { yaw = yaw, pitch = pitch }
 
+local wasPaused = false
+local framesSinceUnpause = 0
+
 registerUpdate(function(dt)
-    -- EXIT EARLY IF PAUSED - stops camera movement
-    if _G_root.gamePaused then
+    local playerId = entityId
+    local px, py, pz = getPosition(playerId)
+    
+    -- FORCE CAMERA TO DEFAULT POSITION ON FIRST FRAME
+    if firstFrame then
+        log("[Camera] FIRST FRAME - Setting default camera position")
+        
+        -- Compute default camera position immediately
+        local cosY = math.cos(DEFAULT_YAW)
+        local sinY = math.sin(DEFAULT_YAW)
+        local cosP = math.cos(DEFAULT_PITCH)
+        local sinP = math.sin(DEFAULT_PITCH)
+        
+        local ox = config.offX
+        local oy = config.offY
+        local oz = config.offZ
+        
+        local pitchY = oy * cosP - oz * sinP
+        local pitchZ = oy * sinP + oz * cosP
+        
+        local rx = pitchZ * sinY
+        local rz = pitchZ * cosY
+        local ry = pitchY
+        
+        local cx = px + rx
+        local cy = py + ry
+        local cz = pz + rz
+        
+        -- SET CAMERA IMMEDIATELY
+        cameraSetTransform(
+            cx, cy, cz,
+            px, py + 0.1, pz,
+            0.0, 1.0, 0.0
+        )
+        
+        yaw = DEFAULT_YAW
+        pitch = DEFAULT_PITCH
+        lastMouseX = nil
+        lastMouseY = nil
+        framesSinceUnpause = 5
+        firstFrame = false
+        
+        log("[Camera] Camera reset to default")
+        return  -- Skip rest of update this frame
+    end
+    
+    local isPaused = _G_root.gamePaused or false
+    
+    if wasPaused and not isPaused then
+        log("[Camera] Detected unpause - resetting mouse tracking")
+        lastMouseX = nil
+        lastMouseY = nil
+        framesSinceUnpause = 3
+    end
+    
+    wasPaused = isPaused
+    
+    if isPaused then
         return
     end
-
-    local playerId = entityId
+    
+    if framesSinceUnpause > 0 then
+        framesSinceUnpause = framesSinceUnpause - 1
+        lastMouseX = nil
+        lastMouseY = nil
+    end
 
     if getCameraOffsets then
         local tx, ty, tz, rx, ry, rz = getCameraOffsets(playerId)
         
-        -- Map C++ component fields to our Camera Logic:
-        -- trans_offset.x -> Distance
-        -- trans_offset.y -> Height
-        -- trans_offset.z -> Look At Height
-        -- rot_offset.y   -> Sensitivity
-        
-        -- Only override if values are set (not zero), otherwise use defaults
         if tx ~= 0 or ty ~= 0 or tz ~= 0 then 
             config.offX = tx
             config.offY = ty
@@ -50,81 +106,60 @@ registerUpdate(function(dt)
             config.touchSensitivity = ry
         end
 
-        -- Initialize Pitch from component once
         if not isInit and rx ~= 0 then
              pitch = rx
              isInit = true
         end
     end
 
-    local px, py, pz = getPosition(playerId)
-
     local isMobile = (isAndroid ~= nil and isAndroid())
 
-    ----------------------------------------------------------------
-    -- 1. Update yaw/pitch from input
-    ----------------------------------------------------------------
-    if isMobile and getMobileLookDelta ~= nil then
-        -- ANDROID: right-side drag → look delta from C++
-        local dx, dy = getMobileLookDelta()
-        yaw   = yaw   - dx * config.touchSensitivity      -- left/right
-        pitch = pitch - dy * config.touchSensitivity      -- up/down
-    else
-        -- PC: use mouse position delta
-        local mx, my = getMousePos()
-        if lastMouseX ~= nil then
-            local dx = mx - lastMouseX
-            local dy = my - lastMouseY
+    if framesSinceUnpause == 0 then
+        if isMobile and getMobileLookDelta ~= nil then
+            local dx, dy = getMobileLookDelta()
+            yaw   = yaw   - dx * config.touchSensitivity
+            pitch = pitch - dy * config.touchSensitivity
+        else
+            local mx, my = getMousePos()
+            if lastMouseX ~= nil then
+                local dx = mx - lastMouseX
+                local dy = my - lastMouseY
 
-            yaw   = yaw   - dx * config.mouseSensitivity  -- left/right
-            pitch = pitch + dy * config.mouseSensitivity  -- up/down
+                yaw   = yaw   - dx * config.mouseSensitivity
+                pitch = pitch + dy * config.mouseSensitivity
+            end
+            lastMouseX, lastMouseY = mx, my
         end
-        lastMouseX, lastMouseY = mx, my
     end
 
-    -- clamp pitch so we don't flip over
     if pitch >  config.pitchLimit then pitch =  config.pitchLimit end
     if pitch < -config.pitchLimit then pitch = -config.pitchLimit end
 
-
-    -- COMPUTE POSITION BASED ON YAW AND PITCH
     local cosY, sinY = math.cos(yaw), math.sin(yaw)
     local cosP, sinP = math.cos(pitch), math.sin(pitch)
 
-    -- Use values from config (which came from C++)
     local ox = config.offX
     local oy = config.offY
     local oz = config.offZ
 
-    -- This rotates the offset vector up/down relative to the camera center
     local pitchX = ox 
     local pitchY = oy * cosP - oz * sinP
     local pitchZ = oy * sinP + oz * cosP
 
-    -- This orbits the vector around the player
     local rx = pitchX * cosY + pitchZ * sinY
     local rz = -pitchX * sinY + pitchZ * cosY
     local ry = pitchY
 
-    -- Final Position
     local cx = px + rx
     local cy = py + ry
     local cz = pz + rz
 
-    -- Target: Look at Player Center
-    -- looking at head
-    local targetX = px
-    local targetY = py + 0.1
-    local targetZ = pz
-
-    -- SET TRANSFORM
     cameraSetTransform(
         cx, cy, cz,
-        targetX, targetY, targetZ,
+        px, py + 0.1, pz,
         0.0, 1.0, 0.0
     )
 
-    -- SHARE STATE
     _G.CameraState.yaw   = yaw
     _G.CameraState.pitch = pitch
 end)

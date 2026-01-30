@@ -1,20 +1,20 @@
 {
   "asset_info": {
-    "name": "Frog_Idle.gltf",
+    "name": "Trucks.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 8389084285543026265
+    "hash": 13338073245538822554
   },
   "descriptor_version": 1,
-  "guid": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+  "guid": "69dea949-38c9-d142-b1a7-ac9123b52e19",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": true,
-    "import_skeleton": true,
+    "import_animations": false,
+    "import_skeleton": false,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Idle.gltf"
+    "source_file": "game\\models\\Trucks.gltf"
   }
 }

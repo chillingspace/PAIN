@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Outerwall1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 17096673233997477729
+  },
+  "descriptor_version": 1,
+  "guid": "efafb266-3c8a-fd49-ae60-44a8e6d170ce",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Outerwall1.glb"
+  }
+}

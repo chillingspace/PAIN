@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Trucks_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 643208359975995239
+  },
+  "descriptor_version": 1,
+  "guid": "4e29c73b-544f-3441-8159-4d4a174c2bc1",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Trucks_occlusionRoughnessMetallic.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Trucks.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 9853272722215877334
+  },
+  "descriptor_version": 1,
+  "guid": "e7901206-a7a1-2440-89d2-217b1481105b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Trucks.glb"
+  }
+}
