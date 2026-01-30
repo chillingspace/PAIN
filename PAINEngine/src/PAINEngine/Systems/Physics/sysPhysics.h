@@ -69,6 +69,8 @@ namespace PAIN {
 
 			glm::vec3 getNormal(entt::entity e) const;
 
+			bool getWallNormal(JPH::BodyID body_id, const glm::vec3& direction, float checkDistance, glm::vec3& outNormal);
+
 			glm::vec3 getVelocity(entt::entity e) const;
 
 		private:

@@ -648,7 +648,7 @@ namespace PAIN {
 
 					settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
 
-					settings.mFriction = .75f;
+					//settings.mFriction = .75f;
 					settings.mAngularDamping = 20.f;
 
 					settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX |
@@ -838,16 +838,14 @@ namespace PAIN {
 
 			float bottomY = -(shapeHeight * 0.5f) + 0.05f;
 			JPH::Vec3 rayDir = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
-
 			float checkRadius = shapeRadius * 0.7f;
 
-			// Define multiple ray origins around the feet
 			JPH::RVec3 rayOrigins[] = {
-				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),              // center
-				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),       // right
-				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),      // left
-				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),       // forward
-				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),      // back
+				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),
+				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),
 			};
 
 			JPH::RayCastResult result;
@@ -857,7 +855,29 @@ namespace PAIN {
 				ray.mDirection = rayDir;
 
 				if (jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result)) {
-					return true;  
+					JPH::Vec3 hitNormal;
+
+					const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), result.mBodyID);
+					if (lock.Succeeded()) {
+						const JPH::Body& hitBody = lock.GetBody();
+						const JPH::Shape* hitShape = hitBody.GetShape();
+
+						JPH::RVec3 hitPos = ray.mOrigin + JPH::Vec3(ray.mDirection * result.mFraction);
+
+						hitNormal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
+							hitPos - hitBody.GetPosition());
+
+						PN_CORE_INFO("Hit normal: ({0}, {1}, {2}), Y value: {3}",
+							hitNormal.GetX(), hitNormal.GetY(), hitNormal.GetZ(), hitNormal.GetY());
+					}
+
+					if (hitNormal.GetY() > 0.7f) {
+						PN_CORE_INFO("Grounded = TRUE");
+						return true;
+					}
+					else {
+						PN_CORE_INFO("Grounded = FALSE (normal too steep)");
+					}
 				}
 			}
 
@@ -892,5 +912,61 @@ namespace PAIN {
 
 			return { 0.f, 0.f, 0.f }; // Placeholder
 		}
+
+		bool System::getWallNormal(JPH::BodyID body_id, const glm::vec3& direction, float checkDistance, glm::vec3& outNormal) {
+			if (!jolt_physics || body_id.IsInvalid())
+				return false;
+
+			JPH::RVec3 bodyPosition;
+
+			{
+				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), body_id);
+				if (lock.Succeeded()) {
+					const JPH::Body& body = lock.GetBody();
+					bodyPosition = body.GetPosition();
+				}
+				else {
+					return false;
+				}
+			}
+
+			// Normalize horizontal direction
+			JPH::Vec3 horizontalDir(direction.x, 0.0f, direction.z);
+			float len = horizontalDir.Length();
+			if (len < 0.001f) return false;
+			horizontalDir = horizontalDir / len;
+
+			JPH::RayCastResult result;
+			JPH::RRayCast ray;
+			ray.mOrigin = bodyPosition;
+			ray.mDirection = horizontalDir * checkDistance;
+
+			bool hit = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
+
+			if (hit) {
+				// Get the surface normal at hit point
+				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), result.mBodyID);
+				if (lock.Succeeded()) {
+					const JPH::Body& hitBody = lock.GetBody();
+					const JPH::Shape* hitShape = hitBody.GetShape();
+
+					JPH::RVec3 hitPos = ray.mOrigin + JPH::Vec3(ray.mDirection * result.mFraction);
+					JPH::Vec3 normal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
+						hitPos - hitBody.GetPosition());
+
+					// Only consider vertical walls (not ground or ceiling)
+					if (abs(normal.GetY()) > 0.5f) {
+						return false;  // Not a wall
+					}
+
+					// Convert to glm
+					outNormal = glm::vec3(normal.GetX(), normal.GetY(), normal.GetZ());
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 	} // namespace Physics
 } // namespace PAIN

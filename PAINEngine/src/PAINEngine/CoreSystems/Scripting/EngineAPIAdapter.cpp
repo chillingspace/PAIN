@@ -371,6 +371,23 @@ namespace PAIN {
         return false;
     }
 
+    std::tuple<bool, glm::vec3> EngineAPIAdapter::GetWallNormal(entt::entity entityId, glm::vec3 direction, float checkDistance) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) {
+            return { false, glm::vec3(0.0f) };
+        }
+
+        auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            glm::vec3 normal;
+            bool hit = phys->getWallNormal(rb.bodyID, direction, checkDistance, normal);
+            return { hit, normal };
+        }
+
+        return { false, glm::vec3(0.0f) };
+    }
+
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */

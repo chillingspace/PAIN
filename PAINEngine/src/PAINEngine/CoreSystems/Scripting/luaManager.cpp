@@ -574,6 +574,13 @@ namespace PAIN {
         lua_.set_function("isGrounded_", [this](entt::entity entityId, float maxDistance) {
             return api_ ? api_->IsGrounded(entityId, maxDistance) : false;
 			});
+        
+        lua_.set_function("getWallNormal_", [this](entt::entity entityId, float dx, float dy, float dz, float checkDistance) {
+            if (!api_) return std::make_tuple(false, 0.f, 0.f, 0.f);
+
+            auto [hit, normal] = api_->GetWallNormal(entityId, glm::vec3(dx, dy, dz), checkDistance);
+            return std::make_tuple(hit, normal.x, normal.y, normal.z);
+            });
 
         /* =========================================================================== */
         /*                                   Audio                                     */
