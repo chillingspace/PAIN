@@ -1,0 +1,100 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -18.612112045288086,
+                        0.0,
+                        10.748771667480469
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "c60c8f27-fe85-4546-8281-deaab9d87acc",
+                            "aoTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "normalTextureOverride": "19d818f3-a8fc-1b4a-bf95-b233da10f329",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "9da056a0-d46c-664b-a2bd-9ba986135c23",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "f79091e8-3999-8543-a6da-c631ad94a064",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Pallet"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.10000000149011612,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        2.0,
+                        0.20000000298023224,
+                        1.7999999523162842
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "27e7d8cd-2ba8-f345-85c2-9658038ff652"
+        }
+    ],
+    "prefabName": "Pallet",
+    "rootEntityGUID": "27e7d8cd-2ba8-f345-85c2-9658038ff652"
+}
