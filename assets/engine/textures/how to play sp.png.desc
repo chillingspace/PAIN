@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "how to play sp.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10987784950765126175
+  },
+  "descriptor_version": 1,
+  "guid": "b94dbf9d-ece7-e245-b1ce-62bb38a5d45b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "engine\\textures\\how to play sp.png"
+  }
+}
