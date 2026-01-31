@@ -62,7 +62,7 @@ namespace PAIN {
             // === Name Management ===
             void setEntityName(entt::entity entity, std::string const& name);
             std::string getEntityName(entt::entity entity) const;
-            std::optional<entt::entity> getEntityByName(std::string const& name) const;
+            std::optional<entt::entity> getEntityByName(std::string const& name) const;        
             bool isNameValid(std::string const& name) const;
             bool entityNameChanged();
 

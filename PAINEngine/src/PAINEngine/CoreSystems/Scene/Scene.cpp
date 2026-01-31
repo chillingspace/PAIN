@@ -1441,6 +1441,17 @@ namespace PAIN {
 		{
 			PN_CORE_INFO("STOPPED");
 			auto controller = services->get<ECS::Controller>();
+
+			// reset lua scripting state before destroying entities
+			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			if (scriptingSystem) {
+				scriptingSystem->getLuaManager().resetForSceneReload();
+				PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			}
+			else {
+				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			}
 			
 			// Clears all entities
 			controller->destroyAllEntities();

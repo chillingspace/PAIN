@@ -134,15 +134,26 @@ namespace PAIN {
     /*                                  Lookup                                     */
     /* =========================================================================== */
     std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
-        // 1) Fast path: use the meta index
-        if (auto opt = meta_.getEntityByName(std::string{ name })) {
-            return asInt(*opt);
-        }
-
-        // 2) Fallback: scan the registry for Entity::Name
         auto& reg = ecs_.getRegistry();
-        //PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}", (void*)&reg, reg.view<PAIN::Entity::Name>().size());
-
+        
+        // 1) Fast path: check meta cache BUT VALIDATE
+        if (auto opt = meta_.getEntityByName(std::string{ name })) {
+            entt::entity e = *opt;
+            
+            // Validate: entity must be alive and still have this name
+            if (reg.valid(e) && reg.all_of<PAIN::Entity::Name>(e)) {
+                const auto& entityName = reg.get<PAIN::Entity::Name>(e).name;
+                if (entityName == name) {
+                    return asInt(e);  // Valid cached entity
+                }
+            }
+            
+            // Stale cache entry detected - will be refreshed below
+            PN_CORE_WARN("[FindEntity] Stale cache entry for '{}' (entity {}) - refreshing", 
+                         name, entt::to_integral(e));
+        }
+        
+        // 2) Fallback: scan the registry for Entity::Name
         auto view = reg.view<PAIN::Entity::Name>();
         for (auto e : view) {
             const auto& n = view.get<PAIN::Entity::Name>(e).name;
@@ -151,7 +162,6 @@ namespace PAIN {
                 meta_.setEntityName(e, std::string{ name });
                 return asInt(e);
             }
-            /*PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);*/
         }
 
         return std::nullopt;
