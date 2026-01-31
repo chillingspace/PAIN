@@ -179,6 +179,9 @@ namespace PAIN {
 
                 return mask_matrix[layer1][layer2];
             }
+
+            // Get Picking mask
+            int getPickingMask() const;
         };
 	}
 }

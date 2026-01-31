@@ -1,0 +1,149 @@
+{
+    "entities": [
+        {
+            "components": {
+                "CompoundCollider": {
+                    "shapes": [
+                        {
+                            "boxHalfExtents": [
+                                1.5099999904632568,
+                                1.3600000143051147,
+                                1.3799999952316284
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                1.2400000095367432,
+                                1.3700000047683716
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.5400000214576721,
+                                0.2800000011920929,
+                                1.649999976158142
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                0.46000000834465027,
+                                -1.7300000190734863
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        }
+                    ],
+                    "useCompoundCollider": true
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -0.23182010650634766,
+                        0.0,
+                        -7.624714374542236
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "ebf0d95e-08c9-5847-8dd1-77cfeae95587",
+                            "aoTextureOverride": "7234f3ff-1b6b-0349-aa5b-41451da8edf8",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "e084a6cc-31ea-cf4d-8ea9-9dc08d1dad00",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "7234f3ff-1b6b-0349-aa5b-41451da8edf8",
+                            "normalTextureOverride": "d65c15fe-50ce-7341-aa2f-ae6016dc4caf",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "7234f3ff-1b6b-0349-aa5b-41451da8edf8",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "b9df8656-0819-a84b-a69b-3b49f50b930f",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Truck1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "31226d9b-7309-d748-b509-cc36e4d5d5c9"
+        }
+    ],
+    "prefabName": "Truck1",
+    "rootEntityGUID": "31226d9b-7309-d748-b509-cc36e4d5d5c9"
+}

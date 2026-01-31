@@ -44,8 +44,10 @@ namespace PAIN {
 
 			int modification_count = 0;
 
+			std::shared_ptr<Services> services;
+
 		public:
-			CommandManager() = default;
+			CommandManager(std::shared_ptr<Services> s) : services(s) {}
 			~CommandManager() = default;
 
 			// Undo action
@@ -89,8 +91,6 @@ namespace PAIN {
 			// Get modification counter
 			int getModificationCount() const { return modification_count; }
 				 
-			// Hooks
-			std::function<void()> onModifySceneHook;
 		};
 
 		// Helper macro for creating actions with less boilerplate

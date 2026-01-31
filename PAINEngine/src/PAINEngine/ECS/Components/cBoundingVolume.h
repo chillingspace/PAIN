@@ -20,7 +20,7 @@ struct BoundingVolume {
   bool needsUpdate = true; // Flag for world AABB recalculation
 
   // Serialization flag
-  static constexpr bool ShouldSerialize = true;
+  static constexpr bool ShouldSerialize = false;
 };
 
 #ifdef _DEBUG
@@ -96,8 +96,6 @@ struct BoundingVolume {
 // - needsUpdate should always be true when loading to trigger world AABB
 // recalculation
 REFL_TYPE(PAIN::BoundingVolume)
-REFL_FIELD(localAABB)
-REFL_FIELD(worldAABB)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::BoundingVolume>);

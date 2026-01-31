@@ -369,7 +369,7 @@ namespace PAIN {
 					layer.layer_id = 0;
 					layer.layer_mask = 1;
 				}
-
+				
 				// Update mask based on ID
 				layer.layer_mask = 1 << layer.layer_id;
 				layer.layerName = layers[layer.layer_id].name;
@@ -519,7 +519,7 @@ namespace PAIN {
 			auto controller = services->get<ECS::Controller>();
 			auto prefabService = services->get<Prefab::Service>();
 
-			// 1. Serialize THIS entity
+			// Serialize THIS entity
 			nlohmann::json E = nlohmann::json::object();
 
 			// Name
@@ -538,7 +538,7 @@ namespace PAIN {
 			// Add to main JSON Array
 			jsonArray.push_back(nlohmann::json{ {"Entity", std::move(E)} });
 
-			// 2. Find and Sort Children
+			// Find and Sort Children
 			if (auto h = controller->getEntityComponent<Entity::Hierarchy>(entity)) {
 				std::vector<entt::entity> children;
 				for (const auto& childGUID : h.value().get().childrenGUIDs) {
@@ -548,7 +548,7 @@ namespace PAIN {
 					}
 				}
 
-				// [CRITICAL] Sort Children by Sibling Index before saving
+				// Sort Children by Sibling Index before saving
 				std::stable_sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
 					auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
 					auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
@@ -557,7 +557,7 @@ namespace PAIN {
 					return idxA < idxB;
 					});
 
-				// 3. Recurse
+				// Recurse
 				for (auto child : children) {
 					recursiveCapture(child, jsonArray);
 				}
@@ -765,6 +765,8 @@ namespace PAIN {
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
+			//*** NOTE When adding variables to capture remember to add into AssetLoader.cpp as well to parse the json var
+			
 			//Convert scene asset to JSON
 			nlohmann::json sceneJson = nlohmann::json::object();
 
@@ -830,6 +832,7 @@ namespace PAIN {
 					{"id", layer.id},
 					{"mask", layer.mask},
 					{"enabled", layer.enabled},
+					{"pickable", layer.pickable},
 					{"name", layer.name},
 					{"color",  {layer.color.r, layer.color.g, layer.color.b}}
 					});
@@ -1275,8 +1278,9 @@ namespace PAIN {
 			}
 
 			//Scene loaded successfully
-			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
+			PN_CORE_INFO("[SceneManager] Loaded scene {} from GUID: {}", currentSceneAsset->name, sceneGUID.ToString());
 			curr_scene_id = sceneGUID;
+			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
@@ -1417,10 +1421,9 @@ namespace PAIN {
 
 			//Reset with default
 			curr_scene_id = Assets::GUID();
+			services->get<Serialization::Service>()->clearModifiedFlag();
+			services->get<Serialization::Service>()->setCurrSceneFileName("");
 
-			// Clear lights
-			//LightSources::get().clear();
-			//PN_CORE_INFO("[SceneManager] Cleared all lights");
 
 			// Reset camera (but don't destroy it - we'll reuse it)
 			active_game_cam = "";
@@ -1524,6 +1527,17 @@ namespace PAIN {
 		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
 			return game_cameras;
 		}
-	}
+
+		int SceneManager::getPickingMask() const
+		{
+			int mask = 0;
+			for (const auto& layer : layers) {
+				if (layer.enabled && layer.pickable) {
+					mask |= layer.mask; // (1 << layer.id)
+				}
+			}
+			return mask;
+		}
+}
 
 }

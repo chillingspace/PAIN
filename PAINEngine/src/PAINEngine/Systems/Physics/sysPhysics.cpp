@@ -814,13 +814,21 @@ namespace PAIN {
 			if (!jolt_physics || body_id.IsInvalid())
 				return false;
 
-			// Lock body for reading to get its position
 			JPH::RVec3 bodyPosition;
+			float shapeRadius = 0.0f;
+			float shapeHeight = 0.0f;
+
 			{
 				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), body_id);
 				if (lock.Succeeded()) {
 					const JPH::Body& body = lock.GetBody();
 					bodyPosition = body.GetPosition();
+
+					const JPH::Shape* shape = body.GetShape();
+					JPH::AABox bounds = shape->GetLocalBounds();
+					shapeHeight = bounds.mMax.GetY() - bounds.mMin.GetY();
+					shapeRadius = std::max(bounds.mMax.GetX() - bounds.mMin.GetX(),
+						bounds.mMax.GetZ() - bounds.mMin.GetZ()) * 0.5f;
 				}
 				else {
 					PN_CORE_ERROR("Failed to lock body for reading in isGrounded");
@@ -828,17 +836,34 @@ namespace PAIN {
 				}
 			}
 
-			JPH::RayCastResult result;
-			JPH::RRayCast ray;
-			ray.mOrigin = bodyPosition + JPH::RVec3(0.0f, 0.05f, 0.0f);      // small offset above feet
-			ray.mDirection = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
-			bool hit = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
+			float bottomY = -(shapeHeight * 0.5f) + 0.05f;
+			JPH::Vec3 rayDir = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
 
-			// Optionally filter by layer here using result.mBodyID if you want
-			return hit;
-			PN_CORE_ERROR("Failed to get hit");
+			float checkRadius = shapeRadius * 0.7f;
+
+			// Define multiple ray origins around the feet
+			JPH::RVec3 rayOrigins[] = {
+				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),              // center
+				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),       // right
+				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),      // left
+				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),       // forward
+				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),      // back
+			};
+
+			JPH::RayCastResult result;
+			for (const auto& origin : rayOrigins) {
+				JPH::RRayCast ray;
+				ray.mOrigin = origin;
+				ray.mDirection = rayDir;
+
+				if (jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result)) {
+					return true;  
+				}
+			}
+
 			return false;
 		}
+
 
 		glm::vec3 System::getNormal(entt::entity e) const {
 

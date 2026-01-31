@@ -33,6 +33,7 @@ namespace PAIN {
             registerTag("hiding_spot");
             registerTag("enemy_patrol_start");
             registerTag("enemy_patrol_end");
+            registerTag("android_ui");
         }
 
         void Service::onDetach() {

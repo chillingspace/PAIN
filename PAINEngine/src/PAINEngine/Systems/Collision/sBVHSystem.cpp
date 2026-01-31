@@ -163,6 +163,99 @@ namespace PAIN {
         return sceneManager->canLayersInteract(layerA->layer_id, layerB->layer_id);
     }
 
+    std::vector<sBVHSystem::RaycastHit> sBVHSystem::raycastAll(
+        const glm::vec3& origin,
+        const glm::vec3& direction,
+        float maxDistance,
+        entt::registry& registry,
+        int layerMask
+    ) {
+        std::vector<RaycastHit> allHits;
+
+        if (!m_bvh.isBuilt()) {
+            return allHits; // Return empty vector
+        }
+
+        glm::vec3 rayDir = glm::normalize(direction);
+
+        // Recursive raycast function
+        std::function<void(int)> raycastNode = [&](int nodeIndex) {
+            if (nodeIndex < 0 || nodeIndex >= m_bvh.getNodes().size()) {
+                return;
+            }
+
+            const auto& node = m_bvh.getNodes()[nodeIndex];
+
+            // Ray-AABB intersection test
+            float tMin, tMax;
+            if (!rayAABBIntersect(origin, rayDir, node.aabb, tMin, tMax)) {
+                return;  // Ray doesn't hit this node
+            }
+
+            if (tMin > maxDistance) return;
+
+            // Leaf node - check entity
+            if (node.isLeaf()) {
+                if (!registry.valid(node.entity)) {
+                    return;
+                }
+
+                // Layer filtering
+                auto* entityLayer = registry.try_get<Entity::Layer>(node.entity);
+                if (entityLayer && layerMask != -1) {
+                    // Check if layer is in mask
+                    if ((layerMask & entityLayer->layer_mask) == 0) {
+                        return;  // Layer not in mask - skip
+                    }
+                }
+
+                // Check distance validity
+                if (tMin < maxDistance) {
+                    RaycastHit hit;
+                    hit.entity = node.entity;
+                    hit.distance = (tMin < 0.0f) ? 0.0f : tMin;
+
+                    hit.point = origin + rayDir * tMin;
+                    hit.normal = calculateAABBNormal(node.aabb, hit.point);
+                    if (entityLayer) hit.layer = entityLayer->layer_id;
+
+                    // Add to hits
+                    allHits.push_back(hit);
+                }
+
+                return;
+            }
+
+            // Internal node - recurse to children
+            if (node.child1Index != -1) {
+                raycastNode(node.child1Index);
+            }
+            if (node.child2Index != -1) {
+                raycastNode(node.child2Index);
+            }
+            };
+
+        raycastNode(m_bvh.getRootIndex());
+
+        std::sort(allHits.begin(), allHits.end(), [](const auto& a, const auto& b) {
+            return a.distance < b.distance;
+            });
+
+        PN_CORE_INFO("Raycast found {} hits. Filtering...", allHits.size());
+
+        for (const auto& hit : allHits) {
+            auto* vol = registry.try_get<BoundingVolume>(hit.entity);
+            float volume = (vol) ? vol->worldAABB.getVolume() : 0.0f;
+
+            // Log every candidate
+            PN_CORE_INFO(" - Hit Entity {}: Dist={:.2f}, Vol={:.2f}",
+                (uint32_t)hit.entity, hit.distance, volume);
+
+        }
+
+        return allHits;
+    }
+
     std::optional<sBVHSystem::RaycastHit> sBVHSystem::raycast(
         const glm::vec3& origin,
         const glm::vec3& direction,
@@ -210,6 +303,7 @@ namespace PAIN {
                     if ((layerMask & entityLayer->layer_mask) == 0) {
                         return;  // Layer not in mask - skip
                     }
+
                 }
 
                 // Get entity's AABB
@@ -218,38 +312,17 @@ namespace PAIN {
                 auto* worldTransform = registry.try_get<WorldTransform>(node.entity);
                 if (!bv || !worldTransform) return;
 
-                // Transform Ray into Entity's Local Space
-                glm::mat4 invMatrix = glm::inverse(worldTransform->matrix);
+                // Check if this intersection is closer than current best
+                if (tMin >= 0) {
+                    closestHit.entity = node.entity;
+                    closestHit.distance = tMin;
+                    closestHit.point = origin + rayDir * tMin;
 
-                // Transform Origin: Point transformation (w=1)
-                glm::vec3 localOrigin = glm::vec3(invMatrix * glm::vec4(origin, 1.0f));
+                    // Calculate normal based on World AABB
+                    closestHit.normal = calculateAABBNormal(node.aabb, closestHit.point);
 
-                // Transform Direction: Vector transformation (w=0), then normalize
-                glm::vec3 localDir = glm::normalize(glm::vec3(invMatrix * glm::vec4(direction, 0.0f)));
-
-                // Perform Intersection against LOCAL AABB
-                float tLocalMin, tLocalMax;
-                if (rayAABBIntersect(localOrigin, localDir, bv->localAABB, tLocalMin, tLocalMax)) {
-
-                    // Convert local distance 't' back to world distance
-                    glm::vec3 worldDirUnnormalized = glm::mat3(worldTransform->matrix) * localDir;
-                    float scaleFactor = glm::length(worldDirUnnormalized);
-
-                    // Actual world distance
-                    float worldDistance = tLocalMin * scaleFactor;
-
-                    // Check if closest
-                    if (worldDistance >= 0 && worldDistance < closestHit.distance) {
-                        closestHit.entity = node.entity;
-                        closestHit.distance = worldDistance;
-                        closestHit.point = origin + direction * worldDistance; // World hit point
-
-                        // Calculate normal in local space, then transform to world
-                        glm::vec3 localNormal = calculateAABBNormal(bv->localAABB, localOrigin + localDir * tLocalMin);
-                        closestHit.normal = glm::normalize(glm::mat3(worldTransform->matrix) * localNormal);
-
-                        closestHit.layer = entityLayer ? entityLayer->layer_id : 0;
-                    }
+                    // Optional: Layer ID
+                    if (entityLayer) closestHit.layer = entityLayer->layer_id;
                 }
 
                 return;
@@ -386,21 +459,30 @@ namespace PAIN {
 
             // Update AABB if transform dirty (Fix #5)
             if (bvComponent.needsUpdate) {
+                // Calculate new aabb if is dirty
+                AABB oldAABB = bvComponent.worldAABB;
                 AABB newWorldAABB = bvComponent.localAABB.transform(transform.matrix);
 
-                if (!(bvComponent.worldAABB == newWorldAABB)) {
-                    bvComponent.worldAABB = newWorldAABB;
-                    aabbUpdateCount++;
-                    anyEntityMoved = true;
+                // Update aabb
+                bvComponent.worldAABB = newWorldAABB;
 
-                    // Incremental update if possible
-                    if (m_bvh.isBuilt() &&
-                        !m_needsFullRebuild &&
-                        bvComponent.bvhNodeIndex != -1) {
+                // Check if the move is large relative to the node size
+                float displacement = glm::distance(oldAABB.getCenter(), newWorldAABB.getCenter());
+                float nodeSize = oldAABB.getExtents().length();
+
+                // Update bvh leaf
+                if (displacement > nodeSize * 2.0f) {
+                    // Full rebuild if the displacement is large
+                    m_needsFullRebuild = true;
+                }
+                else {
+                    // Fast update (just refit)
+                    if (m_bvh.isBuilt() && !m_needsFullRebuild && bvComponent.bvhNodeIndex != -1) {
                         m_bvh.updateLeaf(bvComponent.bvhNodeIndex, bvComponent.worldAABB);
                     }
                 }
 
+                // Remove dirty flag
                 bvComponent.needsUpdate = false;
             }
 
@@ -463,16 +545,31 @@ namespace PAIN {
 
         m_trackedEntities = std::move(m_currentFrameEntities);
 
-        // Rebuild only if necessary (Fix #2, #8)
+        // Rebuild only if necessary
         if (m_needsFullRebuild || !m_bvh.isBuilt()) {
             PN_CORE_INFO("BVH full rebuild: {} items", m_bvhItems.size());
 
             auto rebuildStart = std::chrono::high_resolution_clock::now();
             m_bvh.build(m_bvhItems);
-            auto rebuildEnd = std::chrono::high_resolution_clock::now();
 
+
+            // Iterate over all nodes in the new BVH to update component references
+            const auto& nodes = m_bvh.getNodes();
+            for (int i = 0; i < nodes.size(); ++i) {
+                // Only care about leaf nodes with valid entities
+                if (nodes[i].isLeaf() && nodes[i].entity != entt::null) {
+                    if (registry.valid(nodes[i].entity)) {
+                        auto* bv = registry.try_get<BoundingVolume>(nodes[i].entity);
+                        if (bv) {
+                            bv->bvhNodeIndex = i; 
+                        }
+                    }
+                }
+            }
+
+            auto rebuildEnd = std::chrono::high_resolution_clock::now();
             auto rebuildTime = std::chrono::duration_cast<std::chrono::microseconds>(rebuildEnd - rebuildStart).count();
-            PN_CORE_INFO("BVH rebuild complete: {} microseconds", rebuildTime);
+            // PN_CORE_INFO("BVH rebuild complete: {} microseconds", rebuildTime);
 
             m_needsFullRebuild = false;
             m_lastEntityCount = m_bvhItems.size();

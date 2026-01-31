@@ -428,6 +428,7 @@ namespace PAIN {
 							"game_Jump",
 							"game_Hide",
 							"game_Collect",
+							"game_Move",
 
 							"pause_Resume",
 							"pause_Restart",
@@ -632,8 +633,26 @@ namespace PAIN {
 
 				// ---- BoundingVolume ----
 				registerCompUIFunc<PAIN::BoundingVolume>(
-					"BoundingVolume", [](ComponentsPanel&, PAIN::BoundingVolume& as) {
-						DrawWithReflection(as);
+					"BoundingVolume", [](ComponentsPanel&, PAIN::BoundingVolume& bv) {
+						DrawWithReflection(bv);
+
+						// Local AABB
+						ImGui::Text("Local AABB");
+						// Pass flags for ReadOnly
+						ImGui::InputFloat3("Local Min", glm::value_ptr(bv.localAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputFloat3("Local Max", glm::value_ptr(bv.localAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+						ImGui::Separator();
+
+						// World AABB
+						ImGui::Text("World AABB");
+						ImGui::InputFloat3("World Min", glm::value_ptr(bv.worldAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputFloat3("World Max", glm::value_ptr(bv.worldAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+						// Size of aabb
+						ImGui::Spacing();
+						glm::vec3 worldSize = bv.worldAABB.max - bv.worldAABB.min;
+						ImGui::TextDisabled("Dimensions: (%.2f, %.2f, %.2f)", worldSize.x, worldSize.y, worldSize.z);
 					});
 
 				// ---- Physics ----

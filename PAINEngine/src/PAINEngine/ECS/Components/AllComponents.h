@@ -16,15 +16,15 @@
 namespace PAIN {
 	// All gameplay components (NOT metadata components)
 	/*
- * Some component pipeline to take note for now:
- * 1. When creating a component, follow one of the component files to add in the
- * seri stuff
- * 2. Include your component in Core.h
- * 3. Add in your component to this file
- * 4. Register your component in controller.cpp
- * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on
- * enum)
- */
+	 * Some component pipeline to take note for now:
+	 * 1. When creating a component, follow one of the component files to add in the
+	 * seri stuff
+	 * 2. Include your component in Core.h
+	 * 3. Add in your component to this file
+	 * 4. Register your component in controller.cpp
+	 * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on
+	 * enum)
+	 */
 	using AllGameplayComponents = std::tuple<
 		// Entity components
 		Entity::GUID, Entity::Name, Entity::Hierarchy, Entity::Layer,

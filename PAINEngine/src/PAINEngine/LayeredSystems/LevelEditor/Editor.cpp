@@ -46,7 +46,7 @@ namespace PAIN {
         void Editor::onAttach() {
 
             //Construct command manager
-            command_manager = std::make_shared<CommandManager>();
+            command_manager = std::make_shared<CommandManager>(services);
 
             // Get ECS Service
             auto ecs = services->get<PAIN::ECS::Controller>();
