@@ -11,40 +11,40 @@ if (ANDROID)
   add_dependencies(GameCore CompileAllAssets)
 
 else()
-  add_executable(Ribbit_Express ${GAME_SRC})
+  add_executable(Friends-Frog-ever ${GAME_SRC})
   
   # Configure Subsystem: Console for Debug, Windows (GUI) for Release
   # This matches EntryPoint.h which defines main() for Debug and WinMain() for Release
-  target_link_options(Ribbit_Express PRIVATE 
+  target_link_options(Friends-Frog-ever PRIVATE 
       $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
       $<$<NOT:$<CONFIG:Debug>>:/SUBSYSTEM:WINDOWS>
   )
-  target_link_libraries(Ribbit_Express PRIVATE PAINEngine)
-  add_dependencies(Ribbit_Express CompileAllAssets)
+  target_link_libraries(Friends-Frog-ever PRIVATE PAINEngine)
+  add_dependencies(Friends-Frog-ever CompileAllAssets)
 
   # Copy the correct FMOD runtime next to Game.exe using the imported target
   # Debug -> fmodL.(dll), others -> fmod.(dll)
-  add_custom_command(TARGET Ribbit_Express POST_BUILD
+  add_custom_command(TARGET Friends-Frog-ever POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:lua>"
             "$<TARGET_FILE:FMOD::core>"
-            "$<TARGET_FILE_DIR:Ribbit_Express>"
+            "$<TARGET_FILE_DIR:Friends-Frog-ever>"
     COMMENT "Copying FMOD runtime DLL...")
 
-   add_custom_command(TARGET Ribbit_Express POST_BUILD
+   add_custom_command(TARGET Friends-Frog-ever POST_BUILD
      COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/build/Tools/cuttlefish"
-            "$<TARGET_FILE_DIR:Ribbit_Express>/cuttlefish"
+            "$<TARGET_FILE_DIR:Friends-Frog-ever>/cuttlefish"
      COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/build/Tools/ffmpeg"
-            "$<TARGET_FILE_DIR:Ribbit_Express>/ffmpeg"
+            "$<TARGET_FILE_DIR:Friends-Frog-ever>/ffmpeg"
      COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
      CONFIGURATIONS Debug
    )
 
   # VS debugger working directory
-  set_target_properties(Ribbit_Express PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Ribbit_Express>")
+  set_target_properties(Friends-Frog-ever PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Friends-Frog-ever>")
 endif()
 
 message(STATUS "Game configuration successful.")
