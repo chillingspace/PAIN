@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "building 1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4639621261374885156
+  },
+  "descriptor_version": 1,
+  "guid": "5118d991-2d48-3545-8b17-c9b991d368d0",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\building 1_baseColor.png"
+  }
+}

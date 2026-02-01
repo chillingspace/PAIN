@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Machine1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16467478172731734609
+  },
+  "descriptor_version": 1,
+  "guid": "c79a09c6-ea1f-ca46-8d92-d5cf53337487",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Machine1.material"
+  }
+}

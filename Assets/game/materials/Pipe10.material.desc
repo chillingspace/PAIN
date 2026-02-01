@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pipe10.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16194040530411854674
+  },
+  "descriptor_version": 1,
+  "guid": "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Pipe10.material"
+  }
+}

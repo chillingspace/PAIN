@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pipe10_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11578225417807133902
+  },
+  "descriptor_version": 1,
+  "guid": "b8a2c974-f619-014b-9cb4-6143cbdf7c4b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pipe10_occlusionRoughnessMetallic.png"
+  }
+}

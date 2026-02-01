@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Machine1_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7806958543603422734
+  },
+  "descriptor_version": 1,
+  "guid": "d716543f-207b-5a47-9496-b5ccafe42b6b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Machine1_occlusionRoughnessMetallic.png"
+  }
+}
