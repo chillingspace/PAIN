@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Machine1_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18063029128001913382
+  },
+  "descriptor_version": 1,
+  "guid": "ea2431c4-c2c5-724e-a713-daf897030244",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Machine1_normal.png"
+  }
+}
