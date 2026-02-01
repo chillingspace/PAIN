@@ -56,6 +56,14 @@ Win32/
 out*/
 android/app/src/main/assets*/
 
+
+# ========================
+# Installer outputs
+# ========================
+!installer/REDIST/VC_redist.x64.exe
+installer/GAMEDIRECTORY
+installer/INSTALLER
+installer/INSTALLERFILES
 # ========================
 # Compiled object files / libraries / executables
 # ========================

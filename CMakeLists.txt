@@ -109,7 +109,7 @@ endif()
 
 # Set the startup project for the Visual Studio solution
 if (MSVC)
-  set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Ribbit_Express)
+  set_property(DIRECTORY . PROPERTY VS_STARTUP_PROJECT Friends-Frog-ever)
   add_compile_options(/MP)
   add_compile_options(/bigobj)
 endif()

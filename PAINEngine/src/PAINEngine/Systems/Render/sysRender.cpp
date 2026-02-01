@@ -764,8 +764,10 @@ namespace PAIN {
 				}
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifndef _DEBUG
 				// Skip android UI
 				if (metadata_service->hasTag(entity, "android_ui")) { continue; }
+#endif
 #endif
 
 				if (!ui_elem.b_is_enabled)
