@@ -96,7 +96,11 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+<<<<<<< Updated upstream
                             "materialGUID": "0b9ad008-e8ad-144b-855d-115dd4683035",
+=======
+                            "materialGUID": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
+>>>>>>> Stashed changes
                             "metallicOverride": 1.0,
                             "metallicTextureOverride": "7234f3ff-1b6b-0349-aa5b-41451da8edf8",
                             "normalTextureOverride": "d65c15fe-50ce-7341-aa2f-ae6016dc4caf",
@@ -106,7 +110,11 @@
                             "useOverrides": false
                         }
                     ],
+<<<<<<< Updated upstream
                     "modelGUID": "e60f5690-3ae8-a142-b726-5ea017a209e9",
+=======
+                    "modelGUID": "69dea949-38c9-d142-b1a7-ac9123b52e19",
+>>>>>>> Stashed changes
                     "receiveShadows": true,
                     "visible": true
                 },

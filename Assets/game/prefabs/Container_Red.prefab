@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        -2.270752429962158,
+                        -3.8247485160827637,
                         0.0,
-                        -7.310388565063477
+                        -33.17413330078125
                     ],
                     "rotation": [
                         0.0,
@@ -33,8 +33,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "e182099e-b02e-f047-955a-601cf382ed3b",
-                            "aoTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,30 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-<<<<<<< Updated upstream
-                            "materialGUID": "9dc666a4-a004-0346-803d-0530eb3a2f70",
-=======
-                            "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
->>>>>>> Stashed changes
+                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
-                            "normalTextureOverride": "1982f63e-4b4f-8e44-bda6-ed47f4d8ba20",
+                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
                             "useOverrides": false
                         }
                     ],
-<<<<<<< Updated upstream
-                    "modelGUID": "f6863a86-d8e4-194c-9c87-f42435c1060a",
-=======
-                    "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
->>>>>>> Stashed changes
+                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Truck2"
+                    "name": "Container_Red"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -80,17 +72,17 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.699999988079071,
+                        1.100000023841858,
                         0.0
                     ],
                     "collider_scale": [
-                        2.200000047683716,
-                        1.0,
-                        4.800000190734863
+                        2.700000047683716,
+                        4.300000190734863,
+                        5.599999904632568
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
-                        "behavior": 0
+                        "behavior": 1
                     },
                     "use_gravity": true,
                     "velocity": [
@@ -100,9 +92,9 @@
                     ]
                 }
             },
-            "entityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+            "entityGUID": "4b63afae-38b8-9449-b7da-79abee6ce859"
         }
     ],
-    "prefabName": "Truck2",
-    "rootEntityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+    "prefabName": "Container_Red",
+    "rootEntityGUID": "4b63afae-38b8-9449-b7da-79abee6ce859"
 }

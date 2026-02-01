@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        -2.270752429962158,
+                        -1.5333218574523926,
                         0.0,
-                        -7.310388565063477
+                        -30.645328521728516
                     ],
                     "rotation": [
                         0.0,
@@ -33,8 +33,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "e182099e-b02e-f047-955a-601cf382ed3b",
-                            "aoTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                            "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,30 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-<<<<<<< Updated upstream
-                            "materialGUID": "9dc666a4-a004-0346-803d-0530eb3a2f70",
-=======
-                            "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
->>>>>>> Stashed changes
+                            "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
-                            "normalTextureOverride": "1982f63e-4b4f-8e44-bda6-ed47f4d8ba20",
+                            "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                            "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
                             "useOverrides": false
                         }
                     ],
-<<<<<<< Updated upstream
-                    "modelGUID": "f6863a86-d8e4-194c-9c87-f42435c1060a",
-=======
-                    "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
->>>>>>> Stashed changes
+                    "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Truck2"
+                    "name": "Container_Blue"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -80,13 +72,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.699999988079071,
+                        0.0,
                         0.0
                     ],
                     "collider_scale": [
-                        2.200000047683716,
-                        1.0,
-                        4.800000190734863
+                        2.799999952316284,
+                        6.900000095367432,
+                        5.900000095367432
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -100,9 +92,9 @@
                     ]
                 }
             },
-            "entityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+            "entityGUID": "02e1692c-bdee-3540-8cfd-c006449fc753"
         }
     ],
-    "prefabName": "Truck2",
-    "rootEntityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+    "prefabName": "Container_Blue",
+    "rootEntityGUID": "02e1692c-bdee-3540-8cfd-c006449fc753"
 }

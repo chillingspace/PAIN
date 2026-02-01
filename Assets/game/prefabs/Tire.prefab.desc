@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tire.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16013045410199564609
+  },
+  "descriptor_version": 1,
+  "guid": "96f2d4ae-0b76-d043-a5df-262893a0691e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Tire.prefab"
+  }
+}
