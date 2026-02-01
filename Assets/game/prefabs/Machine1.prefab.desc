@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Machine1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 11226921660539710517
+  },
+  "descriptor_version": 1,
+  "guid": "d2c6ad32-9084-d440-a8a3-898514f129c1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Machine1.prefab"
+  }
+}

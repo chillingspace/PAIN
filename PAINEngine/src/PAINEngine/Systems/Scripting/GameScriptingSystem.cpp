@@ -96,6 +96,11 @@ namespace PAIN {
                         fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
                     std::string realPath = fs->resolvePath(vpath);
 
+                   /* PN_CORE_INFO("[GameScriptingSystem] Loading script '{}' for entity {} (entt::entity={})",
+                        meta->name,
+                        static_cast<uint32_t>(e),
+                        entt::to_integral(e));*/
+
                     // attach this script to this entity
                     attachScript(e, realPath);
 

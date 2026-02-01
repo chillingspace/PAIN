@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Machine1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 7597822580804270696
+  },
+  "descriptor_version": 1,
+  "guid": "d77ff516-4b2e-ab4a-966c-46bef8cbf097",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Machine1.glb"
+  }
+}

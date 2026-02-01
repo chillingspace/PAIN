@@ -3,17 +3,15 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "prototype.scn"   -- current gameplay level
-G.FirstLevelScene     = G.FirstLevelScene    or "prototype.scn"   -- first level from main menu
-G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"   -- tutorial scene
+G.CurrentLevelName    = G.CurrentLevelName   or "Tutorial.scn"
+G.FirstLevelScene     = G.FirstLevelScene    or "Tutorial.scn"
+G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"
 
 G.MainMenuSceneName   = G.MainMenuSceneName  or "mainmenu.scn"    -- main menu scene
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "howtoplay.scn"   -- how to play scene
 G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "howtoplay2.scn"   -- how to play scene 2
 G.SettingsSceneName   = G.SettingsSceneName  or "settings.scn"   -- how to play scene
 G.CreditsSceneName    = G.CreditsSceneName   or "credits.scn"   -- how to play scene
-
-G.SettingsSceneName   = G.SettingsSceneName  or "pausemenu.scn"   -- pause settings
 
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
@@ -22,7 +20,6 @@ local function resolveSceneName(payload, fallback)
     return payload
 end
 
-
 local PlayerState = _G.PlayerState
 
 local handlers = {
@@ -30,13 +27,11 @@ local handlers = {
     -- GAMEPLAY BUTTONS
     ----------------------------------------------------------------------
     game_Jump = function(buttonEntity, payload)
-        -- PlayerInput API from playerMovement.lua
         if _G.PlayerInput and _G.PlayerInput.requestJump then
             _G.PlayerInput.requestJump()
             return
         end
 
-        -- fallback 
         if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
             return
         end
@@ -45,23 +40,16 @@ local handlers = {
     end,
 
     game_Move = function(buttonEntity, payload)
-        -- Joystick movement callback
-        -- Payload should be a table or string containing dirX and dirY
-        -- This is called by the UI system when joystick is dragged
-        
         if _G_root.gamePaused then
-            -- When paused, send zero movement
             if _G_root.Joystick_OnDrag then
                 _G_root.Joystick_OnDrag(0.0, 0.0)
             end
             return
         end
         
-        -- Parse payload if it's a string (format: "dirX,dirY")
         local dirX, dirY = 0.0, 0.0
         
         if type(payload) == "string" then
-            -- Parse "x,y" format
             local values = {}
             for val in string.gmatch(payload, "[^,]+") do
                 table.insert(values, tonumber(val) or 0.0)
@@ -69,12 +57,10 @@ local handlers = {
             dirX = values[1] or 0.0
             dirY = values[2] or 0.0
         elseif type(payload) == "table" then
-            -- If payload is a table with x,y or dirX,dirY
             dirX = payload.dirX or payload.x or 0.0
             dirY = payload.dirY or payload.y or 0.0
         end
         
-        -- Call the existing joystick callback from playerMovement.lua
         if _G_root.Joystick_OnDrag then
             _G_root.Joystick_OnDrag(dirX, dirY)
         else
@@ -82,9 +68,7 @@ local handlers = {
         end
     end,
 
-
     game_Hide = function(buttonEntity, payload)
-        -- hide/unhide button
         if PlayerState and PlayerState.onHideButton then
             PlayerState.onHideButton()
         else
@@ -93,7 +77,6 @@ local handlers = {
     end,
 
     game_Collect = function(buttonEntity, payload)
-        -- collect/deliver button
         if PlayerState and PlayerState.onCollectButton then
             PlayerState.onCollectButton()
         else
@@ -105,22 +88,25 @@ local handlers = {
     -- PAUSE MENU
     ----------------------------------------------------------------------
     pause_Resume = function(buttonEntity, payload)
-        -- Simply unpause the game
-        if pauseAllSystems then
-            pauseAllSystems(false)
+        if _G_root.TogglePause then
+            _G_root.TogglePause()
+            printLog("[UI] pause_Resume -> called TogglePause()")
         else
-            printLog("[UI] pause_Resume pressed, but pauseAllSystems is not bound")
+            printLog("[UI] pause_Resume pressed, but TogglePause is not available")
         end
     end,
 
     pause_Restart = function(buttonEntity, payload)
-        -- reload current level
-        -- priority: button payload > global CurrentLevelName > hardcoded default
-        local levelName = resolveSceneName(payload, G.CurrentLevelName,"Tutorial.scn")
-
+        -- Hardcoded to always restart Tutorial.scn
+        printLog("[UI] pause_Restart -> restarting Tutorial.scn")
+        
+        if _G_root.gamePaused then
+            _G_root.gamePaused = false
+            printLog("[UI] Game unpaused before restart")
+        end
+        
         if changeScene then
-            printLog("[UI] pause_Restart -> changeScene("..levelName..")")
-            changeScene(levelName)
+            changeScene("Tutorial.scn")
         else
             printLog("[UI] pause_Restart pressed, but changeScene is not bound")
         end
@@ -138,13 +124,54 @@ local handlers = {
     end,
 
     pause_ReturnToMainMenu = function(buttonEntity, payload)
-        local mainMenu = resolveSceneName(payloa, G.MainMenuSceneName, "mainmenu.scn")
-
-        if changeScene then
-            printLog("[UI] pause_ReturnToMainMenu -> changeScene("..mainMenu..")")
-            changeScene(mainMenu)
+        -- Show confirmation popup
+        printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
+        
+        if setLayerEnabled then
+            setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
+            printLog("[UI] QuitOverlay (layer 4) shown")
         else
-            printLog("[UI] pause_ReturnToMainMenu pressed, but changeScene is not bound")
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+    ----------------------------------------------------------------------
+    -- Quit Confirmation Overlay
+    ----------------------------------------------------------------------
+    quit_Confirm = function(buttonEntity, payload)
+        -- User pressed YES - quit to main menu
+        printLog("[UI] quit_Confirm -> returning to main menu")
+        
+        -- Unpause first
+        if _G_root.gamePaused then
+            _G_root.gamePaused = false
+            printLog("[UI] Game unpaused before scene change")
+        end
+        
+        -- Hide quit overlay
+        if setLayerEnabled then
+            setLayerEnabled(4, false)
+            printLog("[UI] QuitOverlay hidden")
+        end
+        
+        -- Load main menu - HARDCODED
+        printLog("[UI] quit_Confirm -> changeScene(mainmenu.scn)")
+        if changeScene then
+            changeScene("mainmenu.scn")
+        else
+            printLog("[UI] quit_Confirm pressed, but changeScene is not bound")
+        end
+    end,
+
+    quit_Cancel = function(buttonEntity, payload)
+        -- User pressed NO - close popup
+        printLog("[UI] quit_Cancel -> closing quit confirmation")
+        
+        if setLayerEnabled then
+            setLayerEnabled(4, false)
+            printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
+        else
+            printLog("[UI] setLayerEnabled not available")
         end
     end,
 
@@ -152,12 +179,9 @@ local handlers = {
     -- MAIN MENU
     ----------------------------------------------------------------------
     menu_StartGame = function(buttonEntity, payload)
-        -- Start first level
-        local levelName = resolveSceneName(payload, G.FirstLevelScene, "Tutorial.scn")
-
+        printLog("[UI] menu_StartGame -> changeScene(Tutorial.scn)")
         if changeScene then
-            printLog("[UI] menu_StartGame -> changeScene("..levelName..")")
-            changeScene(levelName)
+            changeScene("Tutorial.scn")
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
         end
@@ -178,10 +202,10 @@ local handlers = {
         local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
 
         if howtoplayScene and changeScene then
-            printLog("[UI] menu_OpenSettings -> changeScene("..howtoplayScene..")")
+            printLog("[UI] menu_HowToPlay -> changeScene("..howtoplayScene..")")
             changeScene(howtoplayScene)
         else
-            printLog("[UI] menu_OpenSettings pressed (no scene specified / not implemented)")
+            printLog("[UI] menu_HowToPlay pressed (no scene specified / not implemented)")
         end
     end,
 
@@ -189,17 +213,17 @@ local handlers = {
         local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
 
         if creditsScene and changeScene then
-            printLog("[UI] menu_OpenSettings -> changeScene("..creditsScene..")")
+            printLog("[UI] menu_Credits -> changeScene("..creditsScene..")")
             changeScene(creditsScene)
         else
-            printLog("[UI] menu_OpenSettings pressed (no scene specified / not implemented)")
+            printLog("[UI] menu_Credits pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_QuitGame = function(buttonEntity, payload)
         if quitApplication then
             printLog("[UI] menu_QuitGame -> quitApplication()")
-            quitApplication() -- i think no such thing yet
+            quitApplication()
         else
             printLog("[UI] menu_QuitGame pressed (quitapplication() not bound; implement in EngineAPI)")
         end
@@ -217,13 +241,11 @@ local handlers = {
     end,
 
     menu_BackToMain = function(buttonEntity, payload)
-        local backtomainScene = resolveSceneName(payload or G.TutorialSceneName, "mainmenu.scn")
-
-        if backtomainScene and changeScene then
-            printLog("[UI] menu_OpenTutorial -> changeScene("..backtomainScene..")")
-            changeScene(backtomainScene)
+        printLog("[UI] menu_BackToMain -> changeScene(mainmenu.scn)")
+        if changeScene then
+            changeScene("mainmenu.scn")
         else
-            printLog("[UI] menu_OpenTutorial pressed (no scene specified / not implemented)")
+            printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")
         end
     end,
 

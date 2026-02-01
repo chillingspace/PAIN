@@ -1,3 +1,5 @@
+
+#ifdef _DEBUG
 #include "pch.h"
 #include "Command.h"
 
@@ -25,6 +27,7 @@ namespace PAIN {
 			} guard(is_executing_undo_redo);
 
 			action.undo_action();
+
 #ifdef PN_PLATFORM_WINDOWS
 			if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
@@ -32,6 +35,7 @@ namespace PAIN {
 				}
 			}
 #endif
+
 			redo_stack.push(std::move(action));
 			undo_stack.pop();
 
@@ -91,6 +95,7 @@ namespace PAIN {
 				}
 			}
 #endif
+
 			// Push executed action onto the undo action stack
 			undo_stack.push(std::move(action));
 
@@ -132,3 +137,4 @@ namespace PAIN {
 		}
 	}
 }
+#endif

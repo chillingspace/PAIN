@@ -211,10 +211,15 @@ namespace PAIN {
     }
 
     void LuaManager::resetForSceneReload() {
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Starting reset...");
+
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing {} update callbacks", updates_.size());
         updates_.clear();
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing key handlers");
         keyDown_.clear();
         keyUp_.clear();
         onClick_.clear();
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing {} collision handlers", onCollision_.size());
         onCollision_.clear();
         pauseHandlers_.clear();
         timeouts_.clear();
@@ -227,6 +232,26 @@ namespace PAIN {
         while (!timeoutHeap_.empty()) timeoutHeap_.pop();
 
         pendingSceneChange_.reset();
+
+        // clear cached entity references directly from lua globals
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing Lua global cached entities...");
+
+        // clear known globals that cache entity state
+        lua_["PlayerEntity"] = sol::nil;
+        lua_["PlayerState"] = sol::nil;
+        lua_["DetectionUI"] = sol::nil;
+        lua_["CameraState"] = sol::nil;
+        lua_["gamePaused"] = sol::nil;
+        lua_["PlayerInput"] = sol::nil;
+
+        // clear the _G.UI table if it exists
+        sol::object ui_obj = lua_["UI"];
+        if (ui_obj.valid()) {
+            lua_["UI"] = sol::nil;
+        }
+
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Cleared Lua global cached values");
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Reset complete");
     }
 
 

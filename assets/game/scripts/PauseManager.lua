@@ -1,13 +1,12 @@
 -- PauseManager.lua
 log("[PauseManager] Script LOADED at startup!")
 
+-- Track current level globally
+_G_root.CurrentLevelName = _G_root.CurrentLevelName or "Tutorial.scn"
 
 local isPaused = false
 local escWasPressed = false
 local KEY_ESCAPE = 256
-local sceneChange = false
-local nextScene = nil
-
 
 registerUpdate(function(dt)
     -- Handle ESC key for pause
@@ -19,19 +18,7 @@ registerUpdate(function(dt)
     end
     
     escWasPressed = escPressed
-    
-    -- Handle scene changes (for restart button)
-    if sceneChange then
-        if nextScene == nil then
-            return
-        end
-        
-        changeScene(nextScene)
-        sceneChange = false
-        nextScene = nil
-    end
 end)
-
 
 -- Make TogglePause globally accessible
 function TogglePause()
@@ -65,27 +52,8 @@ end
 -- Export to global scope so other scripts can call it
 _G_root.TogglePause = TogglePause
 
-
--- Continue button - unpause the game
-_G_root.continue_button = function()
-    log("[UI] Continue button pressed")
-    if isPaused then
-        TogglePause()
-    end
-end
-
-
--- Restart button - reload current scene
-_G_root.restart_button = function()
-    log("[UI] Restart button pressed")
-    sceneChange = true
-    nextScene = "Tutorial.scn"  -- Reloads the game scene
-end
-
-
--- Quit to Main Menu button
-_G_root.quit_button = function()
-    log("[UI] Quit to menu button pressed")
-    sceneChange = true
-    nextScene = "mainmenu.scn"
+-- Helper function to update current level name
+function _G_root.SetCurrentLevel(sceneName)
+    _G_root.CurrentLevelName = sceneName
+    log("[PauseManager] Current level set to: " .. sceneName)
 end

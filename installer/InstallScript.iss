@@ -11,25 +11,25 @@
 AppId={{DBE1979A-0CA9-4A8B-81DE-029260E99EE2}
 
 ; Standard app data stuff
-; !!NOTE!!: Replace all instances of "Ribbit-Express" with your game name.
-AppName=Ribbit-Express
-AppVerName=Ribbit-Express Version 1
+; !!NOTE!!: Replace all instances of "Friends-Frog-ever" with your game name.
+AppName=Friends-Frog-ever
+AppVerName=Friends-Frog-ever Version 1
 AppPublisher=DigiPen Institute of Technology
 AppPublisherURL=http://www.digipen.edu/
 AppSupportURL=http://www.digipen.edu/
 
 ; Default path to the file storage directory.
 ; {pf} is the default program files directory set by Windows
-DefaultDirName={pf}\DigiPen\Ribbit-Express
+DefaultDirName={pf}\DigiPen\Friends-Frog-ever
 
 ; Start menu directory
-DefaultGroupName=DigiPen\Ribbit-Express
+DefaultGroupName=DigiPen\Friends-Frog-ever
 
 ; Output directory for the installer.
 OutputDir=.\INSTALLER
 
 ; Setup executable installer
-OutputBaseFilename=Ribbit-Express_Setup
+OutputBaseFilename=Friends-Frog-ever_Setup
 
 ; Path to the DigiPen EULA (Needed to pass TCRs)
 LicenseFile=INSTALLERFILES\DigiPen_EULA.txt
@@ -79,6 +79,7 @@ Source: .\GAMEDIRECTORY\*; DestDir: {app}; Flags: ignoreversion recursesubdirs c
 ; Source: .\REDIST\vcredist_2008_x86.exe; DestDir: {tmp}; Flags: ignoreversion
 Source: .\REDIST\VC_redist.x64.exe; DestDir: {tmp}; Flags: ignoreversion
 ; Source: .\REDIST\dxwebsetup.exe; DestDir: {tmp}; Flags: ignoreversion
+Source: .\INSTALLERFILES\frog_icon.ico; DestDir: {app}; Flags: ignoreversion
 
 ; This is the list of shortcuts that the installer will setup for you.
 ; Of note, this will create the uninstaller automatically.
@@ -87,10 +88,10 @@ Source: .\REDIST\VC_redist.x64.exe; DestDir: {tmp}; Flags: ignoreversion
 ;   {group} is the start menu location that the game will install shortcuts to.
 ;   {commondesktop} is your Windows desktop directory.
 [Icons]
-Name: {group}\Ribbit-Express; Filename: {app}\Ribbit_Express.exe; WorkingDir: {app}; IconFilename: "{app}\assets\Icons\Icon_256x256.ico"
-Name: {group}\{cm:UninstallProgram,Ribbit-Express}; Filename: {uninstallexe}
-Name: {group}\{cm:UninstallProgram,Ribbit-Express}; Filename: {uninstallexe};  IconFilename: "{app}\assets\Icons\Icon_256x256.ico"
-Name: {commondesktop}\Ribbit-Express; Filename: {app}\Ribbit_Express.exe; Tasks: desktopicon; WorkingDir: {app}; IconFilename: "{app}\assets\Icons\Icon_256x256.ico"
+Name: {group}\Friends-Frog-ever; Filename: {app}\Friends-Frog-ever.exe; WorkingDir: {app}; IconFilename: "{app}\frog_icon.ico"
+Name: {group}\{cm:UninstallProgram,Friends-Frog-ever}; Filename: {uninstallexe}
+Name: {group}\{cm:UninstallProgram,Friends-Frog-ever}; Filename: {uninstallexe};  IconFilename: "{app}\frog_icon.ico"
+Name: {commondesktop}\Friends-Frog-ever; Filename: {app}\Friends-Frog-ever.exe; Tasks: desktopicon; WorkingDir: {app}; IconFilename: "{app}\frog_icon.ico"
 
 ; List of items to execute in the installer.
 ; Note that this will run all executables in their silent versions as required by the TCRs.
@@ -101,7 +102,7 @@ Name: {commondesktop}\Ribbit-Express; Filename: {app}\Ribbit_Express.exe; Tasks:
 ;Filename: {tmp}\vc_redist.x86.exe; Parameters: /q; StatusMsg: Installing Visual C++ 2015 Redistributable...
 Filename: {tmp}\VC_redist.x64.exe; Parameters: /q; StatusMsg: Installing Visual C++ 2022 Redistributable...
 ;Filename: {tmp}\dxwebsetup.exe; Parameters: /q; StatusMsg: Installing DirectX...
-Filename: {app}\Ribbit_Express.exe; Description: {cm:LaunchProgram,Ribbit-Express}; Flags: nowait postinstall skipifsilent
+Filename: {app}\Friends-Frog-ever.exe; Description: {cm:LaunchProgram,Friends-Frog-ever}; Flags: nowait postinstall skipifsilent
 
 
-;To be able to run and generate the Ribbit-Express_Setup.exe you need to download and install "Inno Setup" application, then open this file with the application.
+;To be able to run and generate the Friends-Frog-ever_Setup.exe you need to download and install "Inno Setup" application, then open this file with the application.
