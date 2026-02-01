@@ -47,7 +47,11 @@
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
+=======
+        "164de26f-1403-e146-8a76-735d5dc42155",
+>>>>>>> Stashed changes
 =======
         "164de26f-1403-e146-8a76-735d5dc42155",
 >>>>>>> Stashed changes
@@ -78,6 +82,7 @@
         "19d818f3-a8fc-1b4a-bf95-b233da10f329",
         "9da056a0-d46c-664b-a2bd-9ba986135c23",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         "f6863a86-d8e4-194c-9c87-f42435c1060a",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
@@ -94,6 +99,8 @@
         "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
         "a77749e3-6c15-7446-a792-5609dd96b391",
 =======
+=======
+>>>>>>> Stashed changes
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "7bad0c48-9943-6747-a23a-d44305d89936",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
@@ -113,6 +120,9 @@
         "d06b5061-9f4d-1143-8011-9925e1c8c6d1",
         "39dddb2b-a135-464b-a27a-f3357d319743",
         "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
@@ -137,9 +147,15 @@
         "farPlane": 100.0,
         "forward": [
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             -0.4290778338909149,
             -0.694439172744751,
             -0.5776214003562927
+=======
+            -0.08684895187616348,
+            -0.6558303833007813,
+            -0.7498958706855774
+>>>>>>> Stashed changes
 =======
             -0.08684895187616348,
             -0.6558303833007813,
@@ -150,9 +166,15 @@
         "nearPlane": 0.10000000149011612,
         "position": [
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             -2.950740337371826,
             18.582815170288086,
             18.467924118041992
+=======
+            -12.243891716003418,
+            14.467323303222656,
+            14.615235328674316
+>>>>>>> Stashed changes
 =======
             -12.243891716003418,
             14.467323303222656,
@@ -14353,7 +14375,11 @@
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                     "materialGUID": "9dc666a4-a004-0346-803d-0530eb3a2f70",
+=======
+                                    "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
+>>>>>>> Stashed changes
 =======
                                     "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
 >>>>>>> Stashed changes
@@ -14367,7 +14393,11 @@
                                 }
                             ],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                             "modelGUID": "f6863a86-d8e4-194c-9c87-f42435c1060a",
+=======
+                            "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
+>>>>>>> Stashed changes
 =======
                             "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
 >>>>>>> Stashed changes
@@ -14425,7 +14455,11 @@
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                             "materialGUID": "9dc666a4-a004-0346-803d-0530eb3a2f70",
+=======
+                                            "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
+>>>>>>> Stashed changes
 =======
                                             "materialGUID": "6439372b-ca5b-ae4e-a7c6-5d7915cf7420",
 >>>>>>> Stashed changes
@@ -14439,7 +14473,11 @@
                                         }
                                     ],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                     "modelGUID": "f6863a86-d8e4-194c-9c87-f42435c1060a",
+=======
+                                    "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
+>>>>>>> Stashed changes
 =======
                                     "modelGUID": "7bad0c48-9943-6747-a23a-d44305d89936",
 >>>>>>> Stashed changes
@@ -14613,7 +14651,11 @@
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                     "materialGUID": "0b9ad008-e8ad-144b-855d-115dd4683035",
+=======
+                                    "materialGUID": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
+>>>>>>> Stashed changes
 =======
                                     "materialGUID": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
 >>>>>>> Stashed changes
@@ -14627,7 +14669,11 @@
                                 }
                             ],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                             "modelGUID": "e60f5690-3ae8-a142-b726-5ea017a209e9",
+=======
+                            "modelGUID": "69dea949-38c9-d142-b1a7-ac9123b52e19",
+>>>>>>> Stashed changes
 =======
                             "modelGUID": "69dea949-38c9-d142-b1a7-ac9123b52e19",
 >>>>>>> Stashed changes
@@ -14734,7 +14780,11 @@
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                             "materialGUID": "0b9ad008-e8ad-144b-855d-115dd4683035",
+=======
+                                            "materialGUID": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
+>>>>>>> Stashed changes
 =======
                                             "materialGUID": "618cb3d4-e601-4b48-b7e0-40fb1d405fc8",
 >>>>>>> Stashed changes
@@ -14748,7 +14798,11 @@
                                         }
                                     ],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                     "modelGUID": "e60f5690-3ae8-a142-b726-5ea017a209e9",
+=======
+                                    "modelGUID": "69dea949-38c9-d142-b1a7-ac9123b52e19",
+>>>>>>> Stashed changes
 =======
                                     "modelGUID": "69dea949-38c9-d142-b1a7-ac9123b52e19",
 >>>>>>> Stashed changes
@@ -14895,10 +14949,13 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 20
+<<<<<<< Updated upstream
                                 },
                                 "Layer": {
                                     "layer_id": 0,
                                     "layer_mask": 1
+=======
+>>>>>>> Stashed changes
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15162,10 +15219,13 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 22
+<<<<<<< Updated upstream
                                 },
                                 "Layer": {
                                     "layer_id": 0,
                                     "layer_mask": 1
+=======
+>>>>>>> Stashed changes
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15773,10 +15833,13 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 25
+<<<<<<< Updated upstream
                                 },
                                 "Layer": {
                                     "layer_id": 0,
                                     "layer_mask": 1
+=======
+>>>>>>> Stashed changes
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15968,10 +16031,13 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 26
+<<<<<<< Updated upstream
                                 },
                                 "Layer": {
                                     "layer_id": 0,
                                     "layer_mask": 1
+=======
+>>>>>>> Stashed changes
                                 },
                                 "LocalTransform": {
                                     "position": [
