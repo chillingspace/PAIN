@@ -190,7 +190,7 @@ namespace PAIN {
             node.height = 0;
             node.child1Index = -1;
             node.child2Index = -1;
-
+            PN_CORE_TRACE("Leaf Created: Node {}, Entity {}", nodeIndex, (uint32_t)node.entity);
             return nodeIndex;
         }
 
@@ -274,40 +274,37 @@ namespace PAIN {
         recursionDepth++;
 
         // Build left child
-        node.child1Index = buildRecursive(items, start, mid);
-
-        // Build right child
-        node.child2Index = buildRecursive(items, mid, end);
+        PN_CORE_TRACE("Recursing Left: [{}, {})", start, mid);
+        int leftResult = buildRecursive(items, start, mid);
+        PN_CORE_TRACE("Recursing Right: [{}, {})", mid, end);
+        int rightResult = buildRecursive(items, mid, end);
 
         recursionDepth--;
 
         // ========================================
-        // 8. VALIDATE CHILDREN
+        // 8. VALIDATE & LINK CHILDREN
         // ========================================
-        if (node.child1Index < 0 || node.child1Index >= m_nodeCapacity) {
-            PN_CORE_ERROR("Invalid child1 index: {}", node.child1Index);
-            node.child1Index = -1;
+        
+        // Check for failure in EITHER child
+        if (leftResult == -1 || rightResult == -1) {
+            freeNode(nodeIndex);
+            if (leftResult != -1) freeNode(leftResult);
+            if (rightResult != -1) freeNode(rightResult);
+            return -1;
         }
 
-        if (node.child2Index < 0 || node.child2Index >= m_nodeCapacity) {
-            PN_CORE_ERROR("Invalid child2 index: {}", node.child2Index);
-            node.child2Index = -1;
-        }
+        // Re-acquire the reference from the vector using the index.
+        BVHNode& currentNode = m_nodes[nodeIndex];
 
-        // ========================================
-        // 9. SET PARENT POINTERS
-        // ========================================
-        if (node.child1Index != -1) {
-            m_nodes[node.child1Index].parentIndex = nodeIndex;
-        }
-        if (node.child2Index != -1) {
-            m_nodes[node.child2Index].parentIndex = nodeIndex;
-        }
+        currentNode.child1Index = leftResult;
+        currentNode.child2Index = rightResult;
+        currentNode.aabb = combinedAABB;
+        currentNode.entity = entt::null; // Internal nodes have no entity
+        currentNode.height = std::max(m_nodes[leftResult].height, m_nodes[rightResult].height) + 1;
 
-        // ========================================
-        // 10. COMPUTE NODE AABB
-        // ========================================
-        computeAABB(nodeIndex);
+        // Link Parents
+        m_nodes[leftResult].parentIndex = nodeIndex;
+        m_nodes[rightResult].parentIndex = nodeIndex;
 
         return nodeIndex;
     }

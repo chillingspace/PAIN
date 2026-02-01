@@ -1046,8 +1046,22 @@ namespace PAIN {
 						float cubeSize = 128.0f;
 						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
 
+						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+						float defaultDistance = 10.0f; 
+						glm::vec3 lookAtTarget = camera->pos + (camera->forward * defaultDistance);
+
+						if (selectedEntity != entt::null) {
+							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
+
+							if (worldTransformOpt.has_value()) {
+								WorldTransform& worldTransform = worldTransformOpt.value().get();
+
+							    lookAtTarget = glm::vec3(worldTransform.matrix[3]);
+
+							}
+						}
 						// Calculate distance from camera to look-at point (origin)
-						glm::vec3 lookAtTarget = glm::vec3(0.0f);
+						
 						float cameraDistance = glm::length(camera->pos - lookAtTarget);
 
 						// Set these before ViewManipulate
@@ -1087,24 +1101,38 @@ namespace PAIN {
 					 // === Mouse Picking - AFTER GIZMO ===
 					 // ========================================
 
-					// Track if we were using the gizmo in the previous frame
-					static bool wasUsingGizmo = false;
-					// REMOVE THIS LINE: bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
-					// Reuse the variable declared above
+
+					bool isHoveringViewCube = false;
+					{
+						ImVec2 mousePos = ImGui::GetMousePos();
+						// Use the exact same coordinates you used for ViewManipulate
+						float cubeSize = 128.0f;
+						ImVec2 cubePos(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+
+						if (mousePos.x >= cubePos.x && mousePos.x <= cubePos.x + cubeSize &&
+							mousePos.y >= cubePos.y && mousePos.y <= cubePos.y + cubeSize) {
+							isHoveringViewCube = true;
+						}
+					}
+
+
+					bool isAnyGizmoActive = isUsingGizmo || ImGuizmo::IsUsingViewManipulate() || isHoveringViewCube;
+
+					static bool wasAnyGizmoActive = false;
 
 					if (contentHovered) {
-						// Only pick on click if gizmo is NOT being used
 						bool shouldPick = false;
 
 						// Case 1: Direct click (no drag)
-						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isUsingGizmo) {
+						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isAnyGizmoActive) {
 							shouldPick = true;
 						}
 
 						// Case 2: Mouse released after dragging (but NOT on gizmo)
+						// We add '!wasAnyGizmoActive' to ensure we didn't just finish using the cube
 						if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
-							&& !isUsingGizmo
-							&& !wasUsingGizmo
+							&& !isAnyGizmoActive
+							&& !wasAnyGizmoActive
 							&& !ImGui::IsMouseDragging(ImGuiMouseButton_Left, 1.0f)) {
 							shouldPick = true;
 						}
@@ -1116,7 +1144,8 @@ namespace PAIN {
 						}
 					}
 
-					wasUsingGizmo = isUsingGizmo;
+					// Update state for next frame
+					wasAnyGizmoActive = isAnyGizmoActive;
 		
                 }
                 ImGui::End();

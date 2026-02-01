@@ -14,8 +14,6 @@
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 
 namespace PAIN {
-    //namespace Path { class Path; } 
-    //}
 
     class IEngineAPI;
 

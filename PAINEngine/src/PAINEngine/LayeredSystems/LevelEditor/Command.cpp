@@ -1,6 +1,7 @@
+#ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
 #include "pch.h"
 #include "Command.h"
-#include "CoreSystems/Serialization/sSerialization.h"
 
 
 namespace PAIN {
@@ -26,13 +27,13 @@ namespace PAIN {
 			} guard(is_executing_undo_redo);
 
 			action.undo_action();
-#ifdef PN_PLATFORM_WINDOWS
+
 			if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
 					ser->modifyScene();
 				}
 			}
-#endif
+
 			redo_stack.push(std::move(action));
 			undo_stack.pop();
 
@@ -60,13 +61,11 @@ namespace PAIN {
 
 			action.do_action();
 
-#ifdef PN_PLATFORM_WINDOWS
             if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
 					ser->modifyScene();
 				}
 			}
-#endif
 
 			undo_stack.push(std::move(action));
 			redo_stack.pop();
@@ -85,13 +84,12 @@ namespace PAIN {
 			// Execute action immediately
 			action.do_action();
 
-#ifdef PN_PLATFORM_WINDOWS
             if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
 					ser->modifyScene();
 				}
 			}
-#endif
+
 			// Push executed action onto the undo action stack
 			undo_stack.push(std::move(action));
 
@@ -133,3 +131,5 @@ namespace PAIN {
 		}
 	}
 }
+#endif
+#endif
