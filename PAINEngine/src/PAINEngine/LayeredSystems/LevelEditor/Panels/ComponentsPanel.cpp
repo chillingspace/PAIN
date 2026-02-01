@@ -432,8 +432,10 @@ namespace PAIN {
 
 							"pause_Resume",
 							"pause_Restart",
-							"pause_ReturnToMainMenu",
 							"pause_Settings",
+							"pause_ReturnToMainMenu",
+							"quit_Confirm",
+							"quit_Cancel",
 
 							"menu_StartGame",
 							"menu_OpenSettings",

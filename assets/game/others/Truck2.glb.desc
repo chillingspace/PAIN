@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Truck2.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 6696648668785634178
+  },
+  "descriptor_version": 1,
+  "guid": "0cd30c63-6d07-8146-88de-46edaca4543a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Truck2.glb"
+  }
+}
