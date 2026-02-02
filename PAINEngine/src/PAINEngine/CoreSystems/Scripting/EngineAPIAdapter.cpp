@@ -428,6 +428,60 @@ namespace PAIN {
         reg.get<PAIN::Audio::AudioSource>(entityId).looping = looping;
     }
 
+    // ==================== New Direct File Playback Methods ====================
+
+    int EngineAPIAdapter::Audio_PlayFile(const std::string& filename, float volumeDb, 
+        bool looping, bool is3D, entt::entity sourceEntity)
+    {
+        if (!audio_) return -1;
+
+        glm::vec3 pos(0.0f);
+        
+        // Get entity position for 3D audio
+        if (is3D && sourceEntity != entt::null) {
+            auto& reg = ecs_.getRegistry();
+            if (reg.all_of<PAIN::WorldTransform>(sourceEntity)) {
+                pos = reg.get<PAIN::WorldTransform>(sourceEntity).position;
+            } else if (reg.all_of<PAIN::LocalTransform>(sourceEntity)) {
+                pos = reg.get<PAIN::LocalTransform>(sourceEntity).position;
+            }
+        }
+
+        auto result = audio_->playFile(filename, "sfx", volumeDb, looping, is3D, pos,
+            PAIN::Audio::MIN_DISTANCE_3D, PAIN::Audio::MAX_DISTANCE_3D);
+        
+        return result ? result->value : -1;
+    }
+
+    int EngineAPIAdapter::Audio_PlaySFX(const std::string& filename, bool looping)
+    {
+        if (!audio_) return -1;
+        
+        auto result = audio_->playSFX(filename, looping, 0.0f);
+        return result ? result->value : -1;
+    }
+
+    int EngineAPIAdapter::Audio_PlayBGM(const std::string& filename, bool overlay)
+    {
+        if (!audio_) return -1;
+        
+        auto result = audio_->playBGM(filename, overlay, 0.0f);
+        return result ? result->value : -1;
+    }
+
+    void EngineAPIAdapter::Audio_TransitionBGM(const std::string& newFilename, float transitionTime)
+    {
+        if (!audio_) return;
+        audio_->transitionBGM(newFilename, transitionTime, 0.0f);
+    }
+
+    void EngineAPIAdapter::Audio_TransitionBGMWithSFX(const std::string& newBGMFilename,
+        const std::string& sfxFilename, float transitionTime)
+    {
+        if (!audio_) return;
+        audio_->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime, 0.0f);
+    }
+
     /* =========================================================================== */
     /*                           Scene / System state                              */
     /* =========================================================================== */

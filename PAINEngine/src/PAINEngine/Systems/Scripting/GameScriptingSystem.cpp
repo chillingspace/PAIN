@@ -270,6 +270,7 @@ namespace PAIN {
             auto ecs_ptr = services_ptr->get<ECS::Controller>();
             auto meta_ptr = services_ptr->get<MetaData::Service>();
             auto assets_ptr = services_ptr->get<Assets::Manager>();
+            auto audio_ptr = services_ptr->get<Audio::Audio>();
             auto path_ptr = services_ptr->get<Path::Path>();
             auto scene_ptr = services_ptr->get<Scene::SceneManager>();
             
@@ -282,6 +283,7 @@ namespace PAIN {
                 *ecs_ptr,
                 *meta_ptr,
                 assets_ptr.get(),
+                audio_ptr.get(),
                 path_ptr.get(),
                 scene_ptr.get()
             );

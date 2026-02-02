@@ -40,6 +40,19 @@ namespace PAIN {
             std::optional<AudioChannelId> play(std::shared_ptr<Sound> sound, std::string const& group, float vol, float pitch, bool looping, bool is3D, const glm::vec3& pos, float min_dist, float max_dist) override;
             std::optional<AudioChannelId> playRandom(std::string_view, const glm::vec3&, float) override;
 
+            // New direct file playback methods
+            std::optional<AudioChannelId> playFile(const std::string& filename, 
+                const std::string& group, float volumeDb, bool looping, bool is3D, 
+                const glm::vec3& pos, float minDist, float maxDist) override;
+            std::optional<AudioChannelId> playSFX(const std::string& filename, 
+                bool looping, float volumeDb) override;
+            std::optional<AudioChannelId> playBGM(const std::string& filename, 
+                bool overlay, float volumeDb) override;
+            void transitionBGM(const std::string& newFilename, 
+                float transitionTime, float volumeDb) override;
+            void transitionBGMWithSFX(const std::string& newBGMFilename,
+                const std::string& sfxFilename, float transitionTime, float volumeDb) override;
+
             AudioResult stop(AudioChannelId) override;
             void        stopAll() override;
             AudioResult pauseChannel(AudioChannelId) override;

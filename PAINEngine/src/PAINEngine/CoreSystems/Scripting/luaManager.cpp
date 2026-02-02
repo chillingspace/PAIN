@@ -644,6 +644,51 @@ namespace PAIN {
             api_->Audio_SetLooping(entityId, looping);
             });
 
+        // ==================== New Direct File Playback Functions ====================
+
+        // audioPlayFile(filename, volumeDb?, looping?, is3D?, sourceEntityId?)
+        // Plays audio file with optional spatial positioning
+        // If sourceEntityId is provided, uses that entity's position for 3D audio
+        // If not provided, uses the current script's entity as source
+        lua_.set_function("audioPlayFile", [this](const std::string& filename, 
+            sol::optional<float> volumeDb, 
+            sol::optional<bool> looping, 
+            sol::optional<bool> is3D,
+            sol::optional<entt::entity> sourceEntity) -> int {
+            if (!api_) return -1;
+            
+            float vol = volumeDb.value_or(0.0f);
+            bool loop = looping.value_or(false);
+            bool spatial = is3D.value_or(false);
+            entt::entity source = sourceEntity.value_or(currentEntity_);
+            
+            return api_->Audio_PlayFile(filename, vol, loop, spatial, source);
+            });
+
+        // audioPlaySFX(filename, looping?) - Simple SFX playback
+        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<bool> looping) -> int {
+            if (!api_) return -1;
+            return api_->Audio_PlaySFX(filename, looping.value_or(false));
+            });
+
+        // audioPlayBGM(filename, overlay?) - Play BGM, overlay adds to existing BGM
+        lua_.set_function("audioPlayBGM", [this](const std::string& filename, sol::optional<bool> overlay) -> int {
+            if (!api_) return -1;
+            return api_->Audio_PlayBGM(filename, overlay.value_or(false));
+            });
+
+        // audioTransitionBGM(newFilename, transitionTime?) - Crossfade to new BGM
+        lua_.set_function("audioTransitionBGM", [this](const std::string& newFilename, sol::optional<float> transitionTime) {
+            if (!api_) return;
+            api_->Audio_TransitionBGM(newFilename, transitionTime.value_or(2.0f));
+            });
+
+        // audioTransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime?) - Crossfade with SFX trigger
+        lua_.set_function("audioTransitionBGMWithSFX", [this](const std::string& newBGMFilename, 
+            const std::string& sfxFilename, sol::optional<float> transitionTime) {
+            if (!api_) return;
+            api_->Audio_TransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f));
+            });
 
         /* =========================================================================== */
         /*                           Scene / System state                              */

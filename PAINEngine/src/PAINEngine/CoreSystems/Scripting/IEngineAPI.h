@@ -91,6 +91,25 @@ namespace PAIN {
         virtual void Audio_SetGroup(entt::entity entityId, std::string group) = 0;
         virtual void Audio_SetLooping(entt::entity entityId, bool looping) = 0;
 
+        // Direct file playback (bypasses AudioSource component)
+        // Returns channel ID, or -1 on failure
+        virtual int Audio_PlayFile(const std::string& filename, float volumeDb, 
+            bool looping, bool is3D, entt::entity sourceEntity) = 0;
+        
+        // SFX convenience (plays in "sfx" group, non-3D)
+        virtual int Audio_PlaySFX(const std::string& filename, bool looping) = 0;
+        
+        // BGM playback (plays in "music" group, looping)
+        // overlay: if true, plays alongside existing BGM; if false, stops current BGM first
+        virtual int Audio_PlayBGM(const std::string& filename, bool overlay) = 0;
+        
+        // BGM transition with crossfade
+        virtual void Audio_TransitionBGM(const std::string& newFilename, float transitionTime) = 0;
+        
+        // BGM transition with SFX trigger at start
+        virtual void Audio_TransitionBGMWithSFX(const std::string& newBGMFilename,
+            const std::string& sfxFilename, float transitionTime) = 0;
+
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */

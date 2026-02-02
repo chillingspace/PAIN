@@ -15,6 +15,7 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Audio/Audio.h"
 
 namespace PAIN {
 
@@ -25,15 +26,12 @@ namespace PAIN {
         EngineAPIAdapter(PAIN::ECS::Controller& ecs,
             PAIN::MetaData::Service& meta,
             PAIN::Assets::Manager* assets,
-            //PAIN::Audio::Audio* audio,
+            PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
             PAIN::Scene::SceneManager* scene)
-            //PAIN::Serialization::Service* ser)
-            : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
+            : ecs_(ecs), meta_(meta), assets_(assets), audio_(audio), 
               fs_(fs), scene_(scene)
         {
-            //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
-            //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);
         }
 
         /* =========================================================================== */
@@ -102,6 +100,15 @@ namespace PAIN {
         void Audio_SetVolumeDb(entt::entity entityId, float db) override;
         void Audio_SetGroup(entt::entity entityId, std::string group) override;
         void Audio_SetLooping(entt::entity entityId, bool looping) override;
+
+        // New direct file playback methods
+        int Audio_PlayFile(const std::string& filename, float volumeDb, 
+            bool looping, bool is3D, entt::entity sourceEntity) override;
+        int Audio_PlaySFX(const std::string& filename, bool looping) override;
+        int Audio_PlayBGM(const std::string& filename, bool overlay) override;
+        void Audio_TransitionBGM(const std::string& newFilename, float transitionTime) override;
+        void Audio_TransitionBGMWithSFX(const std::string& newBGMFilename,
+            const std::string& sfxFilename, float transitionTime) override;
 
         /* =========================================================================== */
         /*                           Scene / System state                              */
@@ -205,7 +212,7 @@ namespace PAIN {
     private:
         PAIN::ECS::Controller& ecs_;
         PAIN::MetaData::Service& meta_;
-        //PAIN::Audio::Audio* audio_ = nullptr;
+        PAIN::Audio::Audio* audio_ = nullptr;
         PAIN::Path::Path* fs_ = nullptr;
         PAIN::Scene::SceneManager* scene_ = nullptr;
         PAIN::Serialization::Service* ser_ = nullptr;
