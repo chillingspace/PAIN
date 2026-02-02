@@ -4,7 +4,7 @@
 local ui = {}
 
 -- config
-local DURATION = 1.0    -- seconds to be “seen” before losing a life
+local DURATION = 1.5    -- seconds to be “seen” before losing a life
 local HIDE_X   = -2000  -- off-screen position to hide UI
 local HIDE_Y   = -2000
 
@@ -19,6 +19,10 @@ local fillLX, fillLY = 0, 0
 local fillRX, fillRY = 0, 0
 local ovX, ovY = 0, 0
 local FILL_HALF_WIDTH = 0.055 -- was 0.05
+
+local preloadStage = 0
+local PRELOAD_X = -1000  -- different from HIDE_X to force a position change
+local PRELOAD_Y = -1000
 
 local function cachePositions()
     if cached then return end
@@ -146,6 +150,56 @@ end
 -- per-frame update ----------------------------------------------
 
 local function update(dt)
+    if preloadStage < 5 then
+        preloadStage = preloadStage + 1
+        
+        if preloadStage == 1 then
+            -- Frame 1: preload audio
+            if sfxAlertOnce then
+                audioSetVolumeDb(sfxAlertOnce, -80.0)
+                audioPlay(sfxAlertOnce)
+            end
+            if sfxAlertLoop then
+                audioSetVolumeDb(sfxAlertLoop, -80.0)
+                audioPlay(sfxAlertLoop)
+            end
+            if bgmCombatLayer then
+                audioSetVolumeDb(bgmCombatLayer, -80.0)
+                audioPlay(bgmCombatLayer)
+            end
+        elseif preloadStage == 2 then
+            -- Frame 2: stop audio
+            if sfxAlertOnce then audioStop(sfxAlertOnce) end
+            if sfxAlertLoop then audioStop(sfxAlertLoop) end
+            if bgmCombatLayer then audioStop(bgmCombatLayer) end
+        
+        elseif preloadStage == 3 then
+            -- Frame 3: move UI to a preload position (still off-screen)
+            cachePositions()
+            if barBG then set2DPosition(barBG, PRELOAD_X, PRELOAD_Y) end
+            if barFillL then 
+                set2DPosition(barFillL, PRELOAD_X, PRELOAD_Y)
+            end
+            if barFillR then 
+                set2DPosition(barFillR, PRELOAD_X, PRELOAD_Y) 
+            end
+            if overlay then set2DPosition(overlay, PRELOAD_X, PRELOAD_Y) end
+
+        elseif preloadStage == 4 then
+            -- Frame 4: let textures render
+
+        elseif preloadStage == 5 then
+            -- Frame 5: hide properly and reset scales
+            hideUI()
+            -- Reset texture scales to 0 so they're ready for first detection
+            if barFillL then setScale(barFillL, 0.0, 1.0, 1.0) end
+            if barFillR then setScale(barFillR, 0.0, 1.0, 1.0) end
+        end
+        
+        return
+    end
+
+
     if not ui.active then
         return
     end
@@ -201,8 +255,8 @@ end
 
 registerUpdate(update)
 
--- start hidden on scene load
-hideUI()
+-- -- start hidden on scene load
+-- hideUI()
 
 -- make this table globally accessible to other scripts
 DetectionUI = ui -- normal global

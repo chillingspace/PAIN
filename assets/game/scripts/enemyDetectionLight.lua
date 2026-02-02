@@ -13,6 +13,8 @@ local MAX_DISTANCE = 9.0                              -- how far the light reach
 -- spotlight points straight down in world space for now
 local LIGHT_DIR = { x = 0.0, y = -1.0, z = 0.0 }
 
+_G.EnemyFrozen = _G.EnemyFrozen or {}
+
 local function normalize(x, y, z)
     local len = math.sqrt(x*x + y*y + z*z)
     if len <= 1e-6 then return 0.0, 0.0, 0.0, 0.0 end
@@ -34,6 +36,11 @@ registerUpdate(function(dt)
             DetectionUI.cancel(enemy)
         end
         seeingPlayer = false
+
+        -- only unfreeze enemy once the ui bar has fully drained
+        if not (DetectionUI and DetectionUI.active) then
+            _G.EnemyFrozen[enemy] = false
+        end
         return
     end
 
@@ -78,6 +85,7 @@ registerUpdate(function(dt)
     if inCone then
         if not seeingPlayer then
             seeingPlayer = true
+            _G.EnemyFrozen[enemy] = true 
             if DetectionUI and DetectionUI.begin then
                 DetectionUI.begin(enemy)
             end
@@ -88,6 +96,11 @@ registerUpdate(function(dt)
             if DetectionUI and DetectionUI.cancel then
                 DetectionUI.cancel(enemy)
             end
+        end
+
+        -- only unfreeze once the ui bar is fully drained
+        if not (DetectionUI and DetectionUI.active) then
+            _G.EnemyFrozen[enemy] = false
         end
     end
 
