@@ -192,7 +192,7 @@ local handlers = {
             changeScene(firstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
-        --end
+        end
     end,
 
     menu_OpenSettings = function(buttonEntity, payload)
