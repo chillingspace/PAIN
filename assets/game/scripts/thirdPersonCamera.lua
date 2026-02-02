@@ -24,9 +24,35 @@ _G.CameraState = { yaw = yaw, pitch = pitch }
 local wasPaused = false
 local framesSinceUnpause = 0
 
+function _G.ResetThirdPersonCamera()
+    firstFrame = true
+    yaw = DEFAULT_YAW
+    pitch = DEFAULT_PITCH
+    lastMouseX = nil
+    lastMouseY = nil
+    log("[Camera] Camera reset called externally")
+end
+
+log("[Camera] thirdPersonCamera.lua script loaded")
+log("[Camera] entityId = " .. tostring(entityId))
+if not entityId then
+    log("[Camera] ERROR: entityId is nil! Camera script won't work!")
+end
+
 registerUpdate(function(dt)
+
+    if not entityId then
+        log("[Camera] ERROR: entityId is nil in update loop!")
+        return
+    end
+
     local playerId = entityId
     local px, py, pz = getPosition(playerId)
+
+    if not px then
+        log("[Camera] ERROR: getPosition returned nil for player " .. tostring(playerId))
+        return
+    end
     
     -- FORCE CAMERA TO DEFAULT POSITION ON FIRST FRAME
     if firstFrame then

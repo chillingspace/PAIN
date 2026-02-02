@@ -1507,10 +1507,6 @@ namespace PAIN {
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
 			}
-			else {
-				PN_CORE_ERROR("Game camera not found");
-			}
-
 		}
 
 		void SceneManager::ChangeGameCamera(std::string cam_name)

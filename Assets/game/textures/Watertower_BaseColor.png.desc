@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\WaterTower_baseColor.png"
+    "source_file": "game\\textures\\Watertower_BaseColor.png"
   }
 }

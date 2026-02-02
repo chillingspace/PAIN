@@ -46,6 +46,9 @@ namespace PAIN {
 		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
 		case UIAction::menu_BackToMain:        return "menu_BackToMain";
 
+		case UIAction::quit_Confirm:           return "quit_Confirm";
+		case UIAction::quit_Cancel:            return "quit_Cancel";
+
 		case UIAction::None:
 		default:                               return "None";
 		}

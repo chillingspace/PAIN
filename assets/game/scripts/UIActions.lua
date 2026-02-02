@@ -3,8 +3,8 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "Tutorial.scn"
-G.FirstLevelScene     = G.FirstLevelScene    or "Tutorial.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "Level1.scn"
+G.FirstLevelScene     = G.FirstLevelScene    or "Level1.scn"
 G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"
 
 G.MainMenuSceneName   = G.MainMenuSceneName  or "mainmenu.scn"
@@ -105,7 +105,7 @@ local handlers = {
         end
         
         if changeScene then
-            changeScene("Tutorial.scn")
+            changeScene(G.CurrentLevelName)
         else
             printLog("[UI] pause_Restart pressed, but changeScene is not bound")
         end
@@ -178,9 +178,18 @@ local handlers = {
     -- MAIN MENU
     ----------------------------------------------------------------------
     menu_StartGame = function(buttonEntity, payload)
-        printLog("[UI] menu_StartGame -> changeScene(Tutorial.scn)")
-        if changeScene then
-            changeScene("Tutorial.scn")
+
+        local firstLevelScene = resolveSceneName(payload, G.FirstLevelScene, "Level1.scn")
+
+        printLog("[UI] menu_StartGame -> changeScene(" .. firstLevelScene .. ")")
+
+        -- Reset camera state before scene transition
+        -- if _G.ResetThirdPersonCamera then
+        --     _G.ResetThirdPersonCamera()
+        -- end
+
+        if firstLevelScene and changeScene then
+            changeScene(firstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
         end

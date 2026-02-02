@@ -434,8 +434,6 @@ namespace PAIN {
 							"pause_Restart",
 							"pause_Settings",
 							"pause_ReturnToMainMenu",
-							"quit_Confirm",
-							"quit_Cancel",
 
 							"menu_StartGame",
 							"menu_OpenSettings",
@@ -443,6 +441,11 @@ namespace PAIN {
 							"menu_Credits",
 							"menu_OpenTutorial",
 							"menu_QuitGame",
+
+							"menu_BackToMain",
+
+							"quit_Confirm",
+							"quit_Cancel",
 						};
 
 						int action_idx = static_cast<int>(button.action);

@@ -207,9 +207,16 @@ namespace PAIN {
             }
             else {
                 PN_CORE_INFO("GAME");
-                m_Scene->SetGameCamera();
+                // We will set game camera below continuously
             }
             lastEditorVisible = editor_visible;
+        }
+
+        // Enforce Game Camera when in Game Mode
+        // This handles cases like Scene Transitions where the camera resets to Editor
+        // but the Editor Visibility hasn't changed.
+        if (!editor_visible) {
+            m_Scene->SetGameCamera();
         }
 #endif 
 
