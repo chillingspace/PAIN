@@ -252,7 +252,7 @@ namespace PAIN {
 							ImGui::DragFloat2("Texture Scale", &texture_comp.texture_scale.x,
 											  0.02f, 0.2f, 4.0f, "%.2f");
 						changed |= ImGui::DragFloat2("Texture Position", &texture_comp.pos.x);
-
+						
 						ImGui::PopStyleVar();
 
 						return changed;
@@ -389,35 +389,91 @@ namespace PAIN {
 
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
-						// ── Script Callback ──
-						ImGui::SeparatorText("Callback");
+						//// ── Script Callback ──
+						//ImGui::SeparatorText("Callback");
 
-						// Function name input
-						char funcName[128];
-						strncpy(funcName, button.on_click_callback_lua.c_str(),
-								sizeof(funcName) - 1);
-						funcName[sizeof(funcName) - 1] = '\0';
+						//// Function name input
+						//char funcName[128];
+						//strncpy(funcName, button.on_click_callback_lua.c_str(),
+						//		sizeof(funcName) - 1);
+						//funcName[sizeof(funcName) - 1] = '\0';
 
-						if (ImGui::InputText("Function Name", funcName, sizeof(funcName))) {
-							button.on_click_callback_lua = funcName;
+						//if (ImGui::InputText("Function Name", funcName, sizeof(funcName))) {
+						//	button.on_click_callback_lua = funcName;
+						//	changed = true;
+						//}
+						//ImGui::TextDisabled("(e.g., OnPlayButtonClick)");
+						//ImGui::TextDisabled("Function must be defined in a loaded script");
+
+						//// ── Button State (Read-only display) ──
+						//ImGui::SeparatorText("State");
+
+						//const char* state_names[] = {"Normal", "Highlighted", "Pressed",
+						//							 "Disabled"};
+						//int current_state = static_cast<int>(button.state);
+
+						//ImGui::BeginDisabled(); // Make it read-only (runtime state)
+						//ImGui::Combo("Current State", &current_state, state_names,
+						//			 IM_ARRAYSIZE(state_names));
+						//ImGui::EndDisabled();
+
+						//ImGui::TextDisabled("(Runtime state - updates automatically)");
+
+						// -- Action --
+						ImGui::SeparatorText("Action");
+
+						// must match UIAction order
+						static const char* action_names[] = {
+							"None",
+							"game_Jump",
+							"game_Hide",
+							"game_Collect",
+							"game_Move",
+
+							"pause_Resume",
+							"pause_Restart",
+							"pause_Settings",
+							"pause_ReturnToMainMenu",
+
+							"menu_StartGame",
+							"menu_OpenSettings",
+							"menu_HowToPlay",
+							"menu_Credits",
+							"menu_QuitGame",
+
+							"menu_OpenTutorial",
+							"menu_BackToMain",
+
+							"quit_Confirm",
+							"quit_Cancel",
+						};
+
+						int action_idx = static_cast<int>(button.action);
+
+						if (ImGui::Combo("UI Action", &action_idx, action_names, IM_ARRAYSIZE(action_names))) {
+							button.action = static_cast<PAIN::UIAction>(action_idx);
+							changed = true;
+
+							// if user picked a real action, clear legacy callback to avoid confusion
+							if (button.action != PAIN::UIAction::None) {
+								button.on_click_callback_lua.clear();
+							}
+						}
+
+						ImGui::TextDisabled("Pick an action.");
+
+						// -- Payload --
+						ImGui::SeparatorText("Payload (Optional)");
+						ImGui::TextDisabled("Used by actions like StartGame/Restart/ReturnToMainMenu (e.g. scene path).");
+
+						char payloadBuf[256];
+						strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
+						payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+
+						if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
+							button.payload = payloadBuf;
 							changed = true;
 						}
-						ImGui::TextDisabled("(e.g., OnPlayButtonClick)");
-						ImGui::TextDisabled("Function must be defined in a loaded script");
-
-						// ── Button State (Read-only display) ──
-						ImGui::SeparatorText("State");
-
-						const char* state_names[] = {"Normal", "Highlighted", "Pressed",
-													 "Disabled"};
-						int current_state = static_cast<int>(button.state);
-
-						ImGui::BeginDisabled(); // Make it read-only (runtime state)
-						ImGui::Combo("Current State", &current_state, state_names,
-									 IM_ARRAYSIZE(state_names));
-						ImGui::EndDisabled();
-
-						ImGui::TextDisabled("(Runtime state - updates automatically)");
 
 						// ── State Colors ──
 						ImGui::SeparatorText("State Colors");
@@ -582,8 +638,26 @@ namespace PAIN {
 
 				// ---- BoundingVolume ----
 				registerCompUIFunc<PAIN::BoundingVolume>(
-					"BoundingVolume", [](ComponentsPanel&, PAIN::BoundingVolume& as) {
-						DrawWithReflection(as);
+					"BoundingVolume", [](ComponentsPanel&, PAIN::BoundingVolume& bv) {
+						DrawWithReflection(bv);
+
+						// Local AABB
+						ImGui::Text("Local AABB");
+						// Pass flags for ReadOnly
+						ImGui::InputFloat3("Local Min", glm::value_ptr(bv.localAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputFloat3("Local Max", glm::value_ptr(bv.localAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+						ImGui::Separator();
+
+						// World AABB
+						ImGui::Text("World AABB");
+						ImGui::InputFloat3("World Min", glm::value_ptr(bv.worldAABB.min), "%.3f", ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputFloat3("World Max", glm::value_ptr(bv.worldAABB.max), "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+						// Size of aabb
+						ImGui::Spacing();
+						glm::vec3 worldSize = bv.worldAABB.max - bv.worldAABB.min;
+						ImGui::TextDisabled("Dimensions: (%.2f, %.2f, %.2f)", worldSize.x, worldSize.y, worldSize.z);
 					});
 
 				// ---- Physics ----
@@ -797,6 +871,11 @@ namespace PAIN {
 
 				registerCompUIFunc<PAIN::UIAnimation>(
 					"UIAnimation", [this](ComponentsPanel&, PAIN::UIAnimation& ui) {
+						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
+					});
+
+				registerCompUIFunc<PAIN::CustomHitbox2D>(
+					"CustomHitbox2D", [this](ComponentsPanel&, PAIN::CustomHitbox2D& ui) {
 						DrawWithReflection(ui, static_cast<ComponentsPanel*>(this));
 					});
 
@@ -1381,6 +1460,38 @@ namespace PAIN {
 							ImGui::PopStyleVar();
 						} else {
 							ImGui::TextDisabled("No UI registered for this component");
+						}
+
+						ImGui::Spacing();
+
+						// Remove Component Button
+						ImGui::Separator();
+						ImGui::Spacing();
+
+						std::string componentName = comp_name;
+
+						// Center the button
+						float buttonWidth = 150.0f;
+						float availWidth = ImGui::GetContentRegionAvail().x;
+						float offset = (availWidth - buttonWidth) * 0.5f;
+						if (offset > 0) {
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+						}
+
+						// Red remove button
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+
+						if (ImGui::Button("Remove Component", ImVec2(buttonWidth, 0))) {
+							comp_string_ref = componentName;
+							should_open_remove_popup = true;
+						}
+
+						ImGui::PopStyleColor(3);
+
+						if (ImGui::IsItemHovered()) {
+							ImGui::SetTooltip("Remove this component from the entity");
 						}
 
 						ImGui::Spacing();

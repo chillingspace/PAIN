@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pipe10_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3195301663498004278
+  },
+  "descriptor_version": 1,
+  "guid": "ca65c8fb-c79d-9c4e-b32c-2ce453f01543",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pipe10_baseColor.png"
+  }
+}

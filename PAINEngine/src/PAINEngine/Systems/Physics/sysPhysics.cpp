@@ -637,17 +637,26 @@ namespace PAIN {
 																  transform.position.z),
 													   rotationQuat, motion_type, jolt_layer);
 
-					settings.mAllowDynamicOrKinematic =
-						true; // Allow runtime motion type changes
+					settings.mAllowDynamicOrKinematic = true;
 
 					// tag body with owning entt::entity so contact listener can map back
 					settings.mUserData = static_cast<uint64_t>(static_cast<uint32_t>(entity));
 
-					settings.mOverrideMassProperties =
-						JPH::EOverrideMassProperties::CalculateInertia;
-					settings.mMassPropertiesOverride.mMass = 10.0f; // any positive number
-					settings.mMassPropertiesOverride.mInertia =
-						JPH::Mat44::sScale(1.0f); // placeholder inertia tensor
+					settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+					settings.mMassPropertiesOverride.mMass = 10.f; // any positive number
+					settings.mMassPropertiesOverride.mInertia =		JPH::Mat44::sScale(1.f); // placeholder inertia tensor
+
+					settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
+
+					settings.mFriction = .75f;
+					settings.mAngularDamping = 20.f;
+
+					settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX |
+						JPH::EAllowedDOFs::TranslationY |
+						JPH::EAllowedDOFs::TranslationZ;
+
+					JPH::Vec3 com_offset(0.0f, -0.3f * transform.scale.y, 0.0f);
+					settings.mMassPropertiesOverride.mInertia.SetTranslation(com_offset);
 
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(
 						settings, JPH::EActivation::Activate);
@@ -798,6 +807,90 @@ namespace PAIN {
 			// Create and add
 			JPH::Body* floorBody = body_interface->CreateBody(floorSettings);
 			body_interface->AddBody(floorBody->GetID(), JPH::EActivation::DontActivate);
+		}
+
+		// Check if on object
+		bool System::isGrounded(JPH::BodyID body_id, float maxDistance) {
+			if (!jolt_physics || body_id.IsInvalid())
+				return false;
+
+			JPH::RVec3 bodyPosition;
+			float shapeRadius = 0.0f;
+			float shapeHeight = 0.0f;
+
+			{
+				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), body_id);
+				if (lock.Succeeded()) {
+					const JPH::Body& body = lock.GetBody();
+					bodyPosition = body.GetPosition();
+
+					const JPH::Shape* shape = body.GetShape();
+					JPH::AABox bounds = shape->GetLocalBounds();
+					shapeHeight = bounds.mMax.GetY() - bounds.mMin.GetY();
+					shapeRadius = std::max(bounds.mMax.GetX() - bounds.mMin.GetX(),
+						bounds.mMax.GetZ() - bounds.mMin.GetZ()) * 0.5f;
+				}
+				else {
+					PN_CORE_ERROR("Failed to lock body for reading in isGrounded");
+					return false;
+				}
+			}
+
+			float bottomY = -(shapeHeight * 0.5f) + 0.05f;
+			JPH::Vec3 rayDir = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
+
+			float checkRadius = shapeRadius * 0.7f;
+
+			// Define multiple ray origins around the feet
+			JPH::RVec3 rayOrigins[] = {
+				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),              // center
+				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),       // right
+				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),      // left
+				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),       // forward
+				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),      // back
+			};
+
+			JPH::RayCastResult result;
+			for (const auto& origin : rayOrigins) {
+				JPH::RRayCast ray;
+				ray.mOrigin = origin;
+				ray.mDirection = rayDir;
+
+				if (jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result)) {
+					return true;  
+				}
+			}
+
+			return false;
+		}
+
+
+		glm::vec3 System::getNormal(entt::entity e) const {
+
+			glm::vec3 n{};
+
+			if (!body_interface) return { 0.f, 0.f, 0.f };
+
+			auto svc = services.lock();
+			if (!svc) return { 0.f, 0.f, 0.f };
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return { 0.f, 0.f, 0.f };
+
+			auto& registry = ecs->getRegistry();
+
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e))
+				return { 0.f, 0.f, 0.f };
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid()) return { 0.f, 0.f, 0.f };
+
+			// Calculate normal here
+			/*JPH::Vec3 vel = body_interface->GetLinearVelocity(rb.bodyID);
+
+			return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());*/
+
+			return { 0.f, 0.f, 0.f }; // Placeholder
 		}
 	} // namespace Physics
 } // namespace PAIN

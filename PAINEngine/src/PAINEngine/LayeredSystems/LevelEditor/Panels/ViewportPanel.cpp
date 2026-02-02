@@ -25,6 +25,7 @@
 #include "ECS/Components/cEntity.h"
 #include "Systems/Transform/sysTransform.h"
 
+#include "Systems/Collision/sBVHSystem.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "CoreSystems/EntityTemplate/sEntityTemplate.h"
 
@@ -77,8 +78,10 @@ namespace PAIN {
 				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
 
+				// [DEBUG] Ensure services exist
 				if (!camera || !ecs) {
-					return glm::vec3(0.0f);  // Fallback to origin
+					PN_CORE_WARN("[ViewportPanel] Cannot raycast: Camera or ECS missing");
+					return glm::vec3(0.0f);
 				}
 
 				// Get camera matrices
@@ -89,57 +92,52 @@ namespace PAIN {
 				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
 				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
 
+				//PN_CORE_TRACE("[Raycast] Origin: ({}, {}, {}) Dir: ({}, {}, {})",
+				//	rayOrigin.x, rayOrigin.y, rayOrigin.z,
+				//	rayDirection.x, rayDirection.y, rayDirection.z);
+
 				// ========================================
-				// TRY 1: Find intersection with existing geometry
+				// Try Find intersection via BVH
 				// ========================================
-				float closestDistance = std::numeric_limits<float>::max();
-				bool foundHit = false;
+				auto bvhSystem = services->get<PAIN::sBVHSystem>();
+				auto& registry = ecs->getRegistry(currentRegistryID);
 
-				auto view = ecs->getRegistry(currentRegistryID).view<LocalTransform, ModelRenderer>();
+				if (bvhSystem) {
+					//call raycast
+					float maxDist = 1000.0f;
+					auto hit = bvhSystem->raycast(rayOrigin, rayDirection, maxDist, registry, -1);
 
-				for (auto [entity, transform, model] : view.each()) {
-					if (!model.visible) continue;
+					if (hit.has_value()) {
+						// [DEBUG] Log hit
+						PN_CORE_INFO("[Raycast] Hit Entity {} at Distance: {}", (uint32_t)hit->entity, hit->distance);
 
-					// Try AABB intersection
-					float distance;
-					if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
-						if (distance < closestDistance) {
-							closestDistance = distance;
-							foundHit = true;
-						}
+
+						return hit->point;
 					}
 				}
-
-				// ========================================
-				// TRY 2: If hit found, use that position
-				// ========================================
-				if (foundHit) {
-					return rayOrigin + (rayDirection * closestDistance);
+				else {
+					PN_CORE_WARN("[ViewportPanel] BVH System missing!");
 				}
 
 				// ========================================
-				// TRY 3: No hit - project onto ground plane (Y=0)
+				// ELSE IF: Try No hit - project onto ground plane (Y=0)
 				// ========================================
-				// Plane equation: dot(N, (P - P0)) = 0
-				// For Y=0 plane: N = (0, 1, 0), P0 = (0, 0, 0)
-
 				glm::vec3 planeNormal(0.0f, 1.0f, 0.0f);
 				glm::vec3 planePoint(0.0f, 0.0f, 0.0f);
 
 				float denom = glm::dot(rayDirection, planeNormal);
 
 				if (abs(denom) > 0.0001f) {
-					// Ray intersects plane
 					float t = glm::dot((planePoint - rayOrigin), planeNormal) / denom;
-
 					if (t >= 0.0f) {
-						// Valid intersection
+						// [DEBUG] Log plane hit
+						// PN_CORE_TRACE("[Raycast] Hit Ground Plane at distance {}", t);
 						return rayOrigin + (rayDirection * t);
 					}
 				}
 
 				// ========================================
-				// FALLBACK: Fixed distance in front of camera
+				// ELSE: Fixed distance in front of camera
 				// ========================================
 				return rayOrigin + (rayDirection * defaultDistance);
 			}
@@ -271,156 +269,46 @@ namespace PAIN {
 				return glm::normalize(rayWorld);
 			}
 
-			// sphere ray intersect 
-			bool ViewportPanel::rayIntersectsSphere(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const glm::vec3& sphereCenter, float sphereRadius,
-				float& distance) {
-				glm::vec3 oc = rayOrigin - sphereCenter;
 
-				float a = glm::dot(rayDir, rayDir);
-				float b = 2.0f * glm::dot(oc, rayDir);
-				float c = glm::dot(oc, oc) - sphereRadius * sphereRadius;
-
-				float discriminant = b * b - 4.0f * a * c;
-
-				if (discriminant < 0.0f) {
-					return false;
-				}
-
-				float t = (-b - sqrt(discriminant)) / (2.0f * a);
-
-				if (t < 0.0f) {
-					t = (-b + sqrt(discriminant)) / (2.0f * a);
-					if (t < 0.0f) {
-						return false;
-					}
-				}
-
-				distance = t;
-				return true;
-			}
-
-			// AABB ray intersect for picking
-			bool ViewportPanel::rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-				const LocalTransform& transform, float& distance) {
-				glm::vec3 minBound = transform.position - transform.scale * 0.5f;
-				glm::vec3 maxBound = transform.position + transform.scale * 0.5f;
-
-				float tMin = 0.0f;
-				float tMax = (std::numeric_limits<float>::max)();
-
-				for (int i = 0; i < 3; i++) {
-					if (abs(rayDir[i]) < 0.0001f) {
-						if (rayOrigin[i] < minBound[i] || rayOrigin[i] > maxBound[i]) {
-							return false;
-						}
-					}
-					else {
-						float t1 = (minBound[i] - rayOrigin[i]) / rayDir[i];
-						float t2 = (maxBound[i] - rayOrigin[i]) / rayDir[i];
-
-						if (t1 > t2) std::swap(t1, t2);
-
-						tMin = std::max(tMin, t1);
-						tMax = std::min(tMax, t2);
-
-						if (tMin > tMax) {
-							return false;
-						}
-					}
-				}
-
-				distance = tMin;
-				return tMin >= 0.0f;
-			}
-
-			// Helper method to find entity at mouse position - IMPROVED VERSION
 			entt::entity ViewportPanel::findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize) {
 				auto scene = services->get<Scene::SceneManager>();
-				auto camera = scene->GetActiveCamera();
 				auto ecs = services->get<ECS::Controller>();
+				auto bvhSystem = ecs->getSystem<sBVHSystem>();
 
-				if (!camera || !ecs) {
+				if (!bvhSystem) {
+					PN_CORE_WARN("Cannot pick entity: Missing required services!");
 					return entt::null;
 				}
 
-				// Get camera matrices
+				auto camera = scene->GetActiveCamera();
+				if (!camera) return entt::null;
+
+				// Calculate Ray 
 				glm::mat4 viewMatrix = camera->view();
 				glm::mat4 projMatrix = camera->projection();
 
-				// Get ray origin and direction
 				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
 				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
 
-				// Find closest entity
-				entt::entity closestEntity = entt::null;
-				float closestDistance = (std::numeric_limits<float>::max)();
+				 //PN_CORE_TRACE("Pick Ray - Origin: ({},{},{}) Dir: ({},{},{})", 
+				 //   rayOrigin.x, rayOrigin.y, rayOrigin.z,
+				 //   rayDirection.x, rayDirection.y, rayDirection.z);
 
-				// Iterate through entities with ModelRenderer (more precise than just Transform)
-				auto view = ecs->getRegistry(currentRegistryID).view<LocalTransform, WorldTransform, ModelRenderer>();
+				// Perform Raycast via BVH
+				float maxDist = 1000.0f;
+				auto& registry = ecs->getRegistry(currentRegistryID);
+				int mask = scene->getPickingMask(); 
+				auto hitResult = bvhSystem->raycast(rayOrigin, rayDirection, maxDist, registry, mask);
 
-				for (auto [entity, local, world, model] : view.each()) {
-
-					// Skip invisible objects
-					if (!model.visible) {
-						continue;
-					}
-
-					// Skip very large objects (likely background/floor)
-					if (local.scale.x > 10.0f || local.scale.y > 10.0f || local.scale.z > 10.0f) {
-						continue;
-					}
-
-					float distance;
-
-					// First do a quick AABB test
-					if (!rayIntersectsAABB(rayOrigin, rayDirection, local, distance)) {
-						continue;
-					}
-
-					// For more precision, use a tighter bounding sphere based on model scale
-					glm::vec3 sphereCenter = local.position;
-					float sphereRadius = glm::length(local.scale) * 0.5f; // More conservative radius
-
-					float sphereDistance;
-					if (rayIntersectsSphere(rayOrigin, rayDirection, sphereCenter, sphereRadius, sphereDistance)) {
-						// Use the sphere distance for more accurate sorting
-						if (sphereDistance < closestDistance) {
-							closestDistance = sphereDistance;
-							closestEntity = entity;
-						}
-					}
+				if (hitResult.has_value()) {
+					//PN_CORE_INFO("Raycast Hit Entity: {}", (uint32_t)hitResult->entity);
+					return hitResult->entity;
 				}
 
-				// Fallback to entities with just Transform (in case some don't have ModelRenderer)
-				if (closestEntity == entt::null) {
-					auto transformOnlyView = ecs->getRegistry(currentRegistryID).view<LocalTransform>();
-
-					for (auto entity : transformOnlyView) {
-						// Skip if we already checked this entity
-						if (ecs->getRegistry(currentRegistryID).all_of<ModelRenderer>(entity)) {
-							continue;
-						}
-
-						auto& transform = transformOnlyView.get<LocalTransform>(entity);
-
-						// Skip very large objects
-						if (transform.scale.x > 10.0f || transform.scale.y > 10.0f || transform.scale.z > 10.0f) {
-							continue;
-						}
-
-						float distance;
-						if (rayIntersectsAABB(rayOrigin, rayDirection, transform, distance)) {
-							if (distance < closestDistance) {
-								closestDistance = distance;
-								closestEntity = entity;
-							}
-						}
-					}
-				}
-
-				return closestEntity;
+				PN_CORE_TRACE("Raycast Missed");
+				return entt::null;
 			}
+
 
 
 			// ImGuizmo picking logic
@@ -673,8 +561,8 @@ namespace PAIN {
 							}
 						}
 
-						// Focus on entity 
-						if (ImGui::IsKeyPressed(ImGuiKey_F)) {
+						// Focus on entity (skip if typing in text field)
+						if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_F)) {
 
 							entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
 
@@ -843,7 +731,7 @@ namespace PAIN {
 					// ========================================
 					if (m_EntityPanel) {
 						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
-
+							
 						if (selectedEntity != entt::null) {
 							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
 							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
@@ -862,13 +750,15 @@ namespace PAIN {
 									ImGuizmo::SetDrawlist();
 									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
 
-									// Hotkeys
+									// Hotkeys (skip if typing in text field)
+								if (!ImGui::GetIO().WantTextInput) {
 									if (ImGui::IsKeyPressed(ImGuiKey_T))
 										m_GizmoOperation = ImGuizmo::TRANSLATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_R))
 										m_GizmoOperation = ImGuizmo::ROTATE;
 									if (ImGui::IsKeyPressed(ImGuiKey_Y))
 										m_GizmoOperation = ImGuizmo::SCALE;
+								}
 
 									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
@@ -905,6 +795,7 @@ namespace PAIN {
 									static glm::quat cachedRotation;
 									static glm::vec3 cachedScale;
 									static entt::entity lastSelectedEntity = entt::null;
+									static LocalTransform startTransform; 
 
 									bool isCurrentlyUsing = ImGuizmo::IsUsing();
 
@@ -1068,6 +959,75 @@ namespace PAIN {
 												body_interface.ActivateBody(rb.bodyID);
 											}
 										}
+
+										LocalTransform endTransform = localTransform;
+
+										// Only create command if something actually changed
+
+										// Check if actually changed
+										if ((cachedPosition != endTransform.position ||
+											cachedRotation != endTransform.rotation ||
+											cachedScale != endTransform.scale) && command_manager)
+										{
+											auto guidOpt = ecs->getEntityComponent<Entity::GUID>(selectedEntity, currentRegistryID);
+
+											if (guidOpt.has_value()) {
+
+												// Capture Start/End data by value for the lambda
+												Assets::GUID targetGUID = guidOpt.value().get().guid;
+												LocalTransform startT = { cachedPosition, cachedRotation, cachedScale };
+												LocalTransform endT = endTransform;
+
+												command_manager->executeAction(Action{
+													// DO Action (Redo/Apply) using imguizmo
+													[this, targetGUID, endT]() {
+														auto ecs = services->get<ECS::Controller>();
+														entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
+
+														if (ecs->checkEntity(e, currentRegistryID)) {
+															auto& registry = ecs->getRegistry(currentRegistryID);
+
+															// Update Transform
+															registry.get_or_emplace<LocalTransform>(e) = endT;
+
+															// Mark Dirty
+															auto transformSystem = ecs->getSystem<Transform::System>();
+															if (transformSystem) {
+																transformSystem->markDirty(e, registry);
+															}
+
+															// Sync Physics
+															SyncBodyToTransform(e, registry, ecs.get(), endT, false);
+														}
+													},
+
+													// UNDO transform using imguizmo
+													[this, targetGUID, startT]() {
+														auto ecs = services->get<ECS::Controller>();
+														entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
+
+														if (ecs->checkEntity(e, currentRegistryID)) {
+															auto& registry = ecs->getRegistry(currentRegistryID);
+
+															// Revert Transform
+															registry.get_or_emplace<LocalTransform>(e) = startT;
+
+															// Mark Dirty
+															auto transformSystem = ecs->getSystem<Transform::System>();
+															if (transformSystem) {
+																transformSystem->markDirty(e, registry);
+															}
+
+															// Sync Physics
+															SyncBodyToTransform(e, registry, ecs.get(), startT, false);
+														}
+													},
+
+													// 3. Description
+													"Transform Entity: " + targetGUID.ToString()
+													});
+												}
+											}
 									}
 
 									wasUsing = isCurrentlyUsing;
@@ -1086,8 +1046,22 @@ namespace PAIN {
 						float cubeSize = 128.0f;
 						ImVec2 cubePosition(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
 
+						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+						float defaultDistance = 10.0f; 
+						glm::vec3 lookAtTarget = camera->pos + (camera->forward * defaultDistance);
+
+						if (selectedEntity != entt::null) {
+							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
+
+							if (worldTransformOpt.has_value()) {
+								WorldTransform& worldTransform = worldTransformOpt.value().get();
+
+							    lookAtTarget = glm::vec3(worldTransform.matrix[3]);
+
+							}
+						}
 						// Calculate distance from camera to look-at point (origin)
-						glm::vec3 lookAtTarget = glm::vec3(0.0f);
+						
 						float cameraDistance = glm::length(camera->pos - lookAtTarget);
 
 						// Set these before ViewManipulate
@@ -1127,24 +1101,38 @@ namespace PAIN {
 					 // === Mouse Picking - AFTER GIZMO ===
 					 // ========================================
 
-					// Track if we were using the gizmo in the previous frame
-					static bool wasUsingGizmo = false;
-					// REMOVE THIS LINE: bool isUsingGizmo = ImGuizmo::IsUsing() || ImGuizmo::IsOver();
-					// Reuse the variable declared above
+
+					bool isHoveringViewCube = false;
+					{
+						ImVec2 mousePos = ImGui::GetMousePos();
+						// Use the exact same coordinates you used for ViewManipulate
+						float cubeSize = 128.0f;
+						ImVec2 cubePos(viewportPos.x + size.x - cubeSize - 10.0f, viewportPos.y + 10.0f);
+
+						if (mousePos.x >= cubePos.x && mousePos.x <= cubePos.x + cubeSize &&
+							mousePos.y >= cubePos.y && mousePos.y <= cubePos.y + cubeSize) {
+							isHoveringViewCube = true;
+						}
+					}
+
+
+					bool isAnyGizmoActive = isUsingGizmo || ImGuizmo::IsUsingViewManipulate() || isHoveringViewCube;
+
+					static bool wasAnyGizmoActive = false;
 
 					if (contentHovered) {
-						// Only pick on click if gizmo is NOT being used
 						bool shouldPick = false;
 
 						// Case 1: Direct click (no drag)
-						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isUsingGizmo) {
+						if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isAnyGizmoActive) {
 							shouldPick = true;
 						}
 
 						// Case 2: Mouse released after dragging (but NOT on gizmo)
+						// We add '!wasAnyGizmoActive' to ensure we didn't just finish using the cube
 						if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
-							&& !isUsingGizmo
-							&& !wasUsingGizmo
+							&& !isAnyGizmoActive
+							&& !wasAnyGizmoActive
 							&& !ImGui::IsMouseDragging(ImGuiMouseButton_Left, 1.0f)) {
 							shouldPick = true;
 						}
@@ -1156,7 +1144,8 @@ namespace PAIN {
 						}
 					}
 
-					wasUsingGizmo = isUsingGizmo;
+					// Update state for next frame
+					wasAnyGizmoActive = isAnyGizmoActive;
 		
                 }
                 ImGui::End();

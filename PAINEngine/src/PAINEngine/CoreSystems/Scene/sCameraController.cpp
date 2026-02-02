@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "sCameraController.h"
 
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
+
 
 namespace PAIN {
     MobileMoveAxes g_MobileMoveAxes;
@@ -203,9 +207,16 @@ namespace PAIN {
             }
             else {
                 PN_CORE_INFO("GAME");
-                m_Scene->SetGameCamera();
+                // We will set game camera below continuously
             }
             lastEditorVisible = editor_visible;
+        }
+
+        // Enforce Game Camera when in Game Mode
+        // This handles cases like Scene Transitions where the camera resets to Editor
+        // but the Editor Visibility hasn't changed.
+        if (!editor_visible) {
+            m_Scene->SetGameCamera();
         }
 #endif 
 
@@ -475,8 +486,12 @@ namespace PAIN {
                 });
         }
 
-        // ===== BOTH MODES: Camera mode switching and audio mute =====
         dispatcher.Dispatch<Event::KeyTriggered>([&](Event::KeyTriggered& e) -> bool {
+#ifdef _DEBUG
+            if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantTextInput) {
+                return false;
+            }
+#endif
             auto& gs = GraphicsSettings::get();
             auto window = services->get<Window::Window>();
 
@@ -499,38 +514,14 @@ namespace PAIN {
             }
             case PAIN_KEY_ESCAPE:
             {
-//                // Load pause menu scene
-//                auto sceneManager = services->get<Scene::SceneManager>();
-//                auto assetManager = services->get<Assets::Manager>();
-//
-//                if (sceneManager && assetManager) {
-//                    // Find the pause menu scene file
-//#ifdef PN_PLATFORM_WINDOWS
-//                    std::filesystem::path pause_scene_path = "game/scenes/pausemenu.scn";
-//#else
-//                    std::filesystem::path pause_scene_path = "game\\scenes\\pausemenu.scn";
-//#endif
-//
-//                    // Get the GUID for the pause menu scene
-//                    auto pause_guid = assetManager->findGUID(pause_scene_path);
-//
-//                    // Load the pause menu scene
-//                    if (pause_guid.IsValid()) {
-//                        sceneManager->loadScene(pause_guid);
-//                        PN_CORE_INFO("Loading pause menu scene");
-//                    }
-//                    else {
-//                        PN_CORE_ERROR("Pause menu scene not found: {}", pause_scene_path.string());
-//                    }
-//                }
 
-                auto window = services->get<Window::Window>();
-                if (window) {
-                    b_hide_mouse = !b_hide_mouse;
-                    window->setCursorMode(true);
-                    PN_CORE_INFO("Cursor Mode: {}", b_hide_mouse ? "Hidden" : "Visible");
-                }
-                break;
+                //auto window = services->get<Window::Window>();
+                //if (window) {
+                //    b_hide_mouse = !b_hide_mouse;
+                //    window->setCursorMode(true);
+                //    PN_CORE_INFO("Cursor Mode: {}", b_hide_mouse ? "Hidden" : "Visible");
+                //}
+                //break;
             }
 
             case PAIN_KEY_EQUAL: // '+' key in many layouts (with shift)
@@ -592,6 +583,10 @@ namespace PAIN {
             case PAIN_KEY_F10:
                 gs.ibl = !gs.ibl;
                 PN_CORE_INFO("Toggled IBL: {}", gs.ibl);
+                break;
+            case PAIN_KEY_F11:
+                gs.DEBUG_DRAW_UI_HITBOXES = !gs.DEBUG_DRAW_UI_HITBOXES;
+                PN_CORE_INFO("Toggled DEBUG_DRAW_UI_HITBOXES: {}", gs.DEBUG_DRAW_UI_HITBOXES);
                 break;
 
 

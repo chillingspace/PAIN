@@ -9,10 +9,6 @@
 #include "CoreSystems/Events/Event.h" // Defines Event::Event
 #include "CoreSystems/Collision/BVH.h" // Defines BVH and includes BVHNode, AABB
 #include "CoreSystems/Scene/Scene.h"
-#include <vector>
-#include <utility>
-#include <memory>
-#include <string>
 
 // Forward declarations for types used as pointers/references within the PAIN namespace
 namespace PAIN {
@@ -57,6 +53,8 @@ public:
         int layer = 0;
     };
 
+    std::vector<RaycastHit> raycastAll(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, entt::registry& registry, int layerMask);
+
     std::optional<RaycastHit> raycast(
         const glm::vec3& origin,
         const glm::vec3& direction,
@@ -84,6 +82,7 @@ private:
         entt::entity entityA,
         entt::entity entityB
     );
+
 
     bool rayAABBIntersect(
         const glm::vec3& origin,

@@ -1,0 +1,100 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -18.23506736755371,
+                        -9.5367431640625e-07,
+                        -34.341957092285156
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "8e95fbff-6409-534d-9514-5cd28ca3299b",
+                            "aoTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
+                            "normalTextureOverride": "32c78f38-e359-b04f-8588-85117e067bfb",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "45a24c40-8fa2-c747-9653-4d55350bf379",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Pipe10"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        -1.0,
+                        5.199999809265137,
+                        1.399999976158142
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        10.5,
+                        1.0
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "b1a6c3e1-df6d-f948-bece-8c5f267e13d7"
+        }
+    ],
+    "prefabName": "Pipe10",
+    "rootEntityGUID": "b1a6c3e1-df6d-f948-bece-8c5f267e13d7"
+}

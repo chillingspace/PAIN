@@ -12,20 +12,19 @@
 
 // To include all components excluding metadata
 #include "Core.h"
-#include "cCompoundCollider.h"
 
 namespace PAIN {
 	// All gameplay components (NOT metadata components)
 	/*
- * Some component pipeline to take note for now:
- * 1. When creating a component, follow one of the component files to add in the
- * seri stuff
- * 2. Include your component in Core.h
- * 3. Add in your component to this file
- * 4. Register your component in controller.cpp
- * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on
- * enum)
- */
+	 * Some component pipeline to take note for now:
+	 * 1. When creating a component, follow one of the component files to add in the
+	 * seri stuff
+	 * 2. Include your component in Core.h
+	 * 3. Add in your component to this file
+	 * 4. Register your component in controller.cpp
+	 * 5. If IMGUI UI is needed add it in components panel (REFL cannot work on
+	 * enum)
+	 */
 	using AllGameplayComponents = std::tuple<
 		// Entity components
 		Entity::GUID, Entity::Name, Entity::Hierarchy, Entity::Layer,
@@ -43,7 +42,7 @@ namespace PAIN {
 
 		// UI comps
 		UIRectTransform, UIButton, UIElement, UICanvas, UIAnimation, UIText,
-		UIFollowsWorldEntity, UIJoystick, UVCoordinates,
+		UIFollowsWorldEntity, UIJoystick, UVCoordinates, CustomHitbox2D,
 		// AI
 		// AI::Blackboard,
 		AI::Controller, AI::Sensors, AI::NavAgent, AI::Steering
@@ -121,6 +120,8 @@ namespace PAIN {
 			return "UIJoystick";
 		else if constexpr (std::is_same_v<T, UVCoordinates>)
 			return "UVCoordinates";
+		else if constexpr (std::is_same_v<T, CustomHitbox2D>)
+			return "CustomHitbox2D";
 		// AI components
 		// else if constexpr (std::is_same_v<T, AI::Blackboard>) return
 		// "AIBlackboard";

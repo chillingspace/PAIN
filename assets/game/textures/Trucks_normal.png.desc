@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Trucks_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 9903833672883862772
+  },
+  "descriptor_version": 1,
+  "guid": "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Trucks_normal.png"
+  }
+}

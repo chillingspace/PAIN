@@ -1,0 +1,100 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -17.248138427734375,
+                        0.0,
+                        -22.182249069213867
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "8bc02aac-f31f-5840-be85-03b4c33f2f3f",
+                            "aoTextureOverride": "b17c320d-3f1f-aa4b-913f-00bbe0dfe770",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "c79a09c6-ea1f-ca46-8d92-d5cf53337487",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "b17c320d-3f1f-aa4b-913f-00bbe0dfe770",
+                            "normalTextureOverride": "12810197-56d5-4542-9186-d7cb2d72bfe8",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "b17c320d-3f1f-aa4b-913f-00bbe0dfe770",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "6b40a756-36a9-e84f-9472-7f429f1e0a32",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Machine1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        -1.7999999523162842,
+                        1.899999976158142,
+                        -1.5
+                    ],
+                    "collider_scale": [
+                        3.0,
+                        4.099999904632568,
+                        3.5
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "4c6f4535-d61a-1e46-bdf1-3eba6dbce89c"
+        }
+    ],
+    "prefabName": "Machine1",
+    "rootEntityGUID": "4c6f4535-d61a-1e46-bdf1-3eba6dbce89c"
+}

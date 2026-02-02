@@ -56,9 +56,9 @@ jobs:
         run: |
           cd bin/Debug
           # Start the exe, wait 10s, kill if still running
-          Start-Process .\Ribbit_Express.exe
+          Start-Process .\Friends-Frog-ever.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Ribbit_Express -ErrorAction SilentlyContinue
+          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
         shell: pwsh
 
       - name: Build Release solution
@@ -68,9 +68,9 @@ jobs:
       - name: Run Release executable and test for crashes
         run: |
           cd bin/Release
-          Start-Process .\Ribbit_Express.exe
+          Start-Process .\Friends-Frog-ever.exe
           Start-Sleep -Seconds 10
-          Stop-Process -Name Ribbit_Express -ErrorAction SilentlyContinue
+          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
         shell: pwsh
   build-android:
     runs-on: windows-latest

@@ -14,8 +14,6 @@
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 
 namespace PAIN {
-    //namespace Path { class Path; } 
-    //}
 
     class IEngineAPI;
 
@@ -51,6 +49,7 @@ namespace PAIN {
 
         // misc
         void callGlobal(const std::string& name);
+        void callGlobal(const std::string& name, const std::string& arg1, entt::entity arg2, const std::string& arg3);
         void callGlobalWithVec2(const std::string& name, float x, float y);
         void queueOp(std::function<void(void)> op) { delayedOps_.push_back(std::move(op)); }
         void setPendingSceneChange(std::function<void(void)> op) { pendingSceneChange_ = std::move(op); }
@@ -72,6 +71,8 @@ namespace PAIN {
         sol::state& state() { return lua_; } // so AI can call into Lua directly
         const sol::state& state() const { return lua_; }
 
+        void setServices(Services* services) { services_ = services; }
+
     private:
         // bindings
         void openLibs(bool shipping);
@@ -82,6 +83,8 @@ namespace PAIN {
         bool runFileIntoEnv(const std::string& path, entt::entity entityId, const std::vector<ScriptExternalVar>& vars, bool runWhenPaused);
 
         static entt::entity toEntity(int id);
+
+        //GLFWwindow* window_ = nullptr;
 
     private:
         struct TimeoutNode {
@@ -94,6 +97,7 @@ namespace PAIN {
 
         sol::state lua_;
         std::shared_ptr<IEngineAPI> api_;
+        Services* services_ = nullptr;
         bool shipping_{ false };
         bool gamePaused_{ false };
 

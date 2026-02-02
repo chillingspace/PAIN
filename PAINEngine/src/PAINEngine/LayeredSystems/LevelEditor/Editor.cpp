@@ -46,7 +46,7 @@ namespace PAIN {
         void Editor::onAttach() {
 
             //Construct command manager
-            command_manager = std::make_shared<CommandManager>();
+            command_manager = std::make_shared<CommandManager>(services);
 
             // Get ECS Service
             auto ecs = services->get<PAIN::ECS::Controller>();
@@ -149,24 +149,27 @@ namespace PAIN {
             platform->beginFrame();
 
 
-            if (ImGui::IsKeyPressed(ImGuiKey_F1, false)) {
+            // Skip hotkeys if user is typing in a text field
+            if (!ImGui::GetIO().WantTextInput) {
+                if (ImGui::IsKeyPressed(ImGuiKey_F1, false)) {
 
-                auto scene = services->get<Scene::SceneManager>();
+                    auto scene = services->get<Scene::SceneManager>();
 
-                // When hiding editor, auto-play the scene
-                if (!scene->isPlaying()) {
-                    editor_visible ? scene->onPlay() : scene->onStop();
+                    // When hiding editor, auto-play the scene
+                    if (!scene->isPlaying()) {
+                        editor_visible ? scene->onPlay() : scene->onStop();
+                    }
+                    toggleVisible();
+                    PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
                 }
-                toggleVisible();
-                PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
-            }
 
-            if (ImGui::IsKeyPressed(ImGuiKey_F2 , false)) {
-                editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0
-                if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
-                else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
-                else if (editor_debug_mode == 2) PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
-                else PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
+                if (ImGui::IsKeyPressed(ImGuiKey_F2 , false)) {
+                    editor_debug_mode = (editor_debug_mode + 1) % 4; // Cycles 0 -> 1 -> 2 -> 3 -> 0
+                    if (editor_debug_mode == 0) PN_CORE_INFO("Editor debug rendering: OFF");
+                    else if (editor_debug_mode == 1) PN_CORE_INFO("Editor debug rendering: ON (Physics Colliders)");
+                    else if (editor_debug_mode == 2) PN_CORE_INFO("Editor debug rendering: ON (BVH Tree)");
+                    else PN_CORE_INFO("Editor debug rendering: ON (Original Visual AABBs)");
+                }
             }
 
 #ifdef PN_PLATFORM_ANDROID

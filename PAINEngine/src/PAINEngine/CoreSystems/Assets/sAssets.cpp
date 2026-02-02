@@ -419,7 +419,8 @@ namespace PAIN {
 					// Cleanup loading flag
 					std::unique_lock<std::mutex> loading_lock(loading_mutex);
 					loading_assets.erase(id);
-					throw std::runtime_error("Asset not in registry!");
+					PN_CORE_WARN("Asset Not In Registry. Did not cache it!");
+					return nullptr;
 				}
 				asset_data = registry_it->second;
 			}
@@ -482,7 +483,7 @@ namespace PAIN {
 
 					//Cast and check gl texture
 					std::shared_ptr<Assets::Texture> const& tex = std::dynamic_pointer_cast<Assets::Texture>(asset.second);
-					if (tex && !tex->gl_texture) uploadTexture(tex);
+					if (tex && !tex->gl_texture) services->get<sRenderer>()->uploadTexture(tex);
 				}
 			}
 

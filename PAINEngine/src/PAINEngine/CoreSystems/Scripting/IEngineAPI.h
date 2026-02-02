@@ -79,6 +79,7 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
+		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
 
         /* =========================================================================== */
         /*                                   Audio                                     */
@@ -99,6 +100,12 @@ namespace PAIN {
         virtual float GetFps() const = 0;
         virtual void  SetDeltaMultiplier(float m) = 0;
         virtual float GetDeltaMultiplier() const = 0;
+
+        /* =========================================================================== */
+        /*                              Layer Control                                  */
+        /* =========================================================================== */
+        virtual bool SetLayerEnabled(int layerId, bool enabled) = 0;
+        virtual bool GetLayerEnabled(int layerId) = 0;
 
         /* =========================================================================== */
         /*                              Graphics / FX                                  */
@@ -137,6 +144,8 @@ namespace PAIN {
         virtual void SetMeshId(entt::entity entityId, uint32_t meshId) = 0;
 
         virtual void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) = 0;
+        virtual void SetUITextureScale(entt::entity e, glm::vec2 s) = 0;
+        virtual glm::vec2 GetUITextureScale(entt::entity e) = 0;
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
@@ -158,6 +167,13 @@ namespace PAIN {
         virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
         virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
         virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationDuration(entt::entity entityId) = 0;
+
+        /* =========================================================================== */
+        /*                              Application Control                              */
+        /* =========================================================================== */
+        // Request application quit / safe shutdown
+        virtual void QuitApplication() = 0;
 
     };
 

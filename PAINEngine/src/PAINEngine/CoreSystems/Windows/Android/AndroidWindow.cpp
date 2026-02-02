@@ -513,12 +513,16 @@ namespace PAIN {
         }
 
         void Android_Window::safeShutdown() {
-            auto* pain_app = static_cast<PAIN::Application*>(m_EventPackage.app);
-            if (pain_app) {
-                pain_app->terminate();
-            }
-            else {
-                shutdown();
+            //auto* pain_app = static_cast<PAIN::Application*>(m_EventPackage.app);
+            //if (pain_app) {
+            //    pain_app->terminate();
+            //}
+            //else {
+            //    shutdown();
+            //}
+            if (m_App && m_App->activity) {
+                // This is the proper way to close an Android app
+                ANativeActivity_finish(m_App->activity);
             }
         }
 

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "how to play pg2.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4658089850658293479
+  },
+  "descriptor_version": 1,
+  "guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\how to play pg2.png"
+  }
+}

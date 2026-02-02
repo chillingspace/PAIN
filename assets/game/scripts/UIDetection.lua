@@ -1,0 +1,211 @@
+-- UIDetection.lua
+-- Controls the detection bar, red overlay, and audio.
+
+local ui = {}
+
+-- config
+local DURATION = 1.0    -- seconds to be “seen” before losing a life
+local HIDE_X   = -2000  -- off-screen position to hide UI
+local HIDE_Y   = -2000
+
+local barBG       = findEntity("UI_DetectBar_BG")
+local barFillL   = findEntity("UI_DetectBar_Fill_L")
+local barFillR   = findEntity("UI_DetectBar_Fill_R")
+local overlay     = findEntity("UI_DetectOverlay")
+
+local cached = false
+local bgX, bgY = 0, 0
+local fillLX, fillLY = 0, 0
+local fillRX, fillRY = 0, 0
+local ovX, ovY = 0, 0
+local FILL_HALF_WIDTH = 0.055 -- was 0.05
+
+local function cachePositions()
+    if cached then return end
+    if barBG then bgX, bgY = get2DPosition(barBG) end
+    if barFillL then fillLX, fillLY = get2DPosition(barFillL) end
+    if barFillR then fillRX, fillRY = get2DPosition(barFillR) end
+    if overlay then ovX, ovY = get2DPosition(overlay) end
+    cached = true
+end
+
+-- audio entities
+local sfxAlertOnce   = findEntity("Enemy_Alert_Hit_v1")
+local sfxAlertLoop   = findEntity("Enemy_Alert_Loop_v1")
+local bgmCombatLayer = findEntity("BGM_Level1b_CombatLayer 2")
+
+-- internal state
+ui.active      = false
+ui.timer       = 0.0
+ui.duration    = DURATION
+ui.sourceEnemy = nil
+ui.isDetected  = false
+
+-- combat layer fade
+local combatCurrentDb = -80.0      -- start silent
+local combatTargetDb  = -3.0       -- loudness when “in combat”
+local combatFadeSpeed = 40.0       -- dB per second
+local ALERT_ONCE_DB = -8.0   
+local ALERT_LOOP_DB = -12.0
+
+-- helpers -------------------------------------------------------
+
+local function hideUI()
+    cachePositions()
+    if barBG then    set2DPosition(barBG,   HIDE_X, HIDE_Y)  end
+    if barFillL then set2DPosition(barFillL, HIDE_X, HIDE_Y) end
+    if barFillR then set2DPosition(barFillR, HIDE_X, HIDE_Y) end
+    if overlay then  set2DPosition(overlay, HIDE_X, HIDE_Y)  end
+end
+
+local function showUI()
+    cachePositions()
+    if barBG then set2DPosition(barBG, bgX, bgY) end
+
+    if barFillL then
+        set2DPosition(barFillL, fillLX, fillLY)
+        setScale(barFillL, 0.0, 1.0, 1.0)
+    end
+
+    if barFillR then
+        set2DPosition(barFillR, fillRX, fillRY)
+        setScale(barFillR, 0.0, 1.0, 1.0)
+    end
+
+    if overlay then set2DPosition(overlay, ovX, ovY) end
+end
+
+local function stopAudio()
+    if sfxAlertLoop   then audioStop(sfxAlertLoop)   end
+    if bgmCombatLayer then audioStop(bgmCombatLayer) end
+end
+
+-- public API called from enemy scripts --------------------------
+
+function ui.begin(enemyEntity)
+    if ui.active then
+        ui.sourceEnemy = enemyEntity
+        return
+    end
+
+    ui.active      = true
+    ui.isDetected  = true
+    ui.timer       = 0.0
+    ui.sourceEnemy = enemyEntity
+
+    showUI()
+
+    -- enemy alert SFX once then loop
+    if sfxAlertOnce then 
+        audioSetVolumeDb(sfxAlertOnce, ALERT_ONCE_DB)
+        audioPlay(sfxAlertOnce) 
+    end
+
+    if sfxAlertLoop then
+        audioSetLooping(sfxAlertLoop, true)
+        audioSetVolumeDb(sfxAlertLoop, ALERT_LOOP_DB)
+        audioPlay(sfxAlertLoop)
+    end
+
+    -- start combat BGM layer from silence
+    if bgmCombatLayer then
+        audioSetLooping(bgmCombatLayer, true)
+        audioPlay(bgmCombatLayer)
+        combatCurrentDb = -80.0
+        audioSetVolumeDb(bgmCombatLayer, combatCurrentDb)
+    end
+end
+
+function ui.cancel(enemyEntity)
+    -- only cancel if the same enemy that started it
+    if enemyEntity and ui.sourceEnemy and enemyEntity ~= ui.sourceEnemy then
+        return
+    end
+
+    if not ui.active then return end
+    ui.isDetected  = false
+    ui.sourceEnemy = nil
+end
+
+-- When the bar fully fills
+function ui.confirmHit()
+    if not ui.active then return end
+    ui.active     = false
+    ui.isDetected = false
+    ui.timer      = 0.0
+
+    hideUI()
+    stopAudio()
+
+    -- tell global player state script that player got caught
+    if _G.PlayerState and _G.PlayerState.onCaught and _G.PlayerState.player then
+        _G.PlayerState.onCaught(_G.PlayerState.player)
+    end
+end
+
+-- per-frame update ----------------------------------------------
+
+local function update(dt)
+    if not ui.active then
+        return
+    end
+
+    -- Charge up while detected, drain down when not
+    if ui.isDetected then
+        ui.timer = ui.timer + dt
+        if ui.timer >= ui.duration then
+            ui.timer = ui.duration
+            ui.confirmHit()
+            return
+        end
+    else
+        ui.timer = ui.timer - dt
+        if ui.timer <= 0.0 then
+            ui.timer  = 0.0
+            ui.active = false
+            hideUI()
+            stopAudio()
+            return
+        end
+    end
+
+    local t = ui.timer / ui.duration
+
+    local clamped = math.max(0.0, math.min(1.0, t))
+    -- if barFillL then setScale(barFillL, clamped, 1.0, 1.0) end
+    -- if barFillR then setScale(barFillR, clamped, 1.0, 1.0) end
+
+    if barFillL then
+        local sx, sy = getUITextureScale(barFillL)
+        setUITextureScale(barFillL, clamped, sy)
+
+        local shift = (1.0 - clamped) * FILL_HALF_WIDTH
+        set2DPosition(barFillL, fillLX - shift, fillLY)
+    end
+
+    if barFillR then
+        local sx, sy = getUITextureScale(barFillR)
+        setUITextureScale(barFillR, clamped, sy)
+
+        local shift = (1.0 - clamped) * FILL_HALF_WIDTH
+        set2DPosition(barFillR, fillRX + shift, fillRY)
+    end
+
+
+    -- fade in combat BGM
+    if bgmCombatLayer then
+        combatCurrentDb = math.min(combatTargetDb, combatCurrentDb + combatFadeSpeed * dt)
+        audioSetVolumeDb(bgmCombatLayer, combatCurrentDb)
+    end
+end
+
+registerUpdate(update)
+
+-- start hidden on scene load
+hideUI()
+
+-- make this table globally accessible to other scripts
+DetectionUI = ui -- normal global
+if _G_root then
+    _G_root.DetectionUI = ui
+end

@@ -1,0 +1,237 @@
+{
+    "entities": [
+        {
+            "components": {
+                "CompoundCollider": {
+                    "shapes": [
+                        {
+                            "boxHalfExtents": [
+                                0.5,
+                                0.019999999552965164,
+                                0.5
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                2.930000066757202,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.029999999329447746,
+                                0.5299999713897705,
+                                0.5099999904632568
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                1.7200000286102295,
+                                1.559999942779541,
+                                0.029999999329447746
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.47999998927116394,
+                                0.49000000953674316,
+                                0.009999999776482582
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.009999999776482582,
+                                1.559999942779541,
+                                1.75
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.44999998807907104,
+                                0.5600000023841858,
+                                0.009999999776482582
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                0.0,
+                                1.1399999856948853,
+                                -1.7599999904632568
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.019999999552965164,
+                                0.49000000953674316,
+                                0.18000000715255737
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                -1.75,
+                                1.4600000381469727,
+                                -1.1799999475479126
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        },
+                        {
+                            "boxHalfExtents": [
+                                0.009999999776482582,
+                                0.4399999976158142,
+                                0.1599999964237213
+                            ],
+                            "capsuleHalfHeight": 0.5,
+                            "capsuleRadius": 0.25,
+                            "offset": [
+                                -1.7899999618530273,
+                                1.5299999713897705,
+                                1.159999966621399
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "sphereRadius": 0.5,
+                            "type": 0
+                        }
+                    ],
+                    "useCompoundCollider": true
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -15.446202278137207,
+                        -0.19188618659973145,
+                        -48.442298889160156
+                    ],
+                    "rotation": [
+                        -1.2959117157151923e-07,
+                        0.7011948823928833,
+                        -1.3188946468289942e-07,
+                        0.7129696607589722
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "2b5b7fe0-4af2-e444-8b1b-9b670d6d1bc8",
+                            "aoTextureOverride": "568564f4-80b4-544e-9990-901825e0bcca",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "65365c00-7be8-7b48-9780-ed46b6ef0404",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "568564f4-80b4-544e-9990-901825e0bcca",
+                            "normalTextureOverride": "9611dfef-4b44-7b4d-84ba-e855cf152b5f",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "568564f4-80b4-544e-9990-901825e0bcca",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "72c56f00-de1f-7546-a886-4494f74066a0",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Build1"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        1.7000000476837158,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        3.799999952316284,
+                        3.0,
+                        3.5999999046325684
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "eae1001b-da42-5c46-99ec-e9876acb4272"
+        }
+    ],
+    "prefabName": "Build1",
+    "rootEntityGUID": "eae1001b-da42-5c46-99ec-e9876acb4272"
+}

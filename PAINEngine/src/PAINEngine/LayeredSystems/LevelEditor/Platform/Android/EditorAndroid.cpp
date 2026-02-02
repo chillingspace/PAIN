@@ -214,7 +214,7 @@ namespace PAIN {
 				io.AddKeyEvent(key, true);
 				io.SetKeyEventNativeData(key, e.getKeyCode(), 0);
 			}
-			return io.WantCaptureKeyboard;
+			return io.WantTextInput;
 			});
 
 		dispatcher.Dispatch<Event::AndroidKeyUp>([&](Event::AndroidKeyUp& e) -> bool {
@@ -232,7 +232,7 @@ namespace PAIN {
 				io.AddKeyEvent(key, false);
 				io.SetKeyEventNativeData(key, e.getKeyCode(), 0);
 			}
-			return io.WantCaptureKeyboard;
+			return io.WantTextInput;
 			});
 
 		// Handle back button (can be used for ImGui navigation or custom handling)
@@ -240,7 +240,7 @@ namespace PAIN {
 			// ImGui doesn't have a specific back button, but we can treat it as Escape
 			io.AddKeyEvent(ImGuiKey_Escape, true);
 			io.AddKeyEvent(ImGuiKey_Escape, false);
-			return io.WantCaptureKeyboard;
+			return io.WantTextInput;
 			});
 	}
 	}

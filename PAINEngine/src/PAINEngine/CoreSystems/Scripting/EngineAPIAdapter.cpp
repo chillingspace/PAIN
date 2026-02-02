@@ -23,6 +23,9 @@
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -131,15 +134,26 @@ namespace PAIN {
     /*                                  Lookup                                     */
     /* =========================================================================== */
     std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
-        // 1) Fast path: use the meta index
-        if (auto opt = meta_.getEntityByName(std::string{ name })) {
-            return asInt(*opt);
-        }
-
-        // 2) Fallback: scan the registry for Entity::Name
         auto& reg = ecs_.getRegistry();
-        //PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}", (void*)&reg, reg.view<PAIN::Entity::Name>().size());
-
+        
+        // 1) Fast path: check meta cache BUT VALIDATE
+        if (auto opt = meta_.getEntityByName(std::string{ name })) {
+            entt::entity e = *opt;
+            
+            // Validate: entity must be alive and still have this name
+            if (reg.valid(e) && reg.all_of<PAIN::Entity::Name>(e)) {
+                const auto& entityName = reg.get<PAIN::Entity::Name>(e).name;
+                if (entityName == name) {
+                    return asInt(e);  // Valid cached entity
+                }
+            }
+            
+            // Stale cache entry detected - will be refreshed below
+            PN_CORE_WARN("[FindEntity] Stale cache entry for '{}' (entity {}) - refreshing", 
+                         name, entt::to_integral(e));
+        }
+        
+        // 2) Fallback: scan the registry for Entity::Name
         auto view = reg.view<PAIN::Entity::Name>();
         for (auto e : view) {
             const auto& n = view.get<PAIN::Entity::Name>(e).name;
@@ -148,7 +162,6 @@ namespace PAIN {
                 meta_.setEntityName(e, std::string{ name });
                 return asInt(e);
             }
-            /*PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);*/
         }
 
         return std::nullopt;
@@ -355,6 +368,19 @@ namespace PAIN {
 
     }
 
+    bool EngineAPIAdapter::IsGrounded(entt::entity entityId, float maxDistance) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return false;
+
+		auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);       
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+			return phys->isGrounded(rb.bodyID, maxDistance);
+        }
+
+        return false;
+    }
+
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */
@@ -466,6 +492,64 @@ namespace PAIN {
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
     /* =========================================================================== */
+/*                              Layer Control                                  */
+/* =========================================================================== */
+
+    bool EngineAPIAdapter::SetLayerEnabled(int layerId, bool enabled) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] SetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (auto& layer : layers) {
+            if (layer.id == layerId) {
+                layer.enabled = enabled;
+                PN_CORE_INFO("[EngineAPIAdapter] Set Layer {} enabled: {}", layerId, enabled);
+                return true;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
+    bool EngineAPIAdapter::GetLayerEnabled(int layerId) {
+        if (!scene_) {
+            PN_CORE_ERROR("[EngineAPIAdapter] GetLayerEnabled: SceneManager not available");
+            return false;
+        }
+
+        auto& layers = scene_->getLayers();
+        for (const auto& layer : layers) {
+            if (layer.id == layerId) {
+                return layer.enabled;
+            }
+        }
+
+        PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
+        return false;
+    }
+
+    /* =========================================================================== */
+    /*                         Application / Quit Control                           */
+    /* =========================================================================== */
+    void EngineAPIAdapter::QuitApplication()
+    {
+        // Prefer a safe shutdown via the window system when available
+        if (window_) {
+            PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> calling Window::safeShutdown()");
+            window_->safeShutdown();
+            return;
+        }
+
+        // Fallback: request quit via global flag (Application::Run checks this)
+        PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> window not available, setting g_shouldQuitApplication");
+        PAIN::g_shouldQuitApplication = true;
+    }
+
+
+    /* =========================================================================== */
     /*                              Graphics / FX                                  */
     /* =========================================================================== */
     void EngineAPIAdapter::ShakeCamera(float /*duration*/, float /*amplitude*/) {}
@@ -513,6 +597,11 @@ namespace PAIN {
         Dispatcher d{ e };
 
 #ifdef PN_PLATFORM_WINDOWS
+#ifdef _DEBUG
+        // Skip keyboard input if user is typing in ImGui text field
+        ImGuiIO& io = ImGui::GetIO();
+        if (!io.WantTextInput) {
+#endif
         d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
             keysDown_.insert(ev.getKeyCode());
             keysPressed_.insert(ev.getKeyCode());
@@ -526,6 +615,9 @@ namespace PAIN {
         d.Dispatch<KeyRepeated>([&](KeyRepeated&) {
             return false;
             });
+#ifdef _DEBUG
+        }
+#endif
 
         d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed& ev) {
             mouseDown_.insert(ev.getBtnCode());
@@ -677,6 +769,20 @@ namespace PAIN {
         tex.texture_guid = guid;
     }
 
+    void EngineAPIAdapter::SetUITextureScale(entt::entity e, glm::vec2 s)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Texture2D>(e)) return;
+        reg.get<Texture2D>(e).texture_scale = s;
+    }
+
+    glm::vec2 EngineAPIAdapter::GetUITextureScale(entt::entity e)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Texture2D>(e)) return { 1.f, 1.f };
+        return reg.get<Texture2D>(e).texture_scale;
+    }
+
     /* =========================================================================== */
     /*                                  Lighting                                   */
     /* =========================================================================== */
@@ -781,20 +887,29 @@ namespace PAIN {
         if (!reg.all_of<PAIN::Animation>(entityId)) return;
 
         int idx = FindAnimIndex(ecs_, entityId, animName);
-        if (idx != -1) {
-            auto& anim = reg.get<PAIN::Animation>(entityId);
 
-            // Only crossfade if different
-            if (anim.currentAnimationIndex != idx) {
-                anim.nextAnimationIndex = idx;
-                anim.transitionDuration = duration > 0.0f ? duration : 0.1f;
-                anim.transitionWeight = 0.0f; // Start transition from 0
-                anim.isPlaying = true;
-            }
-        }
-        else {
+        if (idx == -1) {
             PN_CORE_WARN("[EngineAPI] Animation_CrossFade: Animation '{}' not found on entity {}", animName, (uint32_t)entityId);
+            return;
         }
+
+        auto& anim = reg.get<PAIN::Animation>(entityId);
+
+        // Only crossfade if different
+        if (anim.currentAnimationIndex == idx && anim.nextAnimationIndex == -1) {
+            return;
+        }
+
+        // If ALREADY transitioning to this animation, let it finish.
+        if (anim.nextAnimationIndex == idx) {
+            return; 
+        }
+
+        anim.nextAnimationIndex = idx;
+        anim.transitionDuration = duration > 0.0f ? duration : 0.1f; 
+        anim.transitionWeight = 0.0f;
+        anim.isPlaying = true;
+
     }
 
     void EngineAPIAdapter::Animation_SetSpeed(entt::entity entityId, float speed)
@@ -824,5 +939,14 @@ namespace PAIN {
         // Check if current is the anim AND it's playing
         // OR check if we are transitioning TO it
         return (anim.currentAnimationIndex == idx && anim.isPlaying) || (anim.nextAnimationIndex == idx);
+    }
+    float EngineAPIAdapter::GetAnimationDuration(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            return reg.get<PAIN::Animation>(entityId).animationTime;
+        }
+
+        return 0.0f;
     }
 }

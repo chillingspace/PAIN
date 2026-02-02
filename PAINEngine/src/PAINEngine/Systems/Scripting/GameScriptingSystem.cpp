@@ -9,6 +9,7 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "PAINEngine/CoreSystems/Scene/Scene.h"
 #include "PAINEngine/CoreSystems/Scene/Camera.h"
+#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #ifdef PN_PLATFORM_ANDROID
 #include "PAINEngine/CoreSystems/Events/Android/TouchEvents.h"
@@ -22,6 +23,9 @@
 #include "PAINEngine/CoreSystems/Events/GLFW/KeyEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/MouseEvents.h"
 #include "PAINEngine/CoreSystems/Events/GLFW/WindowEvents.h"
+#ifdef _DEBUG
+#include <imgui.h>
+#endif
 #endif
 
 namespace PAIN {
@@ -93,6 +97,11 @@ namespace PAIN {
                         fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
                     std::string realPath = fs->resolvePath(vpath);
 
+                   /* PN_CORE_INFO("[GameScriptingSystem] Loading script '{}' for entity {} (entt::entity={})",
+                        meta->name,
+                        static_cast<uint32_t>(e),
+                        entt::to_integral(e));*/
+
                     // attach this script to this entity
                     attachScript(e, realPath);
 
@@ -114,24 +123,36 @@ namespace PAIN {
             using namespace Event;
             Dispatcher d{ e };
 
-            luaManager_.Input_OnEvent(e); // foward all events to luamanger
-
 #ifdef PN_PLATFORM_WINDOWS
-            d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
-                //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
-                if (auto name = getKeyName(ev.getKeyCode())) {
-                    //PN_CORE_INFO("[GSS] KeyDown -> {}", *name);
-                    luaManager_.onKeyDown(*name);
-                }
-                return false;
-                });
-            d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
-                //PN_CORE_INFO("[GSS] KeyReleased code={}", ev.getKeyCode());
-                if (auto name = getKeyName(ev.getKeyCode())) {
-                    luaManager_.onKeyUp(*name);
-                }
-                return false;
-                });
+#ifdef _DEBUG
+            // Skip keyboard input if user is typing in ImGui text field (WantTextInput)
+            ImGuiIO& io = ImGui::GetIO();
+            bool skipKeyboard = io.WantTextInput;
+#else
+            bool skipKeyboard = false;
+#endif
+
+            if (!skipKeyboard) {
+                luaManager_.Input_OnEvent(e); // forward keyboard events to luamanager only when not captured by editor
+            }
+
+            if (!skipKeyboard) {
+                d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
+                    //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
+                    if (auto name = getKeyName(ev.getKeyCode())) {
+                        //PN_CORE_INFO("[GSS] KeyDown -> {}", *name);
+                        luaManager_.onKeyDown(*name);
+                    }
+                    return false;
+                    });
+                d.Dispatch<KeyReleased>([&](KeyReleased& ev) {
+                    //PN_CORE_INFO("[GSS] KeyReleased code={}", ev.getKeyCode());
+                    if (auto name = getKeyName(ev.getKeyCode())) {
+                        luaManager_.onKeyUp(*name);
+                    }
+                    return false;
+                    });
+            } // end if (!skipKeyboard)
             d.Dispatch<MouseBtnPressed>([&](MouseBtnPressed&) {
                 luaManager_.onClick();
                 return false;
@@ -142,6 +163,7 @@ namespace PAIN {
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
+            luaManager_.Input_OnEvent(e); // forward all events to luamanager on Android
             d.Dispatch<TouchDown>([&](TouchDown&) {
                 luaManager_.onClick();
                 return false;
@@ -257,12 +279,15 @@ namespace PAIN {
                 return;
             }
 
+            // Provide optional window pointer so adapter can request safeShutdown
+            auto window_ptr = services_ptr->get<Window::Window>();
             auto adapter = std::make_shared<EngineAPIAdapter>(
                 *ecs_ptr,
                 *meta_ptr,
                 assets_ptr.get(),
                 path_ptr.get(),
-                scene_ptr.get()
+                scene_ptr.get(),
+                window_ptr ? window_ptr.get() : nullptr
             );
 
 #ifdef _DEBUG

@@ -4,17 +4,16 @@
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Renderer/text.h"
-#include "CoreSystems/Scene/Scene.h"
-#include "ECS/Components/AllComponents.h"
-#include "ECS/Components/cAnimation.h"
-#include "ECS/Components/cCompoundCollider.h" // For CompoundCollider visualization
-#include "ECS/Components/cPhysics.h"		  // For rendering RigidBody3D
+#include "CoreSystems/Scene/Scene.h"	  
 #include "ECS/Controller.h"
 #include "Systems/Collision/sBVHSystem.h"
+#include "ECS/sMetaData.h"
+#include "Core.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
 #endif
+#include <Systems/UI/sysUIInput.h>
 
 namespace PAIN {
 	namespace Render {
@@ -724,6 +723,10 @@ namespace PAIN {
 			if (!rendererService || !rendererService->w_renderer)
 				return;
 
+			auto metadata_service = services.lock()->get<MetaData::Service>();
+			if (!metadata_service) return;
+
+
 			// Texture and text groups
 			auto texture_group =
 				registry.group<Texture2D>(entt::get<UIElement, UIRectTransform>);
@@ -752,12 +755,20 @@ namespace PAIN {
 				PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
 			}
 
+
 			for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
 				// Layer check
 				auto layerComp = registry.try_get<Entity::Layer>(entity);
 				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
 					continue;
 				}
+
+#ifdef PN_PLATFORM_WINDOWS
+#ifndef _DEBUG
+				// Skip android UI
+				if (metadata_service->hasTag(entity, "android_ui")) { continue; }
+#endif
+#endif
 
 				if (!ui_elem.b_is_enabled)
 					continue;
@@ -825,8 +836,12 @@ namespace PAIN {
 				// PN_CORE_INFO("[Render System] Rendering Font: {}",
 				// font_opt.value()->name);
 
-				text_comp.text_pos = rect_comp.calculated_world_position;
-				text_comp.scale_factor = rect_comp.scale.x;
+				// Only recalculate text_pos when layout changes
+				if (rect_comp.layout_dirty) {
+					text_comp.text_pos = rect_comp.calculated_world_position;
+					text_comp.scale_factor = rect_comp.scale.x;
+					rect_comp.layout_dirty = false;
+				}
 
 				TextRenderer::get().renderText(text_comp);
 
@@ -836,6 +851,28 @@ namespace PAIN {
 					PN_CORE_ERROR(
 						"[Render System] GL error after rendering font '{}': 0x{:X}",
 						font_opt.value()->name, err);
+				}
+			}
+
+			// ========================================
+			// DEBUG UI HITBOXES
+			// ========================================
+			auto& gs = GraphicsSettings::get();
+			if (gs.DEBUG_DRAW_UI_HITBOXES) {
+				// Draw hitboxes for entities with CustomHitbox2D
+				auto hitbox_view = registry.view<CustomHitbox2D, Texture2D, UIElement, UIRectTransform>();
+				for (auto [entity, hitbox, tex, element, rect] : hitbox_view.each()) {
+					if (!element.b_is_enabled) continue;
+
+					// Calculate hitbox bounds (same logic as in raycastUI)
+					glm::vec2 hitbox_center = tex.pos + UI::normalizeSize(hitbox.position_offset, services);
+					glm::vec2 normalized_min = UI::normalizeSize(hitbox.min_point, services);
+					glm::vec2 normalized_max = UI::normalizeSize(hitbox.max_point, services);
+					glm::vec2 rect_min = hitbox_center + normalized_min;
+					glm::vec2 rect_max = hitbox_center + normalized_max;
+
+					// Draw debug rectangle
+					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
 				}
 			}
 

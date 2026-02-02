@@ -8,6 +8,7 @@
 #include <CoreSystems/Scripting/EngineAPIAdapter.h>
 
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
+#include "CoreSystems/Windows/Window.h"
 
 
 namespace PAIN {
@@ -391,6 +392,7 @@ namespace PAIN {
                             newLayer.mask = 1 << newId;
                             newLayer.enabled = true;
                             newLayer.name = "Layer " + std::to_string(newId);
+                            newLayer.pickable = true;
 
                             // Assign a nice default color
                             static const glm::vec3 defaultColors[] = {
@@ -535,7 +537,7 @@ namespace PAIN {
 
                     // Card background
                     ImVec2 cardPos = ImGui::GetCursorScreenPos();
-                    ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 80);
+                    ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 100);
 
                     ImU32 cardColor = isSelected
                         ? IM_COL32(60, 80, 100, 255)   // Selected
@@ -567,23 +569,8 @@ namespace PAIN {
 
                     ImGui::BeginGroup();
                     {
-                        // Row 1: Visibility + Name + Actions
+                        // Row 1: Name, Color, Duplicate
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
-
-                        // Visibility toggle with nice icon
-                        bool wasEnabled = layer.enabled;
-                        if (ImGui::Checkbox(layer.enabled ? "Visible" : "Hidden", &layer.enabled)) {
-                            if (wasEnabled != layer.enabled) {
-                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}",
-                                    layer.name,
-                                    layer.enabled ? "enabled" : "disabled");
-                            }
-                        }
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip(layer.enabled ? "Layer Visible" : "Layer Hidden");
-                        }
-
-                        ImGui::SameLine();
 
                         // Layer name (editable)
                         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.25f, 0.3f, 0.8f));
@@ -603,6 +590,7 @@ namespace PAIN {
                             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
                             // Color changed
                         }
+                        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Layer Name Color");
 
                         ImGui::SameLine();
 
@@ -627,7 +615,33 @@ namespace PAIN {
                             ImGui::SetTooltip("Duplicate layer");
                         }
 
-                        // Row 2: Layer info
+                        // Row 2 : Visibility and Pickable Toggles
+                        bool wasEnabled = layer.enabled;
+                        if (ImGui::Checkbox(layer.enabled ? "Visible" : "Hidden", &layer.enabled)) {
+                            if (wasEnabled != layer.enabled) {
+                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}",
+                                    layer.name,
+                                    layer.enabled ? "enabled" : "disabled");
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip(layer.enabled ? "Layer Visible" : "Layer Hidden");
+                        }
+
+                        ImGui::SameLine();
+
+                        bool wasPickable = layer.pickable;
+
+                        if (ImGui::Checkbox(layer.pickable ? "Pickable" : "Not Pickable", &layer.pickable)) {
+                            if (wasPickable != layer.pickable) {
+                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}", layer.name, layer.pickable ? "pickable" : "locked");
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip(layer.pickable ? "Can be selected by mouse" : "Cannot be selected by mouse");
+                        }
+
+                        // Row 3: Layer info
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
                         ImGui::Text("ID");
@@ -653,7 +667,7 @@ namespace PAIN {
                         ImGui::Text("Collides with: %d layers", collisionCount);
                         ImGui::PopStyleColor();
 
-                        // Row 3: Entity count (if entities have layer component)
+                        // Entity count (if entities have layer component)
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
 
                         int entityCount = 0;
@@ -895,6 +909,418 @@ namespace PAIN {
 
             }
 
+            void ScenesPanel::drawLoadingScreenPanel() {
+                // Get scene service
+                auto scn_service = services->get<Scene::SceneManager>();
+                if (!scn_service || !scn_service->loadingScreen) {
+                    ImGui::TextDisabled("Loading screen not available");
+                    return;
+                }
+                
+                auto& loadingScreen = scn_service->loadingScreen;
+                
+                ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Loading Screen Configuration");
+                ImGui::Separator();
+                ImGui::Spacing();
+                
+                // ============================================================
+                // Progress Bar Settings
+                // ============================================================
+                if (ImGui::CollapsingHeader("Progress Bar", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::Indent();
+                    
+                    // Position
+                    glm::vec2 barPos = loadingScreen->getProgressBarPosition();
+                    float barPosArray[2] = { barPos.x, barPos.y };
+                    
+                    ImGui::Text("Position (Screen Space)");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::DragFloat2("##BarPos", barPosArray, 1.0f, 0.0f, 2000.0f, "%.0f px")) {
+                        loadingScreen->setProgressBarPosition(barPosArray[0], barPosArray[1]);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Position in screen space (X, Y) from top-left corner");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Size
+                    glm::vec2 barSize = loadingScreen->getProgressBarSize();
+                    float barSizeArray[2] = { barSize.x, barSize.y };
+                    
+                    ImGui::Text("Size");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::DragFloat2("##BarSize", barSizeArray, 1.0f, 50.0f, 2000.0f, "%.0f px")) {
+                        loadingScreen->setProgressBarSize(barSizeArray[0], barSizeArray[1]);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Progress bar dimensions (Width, Height) in pixels");
+                    }
+
+                    ImGui::Spacing();
+
+                    // Progress Bar enable/disable toggle
+                    bool showProgress = loadingScreen->getShowProgressBar();
+                    if (ImGui::Checkbox("Progress Bar Shown", &showProgress)) loadingScreen->setShowProgressBar(showProgress);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show progress bar on loading screen");
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                
+                // ============================================================
+                // Status Text Settings
+                // ============================================================
+                if (ImGui::CollapsingHeader("Status Text", ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::Indent();
+                    
+                    // Position
+                    glm::vec2 textPos = loadingScreen->getStatusTextPosition();
+                    float textPosArray[2] = { textPos.x, textPos.y };
+                    
+                    ImGui::Text("Position (Screen Space)");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::DragFloat2("##TextPos", textPosArray, 1.0f, 0.0f, 2000.0f, "%.0f px")) {
+                        loadingScreen->setStatusTextPosition(textPosArray[0], textPosArray[1]);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Text position (X, Y) from top-left corner");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Scale
+                    float textScale = loadingScreen->getStatusTextScale();
+                    ImGui::Text("Font Scale");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::SliderFloat("##TextScale", &textScale, 0.01f, 0.1f, "%.2f")) {
+                        loadingScreen->setStatusTextScale(textScale);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Multiplier for text size (1.0 = default)");
+                    }
+
+                    ImGui::Spacing();
+
+                    // Status text enable/disable toggle
+                    bool showStatus = loadingScreen->getShowStatusText();
+                    if (ImGui::Checkbox("Status Text Shown", &showStatus)) loadingScreen->setShowStatusText(showStatus);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Status Text on loading screen");
+                    }
+                    
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Quick presets
+                    ImGui::Text("Quick Presets:");
+                    
+                    auto win = services->get<Window::Window>();
+                    if (win) {
+                        auto framebuffer = win->getFrameBuffer();
+                        float screenWidth = framebuffer.x;
+                        float screenHeight = framebuffer.y;
+                        glm::vec2 barPos = loadingScreen->getProgressBarPosition();
+                        
+                        if (ImGui::Button("Below Progress Bar")) {
+                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y - 70.0f);
+                        }
+                        ImGui::SameLine();
+                        
+                        if (ImGui::Button("Above Progress Bar")) {
+                            loadingScreen->setStatusTextPosition(screenWidth / 2.0f, barPos.y + 70.0f);
+                        }
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                
+                // ============================================================
+                // Style & Color Settings  
+                // ============================================================
+                if (ImGui::CollapsingHeader("Style & Colors")) {
+                    ImGui::Indent();
+
+                    auto bgColor = loadingScreen->getBackgroundColor();
+                    float bgfillColorArray[3] = { bgColor.r, bgColor.g, bgColor.b };
+
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Background Appearance");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    // Fill Color
+                    ImGui::Text("Background Fill Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##BGFillColor", bgfillColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setBackgroundColor(glm::vec3(bgfillColorArray[0], bgfillColorArray[1], bgfillColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the background");
+                    }
+
+                    ImGui::Spacing();
+                    
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Progress Bar Appearance");
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Get current style
+                    auto [fillColor, glowColor, glowIntensity] = loadingScreen->getProgressBarStyle();
+                    float fillColorArray[3] = { fillColor.r, fillColor.g, fillColor.b };
+                    float glowColorArray[3] = { glowColor.r, glowColor.g, glowColor.b };
+                    float intensity = glowIntensity;
+                    
+                    // Fill Color
+                    ImGui::Text("Fill Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##FillColor", fillColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(fillColorArray[0], fillColorArray[1], fillColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the filled progress portion");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Glow Color
+                    ImGui::Text("Glow Color:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::ColorEdit3("##GlowColor", glowColorArray, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(glowColorArray[0], glowColorArray[1], glowColorArray[2]));
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Color of the animated glow effect");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Glow Intensity
+                    ImGui::Text("Glow Intensity:");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::SliderFloat("##GlowIntensity", &intensity, 0.0f, 2.0f, "%.2f")) {
+                        loadingScreen->setProgressBarGlowIntensity(intensity);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Intensity of the glow effect (0 = off, 2 = maximum)");
+                    }
+                    
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Quick color presets
+                    ImGui::Text("Quick Presets:");
+                    
+                    if (ImGui::Button("Cyan/Blue (Default)")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.2f, 0.8f, 0.9f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(0.3f, 0.6f, 1.0f));
+                        loadingScreen->setProgressBarGlowIntensity(0.8f);
+                    }
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Green/Yellow")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.3f, 0.9f, 0.3f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(1.0f, 1.0f, 0.3f));
+                        loadingScreen->setProgressBarGlowIntensity(0.6f);
+                    }
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Purple/Pink")) {
+                        loadingScreen->setProgressBarFillColor(glm::vec3(0.8f, 0.3f, 0.9f));
+                        loadingScreen->setProgressBarGlowColor(glm::vec3(1.0f, 0.4f, 0.8f));
+                        loadingScreen->setProgressBarGlowIntensity(1.0f);
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                
+                // ============================================================
+                // Background Settings
+                // ============================================================
+                if (ImGui::CollapsingHeader("Background")) {
+                    ImGui::Indent();
+                    
+                    ImGui::TextWrapped("Set a background texture and optionally configure spritesheet animation.");
+                    ImGui::Spacing();
+                    
+                    // Background texture selector
+                    Assets::GUID currentBg = scn_service->loadingScreen->getBackgroundTexture();
+                    if (DrawAssetSelectorField("Background Texture",
+                        currentBg,
+                        PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                        services, false)) {
+                        
+                        if (currentBg.IsValid()) {
+                            loadingScreen->setBackgroundTexture(currentBg);
+                        }
+                    }
+
+                    ImGui::Spacing();
+
+                    // Scale
+                    float bgScale = loadingScreen->getBGScale();
+                    ImGui::Text("Background Texture Scale");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::SliderFloat("##BGScale", &bgScale, 0.1f, 10.0f, "%.2f")) {
+                        loadingScreen->setBGScale(bgScale);
+                    }
+                    
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+                    
+                    // Spritesheet Animation
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Animation");
+                    ImGui::TextWrapped("Configure spritesheet-based animation for the background texture.");
+                    ImGui::Spacing();
+                    
+                    // Get current settings
+                    auto [frameCount, framesPerRow, frameTime, enabled] = loadingScreen->getSpritesheetSettings();
+                    
+                    // Frame count
+                    int tempFrameCount = frameCount;
+                    ImGui::Text("Frame Count:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::InputInt("##FrameCount", &tempFrameCount, 1, 10)) {
+                        if (tempFrameCount >= 1 && tempFrameCount <= 1000) {
+                            loadingScreen->setSpritesheetAnimation(tempFrameCount, framesPerRow, frameTime);
+                        }
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Total number of frames in the spritesheet");
+                    }
+                    
+                    // Frames per row
+                    int tempFramesPerRow = framesPerRow;
+                    ImGui::Text("Frames Per Row:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::InputInt("##FramesPerRow", &tempFramesPerRow, 1, 10)) {
+                        if (tempFramesPerRow >= 1 && tempFramesPerRow <= 100) {
+                            loadingScreen->setSpritesheetAnimation(frameCount, tempFramesPerRow, frameTime);
+                        }
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Number of frames per row in the spritesheet layout");
+                    }
+                    
+                    // Frame time
+                    float tempFrameTime = frameTime;
+                    ImGui::Text("Frame Duration:");
+                    ImGui::SetNextItemWidth(150);
+                    if (ImGui::SliderFloat("##FrameTime", &tempFrameTime, 0.01f, 1.0f, "%.2f sec")) {
+                        loadingScreen->setSpritesheetAnimation(frameCount, framesPerRow, tempFrameTime);
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Time to display each frame");
+                    }
+                    
+                    // Enable/disable toggle
+                    bool tempEnabled = enabled;
+                    if (ImGui::Checkbox("Enable Animation", &tempEnabled)) {
+                        loadingScreen->setAnimationEnabled(tempEnabled);
+                    }
+
+                    ImGui::Spacing();
+
+                    // Background enable/disable toggle
+                    bool showBG = loadingScreen->getShowBG();
+                    if (ImGui::Checkbox("Texture Background Shown", &showBG)) loadingScreen->setShowBG(showBG);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Texture As Background on loading screen");
+                    }
+
+                    ImGui::Spacing();
+
+                    // Overlay enable/disable toggle
+                    bool showOverlay = loadingScreen->getShowOverlay();
+                    if (ImGui::Checkbox("Overlay Shown", &showOverlay)) loadingScreen->setShowOverlay(showOverlay);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Show Overlay on loading screen");
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                
+                // ============================================================
+                // Live Preview Section
+                // ============================================================
+                if (ImGui::CollapsingHeader("Live Preview")) {
+                    ImGui::Indent();
+                    
+                    ImGui::TextColored(ImVec4(0.8f, 1.0f, 0.8f, 1.0f), "Loading Screen Preview");
+                    ImGui::TextWrapped("Preview the loading screen in real-time without reloading the scene.");
+                    
+                    ImGui::Spacing();
+                    
+                    // Preview controls
+                    static float previewProgress = 0.5f;
+                    static char previewStatus[256] = "Loading assets...";
+                    static bool autoAnimate = false;
+                    
+                    ImGui::Text("Progress:");
+                    ImGui::SetNextItemWidth(200);
+                    ImGui::SliderFloat("##PreviewProgress", &previewProgress, 0.0f, 1.0f, "%.2f");
+                    
+                    ImGui::Spacing();
+                    
+                    ImGui::Text("Status Text:");
+                    ImGui::SetNextItemWidth(300);
+                    ImGui::InputText("##PreviewStatus", previewStatus, IM_ARRAYSIZE(previewStatus));
+                    
+                    ImGui::Spacing();
+                    
+                    ImGui::Checkbox("Auto-animate progress", &autoAnimate);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Automatically cycle progress from 0%% to 100%%");
+                    }
+                    
+                    ImGui::Spacing();
+                    
+                    // Preview enable/disable toggle
+                    static bool enablePreview = false;
+                    ImGui::Checkbox("Enable Live Preview", &enablePreview);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Toggle real-time preview rendering (may impact performance)");
+                    }
+                    
+                    // Auto-animate logic
+                    if (autoAnimate) {
+                        previewProgress += 0.01f * ImGui::GetIO().DeltaTime;
+                        if (previewProgress > 1.0f) previewProgress = 0.0f;
+                    }
+
+                    // Only render preview if enabled
+                    if (enablePreview) {
+                        loadingScreen->renderPreview(previewProgress, std::string(previewStatus));
+                    }
+                    
+                    ImGui::Unindent();
+                }
+                
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                if (ImGui::Button("Default Configuration##LoadingScreen")) loadingScreen->defaultSetup();
+
+                ImGui::Spacing();
+                
+                // Info footer
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                ImGui::TextWrapped("All settings are applied in real-time. Changes will be visible the next time the loading screen is displayed.");
+                ImGui::PopStyleColor();
+            }
+
             void ScenesPanel::onAttach()
             {
 #ifdef PN_PLATFORM_WINDOWS
@@ -1000,51 +1426,14 @@ namespace PAIN {
                 }
 
                 //Render Active Cam
-
                 if (ImGui::CollapsingHeader("Camera Settings")) {
                     drawActiveCamPanel();
-
                 }
 
-                //// Scene configuration panels
-                //drawSkyboxSettingsPanel();
-                //drawGraphicsSettingsPanel();
-                //drawEnvironmentSettingsPanel();
-                //drawCameraSettingsPanel();
-                //drawLayerManagementPanel();
-
-                // Layers
-                //ImGui::Text("Total Layers: %u", (unsigned)doc.layers.size());
-
-                //if (ImGui::Button("Create Layer")) {
-                //    ser->addLayer();
-                //}
-                //ImGui::SameLine();
-                //if (ImGui::Button("Remove Layer")) {
-                //    // pick a selected index from your panel state; here assume 0 for sample
-                //    unsigned sel = std::min<unsigned>(selectedLayerIdx_, (unsigned)doc.layers.size() - 1);
-                //    ser->removeLayer(sel);
-                //    selectedLayerIdx_ = (unsigned)std::min<size_t>(selectedLayerIdx_, doc.layers.size() ? doc.layers.size() - 1 : 0);
-                //}
-
-                //ImGui::TextUnformatted("Layer List:");
-                //ImGui::BeginChild("##LayerList", ImVec2(0, 200), true);
-                //for (unsigned i = 0; i < doc.layers.size(); ++i) {
-                //    bool vis = doc.layers[i].enabled;
-                //    if (ImGui::Checkbox((std::string("##vis_") + std::to_string(i)).c_str(), &vis)) {
-                //        ser->setLayerVisible(i, vis);        // <- write to service
-                //        if (hooks_.onLayerVisibleChanged) hooks_.onLayerVisibleChanged(i, vis);
-                //        if (hooks_.onDirty)               hooks_.onDirty();
-                //    }
-                //    ImGui::SameLine();
-                //    std::string label = "Layer " + std::to_string(doc.layers[i].id);
-                //    if (ImGui::Selectable(label.c_str(), selectedLayerIdx_ == i)) {
-                //        selectedLayerIdx_ = i;
-                //    }
-                //}
-                //ImGui::EndChild();
-
-                //if (ImGui::Button("Edit Layer Bit Mask")) { showEditMask_ = true; }
+                //Render loading screen
+                if (ImGui::CollapsingHeader("Loading Screen")) {
+                    drawLoadingScreenPanel();
+                }
 
                 // Modals last
 #ifdef PN_PLATFORM_WINDOWS
@@ -1053,22 +1442,6 @@ namespace PAIN {
                 drawSaveAsModal();
 #endif
                 drawEditMaskModal();
-
-                //// Show the error popup when load scene fails
-                //if (showSceneLoadError_) {
-                //    ImGui::OpenPopup("Scene Load Error");
-                //    showSceneLoadError_ = false;
-                //}
-
-                //// Render the modal if it's open
-                //if (ImGui::BeginPopupModal("Scene Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-                //    ImGui::TextWrapped("%s", loadSceneErrorMsg_.c_str());
-                //    ImGui::Spacing();
-                //    if (ImGui::Button("OK", ImVec2(120, 0))) {
-                //        ImGui::CloseCurrentPopup();
-                //    }
-                //    ImGui::EndPopup();
-                //}
 
                 renderPopUps();
             }

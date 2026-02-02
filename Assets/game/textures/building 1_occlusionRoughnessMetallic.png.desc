@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "building 1_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7504139240049855031
+  },
+  "descriptor_version": 1,
+  "guid": "5c00815c-1692-6e45-b852-06a086a81b0d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\building 1_occlusionRoughnessMetallic.png"
+  }
+}

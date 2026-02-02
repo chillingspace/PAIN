@@ -512,6 +512,7 @@ namespace PAIN {
 			registerComponent<UVCoordinates>("UVCoordinates");
 			registerComponent<UIFollowsWorldEntity>("UIFollowsWorldEntity");
 			registerComponent<UIJoystick>("UIJoystick");
+			registerComponent<CustomHitbox2D>("CustomHitbox2D");
 		}
 		void Controller::registerAllSystems() {
 			registerSystem<Transform::System>();

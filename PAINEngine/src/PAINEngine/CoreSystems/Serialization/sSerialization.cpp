@@ -35,24 +35,17 @@ namespace PAIN {
         return s;
     }
 
-        //inline std::string sanitize_base(std::string s) {
-        //    s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) {
-        //        return !(std::isalnum(c) || c == '_' || c == '-');
-        //        }), s.end());
-        //    return s;
-        //}
-
         void PAIN::Serialization::Service::onAttach() {
         }
 
         void PAIN::Serialization::Service::onDetach() {
 
             // Handled in Tools panel
-            //if (!curr_scene_file_.empty()) {
+            //if (!curr_scene_file.empty()) {
             //    if (isModifiedScene) {
-            //        PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file_);
+            //        PN_CORE_INFO("[Serialization] Autosave on shutdown: {}", curr_scene_file);
             //        if (!saveCurrentScene()) {
-            //            PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file_);
+            //            PN_CORE_WARN("[Serialization] Autosave FAILED: {}", curr_scene_file);
             //        }
             //    }
             //}
@@ -163,129 +156,25 @@ namespace PAIN {
             std::string path = file_path;
             if (path.size() < 4 || path.rfind(".scn") != path.size() - 4) path += ".scn";
             const bool ok = saveJsonFile(path, scene);
-            if (ok) { curr_scene_file_ = file_path; isModifiedScene = false; }
+            if (ok) { curr_scene_file = file_path; clearModifiedFlag(); }
             return ok;
         }
 
         bool Service::loadSceneFromFile(const std::string& file_path) {
             return false;
-//            auto path_service = services->get<Path::Path>();
-//            std::string virtPath = file_path;
-//
-//            if (virtPath.size() < 4 || virtPath.rfind(".scn") != virtPath.size() - 4)
-//                virtPath += ".scn";
-//
-//#ifdef PN_PLATFORM_WINDOWS
-//            // avoid the assert in WindowsPath::createFileStream
-//            const std::string realPath = path_service->resolvePath(virtPath);
-//            if (!std::filesystem::exists(realPath)) {
-//                PN_CORE_WARN("[Scene] File not found: {}", realPath);
-//                return false;
-//            }
-//#endif
-//            const auto j = loadJsonFile(file_path);
-//            if (!j.is_object()) {
-//                PN_CORE_WARN("[Scene] expected object root (reflection)");
-//                return false;
-//            }
-//
-//            // Reflect into doc_
-//            // set doc_ + clear dirty
-//            doc_from_json_(j);
-//
-//            if (auto metadata_service = services->get<PAIN::MetaData::Service>()) {
-//                if (j.contains("metadata_service")) {
-//                    metadata_service->deserializeServiceState(j["metadata_service"]);
-//                }
-//            }
-//
-//            // Rebuild ECS from the new bolt on section if present
-//            if (auto ecsIt = j.find("ecs"); ecsIt != j.end() && ecsIt->is_object()) {
-//                if (auto controller = services->get<PAIN::ECS::Controller>()) {
-//                    controller->destroyAllEntities();
-//
-//                    if (auto entsIt = ecsIt->find("Entities"); entsIt != ecsIt->end() && entsIt->is_array()) {
-//                        // PASS 1: Create all entities with their original GUIDs
-//                        // This ensures all entities exist in the GUID registry before we deserialize Hierarchy
-//                        std::vector<std::pair<entt::entity, const nlohmann::json*>> entity_data_pairs;
-//
-//                        for (const auto& ewrap : *entsIt) {
-//                            if (!ewrap.is_object()) continue;
-//                            auto eit = ewrap.find("Entity");
-//                            if (eit == ewrap.end() || !eit->is_object()) continue;
-//
-//                            const auto& E = *eit;
-//
-//                            // Extract the GUID from Components
-//                            Assets::GUID entity_guid;
-//                            bool has_guid = false;
-//
-//                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-//                                if (auto guidIt = compsIt->find("GUID"); guidIt != compsIt->end() && guidIt->is_object()) {
-//                                    try {
-//                                        // Deserialize the GUID using reflection
-//                                        Entity::GUID guid_comp;
-//                                        PAIN::Serialization::from_json_reflected(guid_comp, *guidIt);
-//                                        entity_guid = guid_comp.guid;
-//                                        has_guid = true;
-//                                    }
-//                                    catch (const std::exception& ex) {
-//                                        PN_CORE_ERROR("[Scene Load] Failed to deserialize GUID: {}", ex.what());
-//                                    }
-//                                }
-//                            }
-//
-//                            // Create entity with the original GUID if available
-//                            entt::entity e;
-//                            if (has_guid && entity_guid.IsValid()) {
-//                                e = controller->createEntity(entity_guid);
-//                                PN_CORE_INFO("[Scene Load] Created entity {} with preserved GUID {}",
-//                                    static_cast<uint32_t>(e), entity_guid.ToString());
-//                            }
-//                            else {
-//                                e = controller->createEntity();
-//                                PN_CORE_WARN("[Scene Load] Created entity {} without GUID, generated new one",
-//                                    static_cast<uint32_t>(e));
-//                            }
-//
-//                            // Store for second pass
-//                            entity_data_pairs.emplace_back(e, &E);
-//                        }
-//
-//                        // PASS 2: Deserialize all components now that all entities exist in GUID registry
-//                        for (const auto& [e, E_ptr] : entity_data_pairs) {
-//                            const auto& E = *E_ptr;
-//
-//                            // Name
-//                            if (auto n = E.find("Name"); n != E.end() && n->is_string())
-//                                controller->addEntityComponent(e, Entity::Name{ n->get<std::string>() });
-//                            else
-//                                controller->addEntityComponent(e, Entity::Name{ "Entity " + std::to_string((int)e) });
-//
-//                            // Deserialize all components (including Hierarchy, which now can resolve GUIDs)
-//                            if (auto compsIt = E.find("Components"); compsIt != E.end() && compsIt->is_object()) {
-//                                controller->loadAllComponentsFromJson(e, *compsIt);
-//                            }
-//                        }
-//
-//                        PN_CORE_INFO("[Scene Load] Successfully loaded {} entities with hierarchy", entity_data_pairs.size());
-//                    }
-//                }
-//            }
-//
-//            // Remember which file is loaded for saving
-//            curr_scene_file_ = file_path;
-//
-//            PN_CORE_INFO("[Serialization] loadSceneFromFile OK, marking scene changed");
-//            markSceneChanged();
-//            return true;
+        }
+
+        void Service::modifyScene()
+        {
+            PN_CORE_ERROR("SCENE MODIFIED");
+            isModifiedScene = true;
         }
 
         std::string Service::getCurrSceneId() const
         {
             // Find the last '/' in the path to get the base filename
-            size_t lastSlash = curr_scene_file_.find_last_of('/');
-            std::string baseName = (lastSlash != std::string::npos) ? curr_scene_file_.substr(lastSlash + 1) : curr_scene_file_;
+            size_t lastSlash = curr_scene_file.find_last_of('/');
+            std::string baseName = (lastSlash != std::string::npos) ? curr_scene_file.substr(lastSlash + 1) : curr_scene_file;
 
             // Remove ".scn" extension if present
             size_t scnPos = baseName.rfind(".scn");
@@ -357,21 +246,24 @@ namespace PAIN {
         bool Service::createNewScene(std::string_view baseName)
         {
             const std::string path = makeVirtualScenePathFromBase(baseName);
+            clearModifiedFlag();
             return saveSceneToFile(path); // uses existing minimal payload
         }
 
         bool Service::saveCurrentScene()
         {
-            if (curr_scene_file_.empty()) return false;
+            if (curr_scene_file.empty()) return false;
             // for now just touch the minimal payload, later then dump ECS/cameras wtv
-            return saveSceneToFile(curr_scene_file_);
+            clearModifiedFlag();
+            return saveSceneToFile(curr_scene_file);
         }
 
         bool Service::saveSceneAs(std::string_view baseName)
         {
             const std::string path = makeVirtualScenePathFromBase(baseName);
             if (!saveSceneToFile(path)) return false;
-            curr_scene_file_ = path;
+            curr_scene_file = path;
+            clearModifiedFlag();
             return true;
         }
 
@@ -395,7 +287,7 @@ namespace PAIN {
         //    std::error_code ec;
         //    std::filesystem::remove(path, ec);
         //    if (ec) return false;
-        //    if (curr_scene_file_ == path) curr_scene_file_.clear();
+        //    if (curr_scene_file == path) curr_scene_file.clear();
         //    return true;
         //}
 
@@ -432,7 +324,7 @@ namespace PAIN {
                 return false;
             }
 
-            if (curr_scene_file_ == full_path) curr_scene_file_.clear();
+            if (curr_scene_file == full_path) curr_scene_file.clear();
 
             PN_CORE_INFO("[Serialization] Deleted scene: {}", full_path);
             return true;

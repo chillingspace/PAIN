@@ -105,6 +105,8 @@ namespace PAIN {
             // Helper to detect changes in editor (do not serialize this)
             glm::vec3 last_applied_offset = glm::vec3(0.0f);
 
+            bool use_gravity = true;
+
             // link layer to bodyID
             /*RigidBody3D() {
                 layer.setBodyReference(bodyID);
@@ -296,7 +298,6 @@ static_assert(refl::trait::is_reflectable_v<PAIN::Joint>);
 REFL_TYPE(PAIN::Physics::RigidBody3D)
 REFL_FIELD(velocity)
 REFL_FIELD(angular_velocity)
-REFL_FIELD(mass)
 //REFL_FIELD(bodyID)   // Uneditable; Uncommenting this causes issues with the serialization
 //REFL_FIELD(b_is_dynamic)
 //REFL_FIELD(layer)
@@ -304,6 +305,7 @@ REFL_FIELD(motion_type)
 REFL_FIELD(physics_behavior)
 REFL_FIELD(collider_scale) // Currently only for Jolt rigidbody
 REFL_FIELD(collider_offset) // Currently only for Joly rigidbody
+REFL_FIELD(use_gravity)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
