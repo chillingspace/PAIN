@@ -169,6 +169,12 @@ namespace PAIN {
         virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
         virtual float GetAnimationDuration(entt::entity entityId) = 0;
 
+        /* =========================================================================== */
+        /*                              Application Control                              */
+        /* =========================================================================== */
+        // Request application quit / safe shutdown
+        virtual void QuitApplication() = 0;
+
     };
 
 }

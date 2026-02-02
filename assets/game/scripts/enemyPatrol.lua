@@ -44,6 +44,15 @@ end
 registerUpdate(function(dt)
     local id = entityId
 
+    -- freeze while detecting
+    if _G.EnemyFrozen and _G.EnemyFrozen[id] then
+        if moveSoundPlaying and audioStop then
+            audioStop(id)
+            moveSoundPlaying = false
+        end
+        return
+    end
+
     if not pointA or not pointB then
         local ex, ey, ez = getPosition(id)
 

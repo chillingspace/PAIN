@@ -153,10 +153,10 @@ local handlers = {
             printLog("[UI] QuitOverlay hidden")
         end
         
-        -- Load main menu - HARDCODED
-        printLog("[UI] quit_Confirm -> changeScene(mainmenu.scn)")
+        -- Load main menu 
+        printLog("[UI] quit_Confirm -> changeScene(" .. G.MainMenuSceneName .. ")")
         if changeScene then
-            changeScene("mainmenu.scn")
+            changeScene(G.MainMenuSceneName)
         else
             printLog("[UI] quit_Confirm pressed, but changeScene is not bound")
         end

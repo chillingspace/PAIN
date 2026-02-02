@@ -439,9 +439,9 @@ namespace PAIN {
 							"menu_OpenSettings",
 							"menu_HowToPlay",
 							"menu_Credits",
-							"menu_OpenTutorial",
 							"menu_QuitGame",
 
+							"menu_OpenTutorial",
 							"menu_BackToMain",
 
 							"quit_Confirm",

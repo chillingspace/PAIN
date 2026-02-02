@@ -531,6 +531,23 @@ namespace PAIN {
         return false;
     }
 
+    /* =========================================================================== */
+    /*                         Application / Quit Control                           */
+    /* =========================================================================== */
+    void EngineAPIAdapter::QuitApplication()
+    {
+        // Prefer a safe shutdown via the window system when available
+        if (window_) {
+            PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> calling Window::safeShutdown()");
+            window_->safeShutdown();
+            return;
+        }
+
+        // Fallback: request quit via global flag (Application::Run checks this)
+        PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> window not available, setting g_shouldQuitApplication");
+        PAIN::g_shouldQuitApplication = true;
+    }
+
 
     /* =========================================================================== */
     /*                              Graphics / FX                                  */

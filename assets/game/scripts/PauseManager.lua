@@ -2,7 +2,7 @@
 log("[PauseManager] Script LOADED at startup!")
 
 -- Track current level globally
-_G_root.CurrentLevelName = _G_root.CurrentLevelName or "Tutorial.scn"
+_G_root.CurrentLevelName = _G_root.CurrentLevelName or "Level1.scn"
 
 local isPaused = false
 local escWasPressed = false

@@ -9,6 +9,7 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "PAINEngine/CoreSystems/Scene/Scene.h"
 #include "PAINEngine/CoreSystems/Scene/Camera.h"
+#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #ifdef PN_PLATFORM_ANDROID
 #include "PAINEngine/CoreSystems/Events/Android/TouchEvents.h"
@@ -278,12 +279,15 @@ namespace PAIN {
                 return;
             }
 
+            // Provide optional window pointer so adapter can request safeShutdown
+            auto window_ptr = services_ptr->get<Window::Window>();
             auto adapter = std::make_shared<EngineAPIAdapter>(
                 *ecs_ptr,
                 *meta_ptr,
                 assets_ptr.get(),
                 path_ptr.get(),
-                scene_ptr.get()
+                scene_ptr.get(),
+                window_ptr ? window_ptr.get() : nullptr
             );
 
 #ifdef _DEBUG

@@ -715,6 +715,10 @@ namespace PAIN {
             if (!api_ || pendingSceneChange_) return;
             setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
             });
+        lua_.set_function("quitApplication", [this]() {
+            if (!api_) return;
+            api_->QuitApplication();
+            });
         lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
         lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
         lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
