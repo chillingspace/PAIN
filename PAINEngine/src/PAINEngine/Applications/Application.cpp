@@ -331,6 +331,9 @@ namespace PAIN {
 		// ADDED: Log graceful shutdown if quit was requested from script
 		if (g_shouldQuitApplication) {
 			PN_CORE_INFO("Application quit requested from script, shutting down gracefully");
+			// Quit application 
+			auto window = services->get<Window::Window>();
+			if (window) window->safeShutdown();
 		}
 	}
 
