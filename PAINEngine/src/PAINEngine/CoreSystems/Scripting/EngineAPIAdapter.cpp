@@ -718,12 +718,12 @@ namespace PAIN {
 #endif
     }
 
-#ifdef PN_PLATFORM_WINDOWS
+
     void EngineAPIAdapter::Hide_Cursor(bool b_set_cursor)
     {
         window_->setCursorMode(b_set_cursor);
     }
-#endif
+
 
     bool EngineAPIAdapter::Input_IsKeyDown(int key) { return keysDown_.count(key) != 0; }
     bool EngineAPIAdapter::Input_WasKeyPressed(int key) { return keysPressed_.count(key) != 0; }
