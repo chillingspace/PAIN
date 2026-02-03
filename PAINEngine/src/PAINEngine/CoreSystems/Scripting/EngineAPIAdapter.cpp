@@ -446,6 +446,8 @@ namespace PAIN {
             //SetGameCamera();
         }
 
+        return true;
+
         //// Invalid default
         //PAIN::Assets::GUID targetGuid; 
 
@@ -490,7 +492,6 @@ namespace PAIN {
         //// Set Camera to game camera
         //scene_->SetGameCamera();
 
-        return true;
     }
 
     void EngineAPIAdapter::PauseAllSystems(bool) {}

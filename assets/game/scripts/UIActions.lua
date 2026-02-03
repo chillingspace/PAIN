@@ -222,58 +222,58 @@ local handlers = {
     ----------------------------------------------------------------------
     menu_StartGame = function(buttonEntity, payload)
 
-        local firstLevelScene = resolveSceneName(payload, G.FirstLevelScene, "Level1.scn")
+        --local firstLevelScene = resolveSceneName(payload, G.FirstLevelScene, "Level1.scn")
 
-        printLog("[UI] menu_StartGame -> changeScene(" .. firstLevelScene .. ")")
+        --printLog("[UI] menu_StartGame -> changeScene(" .. firstLevelScene .. ")")
 
         -- Reset camera state before scene transition
         -- if _G.ResetThirdPersonCamera then
         --     _G.ResetThirdPersonCamera()
         -- end
 
-        if firstLevelScene and changeScene then
+        if G.FirstLevelScene and changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
                 
             end
-            changeScene(firstLevelScene)
+            changeScene(G.FirstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
         end
     end,
 
     menu_OpenSettings = function(buttonEntity, payload)
-        local settingsScene = resolveSceneName(payload, G.SettingsSceneName, "settings.scn")
+        --local settingsScene = resolveSceneName(payload, G.SettingsSceneName, "settings.scn")
 
-        if settingsScene and changeScene then
-            printLog("[UI] menu_OpenSettings -> changeScene("..settingsScene..")")
-            changeScene(settingsScene)
+        if G.SettingsSceneName and changeScene then
+            printLog("[UI] menu_OpenSettings -> changeScene("..G.SettingsSceneName..")")
+            changeScene(G.SettingsSceneName)
         else
             printLog("[UI] menu_OpenSettings pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_HowToPlay = function(buttonEntity, payload)
-        local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
+        --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
 
-        if howtoplayScene and changeScene then
-            printLog("[UI] menu_HowToPlay -> changeScene("..howtoplayScene..")")
-            changeScene(howtoplayScene)
+        if G.HowToPlaySceneName and changeScene then
+            printLog("[UI] menu_HowToPlay -> changeScene("..G.HowToPlaySceneName..")")
+            changeScene(G.HowToPlaySceneName)
         else
             printLog("[UI] menu_HowToPlay pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_Credits = function(buttonEntity, payload)
-        local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
+        --local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
 
-        if creditsScene and changeScene then
-            printLog("[UI] menu_Credits -> changeScene("..creditsScene..")")
-            changeScene(creditsScene)
-        else
+        --if G.CreditsSceneName and changeScene then
+        --    printLog("[UI] menu_Credits -> changeScene("..G.CreditsSceneName..")")
+        --    changeScene(G.CreditsSceneName)
+        --else
             printLog("[UI] menu_Credits pressed (no scene specified / not implemented)")
-        end
+        --end
     end,
 
     menu_QuitGame = function(buttonEntity, payload)
@@ -286,25 +286,25 @@ local handlers = {
     end,
 
     menu_OpenTutorial = function(buttonEntity, payload)
-        local tutorialScene = resolveSceneName(payload or G.TutorialSceneName, "Tutorial.scn")
+        --local tutorialScene = resolveSceneName(payload or G.TutorialSceneName, "Tutorial.scn")
 
-        if tutorialScene and changeScene then
-            printLog("[UI] menu_OpenTutorial -> changeScene("..tutorialScene..")")
-            changeScene(tutorialScene)
+        if G.TutorialSceneName and changeScene then
+            printLog("[UI] menu_OpenTutorial -> changeScene("..G.TutorialSceneName..")")
+            changeScene(G.TutorialSceneName)
         else
             printLog("[UI] menu_OpenTutorial pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_BackToMain = function(buttonEntity, payload)
-        printLog("[UI] menu_BackToMain -> changeScene(mainmenu.scn)")
+        printLog("[UI] menu_BackToMain -> changeScene("..G.MainMenuSceneName..")")
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
                 
             end
-            changeScene("mainmenu.scn")
+            changeScene(G.MainMenuSceneName)
         else
             printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")
         end
@@ -316,11 +316,11 @@ local handlers = {
     ----------------------------------------------------------------------
     howtoplay_ArrowLeft = function(buttonEntity, payload)
         -- Back to How To Play Page 1
-        local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
+        --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
 
-        if howtoplayScene and changeScene then
-            printLog("[UI] backtohowToPlay1 -> changeScene("..howtoplayScene..")")
-            changeScene(howtoplayScene)
+        if G.HowToPlaySceneName and changeScene then
+            printLog("[UI] backtohowToPlay1 -> changeScene("..G.HowToPlaySceneName..")")
+            changeScene(G.HowToPlaySceneName)
         else
             printLog("[UI] backtohowToPlay1 pressed (no scene specified / not implemented)")
         end
@@ -328,11 +328,11 @@ local handlers = {
 
     howtoplay_ArrowRight = function(buttonEntity, payload)
         -- Back to How To Play Page 2
-        local howtoplayScene2 = resolveSceneName(payload or G.HowToPlaySceneName2, "howtoplay2.scn")
+        --local howtoplayScene2 = resolveSceneName(payload or G.HowToPlaySceneName2, "howtoplay2.scn")
 
-        if howtoplayScene2 and changeScene then
-            printLog("[UI] backtohowToPlay2 -> changeScene("..howtoplayScene2..")")
-            changeScene(howtoplayScene2)
+        if G.HowToPlaySceneName2 and changeScene then
+            printLog("[UI] backtohowToPlay2 -> changeScene("..G.HowToPlaySceneName2..")")
+            changeScene(G.HowToPlaySceneName2)
         else
             printLog("[UI] backtohowToPlay2 pressed (no scene specified / not implemented)")
         end
