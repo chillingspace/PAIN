@@ -9929,6 +9929,14 @@
                         "Name": {
                             "name": "heart_1"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.8500000238418579,
@@ -10031,6 +10039,14 @@
                         "Name": {
                             "name": "heart_2"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.7200000286102295,
@@ -10132,6 +10148,14 @@
                         },
                         "Name": {
                             "name": "heart_3"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [

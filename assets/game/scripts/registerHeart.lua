@@ -9,5 +9,13 @@ registerUpdate(function(dt)
     }
 
     table.insert(_G.UI.hearts, { id = entityId, x = x })
+
+    log(string.format(
+        "[registerHeart] registered heart id=%s x=%.3f (count=%d)",
+        tostring(entityId),
+        x or 0.0,
+        #_G.UI.hearts
+    ))
+
     registered = true
 end)
