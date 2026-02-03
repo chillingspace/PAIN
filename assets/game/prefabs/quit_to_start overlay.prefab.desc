@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "quit_to_start overlay.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 355408861648900905
+  },
+  "descriptor_version": 1,
+  "guid": "3ae755df-b075-fc42-88ae-408c55e41704",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\quit_to_start overlay.prefab"
+  }
+}
