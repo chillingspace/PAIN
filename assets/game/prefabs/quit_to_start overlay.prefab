@@ -1,0 +1,103 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 18
+                },
+                "Layer": {
+                    "layer_id": 4,
+                    "layer_mask": 16
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "quit_to_start overlay"
+                },
+                "Texture2D": {
+                    "pos": [
+                        0.0,
+                        0.0
+                    ],
+                    "texture_guid": "a932d5f4-4bf6-e049-8020-f5065cdc75bd",
+                    "texture_scale": [
+                        1.7999999523162842,
+                        1.0
+                    ]
+                },
+                "UIElement": {
+                    "b_is_enabled": true,
+                    "b_is_interactable": true,
+                    "layer": 0
+                },
+                "UIRectTransform": {
+                    "anchor_max": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchor_min": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchored_position": [
+                        0.0,
+                        0.0
+                    ],
+                    "local_position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "offset_max": [
+                        0.0,
+                        0.0
+                    ],
+                    "offset_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "size_delta": [
+                        100.0,
+                        100.0
+                    ]
+                }
+            },
+            "entityGUID": "a8a2a666-4902-1a43-82f9-85924a7ed701"
+        }
+    ],
+    "prefabName": "quit_to_start overlay",
+    "rootEntityGUID": "a8a2a666-4902-1a43-82f9-85924a7ed701"
+}

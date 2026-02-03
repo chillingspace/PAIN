@@ -114,16 +114,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.016610141843557358,
-            -0.9009469151496887,
-            -0.4336114525794983
+            -0.006481134798377752,
+            -0.7802432775497437,
+            0.6254425644874573
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -4.72704553604126,
-            10.803120613098145,
-            1.1293458938598633
+            0.07120740413665771,
+            14.736430168151855,
+            -15.27226734161377
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 10.5,
@@ -5558,7 +5558,6 @@
                             "childrenGUIDs": [
                                 "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                                 "6453baf0-385a-7a40-bffb-de0d6288d042",
-                                "a49b1377-cce0-e541-9941-87218b1949b6",
                                 "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -5997,7 +5996,7 @@
                                 "Texture2D": {
                                     "pos": [
                                         -0.054999999701976776,
-                                        -0.07000000029802322
+                                        -0.10000000149011612
                                     ],
                                     "texture_guid": "97d2a125-9452-e944-8004-faedf25dc26c",
                                     "texture_scale": [
@@ -6090,7 +6089,7 @@
                         "Texture2D": {
                             "pos": [
                                 -0.054999999701976776,
-                                -0.07000000029802322
+                                -0.10000000149011612
                             ],
                             "texture_guid": "97d2a125-9452-e944-8004-faedf25dc26c",
                             "texture_scale": [
@@ -6286,7 +6285,7 @@
                                 "Texture2D": {
                                     "pos": [
                                         -0.07999999821186066,
-                                        -0.6399999856948853
+                                        -0.4000000059604645
                                     ],
                                     "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
                                     "texture_scale": [
@@ -6379,7 +6378,7 @@
                         "Texture2D": {
                             "pos": [
                                 -0.07999999821186066,
-                                -0.6399999856948853
+                                -0.4000000059604645
                             ],
                             "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
                             "texture_scale": [
@@ -6466,295 +6465,6 @@
                         }
                     },
                     "Name": "quit_button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                250.0,
-                                50.0
-                            ],
-                            "min_point": [
-                                -250.0,
-                                -50.0
-                            ],
-                            "position_offset": [
-                                60.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "a49b1377-cce0-e541-9941-87218b1949b6"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 2,
-                            "layer_mask": 4
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                2.8526031970977783,
-                                1.9104310274124146,
-                                -5.961182594299316
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "settings_button"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "CustomHitbox2D": {
-                                    "max_point": [
-                                        250.0,
-                                        50.0
-                                    ],
-                                    "min_point": [
-                                        -250.0,
-                                        -50.0
-                                    ],
-                                    "position_offset": [
-                                        60.0,
-                                        0.0
-                                    ]
-                                },
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
-                                    "siblingIndex": 3
-                                },
-                                "Layer": {
-                                    "layer_id": 2,
-                                    "layer_mask": 4
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        2.8526031970977783,
-                                        1.9104310274124146,
-                                        -5.961182594299316
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "settings_button"
-                                },
-                                "Scripts": {
-                                    "scripts": [
-                                        {
-                                            "enabled": true,
-                                            "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
-                                        }
-                                    ]
-                                },
-                                "Texture2D": {
-                                    "pos": [
-                                        -0.054999999701976776,
-                                        -0.3499999940395355
-                                    ],
-                                    "texture_guid": "7016a242-0976-204e-bd84-49c06ab665a9",
-                                    "texture_scale": [
-                                        0.4000000059604645,
-                                        0.09000000357627869
-                                    ]
-                                },
-                                "UIAnimation": {
-                                    "b_loop": true,
-                                    "b_playing": false,
-                                    "duration": 0.20000000298023224,
-                                    "frame_duration": 0.10000000149011612,
-                                    "spritesheet_columns": 2,
-                                    "spritesheet_rows": 1,
-                                    "total_frames": 2
-                                },
-                                "UIButton": {
-                                    "action": 8,
-                                    "disabled_color": -10066330,
-                                    "highlighted_color": -3355444,
-                                    "normal_color": -1,
-                                    "payload": "",
-                                    "pressed_color": -5592406,
-                                    "state": 0
-                                },
-                                "UIElement": {
-                                    "b_is_enabled": true,
-                                    "b_is_interactable": true,
-                                    "layer": 0
-                                },
-                                "UIRectTransform": {
-                                    "anchor_max": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchor_min": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchored_position": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "local_position": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_max": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_min": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "pivot": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "size_delta": [
-                                        1024.0,
-                                        88.0
-                                    ]
-                                },
-                                "UVCoordinates": {
-                                    "uv": [
-                                        0.0011627906933426857,
-                                        0.011363636702299118,
-                                        0.4988372027873993,
-                                        0.9886363744735718
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "7beaa535-462c-7f45-9d6d-4090ca227034",
-                            "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
-                            "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                -0.054999999701976776,
-                                -0.3499999940395355
-                            ],
-                            "texture_guid": "7016a242-0976-204e-bd84-49c06ab665a9",
-                            "texture_scale": [
-                                0.4000000059604645,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIAnimation": {
-                            "b_loop": true,
-                            "b_playing": false,
-                            "duration": 0.20000000298023224,
-                            "frame_duration": 0.10000000149011612,
-                            "spritesheet_columns": 2,
-                            "spritesheet_rows": 1,
-                            "total_frames": 2
-                        },
-                        "UIButton": {
-                            "action": 8,
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": 0
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                1024.0,
-                                88.0
-                            ]
-                        },
-                        "UVCoordinates": {
-                            "uv": [
-                                0.0011627906933426857,
-                                0.011363636702299118,
-                                0.4988372027873993,
-                                0.9886363744735718
-                            ]
-                        }
-                    },
-                    "Name": "settings_button"
                 }
             },
             {
@@ -7317,13 +7027,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.4099999964237213,
-                                -0.6499999761581421
+                                0.6200000047683716,
+                                -0.550000011920929
                             ],
                             "texture_guid": "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c",
                             "texture_scale": [
-                                0.15000000596046448,
-                                0.15000000596046448
+                                0.11999999731779099,
+                                0.11999999731779099
                             ]
                         },
                         "UIButton": {
@@ -7421,9 +7131,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.0,
-                                0.0,
-                                0.0
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
                             ],
                             "rotation": [
                                 0.0,
@@ -7447,13 +7157,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.6000000238418579,
-                                -0.6499999761581421
+                                0.7300000190734863,
+                                -0.27000001072883606
                             ],
                             "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
                             "texture_scale": [
-                                0.15000000596046448,
-                                0.15000000596046448
+                                0.11999999731779099,
+                                0.11999999731779099
                             ]
                         },
                         "UIButton": {
@@ -7551,9 +7261,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.0,
-                                0.0,
-                                0.0
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
                             ],
                             "rotation": [
                                 0.0,
@@ -7582,8 +7292,8 @@
                             ],
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                             "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
+                                0.15000000596046448,
+                                0.15000000596046448
                             ]
                         },
                         "UIButton": {

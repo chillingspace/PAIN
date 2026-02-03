@@ -137,6 +137,7 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
+            setLayerEnabled(2, false)
             printLog("[UI] QuitOverlay (layer 4) shown")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -177,6 +178,7 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(4, false)
+            setLayerEnabled(2, true)
             printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -201,7 +203,7 @@ local handlers = {
             changeScene(firstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
-        --end
+        end
     end,
 
     menu_OpenSettings = function(buttonEntity, payload)
