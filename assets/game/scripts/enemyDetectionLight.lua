@@ -7,7 +7,7 @@ local seeingPlayer = false
 
 -- match inspector values
 local LIGHT_OFFSET = { x = 0.0, y = 0.0, z = 0.0 }   -- same as Lighting.offset
-local OUTER_ANGLE_DEG = 17.5                          -- spotlight outer angle
+local OUTER_ANGLE_DEG = 32                          -- spotlight outer angle
 local MAX_DISTANCE = 9.0                              -- how far the light reaches (world units)
 
 -- spotlight points straight down in world space for now
