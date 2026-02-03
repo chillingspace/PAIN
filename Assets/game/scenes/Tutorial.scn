@@ -5,18 +5,17 @@
         "15808cf2-db36-c04b-8954-48d10ebaf528",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
         "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+        "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
         "be682648-fcd7-2b47-b7bf-3faea372c733",
         "9d1b2d15-958b-3d45-ba13-0d338dafa591",
         "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
@@ -37,8 +36,6 @@
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "a77749e3-6c15-7446-a792-5609dd96b391",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "30cd3b32-bce1-564e-8046-1204bbfee443",
         "e01c794e-0add-d542-9860-03f63c3193ab",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
@@ -92,7 +89,7 @@
         "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
@@ -273,6 +270,22 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+                            "volumeDb": 0.0
+                        },
                         "GUID": {
                             "guid": "e91543dd-0d34-974e-9638-1b4754081d8c"
                         },
@@ -286,6 +299,12 @@
                             "layer_mask": 1
                         },
                         "Lighting": {
+                            "direction": [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            "inner_angle": 12.5,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -297,6 +316,7 @@
                                 0.0,
                                 0.0
                             ],
+                            "outer_angle": 17.5,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -356,19 +376,11 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
-                                },
-                                {
-                                    "enabled": true,
                                     "script_asset": "6b41ee65-defa-d443-b888-eaca9da34897"
                                 },
                                 {
                                     "enabled": true,
-                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
+                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
                         }
@@ -513,6 +525,22 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+                            "volumeDb": 0.0
+                        },
                         "GUID": {
                             "guid": "f8d780de-2079-0d4e-bb1c-db23bdf70eaf"
                         },
@@ -526,6 +554,12 @@
                             "layer_mask": 1
                         },
                         "Lighting": {
+                            "direction": [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            "inner_angle": 12.5,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -537,6 +571,7 @@
                                 0.0,
                                 0.0
                             ],
+                            "outer_angle": 17.5,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -596,19 +631,11 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
-                                },
-                                {
-                                    "enabled": true,
                                     "script_asset": "6b41ee65-defa-d443-b888-eaca9da34897"
                                 },
                                 {
                                     "enabled": true,
-                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
+                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
                         }
@@ -753,6 +780,22 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+                            "volumeDb": 0.0
+                        },
                         "GUID": {
                             "guid": "a2cb7a4a-3d80-b54e-95b1-7b513b110f29"
                         },
@@ -766,6 +809,12 @@
                             "layer_mask": 1
                         },
                         "Lighting": {
+                            "direction": [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            "inner_angle": 12.5,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -777,6 +826,7 @@
                                 0.0,
                                 0.0
                             ],
+                            "outer_angle": 17.5,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -836,19 +886,11 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
-                                },
-                                {
-                                    "enabled": true,
                                     "script_asset": "6b41ee65-defa-d443-b888-eaca9da34897"
                                 },
                                 {
                                     "enabled": true,
-                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
+                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
                         }
@@ -1035,6 +1077,22 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+                            "volumeDb": 0.0
+                        },
                         "GUID": {
                             "guid": "46d06e16-1c6f-b549-9aa2-5ccac53f6803"
                         },
@@ -1048,6 +1106,12 @@
                             "layer_mask": 1
                         },
                         "Lighting": {
+                            "direction": [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            "inner_angle": 12.5,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -1059,6 +1123,7 @@
                                 0.0,
                                 0.0
                             ],
+                            "outer_angle": 17.5,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -1118,19 +1183,11 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
-                                },
-                                {
-                                    "enabled": true,
                                     "script_asset": "6b41ee65-defa-d443-b888-eaca9da34897"
                                 },
                                 {
                                     "enabled": true,
-                                    "script_asset": "0ab12b46-3b63-2143-8863-042d7302bdb8"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "22345232-e154-f042-9c56-3391fb5e3164"
+                                    "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
                         }
