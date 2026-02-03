@@ -7,6 +7,10 @@
 
 log("[PlayerState] Script loaded on entityId=", tostring(entityId))
 
+-- local G = _G_root
+-- print("[Game_PlayerState] load time _G.CurrentLevelName=", _G.CurrentLevelName)
+
+
 -- global so other scripts can use
 _G.PlayerState = _G.PlayerState or {
     lives = 3,
@@ -66,7 +70,10 @@ local hidePressed = false
 -- paths for end screens
 local GAMEOVER_TEX = "game/textures/gameover.png"
 local WIN_TEX = "game/textures/win screen.png"
-local CURRENT_SCENE_PATH = "proto2.scn"  
+-- !TODO: Fix current scene path being set wrongly in UIActions.lua
+local CURRENT_SCENE_PATH = _G.CurrentLevelName
+-- local CURRENT_SCENE_PATH = "Level1.scn"
+log("[PlayerState] Current Scene Path:", _G.CurrentLevelName)
 local restartPressed = false
 
 -- Heart UI textures
@@ -96,6 +103,12 @@ if not S._keysRegistered then
 
     S._keysRegistered = true 
 end
+
+-- Ensures that currentScene is always updated
+local function currentScene()
+    return _G.CurrentLevelName or "Level1.scn"
+end
+
 
 local function updateHeartsUI()
     -- Store the player's lives
@@ -519,6 +532,8 @@ end
 
 
 function S.update(dt)
+    CURRENT_SCENE_PATH = currentScene()
+
     if S.pendingHeartBind then
         if bindHeartsFromRegistry() then
             S.pendingHeartBind = false
@@ -709,6 +724,7 @@ end
 -- tick cooldown
 registerUpdate(function(dt)
     S.update(dt)
+    -- print("[Game_PlayerState] runtime _G.CurrentLevelName=", _G.CurrentLevelName)
 end)
 
 

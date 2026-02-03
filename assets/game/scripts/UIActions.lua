@@ -12,6 +12,15 @@ G.HowToPlaySceneName  = G.HowToPlaySceneName or "howtoplay.scn"
 G.SettingsSceneName   = G.SettingsSceneName  or "settings.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "credits.scn"
 
+-- Store current level name globally (For Game_PlayerState)
+if G and G.CurrentLevelName then
+    _G.CurrentLevelName = G.CurrentLevelName
+end
+
+-- print("[UIActions] running, _G_root=", _G_root)
+-- print("[UIActions] before default, CurrentLevelName=", _G_root and _G_root.CurrentLevelName)
+
+
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
         return fallback
