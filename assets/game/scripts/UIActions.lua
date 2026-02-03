@@ -86,6 +86,16 @@ local handlers = {
     ----------------------------------------------------------------------
     -- PAUSE MENU
     ----------------------------------------------------------------------
+    goto_Pause = function(buttonEntity, payload)
+        -- Android touch button callback to pause the game
+        if _G_root.TogglePause then
+            _G_root.TogglePause()
+            printLog("[UI] goto_Pause (Android) -> called TogglePause()")
+        else
+            printLog("[UI] goto_Pause pressed, but TogglePause is not available")
+        end
+    end,
+
     pause_Resume = function(buttonEntity, payload)
         if _G_root.TogglePause then
             _G_root.TogglePause()

@@ -35,7 +35,6 @@ namespace PAIN {
 		case UIAction::pause_Restart:          return "pause_Restart";
 		case UIAction::pause_Settings:         return "pause_Settings";
 		case UIAction::pause_ReturnToMainMenu: return "pause_ReturnToMainMenu";
-			// quit to start ??
 
 		case UIAction::menu_StartGame:         return "menu_StartGame";
 		case UIAction::menu_OpenSettings:      return "menu_OpenSettings";
@@ -49,7 +48,9 @@ namespace PAIN {
 		case UIAction::quit_Confirm:           return "quit_Confirm";
 		case UIAction::quit_Cancel:            return "quit_Cancel";
 
+        case UIAction::goto_Pause:             return "goto_Pause";
 		case UIAction::None:
+
 		default:                               return "None";
 		}
 	}

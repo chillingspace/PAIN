@@ -9352,7 +9352,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 0,
+                            "action": 18,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,

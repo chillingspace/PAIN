@@ -120,7 +120,8 @@ namespace PAIN {
 
 		// quit confirmation overlay
 		quit_Confirm,
-		quit_Cancel
+		quit_Cancel,		
+		goto_Pause
 	};
 
 	struct UIButton {
@@ -314,7 +315,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"},
 
 	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
-	{PAIN::UIAction::quit_Cancel, "quit_Cancel"} })
+	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
+	{PAIN::UIAction::goto_Pause, "goto_Pause"} })
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)

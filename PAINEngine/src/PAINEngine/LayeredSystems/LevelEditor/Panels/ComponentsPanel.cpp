@@ -446,6 +446,7 @@ namespace PAIN {
 
 							"quit_Confirm",
 							"quit_Cancel",
+							"goto_Pause",
 						};
 
 						int action_idx = static_cast<int>(button.action);
