@@ -119,7 +119,8 @@ namespace PAIN {
 		menu_BackToMain,
 
 		howtoplay_ArrowLeft,
-		howtoplay_ArrowRight
+		howtoplay_ArrowRight,
+
 		// quit confirmation overlay
 		quit_Confirm,
 		quit_Cancel,		
