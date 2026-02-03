@@ -441,15 +441,15 @@ namespace PAIN {
 							"menu_Credits",
 							"menu_QuitGame",
 
+							"quit_Confirm",
+							"quit_Cancel",
+							"goto_Pause",
+
 							"howtoplay_ArrowLeft",
 							"howtoplay_ArrowRight",
 
 							"menu_OpenTutorial",
 							"menu_BackToMain",
-
-							"quit_Confirm",
-							"quit_Cancel",
-							"goto_Pause",
 						};
 
 						int action_idx = static_cast<int>(button.action);

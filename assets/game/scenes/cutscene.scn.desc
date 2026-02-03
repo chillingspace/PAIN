@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "cutscene.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 8105696504276015700
+  },
+  "descriptor_version": 1,
+  "guid": "7f37b8ef-7979-1a4f-87e2-b5c29bb67d9c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\cutscene.scn"
+  }
+}

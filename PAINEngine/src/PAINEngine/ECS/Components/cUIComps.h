@@ -118,13 +118,13 @@ namespace PAIN {
 		menu_OpenTutorial,
 		menu_BackToMain,
 
-		howtoplay_ArrowLeft,
-		howtoplay_ArrowRight,
-
 		// quit confirmation overlay
 		quit_Confirm,
-		quit_Cancel,		
-		goto_Pause
+		quit_Cancel,
+		goto_Pause,
+
+		howtoplay_ArrowLeft,
+		howtoplay_ArrowRight
 	};
 
 	struct UIButton {
@@ -317,12 +317,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 	{PAIN::UIAction::menu_OpenTutorial, "menu_OpenTutorial"},
 	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"},
 
-	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
-	{ PAIN::UIAction::howtoplay_ArrowRight, "howtoplay_ArrowRight" }, 
-	
 	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
 	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
-	{PAIN::UIAction::goto_Pause, "goto_Pause"} })
+	{PAIN::UIAction::goto_Pause, "goto_Pause"},
+
+	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
+	{ PAIN::UIAction::howtoplay_ArrowRight, "howtoplay_ArrowRight" }
+})
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)

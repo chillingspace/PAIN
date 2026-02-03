@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "m4 menu extended bg.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4468655977389765614
+  },
+  "descriptor_version": 1,
+  "guid": "6297877b-5f1c-274b-a39b-6923756062d3",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\m4 menu extended bg.png"
+  }
+}
