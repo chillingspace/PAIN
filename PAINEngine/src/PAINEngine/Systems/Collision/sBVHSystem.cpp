@@ -248,8 +248,8 @@ namespace PAIN {
             float volume = (vol) ? vol->worldAABB.getVolume() : 0.0f;
 
             // Log every candidate
-            PN_CORE_INFO(" - Hit Entity {}: Dist={:.2f}, Vol={:.2f}",
-                (uint32_t)hit.entity, hit.distance, volume);
+            //PN_CORE_INFO(" - Hit Entity {}: Dist={:.2f}, Vol={:.2f}",
+            //    (uint32_t)hit.entity, hit.distance, volume);
 
         }
 
@@ -547,7 +547,7 @@ namespace PAIN {
 
         // Rebuild only if necessary
         if (m_needsFullRebuild || !m_bvh.isBuilt()) {
-            PN_CORE_INFO("BVH full rebuild: {} items", m_bvhItems.size());
+            //PN_CORE_INFO("BVH full rebuild: {} items", m_bvhItems.size());
 
             auto rebuildStart = std::chrono::high_resolution_clock::now();
             m_bvh.build(m_bvhItems);

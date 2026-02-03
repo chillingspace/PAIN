@@ -1302,6 +1302,75 @@ namespace PAIN {
 			loadScene(id);
 		}
 
+		void SceneManager::changeScene(const Assets::GUID& sceneGUID)
+		{
+			PN_CORE_INFO("[SceneManager] Scheduling scene transition to GUID: {}", sceneGUID.ToString());
+
+			// Store the target scene and set the flag
+			next_scene_guid = sceneGUID;
+			pending_scene_change = true;
+
+		}
+
+		void SceneManager::processPendingSceneChange()
+		{
+			// If no change is pending, do nothing
+			if (!pending_scene_change) return;
+
+			PN_CORE_INFO("[SceneManager] Executing pending scene transition...");
+
+			pending_scene_change = false;
+
+			auto assetManager = services->get<Assets::Manager>();
+			if (!assetManager) {
+				PN_CORE_ERROR("[SceneManager] Asset Manager not available");
+				return;
+			}
+
+			// Get scene asset by GUID
+			auto sceneOpt = assetManager->getAsset<SceneAsset>(next_scene_guid);
+			if (!sceneOpt.has_value()) {
+				PN_CORE_ERROR("[SceneManager] Failed to load scene with GUID: {}", next_scene_guid.ToString());
+				return;
+			}
+
+			//Get scene asset
+			auto currentSceneAsset = sceneOpt.value();
+
+			//Clear old scene
+			PN_CORE_INFO("[SceneManager] Unloading current scene");
+
+			// Destroy all ECS entities
+			auto controller = services->get<ECS::Controller>();
+			if (controller) {
+				controller->destroyAllEntities();
+				PN_CORE_INFO("[SceneManager] Cleared all entities");
+			}
+
+			//Reset with default
+			curr_scene_id = Assets::GUID();
+			services->get<Serialization::Service>()->setCurrSceneFileName("");
+
+			// Reset camera
+			active_game_cam = "";
+
+			//Configure the new scene
+			if (currentSceneAsset) {
+				configScene(*currentSceneAsset);
+			}
+			else {
+				PN_CORE_INFO("[SceneManager] Failed to configure scene with GUID: {}", next_scene_guid.ToString());
+				return;
+			}
+
+			//Scene changed successfully
+			PN_CORE_INFO("[SceneManager] Changed scene to {} from GUID: {}", currentSceneAsset->name, next_scene_guid.ToString());
+			curr_scene_id = next_scene_guid;
+			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
+
+			is_playing = true;
+		}
+
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 		void SceneManager::createScene(std::string const& name) {
@@ -1437,6 +1506,7 @@ namespace PAIN {
 			PN_CORE_INFO("PLAY");
 			captureSceneVariables(scene_snapshot);
 			scene_snapshot.entityData = captureCurrentEntities();
+			guid_snapshot = curr_scene_id;
 			is_playing = true;
 		}
 
@@ -1462,14 +1532,17 @@ namespace PAIN {
 			controller->getGUIDRegistry().clear();
 
 			// Restore env snapshot variables
+			setupLoadingScreen(scene_snapshot);
+			setupCamera(scene_snapshot);
 			setupEnvironment(scene_snapshot);
 			setupLayers(scene_snapshot);
 
-			// Rebuild entites from snapshop
+			// Rebuild entites from snapshot
 			buildEntitiesFromAsset(scene_snapshot);	
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
+			curr_scene_id = guid_snapshot;
 			is_playing = false;
 
 		}

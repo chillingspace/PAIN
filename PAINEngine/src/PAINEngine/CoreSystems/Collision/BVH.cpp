@@ -68,7 +68,7 @@ namespace PAIN {
     }
 
     void BVH::build(const std::vector<std::pair<entt::entity, AABB>>& items) {
-        PN_CORE_INFO("Building BVH with {} items", items.size());
+        //PN_CORE_INFO("Building BVH with {} items", items.size());
 
         // ========================================
         // 1. VALIDATE INPUT
@@ -190,7 +190,7 @@ namespace PAIN {
             node.height = 0;
             node.child1Index = -1;
             node.child2Index = -1;
-            PN_CORE_TRACE("Leaf Created: Node {}, Entity {}", nodeIndex, (uint32_t)node.entity);
+            //PN_CORE_TRACE("Leaf Created: Node {}, Entity {}", nodeIndex, (uint32_t)node.entity);
             return nodeIndex;
         }
 
@@ -274,9 +274,9 @@ namespace PAIN {
         recursionDepth++;
 
         // Build left child
-        PN_CORE_TRACE("Recursing Left: [{}, {})", start, mid);
+        //PN_CORE_TRACE("Recursing Left: [{}, {})", start, mid);
         int leftResult = buildRecursive(items, start, mid);
-        PN_CORE_TRACE("Recursing Right: [{}, {})", mid, end);
+        //PN_CORE_TRACE("Recursing Right: [{}, {})", mid, end);
         int rightResult = buildRecursive(items, mid, end);
 
         recursionDepth--;
@@ -375,7 +375,7 @@ namespace PAIN {
         // Refit AABBs up to root
         refitParentChain(leafIndex);
 
-        PN_CORE_TRACE("[BVH] Inserted leaf {} for entity {}", leafIndex, static_cast<uint32_t>(entity));
+        //PN_CORE_TRACE("[BVH] Inserted leaf {} for entity {}", leafIndex, static_cast<uint32_t>(entity));
         return leafIndex;
     }
 

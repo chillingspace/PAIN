@@ -442,7 +442,7 @@ namespace PAIN {
 
         if (scn_opt) {
 
-            scene_->loadScene(scn_opt.get()->guid);
+            scene_->changeScene(scn_opt.get()->guid);
             //SetGameCamera();
         }
 

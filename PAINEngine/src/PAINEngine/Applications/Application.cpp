@@ -216,6 +216,12 @@ namespace PAIN {
 			//Drain all events in queue
 			drainEventQueue();
 
+			// Process scene changes
+			auto sceneManager = services->get<Scene::SceneManager>();
+			if (sceneManager) {
+				sceneManager->processPendingSceneChange();
+			}
+
 			if (window->isMinimized()) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue; // Go back to start of while loop
