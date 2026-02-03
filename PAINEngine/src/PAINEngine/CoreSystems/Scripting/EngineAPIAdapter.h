@@ -152,6 +152,9 @@ namespace PAIN {
 
         void Input_EndFrame() override; // call once per frame to clear edges
         void Input_OnEvent(PAIN::Event::Event& e) override; // feed events into the adapter
+#ifdef PN_PLATFORM_WINDOWS
+        void Hide_Cursor(bool b_set_cursor);
+#endif
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */

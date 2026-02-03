@@ -438,49 +438,57 @@ namespace PAIN {
             return false;
         }
 
-        // Invalid default
-        PAIN::Assets::GUID targetGuid; 
+        auto scn_opt = assets_->getAssetData(name);
 
-        // Get asset metadata
-        auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
+        if (scn_opt) {
 
-        for (const auto& info : sceneInfos) {
-            if (info->name == name) {     
-                // e.g "prototype.scn"
-                targetGuid = info->guid;
-                break;
-            }
+            scene_->loadScene(scn_opt.get()->guid);
+            //SetGameCamera();
         }
 
-        if (!targetGuid.IsValid()) {
-            PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
+        //// Invalid default
+        //PAIN::Assets::GUID targetGuid; 
 
-            for (const auto& info : sceneInfos) {
-                PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
-            }
+        //// Get asset metadata
+        //auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
 
-            return false;
-        }
+        //for (const auto& info : sceneInfos) {
+        //    if (info->name == name) {     
+        //        // e.g "prototype.scn"
+        //        targetGuid = info->guid;
+        //        break;
+        //    }
+        //}
 
-        PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
-            name, targetGuid.ToString());
+        //if (!targetGuid.IsValid()) {
+        //    PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
 
-        // Preserve play state
-        bool previousSceneState = scene_->isPlaying();
+        //    for (const auto& info : sceneInfos) {
+        //        PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
+        //    }
 
-        // Load next scene
-        scene_->loadScene(targetGuid);
-        
-        // Set scene to play
-        if (previousSceneState) {
-            scene_->onPlay();
-        }
-        else {
-            scene_->onStop();
-        }
+        //    return false;
+        //}
 
-        // Set Camera to game camera
-        scene_->SetGameCamera();
+        //PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
+        //    name, targetGuid.ToString());
+
+        //// Preserve play state
+        //bool previousSceneState = scene_->isPlaying();
+
+        //// Load next scene
+        //scene_->loadScene(targetGuid);
+        //
+        //// Set scene to play
+        //if (previousSceneState) {
+        //    scene_->onPlay();
+        //}
+        //else {
+        //    scene_->onStop();
+        //}
+
+        //// Set Camera to game camera
+        //scene_->SetGameCamera();
 
         return true;
     }
@@ -709,6 +717,13 @@ namespace PAIN {
         d.Dispatch<SensorEvent>([&](SensorEvent&) { return false; });
 #endif
     }
+
+#ifdef PN_PLATFORM_WINDOWS
+    void EngineAPIAdapter::Hide_Cursor(bool b_set_cursor)
+    {
+        window_->setCursorMode(b_set_cursor);
+    }
+#endif
 
     bool EngineAPIAdapter::Input_IsKeyDown(int key) { return keysDown_.count(key) != 0; }
     bool EngineAPIAdapter::Input_WasKeyPressed(int key) { return keysPressed_.count(key) != 0; }

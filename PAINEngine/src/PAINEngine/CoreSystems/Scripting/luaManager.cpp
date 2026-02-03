@@ -803,18 +803,10 @@ namespace PAIN {
         /* =========================================================================== */
         /*                              Cursor Control                                 */
         /* =========================================================================== */
-        lua_.set_function("showCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] showCursor - not implemented yet");
-            });
-
-        lua_.set_function("hideCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] hideCursor - not implemented yet");
-            });
-
-
-
+        lua_.set_function("Hide_Cursor", [this] { 
+           if (!api_) return;
+           api_->Hide_Cursor(true); 
+        });
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */

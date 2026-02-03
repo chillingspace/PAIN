@@ -3,14 +3,14 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "Level1.scn"
-G.FirstLevelScene     = G.FirstLevelScene    or "Level1.scn"
-G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
+G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
+G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 
-G.MainMenuSceneName   = G.MainMenuSceneName  or "mainmenu.scn"
-G.HowToPlaySceneName  = G.HowToPlaySceneName or "howtoplay.scn"
-G.SettingsSceneName   = G.SettingsSceneName  or "settings.scn"
-G.CreditsSceneName    = G.CreditsSceneName   or "credits.scn"
+G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
+G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
+G.SettingsSceneName   = G.SettingsSceneName  or "game/scenes/settings.scn"
+G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
@@ -89,6 +89,7 @@ local handlers = {
     goto_Pause = function(buttonEntity, payload)
         -- Android touch button callback to pause the game
         if _G_root.TogglePause then
+            Hide_Cursor(false)
             _G_root.TogglePause()
             printLog("[UI] goto_Pause (Android) -> called TogglePause()")
         else
@@ -98,6 +99,7 @@ local handlers = {
 
     pause_Resume = function(buttonEntity, payload)
         if _G_root.TogglePause then
+            Hide_Cursor(true)
             _G_root.TogglePause()
             printLog("[UI] pause_Resume -> called TogglePause()")
         else
@@ -115,6 +117,7 @@ local handlers = {
         end
         
         if changeScene then
+            Hide_Cursor(true)
             changeScene(G.CurrentLevelName)
         else
             printLog("[UI] pause_Restart pressed, but changeScene is not bound")
@@ -139,6 +142,7 @@ local handlers = {
         if setLayerEnabled then
             setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
             setLayerEnabled(2, false)
+            Hide_Cursor(false)
             printLog("[UI] QuitOverlay (layer 4) shown")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -167,6 +171,7 @@ local handlers = {
         -- Load main menu 
         printLog("[UI] quit_Confirm -> changeScene(" .. G.MainMenuSceneName .. ")")
         if changeScene then
+            Hide_Cursor(true)
             changeScene(G.MainMenuSceneName)
         else
             printLog("[UI] quit_Confirm pressed, but changeScene is not bound")
@@ -180,6 +185,7 @@ local handlers = {
         if setLayerEnabled then
             setLayerEnabled(4, false)
             setLayerEnabled(2, true)
+            Hide_Cursor(false)
             printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -201,6 +207,7 @@ local handlers = {
         -- end
 
         if firstLevelScene and changeScene then
+            Hide_Cursor(true)
             changeScene(firstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
@@ -263,6 +270,7 @@ local handlers = {
     menu_BackToMain = function(buttonEntity, payload)
         printLog("[UI] menu_BackToMain -> changeScene(mainmenu.scn)")
         if changeScene then
+            Hide_Cursor(false)
             changeScene("mainmenu.scn")
         else
             printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")

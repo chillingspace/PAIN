@@ -136,6 +136,9 @@ namespace PAIN {
         virtual bool      Input_IsCursorInWindow() = 0;
         virtual void      Input_EndFrame() = 0; // call once per frame to clear edges
         virtual void      Input_OnEvent(PAIN::Event::Event& e) = 0; // feed events into the adapter 
+#ifdef PN_PLATFORM_WINDOWS
+        virtual void      Hide_Cursor(bool b_set_cursor) = 0;
+#endif
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */

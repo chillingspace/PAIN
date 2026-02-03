@@ -32,6 +32,7 @@ function TogglePause()
     -- Toggle UI layers
     setLayerEnabled(1, not isPaused)  -- Game UI layer
     setLayerEnabled(2, isPaused)       -- Pause menu layer
+    Hide_Cursor(isPaused)
     
     -- Show/hide cursor based on pause state
     if isPaused then
