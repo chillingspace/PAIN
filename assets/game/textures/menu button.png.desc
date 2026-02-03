@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu button.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12404644633845344269
+  },
+  "descriptor_version": 1,
+  "guid": "bacd7a08-e42c-594d-b3b0-25a680c65a6e",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\menu button.png"
+  }
+}
