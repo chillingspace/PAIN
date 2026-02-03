@@ -53,6 +53,7 @@ namespace PAIN {
 					std::any data = nullptr;
 					bool b_is_open = false;
 					std::function<void(std::any)> popUpFunction;
+					ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
 				};
 
 				//Map of popups
@@ -114,7 +115,7 @@ namespace PAIN {
 				// Internal PopUps
 				// ----------------------------
 				//Register new popup
-				void registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);
+				void registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func, ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize);
 
 				//Edit registered popup
 				void editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func);

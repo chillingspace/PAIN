@@ -39,6 +39,9 @@ namespace PAIN {
         float inner_angle = 12.5f;
         float outer_angle = 17.5f;
 
+        static constexpr const char* LightTypeNames[] = { "Point", "Directional", "Spotlight" };
+        static constexpr const char* ShadowTypeNames[] = { "None", "Mapped", "Screen Space" };
+
         //Serialization flag
         static constexpr bool ShouldSerialize = true;
     };
@@ -85,10 +88,9 @@ REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
 REFL_FIELD(shadow_type)
-//these are added manually in components panel
-//REFL_FIELD(direction)
-//REFL_FIELD(inner_angle)
-//REFL_FIELD(outer_angle)
+REFL_FIELD(direction)
+REFL_FIELD(inner_angle)
+REFL_FIELD(outer_angle)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Lighting>);

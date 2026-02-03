@@ -603,8 +603,26 @@ namespace PAIN {
 				// ---- Light ----
 				registerCompUIFunc<PAIN::Lighting>(
 					"Lighting", [](ComponentsPanel&, PAIN::Lighting& light) {
-						// Draw refl variables
-						DrawWithReflection(light);
+
+						ImGui::Spacing();
+
+						ImGui::DragFloat3("Offset", glm::value_ptr(light.offset), 0.05); 
+
+						ImGui::ColorEdit3("Color/Intensity", glm::value_ptr(light.light_intensity));
+
+						int currentType = static_cast<int>(light.light_type);
+
+						if (ImGui::Combo("Light Type", &currentType, Lighting::LightTypeNames, IM_ARRAYSIZE(Lighting::LightTypeNames))) {
+							light.light_type = static_cast<PAIN::TYPES>(currentType);
+						}
+
+						int currentShadow = static_cast<int>(light.shadow_type);
+
+						if (ImGui::Combo("Shadow Type", &currentShadow, Lighting::ShadowTypeNames, IM_ARRAYSIZE(Lighting::ShadowTypeNames))) {
+							light.shadow_type = static_cast<PAIN::SHADOW_TYPES>(currentShadow);
+						}
+
+						ImGui::Separator();
 
 						// Direction lighting (Only for Directional & Spotlight)
 						if (light.light_type != PAIN::TYPES::POINT) {

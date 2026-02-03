@@ -1533,7 +1533,10 @@ namespace PAIN {
 
 			// Restore env snapshot variables
 			setupLoadingScreen(scene_snapshot);
-			setupCamera(scene_snapshot);
+			if (curr_scene_id != guid_snapshot) {
+				curr_scene_id = guid_snapshot;
+				setupCamera(scene_snapshot);
+			}
 			setupEnvironment(scene_snapshot);
 			setupLayers(scene_snapshot);
 
@@ -1542,7 +1545,6 @@ namespace PAIN {
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
-			curr_scene_id = guid_snapshot;
 			is_playing = false;
 
 		}
