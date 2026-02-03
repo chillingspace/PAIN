@@ -3,15 +3,15 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "Tutorial.scn"
-G.FirstLevelScene     = G.FirstLevelScene    or "Tutorial.scn"
-G.TutorialSceneName   = G.TutorialSceneName  or "Tutorial.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
+G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
+G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 
-G.MainMenuSceneName   = G.MainMenuSceneName  or "mainmenu.scn"    -- main menu scene
-G.HowToPlaySceneName  = G.HowToPlaySceneName or "howtoplay.scn"   -- how to play scene
-G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "howtoplay2.scn"   -- how to play scene 2
-G.SettingsSceneName   = G.SettingsSceneName  or "settings.scn"   -- how to play scene
-G.CreditsSceneName    = G.CreditsSceneName   or "credits.scn"   -- how to play scene
+G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
+G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
+G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
+G.SettingsSceneName   = G.SettingsSceneName  or "game/scenes/settings.scn"
+G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
@@ -87,8 +87,28 @@ local handlers = {
     ----------------------------------------------------------------------
     -- PAUSE MENU
     ----------------------------------------------------------------------
+    goto_Pause = function(buttonEntity, payload)
+        -- Android touch button callback to pause the game
+        if _G_root.TogglePause then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+                
+            end
+            _G_root.TogglePause()
+            printLog("[UI] goto_Pause (Android) -> called TogglePause()")
+        else
+            printLog("[UI] goto_Pause pressed, but TogglePause is not available")
+        end
+    end,
+
     pause_Resume = function(buttonEntity, payload)
         if _G_root.TogglePause then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+                
+            end
             _G_root.TogglePause()
             printLog("[UI] pause_Resume -> called TogglePause()")
         else
@@ -106,7 +126,12 @@ local handlers = {
         end
         
         if changeScene then
-            changeScene("Tutorial.scn")
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+                
+            end
+            changeScene(G.CurrentLevelName)
         else
             printLog("[UI] pause_Restart pressed, but changeScene is not bound")
         end
@@ -129,6 +154,12 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
+            setLayerEnabled(2, false)
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+                
+            end
             printLog("[UI] QuitOverlay (layer 4) shown")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -154,10 +185,15 @@ local handlers = {
             printLog("[UI] QuitOverlay hidden")
         end
         
-        -- Load main menu - HARDCODED
-        printLog("[UI] quit_Confirm -> changeScene(mainmenu.scn)")
+        -- Load main menu 
+        printLog("[UI] quit_Confirm -> changeScene(" .. G.MainMenuSceneName .. ")")
         if changeScene then
-            changeScene("mainmenu.scn")
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+                
+            end
+            changeScene(G.MainMenuSceneName)
         else
             printLog("[UI] quit_Confirm pressed, but changeScene is not bound")
         end
@@ -169,6 +205,12 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(4, false)
+            setLayerEnabled(2, true)
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+                
+            end
             printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
         else
             printLog("[UI] setLayerEnabled not available")
@@ -179,9 +221,23 @@ local handlers = {
     -- MAIN MENU
     ----------------------------------------------------------------------
     menu_StartGame = function(buttonEntity, payload)
-        printLog("[UI] menu_StartGame -> changeScene(Tutorial.scn)")
-        if changeScene then
-            changeScene("Tutorial.scn")
+
+        local firstLevelScene = resolveSceneName(payload, G.FirstLevelScene, "Level1.scn")
+
+        printLog("[UI] menu_StartGame -> changeScene(" .. firstLevelScene .. ")")
+
+        -- Reset camera state before scene transition
+        -- if _G.ResetThirdPersonCamera then
+        --     _G.ResetThirdPersonCamera()
+        -- end
+
+        if firstLevelScene and changeScene then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+                
+            end
+            changeScene(firstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
         end
@@ -243,6 +299,11 @@ local handlers = {
     menu_BackToMain = function(buttonEntity, payload)
         printLog("[UI] menu_BackToMain -> changeScene(mainmenu.scn)")
         if changeScene then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+                
+            end
             changeScene("mainmenu.scn")
         else
             printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")

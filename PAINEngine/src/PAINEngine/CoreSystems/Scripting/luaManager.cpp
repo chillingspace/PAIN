@@ -1,5 +1,6 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
+#include "PAINEngine/CoreSystems/Audio/Audio.h"
 #include "Utility/Log.h"
 
 #include <fstream>
@@ -644,6 +645,68 @@ namespace PAIN {
             api_->Audio_SetLooping(entityId, looping);
             });
 
+        // ==================== New Direct File Playback Functions ====================
+        // These functions access the Audio service directly via services_
+
+        // audioPlayFile(filename, volumeDb?, looping?, is3D?)
+        // Plays audio file with optional spatial positioning
+        lua_.set_function("audioPlayFile", [this](const std::string& filename, 
+            sol::optional<float> volumeDb, 
+            sol::optional<bool> looping, 
+            sol::optional<bool> is3D) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            float vol = volumeDb.value_or(0.0f);
+            bool loop = looping.value_or(false);
+            bool spatial = is3D.value_or(false);
+            glm::vec3 pos(0.0f); // Default position for non-3D
+            
+            auto result = audio->playFile(filename, "sfx", vol, loop, spatial, pos,
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            
+            return result ? result->value : -1;
+            });
+
+        // audioPlaySFX(filename, looping?) - Simple SFX playback
+        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<bool> looping) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playSFX(filename, looping.value_or(false), 0.0f);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayBGM(filename, overlay?) - Play BGM, overlay adds to existing BGM
+        lua_.set_function("audioPlayBGM", [this](const std::string& filename, sol::optional<bool> overlay) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playBGM(filename, overlay.value_or(false), 0.0f);
+            return result ? result->value : -1;
+            });
+
+        // audioTransitionBGM(newFilename, transitionTime?) - Crossfade to new BGM
+        lua_.set_function("audioTransitionBGM", [this](const std::string& newFilename, sol::optional<float> transitionTime) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            
+            audio->transitionBGM(newFilename, transitionTime.value_or(2.0f), 0.0f);
+            });
+
+        // audioTransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime?) - Crossfade with SFX trigger
+        lua_.set_function("audioTransitionBGMWithSFX", [this](const std::string& newBGMFilename, 
+            const std::string& sfxFilename, sol::optional<float> transitionTime) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            
+            audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
+            });
 
         /* =========================================================================== */
         /*                           Scene / System state                              */
@@ -651,6 +714,10 @@ namespace PAIN {
         lua_.set_function("changeScene", [this](std::string name) {
             if (!api_ || pendingSceneChange_) return;
             setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
+            });
+        lua_.set_function("quitApplication", [this]() {
+            if (!api_) return;
+            api_->QuitApplication();
             });
         lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
         lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
@@ -736,18 +803,11 @@ namespace PAIN {
         /* =========================================================================== */
         /*                              Cursor Control                                 */
         /* =========================================================================== */
-        lua_.set_function("showCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] showCursor - not implemented yet");
-            });
 
-        lua_.set_function("hideCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] hideCursor - not implemented yet");
-            });
-
-
-
+        lua_.set_function("Hide_Cursor", [this] { 
+           if (!api_) return;
+           api_->Hide_Cursor(true); 
+        });
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */

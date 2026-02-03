@@ -67,6 +67,39 @@ namespace PAIN {
                 const glm::vec3& pos = { 0,0,0 },
                 float volumeDb = 0.0f) = 0;
 
+            // Direct file playback (bypasses AudioSource component)
+            virtual std::optional<AudioChannelId> playFile(const std::string& filename, 
+                const std::string& group = "sfx",
+                float volumeDb = 0.0f, 
+                bool looping = false, 
+                bool is3D = false, 
+                const glm::vec3& pos = glm::vec3(0),
+                float minDist = MIN_DISTANCE_3D,
+                float maxDist = MAX_DISTANCE_3D) = 0;
+
+            // SFX convenience (plays in "sfx" group, non-3D by default)
+            virtual std::optional<AudioChannelId> playSFX(const std::string& filename, 
+                bool looping = false,
+                float volumeDb = 0.0f) = 0;
+
+            // BGM playback (plays in "music" group)
+            // overlay: if true, plays alongside existing BGM; if false, stops current BGM first
+            virtual std::optional<AudioChannelId> playBGM(const std::string& filename, 
+                bool overlay = false,
+                float volumeDb = 0.0f) = 0;
+
+            // BGM transition with crossfade
+            // transitionTime: total time for fade-out + fade-in
+            virtual void transitionBGM(const std::string& newFilename, 
+                float transitionTime = 2.0f,
+                float volumeDb = 0.0f) = 0;
+
+            // BGM transition with SFX trigger at start
+            virtual void transitionBGMWithSFX(const std::string& newBGMFilename,
+                const std::string& sfxFilename,
+                float transitionTime = 2.0f,
+                float volumeDb = 0.0f) = 0;
+
             // control (dB)
             virtual AudioResult stop(AudioChannelId ch) = 0;
             virtual void        stopAll() = 0;

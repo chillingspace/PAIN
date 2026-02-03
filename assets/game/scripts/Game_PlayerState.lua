@@ -137,8 +137,13 @@ function S.init(player)
     --log("[PlayerState] Previous S.player=" .. tostring(S.player))
 
     -- Clear the stored UI entity ids
+    -- _G.UI = _G.UI or {}
+    -- _G.UI.hearts = {}
     _G.UI = _G.UI or {}
-    _G.UI.hearts = {}
+    _G.UI.hearts = _G.UI.hearts or {}
+    log("[PlayerState] UI hearts count at init:", _G.UI and _G.UI.hearts and #_G.UI.hearts)
+
+
 
     local oldPlayer = S.player
     S.player = player
@@ -568,6 +573,10 @@ function S.update(dt)
         if restartPressed and changeScene then
             restartPressed = false
             resetInputState()
+
+            _G.UI = _G.UI or {}
+            _G.UI.hearts = {}
+
             changeScene(CURRENT_SCENE_PATH)
         end
         return
@@ -649,7 +658,11 @@ end
 
 function S.onCaught(player)
     -- guard, dont recatch during cooldown
+    log("[PlayerState] onCaught called. canBeCaught=", tostring(S.canBeCaught and S.canBeCaught()))
+    log("[PlayerState] hearts:", tostring(S.heart1), tostring(S.heart2), tostring(S.heart3))
+    log("[PlayerState] lives BEFORE:", tostring(S.lives))
     if not S.canBeCaught() then
+        log("[PlayerState] onCaught blocked by canBeCaught()")
         return
     end
 

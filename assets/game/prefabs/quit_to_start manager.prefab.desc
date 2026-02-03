@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "quit_to_start manager.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 10249448922651337699
+  },
+  "descriptor_version": 1,
+  "guid": "2a7639be-0237-594f-961b-d2b4ad15a7e5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\quit_to_start manager.prefab"
+  }
+}
