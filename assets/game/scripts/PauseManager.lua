@@ -53,7 +53,7 @@ function TogglePause()
 end
 
 -- Export to global scope so other scripts can call it
--- _G_root.TogglePause = TogglePause
+_G_root.TogglePause = TogglePause
 
 -- Helper function to update current level name
 function _G_root.SetCurrentLevel(sceneName)
