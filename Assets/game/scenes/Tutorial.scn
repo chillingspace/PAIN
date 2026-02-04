@@ -1,7 +1,5 @@
 {
     "assets": [
-        "5cccecaa-acca-ae47-a45d-0210732e76aa",
-        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
         "15808cf2-db36-c04b-8954-48d10ebaf528",
@@ -142,6 +140,210 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "b7582502-e810-ce4c-97f3-72a7cf98ca1a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 7,
+                            "layer_mask": 128
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "gamewin_overlay"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "eb3094f7-a1f7-8440-8b40-8b56d3f6deed",
+                            "texture_scale": [
+                                2.0,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "gamewin_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c782207c-7090-924e-8e10-b0c4872abf24"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "gameover_overlay"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "b7128467-93ed-f44f-b83b-c497ae4cc715",
+                            "texture_scale": [
+                                2.0,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "gameover_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "e9adf7b5-ec69-fd44-8eff-be9e86db1836"
                         },
                         "Hierarchy": {
@@ -273,7 +475,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": true,
@@ -287,7 +488,6 @@
                                 0.0
                             ],
                             "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -530,7 +730,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": true,
@@ -544,7 +743,6 @@
                                 0.0
                             ],
                             "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -787,7 +985,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": true,
@@ -801,7 +998,6 @@
                                 0.0
                             ],
                             "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -1086,7 +1282,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": true,
@@ -1100,7 +1295,6 @@
                                 0.0
                             ],
                             "selected_audio": "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4248,8 +4442,7 @@
                                 "222390b0-f729-1e44-ad6b-766eefcc1685",
                                 "fb5ea5fd-e8d8-4e44-b0d6-2dbb1f0a9b6d",
                                 "68e3444a-866b-354e-aa08-938259694be6",
-                                "18934621-8352-cc40-8c3c-7baf0a9001d9",
-                                "2242945d-db90-2943-9f5a-c6345cb5b1a3"
+                                "18934621-8352-cc40-8c3c-7baf0a9001d9"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 4
@@ -4287,7 +4480,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4301,7 +4493,6 @@
                                 0.0
                             ],
                             "selected_audio": "feb46661-0d8d-d947-ac9f-881f436feda7",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4345,7 +4536,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4359,7 +4549,6 @@
                                 0.0
                             ],
                             "selected_audio": "b5f33fbe-eadf-bf46-9329-26bbad7a5e72",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4403,113 +4592,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [
-                                "1d28dd5c-5baa-f54c-a266-bcb84246193a",
-                                "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
-                                "3775932c-0c3a-c84a-a8b9-0b846323bff2"
-                            ],
-                            "group_name": "",
-                            "is3D": true,
-                            "looping": false,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "00000000-0000-0000-0000-000000000000",
-                            "track_volumes": [
-                                {},
-                                {},
-                                {}
-                            ],
-                            "volumeDb": 0.0
-                        },
-                        "GUID": {
-                            "guid": "2242945d-db90-2943-9f5a-c6345cb5b1a3"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "baseColorOverride": [
-                                        0.6000000238418579,
-                                        0.6000000238418579,
-                                        0.6000000238418579
-                                    ],
-                                    "emissiveOverride": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
-                                    "metallicOverride": 0.0,
-                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 0.5,
-                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "5cccecaa-acca-ae47-a45d-0210732e76aa",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Global_BGM"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "b0284e1b-335e-ee46-bbc0-e7601f4b8c7b"
-                                }
-                            ]
-                        }
-                    },
-                    "Name": "Global_BGM"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4523,7 +4605,6 @@
                                 0.0
                             ],
                             "selected_audio": "11f20ced-0a55-f344-a74e-7a57022bd83e",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4532,7 +4613,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4567,7 +4648,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4581,7 +4661,6 @@
                                 0.0
                             ],
                             "selected_audio": "06cab9b7-c91a-6948-bb59-426b8032ea12",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4590,7 +4669,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4625,7 +4704,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4639,7 +4717,6 @@
                                 0.0
                             ],
                             "selected_audio": "d581ecc8-3155-e543-9438-5e38ba0956d3",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4648,7 +4725,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 5
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4683,7 +4760,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4697,7 +4773,6 @@
                                 0.0
                             ],
                             "selected_audio": "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4706,7 +4781,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 6
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4741,7 +4816,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4755,7 +4829,6 @@
                                 0.0
                             ],
                             "selected_audio": "dadd8247-bfe7-7e42-8874-2bccc9ed2210",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4764,7 +4837,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 7
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4799,7 +4872,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4813,7 +4885,6 @@
                                 0.0
                             ],
                             "selected_audio": "3775932c-0c3a-c84a-a8b9-0b846323bff2",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4822,7 +4893,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 8
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4857,7 +4928,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4871,7 +4941,6 @@
                                 0.0
                             ],
                             "selected_audio": "4ae3113a-4586-9045-a43d-17ed1c07d76f",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4880,7 +4949,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 9
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4915,7 +4984,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4929,7 +4997,6 @@
                                 0.0
                             ],
                             "selected_audio": "1d28dd5c-5baa-f54c-a266-bcb84246193a",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4938,7 +5005,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 10
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4973,7 +5040,6 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -4987,7 +5053,6 @@
                                 0.0
                             ],
                             "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -4996,7 +5061,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "e1ad4dcb-d2eb-2e4a-8cf6-a03d54679207",
-                            "siblingIndex": 11
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5203,7 +5268,7 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 10,
+                                    "action": 17,
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -5296,7 +5361,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 10,
+                            "action": 17,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -5492,7 +5557,7 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 9,
+                                    "action": 16,
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -5585,7 +5650,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 9,
+                            "action": 16,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -8103,6 +8168,14 @@
                         "Name": {
                             "name": "heart_1"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.8500000238418579,
@@ -8205,6 +8278,14 @@
                         "Name": {
                             "name": "heart_2"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 -0.7200000286102295,
@@ -8306,6 +8387,14 @@
                         },
                         "Name": {
                             "name": "heart_3"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -15378,7 +15467,6 @@
                             "playbackSpeed": 1.0
                         },
                         "AudioSource": {
-                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -15392,7 +15480,6 @@
                                 0.0
                             ],
                             "selected_audio": "06cab9b7-c91a-6948-bb59-426b8032ea12",
-                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "Camera": {
@@ -19285,6 +19372,42 @@
             "mask": 16,
             "name": "QuitOverlay",
             "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 5,
+            "mask": 32,
+            "name": "RestartOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.8999999761581421,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 6,
+            "mask": 64,
+            "name": "GameOverOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 7,
+            "mask": 128,
+            "name": "GameWinOverlay",
+            "pickable": true
         }
     ],
     "loadingScreen": {
@@ -19334,10 +19457,6 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
             false,
             false,
             false,
@@ -19348,6 +19467,19 @@
             false,
             false,
             false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
             false
         ],
         [
@@ -19355,9 +19487,45 @@
             false,
             false,
             false,
+            false,
+            false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
             false,
             false,
             false,
