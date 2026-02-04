@@ -51,7 +51,7 @@ _G.PlayerInput = _G.PlayerInput or {}
 local PlayerInput = _G.PlayerInput
 
 function PlayerInput.requestJump()
-    if _G_root.gamePaused then return end
+    if IsGamePaused() then return end
     printLog("[Input] requestJump from UI")
 
     -- Same guard as before: cannot jump while hidden
@@ -65,7 +65,7 @@ end
 -- Callback for joystick (on_click_callback_lua = "Joystick_OnDrag")
 _G_root.Joystick_OnDrag = function(dirX, dirY)
     -- Don't process joystick when paused
-    if _G_root.gamePaused then 
+    if IsGamePaused() then 
         joystickDirX = 0.0
         joystickDirY = 0.0
         return 
@@ -78,19 +78,19 @@ _G_root.Joystick_OnDrag = function(dirX, dirY)
 end
 
 registerKeyDown("W", function() 
-    if not _G_root.gamePaused then moveUp = true end 
+    if not IsGamePaused() then moveUp = true end 
 end)
 registerKeyDown("S", function() 
-    if not _G_root.gamePaused then moveDown = true end 
+    if not IsGamePaused() then moveDown = true end 
 end)
 registerKeyDown("A", function() 
-    if not _G_root.gamePaused then moveLeft = true end 
+    if not IsGamePaused() then moveLeft = true end 
 end)
 registerKeyDown("D", function() 
-    if not _G_root.gamePaused then moveRight = true end 
+    if not IsGamePaused() then moveRight = true end 
 end)
 registerKeyDown("SPACE", function() 
-    if not _G_root.gamePaused then jumpPressed = true end 
+    if not IsGamePaused() then jumpPressed = true end 
 end)
 
 registerKeyUp("W", function() moveUp = false end)
@@ -116,7 +116,7 @@ local maxGroundCheckDist = 0.1
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
-    if _G_root.gamePaused then
+    if IsGamePaused() then
         -- Stop walking audio
         if walkingSoundPlaying and audioStop then
             audioStop(entityId)
@@ -127,8 +127,6 @@ registerUpdate(function(dt)
         joystickDirX = 0.0
         joystickDirY = 0.0
         
-        -- Stop all movement
-        setVelocity(entityId, 0.0, 0.0, 0.0)
         return
     end
     

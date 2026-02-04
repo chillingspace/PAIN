@@ -1340,6 +1340,18 @@ namespace PAIN {
 			//Clear old scene
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
 
+			// reset lua scripting state before destroying entities
+			//auto controller = services->get<ECS::Controller>();
+			//PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			//auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			//if (scriptingSystem) {
+			//	scriptingSystem->getLuaManager().resetForSceneReload();
+			//	PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			//}
+			//else {
+			//	PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			//}
+
 			// Destroy all ECS entities
 			auto controller = services->get<ECS::Controller>();
 			if (controller) {
@@ -1368,7 +1380,8 @@ namespace PAIN {
 			curr_scene_id = next_scene_guid;
 			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
 
-			is_playing = true;
+			setPlaying(true);
+			setGamePaused(false);
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
@@ -1478,11 +1491,22 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
 
 			if (is_playing) {
-				is_playing = false;
+				setPlaying(false);
+			}
+
+			// reset lua scripting state before destroying entities
+			auto controller = services->get<ECS::Controller>();
+			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			if (scriptingSystem) {
+				scriptingSystem->getLuaManager().resetForSceneReload();
+				PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			}
+			else {
+				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
 			}
 
 			// Destroy all ECS entities
-			auto controller = services->get<ECS::Controller>();
 			if (controller) {
 				controller->destroyAllEntities();
 				PN_CORE_INFO("[SceneManager] Cleared all entities");
@@ -1507,7 +1531,7 @@ namespace PAIN {
 			captureSceneVariables(scene_snapshot);
 			scene_snapshot.entityData = captureCurrentEntities();
 			guid_snapshot = curr_scene_id;
-			is_playing = true;
+			setPlaying(true);
 		}
 
 		void SceneManager::onStop()
@@ -1545,8 +1569,25 @@ namespace PAIN {
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
-			is_playing = false;
+			setPlaying(false);
 
+		}
+
+		void SceneManager::setPlaying(bool playing)
+		{
+			if (playing)
+			{
+				is_playing = true;
+			}
+			else {
+				is_game_paused = false;
+				is_playing = false;
+			}
+		}
+
+		void SceneManager::setGamePaused(bool paused)
+		{
+			is_game_paused = paused;
 		}
 
 		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {

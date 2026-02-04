@@ -109,8 +109,9 @@ namespace PAIN {
         /*                           Scene / System state                              */
         /* =========================================================================== */
         bool  ChangeScene(std::string name) override;
-        void  PauseAllSystems(bool toPause) override;
+        void  SetGamePaused(bool pause) override;
         bool  IsGamePaused() const override;
+
         float GetFps() const override;
         void  SetDeltaMultiplier(float m) override;
         float GetDeltaMultiplier() const override;

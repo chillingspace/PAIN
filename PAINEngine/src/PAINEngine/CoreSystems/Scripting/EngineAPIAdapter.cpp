@@ -494,15 +494,31 @@ namespace PAIN {
 
     }
 
-    void EngineAPIAdapter::PauseAllSystems(bool) {}
-    bool EngineAPIAdapter::IsGamePaused() const { return false; }
+    // Expose pausing to lua
+    void EngineAPIAdapter::SetGamePaused(bool pause) {
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
+            return;
+        }
+
+        scene_->setGamePaused(pause);
+    }
+    // Check if game is paused
+    bool EngineAPIAdapter::IsGamePaused() const { 
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
+            return false;
+        }
+
+        return scene_->isGamePaused();
+    }
     float EngineAPIAdapter::GetFps() const { return 0.0f; }
     void EngineAPIAdapter::SetDeltaMultiplier(float) {}
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
     /* =========================================================================== */
-/*                              Layer Control                                  */
-/* =========================================================================== */
+    /*                              Layer Control                                  */
+    /* =========================================================================== */
 
     bool EngineAPIAdapter::SetLayerEnabled(int layerId, bool enabled) {
         if (!scene_) {
@@ -815,57 +831,23 @@ namespace PAIN {
     void EngineAPIAdapter::SetLightPosition(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.offset = { x,y,z };
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightPosition: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->position = { x, y, z };*/
     }
     void EngineAPIAdapter::SetLightIntensity(entt::entity entityId, float r, float g, float b) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.light_intensity = { r,g,b };
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightIntensity: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->light_intensity = { r, g, b };*/
     }
     void EngineAPIAdapter::SetLightType(entt::entity entityId, int ty) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.light_type = static_cast<PAIN::TYPES>(ty);
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->light_type = static_cast<PAIN::TYPES>(ty);*/
     }
     void EngineAPIAdapter::SetLightDirection(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.direction = glm::normalize(glm::vec3{ x,y,z });
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightForward: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->forward = glm::normalize(glm::vec3{ x, y, z });*/
     }
     void EngineAPIAdapter::SetShadowType(entt::entity entityId, int st) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);
 
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetShadowType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);*/
     }
 
     /* =========================================================================== */

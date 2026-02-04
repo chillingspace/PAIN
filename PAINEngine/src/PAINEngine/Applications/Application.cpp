@@ -259,17 +259,24 @@ namespace PAIN {
 			}
 #endif
 #ifdef _DEBUG
-			if (services->get<Scene::SceneManager>()->isPlaying()) {
+			if (!services->get<Scene::SceneManager>()->isPlaying()) {
+				timing.dt = 0.0f;
+				services->get<Audio::Audio>()->pauseAll();
+			}
+			else if (services->get<Scene::SceneManager>()->isGamePaused()) {
+				timing.dt = 0.0f;
+			}
+			else {
 				timing.dt = real_dt;
 				services->get<Audio::Audio>()->resumeAll();
 			}
-			else {
-				timing.dt = 0.0f;
-				services->get<Audio::Audio>()->pauseAll();
-
-			}
 #else
-			timing.dt = real_dt;
+			if (services->get<Scene::SceneManager>()->isGamePaused()) {
+				timing.dt = 0.0f;
+			}
+			else {
+				timing.dt = real_dt;
+			}
 #endif
 
 

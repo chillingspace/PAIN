@@ -55,11 +55,16 @@ namespace PAIN {
             ensureInit();
             if (!init_) return;
 
-            // IF GAME IS STOPPED
-            if (timing.dt <= 0.0001f) {
-                return;
-            }
+            auto services_ptr = getServices();
+            auto scene = services_ptr->get<Scene::SceneManager>();
 
+            #ifdef _DEBUG
+            if (scene) {
+                if (!scene->isPlaying()) { // If scene isn't playing don't run any scripts
+                    return;
+                }
+            }
+            #endif
 
             // --- publish LuaManager* into this registry's context once ---
             {
@@ -69,7 +74,7 @@ namespace PAIN {
                 }
             }
 
-            auto services_ptr = getServices();
+
             auto assets = services_ptr->get<Assets::Manager>();
             auto fs = services_ptr->get<Path::Path>();
 
@@ -110,7 +115,7 @@ namespace PAIN {
                 }
             }
 
-            luaManager_.tick(timing.dt);
+            luaManager_.tick(timing.dt, timing.unscaled_dt);
             luaManager_.Input_EndFrame();
 
         }

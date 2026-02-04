@@ -6,12 +6,36 @@ local G = _G_root
 G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
 G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
 G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
-
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
-G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
-G.SettingsSceneName   = G.SettingsSceneName  or "game/scenes/settings.scn"
+G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
+
+-- Placeholder for next level
+G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+
+local Layers = {
+    DEFAULT = 0,
+    UI = 1,
+    PAUSE = 2,
+    TERRAIN = 3,
+    QUIT = 4,
+    RESTART = 5,
+    GAME_OVER = 6,
+    GAME_WIN = 7,
+}
+
+-- Store current level name globally (For Game_PlayerState)
+if G and G.CurrentLevelName then
+    _G.CurrentLevelName = G.CurrentLevelName
+end
+
+if G and G.NextLevelName then
+    _G.NextLevelName = G.NextLevelName
+end
+
+-- print("[UIActions] running, _G_root=", _G_root)
+-- print("[UIActions] before default, CurrentLevelName=", _G_root and _G_root.CurrentLevelName)
 
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
@@ -22,7 +46,52 @@ end
 
 local PlayerState = _G.PlayerState
 
+local function showGameEndOverlay(result)
+    if not setLayerEnabled then
+        printLog("[UI] setLayerEnabled not available")
+        return
+    end
+
+    -- hide gameplay/pause stuff if needed
+    setLayerEnabled(Layers.PAUSE, false) -- pause menu off 
+
+    -- Hide both end screens first 
+    setLayerEnabled(Layers.GAME_OVER, false)
+    setLayerEnabled(Layers.GAME_WIN,  false)
+
+    if result == "win" then
+        setLayerEnabled(Layers.GAME_WIN, true)
+        printLog("[UI] Showing GAME WIN overlay")
+    else
+        setLayerEnabled(Layers.GAME_OVER, true)
+        printLog("[UI] Showing GAME OVER overlay")
+    end
+
+    printLog("[UI] Game end overlay shown, result=" .. tostring(result))
+end
+
+
 local handlers = {
+    ----------------------------------------------------------------------
+    -- GAME END MENUS
+    ----------------------------------------------------------------------
+    game_End = function(buttonEntity, payload)
+        -- payload expected: win or lose
+        showGameEndOverlay(payload)
+    end,
+
+    end_Restart = function()
+        if changeScene then
+            changeScene(G.CurrentLevelName)
+        end
+    end,
+
+    end_MainMenu = function()
+        if changeScene then
+            changeScene(G.MainMenuSceneName)
+        end
+    end,
+
     ----------------------------------------------------------------------
     -- GAMEPLAY BUTTONS
     ----------------------------------------------------------------------
@@ -40,7 +109,7 @@ local handlers = {
     end,
 
     game_Move = function(buttonEntity, payload)
-        if _G_root.gamePaused then
+        if IsGamePaused() then
             if _G_root.Joystick_OnDrag then
                 _G_root.Joystick_OnDrag(0.0, 0.0)
             end
@@ -103,13 +172,13 @@ local handlers = {
     end,
 
     pause_Resume = function(buttonEntity, payload)
-        if _G_root.TogglePause then
+        if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
                 
             end
-            _G_root.TogglePause()
+            SetGamePaused(not IsGamePaused()) 
             printLog("[UI] pause_Resume -> called TogglePause()")
         else
             printLog("[UI] pause_Resume pressed, but TogglePause is not available")
@@ -121,8 +190,8 @@ local handlers = {
         printLog("[UI] pause_Restart -> showing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, true)  -- Show RestartOverlay layer (layer 5)
-            setLayerEnabled(2, false) -- Hide PauseMenu
+            setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
+            setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -138,14 +207,14 @@ local handlers = {
         printLog("[UI] restart_Confirm -> restarting")
         
         -- Unpause first
-        if _G_root.gamePaused then
-            _G_root.gamePaused = false
+        if IsGamePaused() then
+            SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
         -- Hide restart overlay
         if setLayerEnabled then
-            setLayerEnabled(5, false)
+            setLayerEnabled(Layers.RESTART, false)
             printLog("[UI] RestartOverlay hidden")
         end
         
@@ -169,8 +238,8 @@ local handlers = {
         printLog("[UI] restart_Cancel -> closing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, false)
-            setLayerEnabled(2, true) -- Return to Pause Menu
+            setLayerEnabled(Layers.RESTART, false)
+            setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -197,8 +266,8 @@ local handlers = {
         printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
-            setLayerEnabled(2, false)
+            setLayerEnabled(Layers.QUIT, true)  -- Show QuitOverlay layer (layer 4)
+            setLayerEnabled(Layers.PAUSE, false)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -218,14 +287,14 @@ local handlers = {
         printLog("[UI] quit_Confirm -> returning to main menu")
         
         -- Unpause first
-        if _G_root.gamePaused then
-            _G_root.gamePaused = false
+        if IsGamePaused() then
+            SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
         -- Hide quit overlay
         if setLayerEnabled then
-            setLayerEnabled(4, false)
+            setLayerEnabled(Layers.QUIT, false)
             printLog("[UI] QuitOverlay hidden")
         end
         
@@ -248,8 +317,8 @@ local handlers = {
         printLog("[UI] quit_Cancel -> closing quit confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(4, false)
-            setLayerEnabled(2, true)
+            setLayerEnabled(Layers.QUIT, false)
+            setLayerEnabled(Layers.PAUSE, true)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -284,17 +353,6 @@ local handlers = {
             changeScene(G.FirstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
-        end
-    end,
-
-    menu_OpenSettings = function(buttonEntity, payload)
-        --local settingsScene = resolveSceneName(payload, G.SettingsSceneName, "settings.scn")
-
-        if G.SettingsSceneName and changeScene then
-            printLog("[UI] menu_OpenSettings -> changeScene("..G.SettingsSceneName..")")
-            changeScene(G.SettingsSceneName)
-        else
-            printLog("[UI] menu_OpenSettings pressed (no scene specified / not implemented)")
         end
     end,
 

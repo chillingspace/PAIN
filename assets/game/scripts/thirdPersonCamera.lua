@@ -20,6 +20,8 @@ local isInit = false
 local firstFrame = true  -- Force reset on first frame
 
 _G.CameraState = { yaw = yaw, pitch = pitch }
+local frozenCx, frozenCy, frozenCz = nil, nil, nil
+local frozenTx, frozenTy, frozenTz = nil, nil, nil
 
 local wasPaused = false
 local framesSinceUnpause = 0
@@ -97,7 +99,7 @@ registerUpdate(function(dt)
         return  -- Skip rest of update this frame
     end
     
-    local isPaused = _G_root.gamePaused or false
+    local isPaused = IsGamePaused() or false
     
     if wasPaused and not isPaused then
         log("[Camera] Detected unpause - resetting mouse tracking")
@@ -109,6 +111,13 @@ registerUpdate(function(dt)
     wasPaused = isPaused
     
     if isPaused then
+        if frozenCx then
+            cameraSetTransform(
+                frozenCx, frozenCy, frozenCz,
+                frozenTx, frozenTy, frozenTz,
+                0.0, 1.0, 0.0
+            )
+        end
         return
     end
     
@@ -179,6 +188,10 @@ registerUpdate(function(dt)
     local cx = px + rx
     local cy = py + ry
     local cz = pz + rz
+
+    -- Always track camera position
+    frozenCx, frozenCy, frozenCz = cx, cy, cz
+    frozenTx, frozenTy, frozenTz = px, py + 0.1, pz
 
     cameraSetTransform(
         cx, cy, cz,
