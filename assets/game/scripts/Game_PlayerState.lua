@@ -243,7 +243,10 @@ local function requestEndOverlay(result)
 end
 
 local function triggerGameOver()
-    if S.gameEnded then return end
+    -- log("[PlayerState] In triggergameover")
+    if S.gameEnded then 
+        return 
+    end
     S.gameEnded = true
     S.gameWon   = false
     requestEndOverlay("lose")
@@ -715,10 +718,21 @@ function S.onCaught(player)
     local deathPos = { x = px, y = py, z = pz }
 
     S.lives = S.lives - 1
-    if S.lives < 0 then S.lives = 0 end
+
+    if S.lives < 0 then 
+        S.lives = 0 
+    end
+
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
-    if S.lives <= 0 then triggerGameOver() return end
+
+    if S.lives <= 0 then 
+        -- log("[PlayerState] Triggering game over")
+        triggerGameOver() 
+        -- log("[PlayerState] After game over")
+        return 
+    end
+    
     playSfx(S.sfxRespawn)
 
     -- drop carried letter

@@ -491,7 +491,7 @@ namespace PAIN {
     void EngineAPIAdapter::SetDeltaMultiplier(float) {}
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
-    /* =========================================================================== */
+/* =========================================================================== */
 /*                              Layer Control                                  */
 /* =========================================================================== */
 

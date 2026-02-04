@@ -42,7 +42,7 @@ local function showGameEndOverlay(result)
     -- hide gameplay/pause stuff if needed
     setLayerEnabled(2, false) -- pause menu off 
 
-    -- Hide both end screens first (defensive)
+    -- Hide both end screens first 
     setLayerEnabled(G.GameOverLayer, false)
     setLayerEnabled(G.GameWinLayer,  false)
 
@@ -53,10 +53,6 @@ local function showGameEndOverlay(result)
         setLayerEnabled(G.GameOverLayer, true)
         printLog("[UI] Showing GAME OVER overlay")
     end
-
-    -- optionally: choose win/lose subpanel if your overlay has two layers:
-    -- setLayerEnabled(G.GameWinLayer, result == "win")
-    -- setLayerEnabled(G.GameOverLayer, result ~= "win")
 
     printLog("[UI] Game end overlay shown, result=" .. tostring(result))
 end
@@ -69,19 +65,19 @@ local handlers = {
     game_End = function(buttonEntity, payload)
         -- payload expected: win or lose
         showGameEndOverlay(payload)
-    end
+    end,
 
     end_Restart = function()
         if changeScene then
             changeScene(G.CurrentLevelName)
         end
-    end
+    end,
 
     end_MainMenu = function()
         if changeScene then
             changeScene(G.MainMenuSceneName)
         end
-    end
+    end,
 
     ----------------------------------------------------------------------
     -- GAMEPLAY BUTTONS

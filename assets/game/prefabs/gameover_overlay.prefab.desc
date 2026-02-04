@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "gameover_overlay.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 12140110842558638875
+  },
+  "descriptor_version": 1,
+  "guid": "1ebf1807-e398-e14d-b22c-73d493a1b851",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\gameover_overlay.prefab"
+  }
+}
