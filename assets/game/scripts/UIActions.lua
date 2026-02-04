@@ -156,9 +156,9 @@ local handlers = {
                 Hide_Cursor(true)
             end
             -- default to current level or fallback
-            local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
-            printLog("[UI] restart_Confirm -> changeScene("..sceneToLoad..")")
-            changeScene(sceneToLoad)
+            -- local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
+            printLog("[UI] restart_Confirm -> changeScene("..G.CurrentLevelName..")")
+            changeScene(G.CurrentLevelName)
         else
             printLog("[UI] restart_Confirm pressed, but changeScene is not bound")
         end
