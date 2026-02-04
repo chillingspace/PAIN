@@ -46,12 +46,19 @@ namespace PAIN {
                 const glm::vec3& pos, float minDist, float maxDist) override;
             std::optional<AudioChannelId> playSFX(const std::string& filename, 
                 bool looping, float volumeDb) override;
+            std::optional<AudioChannelId> playSFXAt(const std::string& filename,
+                const glm::vec3& pos, float volumeDb, bool looping,
+                float minDist, float maxDist) override;
+            std::optional<AudioChannelId> playRandomFromList(
+                const std::vector<std::string>& files, float volumeDb, bool is3D,
+                const glm::vec3& pos, float minDist, float maxDist) override;
             std::optional<AudioChannelId> playBGM(const std::string& filename, 
                 bool overlay, float volumeDb) override;
             void transitionBGM(const std::string& newFilename, 
                 float transitionTime, float volumeDb) override;
             void transitionBGMWithSFX(const std::string& newBGMFilename,
                 const std::string& sfxFilename, float transitionTime, float volumeDb) override;
+
 
             AudioResult stop(AudioChannelId) override;
             void        stopAll() override;

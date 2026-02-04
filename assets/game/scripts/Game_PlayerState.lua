@@ -35,13 +35,8 @@ _G.PlayerState = _G.PlayerState or {
     letterBaseScale = nil,
     hideScaleFactor = 0.1,   -- how small when hiding 
 
-     -- SFX entities
-    sfxHideIn  = nil,
-    sfxHideOut = nil,
-    sfxRespawn = nil,
-    sfxIdle    = nil,
-    sfxJump    = nil,
-    sfxDrop    = nil,
+    -- SFX file paths (using direct file API, no entities needed)
+    -- These paths are relative to the assets folder
 
     -- end-game state
     gameEnded   = false,
@@ -193,12 +188,7 @@ function S.init(player)
     end
 
     -- alw refresh entity ref (might change after reload)
-    S.sfxHideIn  = findEntity("sfx_hide_in")
-    S.sfxHideOut = findEntity("sfx_hide_out")
-    S.sfxRespawn = findEntity("sfx_respawn")
-    S.sfxIdle    = findEntity("sfx_idle")
-    S.sfxJump    = findEntity("sfx_jump")
-    S.sfxDrop    = findEntity("sfx_drop_collectible")
+    -- SFX entities no longer needed - using direct file API
     S.uiEndScreen = findEntity("end_screen")
     
     if S.uiEndScreen and setUITexture then
@@ -211,9 +201,20 @@ function S.init(player)
     updateHeartsUI()
 end
 
-local function playSfx(e)
-    if e and audioPlay then
-        audioPlay(e)
+-- SFX file paths (relative to assets folder)
+local SFX = {
+    hideIn  = "game/audio/sfx_hide_in.wav",
+    hideOut = "game/audio/sfx_hide_out.wav",
+    respawn = "game/audio/sfx_respawn.wav",
+    idle    = "game/audio/sfx_idle.wav",
+    jump    = "game/audio/sfx_jump.wav",
+    drop    = "game/audio/sfx_drop.wav"
+}
+
+-- Direct file SFX playback (no entity needed)
+local function playSfx(sfxPath)
+    if sfxPath and audioPlaySFX then
+        audioPlaySFX(sfxPath)
     end
 end
 
@@ -339,17 +340,12 @@ end
 
 
 -------------------------------------------------
--- Helper: Sync SFX positions to player
+-- Helper: Sync SFX positions to player (DEPRECATED - no longer needed with direct file API)
 -------------------------------------------------
 local function syncAllSfx(px, py, pz)
-    local sfxEntities = {
-        S.sfxHideIn, S.sfxHideOut, S.sfxRespawn,
-        S.sfxIdle, S.sfxJump, S.sfxDrop
-    }
-    for _, e in ipairs(sfxEntities) do
-        if e then setPosition(e, px, py, pz) end
-    end
+    -- No longer needed: using direct file API without SFX entities
 end
+
 
 -------------------------------------------------
 -- Helper: Find nearest entity with tag within radius
@@ -442,7 +438,7 @@ local function handleHideToggle(px, py, pz)
 
         resetInputState()
         log("[PlayerState] Player left hiding spot")
-        playSfx(S.sfxHideOut)
+        playSfx(SFX.hideOut)
     else
         -- Try to hide
         local bestSpot = findNearestByTag("hiding_spot", px, py, pz, S.hideRadius)
@@ -472,7 +468,7 @@ local function handleHideToggle(px, py, pz)
             S.hidden = true
             S.hiddenIn = bestSpot
             log("[PlayerState] Player is hiding in a box")
-            playSfx(S.sfxHideIn)
+            playSfx(SFX.hideIn)
         end
     end
 end
@@ -678,7 +674,7 @@ function S.onCaught(player)
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
     if S.lives <= 0 then triggerGameOver() return end
-    playSfx(S.sfxRespawn)
+    playSfx(SFX.respawn)
 
     -- drop carried letter
     if S.carriedLetter then
@@ -686,7 +682,7 @@ function S.onCaught(player)
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
         log("[PlayerState] Dropped carried letter at death position")
-        playSfx(S.sfxDrop)
+        playSfx(SFX.drop)
         S.carriedLetter = nil
     end
 

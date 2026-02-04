@@ -648,6 +648,31 @@ namespace PAIN {
 				MIN_DISTANCE_3D, MAX_DISTANCE_3D);
 		}
 
+		std::optional<AudioChannelId> FmodAudio::playSFXAt(const std::string& filename,
+			const glm::vec3& pos, float volumeDb, bool looping,
+			float minDist, float maxDist) {
+			// Play as 3D sound at specified position
+			return playFile(filename, "sfx", volumeDb, looping, true, pos, minDist, maxDist);
+		}
+
+		std::optional<AudioChannelId> FmodAudio::playRandomFromList(
+			const std::vector<std::string>& files, float volumeDb, bool is3D,
+			const glm::vec3& pos, float minDist, float maxDist) {
+			
+			if (files.empty()) {
+				PN_CORE_WARN("[FmodAudio::playRandomFromList] Empty file list");
+				return std::nullopt;
+			}
+
+			// C++ random selection
+			static std::mt19937 rng(std::random_device{}());
+			std::uniform_int_distribution<size_t> dist(0, files.size() - 1);
+			size_t idx = dist(rng);
+
+			const std::string& selectedFile = files[idx];
+			return playFile(selectedFile, "sfx", volumeDb, false, is3D, pos, minDist, maxDist);
+		}
+
 		std::optional<AudioChannelId> FmodAudio::playBGM(const std::string& filename, 
 			bool overlay, float volumeDb) {
 			

@@ -712,6 +712,126 @@ namespace PAIN {
             audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
             });
 
+        // ==================== Spatial / 3D Audio Functions ====================
+
+        // audioPlaySFXAt(filename, x, y, z, volumeDb?, looping?) - Play SFX at 3D position
+        lua_.set_function("audioPlaySFXAt", [this](const std::string& filename, 
+            float x, float y, float z, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playSFXAt(filename, glm::vec3(x, y, z), 
+                volumeDb.value_or(0.0f), looping.value_or(false),
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlaySFXFromEntity(filename, entityId, volumeDb?, looping?) - Play SFX from entity's position
+        lua_.set_function("audioPlaySFXFromEntity", [this](const std::string& filename, 
+            entt::entity entityId, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
+            if (!services_ || !api_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            // Get entity position
+            glm::vec3 pos = api_->GetPosition(entityId);
+            
+            auto result = audio->playSFXAt(filename, pos, 
+                volumeDb.value_or(0.0f), looping.value_or(false),
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // ==================== Random SFX Functions ====================
+
+        // audioPlayRandomSFX({file1, file2, ...}, volumeDb?) - Play random SFX from list
+        lua_.set_function("audioPlayRandomSFX", [this](sol::table fileList, sol::optional<float> volumeDb) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), false, 
+                glm::vec3(0), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayRandomSFXAt({file1, file2, ...}, x, y, z, volumeDb?) - Random SFX at position
+        lua_.set_function("audioPlayRandomSFXAt", [this](sol::table fileList, 
+            float x, float y, float z, sol::optional<float> volumeDb) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+                glm::vec3(x, y, z), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayRandomSFXFromEntity({file1, file2, ...}, entityId, volumeDb?) - Random SFX from entity
+        lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
+            entt::entity entityId, sol::optional<float> volumeDb) -> int {
+            if (!services_ || !api_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            glm::vec3 pos = api_->GetPosition(entityId);
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+                pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // ==================== Channel Control Functions ====================
+
+        // audioSetChannelVolume(channelId, volumeDb) - Set volume of a specific channel
+        lua_.set_function("audioSetChannelVolume", [this](int channelId, float volumeDb) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->setVolumeDb(Audio::AudioChannelId{channelId}, volumeDb);
+            });
+
+        // audioSetChannelPosition(channelId, x, y, z) - Set 3D position of a channel
+        lua_.set_function("audioSetChannelPosition", [this](int channelId, float x, float y, float z) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->setPosition(Audio::AudioChannelId{channelId}, glm::vec3(x, y, z));
+            });
+
+        // audioStopChannel(channelId) - Stop a specific channel
+        lua_.set_function("audioStopChannel", [this](int channelId) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->stop(Audio::AudioChannelId{channelId});
+            });
+
         // ==================== Global Audio Multi-Track Control ====================
         // These functions control persistent global audio that survives scene changes
         // Uses static storage in sysAudio.cpp
