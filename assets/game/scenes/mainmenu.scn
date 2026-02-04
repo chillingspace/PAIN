@@ -1,5 +1,9 @@
 {
     "assets": [
+        "9aac41f9-737d-d540-a485-7155b0011394",
+        "5cccecaa-acca-ae47-a45d-0210732e76aa",
+        "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
@@ -10,10 +14,8 @@
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
-        "9aac41f9-737d-d540-a485-7155b0011394",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
         "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
@@ -59,6 +61,110 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "audio_tracks": [
+                                "e87054db-0ef8-f34b-96a0-e2fede943a49",
+                                "82bb33a4-ab3b-254d-b093-b2b9d7ab363d"
+                            ],
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "00000000-0000-0000-0000-000000000000",
+                            "track_volumes": [
+                                {},
+                                {}
+                            ],
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "ce9fcfb7-b990-8a49-95fe-81b942e9aa88"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "baseColorOverride": [
+                                        0.6000000238418579,
+                                        0.6000000238418579,
+                                        0.6000000238418579
+                                    ],
+                                    "emissiveOverride": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
+                                    "metallicOverride": 0.0,
+                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 0.5,
+                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "5cccecaa-acca-ae47-a45d-0210732e76aa",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Global_BGM"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "b0284e1b-335e-ee46-bbc0-e7601f4b8c7b"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "Global_BGM"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "GUID": {
                             "guid": "68b02a54-55f5-b143-8b8a-f56aa1db959f"
                         },
@@ -71,7 +177,7 @@
                                 "143a00fa-3c41-2d46-aeb5-47ad6b279bef"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -824,118 +930,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "AudioSource": {
-                            "group_name": "music",
-                            "is3D": false,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
-                            "volumeDb": 0.0
-                        },
-                        "GUID": {
-                            "guid": "96d4a9ae-20db-774e-b860-3e2a34cf4380"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "ambience"
-                        }
-                    },
-                    "Name": "ambience"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "AudioSource": {
-                            "group_name": "music",
-                            "is3D": false,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "e87054db-0ef8-f34b-96a0-e2fede943a49",
-                            "volumeDb": 0.0
-                        },
-                        "GUID": {
-                            "guid": "a3242ae0-e1b1-5646-89d0-97604a276a09"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "bgm"
-                        }
-                    },
-                    "Name": "bgm"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "Camera": {
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
@@ -963,7 +957,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1015,7 +1009,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1061,7 +1055,7 @@
                                 "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1322,7 +1316,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1421,6 +1415,7 @@
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -1434,6 +1429,7 @@
                                 0.0
                             ],
                             "selected_audio": "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
+                            "track_volumes": [],
                             "volumeDb": 1.0
                         },
                         "GUID": {
@@ -1442,7 +1438,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1565,7 +1561,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1655,7 +1651,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 8
+                                    "siblingIndex": 7
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -1786,7 +1782,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1876,7 +1872,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 9
+                                    "siblingIndex": 8
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2007,7 +2003,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2097,7 +2093,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 10
+                                    "siblingIndex": 9
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2228,7 +2224,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2318,7 +2314,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 11
+                                    "siblingIndex": 10
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2449,7 +2445,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2539,7 +2535,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 11
                                 },
                                 "Layer": {
                                     "layer_id": 0,

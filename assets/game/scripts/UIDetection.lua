@@ -33,10 +33,10 @@ local function cachePositions()
     cached = true
 end
 
--- audio entities
+-- audio entities (SFX only - combat BGM now handled by GlobalAudio)
 local sfxAlertOnce   = findEntity("Enemy_Alert_Hit_v1")
 local sfxAlertLoop   = findEntity("Enemy_Alert_Loop_v1")
-local bgmCombatLayer = findEntity("BGM_Level1b_CombatLayer 2")
+-- bgmCombatLayer is now controlled via GlobalAudio.setCombat()
 
 -- internal state
 ui.active      = false
@@ -45,10 +45,7 @@ ui.duration    = DURATION
 ui.sourceEnemy = nil
 ui.isDetected  = false
 
--- combat layer fade
-local combatCurrentDb = -80.0      -- start silent
-local combatTargetDb  = -3.0       -- loudness when “in combat”
-local combatFadeSpeed = 40.0       -- dB per second
+-- SFX volumes
 local ALERT_ONCE_DB = -8.0   
 local ALERT_LOOP_DB = -12.0
 
@@ -81,7 +78,10 @@ end
 
 local function stopAudio()
     if sfxAlertLoop   then audioStop(sfxAlertLoop)   end
-    if bgmCombatLayer then audioStop(bgmCombatLayer) end
+    -- Combat BGM now controlled via GlobalAudio.setCombat(false)
+    if _G.GlobalAudio and _G.GlobalAudio.setCombat then
+        _G.GlobalAudio.setCombat(false)
+    end
 end
 
 -- public API called from enemy scripts --------------------------
@@ -111,12 +111,9 @@ function ui.begin(enemyEntity)
         audioPlay(sfxAlertLoop)
     end
 
-    -- start combat BGM layer from silence
-    if bgmCombatLayer then
-        audioSetLooping(bgmCombatLayer, true)
-        audioPlay(bgmCombatLayer)
-        combatCurrentDb = -80.0
-        audioSetVolumeDb(bgmCombatLayer, combatCurrentDb)
+    -- Start combat BGM layer via GlobalAudio
+    if _G.GlobalAudio and _G.GlobalAudio.setCombat then
+        _G.GlobalAudio.setCombat(true)
     end
 end
 
@@ -163,15 +160,10 @@ local function update(dt)
                 audioSetVolumeDb(sfxAlertLoop, -80.0)
                 audioPlay(sfxAlertLoop)
             end
-            if bgmCombatLayer then
-                audioSetVolumeDb(bgmCombatLayer, -80.0)
-                audioPlay(bgmCombatLayer)
-            end
         elseif preloadStage == 2 then
             -- Frame 2: stop audio
             if sfxAlertOnce then audioStop(sfxAlertOnce) end
             if sfxAlertLoop then audioStop(sfxAlertLoop) end
-            if bgmCombatLayer then audioStop(bgmCombatLayer) end
         
         elseif preloadStage == 3 then
             -- Frame 3: move UI to a preload position (still off-screen)
@@ -246,11 +238,7 @@ local function update(dt)
     end
 
 
-    -- fade in combat BGM
-    if bgmCombatLayer then
-        combatCurrentDb = math.min(combatTargetDb, combatCurrentDb + combatFadeSpeed * dt)
-        audioSetVolumeDb(bgmCombatLayer, combatCurrentDb)
-    end
+    -- Combat BGM is now controlled via GlobalAudio.setCombat, no per-frame fade needed here
 end
 
 registerUpdate(update)
