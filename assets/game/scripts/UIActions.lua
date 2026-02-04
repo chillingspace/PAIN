@@ -6,13 +6,20 @@ local G = _G_root
 G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
 G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
 G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
-
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
-G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
+G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
+-- Placeholder for next level
+G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+
 local Layers = {
+    DEFAULT = 0,
+    UI = 1,
+    PAUSE = 2,
+    TERRAIN = 3,
+    QUIT = 4,
     RESTART = 5,
     GAME_OVER = 6,
     GAME_WIN = 7,
@@ -21,6 +28,10 @@ local Layers = {
 -- Store current level name globally (For Game_PlayerState)
 if G and G.CurrentLevelName then
     _G.CurrentLevelName = G.CurrentLevelName
+end
+
+if G and G.NextLevelName then
+    _G.NextLevelName = G.NextLevelName
 end
 
 -- print("[UIActions] running, _G_root=", _G_root)
@@ -42,7 +53,7 @@ local function showGameEndOverlay(result)
     end
 
     -- hide gameplay/pause stuff if needed
-    setLayerEnabled(2, false) -- pause menu off 
+    setLayerEnabled(Layers.PAUSE, false) -- pause menu off 
 
     -- Hide both end screens first 
     setLayerEnabled(Layers.GAME_OVER, false)
@@ -180,7 +191,7 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
-            setLayerEnabled(2, false) -- Hide PauseMenu
+            setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -228,7 +239,7 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, false)
-            setLayerEnabled(2, true) -- Return to Pause Menu
+            setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -255,8 +266,8 @@ local handlers = {
         printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(4, true)  -- Show QuitOverlay layer (layer 4)
-            setLayerEnabled(2, false)
+            setLayerEnabled(Layers.QUIT, true)  -- Show QuitOverlay layer (layer 4)
+            setLayerEnabled(Layers.PAUSE, false)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
@@ -283,7 +294,7 @@ local handlers = {
         
         -- Hide quit overlay
         if setLayerEnabled then
-            setLayerEnabled(4, false)
+            setLayerEnabled(Layers.QUIT, false)
             printLog("[UI] QuitOverlay hidden")
         end
         
@@ -306,8 +317,8 @@ local handlers = {
         printLog("[UI] quit_Cancel -> closing quit confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(4, false)
-            setLayerEnabled(2, true)
+            setLayerEnabled(Layers.QUIT, false)
+            setLayerEnabled(Layers.PAUSE, true)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
