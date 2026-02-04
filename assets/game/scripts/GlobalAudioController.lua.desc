@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "GlobalAudioController.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 10851528965764924038
+  },
+  "descriptor_version": 1,
+  "guid": "b0284e1b-335e-ee46-bbc0-e7601f4b8c7b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\GlobalAudioController.lua"
+  }
+}
