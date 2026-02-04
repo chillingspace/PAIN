@@ -18980,6 +18980,30 @@
             "mask": 16,
             "name": "QuitOverlay",
             "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.8999999761581421
+            ],
+            "enabled": false,
+            "id": 5,
+            "mask": 32,
+            "name": "GameOverOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.8999999761581421,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 6,
+            "mask": 64,
+            "name": "GameWinOverlay",
+            "pickable": true
         }
     ],
     "loadingScreen": {
@@ -19029,11 +19053,6 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
             false,
             false,
             false
@@ -19043,6 +19062,17 @@
             false,
             false,
             false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
             false
         ],
         [
@@ -19050,9 +19080,31 @@
             false,
             false,
             false,
+            false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
             false,
             false,
             false,
