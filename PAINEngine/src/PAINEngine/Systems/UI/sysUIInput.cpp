@@ -544,8 +544,18 @@ namespace PAIN {
 			auto view = registry.view<Texture2D, UIElement, UIRectTransform>();
 			std::vector<std::tuple<entt::entity, int, int>> candidates;
 
+			auto scene = services.lock()->get<Scene::SceneManager>();
+
 			for (auto [entity, tex, element, rect] : view.each()) {
 				if (!element.b_is_enabled || !element.b_is_interactable) continue;
+
+				// Skip if layer is disabled
+				if (registry.all_of<Entity::Layer>(entity)) {
+					const auto& layer = registry.get<Entity::Layer>(entity);
+					if (scene && !scene->isLayerEnabled(layer.layer_id)) {
+						continue;
+					}
+				}
 
 				glm::vec2 rect_min, rect_max;
 

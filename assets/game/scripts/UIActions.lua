@@ -178,7 +178,9 @@ local handlers = {
                 Hide_Cursor(true)
                 
             end
-            SetGamePaused(not IsGamePaused()) 
+            --SetGamePaused(not IsGamePaused()) 
+            _G_root.TogglePause()
+            setLayerEnabled(1, not _G_root.IsGamePaused())
             printLog("[UI] pause_Resume -> called TogglePause()")
         else
             printLog("[UI] pause_Resume pressed, but TogglePause is not available")
@@ -207,8 +209,8 @@ local handlers = {
         printLog("[UI] restart_Confirm -> restarting")
         
         -- Unpause first
-        if IsGamePaused() then
-            SetGamePaused(false) 
+        if  _G_root.IsGamePaused() then
+            _G_root.SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
