@@ -160,7 +160,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "fce43e0d-6930-1e42-98d5-e969a39f0070"
+                            "guid": "37408778-80ca-3140-bd4e-9f35398ac51d"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -168,14 +168,14 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 6,
-                            "layer_mask": 64
+                            "layer_id": 7,
+                            "layer_mask": 128
                         },
                         "LocalTransform": {
                             "position": [
-                                -15.307271957397461,
+                                -7.383508682250977,
                                 0.0,
-                                -49.6586799621582
+                                -2.5342764854431152
                             ],
                             "rotation": [
                                 0.0,
@@ -194,11 +194,15 @@
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 7,
+                                    "layer_mask": 128
+                                },
                                 "LocalTransform": {
                                     "position": [
-                                        -15.307271957397461,
+                                        -7.383508682250977,
                                         0.0,
-                                        -49.6586799621582
+                                        -2.5342764854431152
                                     ],
                                     "rotation": [
                                         0.0,
@@ -214,7 +218,7 @@
                                 }
                             },
                             "correspondingPrefabEntityGUID": "b7582502-e810-ce4c-97f3-72a7cf98ca1a",
-                            "instanceRootGUID": "fce43e0d-6930-1e42-98d5-e969a39f0070",
+                            "instanceRootGUID": "37408778-80ca-3140-bd4e-9f35398ac51d",
                             "sourcePrefabGUID": "9518f1e9-570e-124c-a9fc-a3974432dce0"
                         },
                         "Texture2D": {
@@ -287,7 +291,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "321759e6-409d-e946-a8e5-2af8ef5b5e10"
+                            "guid": "584d9718-733e-4548-8d14-36b0c270ee4b"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -295,14 +299,14 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 5,
-                            "layer_mask": 32
+                            "layer_id": 6,
+                            "layer_mask": 64
                         },
                         "LocalTransform": {
                             "position": [
-                                -15.35759162902832,
+                                -3.8506269454956055,
                                 0.0,
-                                -46.888267517089844
+                                -0.7124209403991699
                             ],
                             "rotation": [
                                 0.0,
@@ -321,11 +325,15 @@
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
+                                "Layer": {
+                                    "layer_id": 6,
+                                    "layer_mask": 64
+                                },
                                 "LocalTransform": {
                                     "position": [
-                                        -15.35759162902832,
+                                        -3.8506269454956055,
                                         0.0,
-                                        -46.888267517089844
+                                        -0.7124209403991699
                                     ],
                                     "rotation": [
                                         0.0,
@@ -341,7 +349,7 @@
                                 }
                             },
                             "correspondingPrefabEntityGUID": "c782207c-7090-924e-8e10-b0c4872abf24",
-                            "instanceRootGUID": "321759e6-409d-e946-a8e5-2af8ef5b5e10",
+                            "instanceRootGUID": "584d9718-733e-4548-8d14-36b0c270ee4b",
                             "sourcePrefabGUID": "1ebf1807-e398-e14d-b22c-73d493a1b851"
                         },
                         "Texture2D": {
@@ -28433,7 +28441,7 @@
             "enabled": false,
             "id": 5,
             "mask": 32,
-            "name": "GameOverOverlay",
+            "name": "RestartOverlay",
             "pickable": true
         },
         {
@@ -28445,6 +28453,18 @@
             "enabled": false,
             "id": 6,
             "mask": 64,
+            "name": "GameOverOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 7,
+            "mask": 128,
             "name": "GameWinOverlay",
             "pickable": true
         }
@@ -28498,27 +28518,11 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
             false,
             false
         ],
         [
             false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
             false,
             false,
             false,
@@ -28534,6 +28538,17 @@
             false,
             false,
             false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
             false
         ],
         [
@@ -28543,9 +28558,31 @@
             false,
             false,
             false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
             false,
             false,
             false,

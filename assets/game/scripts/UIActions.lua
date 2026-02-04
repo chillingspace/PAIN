@@ -12,9 +12,11 @@ G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
--- Variables to store layer
-G.GameOverLayer = 5
-G.GameWinLayer = 6
+local Layers = {
+    RESTART = 5,
+    GAME_OVER = 6,
+    GAME_WIN = 7,
+}
 
 -- Store current level name globally (For Game_PlayerState)
 if G and G.CurrentLevelName then
@@ -43,14 +45,14 @@ local function showGameEndOverlay(result)
     setLayerEnabled(2, false) -- pause menu off 
 
     -- Hide both end screens first 
-    setLayerEnabled(G.GameOverLayer, false)
-    setLayerEnabled(G.GameWinLayer,  false)
+    setLayerEnabled(Layers.GAME_OVER, false)
+    setLayerEnabled(Layers.GAME_WIN,  false)
 
     if result == "win" then
-        setLayerEnabled(G.GameWinLayer, true)
+        setLayerEnabled(Layers.GAME_WIN, true)
         printLog("[UI] Showing GAME WIN overlay")
     else
-        setLayerEnabled(G.GameOverLayer, true)
+        setLayerEnabled(Layers.GAME_OVER, true)
         printLog("[UI] Showing GAME OVER overlay")
     end
 
@@ -177,7 +179,7 @@ local handlers = {
         printLog("[UI] pause_Restart -> showing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, true)  -- Show RestartOverlay layer (layer 5)
+            setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
             setLayerEnabled(2, false) -- Hide PauseMenu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
@@ -201,7 +203,7 @@ local handlers = {
         
         -- Hide restart overlay
         if setLayerEnabled then
-            setLayerEnabled(5, false)
+            setLayerEnabled(Layers.RESTART, false)
             printLog("[UI] RestartOverlay hidden")
         end
         
@@ -225,7 +227,7 @@ local handlers = {
         printLog("[UI] restart_Cancel -> closing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, false)
+            setLayerEnabled(Layers.RESTART, false)
             setLayerEnabled(2, true) -- Return to Pause Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then

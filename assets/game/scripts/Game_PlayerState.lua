@@ -84,6 +84,9 @@ local greyHeartTexture   = "game/textures/heart grey.png"
 
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
+    -- Debugging
+    -- registerKeyUp("C", function() requestEndOverlay("win") end)
+
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
     registerKeyDown("H", function() 
@@ -243,7 +246,6 @@ local function requestEndOverlay(result)
 end
 
 local function triggerGameOver()
-    -- log("[PlayerState] In triggergameover")
     if S.gameEnded then 
         return 
     end
@@ -258,26 +260,6 @@ local function triggerGameWin()
     S.gameWon   = true
     requestEndOverlay("win")
 end
-
--- local function showEndScreen(texPath)
---     if S.uiEndScreen and setUITexture then
---         setUITexture(S.uiEndScreen, texPath)
---     end
--- end
-
--- local function triggerGameOver()
---     if S.gameEnded then return end  
---     S.gameEnded = true
---     S.gameWon   = false
---     showEndScreen(GAMEOVER_TEX)
--- end
-
--- local function triggerGameWin()
---     if S.gameEnded then return end
---     S.gameEnded = true
---     S.gameWon   = true
---     showEndScreen(WIN_TEX)
--- end
 
 function S.isGameEnded()
     return S.gameEnded

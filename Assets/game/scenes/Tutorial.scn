@@ -148,8 +148,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 6,
-                            "layer_mask": 64
+                            "layer_id": 7,
+                            "layer_mask": 128
                         },
                         "LocalTransform": {
                             "position": [
@@ -1399,8 +1399,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 5,
-                            "layer_mask": 32
+                            "layer_id": 6,
+                            "layer_mask": 64
                         },
                         "LocalTransform": {
                             "position": [
@@ -19377,12 +19377,12 @@
             "color": [
                 0.30000001192092896,
                 0.8999999761581421,
-                0.8999999761581421
+                0.30000001192092896
             ],
             "enabled": false,
             "id": 5,
             "mask": 32,
-            "name": "GameOverOverlay",
+            "name": "RestartOverlay",
             "pickable": true
         },
         {
@@ -19394,6 +19394,18 @@
             "enabled": false,
             "id": 6,
             "mask": 64,
+            "name": "GameOverOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 7,
+            "mask": 128,
             "name": "GameWinOverlay",
             "pickable": true
         }
@@ -19447,27 +19459,11 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
             false,
             false
         ],
         [
             false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
             false,
             false,
             false,
@@ -19483,6 +19479,17 @@
             false,
             false,
             false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
             false
         ],
         [
@@ -19492,9 +19499,31 @@
             false,
             false,
             false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
             false,
             false,
             false,
