@@ -494,8 +494,24 @@ namespace PAIN {
 
     }
 
-    void EngineAPIAdapter::PauseAllSystems(bool) {}
-    bool EngineAPIAdapter::IsGamePaused() const { return false; }
+    // Expose pausing to lua
+    void EngineAPIAdapter::SetGamePaused(bool pause) {
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
+            return;
+        }
+
+        scene_->setGamePaused(pause);
+    }
+    // Check if game is paused
+    bool EngineAPIAdapter::IsGamePaused() const { 
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
+            return false;
+        }
+
+        return scene_->isGamePaused();
+    }
     float EngineAPIAdapter::GetFps() const { return 0.0f; }
     void EngineAPIAdapter::SetDeltaMultiplier(float) {}
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }

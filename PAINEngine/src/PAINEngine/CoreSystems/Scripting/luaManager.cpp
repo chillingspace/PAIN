@@ -719,8 +719,8 @@ namespace PAIN {
             if (!api_) return;
             api_->QuitApplication();
             });
-        lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
-        lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
+        lua_.set_function("SetGamePaused", [this](bool p) { if (api_) api_->SetGamePaused(p); });
+        lua_.set_function("IsGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
         lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
         lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
@@ -929,7 +929,15 @@ namespace PAIN {
 
     }
 
-    void LuaManager::tick(double dt) {
+    void LuaManager::tick(double dt, double unscaled_dt) {
+        //// Update Global Time Table
+        //sol::table time = lua_["Time"];
+        //if (!time.valid()) time = lua_.create_named_table("Time");
+
+        //time["deltaTime"] = dt;                 // 0.0 when paused
+        //time["unscaledDeltaTime"] = unscaled_dt; // 0.016 always
+        //time["timeScale"] = (unscaled_dt > 0) ? (dt / unscaled_dt) : 0.0;
+
         // 1) Move any newly scheduled timeouts into the heap with absolute times
         if (!timeouts_.empty()) {
             const double base = nowSeconds();
