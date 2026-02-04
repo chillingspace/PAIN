@@ -1340,6 +1340,18 @@ namespace PAIN {
 			//Clear old scene
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
 
+			// reset lua scripting state before destroying entities
+			//auto controller = services->get<ECS::Controller>();
+			//PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			//auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			//if (scriptingSystem) {
+			//	scriptingSystem->getLuaManager().resetForSceneReload();
+			//	PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			//}
+			//else {
+			//	PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			//}
+
 			// Destroy all ECS entities
 			auto controller = services->get<ECS::Controller>();
 			if (controller) {
@@ -1482,8 +1494,19 @@ namespace PAIN {
 				setPlaying(false);
 			}
 
-			// Destroy all ECS entities
+			// reset lua scripting state before destroying entities
 			auto controller = services->get<ECS::Controller>();
+			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			if (scriptingSystem) {
+				scriptingSystem->getLuaManager().resetForSceneReload();
+				PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			}
+			else {
+				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			}
+
+			// Destroy all ECS entities
 			if (controller) {
 				controller->destroyAllEntities();
 				PN_CORE_INFO("[SceneManager] Cleared all entities");

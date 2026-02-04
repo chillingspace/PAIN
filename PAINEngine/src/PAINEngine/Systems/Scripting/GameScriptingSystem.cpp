@@ -58,11 +58,14 @@ namespace PAIN {
             auto services_ptr = getServices();
             auto scene = services_ptr->get<Scene::SceneManager>();
 
+            #ifdef _DEBUG
             if (scene) {
                 if (!scene->isPlaying()) { // If scene isn't playing don't run any scripts
                     return;
                 }
             }
+            #endif
+
             // --- publish LuaManager* into this registry's context once ---
             {
                 auto& ctx = reg.ctx();

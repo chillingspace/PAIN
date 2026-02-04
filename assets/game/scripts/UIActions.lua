@@ -10,7 +10,6 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
-G.SettingsSceneName   = G.SettingsSceneName  or "game/scenes/settings.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
 local function resolveSceneName(payload, fallback)
@@ -40,7 +39,7 @@ local handlers = {
     end,
 
     game_Move = function(buttonEntity, payload)
-        if _G_root.gamePaused then
+        if IsGamePaused() then
             if _G_root.Joystick_OnDrag then
                 _G_root.Joystick_OnDrag(0.0, 0.0)
             end
@@ -103,13 +102,13 @@ local handlers = {
     end,
 
     pause_Resume = function(buttonEntity, payload)
-        if _G_root.TogglePause then
+        if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
                 
             end
-            _G_root.TogglePause()
+            SetGamePaused(not IsGamePaused()) 
             printLog("[UI] pause_Resume -> called TogglePause()")
         else
             printLog("[UI] pause_Resume pressed, but TogglePause is not available")
@@ -138,8 +137,8 @@ local handlers = {
         printLog("[UI] restart_Confirm -> restarting")
         
         -- Unpause first
-        if _G_root.gamePaused then
-            _G_root.gamePaused = false
+        if IsGamePaused() then
+            SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
@@ -218,8 +217,8 @@ local handlers = {
         printLog("[UI] quit_Confirm -> returning to main menu")
         
         -- Unpause first
-        if _G_root.gamePaused then
-            _G_root.gamePaused = false
+        if IsGamePaused() then
+            SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
@@ -284,17 +283,6 @@ local handlers = {
             changeScene(G.FirstLevelScene)
         else
             printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
-        end
-    end,
-
-    menu_OpenSettings = function(buttonEntity, payload)
-        --local settingsScene = resolveSceneName(payload, G.SettingsSceneName, "settings.scn")
-
-        if G.SettingsSceneName and changeScene then
-            printLog("[UI] menu_OpenSettings -> changeScene("..G.SettingsSceneName..")")
-            changeScene(G.SettingsSceneName)
-        else
-            printLog("[UI] menu_OpenSettings pressed (no scene specified / not implemented)")
         end
     end,
 
