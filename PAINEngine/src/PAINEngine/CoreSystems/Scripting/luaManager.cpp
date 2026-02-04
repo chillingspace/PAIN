@@ -1,6 +1,9 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
+#include "ECS/Components/cEntity.h"
+#include "ECS/Components/cAudioSource.h"
+#include "ECS/Controller.h"
 #include "Utility/Log.h"
 
 #include <fstream>
@@ -707,6 +710,156 @@ namespace PAIN {
             
             audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
             });
+
+        // ==================== Global BGM Multi-Track Control ====================
+        // These functions control the Global_BGM entity's multi-track audio channels
+
+        // globalBGMSetVolume(trackIndex, volumeDb) - Set volume of a specific BGM track
+        lua_.set_function("globalBGMSetVolume", [this](int trackIndex, float volumeDb) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            auto ecs = services_->get<ECS::Controller>();
+            if (!audio || !ecs) return;
+
+            // Find Global_BGM entity by name
+            auto& reg = ecs->getRegistry();
+            entt::entity globalBGMEntity = entt::null;
+            Audio::AudioSource* audioSrc = nullptr;
+            
+            auto view = reg.view<Audio::AudioSource, Entity::Name>();
+            for (auto entity : view) {
+                const auto& nameComp = reg.get<Entity::Name>(entity);
+                if (nameComp.name == "Global_BGM") {
+                    globalBGMEntity = entity;
+                    audioSrc = &reg.get<Audio::AudioSource>(entity);
+                    break;
+                }
+            }
+
+            if (!audioSrc) {
+                PN_WARN("[Lua] globalBGMSetVolume: Global_BGM entity not found");
+                return;
+            }
+
+            if (trackIndex < 0 || trackIndex >= static_cast<int>(audioSrc->track_channel_ids.size())) {
+                PN_WARN("[Lua] globalBGMSetVolume: Track index {} out of range (0-{})", 
+                    trackIndex, audioSrc->track_channel_ids.size() - 1);
+                return;
+            }
+
+            auto& channelId = audioSrc->track_channel_ids[trackIndex];
+            if (channelId.isValid()) {
+                audio->setVolumeDb(channelId, volumeDb);
+                if (trackIndex < static_cast<int>(audioSrc->track_volumes.size())) {
+                    audioSrc->track_volumes[trackIndex] = volumeDb;
+                }
+            }
+        });
+
+        // globalBGMFade(trackIndex, targetDb, durationSeconds) - Fade a track to target volume
+        lua_.set_function("globalBGMFade", [this](int trackIndex, float targetDb, float duration) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            auto ecs = services_->get<ECS::Controller>();
+            if (!audio || !ecs) return;
+
+            auto& reg = ecs->getRegistry();
+            Audio::AudioSource* audioSrc = nullptr;
+            
+            auto view = reg.view<Audio::AudioSource, Entity::Name>();
+            for (auto entity : view) {
+                const auto& nameComp = reg.get<Entity::Name>(entity);
+                if (nameComp.name == "Global_BGM") {
+                    audioSrc = &reg.get<Audio::AudioSource>(entity);
+                    break;
+                }
+            }
+
+            if (!audioSrc) {
+                PN_WARN("[Lua] globalBGMFade: Global_BGM entity not found");
+                return;
+            }
+
+            if (trackIndex < 0 || trackIndex >= static_cast<int>(audioSrc->track_channel_ids.size())) {
+                PN_WARN("[Lua] globalBGMFade: Track index {} out of range", trackIndex);
+                return;
+            }
+
+            auto& channelId = audioSrc->track_channel_ids[trackIndex];
+            if (channelId.isValid()) {
+                audio->setVolumeDb(channelId, targetDb);
+                if (trackIndex < static_cast<int>(audioSrc->track_volumes.size())) {
+                    audioSrc->track_volumes[trackIndex] = targetDb;
+                }
+                PN_INFO("[Lua] globalBGMFade: Track {} fading to {}dB over {}s", trackIndex, targetDb, duration);
+            }
+        });
+
+        // globalBGMGetTrackCount() - Get number of Global BGM tracks
+        lua_.set_function("globalBGMGetTrackCount", [this]() -> int {
+            if (!services_) return 0;
+            auto ecs = services_->get<ECS::Controller>();
+            if (!ecs) return 0;
+
+            auto& reg = ecs->getRegistry();
+            auto view = reg.view<Audio::AudioSource, Entity::Name>();
+            for (auto entity : view) {
+                const auto& nameComp = reg.get<Entity::Name>(entity);
+                if (nameComp.name == "Global_BGM") {
+                    const auto& audioSrc = reg.get<Audio::AudioSource>(entity);
+                    return static_cast<int>(audioSrc.audio_tracks.size());
+                }
+            }
+            return 0;
+        });
+
+        // globalBGMGetVolume(trackIndex) - Get current volume of a track
+        lua_.set_function("globalBGMGetVolume", [this](int trackIndex) -> float {
+            if (!services_) return -80.0f;
+            auto ecs = services_->get<ECS::Controller>();
+            if (!ecs) return -80.0f;
+
+            auto& reg = ecs->getRegistry();
+            auto view = reg.view<Audio::AudioSource, Entity::Name>();
+            for (auto entity : view) {
+                const auto& nameComp = reg.get<Entity::Name>(entity);
+                if (nameComp.name == "Global_BGM") {
+                    const auto& audioSrc = reg.get<Audio::AudioSource>(entity);
+                    if (trackIndex < 0 || trackIndex >= static_cast<int>(audioSrc.track_volumes.size())) {
+                        return -80.0f;
+                    }
+                    return audioSrc.track_volumes[trackIndex];
+                }
+            }
+            return -80.0f;
+        });
+
+        // globalBGMStopAll() - Stop all Global BGM tracks
+        lua_.set_function("globalBGMStopAll", [this]() {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            auto ecs = services_->get<ECS::Controller>();
+            if (!audio || !ecs) return;
+
+            auto& reg = ecs->getRegistry();
+            auto view = reg.view<Audio::AudioSource, Entity::Name>();
+            for (auto entity : view) {
+                auto& nameComp = reg.get<Entity::Name>(entity);
+                if (nameComp.name == "Global_BGM") {
+                    auto& audioSrc = reg.get<Audio::AudioSource>(entity);
+                    for (auto& channelId : audioSrc.track_channel_ids) {
+                        if (channelId.isValid()) {
+                            audio->stop(channelId);
+                            channelId = {-1};
+                        }
+                    }
+                    audioSrc.hasStarted = false;
+                    audioSrc.state = Audio::AudioState::Stopped;
+                    PN_INFO("[Lua] globalBGMStopAll: All {} tracks stopped", audioSrc.track_channel_ids.size());
+                    break;
+                }
+            }
+        });
 
         /* =========================================================================== */
         /*                           Scene / System state                              */
