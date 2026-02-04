@@ -450,6 +450,9 @@ namespace PAIN {
 
 							"menu_OpenTutorial",
 							"menu_BackToMain",
+
+							"restart_Confirm",
+							"restart_Cancel",
 						};
 
 						int action_idx = static_cast<int>(button.action);

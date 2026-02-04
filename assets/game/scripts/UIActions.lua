@@ -117,23 +117,67 @@ local handlers = {
     end,
 
     pause_Restart = function(buttonEntity, payload)
-        -- Hardcoded to always restart Tutorial.scn
-        printLog("[UI] pause_Restart -> restarting Tutorial.scn")
+        -- Show restart confirmation popup
+        printLog("[UI] pause_Restart -> showing restart confirmation")
         
+        if setLayerEnabled then
+            setLayerEnabled(5, true)  -- Show RestartOverlay layer (layer 5)
+            setLayerEnabled(2, false) -- Hide PauseMenu
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+            end
+            printLog("[UI] RestartOverlay (layer 5) shown")
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+    restart_Confirm = function(buttonEntity, payload)
+        -- User pressed YES - restart level
+        printLog("[UI] restart_Confirm -> restarting")
+        
+        -- Unpause first
         if _G_root.gamePaused then
             _G_root.gamePaused = false
-            printLog("[UI] Game unpaused before restart")
+            printLog("[UI] Game unpaused before scene change")
         end
         
+        -- Hide restart overlay
+        if setLayerEnabled then
+            setLayerEnabled(5, false)
+            printLog("[UI] RestartOverlay hidden")
+        end
+        
+        -- Restart Scene
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
-                
             end
-            changeScene(G.CurrentLevelName)
+            -- default to current level or fallback
+            local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
+            printLog("[UI] restart_Confirm -> changeScene("..sceneToLoad..")")
+            changeScene(sceneToLoad)
         else
-            printLog("[UI] pause_Restart pressed, but changeScene is not bound")
+            printLog("[UI] restart_Confirm pressed, but changeScene is not bound")
+        end
+    end,
+
+    restart_Cancel = function(buttonEntity, payload)
+        -- User pressed NO - close popup
+        printLog("[UI] restart_Cancel -> closing restart confirmation")
+        
+        if setLayerEnabled then
+            setLayerEnabled(5, false)
+            setLayerEnabled(2, true) -- Return to Pause Menu
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+            end
+            printLog("[UI] RestartOverlay (layer 5) hidden - returning to pause menu")
+        else
+            printLog("[UI] setLayerEnabled not available")
         end
     end,
 

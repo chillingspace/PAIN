@@ -124,7 +124,9 @@ namespace PAIN {
 		goto_Pause,
 
 		howtoplay_ArrowLeft,
-		howtoplay_ArrowRight
+		howtoplay_ArrowRight,
+		restart_Confirm,
+		restart_Cancel,
 	};
 
 	struct UIButton {
@@ -319,6 +321,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 
 	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
 	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
+	{PAIN::UIAction::restart_Confirm, "restart_Confirm"},
+	{PAIN::UIAction::restart_Cancel, "restart_Cancel"},
 	{PAIN::UIAction::goto_Pause, "goto_Pause"},
 
 	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
