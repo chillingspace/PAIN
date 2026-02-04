@@ -64,8 +64,7 @@
                         "AudioSource": {
                             "audio_tracks": [
                                 "e87054db-0ef8-f34b-96a0-e2fede943a49",
-                                "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
-                                "1d28dd5c-5baa-f54c-a266-bcb84246193a"
+                                "82bb33a4-ab3b-254d-b093-b2b9d7ab363d"
                             ],
                             "group_name": "",
                             "is3D": true,
@@ -81,7 +80,6 @@
                             ],
                             "selected_audio": "00000000-0000-0000-0000-000000000000",
                             "track_volumes": [
-                                {},
                                 {},
                                 {}
                             ],
