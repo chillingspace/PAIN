@@ -441,16 +441,15 @@ namespace PAIN {
 							"menu_Credits",
 							"menu_QuitGame",
 
+							"menu_OpenTutorial",
+							"menu_BackToMain",
+
 							"quit_Confirm",
 							"quit_Cancel",
 							"goto_Pause",
 
 							"howtoplay_ArrowLeft",
 							"howtoplay_ArrowRight",
-
-							"menu_OpenTutorial",
-							"menu_BackToMain",
-
 							"restart_Confirm",
 							"restart_Cancel",
 						};
@@ -482,69 +481,69 @@ namespace PAIN {
 							changed = true;
 						}
 
-						// ── State Colors ──
-						ImGui::SeparatorText("State Colors");
+						//// ── State Colors ──
+						//ImGui::SeparatorText("State Colors");
 
-						auto editColor = [&](const char* label, int& color) -> bool {
-							// Convert 0xAARRGGBB to ImVec4
-							float a = ((color >> 24) & 0xFF) / 255.0f;
-							float r = ((color >> 16) & 0xFF) / 255.0f;
-							float g = ((color >> 8) & 0xFF) / 255.0f;
-							float b = ((color >> 0) & 0xFF) / 255.0f;
-							ImVec4 col(r, g, b, a);
+						//auto editColor = [&](const char* label, int& color) -> bool {
+						//	// Convert 0xAARRGGBB to ImVec4
+						//	float a = ((color >> 24) & 0xFF) / 255.0f;
+						//	float r = ((color >> 16) & 0xFF) / 255.0f;
+						//	float g = ((color >> 8) & 0xFF) / 255.0f;
+						//	float b = ((color >> 0) & 0xFF) / 255.0f;
+						//	ImVec4 col(r, g, b, a);
 
-							bool color_changed = ImGui::ColorEdit4(
-								label, (float*)&col,
-								ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
-									ImGuiColorEditFlags_DisplayHex);
+						//	bool color_changed = ImGui::ColorEdit4(
+						//		label, (float*)&col,
+						//		ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
+						//			ImGuiColorEditFlags_DisplayHex);
 
-							if (color_changed) {
-								int na = static_cast<int>(col.w * 255.0f) & 0xFF;
-								int nr = static_cast<int>(col.x * 255.0f) & 0xFF;
-								int ng = static_cast<int>(col.y * 255.0f) & 0xFF;
-								int nb = static_cast<int>(col.z * 255.0f) & 0xFF;
-								color = (na << 24) | (nr << 16) | (ng << 8) | nb;
-							}
+						//	if (color_changed) {
+						//		int na = static_cast<int>(col.w * 255.0f) & 0xFF;
+						//		int nr = static_cast<int>(col.x * 255.0f) & 0xFF;
+						//		int ng = static_cast<int>(col.y * 255.0f) & 0xFF;
+						//		int nb = static_cast<int>(col.z * 255.0f) & 0xFF;
+						//		color = (na << 24) | (nr << 16) | (ng << 8) | nb;
+						//	}
 
-							return color_changed;
-						};
+						//	return color_changed;
+						//};
 
-						changed |= editColor("Normal Color##normal", button.normal_color);
-						changed |= editColor("Highlighted Color##highlighted",
-											 button.highlighted_color);
-						changed |= editColor("Pressed Color##pressed", button.pressed_color);
-						changed |= editColor("Disabled Color##disabled", button.disabled_color);
+						//changed |= editColor("Normal Color##normal", button.normal_color);
+						//changed |= editColor("Highlighted Color##highlighted",
+						//					 button.highlighted_color);
+						//changed |= editColor("Pressed Color##pressed", button.pressed_color);
+						//changed |= editColor("Disabled Color##disabled", button.disabled_color);
 
-						// ── Optional: Preview current state color ──
-						ImGui::Spacing();
-						ImGui::Text("Current State Preview:");
+						//// ── Optional: Preview current state color ──
+						//ImGui::Spacing();
+						//ImGui::Text("Current State Preview:");
 
-						int preview_color = button.normal_color;
-						switch (button.state) {
-						case UIButtonState::Normal:
-							preview_color = button.normal_color;
-							break;
-						case UIButtonState::Highlighted:
-							preview_color = button.highlighted_color;
-							break;
-						case UIButtonState::Pressed:
-							preview_color = button.pressed_color;
-							break;
-						case UIButtonState::Disabled:
-							preview_color = button.disabled_color;
-							break;
-						}
+						//int preview_color = button.normal_color;
+						//switch (button.state) {
+						//case UIButtonState::Normal:
+						//	preview_color = button.normal_color;
+						//	break;
+						//case UIButtonState::Highlighted:
+						//	preview_color = button.highlighted_color;
+						//	break;
+						//case UIButtonState::Pressed:
+						//	preview_color = button.pressed_color;
+						//	break;
+						//case UIButtonState::Disabled:
+						//	preview_color = button.disabled_color;
+						//	break;
+						//}
 
-						float pa = ((preview_color >> 24) & 0xFF) / 255.0f;
-						float pr = ((preview_color >> 16) & 0xFF) / 255.0f;
-						float pg = ((preview_color >> 8) & 0xFF) / 255.0f;
-						float pb = ((preview_color >> 0) & 0xFF) / 255.0f;
-						ImVec4 preview_col(pr, pg, pb, pa);
+						//float pa = ((preview_color >> 24) & 0xFF) / 255.0f;
+						//float pr = ((preview_color >> 16) & 0xFF) / 255.0f;
+						//float pg = ((preview_color >> 8) & 0xFF) / 255.0f;
+						//float pb = ((preview_color >> 0) & 0xFF) / 255.0f;
+						//ImVec4 preview_col(pr, pg, pb, pa);
 
-						ImGui::ColorButton("##preview", preview_col,
-										   ImGuiColorEditFlags_NoTooltip |
-											   ImGuiColorEditFlags_NoPicker,
-										   ImVec2(ImGui::GetContentRegionAvail().x, 30));
+						//ImGui::ColorButton("##preview", preview_col,
+						//				   ImGuiColorEditFlags_NoTooltip |
+						//					   ImGuiColorEditFlags_NoPicker,
+						//				   ImVec2(ImGui::GetContentRegionAvail().x, 30));
 
 						ImGui::PopStyleVar();
 
