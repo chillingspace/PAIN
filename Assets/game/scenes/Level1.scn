@@ -160,6 +160,260 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "fce43e0d-6930-1e42-98d5-e969a39f0070"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -15.307271957397461,
+                                0.0,
+                                -49.6586799621582
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "gamewin_overlay"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        -15.307271957397461,
+                                        0.0,
+                                        -49.6586799621582
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "b7582502-e810-ce4c-97f3-72a7cf98ca1a",
+                            "instanceRootGUID": "fce43e0d-6930-1e42-98d5-e969a39f0070",
+                            "sourcePrefabGUID": "9518f1e9-570e-124c-a9fc-a3974432dce0"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "eb3094f7-a1f7-8440-8b40-8b56d3f6deed",
+                            "texture_scale": [
+                                2.0,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "gamewin_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "321759e6-409d-e946-a8e5-2af8ef5b5e10"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 5,
+                            "layer_mask": 32
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -15.35759162902832,
+                                0.0,
+                                -46.888267517089844
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "gameover_overlay"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        -15.35759162902832,
+                                        0.0,
+                                        -46.888267517089844
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "c782207c-7090-924e-8e10-b0c4872abf24",
+                            "instanceRootGUID": "321759e6-409d-e946-a8e5-2af8ef5b5e10",
+                            "sourcePrefabGUID": "1ebf1807-e398-e14d-b22c-73d493a1b851"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "b7128467-93ed-f44f-b83b-c497ae4cc715",
+                            "texture_scale": [
+                                2.0,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "gameover_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "e9adf7b5-ec69-fd44-8eff-be9e86db1836"
                         },
                         "Hierarchy": {
@@ -28179,7 +28433,19 @@
             "enabled": false,
             "id": 5,
             "mask": 32,
-            "name": "RestartOverlay",
+            "name": "GameOverOverlay",
+            "pickable": true
+        },
+        {
+            "color": [
+                0.8999999761581421,
+                0.30000001192092896,
+                0.30000001192092896
+            ],
+            "enabled": false,
+            "id": 6,
+            "mask": 64,
+            "name": "GameWinOverlay",
             "pickable": true
         }
     ],
@@ -28231,25 +28497,11 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
             false,
             false
         ],
         [
             false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
             false,
             false,
             false,
@@ -28263,9 +28515,38 @@
             false,
             false,
             false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
             false,
             false,
             false,
