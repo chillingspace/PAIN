@@ -52,6 +52,8 @@ namespace PAIN {
 		case UIAction::quit_Cancel:            return "quit_Cancel";
 
         case UIAction::goto_Pause:             return "goto_Pause";
+        case UIAction::restart_Confirm:        return "restart_Confirm";
+		case UIAction::restart_Cancel:         return "restart_Cancel";
 		case UIAction::None:
 
 		default:                               return "None";
