@@ -7,6 +7,10 @@
 
 log("[PlayerState] Script loaded on entityId=", tostring(entityId))
 
+-- local G = _G_root
+-- print("[Game_PlayerState] load time _G.CurrentLevelName=", _G.CurrentLevelName)
+
+
 -- global so other scripts can use
 _G.PlayerState = _G.PlayerState or {
     lives = 3,
@@ -66,7 +70,12 @@ local hidePressed = false
 -- paths for end screens
 local GAMEOVER_TEX = "game/textures/gameover.png"
 local WIN_TEX = "game/textures/win screen.png"
-local CURRENT_SCENE_PATH = "proto2.scn"  
+
+-- !TODO: Fix current scene path being set wrongly in UIActions.lua
+local CURRENT_SCENE_PATH = _G.CurrentLevelName
+-- local CURRENT_SCENE_PATH = "Level1.scn"
+
+log("[PlayerState] Current Scene Path:", _G.CurrentLevelName)
 local restartPressed = false
 
 -- Heart UI textures
@@ -75,6 +84,9 @@ local greyHeartTexture   = "game/textures/heart grey.png"
 
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
+    -- Debugging
+    -- registerKeyUp("C", function() requestEndOverlay("win") end)
+
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
     registerKeyDown("H", function() 
@@ -96,6 +108,12 @@ if not S._keysRegistered then
 
     S._keysRegistered = true 
 end
+
+-- Ensures that currentScene is always updated
+local function currentScene()
+    return _G.CurrentLevelName or "Level1.scn"
+end
+
 
 local function updateHeartsUI()
     -- Store the player's lives
@@ -217,24 +235,30 @@ local function playSfx(e)
     end
 end
 
-local function showEndScreen(texPath)
-    if S.uiEndScreen and setUITexture then
-        setUITexture(S.uiEndScreen, texPath)
+-- result = either win or lose
+local function requestEndOverlay(result) 
+    if _G_root and _G_root.UI_OnAction then
+        _G_root.UI_OnAction("game_End", nil, result)
+    else
+        -- set a shared global that UIActions can poll
+        _G_root.GameEndState = result
     end
 end
 
 local function triggerGameOver()
-    if S.gameEnded then return end  
+    if S.gameEnded then 
+        return 
+    end
     S.gameEnded = true
     S.gameWon   = false
-    showEndScreen(GAMEOVER_TEX)
+    requestEndOverlay("lose")
 end
 
 local function triggerGameWin()
     if S.gameEnded then return end
     S.gameEnded = true
     S.gameWon   = true
-    showEndScreen(WIN_TEX)
+    requestEndOverlay("win")
 end
 
 function S.isGameEnded()
@@ -519,6 +543,8 @@ end
 
 
 function S.update(dt)
+    CURRENT_SCENE_PATH = currentScene()
+
     if S.pendingHeartBind then
         if bindHeartsFromRegistry() then
             S.pendingHeartBind = false
@@ -674,10 +700,21 @@ function S.onCaught(player)
     local deathPos = { x = px, y = py, z = pz }
 
     S.lives = S.lives - 1
-    if S.lives < 0 then S.lives = 0 end
+
+    if S.lives < 0 then 
+        S.lives = 0 
+    end
+
     updateHeartsUI()
     log("[PlayerState] Player caught! Lives left:", S.lives)
-    if S.lives <= 0 then triggerGameOver() return end
+
+    if S.lives <= 0 then 
+        -- log("[PlayerState] Triggering game over")
+        triggerGameOver() 
+        -- log("[PlayerState] After game over")
+        return 
+    end
+    
     playSfx(S.sfxRespawn)
 
     -- drop carried letter
@@ -709,6 +746,7 @@ end
 -- tick cooldown
 registerUpdate(function(dt)
     S.update(dt)
+    -- print("[Game_PlayerState] runtime _G.CurrentLevelName=", _G.CurrentLevelName)
 end)
 
 

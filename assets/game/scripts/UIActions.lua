@@ -12,6 +12,20 @@ G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2  = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
+local Layers = {
+    RESTART = 5,
+    GAME_OVER = 6,
+    GAME_WIN = 7,
+}
+
+-- Store current level name globally (For Game_PlayerState)
+if G and G.CurrentLevelName then
+    _G.CurrentLevelName = G.CurrentLevelName
+end
+
+-- print("[UIActions] running, _G_root=", _G_root)
+-- print("[UIActions] before default, CurrentLevelName=", _G_root and _G_root.CurrentLevelName)
+
 local function resolveSceneName(payload, fallback)
     if payload == nil or payload == "" then
         return fallback
@@ -21,7 +35,52 @@ end
 
 local PlayerState = _G.PlayerState
 
+local function showGameEndOverlay(result)
+    if not setLayerEnabled then
+        printLog("[UI] setLayerEnabled not available")
+        return
+    end
+
+    -- hide gameplay/pause stuff if needed
+    setLayerEnabled(2, false) -- pause menu off 
+
+    -- Hide both end screens first 
+    setLayerEnabled(Layers.GAME_OVER, false)
+    setLayerEnabled(Layers.GAME_WIN,  false)
+
+    if result == "win" then
+        setLayerEnabled(Layers.GAME_WIN, true)
+        printLog("[UI] Showing GAME WIN overlay")
+    else
+        setLayerEnabled(Layers.GAME_OVER, true)
+        printLog("[UI] Showing GAME OVER overlay")
+    end
+
+    printLog("[UI] Game end overlay shown, result=" .. tostring(result))
+end
+
+
 local handlers = {
+    ----------------------------------------------------------------------
+    -- GAME END MENUS
+    ----------------------------------------------------------------------
+    game_End = function(buttonEntity, payload)
+        -- payload expected: win or lose
+        showGameEndOverlay(payload)
+    end,
+
+    end_Restart = function()
+        if changeScene then
+            changeScene(G.CurrentLevelName)
+        end
+    end,
+
+    end_MainMenu = function()
+        if changeScene then
+            changeScene(G.MainMenuSceneName)
+        end
+    end,
+
     ----------------------------------------------------------------------
     -- GAMEPLAY BUTTONS
     ----------------------------------------------------------------------
@@ -120,7 +179,7 @@ local handlers = {
         printLog("[UI] pause_Restart -> showing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, true)  -- Show RestartOverlay layer (layer 5)
+            setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
             setLayerEnabled(2, false) -- Hide PauseMenu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
@@ -144,7 +203,7 @@ local handlers = {
         
         -- Hide restart overlay
         if setLayerEnabled then
-            setLayerEnabled(5, false)
+            setLayerEnabled(Layers.RESTART, false)
             printLog("[UI] RestartOverlay hidden")
         end
         
@@ -168,7 +227,7 @@ local handlers = {
         printLog("[UI] restart_Cancel -> closing restart confirmation")
         
         if setLayerEnabled then
-            setLayerEnabled(5, false)
+            setLayerEnabled(Layers.RESTART, false)
             setLayerEnabled(2, true) -- Return to Pause Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
