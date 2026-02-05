@@ -32312,22 +32312,22 @@
         }
     ],
     "loadingScreen": {
-        "animationEnabled": false,
+        "animationEnabled": true,
         "backgroundColor": [
             0.10000000149011612,
             0.10000000149011612,
             0.10000000149011612
         ],
-        "backgroundTextureGUID": "407a7faf-4823-4847-81a4-4e37c94a3a3f",
+        "backgroundTextureGUID": "472ea16e-c69d-b84e-98de-9356aa8f96fd",
         "bgScale": 1.0,
         "fillColor": [
             0.20000000298023224,
             0.800000011920929,
             0.8999999761581421
         ],
-        "frameCount": 1,
+        "frameCount": 5,
         "frameTime": 0.10000000149011612,
-        "framesPerRow": 1,
+        "framesPerRow": 5,
         "glowColor": [
             0.4000000059604645,
             0.8999999761581421,
@@ -32336,7 +32336,7 @@
         "glowIntensity": 0.5,
         "progressBarPosition": [
             800.0,
-            133.35000610351563
+            135.0
         ],
         "progressBarSize": [
             960.0000610351563,
@@ -32348,7 +32348,7 @@
         "showStatusText": false,
         "statusTextPosition": [
             800.0,
-            63.350006103515625
+            65.0
         ],
         "statusTextScale": 0.029999999329447746
     },

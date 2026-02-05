@@ -71,6 +71,8 @@ namespace PAIN {
         
         case UIAction::end_NextLevel:         return "end_NextLevel";
 
+        case UIAction::change_Level1:         return "change_Level1";
+
 		case UIAction::None:
 
 		default:                               return "None";

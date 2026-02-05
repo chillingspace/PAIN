@@ -104,32 +104,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.3707389831542969,
-                                    0.02197938598692417,
-                                    1.7226836681365967
-                                ],
-                                "min": [
-                                    1.170738935470581,
-                                    0.0019793864339590073,
-                                    1.5226836204528809
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "9f766a6a-ba81-0146-b181-b87f39b829a5"
                         },
@@ -210,32 +184,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    953.6362915039063,
-                                    0.009999999776482582,
-                                    946.9449462890625
-                                ],
-                                "min": [
-                                    -953.6362915039063,
-                                    -0.009999999776482582,
-                                    -946.9449462890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    47.68181610107422,
-                                    0.0005000000237487257,
-                                    47.34724807739258
-                                ],
-                                "min": [
-                                    -47.68181610107422,
-                                    -0.0005000000237487257,
-                                    -47.34724807739258
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                         },
@@ -407,11 +355,12 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -439,11 +388,12 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -597,10 +547,11 @@
                             ]
                         },
                         "UIButton": {
+                            "action": 0,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "JumpButton_OnClick",
+                            "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -707,10 +658,11 @@
                             ]
                         },
                         "UIButton": {
+                            "action": 0,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "on_click_callback_lua": "Joystick_OnDrag",
+                            "payload": "",
                             "pressed_color": -5592406,
                             "state": 0
                         },
@@ -1290,6 +1242,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -1303,33 +1256,8 @@
                                 0.0
                             ],
                             "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "96d4a9ae-20db-774e-b860-3e2a34cf4380"
@@ -1372,6 +1300,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -1385,33 +1314,8 @@
                                 0.0
                             ],
                             "selected_audio": "e87054db-0ef8-f34b-96a0-e2fede943a49",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "a3242ae0-e1b1-5646-89d0-97604a276a09"
@@ -1453,32 +1357,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    -0.3344363570213318,
-                                    0.30000001192092896,
-                                    3.7015621662139893
-                                ],
-                                "min": [
-                                    -0.9344363808631897,
-                                    -0.30000001192092896,
-                                    3.101562261581421
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "43cf01b6-7578-cc4b-941f-f86513b3dcc6"
                         },
@@ -1557,6 +1435,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1570,33 +1449,8 @@
                                 0.0
                             ],
                             "selected_audio": "feb46661-0d8d-d947-ac9f-881f436feda7",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "d518978b-190c-2d49-950a-d74214f19edc"
@@ -1639,6 +1493,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1652,33 +1507,8 @@
                                 0.0
                             ],
                             "selected_audio": "b5f33fbe-eadf-bf46-9329-26bbad7a5e72",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "33a48da1-0565-fe48-b6c4-f1005e729097"
@@ -1721,6 +1551,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1734,33 +1565,8 @@
                                 0.0
                             ],
                             "selected_audio": "11f20ced-0a55-f344-a74e-7a57022bd83e",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "63a748c4-8688-b54c-8bfa-77c9b2b11b4c"
@@ -1803,6 +1609,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1816,33 +1623,8 @@
                                 0.0
                             ],
                             "selected_audio": "163a51d7-15ef-cc46-83bd-db476f7d1f14",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "91bb961e-e178-ae4c-934a-869ac1a60eea"
@@ -1885,6 +1667,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1898,33 +1681,8 @@
                                 0.0
                             ],
                             "selected_audio": "d581ecc8-3155-e543-9438-5e38ba0956d3",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "26892616-2009-9f4c-b2d3-3d74e8168b7d"
@@ -1967,6 +1725,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": false,
@@ -1980,33 +1739,8 @@
                                 0.0
                             ],
                             "selected_audio": "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    2.459115743637085,
-                                    1.014076590538025,
-                                    1.9239251613616943
-                                ],
-                                "min": [
-                                    0.45911574363708496,
-                                    -0.9859234094619751,
-                                    -0.07607483863830566
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "f74a9501-a7e5-e849-be0e-19469d888d59"
@@ -2048,32 +1782,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.3681994676589966,
-                                    1.3213016986846924,
-                                    1.4571808576583862
-                                ],
-                                "min": [
-                                    -0.6318005323410034,
-                                    -0.6786983013153076,
-                                    -0.5428191423416138
-                                ]
-                            }
-                        },
                         "Camera": {
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
@@ -2143,32 +1851,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
                         },
@@ -2209,32 +1891,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    163.6326141357422,
-                                    615.5164184570313,
-                                    163.63262939453125
-                                ],
-                                "min": [
-                                    -163.6326446533203,
-                                    0.0,
-                                    -163.63267517089844
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    14.923672676086426,
-                                    59.42708969116211,
-                                    19.89852523803711
-                                ],
-                                "min": [
-                                    -55.33074188232422,
-                                    -13.029790878295898,
-                                    -19.80019760131836
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "6470269b-22b7-bb49-aba4-4b2c403d6b88"
                         },
@@ -2316,11 +1972,12 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2334,32 +1991,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    73.85037994384766,
-                                    473.1723937988281,
-                                    66.01360321044922
-                                ],
-                                "min": [
-                                    -73.85037994384766,
-                                    0.0,
-                                    -66.01360321044922
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    23.109590530395508,
-                                    143.30209350585938,
-                                    35.6202392578125
-                                ],
-                                "min": [
-                                    -21.3714542388916,
-                                    -2.35408353805542,
-                                    -20.681838989257813
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ebf28a45-0bab-2a4f-8af3-47c1c46e4eba"
                         },
@@ -2441,11 +2072,12 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2465,6 +2097,7 @@
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -2478,33 +2111,8 @@
                                 0.0
                             ],
                             "selected_audio": "e7ef8409-62f9-114e-a7cb-bcde381f94a1",
+                            "track_volumes": [],
                             "volumeDb": 1.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.4891157150268555,
-                                    0.04407660663127899,
-                                    0.9539251327514648
-                                ],
-                                "min": [
-                                    1.4291157722473145,
-                                    -0.0159233920276165,
-                                    0.8939251899719238
-                                ]
-                            }
                         },
                         "Camera": {
                             "far_plane": 100.0,
@@ -2608,11 +2216,12 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 1,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2638,32 +2247,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "min": [
-                                    -1.0,
-                                    -1.0,
-                                    -1.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    0.699999988079071,
-                                    0.20000000298023224,
-                                    0.6000000238418579
-                                ],
-                                "min": [
-                                    0.30000001192092896,
-                                    -0.20000000298023224,
-                                    0.20000000298023224
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ba694869-ab9b-2e43-b790-76a3f780c451"
                         },
@@ -2741,32 +2324,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    1.7023191452026367,
-                                    4.572196960449219,
-                                    2.754788637161255
-                                ],
-                                "min": [
-                                    -1.6643412113189697,
-                                    0.620154619216919,
-                                    -0.9306185245513916
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    0.48575514554977417,
-                                    0.3379684388637543,
-                                    0.06746348738670349
-                                ],
-                                "min": [
-                                    0.09050439298152924,
-                                    -0.023632388561964035,
-                                    -0.3478893041610718
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "7c755151-da16-0b4c-8bde-b144bb2ed1c4"
                         },
@@ -2848,11 +2405,12 @@
                                 3.0,
                                 3.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -2872,6 +2430,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -2885,33 +2444,8 @@
                                 0.0
                             ],
                             "selected_audio": "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    11.664676666259766,
-                                    8.72545051574707,
-                                    11.37221908569336
-                                ],
-                                "min": [
-                                    -11.664676666259766,
-                                    0.0,
-                                    -11.37221908569336
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    5.044489860534668,
-                                    2.6176629066467285,
-                                    3.9966118335723877
-                                ],
-                                "min": [
-                                    -2.189525604248047,
-                                    -2.812581806210801e-05,
-                                    -3.074782371520996
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "1c882eab-7a77-d645-bcb7-9076c3f8312c"
@@ -2981,6 +2515,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "AudioSource": {
+                                    "audio_tracks": [],
                                     "group_name": "",
                                     "is3D": true,
                                     "looping": false,
@@ -2994,6 +2529,7 @@
                                         0.0
                                     ],
                                     "selected_audio": "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+                                    "track_volumes": [],
                                     "volumeDb": 0.0
                                 },
                                 "BoundingVolume": {
@@ -3061,11 +2597,12 @@
                                         0.09000000357627869,
                                         0.20000000298023224
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3098,11 +2635,12 @@
                                 0.09000000357627869,
                                 0.20000000298023224
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3122,6 +2660,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "",
                             "is3D": true,
                             "looping": false,
@@ -3135,33 +2674,8 @@
                                 0.0
                             ],
                             "selected_audio": "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+                            "track_volumes": [],
                             "volumeDb": 0.0
-                        },
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    11.664676666259766,
-                                    8.72545051574707,
-                                    11.37221908569336
-                                ],
-                                "min": [
-                                    -11.664676666259766,
-                                    0.0,
-                                    -11.37221908569336
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    5.875686168670654,
-                                    2.7236037254333496,
-                                    6.895406246185303
-                                ],
-                                "min": [
-                                    -1.2594695091247559,
-                                    0.10120386630296707,
-                                    -0.0681612640619278
-                                ]
-                            }
                         },
                         "GUID": {
                             "guid": "ff66829c-9037-4b44-b8a8-6a4558d009d3"
@@ -3231,6 +2745,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "AudioSource": {
+                                    "audio_tracks": [],
                                     "group_name": "",
                                     "is3D": true,
                                     "looping": false,
@@ -3244,6 +2759,7 @@
                                         0.0
                                     ],
                                     "selected_audio": "8c81ab4c-86c2-1248-8092-30c6e99421a5",
+                                    "track_volumes": [],
                                     "volumeDb": 0.0
                                 },
                                 "BoundingVolume": {
@@ -3311,11 +2827,12 @@
                                         0.09000000357627869,
                                         0.20000000298023224
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3348,11 +2865,12 @@
                                 0.09000000357627869,
                                 0.20000000298023224
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3371,32 +2889,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    199.99998474121094,
-                                    90.56856536865234,
-                                    100.0
-                                ],
-                                "min": [
-                                    -200.00001525878906,
-                                    0.0,
-                                    -100.0
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    19.808786392211914,
-                                    17.2479248046875,
-                                    13.362717628479004
-                                ],
-                                "min": [
-                                    -19.883878707885742,
-                                    -9.166645050048828,
-                                    -6.638830184936523
-                                ]
-                            }
-                        },
                         "CompoundCollider": {
                             "shapes": [
                                 {
@@ -3561,77 +3053,6 @@
                                         ]
                                     }
                                 },
-                                "CompoundCollider": {
-                                    "shapes": [
-                                        {
-                                            "boxHalfExtents": [
-                                                2.125,
-                                                0.07999999821186066,
-                                                1.25
-                                            ],
-                                            "capsuleHalfHeight": 0.5,
-                                            "capsuleRadius": 0.25,
-                                            "offset": [
-                                                0.0,
-                                                0.07999999821186066,
-                                                0.0
-                                            ],
-                                            "rotation": [
-                                                0.0,
-                                                0.0,
-                                                0.0,
-                                                1.0
-                                            ],
-                                            "sphereRadius": 0.5,
-                                            "type": 0
-                                        },
-                                        {
-                                            "boxHalfExtents": [
-                                                2.125,
-                                                0.45399999618530273,
-                                                0.0625
-                                            ],
-                                            "capsuleHalfHeight": 0.5,
-                                            "capsuleRadius": 0.25,
-                                            "offset": [
-                                                0.0,
-                                                0.5440000295639038,
-                                                -1.190000057220459
-                                            ],
-                                            "rotation": [
-                                                0.0,
-                                                0.0,
-                                                0.0,
-                                                1.0
-                                            ],
-                                            "sphereRadius": 0.5,
-                                            "type": 0
-                                        },
-                                        {
-                                            "boxHalfExtents": [
-                                                2.125,
-                                                0.45399999618530273,
-                                                0.0625
-                                            ],
-                                            "capsuleHalfHeight": 0.5,
-                                            "capsuleRadius": 0.25,
-                                            "offset": [
-                                                0.0,
-                                                0.5440000295639038,
-                                                1.190000057220459
-                                            ],
-                                            "rotation": [
-                                                0.0,
-                                                0.0,
-                                                0.0,
-                                                1.0
-                                            ],
-                                            "sphereRadius": 0.5,
-                                            "type": 0
-                                        }
-                                    ],
-                                    "useCompoundCollider": true
-                                },
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -3653,6 +3074,34 @@
                                         0.10000000149011612,
                                         0.10000000149011612,
                                         0.10000000149011612
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 1
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
                                     ]
                                 }
                             },
@@ -3676,11 +3125,12 @@
                                 1.0,
                                 1.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3694,32 +3144,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    35.818092346191406,
-                                    97.5758056640625,
-                                    35.81809997558594
-                                ],
-                                "min": [
-                                    -35.81809616088867,
-                                    0.0,
-                                    -35.818092346191406
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    3.713871955871582,
-                                    9.757805824279785,
-                                    4.2062554359436035
-                                ],
-                                "min": [
-                                    -3.4499857425689697,
-                                    -0.00022471847478300333,
-                                    -2.9649386405944824
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "588ee14e-7e8e-7143-b622-e490d90dd6b0"
                         },
@@ -3891,11 +3315,12 @@
                                         1.0,
                                         0.6899999976158142
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -3923,11 +3348,12 @@
                                 1.0,
                                 0.6899999976158142
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -3941,32 +3367,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    100.36543273925781,
-                                    20.727630615234375,
-                                    84.21436309814453
-                                ],
-                                "min": [
-                                    -100.0,
-                                    -9.5367431640625e-07,
-                                    -84.21436309814453
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    9.017414093017578,
-                                    9.117691993713379,
-                                    10.79249095916748
-                                ],
-                                "min": [
-                                    -5.292938709259033,
-                                    -7.84134578704834,
-                                    -6.196691989898682
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "5914ec95-29e7-c24d-b907-65bee8d71596"
                         },
@@ -4138,11 +3538,12 @@
                                         0.009999999776482582,
                                         1.7000000476837158
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4170,11 +3571,12 @@
                                 0.009999999776482582,
                                 1.7000000476837158
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4188,32 +3590,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    9.290358543395996,
-                                    7.747631072998047,
-                                    9.775418281555176
-                                ],
-                                "min": [
-                                    -9.290358543395996,
-                                    -2.384185791015625e-07,
-                                    -9.775418281555176
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    36.18666076660156,
-                                    24.0333309173584,
-                                    37.89564895629883
-                                ],
-                                "min": [
-                                    -31.454078674316406,
-                                    0.011587360873818398,
-                                    -32.1559944152832
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ca383b64-37f9-5144-8556-3112b467044e"
                         },
@@ -4385,11 +3761,12 @@
                                         0.06499999761581421,
                                         0.1899999976158142
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4417,11 +3794,12 @@
                                 0.06499999761581421,
                                 0.1899999976158142
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4435,32 +3813,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    423.7960205078125,
-                                    211.10305786132813,
-                                    204.6681671142578
-                                ],
-                                "min": [
-                                    -423.7960205078125,
-                                    0.0,
-                                    -204.66815185546875
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    23.55085563659668,
-                                    21.11479949951172,
-                                    45.76740646362305
-                                ],
-                                "min": [
-                                    -18.717769622802734,
-                                    -0.0044943224638700485,
-                                    -39.62863540649414
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "79005339-07d8-6143-a09a-107aeba8c171"
                         },
@@ -4632,11 +3984,12 @@
                                         1.25,
                                         4.0
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4664,11 +4017,12 @@
                                 1.25,
                                 4.0
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4682,32 +4036,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    34.337738037109375,
-                                    23.61958885192871,
-                                    34.33773422241211
-                                ],
-                                "min": [
-                                    -34.337738037109375,
-                                    0.0,
-                                    -34.33773422241211
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    10.417222023010254,
-                                    7.461183547973633,
-                                    8.603364944458008
-                                ],
-                                "min": [
-                                    -3.4735147953033447,
-                                    -6.801024436950684,
-                                    -6.151154518127441
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ed72180c-d6ee-ac44-8f49-67154b31d237"
                         },
@@ -4879,11 +4207,12 @@
                                         0.20000000298023224,
                                         0.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -4916,11 +4245,12 @@
                                 0.20000000298023224,
                                 0.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -4939,32 +4269,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    34.337738037109375,
-                                    23.61958885192871,
-                                    34.33773422241211
-                                ],
-                                "min": [
-                                    -34.337738037109375,
-                                    0.0,
-                                    -34.33773422241211
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    9.438353538513184,
-                                    7.562443733215332,
-                                    7.237103462219238
-                                ],
-                                "min": [
-                                    -4.665529251098633,
-                                    -6.756748199462891,
-                                    -7.6956400871276855
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "f4d8b793-98e1-724a-acdb-30561cb860da"
                         },
@@ -5136,11 +4440,12 @@
                                         0.20000000298023224,
                                         0.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5173,11 +4478,12 @@
                                 0.20000000298023224,
                                 0.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5196,32 +4502,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    57.97823715209961,
-                                    211.10305786132813,
-                                    5.444207191467285
-                                ],
-                                "min": [
-                                    -57.97823715209961,
-                                    0.0,
-                                    -0.7065536975860596
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    1.7347371578216553,
-                                    21.110469818115234,
-                                    8.293481826782227
-                                ],
-                                "min": [
-                                    0.5087780952453613,
-                                    -0.00018702598754316568,
-                                    -3.319105386734009
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "0c291975-499f-de49-ab36-ff00d8f32a11"
                         },
@@ -5393,11 +4673,12 @@
                                         2.1500000953674316,
                                         0.009999999776482582
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5425,11 +4706,12 @@
                                 2.1500000953674316,
                                 0.009999999776482582
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5443,32 +4725,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    27.541240692138672,
-                                    30.86101722717285,
-                                    18.309297561645508
-                                ],
-                                "min": [
-                                    -28.221391677856445,
-                                    -0.00148561573587358,
-                                    -8.841880798339844
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "be3b471f-a7ea-1140-acae-da4b291a5e37"
                         },
@@ -5640,11 +4896,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5672,11 +4929,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5690,32 +4948,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    27.273595809936523,
-                                    30.860923767089844,
-                                    16.711271286010742
-                                ],
-                                "min": [
-                                    -28.48893165588379,
-                                    -0.0013924845261499286,
-                                    -10.439817428588867
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "cb04dce1-78c5-2f4f-8cb6-02e93c3d86bf"
                         },
@@ -5887,11 +5119,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -5919,11 +5152,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -5937,32 +5171,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    13.316784858703613,
-                                    30.861452102661133,
-                                    30.834548950195313
-                                ],
-                                "min": [
-                                    -14.763631820678711,
-                                    -0.0019199473317712545,
-                                    -25.374502182006836
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "0bf7c600-912b-a740-9acf-c27bf415f1d6"
                         },
@@ -6134,11 +5342,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -6166,11 +5375,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -6184,32 +5394,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    30.78489875793457,
-                                    30.861957550048828,
-                                    15.889486312866211
-                                ],
-                                "min": [
-                                    -24.978572845458984,
-                                    -0.002424592152237892,
-                                    -11.262182235717773
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "077e4122-628b-9c4f-b998-e54a290e5019"
                         },
@@ -6381,11 +5565,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -6413,11 +5598,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -6431,32 +5617,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    27.465988159179688,
-                                    30.861055374145508,
-                                    15.891178131103516
-                                ],
-                                "min": [
-                                    -28.296653747558594,
-                                    -0.0015227627009153366,
-                                    -11.259971618652344
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "cef80b70-4a80-f741-b6b2-8812c0b4cfd3"
                         },
@@ -6628,11 +5788,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -6660,11 +5821,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -6678,32 +5840,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    30.231040954589844,
-                                    30.86051368713379,
-                                    15.888298988342285
-                                ],
-                                "min": [
-                                    -25.531112670898438,
-                                    -0.0009820800041779876,
-                                    -11.262545585632324
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "21f367f2-9334-e846-b9bf-d05802f0867e"
                         },
@@ -6875,11 +6011,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -6907,11 +6044,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -6925,32 +6063,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.027318954467773,
-                                    30.860946655273438,
-                                    15.879531860351563
-                                ],
-                                "min": [
-                                    -27.735219955444336,
-                                    -0.00141479866579175,
-                                    -11.271540641784668
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "3f42147a-ba7d-434b-b44a-8dfda663ac07"
                         },
@@ -7122,11 +6234,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -7154,11 +6267,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -7172,32 +6286,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.589622497558594,
-                                    30.862003326416016,
-                                    15.871881484985352
-                                ],
-                                "min": [
-                                    -27.173892974853516,
-                                    -0.0024732640013098717,
-                                    -11.279834747314453
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "811fd54b-d671-6a4c-80b4-e8dec373c524"
                         },
@@ -7369,11 +6457,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -7401,11 +6490,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -7419,32 +6509,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    15.792688369750977,
-                                    30.861392974853516,
-                                    30.219186782836914
-                                ],
-                                "min": [
-                                    -11.9028902053833,
-                                    -0.0018633120926097035,
-                                    -25.805822372436523
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "5ffd2b92-9f0b-c34a-9369-4ae1f786b216"
                         },
@@ -7616,11 +6680,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -7648,11 +6713,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -7666,32 +6732,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    15.548344612121582,
-                                    30.860992431640625,
-                                    29.539968490600586
-                                ],
-                                "min": [
-                                    -11.661540985107422,
-                                    -0.0014615757390856743,
-                                    -26.2508602142334
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "7fc1ffa2-0196-0244-8e4c-90ffcd375a88"
                         },
@@ -7863,11 +6903,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -7895,11 +6936,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -7913,32 +6955,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    31.054046630859375,
-                                    30.859638214111328,
-                                    28.640621185302734
-                                ],
-                                "min": [
-                                    -30.216941833496094,
-                                    -0.00010642100824043155,
-                                    -25.517120361328125
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "996f28ff-9455-3f42-ac21-8ab691bd4fee"
                         },
@@ -8110,11 +7126,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -8142,11 +7159,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -8160,32 +7178,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    14.519891738891602,
-                                    30.862598419189453,
-                                    29.805150985717773
-                                ],
-                                "min": [
-                                    -12.819536209106445,
-                                    -0.0030663623474538326,
-                                    -26.048419952392578
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "e23ed3f9-ceb0-4047-8e18-274efe533c9a"
                         },
@@ -8357,11 +7349,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -8389,11 +7382,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -8407,32 +7401,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    29.967998504638672,
-                                    30.86133575439453,
-                                    14.814041137695313
-                                ],
-                                "min": [
-                                    -25.794918060302734,
-                                    -0.0018044360913336277,
-                                    -12.33731746673584
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "67f873fb-db28-ea4a-997b-3324ef732e43"
                         },
@@ -8604,11 +7572,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -8636,11 +7605,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -8654,32 +7624,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    15.761442184448242,
-                                    30.861557006835938,
-                                    28.828702926635742
-                                ],
-                                "min": [
-                                    -11.891900062561035,
-                                    -0.0020245532505214214,
-                                    -27.176610946655273
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "d8affd1d-b4ea-0048-9b58-24f8b164fec4"
                         },
@@ -8851,11 +7795,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -8883,11 +7828,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -8901,32 +7847,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    24.96918487548828,
-                                    30.86151123046875,
-                                    32.11934280395508
-                                ],
-                                "min": [
-                                    -24.962024688720703,
-                                    -0.001979375723749399,
-                                    -29.87529754638672
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "97023170-1da0-ca4d-9b8e-93ad1d00be5e"
                         },
@@ -9098,11 +8018,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -9130,11 +8051,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -9148,32 +8070,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    29.7801513671875,
-                                    30.862525939941406,
-                                    14.173036575317383
-                                ],
-                                "min": [
-                                    -26.165590286254883,
-                                    -0.0029956852085888386,
-                                    -13.354329109191895
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "852ddb5f-9087-2344-9418-faac688017e0"
                         },
@@ -9345,11 +8241,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -9377,11 +8274,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -9395,32 +8293,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    14.967848777770996,
-                                    30.862302780151367,
-                                    27.94200325012207
-                                ],
-                                "min": [
-                                    -12.184066772460938,
-                                    -0.0027710055001080036,
-                                    -27.82179069519043
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "a956549b-e064-ab46-9f20-6973376dddcf"
                         },
@@ -9592,11 +8464,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -9624,11 +8497,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -9642,32 +8516,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    27.61870574951172,
-                                    30.861465454101563,
-                                    14.260648727416992
-                                ],
-                                "min": [
-                                    -28.144332885742188,
-                                    -0.0019337802659720182,
-                                    -12.890751838684082
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "530a8a17-3a39-1748-802e-4a5c1fa0d8f8"
                         },
@@ -9839,11 +8687,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -9871,11 +8720,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -9889,32 +8739,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    16.497905731201172,
-                                    30.861356735229492,
-                                    31.159997940063477
-                                ],
-                                "min": [
-                                    -10.653480529785156,
-                                    -0.0018262086668983102,
-                                    -24.602922439575195
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "d21447d8-ae42-af45-a04d-7325aff31738"
                         },
@@ -10086,11 +8910,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -10118,11 +8943,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -10136,32 +8962,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.115428924560547,
-                                    30.8614559173584,
-                                    16.696611404418945
-                                ],
-                                "min": [
-                                    -27.647560119628906,
-                                    -0.0019251035992056131,
-                                    -10.454739570617676
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "7e498edc-31cb-4e4c-ae67-b4ae92aaa474"
                         },
@@ -10333,11 +9133,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -10365,11 +9166,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -10383,32 +9185,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    13.61296272277832,
-                                    30.889001846313477,
-                                    28.159082412719727
-                                ],
-                                "min": [
-                                    -13.598488807678223,
-                                    -0.02850394695997238,
-                                    -27.621599197387695
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "263483ab-9113-684c-abc7-ebfe7a7a1eb2"
                         },
@@ -10580,11 +9356,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -10612,11 +9389,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -10630,32 +9408,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    29.76814842224121,
-                                    30.860939025878906,
-                                    18.306657791137695
-                                ],
-                                "min": [
-                                    -25.9943790435791,
-                                    -0.0014075532089918852,
-                                    -8.844409942626953
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "f29bb9e0-467d-7741-82a2-f8df802482dc"
                         },
@@ -10827,11 +9579,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -10859,11 +9612,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -10877,32 +9631,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.522192001342773,
-                                    30.86136245727539,
-                                    13.690796852111816
-                                ],
-                                "min": [
-                                    -27.75105857849121,
-                                    -0.0018308699363842607,
-                                    -14.524811744689941
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "ff17be69-46b7-a944-9dbf-65164bd1cf7a"
                         },
@@ -11074,11 +9802,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -11106,11 +9835,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -11124,32 +9854,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    13.551839828491211,
-                                    30.861980438232422,
-                                    27.60372543334961
-                                ],
-                                "min": [
-                                    -13.599888801574707,
-                                    -0.0024488908238708973,
-                                    -28.15976905822754
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "0f400582-7d18-5f44-a27f-0c0e41b098e1"
                         },
@@ -11321,11 +10025,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -11353,11 +10058,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -11371,32 +10077,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    14.286510467529297,
-                                    30.862850189208984,
-                                    27.890151977539063
-                                ],
-                                "min": [
-                                    -12.865640640258789,
-                                    -0.0033181144390255213,
-                                    -27.874109268188477
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "e2a357af-39f2-b842-86b4-425c333b408b"
                         },
@@ -11568,11 +10248,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -11600,11 +10281,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -11618,32 +10300,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.663175582885742,
-                                    30.860980987548828,
-                                    16.689210891723633
-                                ],
-                                "min": [
-                                    -27.09941864013672,
-                                    -0.0014503973070532084,
-                                    -10.461925506591797
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "879219f3-0b37-6b43-a0d6-22709edce709"
                         },
@@ -11815,11 +10471,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -11847,11 +10504,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -11865,32 +10523,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    16.49858856201172,
-                                    30.86136245727539,
-                                    30.607881546020508
-                                ],
-                                "min": [
-                                    -10.652786254882813,
-                                    -0.0018304022960364819,
-                                    -25.155054092407227
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "d91d6421-0fcd-034f-8d15-16bf165e4e60"
                         },
@@ -12062,11 +10694,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -12094,11 +10727,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -12112,32 +10746,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    29.69740867614746,
-                                    30.861495971679688,
-                                    17.290794372558594
-                                ],
-                                "min": [
-                                    -26.065637588500977,
-                                    -0.0019648694433271885,
-                                    -9.860638618469238
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "b81b9686-d0bc-db48-97ce-7f12c8045834"
                         },
@@ -12309,11 +10917,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -12341,11 +10950,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -12359,32 +10969,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    12.68154239654541,
-                                    30.86109161376953,
-                                    31.428102493286133
-                                ],
-                                "min": [
-                                    -14.469598770141602,
-                                    -0.0015612475108355284,
-                                    -24.334552764892578
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "c5dbfe4e-f264-ee4d-a933-d93fdad7c6bd"
                         },
@@ -12556,11 +11140,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -12588,11 +11173,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -12606,32 +11192,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    12.957890510559082,
-                                    30.861042022705078,
-                                    31.66956901550293
-                                ],
-                                "min": [
-                                    -14.193209648132324,
-                                    -0.00151140580419451,
-                                    -24.093032836914063
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "2a0790fd-e25f-be40-b7b6-7dec0d90af41"
                         },
@@ -12803,11 +11363,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -12835,11 +11396,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -12853,32 +11415,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    12.966277122497559,
-                                    30.861024856567383,
-                                    32.206363677978516
-                                ],
-                                "min": [
-                                    -14.184892654418945,
-                                    -0.0014933652710169554,
-                                    -23.55626678466797
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "485ed0a6-0041-a44f-b638-9c4d6956f1ad"
                         },
@@ -13050,11 +11586,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -13082,11 +11619,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -13100,32 +11638,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    16.490205764770508,
-                                    30.860923767089844,
-                                    32.26075744628906
-                                ],
-                                "min": [
-                                    -10.660879135131836,
-                                    -0.0013921544887125492,
-                                    -23.501766204833984
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "46cde265-c9fd-8648-86f0-940b513ef9d7"
                         },
@@ -13297,11 +11809,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -13329,11 +11842,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -13347,32 +11861,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    30.323362350463867,
-                                    30.86244773864746,
-                                    18.466148376464844
-                                ],
-                                "min": [
-                                    -25.44062614440918,
-                                    -0.002915577730163932,
-                                    -8.68595027923584
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "de84d4fd-2e7c-d24b-b5c1-01ad63c12e0d"
                         },
@@ -13544,11 +12032,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -13576,11 +12065,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -13594,32 +12084,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    30.375221252441406,
-                                    30.86199951171875,
-                                    18.191116333007813
-                                ],
-                                "min": [
-                                    -25.38825798034668,
-                                    -0.0024674353189766407,
-                                    -8.96055793762207
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "965e8f51-14e5-4845-a78c-7256b8e239f3"
                         },
@@ -13791,11 +12255,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -13823,11 +12288,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -13841,32 +12307,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    16.498733520507813,
-                                    30.860950469970703,
-                                    31.710309982299805
-                                ],
-                                "min": [
-                                    -10.65237808227539,
-                                    -0.0014188472414389253,
-                                    -24.0522518157959
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "c988993f-df1f-0648-a7e3-7061926636c3"
                         },
@@ -14038,11 +12478,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -14070,11 +12511,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -14088,32 +12530,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.98029327392578,
-                                    30.862632751464844,
-                                    14.239982604980469
-                                ],
-                                "min": [
-                                    -27.020687103271484,
-                                    -0.003102159360423684,
-                                    -13.402115821838379
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "d9f20d17-2c09-0b4b-81dd-cee4fcc5c589"
                         },
@@ -14285,11 +12701,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -14317,11 +12734,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -14335,32 +12753,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    29.20940589904785,
-                                    30.862014770507813,
-                                    18.30526351928711
-                                ],
-                                "min": [
-                                    -26.554067611694336,
-                                    -0.002483092714101076,
-                                    -8.84636116027832
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "94f5f4f6-22f1-1847-a64c-91d4c238da5a"
                         },
@@ -14532,11 +12924,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -14564,11 +12957,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -14582,32 +12976,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.090953826904297,
-                                    30.860490798950195,
-                                    18.314550399780273
-                                ],
-                                "min": [
-                                    -27.671178817749023,
-                                    -0.0009598210453987122,
-                                    -8.836273193359375
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "719420ef-2c0e-9a48-832b-cf99179dcaee"
                         },
@@ -14779,11 +13147,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -14811,11 +13180,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -14829,32 +13199,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    9.290358543395996,
-                                    7.747631072998047,
-                                    9.775418281555176
-                                ],
-                                "min": [
-                                    -9.290358543395996,
-                                    -2.384185791015625e-07,
-                                    -9.775418281555176
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    31.966094970703125,
-                                    24.015117645263672,
-                                    33.24018478393555
-                                ],
-                                "min": [
-                                    -30.099945068359375,
-                                    -0.0032108703162521124,
-                                    -31.594398498535156
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "dad76809-a3cb-734b-8df6-bb609ac08443"
                         },
@@ -15026,11 +13370,12 @@
                                         0.06499999761581421,
                                         0.1899999976158142
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -15058,11 +13403,12 @@
                                 0.06499999761581421,
                                 0.1899999976158142
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -15076,32 +13422,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "BoundingVolume": {
-                            "localAABB": {
-                                "max": [
-                                    135.75128173828125,
-                                    308.5953063964844,
-                                    278.80621337890625
-                                ],
-                                "min": [
-                                    -135.75128173828125,
-                                    0.0,
-                                    -278.80621337890625
-                                ]
-                            },
-                            "worldAABB": {
-                                "max": [
-                                    28.651582717895508,
-                                    30.861936569213867,
-                                    18.30423355102539
-                                ],
-                                "min": [
-                                    -27.11184310913086,
-                                    -0.002404920756816864,
-                                    -8.84735107421875
-                                ]
-                            }
-                        },
                         "GUID": {
                             "guid": "7162f9d3-a380-b342-8f52-41800fc78fad"
                         },
@@ -15273,11 +13593,12 @@
                                         3.0,
                                         5.5
                                     ],
-                                    "mass": -107374176.0,
                                     "motion_type": 0,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
                                     "velocity": [
                                         0.0,
                                         0.0,
@@ -15305,11 +13626,12 @@
                                 3.0,
                                 5.5
                             ],
-                            "mass": -107374176.0,
                             "motion_type": 0,
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
+                            "use_gravity": true,
                             "velocity": [
                                 0.0,
                                 0.0,
@@ -15353,7 +13675,8 @@
             "enabled": true,
             "id": 0,
             "mask": 1,
-            "name": "Layer 0"
+            "name": "Layer 0",
+            "pickable": true
         },
         {
             "color": [
@@ -15364,9 +13687,51 @@
             "enabled": true,
             "id": 1,
             "mask": 2,
-            "name": "UI"
+            "name": "UI",
+            "pickable": true
         }
     ],
+    "loadingScreen": {
+        "animationEnabled": true,
+        "backgroundColor": [
+            0.10000000149011612,
+            0.10000000149011612,
+            0.10000000149011612
+        ],
+        "backgroundTextureGUID": "472ea16e-c69d-b84e-98de-9356aa8f96fd",
+        "bgScale": 1.0,
+        "fillColor": [
+            0.20000000298023224,
+            0.800000011920929,
+            0.8999999761581421
+        ],
+        "frameCount": 5,
+        "frameTime": 0.10000000149011612,
+        "framesPerRow": 5,
+        "glowColor": [
+            0.4000000059604645,
+            0.8999999761581421,
+            1.0
+        ],
+        "glowIntensity": 0.5,
+        "progressBarPosition": [
+            800.0,
+            135.0
+        ],
+        "progressBarSize": [
+            960.0000610351563,
+            40.0
+        ],
+        "showBackground": true,
+        "showOverlay": false,
+        "showProgressBar": false,
+        "showStatusText": false,
+        "statusTextPosition": [
+            800.0,
+            65.0
+        ],
+        "statusTextScale": 0.029999999329447746
+    },
     "mask_matrix": [
         [
             false,

@@ -467,66 +467,65 @@ namespace PAIN {
         }
 
         void LoadingScreen::renderBackgroundTexture() {
-            // Check if background texture is set
             if (!m_backgroundTextureGUID.IsValid()) return;
-            
-            // Get services
+
             auto serv = services.lock();
             if (!serv) return;
-            
-            // Get renderer
+
             auto renderer = serv->get<sRenderer>();
             if (!renderer || !renderer->w_renderer) return;
-            
-            // Get window for dimensions
+
             auto win = serv->get<Window::Window>();
             if (!win) return;
-            
+
             auto framebuffer = win->getFrameBuffer();
             float screenWidth = framebuffer.x;
             float screenHeight = framebuffer.y;
-            
-            // Get texture asset
+
             auto assetMgr = serv->get<Assets::Manager>();
             auto texOpt = assetMgr->getAsset<Assets::Texture>(m_backgroundTextureGUID);
             if (!texOpt.has_value()) return;
             if (!texOpt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(texOpt.value());
-            
+
             GLuint texID = texOpt.value()->gl_texture;
-            
+
             // Calculate UV coordinates for spritesheet animation
             glm::vec4 uvTransform;
-            
+            float frameWidth = 1.0f;  // Default to full texture
+            float frameHeight = 1.0f;
+
             if (m_animationEnabled && m_frameCount > 1) {
-                // Calculate UV coordinates for current frame in spritesheet
-                float frameWidth = 1.0f / static_cast<float>(m_framesPerRow);
-                int framesPerColumn = (m_frameCount + m_framesPerRow - 1) / m_framesPerRow;  // Ceil division
-                float frameHeight = 1.0f / static_cast<float>(framesPerColumn);
-                
-                // Calculate current frame's row and column
+                frameWidth = 1.0f / static_cast<float>(m_framesPerRow);
+                int framesPerColumn = (m_frameCount + m_framesPerRow - 1) / m_framesPerRow;
+                frameHeight = 1.0f / static_cast<float>(framesPerColumn);
+
                 int frameRow = m_currentFrameIndex / m_framesPerRow;
                 int frameCol = m_currentFrameIndex % m_framesPerRow;
-                
-                // UV transform: (scaleU, scaleV, offsetU, offsetV)
+
+                float flippedRow = (framesPerColumn - 1) - frameRow;
+
                 uvTransform = glm::vec4(
-                    frameWidth,                              // Scale U
-                    frameHeight,                             // Scale V
-                    frameCol * frameWidth,                   // Offset U
-                    frameRow * frameHeight                   // Offset V
+                    frameWidth,
+                    frameHeight,
+                    frameCol * frameWidth,
+                    flippedRow * frameHeight
                 );
-            } else {
-                // No animation: use full texture
+            }
+            else {
                 uvTransform = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
             }
-            
-            // Render fullscreen background texture with UV transform
-            // Use normalized scale (1,1) for fullscreen, renderer handles actual screen dimensions
+
+            // Calculate FRAME dimensions, not texture dimensions
+            float actualFrameWidth = texOpt.value()->width * frameWidth;
+            float actualFrameHeight = texOpt.value()->height * frameHeight;
+
             glm::vec2 pos(0.0f, 0.0f);
-            glm::vec2 scale(texOpt.value()->width, texOpt.value()->height);
+            glm::vec2 scale(actualFrameWidth, actualFrameHeight);
             glm::vec2 normscale = glm::normalize(scale) * bgScale;
-            
+
             renderer->w_renderer->Render2DTexture(texID, pos, normscale, uvTransform);
         }
+
 
         void LoadingScreen::renderBackgroundOverlay() {
             // Only render if overlay shader is loaded
@@ -599,9 +598,9 @@ namespace PAIN {
         void LoadingScreen::defaultSetup() {
             //Set default digipen screen for texture rendering
 #ifdef PN_PLATFORM_WINDOWS
-            std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
+            std::filesystem::path tex_path = "game/textures/loading spritesheet.png";
 #else
-            std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
+            std::filesystem::path tex_path = "game\\textures\\loading spritesheet.png";
 #endif
             m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
             m_backGroundColor = { 0.1f, 0.1f, 0.1f };
@@ -614,6 +613,11 @@ namespace PAIN {
             showOverlay = false;
             showProgress = false;
             showStatus = false;
+
+            //Default animation
+            m_animationEnabled = true;
+            m_frameCount = 5;
+            m_framesPerRow = 5;
 
             //Setup other variables
             auto win = services.lock()->get<Window::Window>();

@@ -1201,9 +1201,9 @@ namespace PAIN {
                 else {
                     //Set default digipen screen for texture rendering
 #ifdef PN_PLATFORM_WINDOWS
-                    std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
+                    std::filesystem::path tex_path = "game/textures/loading spritesheet.png";
 #else
-                    std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
+                    std::filesystem::path tex_path = "game\\textures\\loading spritesheet.png";
 #endif
                     sceneAsset->loadingScreen.backgroundTextureGUID = services->get<Assets::Manager>()->findGUID(tex_path);
                 }
