@@ -1121,6 +1121,79 @@
             {
                 "Entity": {
                     "Components": {
+                        "Camera": {
+                            "far_plane": 100.0,
+                            "height_ratio": 9.0,
+                            "near_plane": 0.10000000149011612,
+                            "rot_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale_offset": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "trans_offset": [
+                                0.0,
+                                1.2999999523162842,
+                                0.10000000149011612
+                            ],
+                            "width_ratio": 16.0
+                        },
+                        "GUID": {
+                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.3681994676589966,
+                                0.3213023543357849,
+                                0.45718085765838623
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "game manager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
+                                },
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "game manager"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
                                 206.89999389648438,
@@ -1263,34 +1336,13 @@
             {
                 "Entity": {
                     "Components": {
-                        "Camera": {
-                            "far_plane": 100.0,
-                            "height_ratio": 9.0,
-                            "near_plane": 0.10000000149011612,
-                            "rot_offset": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "scale_offset": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "trans_offset": [
-                                0.0,
-                                1.2999999523162842,
-                                0.10000000149011612
-                            ],
-                            "width_ratio": 16.0
-                        },
                         "GUID": {
-                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
+                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1298,9 +1350,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.3681994676589966,
-                                0.3213023543357849,
-                                0.45718085765838623
+                                0.0,
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -1315,22 +1367,10 @@
                             ]
                         },
                         "Name": {
-                            "name": "game manager"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
-                                }
-                            ]
+                            "name": "end_screen"
                         }
                     },
-                    "Name": "game manager"
+                    "Name": "end_screen"
                 }
             },
             {
@@ -1433,46 +1473,6 @@
                         }
                     },
                     "Name": "overlay"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "end_screen"
-                        }
-                    },
-                    "Name": "end_screen"
                 }
             },
             {
@@ -1699,6 +1699,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -1731,6 +1732,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -1830,6 +1832,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -1976,6 +1979,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -2165,6 +2169,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -2197,6 +2202,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -2386,6 +2392,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -2418,6 +2425,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -2607,6 +2615,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -2639,6 +2648,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -2828,6 +2838,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -2860,6 +2871,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -3049,6 +3061,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -3081,6 +3094,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,
@@ -3154,22 +3168,22 @@
         }
     ],
     "loadingScreen": {
-        "animationEnabled": false,
+        "animationEnabled": true,
         "backgroundColor": [
             0.10000000149011612,
             0.10000000149011612,
             0.10000000149011612
         ],
-        "backgroundTextureGUID": "407a7faf-4823-4847-81a4-4e37c94a3a3f",
+        "backgroundTextureGUID": "472ea16e-c69d-b84e-98de-9356aa8f96fd",
         "bgScale": 1.0,
         "fillColor": [
             0.20000000298023224,
             0.800000011920929,
             0.8999999761581421
         ],
-        "frameCount": 1,
+        "frameCount": 5,
         "frameTime": 0.10000000149011612,
-        "framesPerRow": 1,
+        "framesPerRow": 5,
         "glowColor": [
             0.4000000059604645,
             0.8999999761581421,
@@ -3177,11 +3191,11 @@
         ],
         "glowIntensity": 0.5,
         "progressBarPosition": [
-            1280.0,
-            218.85000610351563
+            800.0,
+            135.0
         ],
         "progressBarSize": [
-            1536.0,
+            960.0000610351563,
             40.0
         ],
         "showBackground": true,
@@ -3189,8 +3203,8 @@
         "showProgressBar": false,
         "showStatusText": false,
         "statusTextPosition": [
-            1280.0,
-            148.85000610351563
+            800.0,
+            65.0
         ],
         "statusTextScale": 0.029999999329447746
     },
