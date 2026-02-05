@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "GameWinManager.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 425266821090297847
+  },
+  "descriptor_version": 1,
+  "guid": "faa3cea9-93de-124e-af09-6799b6cf63d1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\GameWinManager.prefab"
+  }
+}

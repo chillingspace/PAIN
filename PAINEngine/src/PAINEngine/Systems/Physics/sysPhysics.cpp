@@ -339,6 +339,10 @@ namespace PAIN {
 
 				for (auto&& [entity, rigidBody, transform, world] : group.each()) {
 
+					if (!rigidBody.physics_enabled) {
+						continue;
+					}
+
 					if (!rigidBody.bodyID.IsInvalid()) {
 						JPH::ObjectLayer current_layer =
 							body_interface.GetObjectLayer(rigidBody.bodyID);
@@ -488,6 +492,11 @@ namespace PAIN {
 			// Use view to avoid group ownership conflict with onUpdate
 			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 			for (auto&& [entity, rigidBody, transform] : view.each()) {
+
+				// skip if physics disabled
+				if (!rigidBody.physics_enabled) {
+					continue;
+				}
 
 				// Check if scale OR offset changed in editor
 				// If so, destroy the existing body so it can be recreated below with new
@@ -648,7 +657,7 @@ namespace PAIN {
 
 					settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
 
-					settings.mFriction = .75f;
+					//settings.mFriction = .75f;
 					settings.mAngularDamping = 20.f;
 
 					settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX |
@@ -838,16 +847,14 @@ namespace PAIN {
 
 			float bottomY = -(shapeHeight * 0.5f) + 0.05f;
 			JPH::Vec3 rayDir = JPH::Vec3(0.0f, -1.0f, 0.0f) * maxDistance;
-
 			float checkRadius = shapeRadius * 0.7f;
 
-			// Define multiple ray origins around the feet
 			JPH::RVec3 rayOrigins[] = {
-				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),              // center
-				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),       // right
-				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),      // left
-				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),       // forward
-				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),      // back
+				bodyPosition + JPH::RVec3(0.0f, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(checkRadius, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(-checkRadius, bottomY, 0.0f),
+				bodyPosition + JPH::RVec3(0.0f, bottomY, checkRadius),
+				bodyPosition + JPH::RVec3(0.0f, bottomY, -checkRadius),
 			};
 
 			JPH::RayCastResult result;
@@ -857,7 +864,25 @@ namespace PAIN {
 				ray.mDirection = rayDir;
 
 				if (jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result)) {
-					return true;  
+					JPH::Vec3 hitNormal;
+
+					const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), result.mBodyID);
+					if (lock.Succeeded()) {
+						const JPH::Body& hitBody = lock.GetBody();
+						const JPH::Shape* hitShape = hitBody.GetShape();
+
+						JPH::RVec3 hitPos = ray.mOrigin + JPH::Vec3(ray.mDirection * result.mFraction);
+
+						hitNormal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
+							hitPos - hitBody.GetPosition());
+					}
+
+					if (hitNormal.GetY() > 0.7f) {
+						return true;
+					}
+					else {
+						PN_CORE_INFO("Grounded = FALSE (normal too steep)");
+					}
 				}
 			}
 
@@ -891,6 +916,105 @@ namespace PAIN {
 			return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());*/
 
 			return { 0.f, 0.f, 0.f }; // Placeholder
+		}
+
+		bool System::getWallNormal(JPH::BodyID body_id, const glm::vec3& direction, float checkDistance, glm::vec3& outNormal) {
+			if (!jolt_physics || body_id.IsInvalid())
+				return false;
+
+			JPH::RVec3 bodyPosition;
+
+			{
+				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), body_id);
+				if (lock.Succeeded()) {
+					const JPH::Body& body = lock.GetBody();
+					bodyPosition = body.GetPosition();
+				}
+				else {
+					return false;
+				}
+			}
+
+			// Normalize horizontal direction
+			JPH::Vec3 horizontalDir(direction.x, 0.0f, direction.z);
+			float len = horizontalDir.Length();
+			if (len < 0.001f) return false;
+			horizontalDir = horizontalDir / len;
+
+			JPH::RayCastResult result;
+			JPH::RRayCast ray;
+			ray.mOrigin = bodyPosition;
+			ray.mDirection = horizontalDir * checkDistance;
+
+			bool hit = jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result);
+
+			if (hit) {
+				// Get the surface normal at hit point
+				const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), result.mBodyID);
+				if (lock.Succeeded()) {
+					const JPH::Body& hitBody = lock.GetBody();
+					const JPH::Shape* hitShape = hitBody.GetShape();
+
+					JPH::RVec3 hitPos = ray.mOrigin + JPH::Vec3(ray.mDirection * result.mFraction);
+					JPH::Vec3 normal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
+						hitPos - hitBody.GetPosition());
+
+					// Only consider vertical walls (not ground or ceiling)
+					if (abs(normal.GetY()) > 0.5f) {
+						return false;  // Not a wall
+					}
+
+					// Convert to glm
+					outNormal = glm::vec3(normal.GetX(), normal.GetY(), normal.GetZ());
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		void System::disablePhysics(entt::entity e) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+
+			if (!rb.bodyID.IsInvalid() && body_interface) {
+				body_interface->RemoveBody(rb.bodyID);
+				body_interface->DestroyBody(rb.bodyID);
+				rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+
+				PN_CORE_TRACE("[Physics] Disabled physics for entity {}", (uint32_t)e);
+			}
+
+			rb.physics_enabled = false;
+		}
+
+		void System::enablePhysics(entt::entity e) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+
+			// Body will be recreated in syncNewBodies on next physics update
+			// Just invalidate it to trigger recreation
+			rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+
+			rb.physics_enabled = true;
+
+			PN_CORE_TRACE("[Physics] Enabled physics for entity {}", (uint32_t)e);
 		}
 	} // namespace Physics
 } // namespace PAIN

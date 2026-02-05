@@ -281,6 +281,32 @@ registerUpdate(function(dt)
         dx = dx * invLen
         dz = dz * invLen
 
+        local wallCheckDist = 0.3
+        local hitWall, wallNx, wallNy, wallNz = getWallNormal_(id, dx, 0.0, dz, wallCheckDist)
+        
+        if hitWall then
+            printLog("[Player] Hit wall, sliding along surface")
+            
+            -- Project movement vector onto wall surface
+            -- Formula: v_slide = v - (v · n)n  where n is wall normal
+            local dotProduct = dx * wallNx + dz * wallNz  -- Ignore Y for horizontal movement
+            
+            -- Subtract the component going into the wall
+            dx = dx - dotProduct * wallNx
+            dz = dz - dotProduct * wallNz
+            
+            -- Renormalize (movement might be shorter after projection)
+            local newLen = math.sqrt(dx*dx + dz*dz)
+            if newLen > 0.001 then
+                dx = dx / newLen
+                dz = dz / newLen
+            else
+                -- Moving directly into wall, no slide possible
+                dx = 0.0
+                dz = 0.0
+            end
+        end
+
         vx = dx * speed
         vz = dz * speed
 
@@ -322,6 +348,11 @@ registerUpdate(function(dt)
         
         -- consume jump
         jumpPressed = false
+    end
+
+    if not isGrounded and math.abs(curr_vy) < 0.5 then
+        curr_vx = 0.0
+        curr_vz = 0.0
     end
 
     setRotation(id, baseRx, currentYaw, baseRz)

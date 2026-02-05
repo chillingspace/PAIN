@@ -67,6 +67,8 @@ namespace PAIN {
 
         case UIAction::credits_ArrowLeft:      return "credits_ArrowLeft";
         case UIAction::credits_ArrowRight:     return "credits_ArrowRight";
+        
+        case UIAction::end_NextLevel:         return "end_NextLevel";
 
 		case UIAction::None:
 

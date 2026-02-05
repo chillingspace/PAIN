@@ -14,7 +14,7 @@ G.CreditsSceneName    = G.CreditsSceneName    or "game/scenes/credits.scn"
 G.CreditsSceneName2   = G.CreditsSceneName2   or "game/scenes/credits2.scn"
 
 -- Placeholder for next level
--- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
 -- ==================== AUDIO-AWARE SCENE CHANGE ====================
 -- Helper to do scene transitions with audio fade-out
@@ -81,6 +81,9 @@ local function showGameEndOverlay(result)
     setLayerEnabled(Layers.GAME_OVER, false)
     setLayerEnabled(Layers.GAME_WIN,  false)
 
+    -- Enable Cursor
+    hideCursor(false)
+
     if result == "win" then
         setLayerEnabled(Layers.GAME_WIN, true)
         printLog("[UI] Showing GAME WIN overlay")
@@ -105,6 +108,13 @@ local handlers = {
     end_Restart = function()
         if changeScene then
             changeScene(G.CurrentLevelName)
+        end
+    end,
+
+    end_NextLevel = function()
+        if changeScene then
+            printLog("[UI] Changing to next level: " .. G.NextLevelName)
+            changeScene(G.NextLevelName)
         end
     end,
 
@@ -216,6 +226,10 @@ local handlers = {
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
             setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
+
+            setLayerEnabled(Layers.GAME_OVER, false)
+            setLayerEnabled(Layers.GAME_WIN, false)
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(false)
@@ -268,7 +282,19 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, false)
-            setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+
+            if PlayerState and PlayerState.gameEnded then
+                if PlayerState.gameWon then
+                    setLayerEnabled(Layers.GAME_WIN, true)
+                else
+                    setLayerEnabled(Layers.GAME_OVER, true)
+                end
+            elseif _G_root.IsGamePaused then
+                -- Return to pause menu if paused
+                setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+            end
+            
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(false)
@@ -290,12 +316,17 @@ local handlers = {
         end
     end,
 
+    -- This is the quit button
     pause_ReturnToMainMenu = function(buttonEntity, payload)
         -- Show confirmation popup
         printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
         
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, true)  -- Show QuitOverlay layer (layer 4)
+
+            setLayerEnabled(Layers.GAME_OVER, false)
+            setLayerEnabled(Layers.GAME_WIN, false)
+
             setLayerEnabled(Layers.PAUSE, false)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
@@ -347,7 +378,19 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, false)
-            setLayerEnabled(Layers.PAUSE, true)
+            -- setLayerEnabled(Layers.PAUSE, true)
+
+            if PlayerState and PlayerState.gameEnded then
+                if PlayerState.gameWon then
+                    setLayerEnabled(Layers.GAME_WIN, true)
+                else
+                    setLayerEnabled(Layers.GAME_OVER, true)
+                end
+            elseif _G_root.IsGamePaused then
+                -- Return to pause menu if paused
+                setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+            end
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(false)

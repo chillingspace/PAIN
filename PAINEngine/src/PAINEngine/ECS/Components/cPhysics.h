@@ -107,6 +107,8 @@ namespace PAIN {
 
             bool use_gravity = true;
 
+            bool physics_enabled = true;
+
             // link layer to bodyID
             /*RigidBody3D() {
                 layer.setBodyReference(bodyID);
@@ -114,8 +116,6 @@ namespace PAIN {
 
             //Serialization flag
             static constexpr bool ShouldSerialize = true;
-
-
 		};
 	}
 
@@ -306,6 +306,7 @@ REFL_FIELD(physics_behavior)
 REFL_FIELD(collider_scale) // Currently only for Jolt rigidbody
 REFL_FIELD(collider_offset) // Currently only for Joly rigidbody
 REFL_FIELD(use_gravity)
+REFL_FIELD(physics_enabled)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Physics::RigidBody3D>);
