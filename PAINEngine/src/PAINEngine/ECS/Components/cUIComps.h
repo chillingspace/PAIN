@@ -136,6 +136,9 @@ namespace PAIN {
 
 		mainmenu_Quit_Confirm,
 		mainmenu_Quit_Cancel,
+
+		credits_ArrowLeft,
+		credits_ArrowRight,
 	};
 
 	struct UIButton {

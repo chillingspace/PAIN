@@ -11,6 +11,7 @@ G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CutSceneName        = G.CutSceneName        or "game/scenes/cutscene.scn"
 G.CreditsSceneName    = G.CreditsSceneName    or "game/scenes/credits.scn"
+G.CreditsSceneName2   = G.CreditsSceneName2   or "game/scenes/credits2.scn"
 
 -- Placeholder for next level
 -- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
@@ -598,6 +599,31 @@ local handlers = {
             printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
         else
             printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+
+
+    ----------------------------------------------------------------------
+    -- CREDITS
+    ----------------------------------------------------------------------
+    credits_ArrowLeft = function(buttonEntity, payload)
+        -- Navigate to How To Play Page 1 (no fade - same audio context)
+        if G.CreditsSceneName and changeScene then
+            printLog("[UI] credits_ArrowLeft -> " .. G.CreditsSceneName)
+            changeScene(G.CreditsSceneName)  -- Direct change, same global audio continues
+        else
+            printLog("[UI] credits_ArrowLeft: scene not set")
+        end
+    end,
+
+    credits_ArrowRight = function(buttonEntity, payload)
+        -- Navigate to How To Play Page 2 (no fade - same audio context)
+        if G.CreditsSceneName2 and changeScene then
+            printLog("[UI] credits_ArrowRight -> " .. G.CreditsSceneName2)
+            changeScene(G.CreditsSceneName2)  -- Direct change, same global audio continues
+        else
+            printLog("[UI] credits_ArrowRight: scene not set")
         end
     end,
 }
