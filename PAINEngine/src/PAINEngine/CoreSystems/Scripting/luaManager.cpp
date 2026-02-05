@@ -935,10 +935,6 @@ namespace PAIN {
             if (!api_ || pendingSceneChange_) return;
             setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
             });
-        lua_.set_function("setCurrentScene", [this](std::string name) {
-            if (!api_ || pendingSceneChange_) return;
-            setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
-            });
         lua_.set_function("getCurrentSceneName", [this]() -> std::string {
             return api_ ? api_->GetCurrentSceneName() : "";
             });
