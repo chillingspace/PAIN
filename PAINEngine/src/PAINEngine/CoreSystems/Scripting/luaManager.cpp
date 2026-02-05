@@ -998,14 +998,9 @@ namespace PAIN {
         lua_.set_function("mousePos", [this] { return api_ ? api_->Input_GetMousePos() : glm::vec2{ 0 }; });
         lua_.set_function("mouseScroll", [this] { return api_ ? api_->Input_GetScrollDelta() : glm::vec2{ 0 }; });
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
-
-        /* =========================================================================== */
-        /*                              Cursor Control                                 */
-        /* =========================================================================== */
-
-        lua_.set_function("Hide_Cursor", [this] { 
+        lua_.set_function("hideCursor", [this](bool hidden){
            if (!api_) return;
-           api_->Hide_Cursor(true); 
+           api_->HideCursor(hidden);
         });
 
         /* =========================================================================== */

@@ -181,7 +181,7 @@ local handlers = {
         if _G_root.TogglePause then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             _G_root.TogglePause()
@@ -195,7 +195,7 @@ local handlers = {
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             --SetGamePaused(not IsGamePaused()) 
@@ -216,7 +216,7 @@ local handlers = {
             setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             printLog("[UI] RestartOverlay (layer 5) shown")
         else
@@ -244,7 +244,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             -- default to current level or fallback
             -- local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
@@ -264,9 +264,9 @@ local handlers = {
             setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
-            printLog("[UI] RestartOverlay (layer 5) hidden - returning to pause menu")
+            printLog("[UI] Overlay (layer 5) hidden - returning to pause menu")
         else
             printLog("[UI] setLayerEnabled not available")
         end
@@ -292,7 +292,7 @@ local handlers = {
             setLayerEnabled(Layers.PAUSE, false)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             printLog("[UI] QuitOverlay (layer 4) shown")
@@ -325,7 +325,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             changeScene(G.MainMenuSceneName)
@@ -343,7 +343,7 @@ local handlers = {
             setLayerEnabled(Layers.PAUSE, true)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
@@ -369,7 +369,7 @@ local handlers = {
         if G.FirstLevelScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             changeSceneWithAudioFade(G.FirstLevelScene)
         else
@@ -423,7 +423,7 @@ local handlers = {
         printLog("[UI] menu_BackToMain -> " .. G.MainMenuSceneName)
         local isMobile = (isAndroid ~= nil and isAndroid())
         if isMobile then
-            Hide_Cursor(false)
+            hideCursor(false)
         end
         changeSceneWithAudioFade(G.MainMenuSceneName)
     end,
@@ -461,7 +461,7 @@ local handlers = {
         if _G_root.TogglePause then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             _G_root.TogglePause()
@@ -475,7 +475,7 @@ local handlers = {
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             --SetGamePaused(not IsGamePaused()) 
             _G_root.TogglePause()
@@ -492,7 +492,7 @@ local handlers = {
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             --SetGamePaused(not IsGamePaused()) 
             _G_root.TogglePause()
@@ -525,7 +525,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             changeScene(G.MainMenuSceneName)
@@ -543,7 +543,7 @@ local handlers = {
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             --_G_root.TogglePause()
             printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")

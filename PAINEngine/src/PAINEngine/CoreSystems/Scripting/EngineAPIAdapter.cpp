@@ -763,9 +763,10 @@ namespace PAIN {
     }
 
 
-    void EngineAPIAdapter::Hide_Cursor(bool b_set_cursor)
+    void EngineAPIAdapter::HideCursor(bool hidden)
     {
-        window_->setCursorMode(b_set_cursor);
+        PN_CORE_ERROR("Setting CURSOR mode to {}", hidden);
+        window_->hideCursor(hidden);
     }
 
 

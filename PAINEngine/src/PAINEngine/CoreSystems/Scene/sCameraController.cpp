@@ -237,13 +237,13 @@ namespace PAIN {
         // Disable cursor (WINDOWS ONLY)
         auto window = services->get<Window::Window>();
 
-        if (gameMode) {
-            window->setCursorMode(b_hide_mouse);
+        //if (gameMode) {
+        //    window->setCursorMode(true);
 
-        }
-        else {
-            window->setCursorMode(false);
-        }
+        //}
+        //else {
+        //    window->setCursorMode(false);
+        //}
 #endif
 
         if (gameMode) {
@@ -522,9 +522,8 @@ namespace PAIN {
                 //    PN_CORE_INFO("Cursor Mode: {}", b_hide_mouse ? "Hidden" : "Visible");
                 //}
                 //break;
+                break;
             }
-
-            case PAIN_KEY_EQUAL: // '+' key in many layouts (with shift)
             case PAIN_KEY_KP_ADD: // Numpad +
                 if (camera) {
                     camera->speed += 0.5f; // Increase speed by 0.5 (adjust as needed)
@@ -543,13 +542,13 @@ namespace PAIN {
                 break;
 
             case PAIN_KEY_I:
-                gs.interpolate_animation = !gs.interpolate_animation;
-                PN_CORE_INFO("Toggled interpolate_animation: {}", gs.interpolate_animation);
+               /* gs.interpolate_animation = !gs.interpolate_animation;
+                PN_CORE_INFO("Toggled interpolate_animation: {}", gs.interpolate_animation);*/
                 break;
 
             case PAIN_KEY_G:
-                gs.draw_floor = !gs.draw_floor;
-                PN_CORE_INFO("Toggled draw_floor: {}", gs.draw_floor);
+                //gs.draw_floor = !gs.draw_floor;
+                //PN_CORE_INFO("Toggled draw_floor: {}", gs.draw_floor);
                 break;
 
             case PAIN_KEY_F3:
