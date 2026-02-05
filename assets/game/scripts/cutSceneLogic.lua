@@ -7,6 +7,10 @@ local G = _G_root
 
 registerUpdate(function(dt)
     -- Check for mouse click
+    if _G_root.IsGamePaused() then
+        return
+    end
+
     if wasMousePressed(0) then
         print("1. Mouse Click Detected!")
         
@@ -31,7 +35,7 @@ registerUpdate(function(dt)
             else
                 print("[Cutscene] Error: changeScene function not found")
             end
-            return -- Exit to prevent trying to load a non-existent frame 16
+            return
         end
         
         -- 4. Try to find the image
