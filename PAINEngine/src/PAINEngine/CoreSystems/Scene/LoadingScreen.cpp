@@ -91,13 +91,10 @@ namespace PAIN {
         }
 
         void LoadingScreen::render() {
-            // Calculate delta time for animations
-            auto last_time = std::chrono::steady_clock::now();
-
-            //Update delta time
+            //Update delta time using member variable to track time between frames
             auto now = std::chrono::steady_clock::now();
-            float real_dt = std::chrono::duration<float>(now - last_time).count();
-            last_time = now;
+            float real_dt = std::chrono::duration<float>(now - m_lastFrameTime).count();
+            m_lastFrameTime = now;
 
             // Store Unscaled Time (Always ticking even when paused)
             timing.unscaled_dt = real_dt;
@@ -774,6 +771,27 @@ namespace PAIN {
         // ============================================================
 
         void LoadingScreen::renderPreview(float progress, const std::string& status) {
+            //Update delta time using member variable to track time between frames
+            auto now = std::chrono::steady_clock::now();
+            float real_dt = std::chrono::duration<float>(now - m_lastFrameTime).count();
+            m_lastFrameTime = now;
+
+            // Store Unscaled Time (Always ticking even when paused)
+            timing.unscaled_dt = real_dt;
+            timing.dt = real_dt;
+
+            // Update animation time
+            m_animationTime += timing.dt;
+
+            // Update spritesheet animation frame if enabled
+            if (m_animationEnabled && m_frameCount > 1) {
+                m_currentFrameTime += timing.dt;
+                if (m_currentFrameTime >= m_frameTime) {
+                    m_currentFrameTime = 0.0f;
+                    m_currentFrameIndex = (m_currentFrameIndex + 1) % m_frameCount;
+                }
+            }
+
             // Temporarily override progress and status
             float oldProgress = m_progress.load();
             std::string oldStatus;
