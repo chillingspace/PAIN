@@ -503,6 +503,16 @@ namespace PAIN {
         lua_.set_function("getDataID", [this](const std::string name) { return api_ ? api_->GetDataGUID(name) : std::string{};    });
         lua_.set_function("getShaderID", [this](const std::string name) { return api_ ? api_->GetShaderGUID(name) : std::string{};  });
 
+        lua_.set_function("getTexture", [this](entt::entity entityId) {
+            return api_ ? api_->GetEntityTexture(entityId) : "";
+            });
+        lua_.set_function("setTexture", [this](entt::entity entityId, std::string guidStr) {
+            if (api_) {
+                api_->SetEntityTexture(entityId, guidStr);
+            }
+            });
+
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */

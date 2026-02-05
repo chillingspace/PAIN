@@ -13,6 +13,10 @@ local MAX_DISTANCE = 9.0                              -- how far the light reach
 -- spotlight points straight down in world space for now
 local LIGHT_DIR = { x = 0.0, y = -1.0, z = 0.0 }
 
+-- light colors
+local NORMAL_COLOR = { r = 0.5, g = 0.5, b = 0.5 }  -- warm white/yellow
+local ALERT_COLOR  = { r = 1.0, g = 0.1, b = 0.1 } -- red
+
 _G.EnemyFrozen = _G.EnemyFrozen or {}
 
 local function normalize(x, y, z)
@@ -20,6 +24,8 @@ local function normalize(x, y, z)
     if len <= 1e-6 then return 0.0, 0.0, 0.0, 0.0 end
     return x/len, y/len, z/len, len
 end
+
+setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
 
 registerUpdate(function(dt)
     -- cache player
@@ -36,6 +42,7 @@ registerUpdate(function(dt)
             DetectionUI.cancel(enemy)
         end
         seeingPlayer = false
+        setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
 
         -- only unfreeze enemy once the ui bar has fully drained
         if not (DetectionUI and DetectionUI.active) then
@@ -63,6 +70,11 @@ registerUpdate(function(dt)
     -- early out on distance
     local vxN, vyN, vzN, dist = normalize(vx, vy, vz)
     if dist == 0.0 or dist > MAX_DISTANCE then
+        if seeingPlayer then
+            seeingPlayer = false
+            if DetectionUI and DetectionUI.cancel then DetectionUI.cancel(enemy) end
+            setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
+        end
         return
     end
 
@@ -89,6 +101,7 @@ registerUpdate(function(dt)
             if DetectionUI and DetectionUI.begin then
                 DetectionUI.begin(enemy)
             end
+            setLightIntensity(enemy, ALERT_COLOR.r, ALERT_COLOR.g, ALERT_COLOR.b)
         end
     else
         if seeingPlayer then
@@ -96,6 +109,7 @@ registerUpdate(function(dt)
             if DetectionUI and DetectionUI.cancel then
                 DetectionUI.cancel(enemy)
             end
+            setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
         end
 
         -- only unfreeze once the ui bar is fully drained

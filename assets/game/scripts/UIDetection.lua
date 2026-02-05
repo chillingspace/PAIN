@@ -24,6 +24,8 @@ local preloadStage = 0
 local PRELOAD_X = -1000  -- different from HIDE_X to force a position change
 local PRELOAD_Y = -1000
 
+local INNER_OFFSET = 0.006
+
 local function cachePositions()
     if cached then return end
     if barBG then bgX, bgY = get2DPosition(barBG) end
@@ -217,7 +219,7 @@ local function update(dt)
 
     local t = ui.timer / ui.duration
 
-    local clamped = math.max(0.0, math.min(1.0, t))
+    local clamped = math.max(0.0, math.min(0.88, t)) 
     -- if barFillL then setScale(barFillL, clamped, 1.0, 1.0) end
     -- if barFillR then setScale(barFillR, clamped, 1.0, 1.0) end
 
@@ -226,7 +228,7 @@ local function update(dt)
         setUITextureScale(barFillL, clamped, sy)
 
         local shift = (1.0 - clamped) * FILL_HALF_WIDTH
-        set2DPosition(barFillL, fillLX - shift, fillLY)
+        set2DPosition(barFillL, fillLX - shift + INNER_OFFSET, fillLY)
     end
 
     if barFillR then
@@ -234,7 +236,7 @@ local function update(dt)
         setUITextureScale(barFillR, clamped, sy)
 
         local shift = (1.0 - clamped) * FILL_HALF_WIDTH
-        set2DPosition(barFillR, fillRX + shift, fillRY)
+        set2DPosition(barFillR, fillRX + shift - INNER_OFFSET, fillRY)
     end
 
 

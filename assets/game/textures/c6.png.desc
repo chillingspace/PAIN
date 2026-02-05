@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c6.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11758330623532573503
+  },
+  "descriptor_version": 1,
+  "guid": "2d10b49b-5cc8-2246-bcf0-6f8f7aad10d6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c6.png"
+  }
+}

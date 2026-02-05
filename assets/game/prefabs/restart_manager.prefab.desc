@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "restart_manager.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 350121016218273541
+  },
+  "descriptor_version": 1,
+  "guid": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\restart_manager.prefab"
+  }
+}

@@ -451,6 +451,106 @@ local handlers = {
             printLog("[UI] howtoplay_ArrowRight: scene not set")
         end
     end,
+
+
+    ----------------------------------------------------------------------
+    -- CUT SCENE
+    ----------------------------------------------------------------------
+    cutscene_Open_Menu = function(buttonEntity, payload)
+        -- Android touch button callback to pause the game
+        if _G_root.TogglePause then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+                
+            end
+            _G_root.TogglePause()
+            printLog("[UI] cutscene_Open_Menu (Android) -> called TogglePause()")
+        else
+            printLog("[UI] cutscene_Open_Menu pressed, but TogglePause is not available")
+        end
+    end,
+
+    cutscene_Close_Menu = function(buttonEntity, payload)
+        if IsGamePaused() then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+            end
+            --SetGamePaused(not IsGamePaused()) 
+            _G_root.TogglePause()
+            
+            setLayerEnabled(1, not _G_root.IsGamePaused())
+            setLayerEnabled(2, _G_root.IsGamePaused())
+            printLog("[UI] cutscene_Close_Menu -> called TogglePause()")
+        else
+            printLog("[UI] cutscene_Close_Menu pressed, but TogglePause is not available")
+        end
+    end,
+
+    cutscene_Menu_Quit = function(buttonEntity, payload)
+        if IsGamePaused() then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+            end
+            --SetGamePaused(not IsGamePaused()) 
+            _G_root.TogglePause()
+            
+            setLayerEnabled(3, true)
+            printLog("[UI] cutscene_Menu_Button -> called TogglePause()")
+        else
+            printLog("[UI] cutscene_Menu_Button pressed, but TogglePause is not available")
+        end
+    end,
+
+    cutscene_Quit_Confirm = function(buttonEntity, payload)
+        -- User pressed YES - quit to main menu
+        printLog("[UI] cutscene_Quit_Confirm -> returning to main menu")
+        
+        -- Unpause first
+        if IsGamePaused() then
+            SetGamePaused(false) 
+            printLog("[UI] Game unpaused before scene change")
+        end
+        
+        -- Hide quit overlay
+        if setLayerEnabled then
+            setLayerEnabled(Layers.QUIT, false)
+            printLog("[UI] QuitOverlay hidden")
+        end
+        
+        -- Load main menu 
+        printLog("[UI] cutscene_Quit_Confirm -> changeScene(" .. G.MainMenuSceneName .. ")")
+        if changeScene then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+                
+            end
+            changeScene(G.MainMenuSceneName)
+        else
+            printLog("[UI] cutscene_Quit_Confirm pressed, but changeScene is not bound")
+        end
+    end,
+
+    cutscene_Quit_Cancel = function(buttonEntity, payload)
+        -- User pressed NO - close popup
+        printLog("[UI] cutscene_Quit_Cancel -> closing quit confirmation")
+        
+        if setLayerEnabled then
+            setLayerEnabled(3, false)
+            setLayerEnabled(2, false) -- Return to Menu
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+            end
+            --_G_root.TogglePause()
+            printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
 }
 
 function G.UI_OnAction(actionName, buttonEntity, payload)

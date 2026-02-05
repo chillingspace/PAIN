@@ -49,6 +49,9 @@ namespace PAIN {
         virtual std::string GetDataGUID(std::string_view name) = 0;
         virtual std::string GetShaderGUID(std::string_view name) = 0;
 
+        virtual std::string GetEntityTexture(entt::entity entityId) = 0;
+        virtual void SetEntityTexture(entt::entity entity, const std::string& guidStr) = 0;
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */

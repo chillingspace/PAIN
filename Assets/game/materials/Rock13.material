@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Rock13_baseColor.png",
+        "ao": "game\\textures\\Rock13_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Rock13_emissive.png",
+        "lightmap": "game\\textures\\Rock13_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Rock13_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Rock13_normal.png",
+        "roughness": "game\\textures\\Rock13_occlusionRoughnessMetallic.png"
+    }
+}

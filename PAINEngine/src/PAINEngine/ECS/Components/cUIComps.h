@@ -127,6 +127,12 @@ namespace PAIN {
 		howtoplay_ArrowRight,
 		restart_Confirm,
 		restart_Cancel,
+
+		cutscene_Open_Menu,
+		cutscene_Close_Menu,
+		cutscene_Menu_Quit,
+		cutscene_Quit_Confirm,
+		cutscene_Quit_Cancel,
 	};
 
 	struct UIButton {

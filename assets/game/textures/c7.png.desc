@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c7.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2762664946531414046
+  },
+  "descriptor_version": 1,
+  "guid": "78807d65-eb36-e547-9b16-937775ae9e68",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c7.png"
+  }
+}
