@@ -33,11 +33,11 @@ namespace PAIN {
 			if (!component.modelGUID.IsValid())
 				return;
 
+			// Initiate scene VBO update
+			if (component.prevModelGUID.IsValid()) services.lock()->get<sRenderer>()->initSceneVbo();
+
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;
-
-			// Initiate scene VBO update
-			services.lock()->get<sRenderer>()->initSceneVbo();
 
 			// Boolean for checking for material updates
 			bool material_updates = false;

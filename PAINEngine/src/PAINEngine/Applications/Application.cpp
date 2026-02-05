@@ -29,6 +29,9 @@
 //Loading screen
 #include "CoreSystems/Scene/LoadingScreen.h"
 
+//Haptics service
+#include "CoreSystems/Haptics/Haptics.h"
+
 namespace PAIN {
 
 	Application::Application() {
@@ -143,6 +146,11 @@ namespace PAIN {
 					ls.setProgress(0.6f);
 					ls.setStatus("Initializing Serialization Service...");
 					addCoreSystem(std::make_shared<Serialization::Service>());
+
+					// Add Haptics
+					ls.setProgress(0.65f);
+					ls.setStatus("Initializing Haptics Service...");
+					services->set<Haptics::Haptics>(std::shared_ptr<Haptics::Haptics>(Haptics::Haptics::create(app)));
 				}
 				catch (const std::exception& e) {
 					PN_CORE_ERROR("[AsyncServiceSetup] Worker thread failed: {}", e.what());
