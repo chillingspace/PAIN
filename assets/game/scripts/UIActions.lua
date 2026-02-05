@@ -81,6 +81,9 @@ local function showGameEndOverlay(result)
     setLayerEnabled(Layers.GAME_OVER, false)
     setLayerEnabled(Layers.GAME_WIN,  false)
 
+    -- Enable Cursor
+    hideCursor(false)
+
     if result == "win" then
         setLayerEnabled(Layers.GAME_WIN, true)
         printLog("[UI] Showing GAME WIN overlay")
