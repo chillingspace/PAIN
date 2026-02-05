@@ -530,12 +530,12 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(3, false)
-            setLayerEnabled(2, true) -- Return to Menu
+            setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
             end
-            _G_root.TogglePause()
+            --_G_root.TogglePause()
             printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
         else
             printLog("[UI] setLayerEnabled not available")
