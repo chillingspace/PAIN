@@ -398,12 +398,12 @@ local handlers = {
     menu_Credits = function(buttonEntity, payload)
         --local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
 
-        --if G.CreditsSceneName and setCurrentScene then
-        --    printLog("[UI] menu_Credits -> setCurrentScene("..G.CreditsSceneName..")")
-        --    setCurrentScene(G.CreditsSceneName)
-        --else
+        if G.CreditsSceneName and setCurrentScene then
+            printLog("[UI] menu_Credits -> setCurrentScene("..G.CreditsSceneName..")")
+            changeSceneWithAudioFade(G.CreditsSceneName)
+        else
             printLog("[UI] menu_Credits pressed (no scene specified / not implemented)")
-        --end
+        end
     end,
 
     menu_QuitGame = function(buttonEntity, payload)

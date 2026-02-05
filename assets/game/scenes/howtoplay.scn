@@ -154,6 +154,14 @@
                         "Name": {
                             "name": "ui_canvas"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "dc7fd95a-a106-4f46-87bd-ec491f47571c"
+                                }
+                            ]
+                        },
                         "UICanvas": {
                             "sort_order": 0
                         },

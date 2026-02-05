@@ -154,6 +154,14 @@
                         "Name": {
                             "name": "ui_canvas"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "dc7fd95a-a106-4f46-87bd-ec491f47571c"
+                                }
+                            ]
+                        },
                         "UICanvas": {
                             "sort_order": 0
                         },
@@ -296,7 +304,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 19,
+                            "action": 30,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -561,17 +569,17 @@
                             ]
                         },
                         "Name": {
-                            "name": "instructions1"
+                            "name": "credits1"
                         },
                         "Texture2D": {
                             "pos": [
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+                            "texture_guid": "7158b6f0-2b9a-a646-ae06-b0e132c7181b",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                4.0,
+                                3.0
                             ]
                         },
                         "UIElement": {
@@ -626,7 +634,7 @@
                             ]
                         }
                     },
-                    "Name": "instructions1"
+                    "Name": "credits1"
                 }
             },
             {

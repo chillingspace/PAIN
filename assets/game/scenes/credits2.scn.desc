@@ -1,15 +1,15 @@
 {
   "asset_info": {
-    "name": "credit2.scn",
+    "name": "credits2.scn",
     "type": "Scenes"
   },
   "build_data": {
-    "hash": 13748161427854203779
+    "hash": 18192886220699958334
   },
   "descriptor_version": 1,
   "guid": "d79a175d-ceee-1542-a413-68b46cc237dd",
   "import_settings": null,
   "meta_data": {
-    "source_file": "game\\scenes\\credit2.scn"
+    "source_file": "game\\scenes\\credits2.scn"
   }
 }
