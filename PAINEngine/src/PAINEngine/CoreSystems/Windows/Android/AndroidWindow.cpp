@@ -530,7 +530,7 @@ namespace PAIN {
             return !b_active || !b_surfaceready;
         }
 
-        void Android_Window::setCursorMode(bool locked) {
+        void Android_Window::hideCursor(bool hidden) {
 
         }
 	}
