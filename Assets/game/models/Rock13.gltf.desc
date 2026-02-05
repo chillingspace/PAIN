@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Rock13.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 9754475200309383959
+  },
+  "descriptor_version": 1,
+  "guid": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": false,
+    "import_skeleton": false,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Rock13.gltf"
+  }
+}

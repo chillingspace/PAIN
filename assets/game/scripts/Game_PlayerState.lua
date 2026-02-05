@@ -469,7 +469,7 @@ local function pickupLetter(letter)
     if addTag then addTag(letter, "letter_carried") end
     if audioPlay then audioPlay(letter) end
 
-    disablePhysics(bestLetter)
+    disablePhysics(letter)
 
     log("[PlayerState] Collected letter on back")
 end
